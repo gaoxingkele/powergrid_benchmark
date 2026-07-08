@@ -1,0 +1,102 @@
+{
+  "prompt": "You are generating candidate SQLite SQL for CHESS-style MA-SQLGrid.\n\nReturn 3 distinct read-only SQLite SELECT queries as a numbered list. Do not include explanation.\nDo not use INSERT, UPDATE, DELETE, DROP, PRAGMA, or multiple statements.\nUse only the selected context, normalization hints, and inferred output-form hints below. Candidate queries should differ in plausible joins/projections while respecting the inferred projection count and relevant literal predicates.\n\nCondition: C5_MASQLGrid_DomainContext_Validated\n\nSQLite selected context:\nTables and selected columns:\n- asset_types(asset_type_id) -- equipment type catalog such as Transformer, Breaker, Line, Relay, Substation, Capacitor\n- assets(asset_id, asset_type_id, location_id) -- individual grid assets with names, type, location, install date, status, and MW capacity\n- grid_topology(edge_id, upstream_asset_id, downstream_asset_id) -- directed upstream/downstream asset connections and switch status\n- locations(location_id, location_name) -- grid yards, substations, regions, coordinates, and location criticality\n- sensor_readings(reading_id, asset_id) -- time-series sensor readings for assets with sensor type, value, unit, and alarm flag\n- work_orders(work_order_id, asset_id, assigned_technician_id) -- maintenance work orders with priority, status, schedule, completion date, and fault code\nJoin paths:\n- assets.asset_type_id = asset_types.asset_type_id\n- assets.location_id = locations.location_id\n- work_orders.asset_id = assets.asset_id\n- sensor_readings.asset_id = assets.asset_id\n- grid_topology.upstream_asset_id = assets.asset_id\n- grid_topology.downstream_asset_id = assets.asset_id\nExact database values matched from the question:\n- locations.location_name: Remote Spur\nPower-grid domain normalization hints inferred from the question:\n- locations.location_name = \"Remote Spur\"\nAnswer-shape hints inferred from the question text:\n- expected column count: 1\n- row granularity: scalar\n- deterministic ordering needed: False\n- Use COUNT(*) for count questions.\n\nQuestion ID: Q136\nQuestion: How many assets are installed at Remote Spur?\n",
+  "rank_trace": [
+    {
+      "candidate_index": 0,
+      "column_count": 1,
+      "empty_result": false,
+      "exec_error": "",
+      "exec_ok": true,
+      "expected_column_count": 1,
+      "missing_value_hints": [],
+      "order_ok": true,
+      "order_required": false,
+      "ranker_score": 33,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": true,
+      "sql": "SELECT COUNT(*) FROM assets AS a JOIN locations AS l ON l.location_id = a.location_id WHERE l.location_name = 'Remote Spur';",
+      "value_hint_count": 1,
+      "value_hits": 1
+    },
+    {
+      "candidate_index": 1,
+      "column_count": 1,
+      "empty_result": false,
+      "exec_error": "",
+      "exec_ok": true,
+      "expected_column_count": 1,
+      "missing_value_hints": [],
+      "order_ok": true,
+      "order_required": false,
+      "ranker_score": 32,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": true,
+      "sql": "SELECT COUNT(a.asset_id) FROM locations AS l LEFT JOIN assets AS a ON a.location_id = l.location_id WHERE l.location_name = 'Remote Spur';",
+      "value_hint_count": 1,
+      "value_hits": 1
+    },
+    {
+      "candidate_index": 2,
+      "column_count": 1,
+      "empty_result": false,
+      "exec_error": "",
+      "exec_ok": true,
+      "expected_column_count": 1,
+      "missing_value_hints": [],
+      "order_ok": true,
+      "order_required": false,
+      "ranker_score": 31,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": true,
+      "sql": "SELECT COUNT(*) FROM assets WHERE location_id IN ( SELECT location_id FROM locations WHERE location_name = 'Remote Spur' );",
+      "value_hint_count": 1,
+      "value_hits": 1
+    },
+    {
+      "candidate_index": 3,
+      "column_count": 1,
+      "empty_result": false,
+      "exec_error": "",
+      "exec_ok": true,
+      "expected_column_count": 1,
+      "missing_value_hints": [
+        "locations.location_name = \"Remote Spur\""
+      ],
+      "order_ok": true,
+      "order_required": false,
+      "ranker_score": 23,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": true,
+      "sql": "SELECT COUNT(*);",
+      "value_hint_count": 1,
+      "value_hits": 0
+    },
+    {
+      "candidate_index": 4,
+      "column_count": 0,
+      "empty_result": false,
+      "exec_error": "no such column: a.asset_id",
+      "exec_ok": false,
+      "expected_column_count": 1,
+      "missing_value_hints": [
+        "locations.location_name = \"Remote Spur\""
+      ],
+      "order_ok": true,
+      "order_required": false,
+      "ranker_score": -14,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": false,
+      "sql": "SELECT COUNT(a.asset_id);",
+      "value_hint_count": 1,
+      "value_hits": 0
+    }
+  ],
+  "raw_response": "1. ```sql\nSELECT COUNT(*)\nFROM assets AS a\nJOIN locations AS l ON l.location_id = a.location_id\nWHERE l.location_name = 'Remote Spur';\n```\n\n2. ```sql\nSELECT COUNT(a.asset_id)\nFROM locations AS l\nLEFT JOIN assets AS a ON a.location_id = l.location_id\nWHERE l.location_name = 'Remote Spur';\n```\n\n3. ```sql\nSELECT COUNT(*)\nFROM assets\nWHERE location_id IN (\n  SELECT location_id\n  FROM locations\n  WHERE location_name = 'Remote Spur'\n);\n```",
+  "repair_raw_response": "",
+  "repaired_sql": ""
+}

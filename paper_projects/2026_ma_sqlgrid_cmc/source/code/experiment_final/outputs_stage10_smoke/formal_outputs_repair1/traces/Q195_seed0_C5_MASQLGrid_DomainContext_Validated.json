@@ -1,0 +1,128 @@
+{
+  "prompt": "You are generating candidate SQLite SQL for CHESS-style MA-SQLGrid.\n\nReturn 3 distinct read-only SQLite SELECT queries as a numbered list. Do not include explanation.\nDo not use INSERT, UPDATE, DELETE, DROP, PRAGMA, or multiple statements.\nUse only the selected context, normalization hints, and inferred output-form hints below. Candidate queries should differ in plausible joins/projections while respecting the inferred projection count and relevant literal predicates.\n\nCondition: C5_MASQLGrid_DomainContext_Validated\n\nSQLite selected context:\nTables and selected columns:\n- asset_types(asset_type_id, type_name) -- equipment type catalog such as Transformer, Breaker, Line, Relay, Substation, Capacitor\n- assets(asset_id, asset_name, asset_type_id, location_id, capacity_mw) -- individual grid assets with names, type, location, install date, status, and MW capacity\n- grid_topology(edge_id, upstream_asset_id, downstream_asset_id) -- directed upstream/downstream asset connections and switch status\n- locations(location_id) -- grid yards, substations, regions, coordinates, and location criticality\n- sensor_readings(reading_id, asset_id, reading_value) -- time-series sensor readings for assets with sensor type, value, unit, and alarm flag\n- work_orders(work_order_id, asset_id, assigned_technician_id, fault_code) -- maintenance work orders with priority, status, schedule, completion date, and fault code\nJoin paths:\n- assets.asset_type_id = asset_types.asset_type_id\n- assets.location_id = locations.location_id\n- work_orders.asset_id = assets.asset_id\n- sensor_readings.asset_id = assets.asset_id\n- grid_topology.upstream_asset_id = assets.asset_id\n- grid_topology.downstream_asset_id = assets.asset_id\nExact database values matched from the question:\n- asset_types.type_name: Breaker\n- work_orders.fault_code: BREAKER\nPower-grid domain normalization hints inferred from the question:\n- asset_types.type_name = \"Breaker\"\n- work_orders.fault_code = \"BREAKER\"\nAnswer-shape hints inferred from the question text:\n- expected column count: 1\n- row granularity: multi-row\n- deterministic ordering needed: False\n- Use AVG(...) for average questions.\n\nQuestion ID: Q195\nQuestion: What is the average capacity for Breaker assets?\n",
+  "rank_trace": [
+    {
+      "candidate_index": 0,
+      "column_count": 1,
+      "empty_result": false,
+      "exec_error": "",
+      "exec_ok": true,
+      "expected_column_count": 1,
+      "missing_value_hints": [
+        "work_orders.fault_code = \"BREAKER\""
+      ],
+      "order_ok": true,
+      "order_required": false,
+      "ranker_score": 30,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": true,
+      "sql": "SELECT AVG(a.capacity_mw) AS average_capacity FROM assets AS a JOIN asset_types AS t ON a.asset_type_id = t.asset_type_id WHERE t.type_name = 'Breaker';",
+      "value_hint_count": 2,
+      "value_hits": 1
+    },
+    {
+      "candidate_index": 1,
+      "column_count": 1,
+      "empty_result": false,
+      "exec_error": "",
+      "exec_ok": true,
+      "expected_column_count": 1,
+      "missing_value_hints": [
+        "work_orders.fault_code = \"BREAKER\""
+      ],
+      "order_ok": true,
+      "order_required": false,
+      "ranker_score": 29,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": true,
+      "sql": "SELECT AVG(capacity_mw) AS average_capacity FROM assets WHERE asset_type_id IN ( SELECT asset_type_id FROM asset_types WHERE type_name = 'Breaker' );",
+      "value_hint_count": 2,
+      "value_hits": 1
+    },
+    {
+      "candidate_index": 2,
+      "column_count": 1,
+      "empty_result": false,
+      "exec_error": "",
+      "exec_ok": true,
+      "expected_column_count": 1,
+      "missing_value_hints": [
+        "work_orders.fault_code = \"BREAKER\""
+      ],
+      "order_ok": true,
+      "order_required": false,
+      "ranker_score": 28,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": true,
+      "sql": "SELECT AVG(a.capacity_mw) AS average_capacity FROM assets AS a LEFT JOIN asset_types AS t ON a.asset_type_id = t.asset_type_id WHERE t.type_name = 'Breaker';",
+      "value_hint_count": 2,
+      "value_hits": 1
+    },
+    {
+      "candidate_index": 3,
+      "column_count": 0,
+      "empty_result": false,
+      "exec_error": "no such column: a.capacity_mw",
+      "exec_ok": false,
+      "expected_column_count": 1,
+      "missing_value_hints": [
+        "asset_types.type_name = \"Breaker\"",
+        "work_orders.fault_code = \"BREAKER\""
+      ],
+      "order_ok": true,
+      "order_required": false,
+      "ranker_score": -16,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": false,
+      "sql": "SELECT AVG(a.capacity_mw) AS average_capacity;",
+      "value_hint_count": 2,
+      "value_hits": 0
+    },
+    {
+      "candidate_index": 4,
+      "column_count": 0,
+      "empty_result": false,
+      "exec_error": "no such column: capacity_mw",
+      "exec_ok": false,
+      "expected_column_count": 1,
+      "missing_value_hints": [
+        "asset_types.type_name = \"Breaker\"",
+        "work_orders.fault_code = \"BREAKER\""
+      ],
+      "order_ok": true,
+      "order_required": false,
+      "ranker_score": -17,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": false,
+      "sql": "SELECT AVG(capacity_mw) AS average_capacity;",
+      "value_hint_count": 2,
+      "value_hits": 0
+    },
+    {
+      "candidate_index": 5,
+      "column_count": 1,
+      "empty_result": false,
+      "exec_error": "",
+      "exec_ok": true,
+      "expected_column_count": 1,
+      "missing_value_hints": [],
+      "order_ok": true,
+      "order_required": false,
+      "ranker_score": null,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": true,
+      "sql": "SELECT AVG(a.capacity_mw) AS average_capacity FROM assets AS a JOIN asset_types AS t ON a.asset_type_id = t.asset_type_id LEFT JOIN work_orders AS w ON w.asset_id = a.asset_id WHERE t.type_name = 'Breaker' AND w.fault_code = 'BREAKER';",
+      "value_hint_count": 2,
+      "value_hits": 2
+    }
+  ],
+  "raw_response": "1. ```sql\nSELECT AVG(a.capacity_mw) AS average_capacity\nFROM assets AS a\nJOIN asset_types AS t ON a.asset_type_id = t.asset_type_id\nWHERE t.type_name = 'Breaker';\n```\n\n2. ```sql\nSELECT AVG(capacity_mw) AS average_capacity\nFROM assets\nWHERE asset_type_id IN (\n  SELECT asset_type_id\n  FROM asset_types\n  WHERE type_name = 'Breaker'\n);\n```\n\n3. ```sql\nSELECT AVG(a.capacity_mw) AS average_capacity\nFROM assets AS a\nLEFT JOIN asset_types AS t ON a.asset_type_id = t.asset_type_id\nWHERE t.type_name = 'Breaker';\n```",
+  "repair_raw_response": "SELECT AVG(a.capacity_mw) AS average_capacity FROM assets AS a JOIN asset_types AS t ON a.asset_type_id = t.asset_type_id LEFT JOIN work_orders AS w ON w.asset_id = a.asset_id WHERE t.type_name = 'Breaker' AND w.fault_code = 'BREAKER';",
+  "repaired_sql": "SELECT AVG(a.capacity_mw) AS average_capacity FROM assets AS a JOIN asset_types AS t ON a.asset_type_id = t.asset_type_id LEFT JOIN work_orders AS w ON w.asset_id = a.asset_id WHERE t.type_name = 'Breaker' AND w.fault_code = 'BREAKER';"
+}

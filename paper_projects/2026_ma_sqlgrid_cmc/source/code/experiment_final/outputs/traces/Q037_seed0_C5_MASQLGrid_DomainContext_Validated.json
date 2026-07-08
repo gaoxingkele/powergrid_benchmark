@@ -1,0 +1,102 @@
+{
+  "prompt": "You are generating candidate SQLite SQL for CHESS-style MA-SQLGrid.\n\nReturn 3 distinct read-only SQLite SELECT queries as a numbered list. Do not include explanation.\nDo not use INSERT, UPDATE, DELETE, DROP, PRAGMA, or multiple statements.\nUse only the selected context, normalization hints, and inferred output-form hints below. Candidate queries should differ in plausible joins/projections while respecting the inferred projection count and relevant literal predicates.\n\nCondition: C5_MASQLGrid_DomainContext_Validated\n\nSQLite selected context:\nTables and selected columns:\n- asset_types(asset_type_id) -- equipment type catalog such as Transformer, Breaker, Line, Relay, Substation, Capacitor\n- assets(asset_id, asset_name, asset_type_id, location_id) -- individual grid assets with names, type, location, install date, status, and MW capacity\n- grid_topology(edge_id, upstream_asset_id, downstream_asset_id, connection_type, switch_status) -- directed upstream/downstream asset connections and switch status\n- locations(location_id) -- grid yards, substations, regions, coordinates, and location criticality\n- sensor_readings(reading_id, asset_id) -- time-series sensor readings for assets with sensor type, value, unit, and alarm flag\n- work_orders(work_order_id, asset_id, assigned_technician_id) -- maintenance work orders with priority, status, schedule, completion date, and fault code\nJoin paths:\n- assets.asset_type_id = asset_types.asset_type_id\n- assets.location_id = locations.location_id\n- work_orders.asset_id = assets.asset_id\n- sensor_readings.asset_id = assets.asset_id\n- grid_topology.upstream_asset_id = assets.asset_id\n- grid_topology.downstream_asset_id = assets.asset_id\nExact database values matched from the question:\n- assets.asset_name: BR-004\nPower-grid domain normalization hints inferred from the question:\n- assets.asset_name = \"BR-004\"\nAnswer-shape hints inferred from the question text:\n- expected column count: 1\n- row granularity: multi-row\n- deterministic ordering needed: True\n\nQuestion ID: Q037\nQuestion: List assets connected downstream from BR-004.\n",
+  "rank_trace": [
+    {
+      "candidate_index": 0,
+      "column_count": 1,
+      "empty_result": false,
+      "exec_error": "",
+      "exec_ok": true,
+      "expected_column_count": 1,
+      "missing_value_hints": [],
+      "order_ok": true,
+      "order_required": true,
+      "ranker_score": 33,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": true,
+      "sql": "SELECT a2.asset_name FROM assets AS a1 JOIN grid_topology AS gt ON gt.upstream_asset_id = a1.asset_id JOIN assets AS a2 ON a2.asset_id = gt.downstream_asset_id WHERE a1.asset_name = 'BR-004' ORDER BY a2.asset_name;",
+      "value_hint_count": 1,
+      "value_hits": 1
+    },
+    {
+      "candidate_index": 1,
+      "column_count": 1,
+      "empty_result": false,
+      "exec_error": "",
+      "exec_ok": true,
+      "expected_column_count": 1,
+      "missing_value_hints": [],
+      "order_ok": true,
+      "order_required": true,
+      "ranker_score": 32,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": true,
+      "sql": "SELECT DISTINCT downstream.asset_name FROM grid_topology AS gt JOIN assets AS upstream ON upstream.asset_id = gt.upstream_asset_id JOIN assets AS downstream ON downstream.asset_id = gt.downstream_asset_id WHERE upstream.asset_name = 'BR-004' ORDER BY downstream.asset_name;",
+      "value_hint_count": 1,
+      "value_hits": 1
+    },
+    {
+      "candidate_index": 2,
+      "column_count": 1,
+      "empty_result": false,
+      "exec_error": "",
+      "exec_ok": true,
+      "expected_column_count": 1,
+      "missing_value_hints": [],
+      "order_ok": true,
+      "order_required": true,
+      "ranker_score": 31,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": true,
+      "sql": "SELECT a_down.asset_name FROM assets AS a_up JOIN grid_topology AS gt ON gt.upstream_asset_id = a_up.asset_id LEFT JOIN assets AS a_down ON a_down.asset_id = gt.downstream_asset_id WHERE a_up.asset_name = 'BR-004' ORDER BY a_down.asset_name;",
+      "value_hint_count": 1,
+      "value_hits": 1
+    },
+    {
+      "candidate_index": 3,
+      "column_count": 0,
+      "empty_result": false,
+      "exec_error": "no such column: a2.asset_name",
+      "exec_ok": false,
+      "expected_column_count": 1,
+      "missing_value_hints": [
+        "assets.asset_name = \"BR-004\""
+      ],
+      "order_ok": false,
+      "order_required": true,
+      "ranker_score": -18,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": false,
+      "sql": "SELECT a2.asset_name;",
+      "value_hint_count": 1,
+      "value_hits": 0
+    },
+    {
+      "candidate_index": 4,
+      "column_count": 0,
+      "empty_result": false,
+      "exec_error": "no such column: downstream.asset_name",
+      "exec_ok": false,
+      "expected_column_count": 1,
+      "missing_value_hints": [
+        "assets.asset_name = \"BR-004\""
+      ],
+      "order_ok": false,
+      "order_required": true,
+      "ranker_score": -19,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": false,
+      "sql": "SELECT DISTINCT downstream.asset_name;",
+      "value_hint_count": 1,
+      "value_hits": 0
+    }
+  ],
+  "raw_response": "1. ```sql\nSELECT a2.asset_name\nFROM assets AS a1\nJOIN grid_topology AS gt ON gt.upstream_asset_id = a1.asset_id\nJOIN assets AS a2 ON a2.asset_id = gt.downstream_asset_id\nWHERE a1.asset_name = 'BR-004'\nORDER BY a2.asset_name;\n```\n\n2. ```sql\nSELECT DISTINCT downstream.asset_name\nFROM grid_topology AS gt\nJOIN assets AS upstream ON upstream.asset_id = gt.upstream_asset_id\nJOIN assets AS downstream ON downstream.asset_id = gt.downstream_asset_id\nWHERE upstream.asset_name = 'BR-004'\nORDER BY downstream.asset_name;\n```\n\n3. ```sql\nSELECT a_down.asset_name\nFROM assets AS a_up\nJOIN grid_topology AS gt ON gt.upstream_asset_id = a_up.asset_id\nLEFT JOIN assets AS a_down ON a_down.asset_id = gt.downstream_asset_id\nWHERE a_up.asset_name = 'BR-004'\nORDER BY a_down.asset_name;\n```",
+  "repair_raw_response": "",
+  "repaired_sql": ""
+}

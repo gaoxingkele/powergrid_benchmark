@@ -1,0 +1,102 @@
+{
+  "prompt": "You are generating candidate SQLite SQL for CHESS-style MA-SQLGrid.\n\nReturn 3 distinct read-only SQLite SELECT queries as a numbered list. Do not include explanation.\nDo not use INSERT, UPDATE, DELETE, DROP, PRAGMA, or multiple statements.\nUse only the selected context, normalization hints, and inferred output-form hints below. Candidate queries should differ in plausible joins/projections while respecting the inferred projection count and relevant literal predicates.\n\nCondition: C5_MASQLGrid_DomainContext_Validated\n\nSQLite selected context:\nTables and selected columns:\n- asset_types(asset_type_id) -- equipment type catalog such as Transformer, Breaker, Line, Relay, Substation, Capacitor\n- assets(asset_id, asset_name, asset_type_id, location_id) -- individual grid assets with names, type, location, install date, status, and MW capacity\n- grid_topology(edge_id, upstream_asset_id, downstream_asset_id, connection_type, switch_status) -- directed upstream/downstream asset connections and switch status\n- locations(location_id) -- grid yards, substations, regions, coordinates, and location criticality\n- sensor_readings(reading_id, asset_id) -- time-series sensor readings for assets with sensor type, value, unit, and alarm flag\n- work_orders(work_order_id, asset_id, assigned_technician_id) -- maintenance work orders with priority, status, schedule, completion date, and fault code\nJoin paths:\n- assets.asset_type_id = asset_types.asset_type_id\n- assets.location_id = locations.location_id\n- work_orders.asset_id = assets.asset_id\n- sensor_readings.asset_id = assets.asset_id\n- grid_topology.upstream_asset_id = assets.asset_id\n- grid_topology.downstream_asset_id = assets.asset_id\nExact database values matched from the question:\n- assets.asset_name: TX-001\nPower-grid domain normalization hints inferred from the question:\n- assets.asset_name = \"TX-001\"\nAnswer-shape hints inferred from the question text:\n- expected column count: 4\n- row granularity: multi-row\n- deterministic ordering needed: True\n- Project edge_id, downstream asset, connection_type, and switch_status.\n\nQuestion ID: Q163\nQuestion: List topology edges that originate from upstream asset TX-001.\n",
+  "rank_trace": [
+    {
+      "candidate_index": 0,
+      "column_count": 4,
+      "empty_result": false,
+      "exec_error": "",
+      "exec_ok": true,
+      "expected_column_count": 4,
+      "missing_value_hints": [],
+      "order_ok": true,
+      "order_required": true,
+      "ranker_score": 33,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": true,
+      "sql": "SELECT gt.edge_id, a.asset_name AS downstream_asset, gt.connection_type, gt.switch_status FROM grid_topology AS gt JOIN assets AS a ON a.asset_id = gt.downstream_asset_id JOIN assets AS u ON u.asset_id = gt.upstream_asset_id WHERE u.asset_name = 'TX-001' ORDER BY gt.edge_id;",
+      "value_hint_count": 1,
+      "value_hits": 1
+    },
+    {
+      "candidate_index": 1,
+      "column_count": 4,
+      "empty_result": false,
+      "exec_error": "",
+      "exec_ok": true,
+      "expected_column_count": 4,
+      "missing_value_hints": [],
+      "order_ok": true,
+      "order_required": true,
+      "ranker_score": 32,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": true,
+      "sql": "SELECT gt.edge_id, d.asset_name AS downstream_asset, gt.connection_type, gt.switch_status FROM grid_topology AS gt JOIN assets AS d ON d.asset_id = gt.downstream_asset_id WHERE gt.upstream_asset_id = ( SELECT asset_id FROM assets WHERE asset_name = 'TX-001' ) ORDER BY gt.edge_id, d.asset_name;",
+      "value_hint_count": 1,
+      "value_hits": 1
+    },
+    {
+      "candidate_index": 2,
+      "column_count": 4,
+      "empty_result": false,
+      "exec_error": "",
+      "exec_ok": true,
+      "expected_column_count": 4,
+      "missing_value_hints": [],
+      "order_ok": true,
+      "order_required": true,
+      "ranker_score": 31,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": true,
+      "sql": "SELECT edge_id, downstream_asset_name, connection_type, switch_status FROM ( SELECT gt.edge_id, a.asset_name AS downstream_asset_name, gt.connection_type, gt.switch_status FROM grid_topology AS gt JOIN assets AS a ON a.asset_id = gt.downstream_asset_id JOIN assets AS u ON u.asset_id = gt.upstream_asset_id WHERE u.asset_name = 'TX-001' ) ORDER BY edge_id;",
+      "value_hint_count": 1,
+      "value_hits": 1
+    },
+    {
+      "candidate_index": 3,
+      "column_count": 0,
+      "empty_result": false,
+      "exec_error": "no such column: gt.edge_id",
+      "exec_ok": false,
+      "expected_column_count": 4,
+      "missing_value_hints": [
+        "assets.asset_name = \"TX-001\""
+      ],
+      "order_ok": false,
+      "order_required": true,
+      "ranker_score": -18,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": false,
+      "sql": "SELECT gt.edge_id, a.asset_name AS downstream_asset, gt.connection_type, gt.switch_status;",
+      "value_hint_count": 1,
+      "value_hits": 0
+    },
+    {
+      "candidate_index": 4,
+      "column_count": 0,
+      "empty_result": false,
+      "exec_error": "no such column: gt.edge_id",
+      "exec_ok": false,
+      "expected_column_count": 4,
+      "missing_value_hints": [
+        "assets.asset_name = \"TX-001\""
+      ],
+      "order_ok": false,
+      "order_required": true,
+      "ranker_score": -19,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": false,
+      "sql": "SELECT gt.edge_id, d.asset_name AS downstream_asset, gt.connection_type, gt.switch_status;",
+      "value_hint_count": 1,
+      "value_hits": 0
+    }
+  ],
+  "raw_response": "1. ```sql\nSELECT gt.edge_id, a.asset_name AS downstream_asset, gt.connection_type, gt.switch_status\nFROM grid_topology AS gt\nJOIN assets AS a\n  ON a.asset_id = gt.downstream_asset_id\nJOIN assets AS u\n  ON u.asset_id = gt.upstream_asset_id\nWHERE u.asset_name = 'TX-001'\nORDER BY gt.edge_id;\n```\n\n2. ```sql\nSELECT gt.edge_id, d.asset_name AS downstream_asset, gt.connection_type, gt.switch_status\nFROM grid_topology AS gt\nJOIN assets AS d\n  ON d.asset_id = gt.downstream_asset_id\nWHERE gt.upstream_asset_id = (\n  SELECT asset_id\n  FROM assets\n  WHERE asset_name = 'TX-001'\n)\nORDER BY gt.edge_id, d.asset_name;\n```\n\n3. ```sql\nSELECT edge_id, downstream_asset_name, connection_type, switch_status\nFROM (\n  SELECT gt.edge_id,\n         a.asset_name AS downstream_asset_name,\n         gt.connection_type,\n         gt.switch_status\n  FROM grid_topology AS gt\n  JOIN assets AS a\n    ON a.asset_id = gt.downstream_asset_id\n  JOIN assets AS u\n    ON u.asset_id = gt.upstream_asset_id\n  WHERE u.asset_name = 'TX-001'\n)\nORDER BY edge_id;\n```",
+  "repair_raw_response": "",
+  "repaired_sql": ""
+}

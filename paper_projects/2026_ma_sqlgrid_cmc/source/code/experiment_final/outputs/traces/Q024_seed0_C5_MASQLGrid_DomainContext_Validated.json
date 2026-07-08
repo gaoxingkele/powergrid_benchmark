@@ -1,0 +1,102 @@
+{
+  "prompt": "You are generating candidate SQLite SQL for CHESS-style MA-SQLGrid.\n\nReturn 3 distinct read-only SQLite SELECT queries as a numbered list. Do not include explanation.\nDo not use INSERT, UPDATE, DELETE, DROP, PRAGMA, or multiple statements.\nUse only the selected context, normalization hints, and inferred output-form hints below. Candidate queries should differ in plausible joins/projections while respecting the inferred projection count and relevant literal predicates.\n\nCondition: C5_MASQLGrid_DomainContext_Validated\n\nSQLite selected context:\nTables and selected columns:\n- asset_types(asset_type_id) -- equipment type catalog such as Transformer, Breaker, Line, Relay, Substation, Capacitor\n- assets(asset_id, asset_type_id, location_id) -- individual grid assets with names, type, location, install date, status, and MW capacity\n- maintenance_logs(log_id, work_order_id, technician_id) -- maintenance actions, timestamps, notes, and parts cost\n- sensor_readings(reading_id, asset_id, alarm_flag) -- time-series sensor readings for assets with sensor type, value, unit, and alarm flag\n- technicians(technician_id, technician_name, active) -- maintenance technicians, specialties, home regions, and active flag\n- work_orders(work_order_id, asset_id, assigned_technician_id) -- maintenance work orders with priority, status, schedule, completion date, and fault code\nJoin paths:\n- assets.asset_type_id = asset_types.asset_type_id\n- work_orders.asset_id = assets.asset_id\n- work_orders.assigned_technician_id = technicians.technician_id\n- maintenance_logs.work_order_id = work_orders.work_order_id\n- maintenance_logs.technician_id = technicians.technician_id\n- sensor_readings.asset_id = assets.asset_id\nPower-grid domain normalization hints inferred from the question:\n- technicians.active = 0\nAnswer-shape hints inferred from the question text:\n- expected column count: 2\n- row granularity: multi-row\n- deterministic ordering needed: True\n- Project technician_name and specialty.\n\nQuestion ID: Q024\nQuestion: Which technicians are inactive?\n",
+  "rank_trace": [
+    {
+      "candidate_index": 0,
+      "column_count": 2,
+      "empty_result": false,
+      "exec_error": "",
+      "exec_ok": true,
+      "expected_column_count": 2,
+      "missing_value_hints": [],
+      "order_ok": true,
+      "order_required": true,
+      "ranker_score": 33,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": true,
+      "sql": "SELECT technician_name, specialty FROM technicians WHERE active = 0 ORDER BY technician_name, specialty;",
+      "value_hint_count": 1,
+      "value_hits": 1
+    },
+    {
+      "candidate_index": 1,
+      "column_count": 2,
+      "empty_result": false,
+      "exec_error": "",
+      "exec_ok": true,
+      "expected_column_count": 2,
+      "missing_value_hints": [],
+      "order_ok": true,
+      "order_required": true,
+      "ranker_score": 32,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": true,
+      "sql": "SELECT t.technician_name, t.specialty FROM technicians AS t LEFT JOIN maintenance_logs AS ml ON ml.technician_id = t.technician_id WHERE t.active = 0 ORDER BY t.technician_name, t.specialty;",
+      "value_hint_count": 1,
+      "value_hits": 1
+    },
+    {
+      "candidate_index": 2,
+      "column_count": 2,
+      "empty_result": false,
+      "exec_error": "",
+      "exec_ok": true,
+      "expected_column_count": 2,
+      "missing_value_hints": [],
+      "order_ok": true,
+      "order_required": true,
+      "ranker_score": 31,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": true,
+      "sql": "SELECT DISTINCT t.technician_name, t.specialty FROM technicians AS t LEFT JOIN work_orders AS wo ON wo.assigned_technician_id = t.technician_id WHERE t.active = 0 ORDER BY t.technician_name, t.specialty;",
+      "value_hint_count": 1,
+      "value_hits": 1
+    },
+    {
+      "candidate_index": 3,
+      "column_count": 0,
+      "empty_result": false,
+      "exec_error": "no such column: technician_name",
+      "exec_ok": false,
+      "expected_column_count": 2,
+      "missing_value_hints": [
+        "technicians.active = 0"
+      ],
+      "order_ok": false,
+      "order_required": true,
+      "ranker_score": -18,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": false,
+      "sql": "SELECT technician_name, specialty;",
+      "value_hint_count": 1,
+      "value_hits": 0
+    },
+    {
+      "candidate_index": 4,
+      "column_count": 0,
+      "empty_result": false,
+      "exec_error": "no such column: t.technician_name",
+      "exec_ok": false,
+      "expected_column_count": 2,
+      "missing_value_hints": [
+        "technicians.active = 0"
+      ],
+      "order_ok": false,
+      "order_required": true,
+      "ranker_score": -19,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": false,
+      "sql": "SELECT t.technician_name, t.specialty;",
+      "value_hint_count": 1,
+      "value_hits": 0
+    }
+  ],
+  "raw_response": "1. ```sql\nSELECT technician_name, specialty\nFROM technicians\nWHERE active = 0\nORDER BY technician_name, specialty;\n```\n\n2. ```sql\nSELECT t.technician_name, t.specialty\nFROM technicians AS t\nLEFT JOIN maintenance_logs AS ml\n  ON ml.technician_id = t.technician_id\nWHERE t.active = 0\nORDER BY t.technician_name, t.specialty;\n```\n\n3. ```sql\nSELECT DISTINCT t.technician_name, t.specialty\nFROM technicians AS t\nLEFT JOIN work_orders AS wo\n  ON wo.assigned_technician_id = t.technician_id\nWHERE t.active = 0\nORDER BY t.technician_name, t.specialty;\n```",
+  "repair_raw_response": "",
+  "repaired_sql": ""
+}

@@ -1,0 +1,67 @@
+{
+  "prompt": "You are generating candidate SQLite SQL for CHESS-style MA-SQLGrid.\n\nReturn 3 distinct read-only SQLite SELECT queries as a numbered list. Do not include explanation.\nDo not use INSERT, UPDATE, DELETE, DROP, PRAGMA, or multiple statements.\nUse only the selected context, normalization hints, and inferred output-form hints below. Candidate queries should differ in plausible joins/projections while respecting the inferred projection count and relevant literal predicates.\n\nCondition: C5_MASQLGrid_DomainContext_Validated\n\nSQLite selected context:\nTables and selected columns:\n- asset_types(asset_type_id, type_name) -- equipment type catalog such as Transformer, Breaker, Line, Relay, Substation, Capacitor\n- assets(asset_id, asset_type_id, location_id, status) -- individual grid assets with names, type, location, install date, status, and MW capacity\n- grid_topology(edge_id, upstream_asset_id, downstream_asset_id) -- directed upstream/downstream asset connections and switch status\n- maintenance_logs(log_id, work_order_id, technician_id, action_type, notes) -- maintenance actions, timestamps, notes, and parts cost\n- technicians(technician_id, specialty) -- maintenance technicians, specialties, home regions, and active flag\n- work_orders(work_order_id, asset_id, assigned_technician_id, fault_code) -- maintenance work orders with priority, status, schedule, completion date, and fault code\nJoin paths:\n- assets.asset_type_id = asset_types.asset_type_id\n- work_orders.asset_id = assets.asset_id\n- work_orders.assigned_technician_id = technicians.technician_id\n- maintenance_logs.work_order_id = work_orders.work_order_id\n- maintenance_logs.technician_id = technicians.technician_id\n- grid_topology.upstream_asset_id = assets.asset_id\n- grid_topology.downstream_asset_id = assets.asset_id\nExact database values matched from the question:\n- asset_types.type_name: Line\n- assets.status: maintenance\n- maintenance_logs.action_type: repair\n- maintenance_logs.notes: line repair\n- technicians.specialty: line\n- work_orders.fault_code: LINE\nPower-grid domain normalization hints inferred from the question:\n- asset_types.type_name = \"Line\"\n- assets.status = \"maintenance\"\n- technicians.specialty = \"line\"\n- work_orders.fault_code = \"LINE\"\n- maintenance_logs.action_type = \"repair\"\n- maintenance_logs.notes = \"line repair\"\nAnswer-shape hints inferred from the question text:\n- expected column count: 2\n- row granularity: multi-row\n- deterministic ordering needed: True\n- Project log_id and work_order_id.\n\nQuestion ID: Q067\nQuestion: Which maintenance logs mention line repair?\n",
+  "rank_trace": [
+    {
+      "candidate_index": 0,
+      "column_count": 2,
+      "empty_result": false,
+      "exec_error": "",
+      "exec_ok": true,
+      "expected_column_count": 2,
+      "missing_value_hints": [
+        "asset_types.type_name = \"Line\"",
+        "work_orders.fault_code = \"LINE\""
+      ],
+      "order_ok": true,
+      "order_required": true,
+      "ranker_score": 39,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": true,
+      "sql": "SELECT ml.log_id, ml.work_order_id FROM maintenance_logs AS ml WHERE ml.action_type = 'repair' AND ml.notes = 'line repair' ORDER BY ml.log_id, ml.work_order_id;",
+      "value_hint_count": 6,
+      "value_hits": 4
+    },
+    {
+      "candidate_index": 1,
+      "column_count": 2,
+      "empty_result": true,
+      "exec_error": "",
+      "exec_ok": true,
+      "expected_column_count": 2,
+      "missing_value_hints": [],
+      "order_ok": true,
+      "order_required": true,
+      "ranker_score": 50,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": true,
+      "sql": "SELECT ml.log_id, ml.work_order_id FROM maintenance_logs AS ml JOIN work_orders AS wo ON ml.work_order_id = wo.work_order_id JOIN assets AS a ON wo.asset_id = a.asset_id JOIN asset_types AS at ON a.asset_type_id = at.asset_type_id WHERE at.type_name = 'Line' AND a.status = 'maintenance' AND wo.fault_code = 'LINE' AND ml.action_type = 'repair' AND ml.notes = 'line repair' ORDER BY ml.log_id, ml.work_order_id;",
+      "value_hint_count": 6,
+      "value_hits": 6
+    },
+    {
+      "candidate_index": 2,
+      "column_count": 2,
+      "empty_result": false,
+      "exec_error": "",
+      "exec_ok": true,
+      "expected_column_count": 2,
+      "missing_value_hints": [
+        "asset_types.type_name = \"Line\""
+      ],
+      "order_ok": true,
+      "order_required": true,
+      "ranker_score": 44,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": true,
+      "sql": "SELECT ml.log_id, ml.work_order_id FROM maintenance_logs AS ml JOIN technicians AS t ON ml.technician_id = t.technician_id JOIN work_orders AS wo ON ml.work_order_id = wo.work_order_id WHERE t.specialty = 'line' AND wo.fault_code = 'LINE' AND ml.action_type = 'repair' AND ml.notes = 'line repair' ORDER BY ml.log_id, ml.work_order_id;",
+      "value_hint_count": 6,
+      "value_hits": 5
+    }
+  ],
+  "raw_response": "1. `SELECT ml.log_id, ml.work_order_id FROM maintenance_logs AS ml WHERE ml.action_type = 'repair' AND ml.notes = 'line repair' ORDER BY ml.log_id, ml.work_order_id;`\n\n2. `SELECT ml.log_id, ml.work_order_id FROM maintenance_logs AS ml JOIN work_orders AS wo ON ml.work_order_id = wo.work_order_id JOIN assets AS a ON wo.asset_id = a.asset_id JOIN asset_types AS at ON a.asset_type_id = at.asset_type_id WHERE at.type_name = 'Line' AND a.status = 'maintenance' AND wo.fault_code = 'LINE' AND ml.action_type = 'repair' AND ml.notes = 'line repair' ORDER BY ml.log_id, ml.work_order_id;`\n\n3. `SELECT ml.log_id, ml.work_order_id FROM maintenance_logs AS ml JOIN technicians AS t ON ml.technician_id = t.technician_id JOIN work_orders AS wo ON ml.work_order_id = wo.work_order_id WHERE t.specialty = 'line' AND wo.fault_code = 'LINE' AND ml.action_type = 'repair' AND ml.notes = 'line repair' ORDER BY ml.log_id, ml.work_order_id;`",
+  "repair_raw_response": "",
+  "repaired_sql": ""
+}

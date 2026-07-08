@@ -1,0 +1,602 @@
+{
+  "metadata_audit": {
+    "column_count_mismatch_count": 0,
+    "inferred_column_count_distribution": {
+      "1": 61,
+      "2": 31,
+      "3": 57,
+      "4": 31
+    },
+    "metadata_column_count_distribution": {
+      "1": 61,
+      "2": 31,
+      "3": 57,
+      "4": 31
+    },
+    "mismatches": [],
+    "question_count": 180,
+    "split": "test",
+    "value_hint_record_count": 170
+  },
+  "pattern_audit": {
+    "failure_count": 0,
+    "failures": [],
+    "fixture_count": 11,
+    "rows": [
+      {
+        "expected_column_count": 2,
+        "inferred_column_count": 2,
+        "inferred_hints": [
+          "Project asset_name and install_date."
+        ],
+        "missing_required_hints": [],
+        "normalized_value_hints": [
+          "locations.region = \"North\"",
+          "technicians.home_region = \"North\"",
+          "assets.install_date < '2018-01-01'"
+        ],
+        "question": "Find assets installed before 2018 in the North region.",
+        "selected_columns": {
+          "asset_types": [
+            "asset_type_id"
+          ],
+          "assets": [
+            "asset_id",
+            "asset_type_id",
+            "location_id",
+            "install_date"
+          ],
+          "grid_topology": [
+            "edge_id",
+            "upstream_asset_id",
+            "downstream_asset_id"
+          ],
+          "locations": [
+            "location_id",
+            "region"
+          ],
+          "sensor_readings": [
+            "reading_id",
+            "asset_id"
+          ],
+          "technicians": [
+            "technician_id",
+            "home_region"
+          ]
+        },
+        "selected_tables": [
+          "asset_types",
+          "assets",
+          "grid_topology",
+          "locations",
+          "sensor_readings",
+          "technicians"
+        ]
+      },
+      {
+        "expected_column_count": 1,
+        "inferred_column_count": 1,
+        "inferred_hints": [
+          "Project technician_name for technician listing questions.",
+          "Project work_order_id and status for named assignee questions.",
+          "Technician listing questions should project technician_name, not work_order columns."
+        ],
+        "missing_required_hints": [],
+        "normalized_value_hints": [
+          "work_orders.priority = \"high\"",
+          "work_orders.priority = 'high'"
+        ],
+        "question": "Which technicians are assigned to high-priority work orders?",
+        "selected_columns": {
+          "asset_types": [
+            "asset_type_id"
+          ],
+          "assets": [
+            "asset_id",
+            "asset_type_id",
+            "location_id"
+          ],
+          "grid_topology": [
+            "edge_id",
+            "upstream_asset_id",
+            "downstream_asset_id"
+          ],
+          "maintenance_logs": [
+            "log_id",
+            "work_order_id",
+            "technician_id"
+          ],
+          "technicians": [
+            "technician_id",
+            "technician_name"
+          ],
+          "work_orders": [
+            "work_order_id",
+            "asset_id",
+            "assigned_technician_id",
+            "priority",
+            "status"
+          ]
+        },
+        "selected_tables": [
+          "asset_types",
+          "assets",
+          "grid_topology",
+          "maintenance_logs",
+          "technicians",
+          "work_orders"
+        ]
+      },
+      {
+        "expected_column_count": 3,
+        "inferred_column_count": 3,
+        "inferred_hints": [
+          "Project reading_time, reading_value, and unit.",
+          "Use ORDER BY reading_time DESC for latest readings."
+        ],
+        "missing_required_hints": [],
+        "normalized_value_hints": [
+          "assets.asset_name = \"LN-003\"",
+          "sensor_readings.sensor_type = \"voltage\"",
+          "sensor_readings.sensor_type = 'voltage'"
+        ],
+        "question": "Show the latest voltage reading for asset LN-003.",
+        "selected_columns": {
+          "asset_types": [
+            "asset_type_id"
+          ],
+          "assets": [
+            "asset_id",
+            "asset_name",
+            "asset_type_id",
+            "location_id"
+          ],
+          "grid_topology": [
+            "edge_id",
+            "upstream_asset_id",
+            "downstream_asset_id"
+          ],
+          "locations": [
+            "location_id"
+          ],
+          "sensor_readings": [
+            "reading_id",
+            "asset_id",
+            "reading_time",
+            "sensor_type",
+            "reading_value",
+            "unit"
+          ],
+          "work_orders": [
+            "work_order_id",
+            "asset_id",
+            "assigned_technician_id"
+          ]
+        },
+        "selected_tables": [
+          "asset_types",
+          "assets",
+          "grid_topology",
+          "locations",
+          "sensor_readings",
+          "work_orders"
+        ]
+      },
+      {
+        "expected_column_count": 2,
+        "inferred_column_count": 2,
+        "inferred_hints": [
+          "Project asset_name for asset listing questions.",
+          "Project asset_name and reading_value.",
+          "Use ORDER BY reading_value DESC LIMIT 1 for highest readings."
+        ],
+        "missing_required_hints": [],
+        "normalized_value_hints": [
+          "sensor_readings.sensor_type = \"temperature\"",
+          "sensor_readings.sensor_type = 'temperature'",
+          "sensor_readings.alarm_flag = 1"
+        ],
+        "question": "Which asset has the highest recorded temperature alarm?",
+        "selected_columns": {
+          "asset_types": [
+            "asset_type_id"
+          ],
+          "assets": [
+            "asset_id",
+            "asset_name",
+            "asset_type_id",
+            "location_id"
+          ],
+          "grid_topology": [
+            "edge_id",
+            "upstream_asset_id",
+            "downstream_asset_id"
+          ],
+          "locations": [
+            "location_id"
+          ],
+          "sensor_readings": [
+            "reading_id",
+            "asset_id",
+            "reading_time",
+            "sensor_type",
+            "reading_value",
+            "alarm_flag"
+          ],
+          "technicians": [
+            "technician_id",
+            "active"
+          ]
+        },
+        "selected_tables": [
+          "asset_types",
+          "assets",
+          "grid_topology",
+          "locations",
+          "sensor_readings",
+          "technicians"
+        ]
+      },
+      {
+        "expected_column_count": 2,
+        "inferred_column_count": 2,
+        "inferred_hints": [
+          "Project asset_name and region."
+        ],
+        "missing_required_hints": [],
+        "normalized_value_hints": [
+          "locations.criticality = \"critical\"",
+          "locations.criticality = 'critical'"
+        ],
+        "question": "Show assets in critical locations with their region.",
+        "selected_columns": {
+          "asset_types": [
+            "asset_type_id"
+          ],
+          "assets": [
+            "asset_id",
+            "asset_name",
+            "asset_type_id",
+            "location_id"
+          ],
+          "grid_topology": [
+            "edge_id",
+            "upstream_asset_id",
+            "downstream_asset_id"
+          ],
+          "locations": [
+            "location_id",
+            "location_name",
+            "region",
+            "criticality"
+          ],
+          "sensor_readings": [
+            "reading_id",
+            "asset_id"
+          ],
+          "work_orders": [
+            "work_order_id",
+            "asset_id",
+            "assigned_technician_id"
+          ]
+        },
+        "selected_tables": [
+          "asset_types",
+          "assets",
+          "grid_topology",
+          "locations",
+          "sensor_readings",
+          "work_orders"
+        ]
+      },
+      {
+        "expected_column_count": 3,
+        "inferred_column_count": 3,
+        "inferred_hints": [
+          "Project type_name, location_name, and status."
+        ],
+        "missing_required_hints": [],
+        "normalized_value_hints": [
+          "assets.asset_name = \"TX-001\""
+        ],
+        "question": "What type, location, and status are recorded for asset TX-001?",
+        "selected_columns": {
+          "asset_types": [
+            "asset_type_id",
+            "type_name"
+          ],
+          "assets": [
+            "asset_id",
+            "asset_name",
+            "asset_type_id",
+            "location_id",
+            "status"
+          ],
+          "grid_topology": [
+            "edge_id",
+            "upstream_asset_id",
+            "downstream_asset_id"
+          ],
+          "locations": [
+            "location_id",
+            "location_name"
+          ],
+          "sensor_readings": [
+            "reading_id",
+            "asset_id"
+          ],
+          "work_orders": [
+            "work_order_id",
+            "asset_id",
+            "assigned_technician_id"
+          ]
+        },
+        "selected_tables": [
+          "asset_types",
+          "assets",
+          "grid_topology",
+          "locations",
+          "sensor_readings",
+          "work_orders"
+        ]
+      },
+      {
+        "expected_column_count": 4,
+        "inferred_column_count": 4,
+        "inferred_hints": [
+          "Project reading_time, sensor_type, reading_value, and unit.",
+          "Use ORDER BY reading_time DESC for latest readings."
+        ],
+        "missing_required_hints": [],
+        "normalized_value_hints": [
+          "assets.asset_name = \"TX-001\""
+        ],
+        "question": "Show the latest sensor reading recorded for asset TX-001.",
+        "selected_columns": {
+          "asset_types": [
+            "asset_type_id"
+          ],
+          "assets": [
+            "asset_id",
+            "asset_name",
+            "asset_type_id",
+            "location_id"
+          ],
+          "grid_topology": [
+            "edge_id",
+            "upstream_asset_id",
+            "downstream_asset_id"
+          ],
+          "locations": [
+            "location_id"
+          ],
+          "sensor_readings": [
+            "reading_id",
+            "asset_id",
+            "reading_time",
+            "sensor_type",
+            "reading_value",
+            "unit"
+          ],
+          "work_orders": [
+            "work_order_id",
+            "asset_id",
+            "assigned_technician_id"
+          ]
+        },
+        "selected_tables": [
+          "asset_types",
+          "assets",
+          "grid_topology",
+          "locations",
+          "sensor_readings",
+          "work_orders"
+        ]
+      },
+      {
+        "expected_column_count": 4,
+        "inferred_column_count": 4,
+        "inferred_hints": [
+          "Project edge_id, downstream asset, connection_type, and switch_status."
+        ],
+        "missing_required_hints": [],
+        "normalized_value_hints": [
+          "assets.asset_name = \"TX-001\""
+        ],
+        "question": "List topology edges that originate from upstream asset TX-001.",
+        "selected_columns": {
+          "asset_types": [
+            "asset_type_id"
+          ],
+          "assets": [
+            "asset_id",
+            "asset_name",
+            "asset_type_id",
+            "location_id"
+          ],
+          "grid_topology": [
+            "edge_id",
+            "upstream_asset_id",
+            "downstream_asset_id",
+            "connection_type",
+            "switch_status"
+          ],
+          "locations": [
+            "location_id"
+          ],
+          "sensor_readings": [
+            "reading_id",
+            "asset_id"
+          ],
+          "work_orders": [
+            "work_order_id",
+            "asset_id",
+            "assigned_technician_id"
+          ]
+        },
+        "selected_tables": [
+          "asset_types",
+          "assets",
+          "grid_topology",
+          "locations",
+          "sensor_readings",
+          "work_orders"
+        ]
+      },
+      {
+        "expected_column_count": 4,
+        "inferred_column_count": 4,
+        "inferred_hints": [
+          "Project work_order_id, asset_id, status, and priority."
+        ],
+        "missing_required_hints": [],
+        "normalized_value_hints": [
+          "work_orders.fault_code = \"TEMP\""
+        ],
+        "question": "List work orders with fault code TEMP.",
+        "selected_columns": {
+          "asset_types": [
+            "asset_type_id"
+          ],
+          "assets": [
+            "asset_id",
+            "asset_type_id",
+            "location_id"
+          ],
+          "grid_topology": [
+            "edge_id",
+            "upstream_asset_id",
+            "downstream_asset_id"
+          ],
+          "maintenance_logs": [
+            "log_id",
+            "work_order_id",
+            "technician_id"
+          ],
+          "technicians": [
+            "technician_id"
+          ],
+          "work_orders": [
+            "work_order_id",
+            "asset_id",
+            "assigned_technician_id",
+            "priority",
+            "status",
+            "fault_code"
+          ]
+        },
+        "selected_tables": [
+          "asset_types",
+          "assets",
+          "grid_topology",
+          "maintenance_logs",
+          "technicians",
+          "work_orders"
+        ]
+      },
+      {
+        "expected_column_count": 3,
+        "inferred_column_count": 3,
+        "inferred_hints": [
+          "Project work_order_id, asset_id, and status."
+        ],
+        "missing_required_hints": [],
+        "normalized_value_hints": [
+          "work_orders.fault_code = \"TEMP\""
+        ],
+        "question": "Which work orders have fault code TEMP?",
+        "selected_columns": {
+          "asset_types": [
+            "asset_type_id"
+          ],
+          "assets": [
+            "asset_id",
+            "asset_type_id",
+            "location_id"
+          ],
+          "grid_topology": [
+            "edge_id",
+            "upstream_asset_id",
+            "downstream_asset_id"
+          ],
+          "maintenance_logs": [
+            "log_id",
+            "work_order_id",
+            "technician_id"
+          ],
+          "technicians": [
+            "technician_id"
+          ],
+          "work_orders": [
+            "work_order_id",
+            "asset_id",
+            "assigned_technician_id",
+            "priority",
+            "status",
+            "fault_code"
+          ]
+        },
+        "selected_tables": [
+          "asset_types",
+          "assets",
+          "grid_topology",
+          "maintenance_logs",
+          "technicians",
+          "work_orders"
+        ]
+      },
+      {
+        "expected_column_count": 2,
+        "inferred_column_count": 2,
+        "inferred_hints": [
+          "Project asset_name for asset listing questions.",
+          "Project type_name and alarm_count ordered descending with LIMIT 1."
+        ],
+        "missing_required_hints": [],
+        "normalized_value_hints": [
+          "sensor_readings.alarm_flag = 1"
+        ],
+        "question": "Which asset type has the most alarmed sensor readings?",
+        "selected_columns": {
+          "asset_types": [
+            "asset_type_id",
+            "type_name"
+          ],
+          "assets": [
+            "asset_id",
+            "asset_name",
+            "asset_type_id",
+            "location_id"
+          ],
+          "grid_topology": [
+            "edge_id",
+            "upstream_asset_id",
+            "downstream_asset_id"
+          ],
+          "locations": [
+            "location_id"
+          ],
+          "sensor_readings": [
+            "reading_id",
+            "asset_id",
+            "sensor_type",
+            "unit",
+            "alarm_flag"
+          ],
+          "technicians": [
+            "technician_id",
+            "active"
+          ]
+        },
+        "selected_tables": [
+          "asset_types",
+          "assets",
+          "grid_topology",
+          "locations",
+          "sensor_readings",
+          "technicians"
+        ]
+      }
+    ]
+  }
+}
