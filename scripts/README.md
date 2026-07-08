@@ -38,7 +38,7 @@ Refresh the C2GES/NERC report PDF cache:
 python scripts/data_acquisition/download_c2ges_nerc_reports.py
 ```
 
-Create GitHub-friendly dataset archives:
+Create GitHub-friendly dataset archives. The default part size is 20 MB:
 
 ```powershell
 python scripts/data_acquisition/archive_public_datasets.py --clean

@@ -1,8 +1,8 @@
 """Archive downloaded public datasets for GitHub-friendly storage.
 
 Raw dataset folders stay ignored. This script creates tar.gz archives from the
-manifest and splits any archive larger than the configured part size so regular
-GitHub pushes do not hit the 100 MB single-file limit.
+manifest and splits any archive larger than the configured part size. The
+default is 20 MB to keep pushes reliable on unstable connections.
 """
 
 from __future__ import annotations
@@ -17,7 +17,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 MANIFEST = ROOT / "data" / "public_datasets" / "manifests" / "public_dataset_manifest.csv"
 ARCHIVE_ROOT = ROOT / "data" / "public_dataset_archives"
-PART_SIZE = 95 * 1024 * 1024
+PART_SIZE = 20 * 1024 * 1024
 
 
 def should_skip(path: Path) -> bool:
@@ -87,7 +87,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dataset", action="append", default=[], help="Dataset id to archive. Repeatable.")
     parser.add_argument("--clean", action="store_true", help="Delete existing archive directory before archiving.")
-    parser.add_argument("--part-size-mb", type=int, default=95)
+    parser.add_argument("--part-size-mb", type=int, default=20)
     args = parser.parse_args()
 
     if args.clean and ARCHIVE_ROOT.exists():
