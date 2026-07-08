@@ -2,6 +2,7 @@
 title: "Causal-Role-Aware Extractive Evidence Selection for Power Grid Reliability Reports"
 authors: "Not specified in provided sources"
 year: 2026
+publication_status: "original_pending_publication"
 ---
 
 # Causal-Role-Aware Extractive Evidence Selection for Power Grid Reliability Reports
@@ -13,6 +14,8 @@ year: 2026
 - Authors: Not specified in provided sources.
 - Year: 2026
 - Venue: Engineering Letters candidate, inferred from uploaded package name.
+- Publication Status: `original_pending_publication` / 原创待发表.
+- Originality Mark: User-designated original work, pending publication.
 - DOI: Not specified in provided sources.
 - URL: Not specified in provided sources.
 - PDF: `papers/raw/2026_c2ges_engineeringletters.pdf`

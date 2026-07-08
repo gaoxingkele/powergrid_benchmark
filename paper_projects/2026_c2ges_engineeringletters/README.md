@@ -8,9 +8,12 @@
 - Source workspace: `source/`
 - PDF archive: `papers/raw/2026_c2ges_engineeringletters.pdf`
 - ARA package: `ara_artifacts/2026_c2ges_engineeringletters/`
+- Publication status: `original_pending_publication` / 原创待发表
+- Originality mark: user-designated original work, pending publication
 
 ## Status
 
+- [x] Marked as original pending publication
 - [x] Zip extracted
 - [x] Independent paper project created
 - [x] Embedded `.git` removed from managed project copy
