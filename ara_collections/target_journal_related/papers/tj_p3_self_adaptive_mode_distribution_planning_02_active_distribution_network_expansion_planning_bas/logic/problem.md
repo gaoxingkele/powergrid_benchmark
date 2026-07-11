@@ -1,0 +1,11 @@
+# Problem Layer
+
+This external paper is included because it was published in a planned target journal
+and matches the planned topic `p3_self_adaptive_mode_distribution_planning`.
+
+## Match Evidence
+
+- Planned topic: Power Distribution Network Planning Strategy Optimization Based on a Self-Adaptive Multi-Objective Differential Evolution Algorithm
+- Query hit: power distribution network planning evolutionary algorithm
+- Method terms found: planning; optimization
+- Task terms found: expansion planning; distributed generation; planning

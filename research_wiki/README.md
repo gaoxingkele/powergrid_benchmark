@@ -20,6 +20,7 @@
 ## Entry Points
 
 - [Index](index.md)
+- [Mintou experiment strength gates](methodology/mintou_experiment_strength_gates.md)
 - [自动更新协议](protocols/auto_update_policy.md)
 - [思考记录边界](protocols/thought_capture_policy.md)
 - [方法论演化路径](methodology/evolution_path.md)
