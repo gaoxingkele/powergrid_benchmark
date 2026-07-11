@@ -1,21 +1,25 @@
-# Public Dataset Archive Cache
+# Public Dataset Archives
 
-This directory stores compressed public dataset cache artifacts for Git synchronization.
+This directory contains compressed public-dataset cache archives for GitHub synchronization.
 
-Raw dataset directories under `data/public_datasets/` are intentionally ignored by Git.
-Each dataset cache is packaged as `.tar.gz`; archives larger than 20 MiB are split into
-numbered parts such as:
+The original dataset cache under `data/public_datasets/` remains ignored by git. Large archives are split into 20 MB parts using the naming pattern:
 
 ```text
-gridstage.tar.gz.part001
-gridstage.tar.gz.part002
+public_datasets_<category>.tar.gz.part001
+public_datasets_<category>.tar.gz.part002
 ...
 ```
 
-The split files are produced by:
+Small categories are stored as a single `.tar.gz` file.
+
+## Restore
+
+To restore a split archive on Windows PowerShell:
 
 ```powershell
-python scripts\data_acquisition\archive_public_datasets.py --clean --part-size-mb 20
+Get-Content public_datasets_grid_cases.tar.gz.part* -Encoding Byte -ReadCount 0 |
+  Set-Content public_datasets_grid_cases.tar.gz -Encoding Byte
+tar -xzf public_datasets_grid_cases.tar.gz -C ..\..
 ```
 
-The complete index and source paths are tracked in `archives_manifest.csv`.
+Repeat for each category. The `manifest.csv` file lists category, source path, file names, and part sizes.
