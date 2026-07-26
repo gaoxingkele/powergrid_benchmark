@@ -1,0 +1,40 @@
+{
+  "task": "curtailment-rate forecasting under a fixed reference operating policy (70% SNSP-type acceptance cap, reserve 0.10)",
+  "hours": 8760,
+  "window": 48,
+  "horizons": [
+    1,
+    24
+  ],
+  "train_ratio": 0.7,
+  "seeds": [
+    11,
+    23,
+    47,
+    59,
+    71,
+    83,
+    97,
+    109,
+    127,
+    139
+  ],
+  "epochs": 20,
+  "k_neighbors": 8,
+  "methods": {
+    "DSTAR-GRU": "GRU encoder + Siamese retrieval in learned embedding space + validated blend.",
+    "Persistence": "Last observed curtailment rate.",
+    "Seasonal-24h": "Previous-day same-hour curtailment.",
+    "Ridge": "Ridge regression on the flattened window.",
+    "MLP": "Feedforward on the flattened window.",
+    "LSTM": "LSTM head without retrieval.",
+    "kNN-RawFeature": "k-NN retrieval in raw feature space (no learning).",
+    "Ablation-NoSiamese": "Retrieval in RAW feature space instead of the learned embedding.",
+    "Ablation-NoRetrievalBank": "GRU head without any retrieval.",
+    "Ablation-SmallBank": "Retrieval bank restricted to the most recent 168 hours.",
+    "Ablation-LSTMEncoder": "LSTM encoder with the same Siamese retrieval.",
+    "Ablation-NoTopology": "Topology-stress feature removed."
+  },
+  "statistics": "Mann-Whitney U two-sided + Holm per horizon on curtailment MAE",
+  "status": "public_rts_curtailment_v5_onset_eval"
+}

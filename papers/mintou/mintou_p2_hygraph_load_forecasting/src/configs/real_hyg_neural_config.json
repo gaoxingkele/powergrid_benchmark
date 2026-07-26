@@ -1,0 +1,37 @@
+{
+  "variants": {
+    "HyG-LoadFormer (neural)": {},
+    "Ablation-EuclideanGraph (neural)": {
+      "euclidean": true
+    },
+    "Ablation-FixedCurvature (neural)": {
+      "fixed_curvature": true
+    },
+    "Ablation-TemporalOnly (neural)": {
+      "no_graph": true
+    },
+    "Ablation-NoCalendar (neural)": {
+      "no_calendar": true
+    },
+    "Ablation-EqualNeighbors (neural)": {
+      "equal_neighbors": true
+    }
+  },
+  "encoder": "shared MLP 168->96->48",
+  "graph": "Poincare-ball embeddings dim 8, target-adaptive curvature softplus(kappa)+0.1, softmax(-c_i * d_H) attention, linear value map",
+  "head": "concat[target_enc, graph_agg, calendar] -> 64 -> 1",
+  "epochs": 15,
+  "train_stride": 3,
+  "batch_size": 512,
+  "seeds": [
+    11,
+    23,
+    47
+  ],
+  "optimizer": "Adam lr=1e-3, MSE on per-series z-normalized target",
+  "early_stopping": "last 15% of training window by time, best-val state restored",
+  "test_protocol": "identical splits and full test sets as stdlib and neural-baseline rows",
+  "torch_version": "2.13.0+cpu",
+  "device": "cpu",
+  "status": "public_data_benchmark_v6_hyg_neural"
+}

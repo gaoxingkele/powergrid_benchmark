@@ -4,7 +4,6 @@
     "data/public_datasets/grid_cases/simbench/simbench/networks/1-complete_data-mixed-all-0-sw",
     "data/public_datasets/reliability_reports/c2ges_nerc_reports"
   ],
-  "candidate_count": 120,
   "experiments": [
     "benchmark_portfolio_optimization",
     "distribution_project_review",
@@ -31,6 +30,27 @@
     "Ablation-NSGA2Only",
     "Ablation-SmallProjectPool"
   ],
-  "repeats": 4,
-  "status": "public_rts_simbench_nerc_project_review_v1"
+  "method_descriptions": {
+    "TRACE-MOEA": "NSGA-II core + preference coevolution + budget repair + decision trace archive.",
+    "NSGA-II": "pymoo NSGA-II, binary encoding, constrained.",
+    "MOEA/D": "pymoo MOEA/D, Tchebycheff decomposition, penalty for budget.",
+    "AHP-TOPSIS": "AHP-derived weights + TOPSIS closeness ranking + greedy fill.",
+    "Weighted Sum": "Weighted-score ranking + greedy fill.",
+    "Greedy BCR": "Benefit-cost-ratio greedy under budget.",
+    "Random Feasible": "Random permutation greedy fill (no penalties).",
+    "Ablation-NoFeasibilityRepair": "Repair operator disabled; constraint domination only.",
+    "Ablation-NoPreferenceRanking": "Preference coevolution disabled.",
+    "Ablation-NoReliabilityFeatures": "Reliability objective hidden from search (evaluation unchanged).",
+    "Ablation-NoRenewableFeatures": "Renewable objective hidden from search.",
+    "Ablation-NoScheduleRisk": "Risk objective hidden from search.",
+    "Ablation-SingleObjective": "Search on scalarized objective sum.",
+    "Ablation-NSGA2Only": "Engine without repair, coevolution, and trace.",
+    "Ablation-SmallProjectPool": "Candidate pool restricted to one third."
+  },
+  "seeds_per_method_per_experiment": 30,
+  "population_size": 40,
+  "generations": 40,
+  "evaluation": "standard hypervolume, fixed seeded normalization bounds, ref point 1.1^d; feasible non-dominated front only",
+  "statistics": "Mann-Whitney U two-sided, Holm correction per experiment",
+  "status": "public_rts_simbench_nerc_project_review_v2_real_algorithms"
 }

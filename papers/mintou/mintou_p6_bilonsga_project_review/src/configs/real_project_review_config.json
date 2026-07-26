@@ -4,7 +4,6 @@
     "data/public_datasets/grid_cases/simbench/simbench/networks/1-complete_data-mixed-all-0-sw",
     "data/public_datasets/reliability_reports/c2ges_nerc_reports"
   ],
-  "candidate_count": 120,
   "experiments": [
     "budget_constrained_selection",
     "reliability_prioritized_review",
@@ -33,6 +32,28 @@
     "Ablation-LowDependencyDensity",
     "Ablation-LooseBudget"
   ],
-  "repeats": 4,
-  "status": "public_rts_simbench_nerc_project_review_v1"
+  "method_descriptions": {
+    "BiLo-NSGA": "NSGA-II core + bidirectional local search + dependency moves + feasibility recovery.",
+    "NSGA-II": "pymoo NSGA-II, binary encoding, constrained.",
+    "NSGA-III": "pymoo NSGA-III with Das-Dennis reference directions.",
+    "MOEA/D": "pymoo MOEA/D, penalty for budget.",
+    "Greedy BCR": "Benefit-cost-ratio greedy under budget.",
+    "AHP-TOPSIS": "AHP-derived weights + TOPSIS ranking + greedy fill.",
+    "Random Feasible": "Random permutation greedy fill (no penalties).",
+    "Ablation-NoForwardSearch": "Forward insertion disabled.",
+    "Ablation-NoBackwardSearch": "Backward deletion disabled.",
+    "Ablation-RandomMutationOnly": "Local search replaced by high-rate random mutation.",
+    "Ablation-NoDependencyMoves": "Dependency-aware move bonus disabled.",
+    "Ablation-NoFeasibilityRecovery": "Budget repair disabled.",
+    "Ablation-WeightedRankingOnly": "Weighted ranking without evolution.",
+    "Ablation-ShallowLocalSearch": "Local-search depth reduced to 2.",
+    "Ablation-LowDependencyDensity": "Dependency graph thinned (every 3rd candidate isolated).",
+    "Ablation-LooseBudget": "Search at 1.2x budget, evaluated at the true budget."
+  },
+  "seeds_per_method_per_experiment": 30,
+  "population_size": 40,
+  "generations": 40,
+  "evaluation": "standard hypervolume, fixed seeded normalization bounds, ref point 1.1^d; feasible non-dominated front only",
+  "statistics": "Mann-Whitney U two-sided, Holm correction per experiment",
+  "status": "public_rts_simbench_nerc_project_review_v2_real_algorithms"
 }

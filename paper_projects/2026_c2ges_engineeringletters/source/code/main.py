@@ -72,10 +72,7 @@ BOOTSTRAP_SAMPLES = 10000
 BOOTSTRAP_SEED = 202502
 CONTEXT_WINDOW = 2
 CV_FOLDS = 5
-WORKSPACE_FALLBACK = Path(
-    "/media/lenovo/data2/cja/GridMind/references/AutoResearchClaw/"
-    "paper_workspace/workspaces/c2ges-causal-mechanism-ieeeaccess"
-)
+WORKSPACE_ENV_VAR = "C2GES_WORKSPACE"
 
 REVISED_C2GES_CANDIDATES = [
     {"family": "chain_plus_centrality", "weights": {"query": 0.52, "role": 0.40, "graph_signal": 0.08}},
@@ -88,21 +85,48 @@ REVISED_C2GES_CANDIDATES = [
 ]
 
 
-def discover_workspace() -> Path:
-    candidates = [Path.cwd().resolve(), Path(__file__).resolve()]
-    for start in candidates:
+def is_workspace(root: Path) -> bool:
+    return (
+        (root / "verification_pilot" / "agent_audit_40doc").is_dir()
+        and (root / "three-pack" / "config.yaml").is_file()
+    )
+
+
+def discover_workspace(explicit: Path | None = None) -> Path:
+    """Locate the experiment workspace.
+
+    Resolution order: explicit --workspace argument, the C2GES_WORKSPACE
+    environment variable, then an upward search from the current directory and
+    from this file's location.
+    """
+    if explicit is not None:
+        root = Path(explicit).expanduser().resolve()
+        if is_workspace(root):
+            return root
+        raise FileNotFoundError(
+            f"--workspace {root} is not a valid workspace: it must contain "
+            "verification_pilot/agent_audit_40doc/ and three-pack/config.yaml."
+        )
+    env_value = os.environ.get(WORKSPACE_ENV_VAR, "").strip()
+    if env_value:
+        root = Path(env_value).expanduser().resolve()
+        if is_workspace(root):
+            return root
+        raise FileNotFoundError(
+            f"{WORKSPACE_ENV_VAR}={root} is not a valid workspace: it must contain "
+            "verification_pilot/agent_audit_40doc/ and three-pack/config.yaml."
+        )
+    for start in [Path.cwd().resolve(), Path(__file__).resolve()]:
         for parent in [start, *start.parents]:
-            if (
-                (parent / "verification_pilot" / "agent_audit_40doc").is_dir()
-                and (parent / "three-pack" / "config.yaml").is_file()
-            ):
+            if is_workspace(parent):
                 return parent
-    if (
-        (WORKSPACE_FALLBACK / "verification_pilot" / "agent_audit_40doc").is_dir()
-        and (WORKSPACE_FALLBACK / "three-pack" / "config.yaml").is_file()
-    ):
-        return WORKSPACE_FALLBACK
-    raise FileNotFoundError("Could not discover paper workspace root.")
+    raise FileNotFoundError(
+        "Could not discover the C2GES experiment workspace. Pass "
+        "--workspace /path/to/workspace or set the C2GES_WORKSPACE environment "
+        "variable. The workspace root must contain "
+        "verification_pilot/agent_audit_40doc/ and three-pack/config.yaml "
+        "(see MISSING_ARTIFACTS.md in the paper project for the required files)."
+    )
 
 
 def discover_repo(workspace: Path) -> Path:
@@ -749,6 +773,16 @@ def write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--workspace",
+        type=Path,
+        default=None,
+        help=(
+            "Experiment workspace root containing verification_pilot/ and "
+            f"three-pack/config.yaml. Falls back to ${WORKSPACE_ENV_VAR} and "
+            "then to an upward directory search."
+        ),
+    )
     parser.add_argument("--data-dir", type=Path, default=None)
     parser.add_argument("--out-dir", type=Path, default=None)
     parser.add_argument("--bootstrap-samples", type=int, default=BOOTSTRAP_SAMPLES)
@@ -766,7 +800,7 @@ def main() -> None:
     global BOOTSTRAP_SAMPLES
     BOOTSTRAP_SAMPLES = int(args.bootstrap_samples)
 
-    workspace = discover_workspace()
+    workspace = discover_workspace(args.workspace)
     repo_root = discover_repo(workspace)
     data_dir = args.data_dir or workspace / "verification_pilot" / "agent_audit_40doc"
     output_dir = (

@@ -33,3 +33,26 @@
 2. 对 API/token 数据保存获取脚本和 metadata，不把私钥写入仓库。
 3. 对 TB 级数据只保存 DOI、record JSON、下载清单和子集选择策略。
 4. 每个进入实验的数据集都要补充字段字典、split 策略和 baseline whitelist。
+
+
+## Extension Datasets (2026-07-24)
+
+新增 BMS / BESS / 新能源 / ML-OPF 扩展数据源，详见 `data/public_datasets/CACHE_STATUS.md` 与 manifest。
+
+- `nasa_pcoe_battery` (downloaded): NASA PCoE Li-ion aging cells; core .mat files via public mirrors
+- `nasa_randomized_recommissioned_battery` (planned): Landing page + data.json metadata cached; full pack files may require portal download
+- `oxford_battery_degradation` (downloaded): Oxford Battery Degradation Dataset 1 (8 Kokam pouch cells)
+- `calce_battery` (downloaded): CALCE open battery portal page + A123 sample zip links when reachable
+- `battery_archive` (metadata-only): Battery Archive landing + study summaries cached as catalogue entry
+- `stanford_tri_high_power_battery` (downloaded): Stanford-TRI high-power Li-ion characterization (OSF)
+- `acn_data_static` (metadata-only): Sparse offline snapshot of ACN-Data (session JSON + README; full 85k curves optional)
+- `m5bat_bess` (metadata-only): M5BAT large-scale BESS field operation (Apr 2023 report package)
+- `finland_afrr_weather` (metadata-only): Finland aFRR energy market + weather hourly Jun 2024-Mar 2025
+- `bess_european_balancing_inputs` (metadata-only): Paper data for European balancing-market BESS strategies (DE/FI)
+- `renewables_ninja_country_sample` (metadata-only): Country-level renewables.ninja sample files (EU wind/PV archives when reachable)
+- `vce_rare_power` (metadata-only): VCE RARE county-level renewable CF; metadata + readme first, files on demand
+- `eia860_wind_solar_cf` (metadata-only): EIA-860 plant CF catalogue (full multi-GB archive kept metadata-first)
+- `secures_energy` (metadata-only): SECURES-Energy metadata cached; full climate projections download on demand
+- `era5_eu_supply_demand` (metadata-only): Weather/climate-driven EU power supply-demand time series metadata
+- `pglearn_small` (metadata-only): PGLearn Small collection: record card + one representative system subset if available
+- `opfdata_landing` (downloaded): OPFData paper + GCS bucket landing notes (gs://gridopt-dataset/)

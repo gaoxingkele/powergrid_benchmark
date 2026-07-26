@@ -12,7 +12,7 @@ MANIFEST = ROOT / "data" / "public_datasets" / "manifests" / "public_dataset_man
 
 def main() -> int:
     failures = 0
-    rows = list(csv.DictReader(MANIFEST.open(newline="", encoding="utf-8")))
+    rows = list(csv.DictReader(MANIFEST.open(newline="", encoding="utf-8-sig")))
     print(f"manifest rows: {len(rows)}")
     for row in rows:
         dataset_id = row["dataset_id"]

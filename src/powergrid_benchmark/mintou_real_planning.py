@@ -1,14 +1,44 @@
+"""Real-MOEA planning benchmark for mintou p3 (CARS-MODE) and p4 (SHIELD-MOEA).
+
+v2 rewrite. The v1 pipeline scored hand-shaped ranking heuristics per method
+(quality constants, method-name-conditional weights). The portfolio evaluation
+itself was already method-independent, but the "algorithms" were proxies with
+no variance across repeats. This version follows the same discipline as the
+p5/p6 project-review rewrite:
+
+- Problem definition (SimBench-derived candidates, objectives, budget and
+  planning-target constraints, stochastic load/DER/outage scenarios) is
+  identical for every method and computed only from candidate attributes.
+- Every method is a real algorithm on binary plan vectors:
+  * CARS-MODE: multi-objective binary Differential Evolution with jDE-style
+    self-adaptive F/CR, a SaDE-style two-strategy pool with success-based
+    selection, constraint-aware budget repair, and crowding-distance diversity.
+  * SHIELD-MOEA: NSGA-II core with hybrid GA/DE variation, adaptive worst-K
+    scenario screening during search (final evaluation always on the full
+    scenario set), and local feasibility repair.
+  * Baselines: pymoo NSGA-II / MOEA/D; scalarized single-objective GA, binary
+    PSO, and standard DE; weighted-sum and cost-first greedy point methods.
+  * Ablations toggle single real mechanisms (repair, adaptation, diversity,
+    screening, objective masks, scenario stress).
+- Headline metric: standard hypervolume of the feasible non-dominated front
+  under fixed, method-independent normalization bounds (mean-over-scenarios
+  objectives). 30 seeded runs per method/experiment; Mann-Whitney U with Holm
+  correction. Compromise-plan compositions are exported for the pandapower AC
+  validation stage.
+"""
+
 from __future__ import annotations
 
 import csv
 import hashlib
 import json
 import math
-import random
 import time
 from dataclasses import dataclass
 from pathlib import Path
 
+import numpy as np
+from scipy.stats import mannwhitneyu
 
 ROOT = Path(__file__).resolve().parents[2]
 SIMBENCH_NET = (
@@ -23,6 +53,18 @@ SIMBENCH_NET = (
 )
 P3_ROOT = ROOT / "papers" / "mintou" / "mintou_p3_samode_distribution_planning"
 P4_ROOT = ROOT / "papers" / "mintou" / "mintou_p4_shield_resilience_planning"
+
+P3_STATUS = "public_simbench_planning_v6_real_moea"
+P4_STATUS = "public_simbench_planning_v2_real_moea"
+N_SEEDS = 30
+POP_SIZE = 40
+N_GENERATIONS = 40
+N_SCENARIOS = 16
+
+
+# ---------------------------------------------------------------------------
+# SimBench-derived candidates (unchanged data engineering, method-independent)
+# ---------------------------------------------------------------------------
 
 
 @dataclass(frozen=True)
@@ -51,69 +93,6 @@ class Candidate:
     der_support: float
 
 
-@dataclass(frozen=True)
-class Method:
-    name: str
-    role: str
-    quality: float
-    repair: float
-    diversity: float
-    description: str
-
-
-P3_METHODS = (
-    Method("CARS-MODE", "proposed", 0.92, 0.95, 0.86, "Constraint-aware repair and strategy-adaptive MODE."),
-    Method("NSGA-II", "baseline", 0.78, 0.72, 0.80, "Non-dominated sorting evolutionary baseline."),
-    Method("MOEA/D", "baseline", 0.75, 0.68, 0.78, "Decomposition-based MOEA baseline."),
-    Method("Standard DE", "baseline", 0.70, 0.58, 0.60, "Differential evolution without adaptation."),
-    Method("PSO", "baseline", 0.69, 0.55, 0.52, "Particle swarm planning baseline."),
-    Method("GA", "baseline", 0.67, 0.52, 0.56, "Genetic algorithm planning baseline."),
-    Method("Weighted Sum", "baseline", 0.62, 0.40, 0.30, "Single-objective weighted aggregation."),
-    Method("Ablation-NoRepair", "ablation", 0.80, 0.20, 0.82, "Disable constraint repair."),
-    Method("Ablation-FixedDE", "ablation", 0.78, 0.60, 0.62, "Disable strategy adaptation."),
-    Method("Ablation-NoDiversity", "ablation", 0.79, 0.86, 0.20, "Disable diversity preservation."),
-    Method("Ablation-NoDER", "ablation", 0.76, 0.82, 0.70, "Remove DER/storage-oriented candidate preference."),
-)
-
-P4_METHODS = (
-    Method("SHIELD-MOEA", "proposed", 0.93, 0.95, 0.88, "Scenario-screened hybrid evolution for resilient planning."),
-    Method("NSGA-II", "baseline", 0.78, 0.72, 0.80, "Non-dominated sorting baseline."),
-    Method("MOEA/D", "baseline", 0.75, 0.68, 0.78, "Decomposition baseline."),
-    Method("GA", "baseline", 0.67, 0.52, 0.56, "Genetic algorithm baseline."),
-    Method("Weighted Sum", "baseline", 0.62, 0.40, 0.30, "Single-objective weighted planning."),
-    Method("Deterministic Planning", "baseline", 0.60, 0.50, 0.20, "Cost-first deterministic plan."),
-    Method("Ablation-NoScenarioScreen", "ablation", 0.82, 0.88, 0.60, "Disable scenario screening."),
-    Method("Ablation-NoRepair", "ablation", 0.80, 0.20, 0.82, "Disable local feasibility repair."),
-    Method("Ablation-NoResilienceObj", "ablation", 0.77, 0.78, 0.72, "Remove resilience objective."),
-    Method("Ablation-NoOutage", "ablation", 0.78, 0.82, 0.75, "Remove outage uncertainty stress."),
-)
-
-P3_EXPERIMENTS = (
-    "base_distribution_planning",
-    "der_siting_sizing",
-    "storage_allocation",
-    "load_growth_expansion",
-    "pareto_quality",
-    "constraint_repair",
-    "runtime_scalability",
-)
-
-P4_EXPERIMENTS = (
-    "deterministic_vs_scenario",
-    "der_uncertainty",
-    "load_uncertainty",
-    "outage_contingency",
-    "restoration_aware_evaluation",
-    "scenario_screening_efficiency",
-    "pareto_quality",
-    "unseen_stress_generalization",
-)
-
-
-def stable_seed(*parts: str) -> int:
-    return int(hashlib.sha1("||".join(parts).encode("utf-8")).hexdigest()[:12], 16)
-
-
 def read_semicolon_csv(path: Path) -> list[dict[str, str]]:
     with path.open(encoding="utf-8", errors="ignore", newline="") as handle:
         return list(csv.DictReader(handle, delimiter=";"))
@@ -132,20 +111,18 @@ def load_subnet_stats(limit: int = 18) -> list[SubnetStats]:
     loads = read_semicolon_csv(SIMBENCH_NET / "Load.csv")
     lines = read_semicolon_csv(SIMBENCH_NET / "Line.csv")
     res = read_semicolon_csv(SIMBENCH_NET / "RES.csv")
+    empty = lambda: {"load_mw": 0.0, "qload_mvar": 0.0, "load_count": 0.0, "res_mw": 0.0, "line_length_km": 0.0, "line_count": 0.0, "loading_sum": 0.0}
     by_subnet: dict[str, dict[str, float]] = {}
     for row in loads:
-        subnet = row.get("subnet") or "unknown"
-        data = by_subnet.setdefault(subnet, {"load_mw": 0.0, "qload_mvar": 0.0, "load_count": 0.0, "res_mw": 0.0, "line_length_km": 0.0, "line_count": 0.0, "loading_sum": 0.0})
+        data = by_subnet.setdefault(row.get("subnet") or "unknown", empty())
         data["load_mw"] += parse_float(row.get("pLoad", "0"))
         data["qload_mvar"] += parse_float(row.get("qLoad", "0"))
         data["load_count"] += 1
     for row in res:
-        subnet = row.get("subnet") or "unknown"
-        data = by_subnet.setdefault(subnet, {"load_mw": 0.0, "qload_mvar": 0.0, "load_count": 0.0, "res_mw": 0.0, "line_length_km": 0.0, "line_count": 0.0, "loading_sum": 0.0})
+        data = by_subnet.setdefault(row.get("subnet") or "unknown", empty())
         data["res_mw"] += parse_float(row.get("pRES", "0"))
     for row in lines:
-        subnet = row.get("subnet") or "unknown"
-        data = by_subnet.setdefault(subnet, {"load_mw": 0.0, "qload_mvar": 0.0, "load_count": 0.0, "res_mw": 0.0, "line_length_km": 0.0, "line_count": 0.0, "loading_sum": 0.0})
+        data = by_subnet.setdefault(row.get("subnet") or "unknown", empty())
         data["line_length_km"] += parse_float(row.get("length", "0"))
         data["line_count"] += 1
         data["loading_sum"] += parse_float(row.get("loadingMax", "100"), 100.0)
@@ -228,456 +205,996 @@ def build_candidates(stats: list[SubnetStats]) -> list[Candidate]:
     return candidates
 
 
-def experiment_weights(experiment: str, paper: str) -> dict[str, float]:
+# ---------------------------------------------------------------------------
+# Problem definition (method-independent, scenario-aware)
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class ExperimentSetup:
+    """Method-independent problem variant. Scenario multipliers and planning
+    targets are the ONLY experiment knobs; no method identity enters."""
+
+    budget_factor: float = 1.0
+    load_factor: float = 1.0
+    kind_excluded: str = ""
+    hosting_target: float = 0.018
+    der_target: float = 0.48
+    load_range: tuple[float, float] = (0.95, 1.25)
+    der_range: tuple[float, float] = (0.7, 1.3)
+    outage_range: tuple[float, float] = (0.0, 0.25)
+    use_expected_loss: bool = False
+    eval_load_range: tuple[float, float] | None = None
+    eval_der_range: tuple[float, float] | None = None
+    eval_outage_range: tuple[float, float] | None = None
+
+
+P3_EXPERIMENTS: dict[str, ExperimentSetup] = {
+    "base_distribution_planning": ExperimentSetup(),
+    "der_siting_sizing": ExperimentSetup(kind_excluded="storage", hosting_target=0.025, der_target=0.56),
+    "storage_allocation": ExperimentSetup(kind_excluded="der", hosting_target=0.025, der_target=0.56),
+    "load_growth_expansion": ExperimentSetup(load_factor=1.3, hosting_target=0.025),
+    "pareto_quality": ExperimentSetup(),
+    "constraint_repair": ExperimentSetup(budget_factor=0.82),
+    "runtime_scalability": ExperimentSetup(budget_factor=1.2),
+}
+
+P4_EXPERIMENTS: dict[str, ExperimentSetup] = {
+    "deterministic_vs_scenario": ExperimentSetup(),
+    "der_uncertainty": ExperimentSetup(der_range=(0.4, 1.7)),
+    "load_uncertainty": ExperimentSetup(load_range=(0.85, 1.45)),
+    "outage_contingency": ExperimentSetup(outage_range=(0.1, 0.55)),
+    "restoration_aware_evaluation": ExperimentSetup(outage_range=(0.1, 0.55), use_expected_loss=True),
+    "scenario_screening_efficiency": ExperimentSetup(),
+    "pareto_quality": ExperimentSetup(),
+    "unseen_stress_generalization": ExperimentSetup(
+        eval_load_range=(1.3, 1.6), eval_der_range=(1.4, 1.9), eval_outage_range=(0.4, 0.7)
+    ),
+}
+
+
+def make_scenarios(setup: ExperimentSetup, paper: str, evaluation: bool) -> np.ndarray:
+    """Fixed seeded scenario matrix [load_factor, der_factor, outage_severity].
+    p3 is a deterministic planning study: single nominal scenario."""
     if paper == "p3":
-        base = {"loss": 0.24, "voltage": 0.24, "hosting": 0.42, "reliability": 0.12, "resilience": 0.08, "cost": 0.26}
-        if "der" in experiment:
-            base["hosting"] += 0.30
-        if "storage" in experiment:
-            base["voltage"] += 0.12
-            base["hosting"] += 0.16
-        if "growth" in experiment:
-            base["loss"] += 0.12
-            base["voltage"] += 0.08
-            base["hosting"] += 0.12
-        if "constraint" in experiment:
-            base["voltage"] += 0.10
-        return base
-    base = {"loss": 0.16, "voltage": 0.18, "hosting": 0.16, "reliability": 0.20, "resilience": 0.34, "cost": 0.32}
-    if "outage" in experiment or "restoration" in experiment:
-        base["resilience"] += 0.22
-        base["reliability"] += 0.10
-    if "der" in experiment:
-        base["hosting"] += 0.16
-    if "load" in experiment:
-        base["voltage"] += 0.12
-    return base
-
-
-def candidate_score(candidate: Candidate, weights: dict[str, float], method: Method, rng: random.Random) -> float:
-    local_weights = dict(weights)
-    if method.name == "CARS-MODE":
-        local_weights["loss"] *= 1.08
-        local_weights["voltage"] *= 1.20
-        local_weights["hosting"] *= 1.45
-        if candidate.kind == "der":
-            local_weights["hosting"] *= 1.35
-        if candidate.kind == "storage":
-            local_weights["voltage"] *= 1.18
-            local_weights["hosting"] *= 1.18
-    if method.name == "SHIELD-MOEA":
-        local_weights["resilience"] *= 1.35
-        local_weights["reliability"] *= 1.20
-        if candidate.kind in {"automation", "storage"}:
-            local_weights["resilience"] *= 1.20
-    if method.name == "Ablation-FixedDE":
-        local_weights["voltage"] *= 0.86
-        local_weights["hosting"] *= 0.68
-        if candidate.kind in {"der", "storage"}:
-            local_weights["hosting"] *= 0.82
-    benefit = (
-        local_weights["loss"] * candidate.loss_reduction
-        + local_weights["voltage"] * candidate.voltage_reduction
-        + local_weights["hosting"] * candidate.hosting_gain
-        + local_weights["reliability"] * candidate.reliability_gain
-        + local_weights["resilience"] * candidate.resilience_gain
+        return np.array([[setup.load_factor, 1.0, 0.0]])
+    load_range = setup.eval_load_range if evaluation and setup.eval_load_range else setup.load_range
+    der_range = setup.eval_der_range if evaluation and setup.eval_der_range else setup.der_range
+    outage_range = setup.eval_outage_range if evaluation and setup.eval_outage_range else setup.outage_range
+    rng = np.random.default_rng(20260713 if not evaluation else 20260714)
+    return np.column_stack(
+        [
+            rng.uniform(load_range[0], load_range[1], N_SCENARIOS),
+            rng.uniform(der_range[0], der_range[1], N_SCENARIOS),
+            rng.uniform(outage_range[0], outage_range[1], N_SCENARIOS),
+        ]
     )
-    if "NoDER" in method.name and candidate.kind in {"der", "storage"}:
-        benefit *= 0.30
-    if "NoResilienceObj" in method.name:
-        benefit -= weights["resilience"] * candidate.resilience_gain * 0.75
-    noise = rng.uniform(-0.03, 0.03) * (1.05 - method.quality)
-    cost_power = 0.70 + 0.20 * (1 - method.quality)
-    if method.name == "CARS-MODE":
-        cost_power = 0.74
-    if method.name == "SHIELD-MOEA":
-        cost_power = 0.82
-    if method.name == "Ablation-FixedDE":
-        cost_power = 0.86
-    return benefit / max(1.0, candidate.cost**cost_power) + noise
 
 
-def build_portfolio(candidates: list[Candidate], method: Method, experiment: str, paper: str, repeat: int) -> list[Candidate]:
-    rng = random.Random(stable_seed(method.name, experiment, paper, str(repeat)))
-    weights = experiment_weights(experiment, paper)
-    budget = 980 if paper == "p3" else 920
-    if "runtime" in experiment or "scalability" in experiment:
-        budget *= 1.20
-    if "constraint" in experiment:
-        budget *= 0.82
-    if method.name == "CARS-MODE":
-        return cars_mode_portfolio(candidates, weights, budget, rng, experiment)
-    if method.name == "Ablation-NoDER":
-        candidates = [candidate for candidate in candidates if candidate.kind not in {"der", "storage"}]
-    ranked = sorted(candidates, key=lambda c: candidate_score(c, weights, method, rng), reverse=True)
-    if method.name in {"Weighted Sum", "Deterministic Planning"}:
-        ranked = sorted(candidates, key=lambda c: c.cost)
-    if method.name in {"GA", "PSO", "Standard DE"}:
-        rng.shuffle(ranked)
-        ranked = sorted(ranked[: max(12, len(ranked) // 2)], key=lambda c: candidate_score(c, weights, method, rng), reverse=True)
-    if method.name == "Ablation-NoDiversity":
-        preferred_kind = ranked[0].kind if ranked else ""
-        preferred_subnets = {candidate.subnet for candidate in ranked[:3]}
-        concentrated = [candidate for candidate in ranked if candidate.kind == preferred_kind or candidate.subnet in preferred_subnets]
-        ranked = concentrated or ranked
-    portfolio: list[Candidate] = []
-    cost = 0.0
-    target_size = 6 + int(method.diversity * 6)
-    for candidate in ranked:
-        if len(portfolio) >= target_size:
+class PlanningProblem:
+    """Multi-objective 0/1 planning under budget + planning-target constraints.
+
+    Minimization objectives (mean over the scenario set):
+      p3 (5): cost, loss_index, voltage_risk, -hosting_capacity, -reliability
+      p4 (5): cost, loss_index, voltage_risk, -reliability, -survivability
+    """
+
+    def __init__(
+        self,
+        candidates: list[Candidate],
+        stats: list[SubnetStats],
+        paper: str,
+        setup: ExperimentSetup,
+        scenarios: np.ndarray,
+    ):
+        self.candidates = candidates
+        self.paper = paper
+        self.setup = setup
+        self.scenarios = scenarios
+        self.n = len(candidates)
+        self.n_obj = 5
+        self.cost = np.array([c.cost for c in candidates])
+        self.loss_red = np.array([c.loss_reduction for c in candidates])
+        self.volt_red = np.array([c.voltage_reduction for c in candidates])
+        self.hosting_gain = np.array([c.hosting_gain for c in candidates])
+        self.rel_gain = np.array([c.reliability_gain for c in candidates])
+        self.res_gain = np.array([c.resilience_gain for c in candidates])
+        self.der_support = np.array([c.der_support for c in candidates])
+        total_load = sum(item.load_mw for item in stats)
+        total_line = sum(item.line_length_km for item in stats)
+        self.base_loss = 0.12 + total_line / max(1.0, total_load) * 0.015
+        self.base_voltage = 0.18 + total_load / max(1.0, total_line) * 0.010
+        self.hosting_denom = total_load * (0.08 if paper == "p3" else 0.45)
+        self.budget = (980.0 if paper == "p3" else 920.0) * setup.budget_factor
+
+    def _components(self, X: np.ndarray, scenarios: np.ndarray) -> dict[str, np.ndarray]:
+        """Scenario-resolved raw components; every quantity depends only on the
+        plan vector, the candidate attributes, and the scenario multipliers."""
+        X = np.atleast_2d(X).astype(float)
+        S = scenarios
+        loadf = S[:, 0][None, :]
+        derf = S[:, 1][None, :]
+        sev = S[:, 2][None, :]
+        cost = (X @ self.cost)[:, None] * np.ones_like(loadf)
+        loss = np.maximum(0.015, self.base_loss * loadf - (X @ self.loss_red)[:, None] / 120)
+        voltage = np.maximum(0.005, self.base_voltage * loadf - (X @ self.volt_red)[:, None] / 10)
+        hosting = np.minimum(1.0, (X @ self.hosting_gain)[:, None] / np.maximum(1.0, self.hosting_denom * derf))
+        reliability = np.minimum(1.0, 0.35 + (X @ self.rel_gain)[:, None] / 28)
+        survivability = np.minimum(1.0, 0.42 * (1.0 - sev) + (X @ self.res_gain)[:, None] / 24)
+        expected_loss = loss * (1.0 + 0.30 * sev * (1.0 - survivability))
+        count = np.maximum(1.0, X.sum(axis=1))[:, None]
+        der_readiness = np.minimum(1.0, (X @ self.der_support)[:, None] / (count * 0.62))
+        return {
+            "cost": cost,
+            "loss": loss,
+            "voltage": voltage,
+            "hosting": hosting,
+            "reliability": reliability,
+            "survivability": survivability,
+            "expected_loss": expected_loss,
+            "der_readiness": der_readiness,
+        }
+
+    def objectives(self, X: np.ndarray, scenarios: np.ndarray | None = None, aggregate: str = "mean") -> np.ndarray:
+        """aggregate='mean': expectation over scenarios (headline).
+        aggregate='worst': per-objective worst case over scenarios (robustness
+        readout, method-independent)."""
+        S = self.scenarios if scenarios is None else scenarios
+        comp = self._components(X, S)
+        loss = comp["expected_loss"] if self.setup.use_expected_loss else comp["loss"]
+        if self.paper == "p3":
+            cols = [comp["cost"], loss, comp["voltage"], -comp["hosting"], -comp["reliability"]]
+        else:
+            cols = [comp["cost"], loss, comp["voltage"], -comp["reliability"], -comp["survivability"]]
+        if aggregate == "worst":
+            return np.stack([c.max(axis=1) for c in cols], axis=1)
+        return np.stack([c.mean(axis=1) for c in cols], axis=1)
+
+    def violation(self, X: np.ndarray, scenarios: np.ndarray | None = None) -> np.ndarray:
+        """Budget is the only hard constraint. Voltage risk and hosting capacity
+        are already objectives; planning-target shortfalls are reported as
+        descriptive compromise metrics, not feasibility gates (the v1 pipeline's
+        voltage/hosting 'constraints' were unsatisfiable within budget and were
+        silently soft-penalized)."""
+        X = np.atleast_2d(X).astype(float)
+        cost = X @ self.cost
+        return np.maximum(0.0, (cost - self.budget) / self.budget)
+
+
+# ---------------------------------------------------------------------------
+# Shared evaluation helpers (hypervolume etc. reused from the p5/p6 module)
+# ---------------------------------------------------------------------------
+
+
+def _hv_helpers():
+    from powergrid_benchmark.mintou_real_project_review import (
+        holm_correction,
+        hypervolume,
+        nondominated,
+    )
+
+    return hypervolume, nondominated, holm_correction
+
+
+def normalization_bounds(problem: PlanningProblem, aggregate: str = "mean") -> tuple[np.ndarray, np.ndarray]:
+    cache = getattr(problem, "_norm_bounds_cache", None)
+    if cache is None:
+        cache = {}
+        problem._norm_bounds_cache = cache
+    if aggregate in cache:
+        return cache[aggregate]
+    rng = np.random.default_rng(20260713)
+    samples = [np.zeros(problem.n)]
+    for i in range(problem.n):
+        row = np.zeros(problem.n)
+        row[i] = 1.0
+        samples.append(row)
+    for _ in range(2048):
+        density = rng.uniform(0.02, 0.30)
+        row = (rng.random(problem.n) < density).astype(float)
+        order = rng.permutation(problem.n)
+        cost = 0.0
+        selected = np.zeros(problem.n)
+        for idx in order:
+            if row[idx] and cost + problem.cost[idx] <= problem.budget:
+                selected[idx] = 1.0
+                cost += problem.cost[idx]
+        samples.append(selected)
+    F = problem.objectives(np.array(samples), aggregate=aggregate)
+    lo = F.min(axis=0)
+    hi = F.max(axis=0)
+    span = np.maximum(hi - lo, 1e-9)
+    bounds = (lo - 0.05 * span, hi + 0.05 * span)
+    cache[aggregate] = bounds
+    return bounds
+
+
+def feasible_front(problem: PlanningProblem, X: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    _, nondominated, _ = _hv_helpers()
+    X = np.atleast_2d(X)
+    if X.size == 0:
+        return np.empty((0, problem.n)), np.empty((0, problem.n_obj))
+    feasible = problem.violation(X) <= 1e-9
+    X = X[feasible]
+    if X.shape[0] == 0:
+        return np.empty((0, problem.n)), np.empty((0, problem.n_obj))
+    X = np.unique(X, axis=0)
+    F = problem.objectives(X)
+    mask = nondominated(F)
+    return X[mask], F[mask]
+
+
+def _repair_to_budget(x: np.ndarray, problem: PlanningProblem) -> int:
+    benefit = problem.loss_red / 0.12 + problem.volt_red / 0.02 + problem.hosting_gain / 5 + problem.rel_gain / 2 + problem.res_gain / 2
+    score = benefit / np.maximum(problem.cost, 1.0)
+    drops = 0
+    while x @ problem.cost > problem.budget and x.sum() > 0:
+        selected = np.where(x > 0)[0]
+        worst = selected[np.argmin(score[selected])]
+        x[worst] = 0
+        drops += 1
+    return drops
+
+
+def _scalar_score(problem: PlanningProblem, X: np.ndarray, lo: np.ndarray, hi: np.ndarray, scenarios: np.ndarray | None = None) -> np.ndarray:
+    F = problem.objectives(X, scenarios)
+    norm = (F - lo) / np.maximum(hi - lo, 1e-9)
+    return norm.sum(axis=1) + 10.0 * problem.violation(X, scenarios)
+
+
+# ---------------------------------------------------------------------------
+# NSGA-II-style environmental selection (shared by custom methods)
+# ---------------------------------------------------------------------------
+
+
+def _environmental_select(
+    union: np.ndarray,
+    F: np.ndarray,
+    V: np.ndarray,
+    pop_size: int,
+    use_crowding: bool,
+    rng: np.random.Generator,
+) -> np.ndarray:
+    from powergrid_benchmark.mintou_real_project_review import _crowding_distance, _simple_nds
+
+    fronts = _simple_nds(F, V)
+    selected: list[int] = []
+    for front in fronts:
+        if len(selected) + len(front) <= pop_size:
+            selected.extend(front.tolist())
+        else:
+            remaining = pop_size - len(selected)
+            if use_crowding:
+                dist = _crowding_distance(F[front])
+                order = front[np.argsort(-dist)]
+            else:
+                order = front[rng.permutation(len(front))]
+            selected.extend(order[:remaining].tolist())
             break
-        accept_limit = budget * (1.0 + (1.0 - method.repair) * 0.35)
-        if cost + candidate.cost <= accept_limit:
-            if method.name == "Ablation-NoScenarioScreen" and rng.random() < 0.12:
-                continue
-            portfolio.append(candidate)
-            cost += candidate.cost
-    if method.repair > 0.45:
-        while sum(c.cost for c in portfolio) > budget and portfolio:
-            portfolio.remove(min(portfolio, key=lambda c: candidate_score(c, weights, method, rng) / max(1.0, c.cost)))
-    if method.name in {"CARS-MODE", "SHIELD-MOEA"}:
-        kinds = {c.kind for c in portfolio}
-        for desired in ["reinforcement", "storage", "automation"]:
-            if desired not in kinds:
-                replacement = next((c for c in ranked if c.kind == desired and c not in portfolio), None)
-                if replacement and sum(c.cost for c in portfolio) + replacement.cost <= budget:
-                    portfolio.append(replacement)
-        # Local budget repair and replacement: remove the weakest marginal-cost
-        # item, then refill with better budget-feasible candidates.
-        while sum(c.cost for c in portfolio) > budget and portfolio:
-            portfolio.remove(min(portfolio, key=lambda c: candidate_score(c, weights, method, rng) / max(1.0, c.cost)))
-        improved = True
-        while improved:
-            improved = False
-            current_cost = sum(c.cost for c in portfolio)
-            current_score = sum(candidate_score(c, weights, method, rng) for c in portfolio)
-            for candidate in ranked:
-                if candidate in portfolio or current_cost + candidate.cost > budget:
-                    continue
-                trial_score = current_score + candidate_score(candidate, weights, method, rng)
-                if trial_score / (len(portfolio) + 1) > current_score / max(1, len(portfolio)) * 0.985:
-                    portfolio.append(candidate)
-                    improved = True
-                    break
-    return portfolio
+    return union[np.array(selected, dtype=int)]
 
 
-def cars_mode_portfolio(candidates: list[Candidate], weights: dict[str, float], budget: float, rng: random.Random, experiment: str) -> list[Candidate]:
-    def cars_score(candidate: Candidate) -> float:
-        benefit = (
-            1.18 * weights["loss"] * candidate.loss_reduction
-            + 1.35 * weights["voltage"] * candidate.voltage_reduction
-            + 1.55 * weights["hosting"] * candidate.hosting_gain
-            + 0.65 * weights["reliability"] * candidate.reliability_gain
-            + 0.45 * weights["resilience"] * candidate.resilience_gain
-        )
-        if candidate.kind == "der":
-            benefit *= 1.18 if "der" in experiment or "hosting" in experiment else 1.05
-        if candidate.kind == "storage":
-            benefit *= 1.20 if "storage" in experiment or "growth" in experiment else 1.04
-        if candidate.kind == "automation":
-            benefit *= 0.96
-        return benefit / max(1.0, candidate.cost**0.82)
+# ---------------------------------------------------------------------------
+# CARS-MODE: strategy-adaptive multi-objective binary DE (p3 proposed)
+# ---------------------------------------------------------------------------
 
-    ranked = sorted(candidates, key=cars_score, reverse=True)
-    portfolio: list[Candidate] = []
-    kind_counts: dict[str, int] = {}
+
+@dataclass
+class CarsConfig:
+    repair: bool = True
+    strategy_adaptive: bool = True
+    diversity: bool = True
+    # jDE-style probability of resampling F/CR each generation (default 0.1
+    # reproduces the original hardcoded behaviour; exposed for the parameter
+    # sensitivity study in mintou_planning_sensitivity.py).
+    resample_prob: float = 0.1
+
+
+def run_cars_mode(problem: PlanningProblem, cfg: CarsConfig, seed: int) -> np.ndarray:
+    rng = np.random.default_rng(seed)
+    n, pop_size = problem.n, POP_SIZE
+    genome = rng.uniform(0.0, 0.45, (pop_size, n))
+    genome[rng.random((pop_size, n)) < 0.08] = 0.75  # sparse initial plans
+    F_param = np.full(pop_size, 0.5)
+    CR_param = np.full(pop_size, 0.9)
+    strategy_success = np.array([1.0, 1.0])  # rand/1, best/1
+
+    def decode(g: np.ndarray) -> np.ndarray:
+        x = (g > 0.5).astype(float)
+        if cfg.repair:
+            for row in x:
+                _repair_to_budget(row, problem)
+        return x
+
+    pop_x = decode(genome)
+
+    for _ in range(N_GENERATIONS):
+        F_obj = problem.objectives(pop_x)
+        V = problem.violation(pop_x)
+        # current "best" pool = feasible-first non-dominated members
+        from powergrid_benchmark.mintou_real_project_review import _simple_nds
+
+        first_front = _simple_nds(F_obj, V)[0]
+        trial_genome = np.empty_like(genome)
+        strat_used = np.zeros(pop_size, dtype=int)
+        p_best = strategy_success[1] / strategy_success.sum() if cfg.strategy_adaptive else 0.0
+        for i in range(pop_size):
+            if cfg.strategy_adaptive and rng.random() < cfg.resample_prob:
+                F_param[i] = rng.uniform(0.1, 0.9)
+                CR_param[i] = rng.uniform(0.0, 1.0)
+            f_i = F_param[i] if cfg.strategy_adaptive else 0.5
+            cr_i = CR_param[i] if cfg.strategy_adaptive else 0.9
+            idx = rng.choice(pop_size, 3, replace=False)
+            use_best = cfg.strategy_adaptive and rng.random() < p_best
+            strat_used[i] = 1 if use_best else 0
+            if use_best:
+                base = genome[int(rng.choice(first_front))]
+            else:
+                base = genome[idx[0]]
+            mutant = base + f_i * (genome[idx[1]] - genome[idx[2]])
+            cross = rng.random(n) < cr_i
+            cross[rng.integers(0, n)] = True
+            trial_genome[i] = np.clip(np.where(cross, mutant, genome[i]), 0.0, 1.0)
+        trial_x = decode(trial_genome)
+
+        union_g = np.vstack([genome, trial_genome])
+        union_x = np.vstack([pop_x, trial_x])
+        F_union = problem.objectives(union_x)
+        V_union = problem.violation(union_x)
+        # strategy success accounting: trial i succeeded if it Pareto-improves parent i
+        if cfg.strategy_adaptive:
+            for i in range(pop_size):
+                parent_f, trial_f = F_union[i], F_union[pop_size + i]
+                parent_v, trial_v = V_union[i], V_union[pop_size + i]
+                better = (trial_v < parent_v - 1e-12) or (
+                    trial_v <= parent_v + 1e-12 and np.all(trial_f <= parent_f) and np.any(trial_f < parent_f)
+                )
+                if better:
+                    strategy_success[strat_used[i]] += 1.0
+            strategy_success *= 0.95  # decay
+            strategy_success = np.maximum(strategy_success, 0.2)
+
+        selected = _environmental_select(
+            np.arange(2 * pop_size)[:, None], F_union, V_union, pop_size, cfg.diversity, rng
+        ).ravel().astype(int)
+        genome = union_g[selected]
+        pop_x = union_x[selected]
+
+    return pop_x
+
+
+# ---------------------------------------------------------------------------
+# SHIELD-MOEA: scenario-screened hybrid NSGA-II (p4 proposed)
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class ShieldConfig:
+    repair: bool = True
+    scenario_screen: bool = True
+    screen_k: int = 4
+    screen_every: int = 5
+    resilience_in_search: bool = True
+    outage_in_search: bool = True
+
+
+def run_shield_moea(problem: PlanningProblem, cfg: ShieldConfig, seed: int) -> np.ndarray:
+    rng = np.random.default_rng(seed)
+    n, pop_size = problem.n, POP_SIZE
+    pop = np.zeros((pop_size, n))
+    for i in range(pop_size):
+        density = rng.uniform(0.03, 0.18)
+        pop[i] = (rng.random(n) < density).astype(float)
+        if cfg.repair:
+            _repair_to_budget(pop[i], problem)
+
+    full_scenarios = problem.scenarios
+    search_scenarios = full_scenarios
+    if not cfg.outage_in_search:
+        search_scenarios = full_scenarios.copy()
+        search_scenarios[:, 2] = 0.0
+    lo, hi = normalization_bounds(problem)
+
+    def search_objs(X: np.ndarray, scen: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        F = problem.objectives(X, scen)
+        if not cfg.resilience_in_search:
+            F = F[:, :4]  # drop the survivability column from search guidance
+        return F, problem.violation(X, scen)
+
+    active = search_scenarios
+    for gen in range(1, N_GENERATIONS + 1):
+        if cfg.scenario_screen and gen % cfg.screen_every == 1 and problem.paper == "p4":
+            # screen: keep the K scenarios where the current population performs worst
+            scores = np.empty(search_scenarios.shape[0])
+            for s in range(search_scenarios.shape[0]):
+                scen = search_scenarios[s : s + 1]
+                scores[s] = _scalar_score(problem, pop, lo, hi, scen).mean()
+            worst = np.argsort(-scores)[: cfg.screen_k]
+            active = search_scenarios[worst]
+        elif not cfg.scenario_screen:
+            active = search_scenarios
+
+        # hybrid variation: half GA (uniform crossover + bitflip), half binary DE
+        idx_a = rng.integers(0, pop_size, pop_size)
+        idx_b = rng.integers(0, pop_size, pop_size)
+        mask = rng.random((pop_size, n)) < 0.5
+        ga_children = np.where(mask, pop[idx_a], pop[idx_b])
+        flip = rng.random((pop_size, n)) < 1.0 / n
+        ga_children = np.abs(ga_children - flip.astype(float))
+        de_idx = rng.integers(0, pop_size, (pop_size, 3))
+        de_trial = np.clip(pop[de_idx[:, 0]] + 0.5 * (pop[de_idx[:, 1]] - pop[de_idx[:, 2]]), 0.0, 1.0)
+        de_children = (rng.random((pop_size, n)) < np.where(de_trial > 0.5, 0.9, 0.08)).astype(float)
+        half = pop_size // 2
+        children = np.vstack([ga_children[:half], de_children[half:]])
+        if cfg.repair:
+            for row in children:
+                _repair_to_budget(row, problem)
+
+        union = np.vstack([pop, children])
+        F, V = search_objs(union, active)
+        pop = _environmental_select(union, F, V, pop_size, True, rng)
+
+    return pop
+
+
+# ---------------------------------------------------------------------------
+# Scalarized single-objective baselines (real GA / binary PSO / standard DE)
+# ---------------------------------------------------------------------------
+
+
+def run_scalar_ga(problem: PlanningProblem, seed: int) -> np.ndarray:
+    rng = np.random.default_rng(seed)
+    n, pop_size = problem.n, POP_SIZE
+    lo, hi = normalization_bounds(problem)
+    pop = (rng.random((pop_size, n)) < rng.uniform(0.03, 0.18, (pop_size, 1))).astype(float)
+    fit = _scalar_score(problem, pop, lo, hi)
+    for _ in range(N_GENERATIONS):
+        contenders = rng.integers(0, pop_size, (pop_size, 2))
+        parents = np.where((fit[contenders[:, 0]] < fit[contenders[:, 1]])[:, None], pop[contenders[:, 0]], pop[contenders[:, 1]])
+        pairs = rng.permutation(pop_size)
+        mask = rng.random((pop_size, n)) < 0.5
+        children = np.where(mask, parents, parents[pairs])
+        flip = rng.random((pop_size, n)) < 1.5 / n
+        children = np.abs(children - flip.astype(float))
+        child_fit = _scalar_score(problem, children, lo, hi)
+        union = np.vstack([pop, children])
+        union_fit = np.concatenate([fit, child_fit])
+        keep = np.argsort(union_fit)[:pop_size]
+        pop, fit = union[keep], union_fit[keep]
+    return pop[np.argmin(fit)][None, :]
+
+
+def run_binary_pso(problem: PlanningProblem, seed: int) -> np.ndarray:
+    rng = np.random.default_rng(seed)
+    n, pop_size = problem.n, POP_SIZE
+    lo, hi = normalization_bounds(problem)
+    pos = (rng.random((pop_size, n)) < rng.uniform(0.03, 0.18, (pop_size, 1))).astype(float)
+    vel = rng.normal(0.0, 0.1, (pop_size, n))
+    pbest, pbest_fit = pos.copy(), _scalar_score(problem, pos, lo, hi)
+    gbest = pbest[np.argmin(pbest_fit)].copy()
+    gbest_fit = pbest_fit.min()
+    for _ in range(N_GENERATIONS):
+        r1, r2 = rng.random((pop_size, n)), rng.random((pop_size, n))
+        vel = 0.72 * vel + 1.49 * r1 * (pbest - pos) + 1.49 * r2 * (gbest[None, :] - pos)
+        prob = 1.0 / (1.0 + np.exp(-np.clip(vel, -6, 6)))
+        pos = (rng.random((pop_size, n)) < prob).astype(float)
+        fit = _scalar_score(problem, pos, lo, hi)
+        improved = fit < pbest_fit
+        pbest[improved], pbest_fit[improved] = pos[improved], fit[improved]
+        if pbest_fit.min() < gbest_fit:
+            gbest, gbest_fit = pbest[np.argmin(pbest_fit)].copy(), pbest_fit.min()
+    return gbest[None, :]
+
+
+def run_standard_de(problem: PlanningProblem, seed: int) -> np.ndarray:
+    rng = np.random.default_rng(seed)
+    n, pop_size = problem.n, POP_SIZE
+    lo, hi = normalization_bounds(problem)
+    genome = rng.uniform(0.0, 0.45, (pop_size, n))
+    genome[rng.random((pop_size, n)) < 0.08] = 0.75
+    decode = lambda g: (g > 0.5).astype(float)
+    fit = _scalar_score(problem, decode(genome), lo, hi)
+    for _ in range(N_GENERATIONS):
+        idx = np.array([rng.choice(pop_size, 3, replace=False) for _ in range(pop_size)])
+        mutant = genome[idx[:, 0]] + 0.5 * (genome[idx[:, 1]] - genome[idx[:, 2]])
+        cross = rng.random((pop_size, n)) < 0.9
+        cross[np.arange(pop_size), rng.integers(0, n, pop_size)] = True
+        trial = np.clip(np.where(cross, mutant, genome), 0.0, 1.0)
+        trial_fit = _scalar_score(problem, decode(trial), lo, hi)
+        improved = trial_fit < fit
+        genome[improved], fit[improved] = trial[improved], trial_fit[improved]
+    return decode(genome[np.argmin(fit)])[None, :]
+
+
+def run_weighted_sum(problem: PlanningProblem) -> np.ndarray:
+    benefit = problem.loss_red / 0.12 + problem.volt_red / 0.02 + problem.hosting_gain / 5 + problem.rel_gain / 2 + problem.res_gain / 2
+    order = np.argsort(-benefit)
+    x = np.zeros(problem.n)
     cost = 0.0
-    for candidate in ranked:
-        if cost + candidate.cost > budget:
-            continue
-        if candidate.kind == "der" and kind_counts.get("der", 0) >= (3 if "der" in experiment else 2):
-            continue
-        if candidate.kind == "storage" and kind_counts.get("storage", 0) >= (4 if "storage" in experiment or "growth" in experiment else 3):
-            continue
-        portfolio.append(candidate)
-        cost += candidate.cost
-        kind_counts[candidate.kind] = kind_counts.get(candidate.kind, 0) + 1
-        if len(portfolio) >= 9:
-            break
-    # Strategy-adaptive repair: if DER/storage additions crowd out core
-    # electrical-risk projects, replace the weakest flexible asset with a
-    # reinforcement/automation candidate that fits the remaining budget.
-    core_count = sum(1 for c in portfolio if c.kind in {"reinforcement", "automation"})
-    if core_count < 3:
-        flexible = [c for c in portfolio if c.kind in {"der", "storage"}]
-        core_candidates = [c for c in ranked if c.kind in {"reinforcement", "automation"} and c not in portfolio]
-        for weak in sorted(flexible, key=cars_score):
-            for replacement in core_candidates:
-                new_cost = cost - weak.cost + replacement.cost
-                if new_cost <= budget and cars_score(replacement) > cars_score(weak) * 0.80:
-                    portfolio.remove(weak)
-                    portfolio.append(replacement)
-                    cost = new_cost
-                    core_count += 1
-                    break
-            if core_count >= 3:
-                break
-    flexible_count = sum(1 for c in portfolio if c.kind in {"der", "storage"})
-    if flexible_count < 4:
-        flexible_candidates = [c for c in ranked if c.kind in {"der", "storage"} and c not in portfolio]
-        removable_core = sorted([c for c in portfolio if c.kind in {"reinforcement", "automation"}], key=cars_score)
-        for candidate in flexible_candidates:
-            if flexible_count >= 4:
-                break
-            if cost + candidate.cost <= budget:
-                portfolio.append(candidate)
-                cost += candidate.cost
-                flexible_count += 1
-                continue
-            for weak in removable_core:
-                new_cost = cost - weak.cost + candidate.cost
-                if new_cost <= budget and cars_score(candidate) > cars_score(weak) * 0.72:
-                    portfolio.remove(weak)
-                    portfolio.append(candidate)
-                    cost = new_cost
-                    flexible_count += 1
-                    break
-    unique_subnets = {c.subnet for c in portfolio}
-    if len(unique_subnets) < 5:
-        diverse_candidates = [c for c in ranked if c.subnet not in unique_subnets and c not in portfolio]
-        removable = sorted(portfolio, key=lambda c: (c.subnet in unique_subnets, cars_score(c)))
-        for candidate in diverse_candidates:
-            if len(unique_subnets) >= 5:
-                break
-            if cost + candidate.cost <= budget:
-                portfolio.append(candidate)
-                cost += candidate.cost
-                unique_subnets.add(candidate.subnet)
-                continue
-            for weak in removable:
-                if weak not in portfolio:
-                    continue
-                new_cost = cost - weak.cost + candidate.cost
-                if new_cost <= budget and cars_score(candidate) > cars_score(weak) * 0.68:
-                    portfolio.remove(weak)
-                    portfolio.append(candidate)
-                    cost = new_cost
-                    unique_subnets.add(candidate.subnet)
-                    break
-    return portfolio
+    for idx in order:
+        if cost + problem.cost[idx] <= problem.budget:
+            x[idx] = 1.0
+            cost += problem.cost[idx]
+    return x[None, :]
 
 
-def evaluate_portfolio(portfolio: list[Candidate], stats: list[SubnetStats], paper: str, experiment: str) -> dict[str, float]:
-    total_load = sum(item.load_mw for item in stats)
-    total_line = sum(item.line_length_km for item in stats)
-    base_loss = 0.12 + total_line / max(1.0, total_load) * 0.015
-    base_voltage = 0.18 + total_load / max(1.0, total_line) * 0.010
-    base_resilience = 0.42
-    cost = sum(c.cost for c in portfolio)
-    loss = max(0.015, base_loss - sum(c.loss_reduction for c in portfolio) / 120)
-    voltage = max(0.005, base_voltage - sum(c.voltage_reduction for c in portfolio) / 10)
-    hosting_denominator = total_load * (0.08 if paper == "p3" else 0.45)
-    hosting = min(1.0, sum(c.hosting_gain for c in portfolio) / max(1.0, hosting_denominator))
-    reliability = min(1.0, 0.35 + sum(c.reliability_gain for c in portfolio) / 28)
-    resilience = min(1.0, base_resilience + sum(c.resilience_gain for c in portfolio) / 24)
-    der_readiness = min(1.0, sum(c.der_support for c in portfolio) / max(1.0, len(portfolio) * 0.62))
-    flexibility_ratio = sum(1 for c in portfolio if c.kind in {"der", "storage"}) / max(1.0, len(portfolio))
-    subnet_coverage = min(1.0, len({c.subnet for c in portfolio}) / 6.0)
-    kind_diversity = min(1.0, len({c.kind for c in portfolio}) / 4.0)
-    budget = 980 if paper == "p3" else 920
-    violation = 0.0
-    if cost > budget:
-        violation += (cost - budget) / budget
-    if voltage > 0.16:
-        violation += voltage - 0.16
-    if paper == "p3":
-        hosting_target = 0.018
-        der_target = 0.48
-        if "der" in experiment or "storage" in experiment or "growth" in experiment:
-            hosting_target = 0.025
-            der_target = 0.56
-        if hosting < hosting_target:
-            violation += (hosting_target - hosting) * 1.8
-        if der_readiness < der_target:
-            violation += (der_target - der_readiness) * 0.22
-    if paper == "p4":
-        if "outage" in experiment:
-            resilience *= 0.94
-            loss *= 1.05
-        if "unseen" in experiment:
-            resilience *= 0.91
-            voltage *= 1.08
-    if paper == "p3":
-        der_quality = 0.42 + 0.36 * der_readiness + 0.22 * min(1.0, hosting / 0.035)
-        portfolio_quality = 0.56 + 0.18 * flexibility_ratio + 0.16 * subnet_coverage + 0.10 * kind_diversity
-        hypervolume_proxy = max(0.0, (1.0 - loss) * (1.0 - voltage) * (0.55 + reliability) * der_quality * portfolio_quality / (1.0 + violation))
+def run_cost_first(problem: PlanningProblem) -> np.ndarray:
+    order = np.argsort(problem.cost)
+    x = np.zeros(problem.n)
+    cost = 0.0
+    for idx in order:
+        if cost + problem.cost[idx] <= problem.budget:
+            x[idx] = 1.0
+            cost += problem.cost[idx]
+    return x[None, :]
+
+
+def run_pymoo(problem: PlanningProblem, algorithm_name: str, seed: int) -> np.ndarray:
+    from pymoo.algorithms.moo.moead import MOEAD
+    from pymoo.algorithms.moo.nsga2 import NSGA2
+    from pymoo.core.problem import Problem as PymooProblem
+    from pymoo.core.sampling import Sampling
+    from pymoo.operators.crossover.pntx import TwoPointCrossover
+    from pymoo.operators.mutation.bitflip import BitflipMutation
+    from pymoo.optimize import minimize
+    from pymoo.util.ref_dirs import get_reference_directions
+
+    constrained = algorithm_name != "MOEA/D"
+
+    class LowDensitySampling(Sampling):
+        def _do(self, pymoo_problem, n_samples, **kwargs):
+            rng = np.random.default_rng(seed)
+            density = rng.uniform(0.03, 0.18, size=(n_samples, 1))
+            return rng.random((n_samples, pymoo_problem.n_var)) < density
+
+    class Wrapped(PymooProblem):
+        def __init__(self) -> None:
+            super().__init__(n_var=problem.n, n_obj=problem.n_obj, n_ieq_constr=1 if constrained else 0, xl=0, xu=1, vtype=bool)
+
+        def _evaluate(self, X: np.ndarray, out: dict, *args, **kwargs) -> None:
+            Xf = X.astype(float)
+            F = problem.objectives(Xf)
+            V = problem.violation(Xf)
+            if constrained:
+                out["F"] = F
+                out["G"] = V[:, None]
+            else:
+                out["F"] = F + 1e4 * V[:, None]
+
+    operators = dict(sampling=LowDensitySampling(), crossover=TwoPointCrossover(), mutation=BitflipMutation())
+    if algorithm_name == "NSGA-II":
+        algorithm = NSGA2(pop_size=POP_SIZE, **operators)
     else:
-        hypervolume_proxy = max(0.0, (1.0 - loss) * (1.0 - voltage) * (0.55 + hosting) * (0.55 + reliability + (resilience if paper == "p4" else 0) / 2) / (1.0 + violation))
-    return {
-        "investment_cost": cost,
-        "investment_cost_index": cost / budget,
-        "loss_index": loss,
-        "voltage_risk": voltage,
-        "hosting_capacity": hosting,
-        "der_readiness": der_readiness,
-        "flexibility_ratio": flexibility_ratio,
-        "subnet_coverage": subnet_coverage,
-        "kind_diversity": kind_diversity,
-        "reliability_proxy": reliability,
-        "survivability_rate": resilience,
-        "expected_loss_index": loss * (1.0 + (1.0 - resilience) * 0.30),
-        "constraint_violation_rate": violation,
-        "hypervolume_proxy": hypervolume_proxy,
-        "portfolio_size": float(len(portfolio)),
-    }
+        ref_dirs = get_reference_directions("das-dennis", problem.n_obj, n_partitions=3)
+        algorithm = MOEAD(ref_dirs=ref_dirs, n_neighbors=10, prob_neighbor_mating=0.7, **operators)
+    result = minimize(Wrapped(), algorithm, ("n_gen", N_GENERATIONS), seed=seed, verbose=False)
+    X = result.pop.get("X") if result.pop is not None else result.X
+    if X is None:
+        return np.zeros((0, problem.n))
+    return np.atleast_2d(X).astype(float)
 
 
-def run_paper(paper: str, root: Path, methods: tuple[Method, ...], experiments: tuple[str, ...]) -> None:
+# ---------------------------------------------------------------------------
+# Method registry
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class MethodSpec:
+    name: str
+    role: str
+    runner: str  # cars | shield | pymoo | scalar_ga | pso | de | point_ws | point_cost
+    description: str
+    cars: CarsConfig | None = None
+    shield: ShieldConfig | None = None
+    pymoo_name: str = ""
+    kind_excluded: str = ""
+
+
+def p3_methods() -> list[MethodSpec]:
+    return [
+        MethodSpec("CARS-MODE", "proposed", "cars", "Binary MODE: jDE self-adaptive F/CR + SaDE strategy pool + budget repair + crowding diversity.", cars=CarsConfig()),
+        MethodSpec("NSGA-II", "baseline", "pymoo", "pymoo NSGA-II, binary, constrained.", pymoo_name="NSGA-II"),
+        MethodSpec("NSGA-II+Repair", "baseline", "pymoo_repair", "NSGA-II with budget repair applied to returned population.", pymoo_name="NSGA-II"),
+        MethodSpec("MOEA/D", "baseline", "pymoo", "pymoo MOEA/D, penalty for constraints.", pymoo_name="MOEA/D"),
+        MethodSpec("Standard DE", "baseline", "de", "Binary DE/rand/1/bin, F=0.5 CR=0.9, scalarized objective.", ),
+        MethodSpec("PSO", "baseline", "pso", "Binary PSO (sigmoid velocity), scalarized objective."),
+        MethodSpec("GA", "baseline", "scalar_ga", "Single-objective GA, tournament + uniform crossover, scalarized."),
+        MethodSpec("Weighted Sum", "baseline", "point_ws", "Weighted-benefit greedy fill under budget."),
+        MethodSpec("Ablation-NoRepair", "ablation", "cars", "Budget repair disabled.", cars=CarsConfig(repair=False)),
+        MethodSpec("Ablation-FixedDE", "ablation", "cars", "F=0.5 CR=0.9 fixed, single rand/1 strategy.", cars=CarsConfig(strategy_adaptive=False)),
+        MethodSpec("Ablation-NoDiversity", "ablation", "cars", "Crowding distance replaced by random tie-break.", cars=CarsConfig(diversity=False)),
+        MethodSpec("Ablation-NoDER", "ablation", "cars", "der/storage candidates removed from the pool.", cars=CarsConfig(), kind_excluded="der+storage"),
+    ]
+
+
+def p4_methods() -> list[MethodSpec]:
+    return [
+        MethodSpec("SHIELD-MOEA", "proposed", "shield", "NSGA-II core + hybrid GA/DE variation + adaptive worst-K scenario screening + repair.", shield=ShieldConfig()),
+        MethodSpec("NSGA-II", "baseline", "pymoo", "pymoo NSGA-II, binary, constrained (full scenario set).", pymoo_name="NSGA-II"),
+        MethodSpec("NSGA-II+Repair", "baseline", "pymoo_repair", "NSGA-II with budget repair applied to returned population.", pymoo_name="NSGA-II"),
+        MethodSpec("MOEA/D", "baseline", "pymoo", "pymoo MOEA/D, penalty for constraints.", pymoo_name="MOEA/D"),
+        MethodSpec("GA", "baseline", "scalar_ga", "Single-objective GA, scalarized."),
+        MethodSpec("Weighted Sum", "baseline", "point_ws", "Weighted-benefit greedy fill."),
+        MethodSpec("Deterministic Planning", "baseline", "point_cost", "Cost-first greedy fill."),
+        MethodSpec("Ablation-NoScenarioScreen", "ablation", "shield", "Search on all scenarios (no screening).", shield=ShieldConfig(scenario_screen=False)),
+        MethodSpec("Ablation-NoRepair", "ablation", "shield", "Budget repair disabled.", shield=ShieldConfig(repair=False)),
+        MethodSpec("Ablation-NoResilienceObj", "ablation", "shield", "Survivability objective hidden from search.", shield=ShieldConfig(resilience_in_search=False)),
+        MethodSpec("Ablation-NoOutage", "ablation", "shield", "Outage severity zeroed during search (final eval unchanged).", shield=ShieldConfig(outage_in_search=False)),
+    ]
+
+
+# ---------------------------------------------------------------------------
+# Orchestration
+# ---------------------------------------------------------------------------
+
+
+def experiment_pool(candidates: list[Candidate], setup: ExperimentSetup) -> list[Candidate]:
+    if setup.kind_excluded:
+        return [c for c in candidates if c.kind != setup.kind_excluded]
+    return list(candidates)
+
+
+def method_search_mask(pool: list[Candidate], spec: MethodSpec) -> np.ndarray:
+    """Columns of the experiment pool the method may select. Pool-restricted
+    ablations search a subspace but are evaluated (and normalized) in the full
+    experiment space so hypervolumes stay comparable."""
+    if spec.kind_excluded == "der+storage":
+        return np.array([c.kind not in {"der", "storage"} for c in pool])
+    return np.ones(len(pool), dtype=bool)
+
+
+def run_method(spec: MethodSpec, problem: PlanningProblem, seed: int, search_mask: np.ndarray | None = None) -> np.ndarray:
+    if spec.runner == "cars":
+        X = run_cars_mode(problem, spec.cars or CarsConfig(), seed)
+    elif spec.runner == "shield":
+        X = run_shield_moea(problem, spec.shield or ShieldConfig(), seed)
+    elif spec.runner == "pymoo":
+        X = run_pymoo(problem, spec.pymoo_name, seed)
+    elif spec.runner == "pymoo_repair":
+        X = run_pymoo(problem, spec.pymoo_name, seed)
+        for row in X:
+            _repair_to_budget(row, problem)
+    elif spec.runner == "scalar_ga":
+        X = run_scalar_ga(problem, seed)
+    elif spec.runner == "pso":
+        X = run_binary_pso(problem, seed)
+    elif spec.runner == "de":
+        X = run_standard_de(problem, seed)
+    elif spec.runner == "point_ws":
+        X = run_weighted_sum(problem)
+    else:
+        X = run_cost_first(problem)
+    if spec.runner in {"scalar_ga", "pso", "de"}:
+        for row in X:
+            _repair_to_budget(row, problem)
+    if search_mask is not None and not search_mask.all():
+        X = X * search_mask[None, :].astype(float)
+    return X
+
+
+def compromise_solution(problem: PlanningProblem, front_X: np.ndarray, front_F: np.ndarray, lo: np.ndarray, hi: np.ndarray) -> np.ndarray | None:
+    if front_X.shape[0] == 0:
+        return None
+    norm = (front_F - lo) / np.maximum(hi - lo, 1e-9)
+    return front_X[int(np.argmin(norm.sum(axis=1)))]
+
+
+def composition_counts(problem: PlanningProblem, x: np.ndarray | None) -> dict[str, int]:
+    counts = {"reinforcement": 0, "storage": 0, "der": 0, "automation": 0}
+    if x is None:
+        return counts
+    for i in np.where(x > 0)[0]:
+        counts[problem.candidates[int(i)].kind] += 1
+    return counts
+
+
+def run_paper(paper: str) -> None:
+    hypervolume, _, holm_correction = _hv_helpers()
+    root = P3_ROOT if paper == "p3" else P4_ROOT
+    methods = p3_methods() if paper == "p3" else p4_methods()
+    experiments = P3_EXPERIMENTS if paper == "p3" else P4_EXPERIMENTS
+    status = P3_STATUS if paper == "p3" else P4_STATUS
+    proposed_name = "CARS-MODE" if paper == "p3" else "SHIELD-MOEA"
+
     stats = load_subnet_stats()
-    candidates = build_candidates(stats)
+    all_candidates = build_candidates(stats)
     rows: list[dict[str, str]] = []
-    source_status = "public_simbench_der_storage_stress_v5" if paper == "p3" else "public_simbench_planning_v1"
-    start_all = time.perf_counter()
-    for experiment in experiments:
-        for method in methods:
-            for repeat in range(1, 4):
+    compositions: list[dict[str, str]] = []
+
+    for experiment, setup in experiments.items():
+        eval_scenarios = make_scenarios(setup, paper, evaluation=True)
+        search_scenarios = make_scenarios(setup, paper, evaluation=False)
+        pool = experiment_pool(all_candidates, setup)
+        eval_problem = PlanningProblem(pool, stats, paper, setup, eval_scenarios)
+        lo, hi = normalization_bounds(eval_problem)
+        for spec in methods:
+            mask = method_search_mask(pool, spec)
+            if mask.all():
+                search_pool = pool
+            else:
+                # pool-restricted ablation: excluded candidates get prohibitive
+                # cost in the SEARCH problem only; evaluation stays in the full
+                # experiment space so hypervolumes remain comparable
+                search_pool = [
+                    c if keep else Candidate(**{**c.__dict__, "cost": 1e9})
+                    for c, keep in zip(pool, mask)
+                ]
+            search_problem = PlanningProblem(search_pool, stats, paper, setup, search_scenarios)
+            for seed_index in range(N_SEEDS):
+                digest = hashlib.sha1(f"{paper}|{experiment}|{spec.name}".encode("utf-8")).hexdigest()
+                seed = 200000 + seed_index * 7919 + int(digest[:6], 16) % 4096
                 start = time.perf_counter()
-                portfolio = build_portfolio(candidates, method, experiment, paper, repeat)
-                metrics = evaluate_portfolio(portfolio, stats, paper, experiment)
+                X = run_method(spec, search_problem, seed, search_mask=mask)
+                front_X, front_F = feasible_front(eval_problem, X)
+                hv = hypervolume(front_F, lo, hi)
+                if front_X.shape[0] > 0:
+                    lo_w, hi_w = normalization_bounds(eval_problem, aggregate="worst")
+                    F_worst = eval_problem.objectives(front_X, aggregate="worst")
+                    hv_worst = hypervolume(F_worst, lo_w, hi_w)
+                else:
+                    hv_worst = 0.0
+                comp_x = compromise_solution(eval_problem, front_X, front_F, lo, hi)
                 runtime = time.perf_counter() - start
+                comp_metrics: dict[str, float] = {}
+                if comp_x is not None:
+                    comp = eval_problem._components(comp_x[None, :], eval_scenarios)
+                    comp_metrics = {
+                        "cost_index": float(comp_x @ eval_problem.cost / eval_problem.budget),
+                        "loss_index": float(comp["loss"].mean()),
+                        "voltage_risk": float(comp["voltage"].mean()),
+                        "hosting_capacity": float(comp["hosting"].mean()),
+                        "reliability_proxy": float(comp["reliability"].mean()),
+                        "survivability_rate": float(comp["survivability"].mean()),
+                        "portfolio_size": float(comp_x.sum()),
+                        "hosting_shortfall": max(0.0, setup.hosting_target - float(comp["hosting"].mean())),
+                        "der_readiness_shortfall": max(0.0, setup.der_target - float(comp["der_readiness"].mean())),
+                    }
                 rows.append(
                     {
                         "paper": paper,
                         "experiment_id": experiment,
-                        "method": method.name,
-                        "method_role": method.role,
-                        "repeat": str(repeat),
-                        "hypervolume_proxy": f"{metrics['hypervolume_proxy']:.8f}",
-                        "constraint_violation_rate": f"{metrics['constraint_violation_rate']:.8f}",
-                        "investment_cost_index": f"{metrics['investment_cost_index']:.8f}",
-                        "loss_index": f"{metrics['loss_index']:.8f}",
-                        "voltage_risk": f"{metrics['voltage_risk']:.8f}",
-                        "hosting_capacity": f"{metrics['hosting_capacity']:.8f}",
-                        "der_readiness": f"{metrics['der_readiness']:.8f}",
-                        "flexibility_ratio": f"{metrics['flexibility_ratio']:.8f}",
-                        "subnet_coverage": f"{metrics['subnet_coverage']:.8f}",
-                        "kind_diversity": f"{metrics['kind_diversity']:.8f}",
-                        "reliability_proxy": f"{metrics['reliability_proxy']:.8f}",
-                        "survivability_rate": f"{metrics['survivability_rate']:.8f}",
-                        "expected_loss_index": f"{metrics['expected_loss_index']:.8f}",
-                        "portfolio_size": f"{metrics['portfolio_size']:.0f}",
-                        "runtime_s": f"{runtime:.8f}",
-                        "source_status": source_status,
+                        "method": spec.name,
+                        "method_role": spec.role,
+                        "seed": str(seed_index),
+                        "hypervolume": f"{hv:.8f}",
+                        "hypervolume_worst_case": f"{hv_worst:.8f}",
+                        "feasible_front_size": str(front_X.shape[0]),
+                        "compromise_cost_index": f"{comp_metrics.get('cost_index', float('nan')):.8f}",
+                        "compromise_loss_index": f"{comp_metrics.get('loss_index', float('nan')):.8f}",
+                        "compromise_voltage_risk": f"{comp_metrics.get('voltage_risk', float('nan')):.8f}",
+                        "compromise_hosting_capacity": f"{comp_metrics.get('hosting_capacity', float('nan')):.8f}",
+                        "compromise_reliability": f"{comp_metrics.get('reliability_proxy', float('nan')):.8f}",
+                        "compromise_survivability": f"{comp_metrics.get('survivability_rate', float('nan')):.8f}",
+                        "portfolio_size": f"{comp_metrics.get('portfolio_size', 0):.0f}",
+                        "hosting_shortfall": f"{comp_metrics.get('hosting_shortfall', float('nan')):.8f}",
+                        "der_readiness_shortfall": f"{comp_metrics.get('der_readiness_shortfall', float('nan')):.8f}",
+                        "runtime_s": f"{runtime:.6f}",
+                        "source_status": status,
                     }
                 )
-    write_csv(root / "evidence" / "runs" / "real_simbench_planning_results.csv", rows)
-    write_csv(root / "evidence" / "tables" / "real_simbench_planning_leaderboard.csv", leaderboard(rows, paper))
-    write_csv(root / "evidence" / "source" / "real_simbench_planning_source_profile.csv", source_profile(stats, candidates, start_all))
+                if seed_index == 0:
+                    counts = composition_counts(eval_problem, comp_x)
+                    compositions.append(
+                        {
+                            "paper": paper,
+                            "experiment_id": experiment,
+                            "method": spec.name,
+                            "method_role": spec.role,
+                            "reinforcement": str(counts["reinforcement"]),
+                            "storage": str(counts["storage"]),
+                            "der": str(counts["der"]),
+                            "automation": str(counts["automation"]),
+                            "source_status": status,
+                        }
+                    )
+        print(f"[{paper}] {experiment}: done ({len(methods)} methods x {N_SEEDS} seeds)")
+
+    stats_rows = statistics_table(rows, paper, proposed_name, holm_correction)
+    deprecate_v1(root)
+    write_csv_rows(root / "evidence" / "runs" / "real_simbench_planning_results.csv", rows)
+    write_csv_rows(root / "evidence" / "tables" / "real_simbench_planning_leaderboard.csv", aggregate(rows, paper))
+    write_csv_rows(root / "evidence" / "tables" / "real_simbench_planning_significance.csv", stats_rows)
+    write_csv_rows(root / "evidence" / "tables" / "real_simbench_planning_compromise_compositions.csv", compositions)
+    (root / "evidence" / "runs" / "real_simbench_planning_analysis.md").write_text(
+        analysis_markdown(rows, stats_rows, paper), encoding="utf-8"
+    )
     (root / "src" / "configs" / "real_simbench_planning_config.json").write_text(
         json.dumps(
             {
                 "source_dir": str(SIMBENCH_NET.relative_to(ROOT)).replace("\\", "/"),
-                "subnets_used": [item.subnet for item in stats],
-                "candidate_count": len(candidates),
-                "experiments": list(experiments),
-                "methods": [method.name for method in methods],
-                "repeats": 3,
-                "status": source_status,
+                "experiments": {name: setup.__dict__ for name, setup in experiments.items()},
+                "methods": {m.name: m.description for m in methods},
+                "seeds_per_method_per_experiment": N_SEEDS,
+                "population_size": POP_SIZE,
+                "generations": N_GENERATIONS,
+                "scenarios_per_experiment": N_SCENARIOS if paper == "p4" else 1,
+                "evaluation": "standard hypervolume on mean-over-scenario objectives; fixed seeded normalization bounds; feasible non-dominated front only; search and final-evaluation scenario sets are disjoint seeds",
+                "statistics": "Mann-Whitney U two-sided, Holm correction per experiment",
+                "status": status,
             },
             ensure_ascii=False,
             indent=2,
+            default=str,
         )
         + "\n",
         encoding="utf-8",
     )
-    (root / "evidence" / "runs" / "real_simbench_planning_analysis.md").write_text(analysis(rows, paper), encoding="utf-8")
+    print(f"[{paper}] complete")
 
 
-def mean(values: list[float]) -> float:
-    return sum(values) / len(values) if values else math.nan
-
-
-def leaderboard(rows: list[dict[str, str]], paper: str) -> list[dict[str, str]]:
+def aggregate(rows: list[dict[str, str]], paper: str) -> list[dict[str, str]]:
     by_method: dict[str, list[dict[str, str]]] = {}
     for row in rows:
         by_method.setdefault(row["method"], []).append(row)
     board = []
     for method, group in by_method.items():
+        hv = np.array([float(r["hypervolume"]) for r in group])
         board.append(
             {
                 "paper": paper,
                 "method": method,
                 "method_role": group[0]["method_role"],
-                "mean_hypervolume_proxy": f"{mean([float(r['hypervolume_proxy']) for r in group]):.8f}",
-                "mean_constraint_violation_rate": f"{mean([float(r['constraint_violation_rate']) for r in group]):.8f}",
-                "mean_investment_cost_index": f"{mean([float(r['investment_cost_index']) for r in group]):.8f}",
-                "mean_loss_index": f"{mean([float(r['loss_index']) for r in group]):.8f}",
-                "mean_voltage_risk": f"{mean([float(r['voltage_risk']) for r in group]):.8f}",
-                "mean_hosting_capacity": f"{mean([float(r['hosting_capacity']) for r in group]):.8f}",
-                "mean_der_readiness": f"{mean([float(r['der_readiness']) for r in group]):.8f}",
-                "mean_flexibility_ratio": f"{mean([float(r['flexibility_ratio']) for r in group]):.8f}",
-                "mean_subnet_coverage": f"{mean([float(r['subnet_coverage']) for r in group]):.8f}",
-                "mean_kind_diversity": f"{mean([float(r['kind_diversity']) for r in group]):.8f}",
-                "mean_survivability_rate": f"{mean([float(r['survivability_rate']) for r in group]):.8f}",
-                "mean_runtime_s": f"{mean([float(r['runtime_s']) for r in group]):.8f}",
+                "mean_hypervolume": f"{hv.mean():.8f}",
+                "std_hypervolume": f"{hv.std(ddof=1):.8f}",
+                "mean_hypervolume_worst_case": f"{np.mean([float(r['hypervolume_worst_case']) for r in group]):.8f}",
+                "mean_feasible_front_size": f"{np.mean([float(r['feasible_front_size']) for r in group]):.4f}",
+                "mean_compromise_cost_index": f"{np.nanmean([float(r['compromise_cost_index']) for r in group]):.8f}",
+                "mean_portfolio_size": f"{np.mean([float(r['portfolio_size']) for r in group]):.4f}",
+                "mean_runtime_s": f"{np.mean([float(r['runtime_s']) for r in group]):.6f}",
                 "runs": str(len(group)),
             }
         )
-    return sorted(board, key=lambda row: float(row["mean_hypervolume_proxy"]), reverse=True)
+    return sorted(board, key=lambda row: float(row["mean_hypervolume"]), reverse=True)
 
 
-def source_profile(stats: list[SubnetStats], candidates: list[Candidate], start_time: float) -> list[dict[str, str]]:
-    return [
-        {
-            "source_dir": str(SIMBENCH_NET.relative_to(ROOT)).replace("\\", "/"),
-            "subnet_count": str(len(stats)),
-            "candidate_count": str(len(candidates)),
-            "total_load_mw": f"{sum(item.load_mw for item in stats):.6f}",
-            "total_res_mw": f"{sum(item.res_mw for item in stats):.6f}",
-            "total_line_length_km": f"{sum(item.line_length_km for item in stats):.6f}",
-            "subnets": ";".join(item.subnet for item in stats),
-            "build_runtime_s": f"{time.perf_counter() - start_time:.6f}",
-        }
-    ]
+def statistics_table(rows: list[dict[str, str]], paper: str, proposed: str, holm_correction) -> list[dict[str, str]]:
+    stats: list[dict[str, str]] = []
+    experiments = sorted({r["experiment_id"] for r in rows})
+    for experiment in experiments:
+        exp_rows = [r for r in rows if r["experiment_id"] == experiment]
+        proposed_hv = [float(r["hypervolume"]) for r in exp_rows if r["method"] == proposed]
+        others = sorted({r["method"] for r in exp_rows if r["method"] != proposed})
+        pvals: list[float] = []
+        entries: list[dict[str, str]] = []
+        for other in others:
+            other_hv = [float(r["hypervolume"]) for r in exp_rows if r["method"] == other]
+            if np.allclose(proposed_hv, other_hv):
+                u_stat, p_value = float("nan"), 1.0
+            else:
+                try:
+                    u_stat, p_value = mannwhitneyu(proposed_hv, other_hv, alternative="two-sided")
+                except ValueError:
+                    u_stat, p_value = float("nan"), 1.0
+            pvals.append(float(p_value))
+            role = next(r["method_role"] for r in exp_rows if r["method"] == other)
+            entries.append(
+                {
+                    "paper": paper,
+                    "experiment_id": experiment,
+                    "comparison": f"{proposed} vs {other}",
+                    "opponent_role": role,
+                    "n_per_group": str(len(proposed_hv)),
+                    "mean_proposed": f"{np.mean(proposed_hv):.8f}",
+                    "mean_opponent": f"{np.mean(other_hv):.8f}",
+                    "mean_diff": f"{np.mean(proposed_hv) - np.mean(other_hv):.8f}",
+                    "u_statistic": f"{u_stat:.2f}" if not math.isnan(u_stat) else "NA",
+                    "p_value": f"{p_value:.6g}",
+                }
+            )
+        for entry, p_holm in zip(entries, holm_correction(pvals)):
+            entry["p_holm"] = f"{p_holm:.6g}"
+            entry["significant_005_holm"] = str(p_holm < 0.05 and float(entry["mean_diff"]) != 0.0)
+        stats.extend(entries)
+    return stats
 
 
-def analysis(rows: list[dict[str, str]], paper: str) -> str:
-    board = leaderboard(rows, paper)
+def analysis_markdown(rows: list[dict[str, str]], stats: list[dict[str, str]], paper: str) -> str:
+    board = aggregate(rows, paper)
     proposed_name = "CARS-MODE" if paper == "p3" else "SHIELD-MOEA"
+    status = P3_STATUS if paper == "p3" else P4_STATUS
     proposed = next(row for row in board if row["method"] == proposed_name)
     baselines = [row for row in board if row["method_role"] == "baseline"]
     ablations = [row for row in board if row["method_role"] == "ablation"]
-    best_baseline = max(baselines, key=lambda row: float(row["mean_hypervolume_proxy"]))
-    best_ablation = max(ablations, key=lambda row: float(row["mean_hypervolume_proxy"]))
-    proposed_hv = float(proposed["mean_hypervolume_proxy"])
-    baseline_gain = (proposed_hv / float(best_baseline["mean_hypervolume_proxy"]) - 1.0) * 100
-    ablation_gain = (proposed_hv / float(best_ablation["mean_hypervolume_proxy"]) - 1.0) * 100
-    signal = "promising_public_signal" if baseline_gain > 0 and ablation_gain > 0 else "needs_compliant_optimization"
+    best_baseline = max(baselines, key=lambda row: float(row["mean_hypervolume"]))
+    best_ablation = max(ablations, key=lambda row: float(row["mean_hypervolume"]))
+    proposed_hv = float(proposed["mean_hypervolume"])
+    baseline_gain = (proposed_hv / max(1e-12, float(best_baseline["mean_hypervolume"])) - 1.0) * 100
+    ablation_gain = (proposed_hv / max(1e-12, float(best_ablation["mean_hypervolume"])) - 1.0) * 100
+    sig_wins = sum(1 for s in stats if s["opponent_role"] == "baseline" and s["significant_005_holm"] == "True" and float(s["mean_diff"]) > 0)
+    sig_total = sum(1 for s in stats if s["opponent_role"] == "baseline")
+    sig_losses = sum(1 for s in stats if s["significant_005_holm"] == "True" and float(s["mean_diff"]) < 0)
+    if baseline_gain > 0 and sig_wins > sig_total * 0.5 and sig_losses == 0:
+        signal = "significant_public_signal"
+    elif baseline_gain > 0:
+        signal = "positive_but_partially_significant"
+    else:
+        signal = "no_advantage_over_baselines"
     title = "P3 CARS-MODE" if paper == "p3" else "P4 SHIELD-MOEA"
-    status_text = (
-        "public SimBench DER/storage stress planning experiment v5"
-        if paper == "p3"
-        else "public SimBench benchmark-derived planning experiment v1"
-    )
-    return "\n".join(
+    lines = [
+        f"# Real SimBench Planning Analysis - {title} (real MOEA rewrite)",
+        "",
+        f"Status: `{status}`.",
+        "",
+        "## Why this version exists",
+        "",
+        "The previous pipeline scored hand-shaped ranking heuristics per method (quality",
+        "constants, method-name-conditional weights) with deterministic repeats. It is",
+        "preserved as `*_proxy_methods_deprecated.*`. This version implements every method",
+        "as a real algorithm (pymoo NSGA-II/MOEA/D; real scalarized GA/PSO/DE; the proposed",
+        "method as a genuine self-contained MOEA), keeps the evaluation method-independent,",
+        f"and runs {N_SEEDS} seeds per method/experiment with Mann-Whitney U + Holm tests.",
+    ]
+    if paper == "p4":
+        lines.extend(
+            [
+                "Scenario uncertainty is now a real mechanism: each experiment carries a fixed",
+                f"seeded set of {N_SCENARIOS} (load, DER, outage) scenarios; SHIELD-MOEA screens the",
+                "worst-K scenarios during search, while the final evaluation always uses a",
+                "disjoint-seed full scenario set (so screening cannot leak into scoring).",
+            ]
+        )
+    lines.extend(
         [
-            f"# Real SimBench Planning Analysis - {title}",
             "",
-            f"Status: {status_text}. The experiment uses actual SimBench Load, Line, RES, and Transformer/Switch-adjacent network files to derive subnets and candidate planning actions. It is not a full AC power-flow validation.",
+            "## Headline results (pooled across experiments and seeds)",
             "",
             f"- Proposed method: `{proposed_name}`",
-            f"- Proposed mean hypervolume proxy: `{proposed['mean_hypervolume_proxy']}`",
-            f"- Best baseline: `{best_baseline['method']}` with `{best_baseline['mean_hypervolume_proxy']}`",
-            f"- Best ablation: `{best_ablation['method']}` with `{best_ablation['mean_hypervolume_proxy']}`",
+            f"- Proposed mean hypervolume: `{proposed['mean_hypervolume']}` (std `{proposed['std_hypervolume']}`)",
+            f"- Best baseline: `{best_baseline['method']}` with `{best_baseline['mean_hypervolume']}`",
+            f"- Best ablation: `{best_ablation['method']}` with `{best_ablation['mean_hypervolume']}`",
             f"- Relative gain over best baseline: `{baseline_gain:.2f}%`",
             f"- Relative gain over best ablation: `{ablation_gain:.2f}%`",
+            f"- Holm-significant wins vs baselines: `{sig_wins}/{sig_total}` (per-experiment comparisons)",
+            f"- Holm-significant losses (any opponent): `{sig_losses}`",
             f"- Current value signal: `{signal}`",
+            "",
+            "## Leaderboard (mean hypervolume, descending; worst-case HV = robustness readout)",
+            "",
+            "| method | role | mean HV | std | worst-case HV | mean runtime (s) |",
+            "|---|---|---|---|---|---|",
+        ]
+    )
+    for row in board:
+        lines.append(
+            f"| {row['method']} | {row['method_role']} | {row['mean_hypervolume']} | {row['std_hypervolume']} | {row['mean_hypervolume_worst_case']} | {row['mean_runtime_s']} |"
+        )
+    lines.extend(
+        [
             "",
             "## Interpretation Boundary",
             "",
-            "This is a reproducible public benchmark-derived optimization experiment. It validates candidate generation, objective design, baseline coverage, ablations, and result-table wiring. Manuscript-level electrical claims still require pandapower/AC load-flow checks and repeated scenario variance.",
+            "Objectives are engineering proxies computed from SimBench subnet statistics;",
+            "electrical claims are backed separately by the pandapower AC validation stage",
+            "(`real_ac_validation_*`), which should be re-run against the compromise",
+            "compositions exported by this pipeline",
+            "(`tables/real_simbench_planning_compromise_compositions.csv`).",
             "",
-            "## Compliant Optimization Path",
+            "## Remaining Compliant Optimization Path",
             "",
-            "- Add pandapower load-flow feasibility checks when dependencies are available.",
-            "- Add rolling/load-growth scenarios and larger subnet samples.",
-            "- Keep weak ablations and constraint violations in the evidence tables.",
+            "- Nodal siting/sizing experiments on concrete pandapower networks for method",
+            "  differentiation at the electrical level.",
+            "- Monetary calibration of cost coefficients.",
+            "- Keep deprecated proxy-method artifacts and all weak seeds in the evidence trail.",
         ]
-    ) + "\n"
+    )
+    return "\n".join(lines) + "\n"
 
 
-def write_csv(path: Path, rows: list[dict[str, str]]) -> None:
+def deprecate_v1(root: Path) -> None:
+    renames = [
+        (root / "evidence" / "runs" / "real_simbench_planning_results.csv", "real_simbench_planning_results_proxy_methods_deprecated.csv"),
+        (root / "evidence" / "tables" / "real_simbench_planning_leaderboard.csv", "real_simbench_planning_leaderboard_proxy_methods_deprecated.csv"),
+        (root / "evidence" / "runs" / "real_simbench_planning_analysis.md", "real_simbench_planning_analysis_proxy_methods_deprecated.md"),
+    ]
+    for src, new_name in renames:
+        if src.exists():
+            target = src.parent / new_name
+            if not target.exists():
+                src.rename(target)
+
+
+def write_csv_rows(path: Path, rows: list[dict[str, str]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     fields = list(rows[0].keys()) if rows else []
     with path.open("w", encoding="utf-8-sig", newline="") as handle:
@@ -686,10 +1203,10 @@ def write_csv(path: Path, rows: list[dict[str, str]]) -> None:
         writer.writerows(rows)
 
 
-def run_all() -> None:
-    run_paper("p3", P3_ROOT, P3_METHODS, P3_EXPERIMENTS)
-    run_paper("p4", P4_ROOT, P4_METHODS, P4_EXPERIMENTS)
-
-
 if __name__ == "__main__":
-    run_all()
+    import sys
+
+    sys.path.insert(0, str(ROOT / "src"))
+    selected = tuple(arg for arg in sys.argv[1:] if arg in {"p3", "p4"}) or ("p3", "p4")
+    for paper in selected:
+        run_paper(paper)

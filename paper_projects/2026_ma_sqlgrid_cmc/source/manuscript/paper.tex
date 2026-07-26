@@ -13,17 +13,19 @@
 \begin{document}
 \history{Date of publication xxxx 00, 0000, date of current version xxxx 00, 0000.}
 \doi{10.1109/ACCESS.YYYY.XXXXXXX}
-\title{MA-SQLGrid: A Robust Multi-Agent Framework for Text-to-SQL in Power Grid Databases}
-\author{Anonymous}
-\address[1]{Dispatching and Control Center, State Grid Corporation, China}
-\corresp{Correspondence: withheld for anonymous review.}
+\title{MA-SQLGrid: A Multi-Stage Context-Grounding Framework for Text-to-SQL over Power Grid Maintenance Databases}
+\author{\uppercase{Bijing Liu}\authorrefmark{1,2}, \uppercase{Chenglong Sun}\authorrefmark{1,2}, and \uppercase{Yong Yang}\authorrefmark{1,2}}
+\address[1]{NARI Group Corporation (State Grid Electric Power Research Institute), Nanjing 211106, Jiangsu Province, China}
+\address[2]{Beijing Kedong Electric Power Control System Co., Ltd., Beijing 100080, China}
+\tfootnote{This work was supported by the Science and Technology Project of NARI Group Corporation (State Grid Electric Power Research Institute) (Grant No. [TODO: grant number]).}
+\corresp{Corresponding author: Yong Yang (e-mail: yangyong1@sgepri.sgcc.com.cn).}
 
 \begin{abstract}
-Text-to-SQL systems often degrade when a database mixes dense schema, overlapping values, and answer-shape ambiguity. In power-grid maintenance queries, those failures are amplified by status labels, asset categories, topology relations, and date constraints that are easy to express in natural language but easy to lose in a long prompt. We present MA-SQLGrid, a lightweight multi-role framework that constructs compact schema/value context, normalizes domain values, infers answer shape from the question, and uses a fixed non-frontier SQL generator with reference-free validation before final selection. On the held-out \texttt{GridDB-Maintenance-v2\ v0.1} test split, MA-SQLGrid improves execution accuracy from 0.4389 with full schema-values prompting to 0.7000, while the validated variant reaches 0.7278. The compact-domain prompt also reduces estimated prompt length from 710.3 tokens to 259.2 tokens. Validation further raises answer-shape accuracy from 0.8889 to 0.9722, but also increases latency. These results show that compact, domain-grounded context construction is more effective than exhaustive schema dumping for this deterministic maintenance database, and that reference-free validation can add a smaller final gain when candidate SQL is already well grounded.
+Text-to-SQL systems often degrade when a database mixes dense schema, overlapping values, and answer-shape ambiguity. In power-grid maintenance queries, those failures are amplified by status labels, asset categories, topology relations, and date constraints that are easy to express in natural language but easy to lose in a long prompt. We present MA-SQLGrid, a lightweight multi-stage framework that constructs compact schema/value context, normalizes domain values, infers answer shape from the question, and applies reference-free validation before final selection. On the held-out \texttt{GridDB-Maintenance-v2\ v0.1} test split with a fixed \texttt{gpt-5.4-mini} generator, MA-SQLGrid improves execution accuracy from 0.4389 with full schema-values prompting to 0.7000, and to 0.7278 with validation. A second independent generator (\texttt{deepseek-chat}, byte-identical prompts, temperature 0) replicates both effects with larger margins: compact context adds +36.1 points strict accuracy (0.3389 to 0.7000) and validation adds a further +6.7 points (0.7667). Both generators also replicate a convention-sensitivity caveat that the paper reports explicitly: under a projection-tolerant re-scoring, full-schema prompting matches row content at least as well as compact context, so the strict gain is dominated by answer-contract conformance (projection and ordering) rather than row-content retrieval. The compact context shrinks the prompt template by 63.5\% (710.3 to 259.2 estimated tokens); measured input tokens fall by 23.4\% on the original serving stack, which adds a large fixed per-call overhead, and by 74.7\% on the direct second-model endpoint. A three-repeat temperature-0 consistency check bounds run-to-run spread at 1.1 points with 98.3\% per-question verdict agreement. A scale-robustness check on a tenfold row-scaled database with two distractor tables (same 180 questions, second generator) shows that the compact-context advantage persists (+26.1 points strict) with flat input tokens (509 to 504 per question, about six times cheaper than full-schema prompting, whose prompt grows by 51\%), while a fully diagnosed fixed-cap value-inventory truncation bounds the compact conditions' absolute scores at that scale.
 \end{abstract}
 
 \begin{keywords}
-Text-to-SQL, power grid databases, multi-agent systems, schema linking, execution validation
+Text-to-SQL, power grid databases, multi-stage prompting pipelines, schema linking, execution validation
 \end{keywords}
 \titlepgskip=-21pt
 \maketitle
@@ -34,11 +36,11 @@ Text-to-SQL remains fragile in domains where the database is fully known yet sti
 
 Prior Text-to-SQL systems address pieces of this problem, but they tend to optimize one axis at the expense of another. Schema-linking methods improve token-to-column alignment, yet they still depend on the quality of the prompt context \cite{lei2020reexamining}, \cite{gan2021robustness}, \cite{liu2021awakening}. Prompt-based systems often help by adding demonstrations or structured cues, but full-schema prompting can inflate the context without solving literal mismatches \cite{chang2023prompt}, \cite{nan2023enhancing}, \cite{sun2023sqlprompt}. Decomposition and self-correction methods improve reasoning over joins and filters, yet their gains depend on how intermediate steps are grounded \cite{pourreza2023dinsql}, \cite{wang2023macsql}, \cite{talaei2024chess}. Recent surveys also point to a stable pattern: the strongest systems are not simply larger, but more selective about which schema evidence they expose and how they verify outputs \cite{liu2024survey}, \cite{katsogiannismeimarakis2023survey}, \cite{huang2024survey}. That observation motivates a narrower question for this benchmark: can compact domain context, not exhaustive schema exposure, improve a fixed generator on a frozen maintenance database?
 
-MA-SQLGrid answers that question with a lightweight multi-role design. The framework first builds compact schema/value context, then canonicalizes power-grid values, then infers the expected answer shape, and only then generates SQL with one fixed non-frontier model. A final validator compares candidate SQL using execution behavior, answer-shape consistency, and value alignment without gold SQL. This structure follows the spirit of CHESS-style context harnessing \cite{talaei2024chess} while remaining deliberately small enough to isolate the effect of grounding. The central idea is simple: in a narrow domain database, the generator should not see everything. It should see the few schema fragments and canonical values that most directly constrain the query, because those are the elements that determine whether the answer shape and the denotation are right \cite{wu2022chains}, \cite{xie2022unifiedskg}, \cite{li2024select}.
+MA-SQLGrid answers that question with a lightweight multi-stage design. A note on terminology: throughout this paper, MA-SQLGrid is described as a \emph{multi-stage} prompting pipeline with fixed, role-specialized stages (schema selection, value normalization, answer-shape inference, generation, and validation). It is not an interacting multi-agent system: the stages execute in a fixed order, do not negotiate or debate, and share no learned coordination policy. We retain the system name MA-SQLGrid for continuity with the released artifact package, but we deliberately avoid the term ``multi-agent'' for the architecture itself. The framework first builds compact schema/value context, then canonicalizes power-grid values, then infers the expected answer shape, and only then generates SQL with one fixed non-frontier model. A final validator compares candidate SQL using execution behavior, answer-shape consistency, and value alignment without gold SQL. This structure follows the spirit of CHESS-style context harnessing \cite{talaei2024chess} while remaining deliberately small enough to isolate the effect of grounding. The central idea is simple: in a narrow domain database, the generator should not see everything. It should see the few schema fragments and canonical values that most directly constrain the query, because those are the elements that determine whether the answer shape and the denotation are right \cite{wu2022chains}, \cite{xie2022unifiedskg}, \cite{li2024select}.
 
-This paper makes four contributions. First, it defines MA-SQLGrid as a compact multi-role framework for a deterministic power-grid maintenance database, with explicit schema selection, value normalization, and answer-shape inference. Second, it shows that compact domain context outperforms both schema-only and full-schema-values prompting under the same fixed generator. Third, it adds a reference-free validation layer that improves final selection quality, especially on answer-shape-sensitive queries, while making the latency cost explicit. Fourth, it reports a reproducible evaluation protocol for \texttt{GridDB-Maintenance-v2\ v0.1}, including the deterministic split, the evaluator contract, and the comparator definitions needed to interpret the results without importing claims from unrelated Text-to-SQL benchmarks \cite{zhong2020semantic}, \cite{lee2021kaggledbqa}, \cite{lei2024spider}.
+This paper makes six contributions. First, it defines MA-SQLGrid as a compact multi-stage framework for a deterministic power-grid maintenance database, with explicit schema selection, value normalization, and answer-shape inference. Second, it shows that compact domain context outperforms both schema-only and full-schema-values prompting under the same fixed generator. Third, it adds a reference-free validation layer that improves final selection quality, especially on answer-shape-sensitive queries, while making the latency cost explicit. Fourth, it reports a reproducible evaluation protocol for \texttt{GridDB-Maintenance-v2\ v0.1}, including the deterministic split, the evaluator contract, and the comparator definitions needed to interpret the results without importing claims from unrelated Text-to-SQL benchmarks \cite{zhong2020semantic}, \cite{lee2021kaggledbqa}, \cite{lei2024spider}. Fifth, it validates the main findings with a second independent generator (\texttt{deepseek-chat}) under byte-identical prompts: the compact-context and validation gains replicate with larger margins, the evaluation-convention sensitivity finding replicates, and a three-repeat temperature-0 consistency check bounds run-to-run variation. Sixth, it stress-tests scale robustness on the second generator with a tenfold row-scaled database containing two distractor tables: the compact-context and validation gains persist (+26.1 and +5.6 points strict), the compact prompt's input tokens stay flat while the full-schema prompt grows by 51\%, and an honest artifact diagnosis attributes the compact conditions' absolute drop entirely to a fixed-cap value-inventory truncation rather than to a failure of the grounding idea.
 
-The word ``robust'' in the title is used in this bounded sense: robustness to schema/value and answer-shape ambiguity inside the fixed \texttt{GridDB-Maintenance-v2\ v0.1} protocol. It is not a claim of cross-benchmark robustness, production readiness, schema-drift tolerance, or stability across multiple random seeds. This distinction is important because the study is designed to isolate the effect of context construction and validation on one controlled benchmark, not to evaluate broad deployment behavior.
+Where the paper speaks of robustness, the word is used in a bounded sense: robustness to schema/value and answer-shape ambiguity inside the fixed \texttt{GridDB-Maintenance-v2\ v0.1} protocol. The paper makes no claim of cross-benchmark robustness, production readiness, schema-drift tolerance, or stability across multiple random seeds. This distinction is important because the study is designed to isolate the effect of context construction and validation on one controlled benchmark, not to evaluate broad deployment behavior.
 
 The rest of the paper is organized as follows. Section 2 reviews prompting, decomposition, and validation methods. Section 3 formalizes the problem. Section 4 presents MA-SQLGrid. Section 5 describes the dataset, comparators, metrics, and experimental setup. Section 6 reports the test-split results. Section 7 discusses the implications, Section 8 states the limitations, and Section 9 concludes.
 
@@ -55,6 +57,30 @@ Content-aware prompting has also demonstrated that database values matter when t
 Decomposition-based methods improve Text-to-SQL by breaking a query into smaller decisions before generating the final SQL \cite{liu2023divide}, \cite{pourreza2023dinsql}, \cite{arora2023adapt}, \cite{xie2024decomposition}. Multi-agent systems extend that idea by assigning distinct roles for decomposition, generation, and refinement \cite{wang2023macsql}, \cite{xie2024magsql}, \cite{cen2025sqlfixagent}. These methods are attractive because they expose intermediate structure that can be checked against the question. Their drawback is overhead: each stage may reintroduce the same schema context, and the cost of multiple passes can outweigh the benefit when the database is simple and the schema is fixed.
 
 MA-SQLGrid uses a similar role separation, but it is intentionally lighter. It does not rely on a large debate protocol or a broad search over many candidate generators. Instead, it uses compact schema/value context, answer-shape inference, and a single fixed generator, then validates the outputs with reference-free checks. This makes the method closer to CHESS-style context harnessing than to a search-heavy agent pipeline \cite{talaei2024chess}, \cite{wang2023macsql}, \cite{pourreza2023dinsql}. The difference matters because this benchmark rewards careful grounding more than open-ended reasoning depth, so a smaller control loop is enough to expose the main effect.
+
+Table~\ref{tab:feature-comparison} positions MA-SQLGrid against representative pipeline systems along the capability dimensions most relevant to this study. The entries summarize the mechanisms documented in the cited papers; they are not re-implementations, and the table makes no performance claim. Two observations follow from it. First, schema pruning, execution-guided selection, and error-driven repair are individually well established; the specific combination MA-SQLGrid tests is domain-targeted value canonicalization plus explicit answer-shape inference in front of a single fixed generator. Second, most prior pipelines are built for broad cross-domain benchmarks, whereas MA-SQLGrid asks how far compact, domain-specific grounding carries on one frozen operational database. That is a narrower question, and the experimental scope in Section~5 is bounded accordingly.
+
+\begin{table*}[t]
+\caption{Capability comparison with representative Text-to-SQL pipeline systems, based on the mechanisms documented in the cited papers. ``Shape inference'' denotes explicit prediction of the expected answer form (projection count, granularity, ordering) before generation; ``gold-free selection'' means candidate selection uses no gold SQL or gold answers at inference time (true for all listed systems at deployment; listed for completeness of the validation column).}
+\label{tab:feature-comparison}
+\centering
+\footnotesize
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lccccccc}
+\toprule
+System & Schema selection & Value/content linking & Shape inference & Multi-candidate & Execution-based validation & Bounded repair & Domain-specialized \\
+\midrule
+DIN-SQL \cite{pourreza2023dinsql} & yes & partial & no & no & no & yes (self-correction) & no \\
+MAC-SQL \cite{wang2023macsql} & yes (selector) & partial & no & no & yes (refiner) & yes (error-driven) & no \\
+CHESS \cite{talaei2024chess} & yes & yes (retrieval) & no & yes & yes (unit tests) & yes (revision) & no \\
+MAG-SQL \cite{xie2024magsql} & yes (soft linking) & partial (conditions) & no & no & yes & yes (iterative) & no \\
+SQLFixAgent \cite{cen2025sqlfixagent} & no & no & no & yes (fix candidates) & yes & yes (consistency repair) & no \\
+CHASE-SQL \cite{pourreza2024chasesql} & yes & yes & no & yes (multi-path) & yes (selection agent) & yes (fixer) & no \\
+MA-SQLGrid (this work) & yes (lexical+FK) & yes (canonicalization) & yes (rule-based) & yes (C5, $\le$5) & yes (reference-free) & yes (single attempt) & yes (power grid) \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table*}
 
 \subsection{Execution-Based Evaluation and Validation}\label{execution-based-evaluation-and-validation}
 
@@ -90,7 +116,7 @@ s(y_i; x,c,D) ={}& \lambda_1 \mathrm{Exec}(y_i,D)
 \end{aligned}
 \] The final prediction is the highest-scoring executable candidate. This objective is reference-free at inference time and depends only on the candidate SQL, the compact context, and the database behavior \cite{zhong2020semantic}, \cite{beyer2022verification}, \cite{huang2024survey}.
 
-The first component, compact schema/value selection, is where most of the gain comes from. MA-SQLGrid does not expose the full schema. It scores schema items by lexical overlap with the question, relation proximity, and domain salience, then keeps only the subset needed to express the likely joins and predicates. In the implementation used for the formal run, lexical matching is applied to table names, column names, and value mentions; selected tables are expanded through foreign-key neighbors up to a fixed cap; and the domain selector prioritizes maintenance-relevant entities such as assets, work orders, sensor readings, and topology edges when the question contains corresponding operational phrases. The same reduction applies to values: only the hints that help disambiguate maintenance categories, status labels, and temporal forms are retained. This is not a compression trick for its own sake. In a narrow database, irrelevant schema tokens do not improve coverage; they dilute attention. The test results support that choice: the compact-domain condition reaches 0.7 execution accuracy while using far fewer estimated prompt tokens than the full-schema baseline. That pattern is consistent with selective grounding work in schema linking and structured retrieval \cite{lei2020reexamining}, \cite{lin2020bridging}, \cite{quamar2022natural}, \cite{xie2022unifiedskg}.
+The first component is compact schema/value selection. The component ablation of Section~6 attributes the largest single share of the end-to-end gain to the answer-shape channel that this compact context carries (removing shape hints drops correct answers from 126 to 77), with the schema/value reduction itself contributing through disambiguation and attention economy rather than dominating the gain on its own. MA-SQLGrid does not expose the full schema. It scores schema items by lexical overlap with the question, relation proximity, and domain salience, then keeps only the subset needed to express the likely joins and predicates. In the implementation used for the formal run, lexical matching is applied to table names, column names, and value mentions; selected tables are expanded through foreign-key neighbors up to a fixed cap; and the domain selector prioritizes maintenance-relevant entities such as assets, work orders, sensor readings, and topology edges when the question contains corresponding operational phrases. The same reduction applies to values: only the hints that help disambiguate maintenance categories, status labels, and temporal forms are retained. This is not a compression trick for its own sake. In a narrow database, irrelevant schema tokens do not improve coverage; they dilute attention. The test results support that choice: the compact-domain condition reaches 0.7 execution accuracy while using far fewer estimated prompt tokens than the full-schema baseline. That pattern is consistent with selective grounding work in schema linking and structured retrieval \cite{lei2020reexamining}, \cite{lin2020bridging}, \cite{quamar2022natural}, \cite{xie2022unifiedskg}.
 
 The second component, power-grid value normalization, maps question phrasing into canonical database literals before generation. The normalizer is a fixed domain dictionary and pattern set over the local value inventory, not a learned classifier and not a lookup into gold SQL. If the question uses an abbreviated or colloquial form, the normalizer resolves it to the local database value that the SQL must contain. If the question mentions a status or asset class, the system converts that mention into the dataset's canonical vocabulary. For example, phrases such as ``offline assets,'' ``closed topology connection,'' and ``temperature alarm'' are converted into candidate predicates over the corresponding status, topology, or sensor columns. The local inventory used by the formal run contains 196 distinct values across 28 non-ID categorical, date, status, flag, and text columns; on the 180-question test split, the domain context emitted at least one normalized value hint for 170 questions, with 330 hint instances and 111 unique rendered hints. This matters because the benchmark is deterministic: value mismatches are not random noise but predictable lexical failures. Separating normalization from generation makes the generator's task smaller and more stable. It also explains why MA-SQLGrid improves on schema-only and full-schema-values prompting: the prompt is not merely shorter or longer, it is aligned with the database's literal conventions \cite{brunner2020valuenet}, \cite{chen2023large}, \cite{liu2022semantic}.
 
@@ -98,7 +124,7 @@ The third component, answer-shape inference, predicts the form of the answer bef
 h(x) = \arg\max_{t \in \mathcal{T}} p_\phi(t \mid x),
 \] where \(\phi\) is a prompt-derived policy inside the framework. The purpose is to constrain the candidate space, not to solve semantics independently. Questions that ask ``how many,'' ``which,'' ``whether,'' or ``latest'' tend to require different SQL skeletons, and the wrong skeleton often yields a valid but semantically wrong query. Injecting shape into the context gives the generator an inexpensive structural prior. That is why the generic CHESS-style baseline improves shape accuracy relative to schema-only prompting, but the domain-grounded version improves much more once shape is coupled with canonical value hints \cite{liu2023divide}, \cite{talaei2024chess}, \cite{wang2023macsql}.
 
-The generator stage uses one fixed non-frontier model, \texttt{gpt-5.4-mini}, with deterministic decoding at temperature 0. Fixing the model isolates the framework effect from any effect of a stronger generator family. The model receives the compact schema/value context, the normalized domain hints, and the answer-shape cue, then returns candidate SQL in a controlled format. Deterministic decoding is useful here because it turns the comparison into a question of context and validation, not sampling variance. Exact future reproducibility can still be affected by hosted-model drift, so the artifact package retains the model identifier, prompts, context hashes, raw outputs, selected SQL, retries, token estimates, and serving logs needed to audit the reported run. That is the right setting for a framework paper on a frozen benchmark \cite{chang2023prompt}, \cite{nan2023enhancing}, \cite{sun2023sqlprompt}.
+The generator stage uses one fixed non-frontier model, \texttt{gpt-5.4-mini}, with deterministic decoding at temperature 0; a second-generator replication with \texttt{deepseek-chat} under byte-identical prompts is described in Section~5. Fixing the model isolates the framework effect from any effect of a stronger generator family. The model receives the compact schema/value context, the normalized domain hints, and the answer-shape cue, then returns candidate SQL in a controlled format. Deterministic decoding is useful here because it turns the comparison into a question of context and validation, not sampling variance. Exact future reproducibility can still be affected by hosted-model drift, so the artifact package retains the model identifier, prompts, context hashes, raw outputs, selected SQL, retries, token estimates, and serving logs needed to audit the reported run. That is the right setting for a framework paper on a frozen benchmark \cite{chang2023prompt}, \cite{nan2023enhancing}, \cite{sun2023sqlprompt}.
 
 The final stage is reference-free execution, shape, and value validation. Each candidate is executed on the local SQLite database. Candidates that fail syntax or execution are discarded. Among executable candidates, the validator checks whether the observed result shape matches the inferred answer shape and whether the SQL predicates align with the normalized value hints. The selected query is the one with the highest composite score. The procedure is straightforward: construct compact context, generate a small candidate set, execute the candidates, score them by execution success, shape conformity, and value consistency, then return the top-scoring query. The cost is linear in the number of candidates, so the validation layer increases latency, but it also explains the measured improvement in answer-shape accuracy and final execution accuracy \cite{wang2021executions}, \cite{li2024select}, \cite{huang2024survey}.
 
@@ -106,7 +132,7 @@ The ranking policy is conservative by design. Executable candidates outrank non-
 
 For reproducibility, the C5 condition fixes the candidate and repair policy rather than leaving it to an open-ended agent loop. C5 generates at most five candidate SQL strings from the same compact domain context used by C4. Each candidate is checked by the local read-only SQL guard before execution. The ranking signal combines four reference-free checks: whether execution succeeds, whether the observed result shape is compatible with the inferred answer shape, whether the SQL preserves the inferred value hints, and whether ordering cues are respected when the question implies an ordered or top-k answer. If two candidates receive the same effective validation status, the earlier generated candidate is preferred, which gives deterministic tie-breaking under temperature-zero decoding. This deterministic order matters because the formal run uses a single seed label as a reproducibility label, not as a repeated sampling experiment.
 
-The repair boundary is also fixed. C5 permits one repair opportunity when the initially selected candidate fails execution, violates the inferred shape, misses inferred value hints, or ignores an inferred ordering cue. The repair prompt receives the original question, the compact context, the failed SQL, and the reference-free validation signal. It does not receive gold SQL, gold denotation rows, evaluator correctness, required-literal metadata, answer-shape metadata, or order-sensitive metadata. A repaired SQL string is accepted only if it executes and does not worsen the available reference-free validation signal. If no candidate can be extracted, the runner records an error and emits a safe placeholder rather than silently fabricating a successful query. The repaired formal run reported zero contract errors, zero unsafe SQL records, zero provider/extraction errors, and zero leakage-scan problems. Thus, the validation layer is reproducible as a bounded selector over generated candidates, not as an unconstrained self-correction process.
+The repair boundary is also fixed. C5 permits one repair opportunity when the initially selected candidate fails execution, violates the inferred shape, misses inferred value hints, or ignores an inferred ordering cue. The repair prompt receives the original question, the compact context, the failed SQL, and the reference-free validation signal. It does not receive gold SQL, gold denotation rows, evaluator correctness, required-literal metadata, answer-shape metadata, or order-sensitive metadata. A repaired SQL string is accepted only if it executes and does not worsen the available reference-free validation signal. If no candidate can be extracted, the runner records an error and emits a safe placeholder rather than silently fabricating a successful query. The archived formal run reported zero contract errors, zero unsafe SQL records, zero provider/extraction errors, and zero leakage-scan problems. Thus, the validation layer is reproducible as a bounded selector over generated candidates, not as an unconstrained self-correction process.
 
 \begin{table*}[t]
 \caption{Implementation details fixed in the reported MA-SQLGrid run.}
@@ -126,7 +152,7 @@ No-gold contract & Prediction records exclude gold SQL, gold denotation rows, ev
 \end{tabularx}
 \end{table*}
 
-Figure 1 summarizes the architecture, and the rest of the implementation follows a fixed schedule: question analysis, domain normalization, compact prompt assembly, generation, execution, and selection. The method is therefore best understood as a controlled multi-role prompting system rather than a search-heavy agent loop. It is lightweight by design, but each role removes a specific failure mode that the benchmark makes visible.
+Figure 1 summarizes the architecture, and the rest of the implementation follows a fixed schedule: question analysis, domain normalization, compact prompt assembly, generation, execution, and selection. The method is therefore best understood as a controlled multi-stage prompting system rather than a search-heavy agent loop. It is lightweight by design, but each stage removes a specific failure mode that the benchmark makes visible.
 
 \begin{figure*}[t]
 \centering
@@ -168,6 +194,8 @@ The formal comparison centers on five short condition labels, C1 through C5, cho
 
 The main generator is a fixed \texttt{gpt-5.4-mini} configuration with \texttt{temperature=0}. Fixing the model matters because it removes generator-family variation from the comparison. The paper is therefore not a study of model scaling. It is a study of how context construction and validation change the behavior of one fixed generator on a narrow deterministic database. The exact serving logs, prompts, context hashes, model identifier, retries, token estimates, predictions, and scores are retained with the artifact package for reproducibility. That is the right contract for the benchmark and the right boundary for the claims.
 
+To test whether the reported effects are specific to one generator family, the study adds a second-generator protocol. The C2, C4, and C5 conditions were re-run with \texttt{deepseek-chat}, accessed through the provider's direct OpenAI-compatible endpoint (\texttt{api.deepseek.com/v1}) at temperature 0, on the same 180 held-out test questions. The second-model runner reuses the archived formal-run prompts byte-for-byte, so both generators receive identical inputs for C2 and C4 and identical candidate-generation prompts for C5. The C5 validation, ranking, and repair stage, whose original implementation is tied to the archived pipeline, was reimplemented from the specification in Section~4 (identical guard, ranker weights, and bounded-repair policy) and validated against the archive before use: on the archived \texttt{gpt-5.4-mini} candidate sets it reproduces 167 of 169 non-repair selection decisions (98.8\% agreement). Scoring uses the same packaged evaluator under the same strict contract. The second-generator run comprised 540 calls with zero provider errors and a safe-SQL rate of 1.0 in all three conditions. A companion consistency check repeated C4 and C5 three times each at temperature 0 on the same generator (1{,}080 additional calls) to bound run-to-run variation. Both are reported in Section~\ref{second-generator-validation}.
+
 The intended release package contains the dataset files, schema, SQLite database, split file, annotation protocol, evaluator, condition prompts, context hashes, prediction and score records, trace files, component-ablation addendum outputs, validator diagnostics, final \LaTeX/PDF sources, and citation-verification artifacts. This release boundary is important because the paper's claims are local to the fixed artifact package rather than to a mutable hosted endpoint or an unreported private benchmark.
 
 Figure 2 summarizes the evaluation pipeline. Each test question is converted into a condition-specific prompt, sent to the fixed generator, optionally passed through reference-free validation, executed against \texttt{database.sqlite}, and scored by the local semantic evaluator. The pipeline is the same for all conditions except for the context construction and validation roles that define the ablations.
@@ -182,13 +210,15 @@ The primary metric is execution accuracy by validated denotation, computed with 
 \mathrm{Acc} = \frac{1}{N}\sum_{i=1}^{N} z_i.
 \] Higher is better, and the value lies in \([0,1]\). Secondary metrics include safe-SQL rate, executable-SQL rate, answer-shape accuracy, prompt token estimate, latency, provider failure rate, and unsafe-SQL rate. Safe-SQL rate measures whether the prediction passes the read-only SQL guard. Executable-SQL rate measures whether the guarded query actually executes on \texttt{database.sqlite}. These two rates are reported separately because a query can be safe and still fail at execution time, for example by using a nonexistent column. Answer-shape accuracy measures agreement between the predicted result shape and the inferred or annotated shape. Prompt token estimate tracks input size. Latency measures end-to-end runtime per question. Provider failure rate and unsafe-SQL rate are reported because they distinguish model instability from benchmark difficulty. Higher is better for safe-SQL rate, executable-SQL rate, and answer-shape accuracy; lower is better for latency, provider failures, and unsafe SQL.
 
-The benchmark and hardware statistics are straightforward but relevant. The dataset has 20 dev questions and 180 test questions. The local run used an NVIDIA RTX A6000 GPU with 49,140 MB VRAM on a CUDA-enabled machine. All five conditions achieved a safe-SQL rate of 1.0, with no provider failures and no unsafe SQL. Executable-SQL rates were 1.0000 for \texttt{C1} and \texttt{C2}, 0.9167 for \texttt{C3}, 0.8889 for \texttt{C4}, and 0.9722 for \texttt{C5}. These numbers matter because they separate safety and availability from semantic correctness. The main variation is therefore whether the framework selects an executable query with the right denotation and answer shape.
+The benchmark statistics are straightforward but relevant. The dataset has 20 dev questions and 180 test questions. All SQL generation ran through the hosted model API; the local machine only assembles prompts, executes SQLite queries, and scores results, so no local GPU is involved in any reported number. All five conditions achieved a safe-SQL rate of 1.0, with no provider failures and no unsafe SQL. Executable-SQL rates were 1.0000 for \texttt{C1} and \texttt{C2}, 0.9167 for \texttt{C3}, 0.8889 for \texttt{C4}, and 0.9722 for \texttt{C5}. These numbers matter because they separate safety and availability from semantic correctness. The main variation is therefore whether the framework selects an executable query with the right denotation and answer shape.
 
 The experiment uses a fixed prediction contract so that the comparison is auditable without turning the method into an artifact log. Each record stores the condition, prompt/context hashes, selected SQL, candidate list, selected-candidate index, trace path, latency, token estimates, retry count, and error field. It excludes gold SQL, gold result rows, evaluator correctness labels, expected result hashes, required-literal metadata, answer-shape metadata, and order-sensitive metadata. Those excluded fields are used only after prediction generation for scoring and diagnostics. Likewise, the held-out audits, residual-error tables, and illustrative examples in this paper are post-generation diagnostics; they did not feed the prompts, normalizer rules, ranker weights, repair prompts, or candidate-selection decisions. This boundary is essential because C4 and C5 depend on inferred shape and inferred value hints; using dataset metadata in prompts or rankers would no longer test the proposed mechanism.
 
-The formal run produced 900 predictions and 900 score records, corresponding to 180 test questions times five conditions under the deterministic seed label. The repaired artifact chain reports zero contract errors, zero unsafe SQL records, zero provider or extraction errors, and zero leakage-scan problems. These checks do not constitute a scientific contribution by themselves, but they protect the interpretation of the scientific result: the accuracy differences are not explained by missing outputs, unsafe-query rejection, endpoint failure, or direct leakage of gold information.
+The formal run produced 900 predictions and 900 score records, corresponding to 180 test questions times five conditions under the deterministic seed label. The archived artifact chain reports zero contract errors, zero unsafe SQL records, zero provider or extraction errors, and zero leakage-scan problems. These checks do not constitute a scientific contribution by themselves, but they protect the interpretation of the scientific result: the accuracy differences are not explained by missing outputs, unsafe-query rejection, endpoint failure, or direct leakage of gold information.
 
-The single-pass protocol should be interpreted carefully. The formal seed value is a reproducibility label for the deterministic evaluation, not a random-seed sample from which run-level variance can be estimated. The paired sign tests compare per-question binary outcomes within the fixed 180-item test set, so they are useful for showing how often one condition answers a question correctly when another condition does not. They do not establish multi-run stability. Likewise, the Wilson intervals shown in the result figure are item-level intervals over test questions, not confidence intervals over repeated model runs.
+Two evaluation conventions inherited from the dataset annotation protocol must be stated explicitly, because they interact with the proposed method. First, every multi-row gold query carries a deterministic \texttt{ORDER BY} clause, and 131 of the 200 questions are annotated order-sensitive, so the strict evaluator compares row sequences for those questions. Second, every gold query projects exactly the minimal column set recorded in the annotation's answer-shape metadata, and the strict evaluator rejects any prediction whose column count differs. The answer-shape inference stage of MA-SQLGrid encodes precisely these two conventions as question-derived hints (expected projection count, row granularity, and a deterministic-ordering flag). All five conditions receive the same instruction text asking the model to match the requested projection and use deterministic ordering, but only C4 and C5 receive the inferred hints that make the conventions explicit for the specific question; C1--C3 must recover them from the question wording alone. Part of the headline gap between C4/C5 and the baselines is therefore attributable to convention conformance rather than to row-content grounding. Section~6 quantifies this dependence directly by reporting two auxiliary relaxed metrics alongside the strict metric, so the reader can separate the two effects instead of taking the strict gap at face value.
+
+The single-pass protocol should be interpreted carefully. The formal seed value is a reproducibility label for the deterministic evaluation, not a random-seed sample from which run-level variance can be estimated. Two pieces of trace-level determinism evidence bound the protocol risk: decoding temperature was fixed at 0 for every call, and of the 900 archived API calls, 898 succeeded on the first attempt while 2 (one in C1, one in C4) required a single retry; the final records contain no provider errors. This documents that the reported single pass was not silently stabilized by repeated sampling, but it does not replace a repeated-run consistency study; such a study is provided for the second generator in Section~\ref{second-generator-validation}. The paired sign tests compare per-question binary outcomes within the fixed 180-item test set, so they are useful for showing how often one condition answers a question correctly when another condition does not. They do not establish multi-run stability. Likewise, the Wilson intervals shown in the result figure are item-level intervals over test questions, not confidence intervals over repeated model runs.
 
 \section{Results}\label{results}
 
@@ -202,14 +232,34 @@ Condition & Role & Prompt tokens & Latency ms & Executable SQL & Execution accur
 \midrule
 C1 & Schema-only direct generation & 381.3 & 3259.8 & 1.0000 & 0.3944 \\
 C2 & Full schema and values direct generation & 710.3 & 2959.0 & 1.0000 & 0.4389 \\
-C3 & Generic multi-role prompt & 202.0 & 2895.1 & 0.9167 & 0.4000 \\
+C3 & Generic multi-stage prompt & 202.0 & 2895.1 & 0.9167 & 0.4000 \\
 C4 & Compact domain context & 259.2 & 2887.5 & 0.8889 & 0.7000 \\
 C5 & Compact context with validation & 258.2 & 5562.5 & 0.9722 & 0.7278 \\
 \bottomrule
 \end{tabular*}
 \end{table*}
 
-The table above captures the core resource tradeoff. The full-schema baseline is almost three times the size of the compact-domain prompt, yet it performs substantially worse. The validation condition keeps the prompt nearly as small as the unvalidated compact variant, but its latency rises because it scores multiple candidates. That tradeoff is visible in the runtime numbers and is important for interpreting the method. The gain is not free, but it is also not purchased by simply exposing more context.
+The table above captures the core resource tradeoff. The estimated prompt-token column measures the condition-specific context template rendered by the experiment runner: the full-schema context is almost three times the size of the compact-domain context (710.3 versus 259.2 estimated tokens, a 63.5\% reduction), yet it performs substantially worse. The validation condition keeps the prompt nearly as small as the unvalidated compact variant, but its latency rises because it scores multiple candidates. That tradeoff is visible in the runtime numbers and is important for interpreting the method. The gain is not free, but it is also not purchased by simply exposing more context.
+
+\begin{table*}[t]
+\caption{Measured API resource consumption per question, aggregated from the 900 archived provider-reported usage records (180 questions per condition). Input/output tokens are the provider's counts, which include serving-side overhead shared by all conditions; C5 combines candidate generation and, when triggered, one repair call.}
+\label{tab:real-tokens}
+\centering
+\small
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lrrrrr}
+\toprule
+Condition & Input tokens (mean) & Output tokens (mean) & Latency ms (mean) & Latency ms (median) & First-attempt calls \\
+\midrule
+C1 & 5007.7 & 45.0 & 3259.8 & 1998.0 & 179/180 \\
+C2 & 6346.7 & 45.8 & 2959.0 & 1999.5 & 180/180 \\
+C3 & 4756.3 & 47.3 & 2895.1 & 1959.0 & 180/180 \\
+C4 & 4859.0 & 52.0 & 2887.5 & 2102.5 & 179/180 \\
+C5 & 5309.8 & 197.5 & 5562.5 & 3845.5 & 180/180 \\
+\bottomrule
+\end{tabular*}
+\end{table*}
+
+Table~\ref{tab:real-tokens} complements the estimated column with the provider-reported token usage of the actual run, and the two views must not be conflated. The measured input cost of C4 is 4859.0 tokens per question against 6346.7 for C2, a 23.4\% reduction, far smaller than the 63.5\% template-level reduction. The difference is a fixed serving-side overhead of roughly 4500--4600 input tokens per call that is identical across conditions (visible in C1, whose template is only 381.3 estimated tokens but whose measured input is 5007.7). The honest efficiency statement is therefore: compact grounding shrinks the controllable part of the prompt by about a factor of 2.7, which translated into a 23.4\% end-to-end input-token saving under this serving stack; deployments with less fixed overhead would realize proportionally more. The second-generator run (Section~\ref{second-generator-validation}) confirms this reading on a clean endpoint: on \texttt{deepseek-chat}, served directly by its provider with negligible fixed overhead, the same C4-versus-C2 contrast yields a measured 74.7\% input-token reduction (2011.6 versus 509.3 tokens per question). The three numbers triangulate consistently: the template-level estimate (63.5\%) sits between the overhead-masked measurement on the original stack (23.4\%) and the near-overhead-free direct measurement (74.7\%), so the direct endpoint corroborates, rather than contradicts, the template estimate. On the output side, C5 consumes about four times the completion tokens of C4 (197.5 versus 52.0 per question) because it requests multiple candidates and occasionally a repair, which is the direct cost of the validation layer. The complete formal run consumed 4.73M input tokens and 69.8k output tokens across the 900 calls.
 
 The formal results were obtained in one deterministic pass over the test split, so the reported values are single-run outcomes rather than averages over repeated seeds. That is the correct way to present the evidence here because the evaluation was run once and the dataset split is fixed. The analysis therefore focuses on paired per-question contrasts and effect sizes rather than run-to-run variance. For a one-run study, that is the appropriate level of statistical discipline.
 
@@ -230,6 +280,32 @@ C5 vs C4 & 12 & 7 & 119 & 42 & 0.0278 & 0.3593 \\
 
 The paired-comparison table shows that the largest gains are concentrated in the compact-domain conditions. The contrast between \texttt{C4} and \texttt{C2} is especially informative: the compact-domain method is correct on many questions that the full-schema prompt misses, while the reverse cases are rare. That pattern indicates that selective grounding is not just compressing the input. It is changing which predicates and answer shapes the model can reliably infer. The \texttt{C5} versus \texttt{C4} comparison is smaller, which is exactly what one would expect from a validation layer that cleans up some remaining errors but cannot replace the upstream grounding step.
 
+\subsection{Evaluation-Convention Sensitivity}\label{evaluation-convention-sensitivity}
+
+Because the strict metric enforces the two annotation-protocol conventions described in Section~5 (deterministic row ordering and exact minimal projection), and because only C4/C5 receive inferred hints that encode those conventions, the strict gap could in principle overstate the semantic-grounding effect. To quantify this, all 900 archived predictions were re-scored under two relaxed variants of the evaluator. The \emph{order-insensitive} metric compares result rows as multisets while still requiring the exact projection width. The \emph{projection-tolerant} metric additionally accepts a prediction if any column permutation of any subset of its projected columns reproduces the gold denotation as a multiset; it is a deliberately generous upper bound on row-content correctness (it can accept coincidental matches on scalar answers) and ignores the answer contract entirely.
+
+\begin{table*}[t]
+\caption{Strict versus relaxed execution accuracy on the 180-question test split, recomputed from the archived predictions. Order-insensitive: multiset row comparison, exact projection width. Projection-tolerant: additionally allows extra or reordered projection columns; an upper bound on row-content correctness.}
+\label{tab:relaxed-metrics}
+\centering
+\small
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lrrr}
+\toprule
+Condition & Strict (primary) & Order-insensitive & Order-insensitive + projection-tolerant \\
+\midrule
+C1 & 0.3944 (71/180) & 0.4056 (73/180) & 0.8000 (144/180) \\
+C2 & 0.4389 (79/180) & 0.4778 (86/180) & 0.8722 (157/180) \\
+C3 & 0.4000 (72/180) & 0.4056 (73/180) & 0.5000 (90/180) \\
+C4 & 0.7000 (126/180) & 0.7444 (134/180) & 0.7444 (134/180) \\
+C5 & 0.7278 (131/180) & 0.7722 (139/180) & 0.8056 (145/180) \\
+\bottomrule
+\end{tabular*}
+\end{table*}
+
+Table~\ref{tab:relaxed-metrics} supports three honest statements. First, relaxing row order alone changes little: the condition ranking is identical and the C4$-$C2 gap is essentially unchanged (+0.2667 versus +0.2611 strict), because baseline failures almost always involve the projection convention as well, not ordering alone. Second, under the fully projection-tolerant reading the direct baselines recover most of their strict failures (C2 rises from 0.4389 to 0.8722, exceeding C4's 0.7444): the full-schema prompt usually retrieves the correct rows but returns them in an uncontracted form, with extra columns or without deterministic ordering. Third, the compact conditions gain almost nothing from projection tolerance (C4 is identical at 0.7444), because their residual errors are genuine content errors, including the execution errors analyzed below, which no amount of metric relaxation recovers.
+
+The correct interpretation of the headline result is therefore narrower and more precise than the strict numbers alone suggest. The large strict-metric advantage of C4/C5 is dominated by answer-contract conformance: the shape-inference stage reliably converts the dataset's projection and ordering conventions into explicit constraints, and the baselines, which see the same general instruction but no per-question hints, frequently violate the contract even when their row content is right. On row content alone, full-schema prompting is at least as strong as compact grounding for this small database. We report both views because both matter: the strict metric matches the intended deployment contract, in which a maintenance query interface must return exactly the specified columns in a deterministic order, while the relaxed metrics show that the mechanism behind the strict gain is contract enforcement rather than the discovery of rows the baselines cannot find. The shape-inference rules were designed against the dataset's annotation protocol, so this coupling is by construction, and any claim that compact grounding improves row-content retrieval on this benchmark would be unsupported; the paper does not make that claim. Section~\ref{second-generator-validation} shows that this convention-sensitivity pattern, including the projection-tolerant reversal in favor of C2, is not specific to the \texttt{gpt-5.4-mini} generator: it replicates on \texttt{deepseek-chat} and is therefore a cross-model property of the benchmark conventions, not a single-model artifact.
+
 The results figures reinforce the same point. Figure 3 visualizes the execution-accuracy gap across conditions, and Figure 4 shows the tradeoff among execution accuracy, prompt size, and latency. The two figures are useful together because the headline result is not only that \texttt{C4} and \texttt{C5} are better, but that they are better for different reasons. \texttt{C4} wins on efficiency and grounding. \texttt{C5} adds validation cost to recover additional correct queries.
 
 \begin{figure}
@@ -244,7 +320,7 @@ The results figures reinforce the same point. Figure 3 visualizes the execution-
 \caption{Accuracy, context size, and latency tradeoff}
 \end{figure}
 
-The answer-shape metric adds a second layer of interpretation. \texttt{C1} reaches answer-shape accuracy of 0.3278, \texttt{C2} reaches 0.3667, \texttt{C3} reaches 0.5056, \texttt{C4} reaches 0.8889, and \texttt{C5} reaches 0.9722. The shape gain from \texttt{C3} to \texttt{C4} is substantial, which suggests that generic multi-role prompting is not enough on its own. Shape inference matters most when it is paired with domain normalization. The validated condition then improves shape consistency again, which indicates that validation is not only rejecting invalid SQL but also preferring candidates whose result form matches the question.
+The answer-shape metric adds a second layer of interpretation. \texttt{C1} reaches answer-shape accuracy of 0.3278, \texttt{C2} reaches 0.3667, \texttt{C3} reaches 0.5056, \texttt{C4} reaches 0.8889, and \texttt{C5} reaches 0.9722. The shape gain from \texttt{C3} to \texttt{C4} is substantial, which suggests that generic multi-stage prompting is not enough on its own. Shape inference matters most when it is paired with domain normalization. The validated condition then improves shape consistency again, which indicates that validation is not only rejecting invalid SQL but also preferring candidates whose result form matches the question.
 
 Value-hint coverage is treated as an internal trace diagnostic rather than a headline metric. In the runner, a prediction with no inferred value hints receives a vacuous coverage value of 1.0, so this quantity is useful for auditing domain-context traces but not for ranking conditions in the main results table. The stronger evidence for value grounding is instead the paired accuracy gap between \texttt{C4} and \texttt{C2}: the full-schema-values prompt exposes more raw values, but the compact domain context organizes the relevant values around the question, the join path, and the expected answer shape.
 
@@ -267,9 +343,107 @@ C4 without shape hints & 77/180 & 0.4278 & 1.0000 & 0.4389 & 0.0000 \\
 \end{tabular*}
 \end{table*}
 
-\subsection{Illustrative Case Study}\label{illustrative-case-study}
+\subsection{Second-Generator Validation}\label{second-generator-validation}
 
-Question Q021 asks: ``Which assets are offline?'' The gold query returns one column, \texttt{asset\_name}, filtered by \texttt{assets.status = 'offline'} and ordered by asset name. The full-schema-values baseline generates \texttt{SELECT asset\_name FROM assets WHERE status = 'offline';}; it uses the right predicate but omits the required deterministic ordering and is scored as a denotation mismatch under the order-sensitive evaluator. The compact domain context records the normalized hint \texttt{assets.status = "offline"} and an inferred shape with one projected column, multi-row output, and required ordering. Under that context, \texttt{C4} generates \texttt{SELECT asset\_name FROM assets WHERE status = 'offline' ORDER BY asset\_name;}, while \texttt{C5} generates the equivalent aliased form. Both match the validated denotation. This example illustrates the main mechanism: MA-SQLGrid is not merely shortening the prompt; it is making the literal, projection, and ordering constraints explicit before generation.
+The second-generator protocol described in Section~5 re-ran C2, C4, and C5 with \texttt{deepseek-chat} on the same 180 held-out test questions using the byte-identical archived prompts and the same packaged evaluator. Table~\ref{tab:second-model} reports the strict and relaxed metrics for both generators side by side; the archived \texttt{gpt-5.4-mini} rows repeat Table~\ref{tab:relaxed-metrics} unchanged.
+
+\begin{table*}[t]
+\caption{Cross-model comparison on the 180-question test split under the strict and relaxed metrics. The \texttt{gpt-5.4-mini} rows are the archived formal-run values from Table~\ref{tab:relaxed-metrics}; the \texttt{deepseek-chat} rows come from the second-generator run with byte-identical prompts, temperature 0, and the same evaluator.}
+\label{tab:second-model}
+\centering
+\small
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}llrrr}
+\toprule
+Generator & Condition & Strict (primary) & Order-insensitive & Order-insensitive + projection-tolerant \\
+\midrule
+\texttt{gpt-5.4-mini} & C2 & 0.4389 (79/180) & 0.4778 & 0.8722 \\
+\texttt{gpt-5.4-mini} & C4 & 0.7000 (126/180) & 0.7444 & 0.7444 \\
+\texttt{gpt-5.4-mini} & C5 & 0.7278 (131/180) & 0.7722 & 0.8056 \\
+\midrule
+\texttt{deepseek-chat} & C2 & 0.3389 (61/180) & 0.3667 & 0.8500 \\
+\texttt{deepseek-chat} & C4 & 0.7000 (126/180) & 0.7944 & 0.7944 \\
+\texttt{deepseek-chat} & C5 & 0.7667 (138/180) & 0.8278 & 0.8278 \\
+\bottomrule
+\end{tabular*}
+\end{table*}
+
+Three findings replicate. First, the compact-context gain replicates and is larger on the second generator: C4 improves over C2 by +36.1 points strict execution accuracy (0.3389 to 0.7000) on \texttt{deepseek-chat}, versus +26.1 points (0.4389 to 0.7000) on \texttt{gpt-5.4-mini}. The C4 strict score is coincidentally identical on both generators (126/180). Second, the validation-layer gain replicates and is also larger: C5 adds +6.7 points over C4 (0.7000 to 0.7667) versus +2.8 points on the original generator. Third, and most importantly for the interpretation in Section~\ref{evaluation-convention-sensitivity}, the projection-tolerant reversal replicates: under the fully projection-tolerant reading, C2 exceeds C4 on both generators (0.8500 versus 0.7944 on \texttt{deepseek-chat}; 0.8722 versus 0.7444 on \texttt{gpt-5.4-mini}), while the compact conditions gain nothing from projection tolerance (C4 and C5 are unchanged on \texttt{deepseek-chat}). The conclusion that the strict gain is dominated by answer-contract conformance rather than row-content retrieval is therefore a cross-model result, not a single-model observation.
+
+\begin{table*}[t]
+\caption{Measured resource consumption per question for the \texttt{deepseek-chat} second-generator run (provider-reported usage; direct endpoint with negligible fixed serving overhead). C5 combines candidate generation and, when triggered, one repair call.}
+\label{tab:deepseek-tokens}
+\centering
+\small
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lrrrrr}
+\toprule
+Condition & Input tokens (mean) & Output tokens (mean) & Latency ms (mean) & Latency ms (median) & First-attempt calls \\
+\midrule
+C2 & 2011.6 & 49.9 & 1051.9 & 1021.0 & 180/180 \\
+C4 & 509.3 & 46.6 & 1054.0 & 1003.5 & 180/180 \\
+C5 & 680.5 & 186.2 & 3014.2 & 1965.5 & 178/180 \\
+\bottomrule
+\end{tabular*}
+\end{table*}
+
+Table~\ref{tab:deepseek-tokens} reports the resource profile of the second-generator run. Because the direct endpoint adds almost no fixed per-call overhead, the measured input tokens track the rendered prompts closely: C4 consumes 509.3 input tokens per question against 2011.6 for C2, a 74.7\% measured reduction, consistent in magnitude with the 63.5\% template-level estimate, whereas the original serving stack showed only 23.4\% because of its roughly 4{,}500--4{,}600-token fixed overhead per call (Table~\ref{tab:real-tokens}). The output-side pattern of the original run also replicates: C5 consumes about four times the completion tokens of C4 (186.2 versus 46.6) and roughly triples mean latency (3014.2 versus 1054.0~ms), which is the direct cost of multi-candidate validation. C2 and C4 completed all 360 calls on the first attempt; C5 required a single retry on 2 of 180 questions. The full three-condition run consumed 576.3k input and 50.9k output tokens over 540 calls, with zero provider errors.
+
+The companion consistency check bounds run-to-run variation directly: C4 and C5 were each run three times at temperature 0 (1{,}080 calls total). Per-repeat strict execution accuracy was 0.7056/0.6944/0.7000 for C4 and 0.7667/0.7667/0.7611 for C5, a maximum spread of 1.1 points. Exact SQL string agreement across all three repeats was lower (82.2\% of questions for C4, 77.2\% for C5), confirming that token-level sampling nondeterminism exists on hosted endpoints even at temperature 0; however, all three repeats produced the same correct/incorrect verdict on 98.3\% of questions in both conditions. Combined with the trace-level evidence from the original run (898/900 first-attempt calls at temperature 0), the aggregate metrics and per-question verdicts reported in this paper are highly stable under repetition, even though individual SQL strings are not guaranteed to be byte-identical across runs.
+
+The boundary of this validation should be stated as precisely as the result. The study now covers two generator families, one closed (\texttt{gpt-5.4-mini}) and one open-weight served through its provider endpoint (\texttt{deepseek-chat}); no third family was tested, and the cross-model comparison is at the aggregate level, with no per-question significance test across models. The C5 stage for the second generator is a specification-faithful reimplementation validated at 98.8\% selection agreement against the archive, not the original binary. Within those bounds, every headline effect of the paper replicates with the same sign and larger magnitude.
+
+\subsection{Scale Robustness on the Second Generator}\label{scale-robustness}
+
+The v0.1 database is deliberately small, so a natural objection is that both the accuracy gains and the token economics might be artifacts of a database whose entire value dictionary fits in one prompt. To test this, a deterministic tenfold-scaled variant of the database (\texttt{griddb\_maintenance\_v2\_x10}) was built: every entity table receives ten times the rows (for example, 180 assets instead of 18), and two distractor tables (\texttt{vegetation\_inspections} and \texttt{spare\_parts\_inventory}) are added to the schema. The 180 test questions and their gold SQL are byte-identical to v0.1, and all 200 gold queries were re-validated against the scaled database before any model call (zero gold-validation errors). Because the original \texttt{gpt-5.4-mini} serving stack is no longer available, this experiment is framed as \emph{scale robustness on the second generator}: the C2, C4, and C5 conditions were re-run with \texttt{deepseek-chat} at temperature 0 on the scaled database and compared against the same generator's v0.1 run from Table~\ref{tab:second-model}. The condition contexts were rebuilt with the original context-builder modules received from the experiment machine after the initial release; as a fidelity check, on the v0.1 database those builders reproduce the archived formal-run prompts byte-for-byte (180/180 for both C2 and C4). The run comprised 540 primary calls plus 13 bounded repair calls with zero provider errors and a safe-SQL rate of 1.0 in all conditions.
+
+\begin{table*}[t]
+\caption{Scale robustness on \texttt{deepseek-chat}: v0.1 versus the tenfold-scaled (x10) database on the byte-identical 180-question test split, under the strict metric and the order-insensitive projection-tolerant metric of Section~\ref{evaluation-convention-sensitivity}.}
+\label{tab:x10-comparison}
+\centering
+\small
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lrrrr}
+\toprule
+Condition & Strict v0.1 & Strict x10 & Projection-tolerant v0.1 & Projection-tolerant x10 \\
+\midrule
+C2 & 0.3389 (61/180) & 0.3333 (60/180) & 0.8500 & 0.8167 \\
+C4 & 0.7000 (126/180) & 0.5944 (107/180) & 0.7944 & 0.6944 \\
+C5 & 0.7667 (138/180) & 0.6500 (117/180) & 0.8278 & 0.7000 \\
+\bottomrule
+\end{tabular*}
+\end{table*}
+
+\begin{table*}[t]
+\caption{Input-token economics at scale (\texttt{deepseek-chat}, provider-reported means per question). The C5 rows include repair calls when triggered.}
+\label{tab:x10-tokens}
+\centering
+\small
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lrrrrr}
+\toprule
+Condition & Input tokens v0.1 & Input tokens x10 & Growth & Output tokens x10 & Latency ms x10 \\
+\midrule
+C2 & 2011.6 & 3042.6 & +51\% & 48.6 & 989.7 \\
+C4 & 509.3 & 504.0 & $-$1\% (flat) & 47.3 & 1115.9 \\
+C5 & 680.5 & 560.5 & $-$18\% & 180.3 & 1834.1 \\
+\bottomrule
+\end{tabular*}
+\end{table*}
+
+Table~\ref{tab:x10-comparison} shows that the two headline effects survive the tenfold scaling. The compact-context advantage persists at +26.1 points strict (C4 0.5944 versus C2 0.3333), attenuated from +36.1 points at v0.1, and the validation layer still adds +5.6 points (C5 0.6500 versus C4 0.5944, versus +6.7 at v0.1). The convention-sensitivity pattern of Section~\ref{evaluation-convention-sensitivity} also persists: C2's failures remain overwhelmingly projection/shape errors (99 of its 120 strict errors are shape mismatches), so under the projection-tolerant reading C2 again overtakes the compact conditions (0.8167 versus 0.6944/0.7000), exactly as at v0.1.
+
+The token-economics contrast in Table~\ref{tab:x10-tokens} is the clearest scale result. The C2 full-schema-values prompt grew by 51\% in measured input tokens (2011.6 to 3042.6 per question) at ten times the rows plus two distractor tables, and it must keep growing with database size because it enumerates the schema DDL and the full value dictionary. The C4 compact context stayed flat (509.3 to 504.0), making compact grounding roughly six times cheaper in input tokens than full-schema prompting at the x10 scale, with the gap widening as the database grows. The builder-side context estimates show the same divergence: the C2 context grows from 631 to 1125 estimated tokens (+78\%) while the C4 context stays at 174 to 176.
+
+The absolute C4/C5 drop from v0.1 requires an honest diagnosis, and the archived traces localize it precisely to a value-inventory truncation artifact rather than a failure of compact grounding. The pilot builder's value inventory enumerates \texttt{SELECT DISTINCT} values per column with an alphabetical \texttt{LIMIT 80} cap. At v0.1 all 18 asset names fit; at x10 there are 180 distinct \texttt{asset\_name} values and the alphabetical top-80 cuts off before the RL-*/SB-*/TX-* names, including the TX-001 to TX-004 literals referenced by test questions, so the affected questions lose their matched-value lines and normalization hints. The decomposition is exact: 149 of the 180 C4 prompts are byte-identical between v0.1 and x10, and on those the x10 run scores 101/149 against 102/149 for the v0.1 predictions re-scored on the x10 database (no scale effect); the entire drop sits in the 31 changed-prompt questions, which fall from 23/31 to 6/31 correct. Two corroborating observations complete the picture. First, C5's repair trigger fires less often at x10 (13 versus 52 repairs) because fewer inferred value hints means fewer missing-value-hint flags, a downstream symptom of the same truncation. Second, re-scoring the v0.1 predictions on the x10 database moves C4 only from 0.7000 to 0.6944 and leaves C5 at 0.7667, so the v0.1 numbers were not inflated by coincidental denotation matches on tiny tables.
+
+Two caveats bound this experiment. First, the two distractor tables stress only C2, whose prompt includes their DDL and values: the C4/C5 builders enumerate a fixed eight-table catalog, so the distractors are excluded from the compact context by construction, not by learned schema selection. Second, part of C4's token boundedness comes from the same \texttt{LIMIT 80} cap that causes the accuracy artifact; the compact context is bounded partly at the cost of value recall. The implication for the method is concrete: the domain-context \emph{idea} survives scale, but the pilot's fixed-cap alphabetical value scan does not, and a deployment-grade version needs a scalable value index (for example CHESS-style keyword or hash-based value retrieval \cite{talaei2024chess}) once a column exceeds roughly 80 distinct values. Section~\ref{limitations} records this as a limitation.
+
+\subsection{Case Analysis}\label{case-analysis}
+
+Three cases drawn verbatim from the archived traces illustrate the mechanism, the value of validation, and its boundary.
+
+\textbf{Case 1 (contract enforcement, Q021).} The question asks: ``Which assets are offline?'' The gold query returns one column, \texttt{asset\_name}, filtered by \texttt{assets.status = 'offline'} and ordered by asset name. The full-schema-values baseline generates \texttt{SELECT asset\_name FROM assets WHERE status = 'offline';}; it uses the right predicate but omits the required deterministic ordering and is scored as a denotation mismatch under the order-sensitive evaluator. The compact domain context records the normalized hint \texttt{assets.status = "offline"} and an inferred shape with one projected column, multi-row output, and required ordering. Under that context, \texttt{C4} generates \texttt{SELECT asset\_name FROM assets WHERE status = 'offline' ORDER BY asset\_name;}, while \texttt{C5} generates the equivalent aliased form. Both match the validated denotation. This is the modal pattern behind the strict-metric gap and is exactly the contract-conformance effect quantified in Section~\ref{evaluation-convention-sensitivity}.
+
+\textbf{Case 2 (execution-guided reranking, Q110).} The question asks: ``List work orders linked to asset REL-002.'' The first C5 candidate, \texttt{SELECT wo.work\_order\_id, wo.status, wo.schedule FROM work\_orders AS wo JOIN assets AS a ON wo.asset\_id = a.asset\_id WHERE a.asset\_name = 'REL-002' ORDER BY wo.work\_order\_id;}, references the nonexistent column \texttt{wo.schedule} and fails execution. The reference-free ranker demotes it and selects the second candidate, a subquery formulation projecting \texttt{work\_order\_id}, \texttt{priority}, and \texttt{status}, which executes and matches the gold denotation. Under C4, which returns only the first formulation, this question is lost. This is the recovery mode that explains most of C5's reduction of execution errors from 20 to 5.
+
+\textbf{Case 3 (repair success and failure on one question family, Q161 versus Q156/Q157/Q158/Q160/Q162).} Six test questions share the template ``Which work orders are assigned to technician \emph{X}?'' The compact context for these questions selects \texttt{work\_orders(work\_order\_id, asset\_id, assigned\_technician\_id, priority, status)} but omits the \texttt{scheduled\_date} column, while the shape hint asks the model to project \texttt{work\_order\_id}, \texttt{status}, and \texttt{scheduled\_date} and the table comment mentions ``schedule.'' Given this inconsistent evidence, the generator hallucinates \texttt{wo.schedule\_date} (or \texttt{wo.schedule}) in every candidate. For Q161 the single bounded repair call, prompted with the execution error, rewrites the column to the correct \texttt{scheduled\_date} and the repaired query matches the gold denotation. For the other five questions the repair reproduces the same nonexistent column and is rejected, leaving the execution error in place; these five are exactly the residual C5 execution errors in the taxonomy table. The family shows both faces of bounded repair: it can fix a locally diagnosable naming error, but it cannot reliably recover information that the compact context itself dropped, since the repair prompt reuses that same context. The root cause is a schema-selection miss, which is why the paper attributes the main effect to context construction and treats validation as a bounded second layer.
 
 \subsection{Tag-Level Diagnostic Breakdown}\label{tag-level-diagnostic-breakdown}
 
@@ -303,7 +477,7 @@ The largest diagnostic gains appear on order-sensitive, top-k, time-predicate, t
 The available formal artifacts provide an evaluator-level primary error taxonomy for each condition. This taxonomy is not the same object as the answer-shape accuracy metric reported above. Answer-shape accuracy is a diagnostic rate computed over predictions, while the taxonomy assigns an incorrect prediction to a primary evaluator error category. Likewise, the execution-error column is not a contradiction of the safe-SQL rate: those queries pass the read-only guard but fail when executed against the SQLite schema. The table should therefore be read as a compact view of residual failure labels, not as a complete operator-by-operator causal analysis and not as a replacement for the separate shape metric.
 
 \begin{table*}[t]
-\caption{Residual error taxonomy from the repaired formal run. Counts are over 180 test questions.}
+\caption{Residual error taxonomy from the archived formal run. Counts are over 180 test questions.}
 \centering
 \small
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lrrrr}
@@ -333,7 +507,7 @@ The error taxonomy also defines the limits of the current evidence. The dataset 
 
 \subsection{Claim-to-Evidence Mapping}\label{claim-to-evidence-mapping}
 
-The main claims are intentionally narrow and map directly to repaired Stage 13/14 artifacts. The claim-to-evidence table summarizes the mapping so that the reader can distinguish supported results from limitations.
+The main claims are intentionally narrow and map directly to the archived run artifacts released with the paper. The claim-to-evidence table summarizes the mapping so that the reader can distinguish supported results from limitations.
 
 \begin{table*}[t]
 \caption{Claim-to-evidence map for the reported MA-SQLGrid results.}
@@ -343,13 +517,15 @@ The main claims are intentionally narrow and map directly to repaired Stage 13/1
 \toprule
 Claim & Supporting evidence & Boundary \\
 \midrule
-Compact domain context is the main mechanism gain & C4 reaches 126/180 and 0.7000 accuracy; C4 vs C2 has 49 C4-only correct cases, 2 C2-only cases, and +0.2611 mean difference & Applies to \texttt{GridDB-Maintenance-v2 v0.1} under the fixed generator and protocol-B formal pass \\
-MA-SQLGrid reduces context relative to full-schema-values prompting & C4 uses 259.2 estimated prompt tokens versus 710.3 for C2 while improving accuracy from 0.4389 to 0.7000 & Prompt tokens are estimates from the local experiment runner \\
+Compact domain context is the main mechanism gain under the strict answer-contract metric & C4 reaches 126/180 and 0.7000 accuracy; C4 vs C2 has 49 C4-only correct cases, 2 C2-only cases, and +0.2611 mean difference & Applies to \texttt{GridDB-Maintenance-v2 v0.1} under the fixed generator and the single archived formal pass; the sensitivity analysis in Section~\ref{evaluation-convention-sensitivity} shows the gain is dominated by projection/ordering contract conformance, not row-content retrieval \\
+MA-SQLGrid reduces context relative to full-schema-values prompting & C4 uses 259.2 estimated template tokens versus 710.3 for C2 (63.5\% smaller) while improving strict accuracy from 0.4389 to 0.7000; measured API input falls from 6346.7 to 4859.0 tokens per question (23.4\%) & Template tokens are runner estimates; the measured saving is smaller because a fixed serving-side overhead is shared by all conditions (Table~\ref{tab:real-tokens}) \\
 Validation improves the final result modestly & C5 reaches 131/180 and 0.7278; C5 vs C4 has 12 C5-only and 7 C4-only correct cases & C5 over C4 is small and not a strong standalone superiority claim; latency increases to 5562.5 ms \\
 Answer-shape hints materially affect C4 generation & Removing C4 shape hints lowers execution accuracy from 126/180 to 77/180 and answer-shape accuracy from 0.8889 to 0.4389 & Same fixed GridDB test split and generator; only the shape-hint channel is removed \\
 Value hints add a smaller prompt-side gain & Removing C4 value hints lowers execution accuracy from 126/180 to 118/180 & One no-value prediction had a provider/extraction failure and was counted as an error; no cross-domain claim is made \\
 The result is evidence-faithful and leakage-controlled & 900 predictions/scores, zero contract errors, zero unsafe SQL, zero provider/extraction errors, and zero leakage-scan problems & Does not imply production readiness or external benchmark transfer \\
-The statistical interpretation is bounded & Paired sign tests compare per-question outcomes on 180 test items; seed 0 is a deterministic pass label & No run-to-run variance or multi-seed stability is claimed \\
+The main effects replicate on a second independent generator & \texttt{deepseek-chat} with byte-identical prompts: C4 over C2 +0.3611 strict (0.3389 to 0.7000), C5 over C4 +0.0667 (0.7667); projection-tolerant reversal replicates (C2 0.8500 versus C4 0.7944); direct-endpoint input-token reduction 74.7\% & Two generator families only (one closed, one open-weight); aggregate-level comparison with no per-question cross-model significance test; C5 stage reimplemented from specification (98.8\% selection agreement with the archive) \\
+The statistical interpretation is bounded & Paired sign tests compare per-question outcomes on 180 test items; seed 0 is a deterministic pass label; three temperature-0 repeats of C4/C5 on \texttt{deepseek-chat} show a maximum accuracy spread of 1.1 points and 98.3\% per-question verdict agreement & Run-to-run stability is measured only for the second generator; no multi-seed study exists for the original generator \\
+The compact-context and validation gains persist at tenfold database scale with bounded input tokens & On the x10 database (10x rows, two distractor tables, byte-identical 180 questions), \texttt{deepseek-chat} gives C4 0.5944 versus C2 0.3333 strict (+26.1 points) and C5 0.6500 (+5.6); C4 input tokens stay flat (509.3 to 504.0 per question) versus +51\% growth for C2; rebuilt contexts verified byte-identical to the archive on v0.1 (180/180) & Second generator only (original serving stack unavailable); the C4/C5 absolute drop from v0.1 is entirely attributable to the \texttt{LIMIT 80} value-inventory truncation (byte-identical prompts 101/149 versus 102/149; changed prompts 6/31 versus 23/31); distractor tables stress only C2 because the C4/C5 builders use a fixed eight-table catalog \\
 \bottomrule
 \end{tabularx}
 \end{table*}
@@ -370,28 +546,185 @@ The runtime tradeoff is also meaningful. The compact-domain condition is not slo
 
 The broader implication is modest but useful. In tightly scoped operational databases, a compact prompting strategy can outperform a fuller prompt that looks more complete on paper. That is especially relevant for power-grid maintenance tasks, where the schema and value space are regular enough to support selective grounding, but the questions still require careful literal matching and shape control. The results do not justify general claims about all Text-to-SQL settings. They do show that in this setting, compact-domain prompting plus validation is the right design point.
 
-This finding also clarifies how the method should be used. If the user needs a low-latency path, C4 is the preferred condition because it captures the main gain without the validation overhead. If the user can tolerate additional latency for improved answer-shape consistency and a small accuracy gain, C5 is the stronger choice. The paper therefore does not present validation as universally superior. It presents validation as a bounded extension whose value depends on whether the deployment scenario prioritizes execution accuracy or response time. That distinction follows directly from the repaired results: C5 is best overall, but the most important scientific result is the C4 jump over the non-MA-SQLGrid baselines.
+This finding also clarifies how the method should be used. If the user needs a low-latency path, C4 is the preferred condition because it captures the main gain without the validation overhead. If the user can tolerate additional latency for improved answer-shape consistency and a small accuracy gain, C5 is the stronger choice. The paper therefore does not present validation as universally superior. It presents validation as a bounded extension whose value depends on whether the deployment scenario prioritizes execution accuracy or response time. That distinction follows directly from the reported results: C5 is best overall, but the most important scientific result is the C4 jump over the non-MA-SQLGrid baselines.
 
 Finally, the study suggests a practical design rule for similar fixed-schema databases. The first priority should be to identify the domain vocabulary and answer forms that repeatedly appear in user questions. Only after that context is reliable should validation be added. A validator over poorly grounded candidates may reduce syntax and shape failures, but it cannot reliably recover missing domain evidence. In contrast, a compact context that already captures the relevant value and shape information gives the validator candidates worth selecting. This staged interpretation is what makes MA-SQLGrid more than a prompt-length comparison: it ties the improvement to a sequence of schema selection, value normalization, shape control, generation, and reference-free selection.
 
 \section{Limitations}\label{limitations}
 
-This study is tied to a single synthetic and deterministic maintenance database, so the results should be read as evidence about this benchmark rather than a general statement about all enterprise schemas. The split is fixed, the value space is frozen, and the query family is controlled, which makes the dataset well suited to testing grounding and validation but narrow in scope \cite{zhong2020semantic}, \cite{lei2024spider}. The reported formal run also uses one deterministic pass, so the paper does not estimate run-to-run variation across seeds.
+This study is tied to a single synthetic and deterministic maintenance database, so the results should be read as evidence about this benchmark rather than a general statement about all enterprise schemas. The split is fixed, the value space is frozen, and the query family is controlled, which makes the dataset well suited to testing grounding and validation but narrow in scope \cite{zhong2020semantic}, \cite{lei2024spider}. The original formal run uses one deterministic pass; run-to-run variation is bounded empirically only for the second generator, through the three-repeat consistency check in Section~\ref{second-generator-validation}, and no multi-seed study exists for the original generator.
 
-The fixed generator is a hosted non-frontier model. Although the reported run archives prompts, hashes, selected outputs, raw responses, traces, and serving metadata, exact reproduction may be affected if the hosted model implementation changes after the experiment. The claim is therefore tied to the archived run package and model identifier, not to an assumption that a future endpoint invocation will be byte-identical.
+The generators are hosted models: one closed non-frontier model (\texttt{gpt-5.4-mini}) and one open-weight model family served through its provider endpoint (\texttt{deepseek-chat}). Although both runs archive prompts, hashes, selected outputs, raw responses, traces, and serving metadata, exact reproduction may be affected if a hosted implementation changes after the experiment. The claims are therefore tied to the archived run packages and model identifiers, not to an assumption that a future endpoint invocation will be byte-identical. The second-generator validation also has its own limits: it covers only one additional model family, the cross-model comparison is aggregate-level with no per-question significance test across models, and the C5 stage for the second generator is a specification-faithful reimplementation (validated at 98.8\% selection agreement with the archive) rather than the original binary.
 
 The validated condition adds a real latency cost because it executes and scores multiple candidates before choosing one. That overhead is visible in the reported runtime and is the main practical tradeoff of the method. The paper reports tag-level diagnostics and bounded value/shape ablations, but it does not include a full causal operator-by-operator ablation or a schema-drift stress test. Those analyses would require additional experiments that were not conducted on the verified benchmark.
+
+The scale-robustness experiment of Section~\ref{scale-robustness} has its own boundaries. It was run only on the second generator, because the original \texttt{gpt-5.4-mini} serving stack is no longer available, so it bounds scale behavior for the \texttt{deepseek-chat} replication rather than for the archived original run. Its diagnosis also exposes a genuine implementation limitation: the compact context's value inventory enumerates at most 80 distinct values per column in alphabetical order, which silently drops question-relevant literals once a column exceeds that cap, and the entire C4/C5 accuracy drop at tenfold scale is attributable to this truncation. The compact context is therefore bounded partly at the cost of value recall, and a deployment-grade version should replace the fixed-cap scan with a scalable value index, for example CHESS-style keyword or hash-based value retrieval \cite{talaei2024chess}. Finally, the two distractor tables stress only the full-schema condition, because the C4/C5 builders enumerate a fixed eight-table catalog; the experiment therefore does not measure learned schema selection under schema growth.
 
 Another limitation is that the implementation is evaluated as a complete pipeline rather than as a fully randomized component study. The C1-C5 conditions and addendum ablations isolate major design choices, but they do not independently randomize every rule used in schema selection, value normalization, answer-shape inference, and validation. The evidence is therefore strongest for the system-level comparison and for the two removed hint channels, and weaker for fine-grained causal claims about each internal rule. This is why the paper frames C4 as the main mechanism evidence and treats the internal diagnostics as explanations of the observed behavior, not as separate proofs of every component.
 
 \section{Conclusion}\label{conclusion}
 
-MA-SQLGrid shows that a lightweight multi-role Text-to-SQL pipeline can improve domain grounding on a fixed power-grid maintenance database. Compact schema/value context, value normalization, and answer-shape inference outperform broader baseline prompting, and reference-free validation adds a smaller final gain.
+MA-SQLGrid shows that a lightweight multi-stage Text-to-SQL pipeline can improve domain grounding on a fixed power-grid maintenance database. Compact schema/value context, value normalization, and answer-shape inference outperform broader baseline prompting, and reference-free validation adds a smaller final gain. Both effects, and the convention-sensitivity caveat that bounds their interpretation, replicate on a second independent generator with larger margins. A tenfold database-scale stress test on the second generator shows that both gains persist at scale with flat compact-context input tokens, while exposing a fixed-cap value-inventory limitation that future versions should replace with a scalable value index.
 
-The practical takeaway is simple: in a narrow operational database, better context matters more than more context. Future work should test the same design under schema drift, expand the error analysis by query type, report supplementary set-insensitive execution metrics where ordering is not semantically central, and evaluate whether compact grounding transfers to other infrastructure databases with similarly structured vocabularies.
+The practical takeaway is simple: in a narrow operational database, better context matters more than more context, and most of the measurable benefit comes from making the expected answer contract explicit before generation. Future work should test the same design under schema drift and with generator families beyond the two evaluated here, replace the fixed-cap value inventory with a scalable value index and re-test at larger scales, repeat the evaluation on public benchmarks, expand the error analysis by query type, and evaluate whether compact grounding transfers to other infrastructure databases with similarly structured vocabularies.
 
+
+\section*{Data Availability}
+
+The artifact package accompanying this paper contains the frozen dataset (\texttt{schema.sql}, \texttt{database.sqlite}, \texttt{questions.jsonl}, \texttt{splits.json}, annotation protocol), the semantic evaluator with unit tests, the per-condition prompts and context hashes, all 900 prediction/score records and raw API traces of the original run, the second-generator (\texttt{deepseek-chat}) prediction/score records and the three-repeat consistency outputs, the tenfold-scaled database with its scale-robustness run outputs and full traces, the original context-builder modules (verified to reproduce the archived formal-run prompts byte-for-byte), the component-ablation and diagnostic outputs, and the analysis scripts that recompute every number reported in this paper from those artifacts. It is publicly available at \url{https://github.com/gaoxingkele/ma-sqlgrid} (release v0.2.0).
+
+\section*{AI Use Disclosure}
+
+Hosted large language models (\texttt{gpt-5.4-mini} and \texttt{deepseek-chat}) are the experimental subjects of this study: they served as the fixed SQL generators whose behavior under different context-construction conditions is measured, and all of their outputs are archived in the released traces. In addition, AI-based writing and coding assistants were used to help draft and edit the manuscript text and analysis code. All experimental numbers were computed from the archived run artifacts, all content was reviewed and verified by the authors, and the authors take full responsibility for the manuscript.
+
+\section*{Funding}
+
+This work was supported by the Science and Technology Project of NARI Group Corporation (State Grid Electric Power Research Institute) (Grant No. [TODO: grant number]).
+
+\section*{Conflicts of Interest}
+
+The authors declare no conflict of interest.
+
+\appendices
+
+\section{Prompt Templates for the Five Conditions}\label{appendix-prompts}
+
+All five conditions share fixed prompt templates; only the context block differs. The templates below are reproduced verbatim from the archived experiment runner, and every rendered prompt (with its hash) is included in the released traces. Placeholders in angle brackets are filled per question.
+
+\subsection{Direct-generation template (C1--C4)}
+
+\begin{small}
+\begin{verbatim}
+You are a Text-to-SQL system for a synthetic
+SQLite power-grid maintenance database.
+
+Return exactly one read-only SQLite SELECT
+query. Do not include markdown or explanation.
+Do not use INSERT, UPDATE, DELETE, DROP,
+PRAGMA, or multiple statements.
+Use only the provided database context. When
+normalization hints or answer-shape hints are
+present, treat them as question-derived
+constraints. Match the requested projection
+count and include relevant literal predicates.
+
+Condition: <condition name>
+
+<context block>
+
+Question ID: <question id>
+Question: <question text>
+\end{verbatim}
+\end{small}
+
+The context block is the only element that varies across conditions: C1 inserts the full raw \texttt{schema.sql}; C2 inserts a rendered dump of the full schema plus the enumerated distinct values of all non-ID columns; C3 inserts the generically selected schema subset produced by lexical matching without domain rules, value normalization, or shape hints; C4 inserts the compact domain context shown below.
+
+\subsection{Rendered compact domain context (C4/C5), example for Q021}
+
+\begin{small}
+\begin{verbatim}
+SQLite selected context:
+Tables and selected columns:
+- asset_types(asset_type_id) -- equipment type
+  catalog such as Transformer, Breaker, Line,
+  Relay, Substation, Capacitor
+- assets(asset_id, asset_name, asset_type_id,
+  location_id, status) -- individual grid
+  assets with names, type, location, install
+  date, status, and MW capacity
+- grid_topology(edge_id, upstream_asset_id,
+  downstream_asset_id) -- directed
+  upstream/downstream asset connections and
+  switch status
+- locations(location_id) -- grid yards,
+  substations, regions, coordinates, and
+  location criticality
+- sensor_readings(reading_id, asset_id) --
+  time-series sensor readings for assets with
+  sensor type, value, unit, and alarm flag
+- work_orders(work_order_id, asset_id,
+  assigned_technician_id) -- maintenance work
+  orders with priority, status, schedule,
+  completion date, and fault code
+Join paths:
+- assets.asset_type_id =
+  asset_types.asset_type_id
+- assets.location_id = locations.location_id
+- work_orders.asset_id = assets.asset_id
+- sensor_readings.asset_id = assets.asset_id
+- grid_topology.upstream_asset_id =
+  assets.asset_id
+- grid_topology.downstream_asset_id =
+  assets.asset_id
+Exact database values matched from the
+question:
+- assets.status: offline
+Power-grid domain normalization hints inferred
+from the question:
+- assets.status = "offline"
+Answer-shape hints inferred from the question
+text:
+- expected column count: 1
+- row granularity: multi-row
+- deterministic ordering needed: True
+- Project asset_name for asset listing
+  questions.
+\end{verbatim}
+\end{small}
+
+\subsection{Candidate-generation template (C5)}
+
+\begin{small}
+\begin{verbatim}
+You are generating candidate SQLite SQL for
+CHESS-style MA-SQLGrid.
+
+Return 3 distinct read-only SQLite SELECT
+queries as a numbered list. Do not include
+explanation.
+Do not use INSERT, UPDATE, DELETE, DROP,
+PRAGMA, or multiple statements.
+Use only the selected context, normalization
+hints, and inferred output-form hints below.
+Candidate queries should differ in plausible
+joins/projections while respecting the
+inferred projection count and relevant literal
+predicates.
+
+Condition: <condition name>
+
+<compact domain context block, as in C4>
+
+Question ID: <question id>
+Question: <question text>
+\end{verbatim}
+\end{small}
+
+\subsection{Bounded repair template (C5, at most one call)}
+
+\begin{small}
+\begin{verbatim}
+Repair this SQLite SELECT query using only
+selected context and inferred hints.
+
+Return exactly one read-only SQLite SELECT
+query. Do not include markdown or explanation.
+
+<compact domain context block, as in C4>
+
+Question ID: <question id>
+Question: <question text>
+Previous SQL: <selected candidate SQL>
+Reference-free validation result:
+<JSON validation record: exec_ok, shape_ok,
+order_ok, empty result, matched and missing
+value hints>
+\end{verbatim}
+\end{small}
+
+The repair prompt receives only the reference-free validation signal; it never receives gold SQL, gold rows, evaluator verdicts, or dataset metadata.
 
 \bibliographystyle{IEEEtran}
-\bibliography{references}
+\bibliography{references_verified}
 \EOD
 \end{document}

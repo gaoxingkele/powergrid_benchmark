@@ -5,12 +5,23 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-WORKSPACE = ROOT.parent
 sys.path.insert(0, str(ROOT))
 
 from evaluator import execute_sql, load_questions, score_prediction, validate_dataset, validate_read_only_select  # noqa: E402
 
 
+def resolve_workspace() -> Path:
+    """Find the directory that contains data/griddb_maintenance_v2_v0_1."""
+    for parent in [ROOT, *ROOT.parents]:
+        if (parent / "data" / "griddb_maintenance_v2_v0_1" / "database.sqlite").exists():
+            return parent
+    raise FileNotFoundError(
+        "could not locate data/griddb_maintenance_v2_v0_1/database.sqlite in any parent of "
+        f"{ROOT}"
+    )
+
+
+WORKSPACE = resolve_workspace()
 DATA_DIR = WORKSPACE / "data" / "griddb_maintenance_v2_v0_1"
 DB_PATH = DATA_DIR / "database.sqlite"
 QUESTIONS_PATH = DATA_DIR / "questions.jsonl"

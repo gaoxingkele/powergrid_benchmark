@@ -74,10 +74,6 @@ REQUIRED_PREDICTION_FIELDS = {
 
 EXPERIMENT_DIR = Path(__file__).resolve().parent
 STAGE10_DIR = EXPERIMENT_DIR.parent
-FALLBACK_WORKSPACE = Path(
-    "/media/lenovo/data2/cja/GridMind/references/AutoResearchClaw/"
-    "paper_workspace/workspaces/ma-sqlgrid-value-grounded-restart"
-)
 
 
 def resolve_workspace() -> Path:
@@ -87,11 +83,16 @@ def resolve_workspace() -> Path:
     for parent in [EXPERIMENT_DIR, *EXPERIMENT_DIR.parents]:
         if (parent / "data" / "griddb_maintenance_v2_v0_1" / "database.sqlite").exists():
             return parent.resolve()
-    return FALLBACK_WORKSPACE.resolve()
+    raise RuntimeError(
+        "could not locate data/griddb_maintenance_v2_v0_1/database.sqlite; "
+        "set MA_SQLGRID_WORKSPACE to the workspace root containing data/"
+    )
 
 
 WORKSPACE = resolve_workspace()
-REPO_ROOT = WORKSPACE.parents[2]
+# researchclaw (LLM client) may live up to three levels above the workspace in the
+# original development layout; fall back to the workspace itself when shallower.
+REPO_ROOT = WORKSPACE.parents[2] if len(WORKSPACE.parents) > 2 else WORKSPACE
 DATA_DIR = WORKSPACE / "data" / "griddb_maintenance_v2_v0_1"
 DB_PATH = DATA_DIR / "database.sqlite"
 QUESTIONS_PATH = DATA_DIR / "questions.jsonl"
@@ -105,6 +106,8 @@ REPORT_PATH = OUT_DIR / "report.md"
 RESULTS_PATH = OUT_DIR / "results.json"
 
 sys.path.insert(0, str(WORKSPACE / "smoke"))
+# In the public repository layout the received smoke modules live under code/smoke.
+sys.path.insert(0, str(STAGE10_DIR / "smoke"))
 sys.path.insert(0, str(WORKSPACE / "evaluator"))
 sys.path.insert(0, str(REPO_ROOT))
 sys.path.insert(0, str(STAGE10_DIR / "agent_reference"))

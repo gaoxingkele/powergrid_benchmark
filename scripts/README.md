@@ -20,6 +20,15 @@ Refresh default public dataset sources:
 python scripts/data_acquisition/download_public_datasets.py
 ```
 
+Download Zenodo extension datasets via **aria2 + local proxy** (recommended; proven stable):
+
+```powershell
+python scripts/data_acquisition/download_zenodo_aria2.py
+python scripts/data_acquisition/download_zenodo_aria2.py --only vce_rare_power finland_afrr_weather
+```
+
+Flags used: `--all-proxy=http://127.0.0.1:17890 --split=16 --max-connection-per-server=16 --continue=true --file-allocation=none`.
+
 Fetch a specific metadata-only source:
 
 ```powershell

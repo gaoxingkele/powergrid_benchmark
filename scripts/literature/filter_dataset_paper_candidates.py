@@ -52,6 +52,16 @@ DOMAIN_TERMS = [
     "irradiance",
     "weather",
     "forecast",
+    "battery",
+    "lithium",
+    "soh",
+    "soc",
+    "rul",
+    "bess",
+    "energy storage",
+    "fcr",
+    "afrr",
+    "capacity factor",
 ]
 
 

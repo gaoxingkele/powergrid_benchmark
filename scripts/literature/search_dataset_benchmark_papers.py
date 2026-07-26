@@ -30,7 +30,7 @@ ROOT = Path(__file__).resolve().parents[2]
 MANIFEST = ROOT / "data" / "public_datasets" / "manifests" / "public_dataset_manifest.csv"
 OUT_ROOT = ROOT / "papers" / "literature" / "dataset_benchmark_papers"
 OPENALEX_URL = "https://api.openalex.org/works"
-USER_AGENT = "powergrid-benchmark-literature-harvester/0.1 (metadata-only; no-paywall-bypass)"
+USER_AGENT = "powergrid-benchmark-literature-harvester/0.2 (mailto:research@localhost; respectful OpenAlex client)"
 
 
 DATASET_ALIASES: dict[str, list[str]] = {
@@ -54,6 +54,35 @@ DATASET_ALIASES: dict[str, list[str]] = {
     "lbnl_pmu_event_library": ["LBNL PMU event library", "PMU event library"],
     "gridstage": ["GridSTAGE", "synthetic PMU GridSTAGE"],
     "c2ges_nerc_reports": ["NERC event analysis reports", "NERC reliability reports"],
+    "ett": ["ETT dataset", "ETTh1", "ETTm1", "Electricity Transformer Temperature"],
+    "uci_household_power": ["UCI household power consumption", "Individual household electric power consumption"],
+    "uci_tetouan_power": ["Tetouan power consumption", "UCI Tetouan"],
+    "monash_australian_demand": ["Australian electricity demand dataset", "Monash electricity demand"],
+    "panama_load": ["Panama electricity load", "Panama short-term load forecasting"],
+    "elia_total_load": ["Elia total load", "Elia load forecast"],
+    "ausgrid_solar_home": ["Ausgrid Solar Home", "Ausgrid solar home electricity"],
+    "nrel118": ["NREL-118", "NREL 118-bus", "RTS-GMLC NREL 118"],
+    "sgsc": ["Smart Grid Smart City", "SGSC customer trial"],
+    "sgcc_electricity_theft": ["SGCC electricity theft", "State Grid electricity theft detection"],
+    "sdwpf_kddcup2022": ["SDWPF", "KDD Cup 2022 wind", "Spatial Dynamic Wind Power Forecasting"],
+    "miso_mtep": ["MISO MTEP", "MTEP transmission expansion"],
+    "nasa_pcoe_battery": ["NASA battery dataset", "NASA PCoE battery", "NASA lithium-ion battery aging"],
+    "nasa_randomized_recommissioned_battery": ["randomized battery dataset NASA", "recommissioned battery NASA"],
+    "oxford_battery_degradation": ["Oxford Battery Degradation Dataset", "Oxford battery aging"],
+    "calce_battery": ["CALCE battery", "CALCE lithium-ion", "University of Maryland battery data"],
+    "battery_archive": ["Battery Archive", "batteryarchive.org"],
+    "stanford_tri_high_power_battery": ["Stanford high-power lithium-ion", "Toyota Research Institute battery dataset"],
+    "acn_data_static": ["ACN-Data", "Adaptive Charging Network dataset", "Caltech ACN"],
+    "m5bat_bess": ["M5BAT", "large-scale battery storage M5BAT"],
+    "finland_afrr_weather": ["Finland aFRR", "aFRR energy market Finland"],
+    "bess_european_balancing_inputs": ["battery energy storage balancing market", "FCR aFRR BESS"],
+    "renewables_ninja_country_sample": ["Renewables.ninja", "renewables ninja capacity factor"],
+    "vce_rare_power": ["RARE Power Dataset", "Vibrant Clean Energy RARE"],
+    "eia860_wind_solar_cf": ["EIA-860 wind solar", "EIA 860 generation profiles"],
+    "secures_energy": ["SECURES-Energy", "SECURES Energy dataset"],
+    "era5_eu_supply_demand": ["ERA5 wind capacity factor Europe", "climate-driven power supply demand Europe"],
+    "pglearn_small": ["PGLearn", "PGLearn OPF", "learning toolkit for optimal power flow"],
+    "opfdata_landing": ["OPFData", "OPFData AC optimal power flow"],
 }
 
 
@@ -75,6 +104,20 @@ SCI_JOURNAL_HINTS = [
     "Energies",
     "Journal of Modern Power Systems",
     "International Transactions on Electrical Energy Systems",
+    "Journal of Energy Storage",
+    "Journal of Power Sources",
+    "Journal of The Electrochemical Society",
+    "IEEE Transactions on Dielectrics",
+    "IEEE Transactions on Transportation Electrification",
+    "IEEE Transactions on Vehicular Technology",
+    "IEEE Transactions on Industrial Electronics",
+    "IEEE Transactions on Smart Grid",
+    "IEEE Transactions on Power Systems",
+    "Nature Scientific Data",
+    "Scientific Reports",
+    "Energy and AI",
+    "Applied Soft Computing",
+    "Expert Systems with Applications",
 ]
 
 
@@ -293,6 +336,9 @@ def search_alias(alias: str, from_date: str, to_date: str, per_page: int) -> lis
 
 def collect(args: argparse.Namespace) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     datasets = read_manifest()
+    if args.dataset:
+        wanted = set(args.dataset)
+        datasets = [ds for ds in datasets if ds.dataset_id in wanted]
     raw_dir = OUT_ROOT / "metadata" / "openalex_raw"
     pdf_dir = OUT_ROOT / "pdfs"
     raw_dir.mkdir(parents=True, exist_ok=True)
@@ -386,9 +432,23 @@ def collect(args: argparse.Namespace) -> tuple[list[dict[str, Any]], list[dict[s
 def write_outputs(records: list[dict[str, Any]], download_rows: list[dict[str, Any]], args: argparse.Namespace) -> None:
     meta_dir = OUT_ROOT / "metadata"
     meta_dir.mkdir(parents=True, exist_ok=True)
+    csv_path = meta_dir / "dataset_paper_candidates.csv"
+    if args.merge and csv_path.exists():
+        with csv_path.open("r", encoding="utf-8-sig", newline="") as handle:
+            existing = list(csv.DictReader(handle))
+        merged: dict[tuple[str, str], dict[str, Any]] = {}
+        for row in existing:
+            merged[(row.get("dataset_id", ""), row.get("openalex_id") or row.get("doi") or row.get("title") or "")] = row
+        for row in records:
+            key = (row.get("dataset_id", ""), row.get("openalex_id") or row.get("doi") or row.get("title") or "")
+            prev = merged.get(key)
+            if prev and prev.get("pdf_path") and not row.get("pdf_path"):
+                row = {**row, "pdf_path": prev["pdf_path"], "pdf_source_url": prev.get("pdf_source_url", "")}
+            merged[key] = row
+        records = list(merged.values())
     records = sorted(records, key=lambda r: (r["dataset_id"], r["venue_bucket"], r["publication_date"], r["relevance_score"]), reverse=True)
     fields = list(records[0].keys()) if records else []
-    with (meta_dir / "dataset_paper_candidates.csv").open("w", encoding="utf-8-sig", newline="") as handle:
+    with csv_path.open("w", encoding="utf-8-sig", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader()
         writer.writerows(records)
@@ -396,6 +456,18 @@ def write_outputs(records: list[dict[str, Any]], download_rows: list[dict[str, A
         json.dumps(records, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
+    # Rebuild download log from all records with PDFs when merging.
+    if args.merge:
+        download_rows = [
+            {
+                "dataset_id": r["dataset_id"],
+                "title": r["title"],
+                "pdf_path": r["pdf_path"],
+                "pdf_source_url": r.get("pdf_source_url", ""),
+            }
+            for r in records
+            if r.get("pdf_path")
+        ]
     with (meta_dir / "download_log.csv").open("w", encoding="utf-8-sig", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=["dataset_id", "title", "pdf_path", "pdf_source_url"])
         writer.writeheader()
@@ -458,9 +530,11 @@ def main() -> int:
     parser.add_argument("--to-date", default=today)
     parser.add_argument("--per-alias", type=int, default=12)
     parser.add_argument("--max-per-dataset", type=int, default=12)
-    parser.add_argument("--sleep", type=float, default=0.15)
+    parser.add_argument("--sleep", type=float, default=1.0)
     parser.add_argument("--no-download", action="store_true")
     parser.add_argument("--try-landing", action="store_true", help="Try landing pages even when OpenAlex does not mark OA.")
+    parser.add_argument("--dataset", nargs="*", default=None, help="Optional dataset_id filter")
+    parser.add_argument("--merge", action="store_true", help="Merge into existing candidates CSV instead of overwrite")
     args = parser.parse_args()
     records, download_rows = collect(args)
     write_outputs(records, download_rows, args)
