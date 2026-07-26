@@ -7,6 +7,8 @@
 - SCI/CCF status is a candidate label and must be verified against WoS/JCR and the current CCF list.
 - `metadata/dataset_paper_candidates.csv` is the raw candidate set.
 - `metadata/dataset_paper_candidates_filtered.csv` is the power-grid reading list.
+- **研究方向 × 近五年 SCI × Open Access 期刊匹配（中文主文档）**：[`DATASET_DIRECTION_OA_SCI.md`](DATASET_DIRECTION_OA_SCI.md)
+- 机器可读精选表：`metadata/dataset_direction_sci_exemplars_curated.csv`
 
 ## Filtered Summary
 
