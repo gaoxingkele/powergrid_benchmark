@@ -15,6 +15,15 @@
 - `metadata/dataset_direction_sci_exemplars_curated.csv` — 方向 + 代表论文  
 - `metadata/dataset_paper_candidates_filtered.csv` — OpenAlex 过滤候选  
 - `metadata/curated_extension_papers.csv` — 扩展集精选 OA PDF  
+- `metadata/dataset_sci_oa_pdf_summary.csv` / `dataset_sci_oa_pdf_registry.csv` — **每库 ≥5 篇本地 PDF 索引**  
+- 本地 PDF 目录：`pdfs/<dataset_id>/`（已有则跳过，不重复下载）
+
+### 本地 PDF 下载状态（2026-07-26）
+
+- **49/49** 数据集均已达到 ≥5 篇可开放获取 PDF（合计约 245 篇）。  
+- 优先源：arXiv PDF（多为 SCI/顶会论文预印本）+ Nature *Scientific Data/Reports* OA。  
+- MDPI / IEEE Xplore stampPDF 经代理常返回 **403**，未纳入默认批量下载；可用时再手工补官方 OA 版。  
+- 下载脚本：`scripts/literature/download_dataset_sci_oa_pdfs_aria2.py`（aria2 + 本地代理）。
 
 ---
 
@@ -164,11 +173,18 @@ python scripts/literature/search_dataset_benchmark_papers.py --dataset matpower 
 
 # 过滤阅读清单
 python scripts/literature/filter_dataset_paper_candidates.py
+
+# 每数据集补齐 ≥5 篇 SCI/OA 可下载 PDF（跳过已有）
+python scripts/literature/download_dataset_sci_oa_pdfs_aria2.py
+# 可选：OpenAlex 顶刊补缺（易 429）
+python scripts/literature/download_dataset_sci_oa_pdfs_aria2.py --openalex
 ```
 
 本地精选表：
 
 ```text
 papers/literature/dataset_benchmark_papers/metadata/dataset_direction_sci_exemplars_curated.csv
+papers/literature/dataset_benchmark_papers/metadata/dataset_sci_oa_pdf_summary.csv
 papers/literature/dataset_benchmark_papers/DATASET_DIRECTION_OA_SCI.md   # 本文档
+papers/literature/dataset_benchmark_papers/pdfs/<dataset_id>/
 ```
