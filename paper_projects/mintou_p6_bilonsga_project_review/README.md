@@ -2,11 +2,11 @@
 
 ## 论文信息
 
-- **标题**: Non-Dominated Sorting with Bidirectional Local Search for Budget-Constrained Power Grid Project Review
-- **算法**: BiLo-NSGA (Bidirectional Local-search Non-dominated Sorting Genetic Algorithm) — 带前向/后向局部搜索的非支配排序遗传算法，面向预算约束电网项目评审与组合排序
+- **标题**: BiLo-NSGA: Budget-Aware Project-Level Local Moves with Accepted-Move Logging for Power-Grid Portfolio Optimization
+- **算法**: BiLo-NSGA — 在非支配排序框架中测试预算感知的项目级插入与原子替换，并记录已提交的局部移动和确定性修复事件；名称不扩展为“bidirectional”性能主张
 - **当前目标期刊**: Applied Sciences (MDPI)；manifest 备选: IEEE Access
 - **本次评估对象**: IEEE Access vs MDPI Energies 差距对比，及是否保留 Applied Sciences
-- **当前状态**: `project_original_public_benchmark_v1` — 公共基准派生实验 v3，BiLo-NSGA 超最强基线 AHP-TOPSIS 3.87%、超最强消融 3.57%（hypervolume proxy）
+- **当前状态**: P6 local-search evidence contract — 以标准 hypervolume、场景内比较和实际运行级事件日志为边界；不主张前向支配、依赖协同效应、审计完整性或推荐路径
 
 ## 本文件夹用途
 
@@ -24,7 +24,7 @@
   - 代码/配置: `src\code\run_real_project_review.py`、`src\configs\real_project_review_config.json`、`src\environment.md`
   - 探索轨迹: `trace\exploration_tree.yaml`
 - 组合上下文: `D:\aicoding\powergrid_benchmark\papers\mintou\portfolio_status.md`、`papers\mintou\manifest.csv`
-- 同源姊妹工程 (p5): `D:\aicoding\powergrid_benchmark\papers\mintou\mintou_p5_trace_moea_feasibility_review\`
+- 同源姊妹工程 (p5): `mintou_p5_trace_moea_feasibility_review`（共享候选生成管线及公开 NERC/MTEP16 源资产；方法、场景、运行记录和分析按论文区分）
 - 数据缓存清单: `D:\aicoding\powergrid_benchmark\data\public_datasets\CACHE_STATUS.md`
 
 
