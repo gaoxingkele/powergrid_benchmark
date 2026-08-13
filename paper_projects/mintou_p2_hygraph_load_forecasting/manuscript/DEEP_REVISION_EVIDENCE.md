@@ -1,96 +1,113 @@
 # Deep-Revision Claim Contract
 
-This document is the narrative evidence contract for the current manuscript. It records what the observable files in this isolated worktree do and do not support. It does not promote manuscript statements or rendered figures to independent experimental evidence, and it does not fill human-owned metadata by inference.
+This document is the evidence contract for the current manuscript. It distinguishes the new immutable rolling-origin experiment from historical fixed-split, proxy, and presentation assets. It does not infer author metadata, funding, deployment evidence, or unobserved experiment outcomes.
 
 ## Title-to-Evidence Map
 
-The stabilized title is **“Cross-Series Aggregation for 24-Hour-Ahead Point Forecasting of Multi-Region Power Load: A Component-Level Evaluation.”** It is deliberately neutral about superiority and names the implemented scalar-target task.
+The current title is **“Cross-Series Context for 24-Step-Ahead Point Forecasting of Multi-Region Power Load: A Matched Rolling-Origin Component Evaluation.”** “Step” means a processed OPSD position, not necessarily one elapsed UTC hour after complete-row filtering.
 
-| Title or story element | Observable anchor | Licensed statement | Excluded statement |
+| Title or contribution element | Direct evidence | Licensed statement | Excluded statement |
 |---|---|---|---|
-| Cross-series aggregation | `MANUSCRIPT.md`, Sections 4.2 and 4.4, defines the context vector and the TemporalOnly switch that removes it; Sections 6.1–6.3 report the associated comparison. | Aggregation existence is an independently switched component, and the full model separates from TemporalOnly on OPSD at lead 24 under the reported protocol. | A particular attention, distance, or inverse-temperature parameterization is superior. |
-| 24-hour-ahead point forecasting | `MANUSCRIPT.md`, Table 1 and Section 3.1, defines each target as one scalar $y_{i,t+24}$; Sections 6.1, 8, and 9 confine the positive claim to that OPSD task. | The positive result is setting-specific to one scalar target 24 hours after each origin. | Calling the experiment a 24-point next-day trajectory forecast or claiming general short-horizon/all-horizon superiority. |
-| Multi-region | `MANUSCRIPT.md`, Table 1, lists the six-country OPSD pool and eight-profile SimBench pool. | The method is evaluated on pools of related load series. | A universal result over arbitrary regions, grids, or customer hierarchies. |
-| Component-level evaluation | `MANUSCRIPT.md`, Section 4.4, separates aggregation existence, weight form, inverse-temperature, and sequence-phase switches; Figure 3 and Sections 6.2–6.3 report their distinct outcomes. | The evaluation distinguishes the aggregation-existence question from the weight-form question. | Treating the combined ablation block as proof that every individual mechanism helps. |
-| Exact hierarchy as a boundary study | `MANUSCRIPT.md`, Sections 3.2 and 6.4, separates forecast error from coherence under common reconciliation. | The Ausgrid study supplies a negative transfer boundary and a coherence comparison. | Hierarchical forecasting superiority, dispatch performance, or deployment evidence. |
+| Cross-series context | `experiments/p2_s3_identifiable_v1/config.json`, driver, model audit, and run rows define learned Poincaré, uniform-neighbor, Euclidean, fixed-scale, and target-self contexts with a common 48-dimensional context slot. | Cross-series content and weight form are controlled components. | Cross-series aggregation improves forecasting error. |
+| 24-step-ahead point forecasting | The frozen horizon is 24 processed positions and each sample predicts one scalar target per series. The new run retains target UTC dates and records 43 discarded source rows before the 35,000-row cap. | Results concern scalar lead-24 prediction on the retained-row sequence. | A 24-value next-day trajectory or an uninterrupted 24-elapsed-hour lead at every sample. |
+| Matched control | `results/model_audit.csv` records 29,815 parameters, a 100--64--1 head, 48-dimensional context, and the executed distance path for the proposed, target-self, and uniform-context arms. The frozen run uses common seeds, origins, optimizer, batches, epochs, and training exposure. | The proposed-versus-target-self and proposed-versus-uniform comparisons remove the historical smaller-head defect. | Identical wall-clock timing or full capacity matching to the historical external architecture roster. |
+| Rolling-origin component evaluation | Eight frozen quarterly origins and five common seeds yield 240 method--origin--seed rows. Seeds are averaged within origin before exact paired inference. | The rolling origin is the outer analysis unit for the new component claims. | Treating hourly targets, countries, days, or seeds as independent temporal replications. |
+| Component-level result | Table 4 and `paired_comparisons.csv` preserve the matched aggregation null, weighting-form nulls, adverse fixed-scale trend, and confounded independent-encoder result. | The fixed-split aggregation attribution does not replicate under the new estimand. | Upgrading a null to equivalence, claiming a best weighting form, or attributing the independent-encoder gap to sharing alone. |
 
-The three manuscript contributions follow the same contract: (1) the method contribution is a component-identifiable forecaster, not a new geometry claimed superior; (2) the experiment contribution is a multi-setting, temporally split component evaluation; and (3) the result contribution is a bounded map containing one supported OPSD 24-hour-ahead point aggregation result plus unresolved and adverse settings. The abstract, Contributions list, Results, Discussion, Limitations, and Conclusion must retain these same qualifiers.
+The manuscript story is therefore a bounded component evaluation, not a superiority paper. The abstract, contributions, methods, results, discussion, limitations, and conclusion all give the new matched rolling-origin family authority over the aggregation-existence claim. Historical OPSD, SimBench, and Ausgrid results remain context and boundary evidence.
 
 ## Primary Estimand and Analysis Unit
 
-The component estimand that carries the paper's central scientific story is the difference in OPSD lead-24 MAPE between the full CSA-LoadNet configuration and TemporalOnly, which removes cross-series aggregation while retaining the temporal path. Every origin contributes one $t+24$ scalar target per series; no next-day trajectory estimand exists. The targeted external benchmark contrast is CSA-LoadNet versus MLP on the same dataset, lead, origin split, primary metric, and ten-seed set. It is not a capacity-matched estimand: CSA-LoadNet has 29,815 instantiated parameters on OPSD and MLP has 30,465, with different maximum epoch counts.
+For method $a$, rolling origin $o$, and seed $s$, the new primary error is $e^{\mathrm{MAPE}}_{aos}$. The five seeds are averaged within method--origin, and each contrast uses the eight paired differences
 
-The reported inferential unit is one seed-level scalar primary-error summary on a fixed chronological test-target sequence. `MANUSCRIPT.md`, Sections 5.2–5.3, states ten common seeds for the decision set and uses two-sided Mann–Whitney U tests with Holm correction; paired sign-flip tests are sensitivity analyses. Hourly targets are not treated as independent experimental replications. The design therefore supports variation across the reported training seeds on one split, not variation across independently sampled datasets, regions, or weather years.
+\[
+d_o=\frac{1}{5}\sum_s e^{\mathrm{MAPE}}_{\mathrm{CSA},os}
+    -\frac{1}{5}\sum_s e^{\mathrm{MAPE}}_{b,os}.
+\]
 
-Metric roles are fixed before cross-setting interpretation:
+The primary estimand is the mean of $d_o$ for CSA-Poincaré-Shared versus TargetSelfContext-Matched. WAPE is the frozen secondary metric; MAE, RMSE, and sMAPE are descriptive. The five-member primary MAPE family compares the proposed arm with target-self context, uniform cross-series context, Euclidean weighting, fixed scale, and the independent-encoder control. Exact two-sided sign-flip tests enumerate all $2^8$ origin sign assignments, and Holm adjustment covers those five MAPE tests. Pointwise 95% intervals bootstrap the eight origins with 20,000 deterministic resamples. No equivalence margin was specified.
 
-| Dataset/task | Primary metric | Permitted use |
-|---|---|---|
-| OPSD, 1 h and 24 h point leads | MAPE | The OPSD lead-24 component and MLP contrasts carry the positive claim; OPSD 1 h is a negative boundary. |
-| SimBench, 1 h and 24 h point leads | normalized MAE | Near-zero profile values make MAPE descriptive rather than rank-determining; no MLP superiority or parity claim is licensed. |
-| Exact Ausgrid hierarchy, 24 h point lead | hierarchy-weighted sMAPE | Compares forecasting accuracy while giving leaf, region, and root levels equal weight; coherence violation is a separate structural outcome. |
+The central observed contrast is:
 
-No cross-dataset pooled error or average rank is a primary estimand because MAPE, normalized MAE, and hierarchy-weighted sMAPE have different denominators and meanings. The title is therefore task-descriptive, not a claim of overall dominance.
+| Metric | CSA-Poincaré-Shared | Target-self matched | Proposed minus control | Interval | Test scope |
+|---|---:|---:|---:|---:|---|
+| MAPE | 0.036640 | 0.036894 | -0.000253 (-0.69%) | [-0.000669, 0.000232] | raw exact p = 0.328; Holm p = 0.984 |
+| WAPE | 0.036775 | 0.037109 | -0.000334 (-0.90%) | [-0.000778, 0.000153] | raw exact p = 0.227; secondary, not in the Holm family |
+
+Six of eight MAPE origin differences favor the proposed arm, but the corrected comparison is unresolved. The paper therefore does not claim an aggregation benefit. The eight origins are adjacent portions of one six-country record spanning 2017--2018; quarterly spacing reduces test-block overlap but does not make them independent weather-year or system replications.
+
+Historical fixed-split tests used seed-level scalars as their analysis units. They remain accurately reported as historical results, including the favorable selected-MLP and smaller-head TemporalOnly cells, but they do not override the new origin-level matched null.
 
 ## Comparison Budget and Data Visibility
 
-The comparison budget stated in `MANUSCRIPT.md` is: ten seeds for CSA-LoadNet, five single-switch ablations, and the targeted MLP comparator on OPSD and SimBench; a separate preliminary three-seed screen for four compact neural families; and ten seeds per model and reconciliation regime in the exact Ausgrid study. The preliminary screen used the same fixed test trajectory to select MLP for confirmation. It is supporting model-selection evidence only, creates test visibility for comparator choice, and must not be described as equal-strength or preregistered confirmation.
+The new confirmatory budget was frozen before outcome inspection:
 
-The inspected model source fixes the exact capacities and maximum epochs reported in Manuscript Table 2. OPSD and SimBench use training-origin stride 3 for every trained model. In the v8 hierarchy driver, CSA variants receive stride 6, but the external baseline routine retains its module-level stride 3; the results writer nevertheless records the stride-6 sample count for every row. Consequently, the Ausgrid result is not an equal-exposure comparison, and the CSV `train_samples` column is not authoritative for baseline exposure.
+- dataset/task: OPSD six-country scalar lead 24 only;
+- methods: six component-identification arms;
+- temporal origins: eight quarterly UTC anchors from 2017-01-01 through 2018-10-01;
+- seeds: {11, 23, 47, 59, 71} for every method--origin cell;
+- test exposure: 672 processed origins per rolling origin, six targets per processed origin, no test stride;
+- training: stride 3, training targets strictly before each rolling origin, per-origin normalization, final 15% validation, eight completed epochs, common batch size and manual eager Adam;
+- inference: origin-level MAPE family; WAPE secondary.
 
-Data visibility is also asymmetric across operations. Per-series normalization and top-down reconciliation proportions use the pre-test segment only. OPSD/SimBench row-validity filters run before splitting. Ausgrid completeness and top-energy leaf selection use all three years, including the eventual test period; this is not a train-only structural filter. The raw public dataset cache is not present in this isolated worktree, so discarded-row counts and independent reruns cannot be reconstructed here.
+This produces 240 raw run rows, 6,750 forecast-target-date audit rows, 48 seed-averaged origin rows, six leaderboard rows, and ten metric-specific comparison rows. `run_manifest.json` records the exact command, environment, source/config/driver hashes, row counts, and output hashes. `results/run_results.completed_snapshot.csv` is byte-identical to the final raw table.
 
-The authoritative source and evidence scaffold is visible read-only at `../../papers/mintou/mintou_p2_hygraph_load_forecasting/`. The files below were inspected for this contract. Files under `manuscript/derived_tables/` are convenient presentation derivatives; the `../../papers/.../evidence/` files are the claim anchors.
+The proposed, target-self, uniform, Euclidean, and fixed-scale shared-encoder arms all instantiate 29,815 parameters and the same head. Target-self and uniform controls also execute the parameterized distance path as a zero-weight audit computation. The independent-encoder arm matches 29,815 total parameters and the same downstream head, but its six narrower encoders have an estimated 20,304 encoder multiply-accumulates per unique origin versus 124,416 for the shared encoder. It is not a compute-matched isolation of sharing.
 
-| Asset | Visible here | Evidential scope |
-|---|---|---|
-| `../../papers/.../evidence/runs/real_{opsd,simbench}_hyg_neural_results.csv`, `real_{opsd,simbench}_v7_extra_seed_results.csv`, and the MLP rows in `real_{opsd,simbench}_neural_results.csv` | Yes; together they contain 280 decision-set rows: 7 methods × 2 horizons × 10 seeds × 2 datasets. | Direct run-level support for the non-hierarchical decision set. The manuscript's earlier count of 420 was not supported by this arithmetic and has been corrected to 280. |
-| `../../papers/.../evidence/runs/real_ausgrid_exact_hierarchy_v8_results.csv` | Yes; 440 rows: 11 methods × 4 reconciliation regimes × 10 seeds. | Direct run-level support for the exact-hierarchy comparison budget. The identically sized `_partial.csv` copy is not a second experiment. |
-| `../../papers/.../evidence/tables/real_opsd_v7_leaderboard.csv`, `real_simbench_v7_leaderboard.csv`, `real_p2_primary_inference_v2.csv`, `real_p2_paired_sensitivity_v2.csv`, and the v8 Ausgrid leaderboard/significance tables | Yes. | Direct table-level anchors for the reported means, corrected decisions, effect summaries, and sensitivity analyses. |
-| `../../papers/.../src/configs/real_p2_v7_config.json` and `real_ausgrid_exact_hierarchy_v8_config.json` | Yes. | Machine-readable support for the ten-seed lists, model sets, primary metrics, exact hierarchy, and reconciliation labels. The older `real_hyg_neural_config.json` records only the initial three-seed v6 configuration and uses the historical curvature terminology. |
-| `../../papers/.../evidence/source/real_opsd_source_profile.csv` and `real_simbench_source_profile.csv` | Yes. | Direct provenance for source files, row counts, series pools, and chronological boundaries. Their historical dependency-policy labels describe the earlier data preparation records, not the later neural execution environment. |
-| `../../src/powergrid_benchmark/mintou_real_load_forecasting.py`, `mintou_hyg_neural.py`, `mintou_neural_forecasting.py`, and `mintou_hierarchy_reconciliation.py` | Yes. | Direct source anchors for scalar targets, row filtering, hourly aggregation, sequence-index phase features, model capacities, training strides, full-record Ausgrid selection, and the four reconciliation transformations. |
-| `derived_tables/p2_runtime_accuracy.csv`, `p2_cross_setting_ranks.csv`, and `p2_rolling_stability.csv` | Yes. | Presentation summaries only. The rolling table is historical/proxy robustness evidence and is not the current ten-seed decision set. |
-| Figures and generated TeX/PDF copies | Yes. | Presentation and build artifacts, not independent replications of the source results. |
+The new family deliberately excludes MLP, LSTM, TCN, DLinear, PatchTST-lite, SimBench, Ausgrid, and lead 1. This narrows confirmation instead of treating historical three-seed screens or unmatched architectures as equal-strength controls. Historical external comparisons retain their original seed and capacity limitations.
 
-The narrative acceptance phase checks this contract and the manuscript story; it does not by itself re-establish every numerical result. Public source URLs establish dataset provenance at the citation level, while the source profiles, configurations, and run tables establish the processed-series, split, and result record used here. The run-level and table-level files are related layers of one evidence chain and are not independent replications.
+The hashed source is the local OPSD `time_series_60min_singleindex.csv`. The parser scanned 35,043 source rows, discarded 43 with a missing or nonnumeric selected-country value, and retained 35,000. Filtering occurs before all splits. Consequently, rolling windows and leads count retained positions and can cross UTC gaps. No interpolation or imputation is applied. The current run reconstructs only the discarded count before reaching its retained-row cap; it does not establish missingness robustness.
 
 ## Negative and Null Results
 
-These findings are part of the contribution and must remain visible:
+These findings must remain visible and retain their qualifiers:
 
-| Finding recorded in `MANUSCRIPT.md` | Correct scope | Prohibited upgrade |
+| Finding | Evidence and correct scope | Prohibited upgrade |
 |---|---|---|
-| Poincaré-distance, Euclidean-distance, equal-weight, and fixed-distance-scale variants do not separate after the reported correction in any tested setting (Section 6.3). | No weighting-form difference was resolved at the available precision and budget. The historical FixedCurvature key sets inverse-temperature $\tau_i=1$; it does not change metric curvature. | Poincaré, learned scale, fixed scale, or equal weighting is superior; or the variants are equivalent. No equivalence margin was prespecified. |
-| The no-sequence-phase control (historical label NoCalendar) has the best nominal OPSD 24 h mean but is not separated from the full model (Section 6.1). | Sequence-phase contribution is unresolved. | Row-index phase features help, hurt, or are unnecessary. |
-| OPSD 1 h significantly favors MLP (Sections 6.5 and 8). | A short-horizon negative boundary. | General load-forecasting superiority. |
-| SimBench does not separate CSA-LoadNet from MLP at either horizon, with the MLP mean ahead at 24 h (Sections 6.5 and 8). | No superiority or parity claim. | Treating non-significance as equality or successful transfer. |
-| Exact-hierarchy Ausgrid favors DLinear under the reported comparison while bottom-up, top-down, and OLS achieve coherence (Sections 6.4 and 8). | Coherence can be enforced without making CSA-LoadNet the most accurate forecaster; the ranking is qualified by unequal capacity, epochs, and training-origin strides. | Hierarchical accuracy superiority, a capacity-controlled DLinear claim, or reconciliation as evidence of model accuracy. |
-| Full-record Ausgrid leaf selection, unspecified SimBench/Ausgrid timezones, row-index phase features, and unrecorded discard counts remain part of the processed-data contract. | Explicit data-visibility and preprocessing limitations. | Claiming a train-only Ausgrid filter, localized civil-time/DST handling, or missingness robustness. |
-| Alternative weather years, split positions, larger pools, MinT, exogenous weather, and architecture-specific tuning are untested (Section 8). | Explicit external-validity and budget limitations. | Robustness, deployment readiness, or universal mechanism claims. |
+| Matched aggregation null | Proposed MAPE 0.036640 versus target-self 0.036894; difference -0.000253, interval crosses zero, Holm p = 0.984. WAPE is also unresolved (raw p = 0.227). | “Aggregation helps,” equivalence, or general cross-series superiority. |
+| Uniform-context null | Proposed-minus-uniform MAPE -0.000066, Holm p = 0.984; WAPE raw p = 0.422. | Learned attention beats informative uniform cross-series pooling. |
+| Euclidean-weight null | Proposed-minus-Euclidean MAPE -0.000009, Holm p = 0.984; four origins favor each arm. | Poincaré geometry is superior or equivalent. |
+| Fixed-scale adverse trend | Fixed scale has lower mean MAPE and WAPE. Proposed-minus-fixed MAPE is +0.000041 with Holm p = 0.0625; WAPE is higher at all eight origins with raw p = 0.0078. | Learned scale helps; secondary WAPE cannot replace the corrected primary decision. |
+| Independent-encoder adverse result with confounding | Shared is better at all eight origins; MAPE Holm p = 0.0391 and WAPE raw p = 0.0078. Hidden-width allocation and encoder arithmetic differ. | Parameter sharing causes the improvement or the control is compute-matched. |
+| Historical fixed-split conflict | The earlier fixed split favored the proposed arm over selected MLP and smaller-head TemporalOnly. | Treating optimization seeds on one split as temporal replication or ignoring the new matched null. |
+| Historical boundary results | OPSD lead 1 favors MLP; SimBench does not establish MLP superiority or parity at either lead; exact-hierarchy Ausgrid favors DLinear under unequal exposure. | General forecasting superiority, SimBench parity, or capacity-controlled Ausgrid causality. |
+| Reconciliation result | Bottom-up, top-down, and OLS enforce exact hierarchy coherence. | Coherence as evidence of forecasting accuracy or deployment value. |
 
-The weight-form ablations are combined evidence for the joint bounded conclusion that no tested form separated here. They do not identify which form is best, and historical rolling results do not broaden that conclusion.
+The uniform, Euclidean, and fixed-scale arms jointly support only the bounded conclusion that no learned weighting advantage is established by the frozen primary family. Combined ablations do not identify the best individual mechanism. Historical proxy rolling tables remain proxy evidence and are not independent replicates of the new neural run.
 
 ## Shared Assets and Independent Contribution
 
-The master manuscript, journal-submission copy, submission-preview copy, duplicated figure scripts, and rendered figures are packaging variants of shared assets. They must not be counted as independent evidence streams. The historical reviews and changelog document the revision path but are internal records rather than experimental observations. The read-only scaffold file `../../papers/mintou/mintou_p2_hygraph_load_forecasting/PAPER.md` still carries the earlier “Cross-Series Attention” title; its aggregation-centered claim boundary remains useful, but that legacy title is not the current manuscript title.
+`MANUSCRIPT.md`, the journal-submission TeX/PDF, submission previews, duplicated figure directories, and derived plotting tables are packaging or presentation variants, not independent evidence streams. `manuscript/ARTIFACT_STATUS.md` identifies the content master and records that the TeX was regenerated while the PDF and older submission preview could not be rebuilt in the current environment. Historical review files and changelogs are internal records. The historical `HyG-LoadFormer (neural)` label maps to the same full CSA configuration but does not make a prior run an independent replicate of `p2_s3_identifiable_v1`.
 
-OPSD, SimBench, and Ausgrid are public source datasets credited to their providers. Baseline architectures, reconciliation methods, and standard error metrics are prior work. The manuscript's independent scientific contribution is limited to the component-identifiable CSA-LoadNet testbed, the scoped comparison design that separates aggregation existence from aggregation-weight form, and the resulting bounded empirical map. The exact-hierarchy construction and common reconciliation comparison are an additional study-specific evaluation asset, not evidence of cross-project or field-wide superiority.
+The new independent contribution is the immutable matched-control namespace, including its frozen configuration, driver, raw results, forecast-date audit, origin-level analysis, model audit, manifest, experiment report, and validation report. It repairs the historical head mismatch, equalizes seed support within the narrowed comparison family, and uses rolling origin as the outer unit. Its scientific contribution is the matched null and the resulting claim correction, not a new positive performance result.
 
-No companion Mintou project supplies an independent replicate for this paper in the current contract. Reuse of datasets, scripts, formatting assets, or historical labels must remain disclosed as reuse rather than described as an independent contribution.
+Public OPSD, SimBench, and Ausgrid datasets remain provider-owned sources. Standard MAPE/WAPE/MAE/RMSE/sMAPE metrics, neural layers, Adam equations, exact sign-flip inference, Holm correction, and reconciliation transformations are not claimed as original. No companion Mintou project supplies an independent replicate for this paper.
 
 ## New or Rerun Experiments
 
-No experiment was newly run or rerun in this stage, and no experimental outcome, p-value, interval, dataset record, expert label, or deployment claim was newly generated. No reported error or inferential value was changed. Exact parameter counts were added by deterministic arithmetic over the inspected layer definitions, not by fitting models. The stage corrects the task label, temperature/scale semantics, preprocessing/time contract, capacity disclosure, training-exposure disclosure, and reconciliation specification.
+One new experiment namespace was executed once:
 
-The raw OPSD, SimBench, and Ausgrid dataset cache referenced by the source code is absent from this isolated worktree. Independent preprocessing counts and experiment reruns were therefore not possible here. Future evidence tasks include reconstructing discard/imputation counts from the raw sources, rerunning Ausgrid with train-only leaf selection and matched training-origin exposure, repeating the primary analysis across additional chronological/weather-year splits, predeclaring an equivalence margin if equivalence among weight forms is scientifically important, and evaluating untested reconciliation or exogenous-input variants. Until those tasks are performed, the current limitations remain binding.
+- namespace: `experiments/p2_s3_identifiable_v1/`;
+- status: completed;
+- exact command and environment: `run_manifest.json`;
+- raw factorial: 6 methods × 8 origins × 5 seeds = 240 rows;
+- output reports: `EXPERIMENT_RESULT.md` and `VALIDATION_REPORT.md`;
+- primary result: matched aggregation contrast unresolved after Holm correction;
+- secondary result: WAPE agrees that target-self context is unresolved;
+- weighting result: no primary-family learned-weight advantage; fixed scale has an adverse nominal trend;
+- sharing result: shared arm is lower-error than the capacity-matched independent arm, but the comparison is confounded by width allocation and compute.
+
+The execution used Python 3.12.13 and PyTorch 2.13.0+cu130 on one RTX 3090. Fixed CPU/CUDA seeds, deterministic cuDNN, disabled cuDNN benchmarking, and the recorded CUBLAS workspace configuration were used. Global deterministic-algorithm enforcement was unavailable because the preserved environment lacks `sympy`; this degradation is recorded in the manifest. No run was retried, tuned after outcome inspection, or overwritten.
+
+An independent arithmetic audit rechecked output hashes, the 240-cell factorial, parameter counts, seed-to-origin aggregation, exact sign-flip p-values, and daily-to-run MAPE reconstruction without error. This is an analysis audit, not an independent experiment rerun. Reproducibility status remains `UNVERIFIED`, and no byte-for-byte replay claim is made.
 
 ## Unresolved Human Blockers
 
-- **AUTHOR INPUT REQUIRED — CRediT:** `MANUSCRIPT.md`, Author Contributions, still requires assignment of verified roles and approval from every listed author. No roles were inferred in this stage.
-- **AUTHOR INPUT REQUIRED — funding:** `MANUSCRIPT.md`, Funding, still requires a verified funder, grant number, and APC funder, or an author-confirmed no-external-funding statement. No funding status was inferred.
-- **Author metadata confirmation:** the master currently prints an author roster, one affiliation, and correspondence details, but this isolated worktree contains no documentary source or approval record for them. The corresponding authors must verify spelling, ordering, affiliation coverage, correspondence, and the rendered non-Latin names before submission.
-- **Persistent archive:** the Data Availability Statement says the supplementary package is available from the corresponding author and that a persistent archive can be supplied. No repository URL or DOI is visible here; authors must deposit and verify the final evidence package before making a public-archive claim.
-- **Final author approval:** the acknowledgments, conflicts statement, AI-use disclosure, and responsibility language require confirmation by the authors; this narrative stage cannot provide that human attestation.
+- **AUTHOR INPUT REQUIRED -- CRediT:** assign verified contributor roles to Jieyun Zheng, Linyao Zhang, Zhanghuang Zhang, Zhuolin Chen, and Ying Shi, and obtain approval from every author. No roles were inferred.
+- **AUTHOR INPUT REQUIRED -- funding:** provide the verified funder, grant number, and APC funder, or an author-confirmed no-external-funding statement. No funding status was inferred.
+- **Author metadata confirmation:** verify author spelling and order, the single printed affiliation, correspondence details, and rendered non-Latin names against author-approved records.
+- **Persistent archive:** no verified repository URL or DOI is present. Deposit and verify the final evidence package before making a persistent-public-archive claim.
+- **Independent rerun:** a separate immutable rerun is required before changing the new namespace from `UNVERIFIED` to `VERIFIED`.
+- **Final author approval:** acknowledgments, conflicts, AI-use disclosure, data-availability wording, and responsibility language require human confirmation.
 
-These blockers are preserved rather than replaced with guessed metadata. They block submission-ready status but do not justify changing the scientific result.
+These blockers are preserved rather than replaced with guessed metadata. They block submission-ready status but do not justify changing the scientific results.
