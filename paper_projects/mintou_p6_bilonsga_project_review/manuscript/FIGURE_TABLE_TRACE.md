@@ -23,3 +23,7 @@ This internal map records the accepted evidence and deterministic transformation
 | Table 8 | `derived_tables/p6_matched_evaluation_summary.csv` | Matched summary and inference rows | Primary 16-contrast paired family at exactly 3200 units |
 
 Auxiliary regenerated tables are `p6_search_audit_efficiency.csv`, `p6_matched_time_summary.csv`, `p6_forward_substitution_resolution.csv`, `p6_hypervolume_sensitivity.csv`, and `p6_local_sensitivity_effects.csv`. They preserve the full legacy search/event readout, the separately corrected matched-time family, and the descriptive sensitivity scopes; they are not additional experiments.
+
+## Visual Consistency Closure
+
+All nine numbered figures are generated from the same `make_figures.py` entry point and copied to `manuscript/figures/`, `manuscript/journal_submission/figures/`, and `manuscript/submission_preview/figures/` by the journal-preview build. The closure review moved Figure 8's legend outside its data panels and corrected Figure 1's caption to describe the diagram's actual lower elements. No data, label, axis value, or scientific encoding was changed for visual preference.
