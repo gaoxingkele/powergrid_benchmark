@@ -31,6 +31,8 @@
 
 阶段 `p4_s3_boundary_experiments` 另增 1050 条预声明、不可覆盖的边界运行（7 个预算/场景数/生存性系数设置 × 5 个方法 × 30 个种子）。在主评分定义下，SHIELD-MOEA 相对 NSGA-II+Repair 的组内均值差在七个设置中均为正（`+3.46%` 至 `+7.20%`）；但 1050 个前沿中有 441 个触发低侧裁剪，且裁剪会改变差值幅度。替代参考点 `1.2^5` 与不裁剪审计均未改变各组比较方向。新运行、边界表和哈希清单位于本工作树的 `evidence/`，预声明配置和本地运行器位于 `experiments/`。这些补充运行不替代历史主档案，也不改变 p3 声明。
 
+阶段 `p4_s4_results_narrative` 未新增或重跑实验。`evidence/manifests/p4_s4_results_artifact_manifest_20260813.json` 对当前规划、推断、机制控制、敏感性、AC 与边界证据进行哈希固定，`manuscript/figures/build_results_artifacts.ps1` 据此重建四张主结果图与四张派生表。结果叙事先报告代理质量，再报告修复机制，最后把筛选的 65% 静态目标行缩减与 8/8 标签均未检出质量差异、未做等效检验及无墙钟节省同时呈现。四个同范围标签被明确标为独立优化器种子块，而非四个独立不确定性机制；AC 结果仅为固定组成映射下的说明性/关联性检查。
+
 `manuscript/MANUSCRIPT.md` 是唯一规范稿源；`manuscript/journal_submission/` 是由规范稿生成的当前投稿工件目录。`manuscript/submission_preview/` 是本阶段之前生成的旧预览，不应作为当前科学主张的来源。构建状态与不可用依赖见 `manuscript/ARTIFACT_STATUS.md`。
 
 

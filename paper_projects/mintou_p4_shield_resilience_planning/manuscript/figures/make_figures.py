@@ -1,7 +1,14 @@
-"""Manuscript figures for mintou_p4 (SHIELD-MOEA, MDPI Energies).
+"""Compatibility entry point for the canonical p4 results-artifact build.
 
-Reads the real 30-seed evidence CSVs and writes three journal-ready PNG
-figures (300 dpi) into this directory:
+The stage-4 figure and table set is controlled by
+``evidence/manifests/p4_s4_results_artifact_manifest_20260813.json`` and is
+built by ``build_results_artifacts.ps1``.  The historical plotting functions
+below are retained for source history, but ``main`` delegates to the
+hash-checked canonical builder so this entry point cannot silently recreate
+the superseded 72-case AC panel.
+
+The historical implementation below read the real 30-seed evidence CSVs and
+wrote three journal-ready PNG figures into this directory:
 
     fig_hv_boxplot.png      hypervolume boxplots, 8 archive labels x 6 main
                             methods, plus a pooled mean-vs-worst-envelope HV
@@ -12,8 +19,7 @@ figures (300 dpi) into this directory:
                             (all scenarios / stress-only) and mean max line
                             loading per method
 
-fig_sensitivity.png (parameter sweep) is produced separately by
-src/powergrid_benchmark/mintou_planning_sensitivity.py and already exists.
+``fig_sensitivity.png`` remains a separately produced parameter-sweep figure.
 
 Style: matplotlib only; one accent hue (blue = SHIELD-MOEA) plus neutral
 grays; recessive grid; identity is never carried by color alone (labels on
@@ -23,6 +29,23 @@ every bar/box position).
 from __future__ import annotations
 
 from pathlib import Path
+import subprocess
+
+
+def canonical_builder_path() -> Path:
+    """Resolve the controlling builder from the source or journal copy."""
+    figure_dir = Path(__file__).resolve().parent
+    if figure_dir.parent.name == "journal_submission":
+        return figure_dir.parent.parent / "figures" / "build_results_artifacts.ps1"
+    return figure_dir / "build_results_artifacts.ps1"
+
+
+if __name__ == "__main__":
+    subprocess.run(
+        ["powershell.exe", "-NoProfile", "-File", str(canonical_builder_path())],
+        check=True,
+    )
+    raise SystemExit(0)
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -379,12 +402,10 @@ def fig_ac_validation() -> None:
 
 
 def main() -> None:
-    df = load_results()
-    fig_hv_boxplot(df)
-    fig_ablation(df)
-    fig_ac_validation()
-    for name in ["fig_hv_boxplot", "fig_ablation", "fig_ac_validation"]:
-        print(f"wrote {FIG_DIR / (name + '.png')}")
+    subprocess.run(
+        ["powershell.exe", "-NoProfile", "-File", str(canonical_builder_path())],
+        check=True,
+    )
 
 
 if __name__ == "__main__":
