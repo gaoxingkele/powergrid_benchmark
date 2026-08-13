@@ -848,8 +848,10 @@ def fig_mtep_outcome_backtest(mtep: pd.DataFrame) -> None:
         ax.set_xlabel("Outcome-capture ratio")
         ax.set_title(title)
         ax.grid(axis="x", color=GRAY_FILL, linewidth=0.6)
-    axes[0].legend(frameon=False, loc="lower right")
-    fig.tight_layout(w_pad=1.0)
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, frameon=False, loc="upper center", ncol=2,
+               bbox_to_anchor=(0.50, 1.01))
+    fig.tight_layout(w_pad=1.0, rect=(0, 0, 1, 0.94))
     save_figure(fig, "fig_mtep_outcome_backtest")
 
 

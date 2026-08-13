@@ -40,3 +40,10 @@ python paper_projects/mintou_p6_bilonsga_project_review/experiments/p6_s3_matche
 
 Output roots are immutable: the runner refuses to write to an existing path.
 
+## Scientific-closure scope notes
+
+- The metered BiLo-NSGA runner is a stage-local implementation, not an exact semantic replay of the legacy broad-archive code. The legacy code freezes normalization bounds on parents plus pre-repair offspring and uses a `1e-9` denominator floor; this runner freezes bounds on parents plus the repaired child and uses `1e-12`. The retained results therefore apply to this metered implementation.
+- The `depth_2`, registered-depth, and `depth_16` cells jointly set forward/backward proposal caps to `(2, 2)`, `(8, 4)`, and `(16, 8)`. They support only a joint-depth conclusion.
+- The local sensitivity grid is one-factor-at-a-time. It does not identify interactions among depth, penalty, and group bonus.
+- NSGA-II has no repair operator in this runner. Its reported final-feasibility rate is empirical rather than guaranteed by construction.
+
