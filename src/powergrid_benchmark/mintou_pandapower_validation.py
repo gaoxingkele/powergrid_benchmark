@@ -43,6 +43,8 @@ NETWORK_CODES = (
     "1-MV-semiurb--0-sw",
     "1-MV-urban--0-sw",
     "1-MV-comm--0-sw",
+    "pandapower-cigre-mv",
+    "pandapower-ieee33",
 )
 
 SCENARIOS = (
@@ -62,7 +64,7 @@ LOADING_LIMIT = 100.0
 P3_VALIDATION_EXPERIMENTS = ("base_distribution_planning", "der_siting_sizing", "storage_allocation")
 P4_VALIDATION_EXPERIMENTS = ("deterministic_vs_scenario", "outage_contingency", "der_uncertainty")
 
-STATUS = "public_simbench_ac_validation_v2_real_moea_plans"
+STATUS = "public_cross_family_ac_validation_v3_simbench_cigre_ieee33"
 
 
 _COMPOSITION_CACHE: dict[str, list[dict[str, str]]] = {}
@@ -99,11 +101,28 @@ _NET_CACHE: dict[str, object] = {}
 def load_network(code: str):
     import copy
 
-    import simbench as sb
-
     if code not in _NET_CACHE:
-        _NET_CACHE[code] = sb.get_simbench_net(code)
+        if code == "pandapower-cigre-mv":
+            import pandapower.networks as pn
+
+            _NET_CACHE[code] = pn.create_cigre_network_mv(with_der="all")
+        elif code == "pandapower-ieee33":
+            import pandapower.networks as pn
+
+            _NET_CACHE[code] = pn.case33bw()
+        else:
+            import simbench as sb
+
+            _NET_CACHE[code] = sb.get_simbench_net(code)
     return copy.deepcopy(_NET_CACHE[code])
+
+
+def network_family(code: str) -> str:
+    if code.startswith("1-MV-"):
+        return "SimBench MV"
+    if code == "pandapower-cigre-mv":
+        return "CIGRE MV"
+    return "IEEE 33-bus"
 
 
 def choose_n1_line(net) -> int | None:
@@ -237,6 +256,7 @@ def run_paper(paper: str) -> None:
                             "method": method_name,
                             "method_role": role,
                             "network": code,
+                            "network_family": network_family(code),
                             "scenario": scenario_name,
                             "plan_reinforcement": str(composition.get("reinforcement", 0)),
                             "plan_storage": str(composition.get("storage", 0)),
@@ -274,6 +294,7 @@ def run_paper(paper: str) -> None:
         json.dumps(
             {
                 "networks": list(NETWORK_CODES),
+                "network_families": {code: network_family(code) for code in NETWORK_CODES},
                 "scenarios": {name: cfg for name, cfg in SCENARIOS},
                 "experiments": list(experiments),
                 "storage_p_fraction": STORAGE_P_FRACTION,
@@ -333,8 +354,9 @@ def analysis(rows: list[dict[str, str]], paper: str) -> str:
     lines = [
         f"# SimBench AC Load-Flow Validation - {title}",
         "",
-        f"Status: `{STATUS}`. pandapower AC power flow on real SimBench MV networks",
-        f"({', '.join(NETWORK_CODES)}) across {len(SCENARIOS)} stress scenarios,",
+        f"Status: `{STATUS}`. pandapower AC power flow on four SimBench MV networks",
+        "plus the independent CIGRE MV and IEEE 33-bus network families across",
+        f"{len(SCENARIOS)} stress scenarios ({', '.join(NETWORK_CODES)}),",
         "validating the compromise-plan compositions exported by the real-MOEA",
         "planning pipeline (`real_simbench_planning_compromise_compositions.csv`,",
         "seed-0 compromise solution per method/experiment).",

@@ -54,7 +54,7 @@ SIMBENCH_NET = (
 P3_ROOT = ROOT / "papers" / "mintou" / "mintou_p3_samode_distribution_planning"
 P4_ROOT = ROOT / "papers" / "mintou" / "mintou_p4_shield_resilience_planning"
 
-P3_STATUS = "public_simbench_planning_v6_real_moea"
+P3_STATUS = "public_simbench_planning_v7_direct_moea_de_controls"
 P4_STATUS = "public_simbench_planning_v2_real_moea"
 N_SEEDS = 30
 POP_SIZE = 40
@@ -576,6 +576,8 @@ class ShieldConfig:
     screen_every: int = 5
     resilience_in_search: bool = True
     outage_in_search: bool = True
+    variation_mode: str = "hybrid"  # hybrid | ga | de
+    screen_dynamic: bool = True
 
 
 def run_shield_moea(problem: PlanningProblem, cfg: ShieldConfig, seed: int) -> np.ndarray:
@@ -603,7 +605,8 @@ def run_shield_moea(problem: PlanningProblem, cfg: ShieldConfig, seed: int) -> n
 
     active = search_scenarios
     for gen in range(1, N_GENERATIONS + 1):
-        if cfg.scenario_screen and gen % cfg.screen_every == 1 and problem.paper == "p4":
+        screen_due = gen == 1 or (cfg.screen_dynamic and gen % cfg.screen_every == 1)
+        if cfg.scenario_screen and screen_due and problem.paper == "p4":
             # screen: keep the K scenarios where the current population performs worst
             scores = np.empty(search_scenarios.shape[0])
             for s in range(search_scenarios.shape[0]):
@@ -624,8 +627,15 @@ def run_shield_moea(problem: PlanningProblem, cfg: ShieldConfig, seed: int) -> n
         de_idx = rng.integers(0, pop_size, (pop_size, 3))
         de_trial = np.clip(pop[de_idx[:, 0]] + 0.5 * (pop[de_idx[:, 1]] - pop[de_idx[:, 2]]), 0.0, 1.0)
         de_children = (rng.random((pop_size, n)) < np.where(de_trial > 0.5, 0.9, 0.08)).astype(float)
-        half = pop_size // 2
-        children = np.vstack([ga_children[:half], de_children[half:]])
+        if cfg.variation_mode == "ga":
+            children = ga_children
+        elif cfg.variation_mode == "de":
+            children = de_children
+        elif cfg.variation_mode == "hybrid":
+            half = pop_size // 2
+            children = np.vstack([ga_children[:half], de_children[half:]])
+        else:
+            raise ValueError(f"Unknown SHIELD variation_mode: {cfg.variation_mode}")
         if cfg.repair:
             for row in children:
                 _repair_to_budget(row, problem)
@@ -730,7 +740,9 @@ def run_cost_first(problem: PlanningProblem) -> np.ndarray:
 
 
 def run_pymoo(problem: PlanningProblem, algorithm_name: str, seed: int) -> np.ndarray:
+    from pymoo.algorithms.moo.gde3 import GDE3
     from pymoo.algorithms.moo.moead import MOEAD
+    from pymoo.algorithms.moo.nsde import NSDE
     from pymoo.algorithms.moo.nsga2 import NSGA2
     from pymoo.core.problem import Problem as PymooProblem
     from pymoo.core.sampling import Sampling
@@ -740,19 +752,25 @@ def run_pymoo(problem: PlanningProblem, algorithm_name: str, seed: int) -> np.nd
     from pymoo.util.ref_dirs import get_reference_directions
 
     constrained = algorithm_name != "MOEA/D"
+    continuous_de = algorithm_name in {"GDE3", "NSDE"}
 
     class LowDensitySampling(Sampling):
         def _do(self, pymoo_problem, n_samples, **kwargs):
             rng = np.random.default_rng(seed)
             density = rng.uniform(0.03, 0.18, size=(n_samples, 1))
-            return rng.random((n_samples, pymoo_problem.n_var)) < density
+            sample = rng.random((n_samples, pymoo_problem.n_var)) < density
+            return sample.astype(float) if continuous_de else sample
 
     class Wrapped(PymooProblem):
         def __init__(self) -> None:
             super().__init__(n_var=problem.n, n_obj=problem.n_obj, n_ieq_constr=1 if constrained else 0, xl=0, xu=1, vtype=bool)
 
         def _evaluate(self, X: np.ndarray, out: dict, *args, **kwargs) -> None:
-            Xf = X.astype(float)
+            # GDE3/NSDE operate in [0, 1] and use a fixed 0.5 binary decoder.
+            # The decoder is method-independent and is also applied to the
+            # returned population below. The other algorithms use native
+            # Boolean variation.
+            Xf = (X >= 0.5).astype(float) if continuous_de else X.astype(float)
             F = problem.objectives(Xf)
             V = problem.violation(Xf)
             if constrained:
@@ -764,14 +782,21 @@ def run_pymoo(problem: PlanningProblem, algorithm_name: str, seed: int) -> np.nd
     operators = dict(sampling=LowDensitySampling(), crossover=TwoPointCrossover(), mutation=BitflipMutation())
     if algorithm_name == "NSGA-II":
         algorithm = NSGA2(pop_size=POP_SIZE, **operators)
-    else:
+    elif algorithm_name == "MOEA/D":
         ref_dirs = get_reference_directions("das-dennis", problem.n_obj, n_partitions=3)
         algorithm = MOEAD(ref_dirs=ref_dirs, n_neighbors=10, prob_neighbor_mating=0.7, **operators)
+    elif algorithm_name == "GDE3":
+        algorithm = GDE3(pop_size=POP_SIZE, sampling=LowDensitySampling(), variant="DE/rand/1/bin", CR=0.9, F=0.5)
+    elif algorithm_name == "NSDE":
+        algorithm = NSDE(pop_size=POP_SIZE, sampling=LowDensitySampling(), variant="DE/rand/1/bin", CR=0.9, F=(0.3, 0.9))
+    else:
+        raise ValueError(f"Unknown pymoo method: {algorithm_name}")
     result = minimize(Wrapped(), algorithm, ("n_gen", N_GENERATIONS), seed=seed, verbose=False)
     X = result.pop.get("X") if result.pop is not None else result.X
     if X is None:
         return np.zeros((0, problem.n))
-    return np.atleast_2d(X).astype(float)
+    X = np.atleast_2d(X)
+    return (X >= 0.5).astype(float) if continuous_de else X.astype(float)
 
 
 # ---------------------------------------------------------------------------
@@ -797,6 +822,8 @@ def p3_methods() -> list[MethodSpec]:
         MethodSpec("NSGA-II", "baseline", "pymoo", "pymoo NSGA-II, binary, constrained.", pymoo_name="NSGA-II"),
         MethodSpec("NSGA-II+Repair", "baseline", "pymoo_repair", "NSGA-II with budget repair applied to returned population.", pymoo_name="NSGA-II"),
         MethodSpec("MOEA/D", "baseline", "pymoo", "pymoo MOEA/D, penalty for constraints.", pymoo_name="MOEA/D"),
+        MethodSpec("GDE3", "baseline", "pymoo", "pymoo GDE3 with fixed binary decoding and constraint domination.", pymoo_name="GDE3"),
+        MethodSpec("NSDE", "baseline", "pymoo", "pymoo nondominated-sorting differential evolution with fixed binary decoding.", pymoo_name="NSDE"),
         MethodSpec("Standard DE", "baseline", "de", "Binary DE/rand/1/bin, F=0.5 CR=0.9, scalarized objective.", ),
         MethodSpec("PSO", "baseline", "pso", "Binary PSO (sigmoid velocity), scalarized objective."),
         MethodSpec("GA", "baseline", "scalar_ga", "Single-objective GA, tournament + uniform crossover, scalarized."),

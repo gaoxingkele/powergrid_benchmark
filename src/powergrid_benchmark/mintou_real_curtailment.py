@@ -55,7 +55,7 @@ from powergrid_benchmark.mintou_real_dispatch import (  # noqa: E402
 )
 
 P1_ROOT = ROOT / "papers" / "mintou" / "mintou_p1_dstar_gru_dispatch"
-RUN_VERSION = "public_rts_curtailment_v5_onset_eval"
+RUN_VERSION = "public_rts_curtailment_v6_modern_temporal_controls"
 
 SCENARIO_HOURS = 8760  # full year of day-ahead hours
 WINDOW = 48
@@ -297,6 +297,53 @@ def make_torch_model(kind: str, n_features: int):
 
         return MLP()
 
+    if kind == "dlinear":
+
+        class DLinear(nn.Module):
+            def __init__(self) -> None:
+                super().__init__()
+                self.trend = nn.Linear(WINDOW * n_features, 1)
+                self.seasonal = nn.Linear(WINDOW * n_features, 1)
+
+            def forward(self, x):
+                # Fixed 25-hour moving average, with replicate padding, gives
+                # the same decomposition to every feature channel.
+                xt = x.transpose(1, 2)
+                trend = nn.functional.avg_pool1d(
+                    nn.functional.pad(xt, (12, 12), mode="replicate"),
+                    kernel_size=25,
+                    stride=1,
+                ).transpose(1, 2)
+                seasonal = x - trend
+                pred = self.trend(trend.flatten(1)) + self.seasonal(seasonal.flatten(1))
+                return pred.squeeze(-1), None
+
+        return DLinear()
+
+    if kind == "tcn":
+
+        class TCN(nn.Module):
+            def __init__(self) -> None:
+                super().__init__()
+                layers = []
+                channels = n_features
+                for dilation in (1, 2, 4, 8):
+                    layers.extend(
+                        [
+                            nn.Conv1d(channels, 32, kernel_size=3, dilation=dilation, padding=dilation),
+                            nn.ReLU(),
+                        ]
+                    )
+                    channels = 32
+                self.net = nn.Sequential(*layers)
+                self.head = nn.Linear(32, 1)
+
+            def forward(self, x):
+                embedding = self.net(x.transpose(1, 2))[:, :, -1]
+                return self.head(embedding).squeeze(-1), embedding
+
+        return TCN()
+
     class Recurrent(nn.Module):
         def __init__(self, cell: str) -> None:
             super().__init__()
@@ -390,6 +437,8 @@ METHODS = (
     MethodSpec("Ridge", "baseline", "ridge", "Ridge regression on the flattened window.", False),
     MethodSpec("MLP", "baseline", "mlp", "Feedforward on the flattened window.", True),
     MethodSpec("LSTM", "baseline", "lstm_base", "LSTM head without retrieval.", True),
+    MethodSpec("DLinear", "baseline", "dlinear", "Fixed moving-average decomposition with linear trend and seasonal heads.", True),
+    MethodSpec("TCN", "baseline", "tcn", "Causal dilated temporal convolutional network without retrieval.", True),
     MethodSpec("kNN-RawFeature", "baseline", "knn_raw", "k-NN retrieval in raw feature space (no learning).", False),
     MethodSpec("Ablation-NoSiamese", "ablation", "no_siamese", "Retrieval in RAW feature space instead of the learned embedding.", True),
     MethodSpec("Ablation-NoRetrievalBank", "ablation", "gru_only", "GRU head without any retrieval.", True),
@@ -413,6 +462,12 @@ def run_method(spec: MethodSpec, task: Task, horizon: int, targets_full: np.ndar
         return preds
     if spec.runner == "lstm_base":
         preds, _ = train_torch(task, "lstm", seed)
+        return preds
+    if spec.runner == "dlinear":
+        preds, _ = train_torch(task, "dlinear", seed)
+        return preds
+    if spec.runner == "tcn":
+        preds, _ = train_torch(task, "tcn", seed)
         return preds
     if spec.runner == "gru_only":
         preds, _ = train_torch(task, "gru", seed)
@@ -636,7 +691,7 @@ def main() -> None:
     (config_dir / "real_curtailment_config.json").write_text(
         json.dumps(
             {
-                "task": "curtailment-rate forecasting under fixed reference dispatch (bias 0.92, reserve 0.10)",
+                "task": f"curtailment-rate forecasting under fixed reference dispatch (acceptance cap {REFERENCE_BIAS:.2f}, reserve {REFERENCE_RESERVE:.2f})",
                 "hours": SCENARIO_HOURS,
                 "window": WINDOW,
                 "horizons": HORIZONS,

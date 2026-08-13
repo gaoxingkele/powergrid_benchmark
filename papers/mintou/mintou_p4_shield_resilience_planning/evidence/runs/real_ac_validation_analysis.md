@@ -1,34 +1,36 @@
 # SimBench AC Load-Flow Validation - P4 SHIELD-MOEA
 
-Status: `public_simbench_ac_validation_v2_real_moea_plans`. pandapower AC power flow on real SimBench MV networks
-(1-MV-rural--0-sw, 1-MV-semiurb--0-sw, 1-MV-urban--0-sw, 1-MV-comm--0-sw) across 6 stress scenarios,
+Status: `public_cross_family_ac_validation_v3_simbench_cigre_ieee33`. pandapower AC power flow on four SimBench MV networks
+plus the independent CIGRE MV and IEEE 33-bus network families across
+6 stress scenarios (1-MV-rural--0-sw, 1-MV-semiurb--0-sw, 1-MV-urban--0-sw, 1-MV-comm--0-sw, pandapower-cigre-mv, pandapower-ieee33),
 validating the compromise-plan compositions exported by the real-MOEA
 planning pipeline (`real_simbench_planning_compromise_compositions.csv`,
 seed-0 compromise solution per method/experiment).
 
 ## Headline
 
-- No-Plan reference AC-feasible rate: `0.500000` (stress-only: `0.400000`)
-- `SHIELD-MOEA` AC-feasible rate: `0.708333` (stress-only: `0.650000`)
-- Best baseline: `GA` with `0.708333` (stress-only: `0.650000`)
-- `SHIELD-MOEA` mean min voltage: `0.973656` pu vs No-Plan `0.961929` pu
-- `SHIELD-MOEA` mean max line loading: `68.7531%` vs No-Plan `90.7705%`
+- No-Plan reference AC-feasible rate: `0.388889` (stress-only: `0.333333`)
+- `SHIELD-MOEA` AC-feasible rate: `0.685185` (stress-only: `0.622222`)
+- Best baseline: `NSGA-II+Repair` with `0.694444` (stress-only: `0.633333`)
+- `SHIELD-MOEA` mean min voltage: `0.969017` pu vs No-Plan `0.939739` pu
+- `SHIELD-MOEA` mean max line loading: `52.6508%` vs No-Plan `78.6284%`
 
 ## Summary Table
 
 | method | role | AC-feasible rate | stress feasible | mean min vm (pu) | mean max loading (%) | mean losses (MW) |
 |---|---|---|---|---|---|---|
-| NoPlan | reference | 0.500000 | 0.400000 | 0.961929 | 90.7705 | 0.643324 |
-| SHIELD-MOEA | proposed | 0.708333 | 0.650000 | 0.973656 | 68.7531 | 0.484187 |
-| GA | baseline | 0.708333 | 0.650000 | 0.974046 | 63.9211 | 0.466181 |
-| Ablation-NoRepair | ablation | 0.708333 | 0.650000 | 0.974096 | 70.7278 | 0.491981 |
-| Ablation-NoResilienceObj | ablation | 0.708333 | 0.650000 | 0.974225 | 71.2802 | 0.488204 |
-| NSGA-II | baseline | 0.694444 | 0.633333 | 0.973732 | 69.6426 | 0.480895 |
-| Ablation-NoScenarioScreen | ablation | 0.694444 | 0.633333 | 0.972319 | 65.5529 | 0.493379 |
-| Ablation-NoOutage | ablation | 0.625000 | 0.583333 | 0.973213 | 82.3339 | 0.567231 |
-| Deterministic Planning | baseline | 0.541667 | 0.550000 | 0.980021 | 103.6272 | 0.780180 |
-| MOEA/D | baseline | 0.500000 | 0.400000 | 0.961929 | 90.7705 | 0.643324 |
-| Weighted Sum | baseline | 0.500000 | 0.400000 | 0.962705 | 84.7985 | 0.624380 |
+| NoPlan | reference | 0.388889 | 0.333333 | 0.939739 | 78.6284 | 0.568707 |
+| NSGA-II+Repair | baseline | 0.694444 | 0.633333 | 0.968824 | 52.6568 | 0.373346 |
+| Ablation-NoRepair | ablation | 0.694444 | 0.633333 | 0.968988 | 54.2987 | 0.383906 |
+| SHIELD-MOEA | proposed | 0.685185 | 0.622222 | 0.969017 | 52.6508 | 0.376904 |
+| Ablation-NoResilienceObj | ablation | 0.685185 | 0.622222 | 0.969522 | 55.9803 | 0.384360 |
+| NSGA-II | baseline | 0.666667 | 0.611111 | 0.967390 | 52.7615 | 0.376201 |
+| GA | baseline | 0.666667 | 0.600000 | 0.968648 | 48.0520 | 0.361837 |
+| Ablation-NoScenarioScreen | ablation | 0.629630 | 0.566667 | 0.965061 | 51.4980 | 0.390451 |
+| Ablation-NoOutage | ablation | 0.574074 | 0.533333 | 0.968639 | 66.9942 | 0.462712 |
+| Weighted Sum | baseline | 0.416667 | 0.333333 | 0.944572 | 73.7100 | 0.536747 |
+| Deterministic Planning | baseline | 0.416667 | 0.400000 | 0.971322 | 132.0397 | 1.193695 |
+| MOEA/D | baseline | 0.388889 | 0.333333 | 0.939739 | 78.6284 | 0.568707 |
 
 ## Mapping Assumptions (read before citing)
 

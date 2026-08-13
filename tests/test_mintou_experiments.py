@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import json
 from pathlib import Path
 
 from powergrid_benchmark.mintou_experiments import PAPERS, MINTOU_ROOT, result_rows
@@ -118,9 +119,11 @@ def test_p3_p4_real_simbench_planning_outputs_exist() -> None:
         with (root / "evidence" / "tables" / "real_simbench_planning_leaderboard.csv").open(encoding="utf-8-sig") as handle:
             rows = list(csv.DictReader(handle))
         assert any(row["method"] == method for row in rows)
-        assert "mean_hypervolume_proxy" in rows[0]
-        assert "mean_der_readiness" in rows[0]
-        assert "mean_flexibility_ratio" in rows[0]
+        # The v6 real-MOEA pipeline replaced the deprecated hand-built
+        # ``hypervolume_proxy`` with standard, method-independent hypervolume.
+        assert "mean_hypervolume" in rows[0]
+        assert "mean_feasible_front_size" in rows[0]
+        assert "mean_runtime_s" in rows[0]
 
 
 def test_p3_preserves_second_weak_revision() -> None:
@@ -173,15 +176,18 @@ def test_p5_p6_real_project_review_outputs_exist() -> None:
             root / "evidence" / "runs" / "real_project_review_analysis_v2_weak.md",
             root / "evidence" / "source" / "real_project_review_source_profile.csv",
             root / "src" / "configs" / "real_project_review_config.json",
-            root / "src" / "configs" / "real_project_review_methods.json",
         ]
         for path in required:
             assert path.exists(), path
         with (root / "evidence" / "tables" / "real_project_review_leaderboard.csv").open(encoding="utf-8-sig") as handle:
             rows = list(csv.DictReader(handle))
         assert any(row["method"] == method for row in rows)
-        assert "mean_hypervolume_proxy" in rows[0]
-        assert f"mean_{metric}" in rows[0]
+        assert "mean_hypervolume" in rows[0]
+        assert "mean_decision_coverage" in rows[0]
+        assert "mean_local_move_count" in rows[0]
+        with (root / "src" / "configs" / "real_project_review_config.json").open(encoding="utf-8") as handle:
+            config = json.load(handle)
+        assert method in config["methods"]
 
 
 def test_p5_preserves_near_miss_revision() -> None:

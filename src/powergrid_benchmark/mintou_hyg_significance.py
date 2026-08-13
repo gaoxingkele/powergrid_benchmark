@@ -196,18 +196,25 @@ def hyg_train_and_predict_lazy(
     horizon: int,
     epochs: int,
     train_stride: int,
+    device_name: str = "cpu",
 ) -> tuple[list[float], float]:
     import torch
 
     torch.manual_seed(seed)
+    if device_name == "cuda":
+        torch.cuda.manual_seed_all(seed)
+    device = torch.device(device_name)
     index = {name: i for i, name in enumerate(tensors.names)}
-    offsets = torch.arange(-WINDOW + 1, 1)
+    offsets = torch.arange(-WINDOW + 1, 1, device=device)
+    norm = tensors.norm.to(device)
+    means = tensors.means.squeeze(1).to(device)
+    stds = tensors.stds.squeeze(1).to(device)
 
     def indices(samples: list[Sample]):
-        sidx = torch.tensor([index[s.country] for s in samples], dtype=torch.long)
-        t_idx = torch.tensor([s.t for s in samples], dtype=torch.long)
+        sidx = torch.tensor([index[s.country] for s in samples], dtype=torch.long, device=device)
+        t_idx = torch.tensor([s.t for s in samples], dtype=torch.long, device=device)
         target_t = t_idx + horizon
-        y = tensors.norm[sidx, target_t]
+        y = norm[sidx, target_t]
         hour = (target_t % 24).float()
         dow = ((target_t // 24) % 7).float()
         calendar = torch.stack(
@@ -223,7 +230,7 @@ def hyg_train_and_predict_lazy(
 
     def gather_windows(t_batch: "torch.Tensor") -> "torch.Tensor":
         gather_idx = t_batch[:, None] + offsets[None, :]
-        return tensors.norm[:, gather_idx].permute(1, 0, 2)  # [B, S, W]
+        return norm[:, gather_idx].permute(1, 0, 2)  # [B, S, W]
 
     train_strided = train[::train_stride]
     ts = sorted(s.t for s in train_strided)
@@ -235,7 +242,7 @@ def hyg_train_and_predict_lazy(
     s_val, t_val, c_val, y_val = indices(val_samples)
     s_test, t_test, c_test, _ = indices(test)
 
-    model = make_hyg_model(len(tensors.names), variant)
+    model = make_hyg_model(len(tensors.names), variant).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
     loss_fn = torch.nn.MSELoss()
 
@@ -245,11 +252,15 @@ def hyg_train_and_predict_lazy(
     n_fit = t_fit.shape[0]
     for _ in range(epochs):
         model.train()
-        perm = torch.randperm(n_fit)
+        perm = torch.randperm(n_fit, device=device)
         for i in range(0, n_fit, BATCH_SIZE):
             idx = perm[i : i + BATCH_SIZE]
             optimizer.zero_grad()
-            pred = model(gather_windows(t_fit[idx]), c_fit[idx], s_fit[idx])
+            pred = model(
+                gather_windows(t_fit[idx]),
+                c_fit[idx],
+                s_fit[idx],
+            )
             loss = loss_fn(pred, y_fit[idx])
             loss.backward()
             optimizer.step()
@@ -257,7 +268,11 @@ def hyg_train_and_predict_lazy(
         with torch.no_grad():
             val_loss = 0.0
             for i in range(0, t_val.shape[0], 2048):
-                pred = model(gather_windows(t_val[i : i + 2048]), c_val[i : i + 2048], s_val[i : i + 2048])
+                pred = model(
+                    gather_windows(t_val[i : i + 2048]),
+                    c_val[i : i + 2048],
+                    s_val[i : i + 2048],
+                )
                 val_loss += loss_fn(pred, y_val[i : i + 2048]).item() * pred.shape[0]
             val_loss /= max(1, t_val.shape[0])
         if val_loss < best_val:
@@ -268,10 +283,15 @@ def hyg_train_and_predict_lazy(
     with torch.no_grad():
         preds = []
         for i in range(0, t_test.shape[0], 2048):
-            batch = model(gather_windows(t_test[i : i + 2048]), c_test[i : i + 2048], s_test[i : i + 2048])
-            preds.append(denormalize(batch, s_test[i : i + 2048], tensors))
+            batch = model(
+                gather_windows(t_test[i : i + 2048]),
+                c_test[i : i + 2048],
+                s_test[i : i + 2048],
+            )
+            target_index = s_test[i : i + 2048]
+            preds.append(batch * stds[target_index] + means[target_index])
         preds_full = torch.cat(preds)
-    return preds_full.tolist(), time.perf_counter() - start
+    return preds_full.cpu().tolist(), time.perf_counter() - start
 
 
 # ---------------------------------------------------------------------------

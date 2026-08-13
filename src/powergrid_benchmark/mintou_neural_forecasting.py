@@ -250,11 +250,14 @@ def train_and_predict(
     train: list[Sample],
     test: list[Sample],
     horizon: int,
+    device_name: str = "cpu",
 ) -> tuple[list[float], float]:
     import torch
 
     torch.manual_seed(seed)
-    device = torch.device("cpu")
+    if device_name == "cuda":
+        torch.cuda.manual_seed_all(seed)
+    device = torch.device(device_name)
     train_strided = train[::TRAIN_STRIDE]
     # temporal early-stopping split: last 15% of the training window by time
     ts = sorted(s.t for s in train_strided)
@@ -265,6 +268,9 @@ def train_and_predict(
     w_fit, c_fit, s_fit, y_fit = sample_tensors(fit_samples, tensors, horizon)
     w_val, c_val, _, y_val = sample_tensors(val_samples, tensors, horizon)
     w_test, c_test, s_test, _ = sample_tensors(test, tensors, horizon)
+    w_fit, c_fit, y_fit = w_fit.to(device), c_fit.to(device), y_fit.to(device)
+    w_val, c_val, y_val = w_val.to(device), c_val.to(device), y_val.to(device)
+    w_test, c_test = w_test.to(device), c_test.to(device)
 
     model = make_model(model_name).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
@@ -276,7 +282,7 @@ def train_and_predict(
     n_fit = w_fit.shape[0]
     for _ in range(epochs):
         model.train()
-        perm = torch.randperm(n_fit)
+        perm = torch.randperm(n_fit, device=device)
         for i in range(0, n_fit, BATCH_SIZE):
             idx = perm[i : i + BATCH_SIZE]
             optimizer.zero_grad()
@@ -299,7 +305,7 @@ def train_and_predict(
         preds = []
         for i in range(0, w_test.shape[0], 4096):
             batch = model(w_test[i : i + 4096], c_test[i : i + 4096])
-            preds.append(denormalize(batch, s_test[i : i + 4096], tensors))
+            preds.append(denormalize(batch.cpu(), s_test[i : i + 4096], tensors))
         preds_full = torch.cat(preds)
     return preds_full.tolist(), time.perf_counter() - start
 

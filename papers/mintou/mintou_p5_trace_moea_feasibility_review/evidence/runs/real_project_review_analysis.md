@@ -1,6 +1,6 @@
 # Real Project Review Analysis - P5 TRACE-MOEA (v2, real algorithms)
 
-Status: `public_rts_simbench_nerc_project_review_v2_real_algorithms`.
+Status: `public_rts_simbench_nerc_project_review_v3_direct_family_controls`.
 
 ## Why v2 exists
 
@@ -22,7 +22,7 @@ Task: traceable feasibility review over 7 experiments on RTS-GMLC + SimBench + N
 - Best ablation: `Ablation-NoScheduleRisk` with `0.17402541`
 - Relative gain over best baseline: `0.89%`
 - Relative gain over best ablation: `0.13%`
-- Holm-significant wins vs baselines: `38/42` (per-experiment comparisons)
+- Holm-significant wins vs baselines: `45/49` (per-experiment comparisons)
 - Holm-significant losses (any opponent): `1`
 - Current value signal: `positive_but_partially_significant`
 
@@ -30,21 +30,22 @@ Task: traceable feasibility review over 7 experiments on RTS-GMLC + SimBench + N
 
 | method | role | mean HV | std | mean runtime (s) |
 |---|---|---|---|---|
-| TRACE-MOEA | proposed | 0.17424740 | 0.00634763 | 0.047997 |
-| Ablation-NoScheduleRisk | ablation | 0.17402541 | 0.00701730 | 0.042531 |
-| Ablation-NoPreferenceRanking | ablation | 0.17395616 | 0.00563757 | 0.044389 |
-| Ablation-NoFeasibilityRepair | ablation | 0.17300434 | 0.00652491 | 0.041066 |
-| NSGA-II | baseline | 0.17270385 | 0.00642322 | 0.080394 |
-| Ablation-NSGA2Only | ablation | 0.17249235 | 0.00651955 | 0.037266 |
-| Ablation-NoRenewableFeatures | ablation | 0.16929588 | 0.00374682 | 0.041440 |
-| AHP-TOPSIS | baseline | 0.13467830 | 0.00268779 | 0.000394 |
-| Ablation-SingleObjective | ablation | 0.11616713 | 0.02636519 | 0.047783 |
-| Ablation-NoReliabilityFeatures | ablation | 0.09081027 | 0.02123886 | 0.041556 |
-| Random Feasible | baseline | 0.08064060 | 0.02261091 | 0.000321 |
-| Ablation-SmallProjectPool | ablation | 0.06919518 | 0.01279698 | 0.044441 |
-| Greedy BCR | baseline | 0.05575570 | 0.03247700 | 0.000295 |
-| Weighted Sum | baseline | 0.04104791 | 0.01991111 | 0.000291 |
-| MOEA/D | baseline | 0.01954232 | 0.01379150 | 0.315039 |
+| TRACE-MOEA | proposed | 0.17424740 | 0.00634763 | 0.112995 |
+| Ablation-NoScheduleRisk | ablation | 0.17402541 | 0.00701730 | 0.106973 |
+| Ablation-NoPreferenceRanking | ablation | 0.17395616 | 0.00563757 | 0.108510 |
+| Ablation-NoFeasibilityRepair | ablation | 0.17300434 | 0.00652491 | 0.105657 |
+| NSGA-II | baseline | 0.17270385 | 0.00642322 | 0.145561 |
+| Ablation-NSGA2Only | ablation | 0.17249235 | 0.00651955 | 0.101526 |
+| Ablation-NoRenewableFeatures | ablation | 0.16929588 | 0.00374682 | 0.105958 |
+| AHP-TOPSIS | baseline | 0.13467830 | 0.00268779 | 0.065390 |
+| R-NSGA-II | baseline | 0.11980226 | 0.02670657 | 0.192243 |
+| Ablation-SingleObjective | ablation | 0.11616713 | 0.02636519 | 0.111827 |
+| Ablation-NoReliabilityFeatures | ablation | 0.09081027 | 0.02123886 | 0.106201 |
+| Random Feasible | baseline | 0.08064060 | 0.02261091 | 0.065302 |
+| Ablation-SmallProjectPool | ablation | 0.06919518 | 0.01279698 | 0.079213 |
+| Greedy BCR | baseline | 0.05575570 | 0.03247700 | 0.065101 |
+| Weighted Sum | baseline | 0.04104791 | 0.01991111 | 0.065185 |
+| MOEA/D | baseline | 0.01954232 | 0.01379150 | 0.374739 |
 
 ## Interpretation Boundary
 

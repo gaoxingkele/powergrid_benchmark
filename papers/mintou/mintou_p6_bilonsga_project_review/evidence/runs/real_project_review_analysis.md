@@ -1,6 +1,6 @@
 # Real Project Review Analysis - P6 BiLo-NSGA (v2, real algorithms)
 
-Status: `public_rts_simbench_nerc_project_review_v2_real_algorithms`.
+Status: `public_rts_simbench_nerc_project_review_v3_direct_family_controls`.
 
 ## Why v2 exists
 
@@ -17,12 +17,12 @@ Task: budget-constrained project review over 8 experiments on RTS-GMLC + SimBenc
 ## Headline results (pooled across experiments and seeds)
 
 - Proposed method: `BiLo-NSGA`
-- Proposed mean hypervolume: `0.17267347` (std `0.00859345`)
+- Proposed mean hypervolume: `0.17189867` (std `0.00860517`)
 - Best baseline: `NSGA-II` with `0.17000297`
 - Best ablation: `Ablation-NoBackwardSearch` with `0.17294302`
-- Relative gain over best baseline: `1.57%`
-- Relative gain over best ablation: `-0.16%`
-- Holm-significant wins vs baselines: `44/48` (per-experiment comparisons)
+- Relative gain over best baseline: `1.12%`
+- Relative gain over best ablation: `-0.60%`
+- Holm-significant wins vs baselines: `52/56` (per-experiment comparisons)
 - Holm-significant losses (any opponent): `0`
 - Current value signal: `significant_public_signal`
 
@@ -30,22 +30,24 @@ Task: budget-constrained project review over 8 experiments on RTS-GMLC + SimBenc
 
 | method | role | mean HV | std | mean runtime (s) |
 |---|---|---|---|---|
-| Ablation-NoBackwardSearch | ablation | 0.17294302 | 0.00797087 | 0.163004 |
-| BiLo-NSGA | proposed | 0.17267347 | 0.00859345 | 0.193466 |
-| Ablation-LowDependencyDensity | ablation | 0.17262727 | 0.00819118 | 0.194495 |
-| Ablation-ShallowLocalSearch | ablation | 0.17254737 | 0.00782199 | 0.131309 |
-| Ablation-NoDependencyMoves | ablation | 0.17200632 | 0.00856965 | 0.168176 |
-| Ablation-RandomMutationOnly | ablation | 0.17172917 | 0.00700738 | 0.050228 |
-| Ablation-NoForwardSearch | ablation | 0.17170785 | 0.00624825 | 0.075430 |
-| Ablation-NoFeasibilityRecovery | ablation | 0.17045638 | 0.01023639 | 0.174895 |
-| NSGA-II | baseline | 0.17000297 | 0.00739137 | 0.079798 |
-| NSGA-III | baseline | 0.16236232 | 0.01331321 | 0.099807 |
-| Ablation-LooseBudget | ablation | 0.16209123 | 0.01341422 | 0.215883 |
-| AHP-TOPSIS | baseline | 0.13874738 | 0.00152281 | 0.000411 |
-| Random Feasible | baseline | 0.07025532 | 0.02089243 | 0.000339 |
-| Greedy BCR | baseline | 0.04097955 | 0.00766583 | 0.000317 |
-| Ablation-WeightedRankingOnly | ablation | 0.03559022 | 0.00892416 | 0.000311 |
-| MOEA/D | baseline | 0.02529045 | 0.01403781 | 0.307961 |
+| Ablation-NoBackwardSearch | ablation | 0.17294302 | 0.00797087 | 0.161583 |
+| Ablation-NoForwardSearch | ablation | 0.17256956 | 0.00679423 | 0.113853 |
+| Ablation-ShallowLocalSearch | ablation | 0.17235875 | 0.00828795 | 0.151955 |
+| Ablation-LowDependencyDensity | ablation | 0.17235789 | 0.00848525 | 0.218093 |
+| Ablation-LegacyDeletion | ablation | 0.17228212 | 0.00844450 | 0.193346 |
+| Ablation-NoDependencyMoves | ablation | 0.17197839 | 0.00927082 | 0.182324 |
+| BiLo-NSGA | proposed | 0.17189867 | 0.00860517 | 0.218849 |
+| Ablation-RandomMutationOnly | ablation | 0.17172917 | 0.00700738 | 0.049611 |
+| NSGA-II | baseline | 0.17000297 | 0.00739137 | 0.079756 |
+| Ablation-NoFeasibilityRecovery | ablation | 0.16810627 | 0.01271869 | 0.192076 |
+| NSGA-III | baseline | 0.16236232 | 0.01331321 | 0.099305 |
+| Ablation-LooseBudget | ablation | 0.16097970 | 0.01350719 | 0.239613 |
+| AHP-TOPSIS | baseline | 0.13874738 | 0.00152281 | 0.000405 |
+| Pareto Local Search | baseline | 0.11636321 | 0.01487674 | 1.415579 |
+| Random Feasible | baseline | 0.07025532 | 0.02089243 | 0.000332 |
+| Greedy BCR | baseline | 0.04097955 | 0.00766583 | 0.000300 |
+| Ablation-WeightedRankingOnly | ablation | 0.03559022 | 0.00892416 | 0.000318 |
+| MOEA/D | baseline | 0.02529045 | 0.01403781 | 0.303851 |
 
 ## Interpretation Boundary
 

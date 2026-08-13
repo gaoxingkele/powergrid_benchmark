@@ -37,9 +37,9 @@ KNOWN_SIGNALS = {
 
 CLAIM_SUMMARIES = {
     "mintou_p1": "RTS-GMLC fixed/rolling dispatch proxy and high-renewable stress subset support DSTAR-GRU narrowly.",
-    "mintou_p2": "OPSD and SimBench rolling evidence support day-ahead/24h hierarchical load forecasting.",
-    "mintou_p3": "SimBench DER/storage stress proxy supports CARS-MODE narrowly after preserving weak revisions.",
-    "mintou_p4": "SimBench resilience-planning proxy supports SHIELD-MOEA against baseline and ablation.",
+    "mintou_p2": "OPSD supports a narrow day-ahead cross-series aggregation claim; SimBench and Ausgrid expose short-horizon and cross-dataset limits.",
+    "mintou_p3": "Repeated SimBench planning runs support CARS-MODE narrowly; an AC back-check confirms feasibility but changes the physical ranking.",
+    "mintou_p4": "Four SimBench MV networks, six stress scenarios, repeated runs, and AC back-checks support a bounded SHIELD-MOEA resilience claim.",
     "mintou_p5": "RTS-GMLC + SimBench + NERC-report-cache project-review proxy supports TRACE-MOEA.",
     "mintou_p6": "Budget-constrained project-review proxy supports BiLo-NSGA and bidirectional local search.",
 }
@@ -47,8 +47,8 @@ CLAIM_SUMMARIES = {
 BOUNDARIES = {
     "mintou_p1": "Not AC-OPF or unit-commitment proof; topology-control validation remains pending.",
     "mintou_p2": "Do not claim 1h superiority; claims should focus on day-ahead/24h behavior.",
-    "mintou_p3": "Not AC/pandapower feasible planning proof; proxy hypervolume gain is narrow.",
-    "mintou_p4": "Scenario proxy lacks full AC/pandapower feasibility and scenario variance.",
+    "mintou_p3": "AC feasibility is checked on selected solutions, but the benchmark is still limited to one network family and the surrogate and AC rankings differ.",
+    "mintou_p4": "Evidence remains composition-level across four public MV networks and six scenarios; it is not an enterprise deployment or universal optimizer ranking.",
     "mintou_p5": "Benchmark-derived review proxy lacks expert-labeled approval outcomes and calibrated costs.",
     "mintou_p6": "Benchmark-derived project-review proxy lacks expert labels and enterprise validation.",
 }
@@ -56,8 +56,8 @@ BOUNDARIES = {
 NEXT_VALIDATION = {
     "mintou_p1": "Add DC-OPF/UC or Grid2Op validation.",
     "mintou_p2": "Add stronger neural short-horizon baselines only if 1h claims are needed.",
-    "mintou_p3": "Add pandapower/AC load-flow and repeated DER-hosting scenario variance.",
-    "mintou_p4": "Add AC/pandapower feasibility and repeated scenario variance.",
+    "mintou_p3": "Add independent network families and pre-registered AC-first evaluation if a general planning-superiority claim is required.",
+    "mintou_p4": "Add independent utilities/network families and calibrated field consequence models before making deployment claims.",
     "mintou_p5": "Add expert-labeled feasibility-review outcomes and cost calibration.",
     "mintou_p6": "Add expert-labeled review outcomes, dependency labels, and calibrated budget cases.",
 }

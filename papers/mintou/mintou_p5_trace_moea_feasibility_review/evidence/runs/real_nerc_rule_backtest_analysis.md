@@ -24,6 +24,7 @@ frequency over 10 seeded compromise portfolios (published-run seeds).
 | benchmark_portfolio_optimization | Ablation-SingleObjective | ablation | 1.107951 | 0.162735 | 0.0277619 |
 | benchmark_portfolio_optimization | Ablation-SmallProjectPool | ablation | 1.034828 | -0.055145 | 0.465512 |
 | benchmark_portfolio_optimization | Ablation-NoReliabilityFeatures | ablation | 1.024520 | 0.027392 | 0.712551 |
+| benchmark_portfolio_optimization | R-NSGA-II | baseline | 0.948448 | -0.160346 | 0.0261652 |
 | benchmark_portfolio_optimization | Random Feasible | baseline | 0.891288 | -0.069526 | 0.347738 |
 | benchmark_portfolio_optimization | MOEA/D | baseline | 0.597327 | -0.045654 | 0.560112 |
 | benchmark_portfolio_optimization | Greedy BCR | baseline | 0.226572 | -0.305273 | 0.00011029 |
@@ -35,6 +36,7 @@ frequency over 10 seeded compromise portfolios (published-run seeds).
 | reliability_driven_review | Ablation-NoRenewableFeatures | ablation | 1.340772 | 0.217509 | 0.0154462 |
 | **reliability_driven_review | TRACE-MOEA | proposed | 1.338031 | 0.146437 | 0.104422 |
 | reliability_driven_review | Ablation-NSGA2Only | ablation | 1.289209 | 0.060553 | 0.500055 |
+| reliability_driven_review | R-NSGA-II | baseline | 1.090374 | 0.031970 | 0.719298 |
 | reliability_driven_review | Random Feasible | baseline | 1.023574 | 0.073651 | 0.420889 |
 | reliability_driven_review | Ablation-NoReliabilityFeatures | ablation | 0.993940 | -0.007161 | 0.937932 |
 | reliability_driven_review | Weighted Sum | baseline | 0.986595 | 0.042020 | 0.670633 |

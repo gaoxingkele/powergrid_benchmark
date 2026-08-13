@@ -67,6 +67,7 @@ Real 2016 cost estimates are preserved up to one global scale factor per paper
 | benchmark_portfolio_optimization | NSGA-II | baseline | 1.005072 | 1.018619 | 0.035582 | 0.246632 | 0.482724 | 0.748195 | 109.5 |
 | benchmark_portfolio_optimization | Random Feasible | baseline | 0.999676 | 1.017856 | 0.030444 | 0.321595 | 0.470756 | 1.016068 | 80.3 |
 | benchmark_portfolio_optimization | Ablation-NoPreferenceRanking | ablation | 1.005346 | 1.009607 | 0.022535 | 0.463196 | 0.634574 | 0.734576 | 164.6 |
+| benchmark_portfolio_optimization | R-NSGA-II | baseline | 1.007548 | 0.945691 | -0.085064 | 0.005540 | 0.003759 | 0.625272 | 97.7 |
 | reliability_driven_review | Weighted Sum | baseline | 0.997218 | 1.131621 | 0.080953 | 0.009449 | 0.009521 | 1.132695 | 94.0 |
 | reliability_driven_review | Ablation-SingleObjective | ablation | 1.005877 | 1.103495 | 0.198101 | 0.000000 | 0.000000 | 0.719650 | 195.5 |
 | reliability_driven_review | Ablation-NoFeasibilityRepair | ablation | 1.011229 | 1.089176 | 0.173518 | 0.000000 | 0.000000 | 0.464308 | 123.6 |
@@ -82,6 +83,7 @@ Real 2016 cost estimates are preserved up to one global scale factor per paper
 | reliability_driven_review | Ablation-SmallProjectPool | ablation | 0.993268 | 1.015335 | 0.013980 | 0.654521 | 0.219502 | 1.321136 | 69.7 |
 | reliability_driven_review | NSGA-II | baseline | 1.003015 | 1.010258 | 0.022840 | 0.464677 | 0.410797 | 0.856158 | 129.4 |
 | reliability_driven_review | Random Feasible | baseline | 1.005450 | 0.996577 | -0.006297 | 0.840271 | 0.601115 | 0.740006 | 93.6 |
+| reliability_driven_review | R-NSGA-II | baseline | 1.003782 | 0.931533 | -0.119261 | 0.000128 | 0.002229 | 0.819570 | 114.4 |
 
 ## Takeaway
 

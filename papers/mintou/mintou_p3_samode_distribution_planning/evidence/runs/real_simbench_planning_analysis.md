@@ -1,6 +1,6 @@
 # Real SimBench Planning Analysis - P3 CARS-MODE (real MOEA rewrite)
 
-Status: `public_simbench_planning_v6_real_moea`.
+Status: `public_simbench_planning_v7_direct_moea_de_controls`.
 
 ## Why this version exists
 
@@ -19,7 +19,7 @@ and runs 30 seeds per method/experiment with Mann-Whitney U + Holm tests.
 - Best ablation: `Ablation-FixedDE` with `0.04243314`
 - Relative gain over best baseline: `6.22%`
 - Relative gain over best ablation: `-0.60%`
-- Holm-significant wins vs baselines: `48/49` (per-experiment comparisons)
+- Holm-significant wins vs baselines: `62/63` (per-experiment comparisons)
 - Holm-significant losses (any opponent): `2`
 - Current value signal: `positive_but_partially_significant`
 
@@ -27,18 +27,20 @@ and runs 30 seeds per method/experiment with Mann-Whitney U + Holm tests.
 
 | method | role | mean HV | std | worst-case HV | mean runtime (s) |
 |---|---|---|---|---|---|
-| Ablation-FixedDE | ablation | 0.04243314 | 0.00380846 | 0.04243314 | 0.146773 |
-| Ablation-NoDER | ablation | 0.04222752 | 0.00381060 | 0.04222752 | 0.168560 |
-| CARS-MODE | proposed | 0.04217835 | 0.00380680 | 0.04217835 | 0.136531 |
-| NSGA-II+Repair | baseline | 0.03970671 | 0.00390207 | 0.03970671 | 0.087955 |
-| NSGA-II | baseline | 0.03966261 | 0.00405090 | 0.03966261 | 0.088036 |
-| Ablation-NoRepair | ablation | 0.03929326 | 0.00444244 | 0.03929326 | 0.097126 |
-| GA | baseline | 0.03088732 | 0.00068636 | 0.03088732 | 0.007536 |
-| Standard DE | baseline | 0.03026524 | 0.00129071 | 0.03026524 | 0.019946 |
-| Ablation-NoDiversity | ablation | 0.02802405 | 0.00977379 | 0.02802405 | 0.230279 |
-| PSO | baseline | 0.01897728 | 0.00763435 | 0.01897728 | 0.008255 |
-| Weighted Sum | baseline | 0.00584005 | 0.00261118 | 0.00584005 | 0.000384 |
-| MOEA/D | baseline | 0.00047204 | 0.00000000 | 0.00047204 | 0.449709 |
+| Ablation-FixedDE | ablation | 0.04243314 | 0.00380846 | 0.04243314 | 0.118443 |
+| Ablation-NoDER | ablation | 0.04222752 | 0.00381060 | 0.04222752 | 0.141673 |
+| CARS-MODE | proposed | 0.04217835 | 0.00380680 | 0.04217835 | 0.121580 |
+| NSGA-II+Repair | baseline | 0.03970671 | 0.00390207 | 0.03970671 | 0.079412 |
+| NSGA-II | baseline | 0.03966261 | 0.00405090 | 0.03966261 | 0.079693 |
+| Ablation-NoRepair | ablation | 0.03929326 | 0.00444244 | 0.03929326 | 0.080859 |
+| NSDE | baseline | 0.03886633 | 0.00488881 | 0.03886633 | 0.051601 |
+| GDE3 | baseline | 0.03884873 | 0.00479186 | 0.03884873 | 0.051543 |
+| GA | baseline | 0.03088732 | 0.00068636 | 0.03088732 | 0.005310 |
+| Standard DE | baseline | 0.03026524 | 0.00129071 | 0.03026524 | 0.012160 |
+| Ablation-NoDiversity | ablation | 0.02802405 | 0.00977379 | 0.02802405 | 0.193231 |
+| PSO | baseline | 0.01897728 | 0.00763435 | 0.01897728 | 0.005557 |
+| Weighted Sum | baseline | 0.00584005 | 0.00261118 | 0.00584005 | 0.000299 |
+| MOEA/D | baseline | 0.00047204 | 0.00000000 | 0.00047204 | 0.370512 |
 
 ## Interpretation Boundary
 

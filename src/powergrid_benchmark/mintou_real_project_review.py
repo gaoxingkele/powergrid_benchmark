@@ -49,7 +49,7 @@ NERC_ROOT = ROOT / "data" / "public_datasets" / "reliability_reports" / "c2ges_n
 P5_ROOT = ROOT / "papers" / "mintou" / "mintou_p5_trace_moea_feasibility_review"
 P6_ROOT = ROOT / "papers" / "mintou" / "mintou_p6_bilonsga_project_review"
 
-STATUS = "public_rts_simbench_nerc_project_review_v2_real_algorithms"
+STATUS = "public_rts_simbench_nerc_project_review_v3_direct_family_controls"
 N_SEEDS = 30
 POP_SIZE = 40
 N_GENERATIONS = 40
@@ -452,6 +452,44 @@ def normalization_bounds(problem: PortfolioProblem) -> tuple[np.ndarray, np.ndar
     return lo - 0.05 * span, hi + 0.05 * span
 
 
+def preference_reference_point(problem: PortfolioProblem, weights: dict[str, float]) -> np.ndarray:
+    """Scenario-derived, method-independent aspiration point for P5.
+
+    Larger declared importance maps to a more demanding normalized aspiration
+    on the corresponding minimization objective. The mapping is fixed before
+    the R-NSGA-II runs and is shared by every method's achievement-distance
+    readout.
+    """
+    if problem.paper != "p5":
+        raise ValueError("preference reference points are defined for p5 only")
+    importance = np.array(
+        [
+            weights["cost"],
+            weights["reliability"],
+            weights["renewable"],
+            weights["risk"],
+            0.5 * (weights["compliance"] + weights["evidence"]),
+        ],
+        dtype=float,
+    )
+    importance /= max(float(importance.max()), 1e-9)
+    target_norm = 0.75 - 0.55 * importance
+    lo, hi = normalization_bounds(problem)
+    return lo + target_norm * (hi - lo)
+
+
+def achievement_distance(front: np.ndarray, problem: PortfolioProblem, weights: dict[str, float]) -> float:
+    if front.size == 0:
+        return float("inf")
+    lo, hi = normalization_bounds(problem)
+    ref = preference_reference_point(problem, weights)
+    norm = (front - lo) / np.maximum(hi - lo, 1e-9)
+    ref_norm = (ref - lo) / np.maximum(hi - lo, 1e-9)
+    # Positive-part Euclidean achievement distance: zero means the front has a
+    # point meeting every aspiration coordinate.
+    return float(np.min(np.linalg.norm(np.maximum(norm - ref_norm, 0.0), axis=1)))
+
+
 def hypervolume(front: np.ndarray, lo: np.ndarray, hi: np.ndarray) -> float:
     """Standard hypervolume on normalized objectives, reference point 1.1^d.
     Uses pymoo's exact indicator."""
@@ -506,6 +544,7 @@ class EngineConfig:
     trace: bool = False
     forward_ls: bool = False
     backward_ls: bool = False
+    backward_mode: str = "delete"  # delete | substitute
     dependency_moves: bool = False
     ls_depth: int = 8
     random_mutation_only: bool = False
@@ -573,7 +612,7 @@ def _local_search(
     events: list[dict] | None,
     gen: int,
 ) -> int:
-    """Bidirectional local search: forward insertion + backward deletion."""
+    """Forward insertion plus an optional deletion or atomic substitution pass."""
     benefit = problem.reliability + problem.renewable + problem.load_support + problem.quality
     bcr = benefit / np.maximum(problem.cost, 1.0)
     moves = 0
@@ -606,13 +645,50 @@ def _local_search(
             weakest = selected[np.argmin(bcr[selected])]
             fit_before = _scalar_fitness(x, problem, lo, hi)
             x[weakest] = 0
-            if _scalar_fitness(x, problem, lo, hi) < fit_before:
+            if cfg.backward_mode == "substitute":
+                # Atomic backward-forward substitution: deletion creates a
+                # budget neighbourhood and one replacement is evaluated before
+                # the move can be accepted. This avoids treating a standalone
+                # deletion as the proposed backward mechanism.
+                slack = problem.budget - x @ problem.cost
+                candidates = np.where((x < 1) & (problem.cost <= slack))[0]
+                candidates = candidates[candidates != weakest]
+                if candidates.size:
+                    score = bcr[candidates].copy()
+                    if cfg.dependency_moves:
+                        selected_groups = {problem.groups[i] for i in np.where(x > 0)[0]}
+                        score *= np.array([1.06 if problem.groups[i] in selected_groups else 1.0 for i in candidates])
+                    replacement = int(candidates[np.argmax(score)])
+                    x[replacement] = 1
+                else:
+                    replacement = -1
+                accepted = replacement >= 0 and _scalar_fitness(x, problem, lo, hi) < fit_before
+                if accepted:
+                    moves += 1
+                    if events is not None:
+                        events.append(
+                            {
+                                "gen": gen,
+                                "event": "backward_substitute",
+                                "removed": int(weakest),
+                                "inserted": replacement,
+                            }
+                        )
+                else:
+                    if replacement >= 0:
+                        x[replacement] = 0
+                    x[weakest] = 1
+                    break
+            elif cfg.backward_mode == "delete" and _scalar_fitness(x, problem, lo, hi) < fit_before:
                 moves += 1
                 if events is not None:
                     events.append({"gen": gen, "event": "backward_delete", "item": int(weakest)})
-            else:
+            elif cfg.backward_mode == "delete":
                 x[weakest] = 1
                 break
+            else:
+                x[weakest] = 1
+                raise ValueError(f"Unknown backward_mode: {cfg.backward_mode}")
     return moves
 
 
@@ -755,10 +831,16 @@ def _simple_nds(F: np.ndarray, violation: np.ndarray) -> list[np.ndarray]:
 # ---------------------------------------------------------------------------
 
 
-def run_pymoo_baseline(problem: PortfolioProblem, algorithm_name: str, seed: int) -> np.ndarray:
+def run_pymoo_baseline(
+    problem: PortfolioProblem,
+    algorithm_name: str,
+    seed: int,
+    weights: dict[str, float] | None = None,
+) -> np.ndarray:
     from pymoo.algorithms.moo.moead import MOEAD
     from pymoo.algorithms.moo.nsga2 import NSGA2
     from pymoo.algorithms.moo.nsga3 import NSGA3
+    from pymoo.algorithms.moo.rnsga2 import RNSGA2
     from pymoo.core.problem import Problem as PymooProblem
     from pymoo.core.sampling import Sampling
     from pymoo.operators.crossover.pntx import TwoPointCrossover
@@ -806,12 +888,19 @@ def run_pymoo_baseline(problem: PortfolioProblem, algorithm_name: str, seed: int
     )
     if algorithm_name == "NSGA-II":
         algorithm = NSGA2(pop_size=POP_SIZE, **operators)
+    elif algorithm_name == "R-NSGA-II":
+        if weights is None or problem.paper != "p5":
+            raise ValueError("R-NSGA-II requires the P5 scenario weights")
+        ref_points = preference_reference_point(problem, weights)[None, :]
+        algorithm = RNSGA2(ref_points=ref_points, epsilon=0.01, pop_size=POP_SIZE, **operators)
     elif algorithm_name == "NSGA-III":
         ref_dirs = get_reference_directions("das-dennis", problem.n_obj, n_partitions=4 if problem.n_obj == 4 else 3)
         algorithm = NSGA3(ref_dirs=ref_dirs, pop_size=max(POP_SIZE, len(ref_dirs)), **operators)
-    else:
+    elif algorithm_name == "MOEA/D":
         ref_dirs = get_reference_directions("das-dennis", problem.n_obj, n_partitions=4 if problem.n_obj == 4 else 3)
         algorithm = MOEAD(ref_dirs=ref_dirs, n_neighbors=10, prob_neighbor_mating=0.7, **operators)
+    else:
+        raise ValueError(f"Unknown pymoo baseline: {algorithm_name}")
     result = minimize(Wrapped(), algorithm, ("n_gen", N_GENERATIONS), seed=seed, verbose=False)
     X = result.pop.get("X") if result.pop is not None else result.X
     if X is None:
@@ -886,6 +975,76 @@ def run_random_feasible(problem: PortfolioProblem, seed: int) -> np.ndarray:
     return greedy_fill(problem, rng.permutation(problem.n))[None, :]
 
 
+def run_pareto_local_search(problem: PortfolioProblem, seed: int, evaluation_budget: int | None = None) -> np.ndarray:
+    """Multi-start Pareto local search with add, delete, and swap moves.
+
+    The comparator uses the same binary project representation and a fixed
+    neighbourhood-evaluation budget. It has no evolutionary crossover,
+    dependency bonus, feasibility repair, or access to the proposed method's
+    trace archive.
+    """
+    rng = np.random.default_rng(seed)
+    budget = evaluation_budget or POP_SIZE * N_GENERATIONS
+    benefit = problem.reliability + problem.renewable + problem.load_support + problem.quality
+    bcr = benefit / np.maximum(problem.cost, 1.0)
+
+    starts: list[np.ndarray] = []
+    for _ in range(POP_SIZE):
+        density = rng.uniform(0.03, 0.15)
+        x = (rng.random(problem.n) < density).astype(float)
+        _repair_to_budget(x, problem, None, 0)
+        starts.append(x)
+    archive = np.unique(np.asarray(starts), axis=0)
+
+    def reduce_archive(X: np.ndarray) -> np.ndarray:
+        X = np.unique(X, axis=0)
+        feasible = problem.violation(X) <= 0
+        X = X[feasible]
+        if X.shape[0] == 0:
+            return np.zeros((0, problem.n))
+        F = problem.objectives(X)
+        X, F = X[nondominated(F)], F[nondominated(F)]
+        if X.shape[0] > POP_SIZE:
+            keep = np.argsort(-_crowding_distance(F))[:POP_SIZE]
+            X = X[keep]
+        return X
+
+    archive = reduce_archive(archive)
+    for step in range(budget):
+        if archive.shape[0] == 0:
+            break
+        x = archive[int(rng.integers(0, archive.shape[0]))].copy()
+        move = step % 3
+        selected = np.where(x > 0)[0]
+        unselected = np.where(x < 1)[0]
+        changed = False
+        if move == 0 and unselected.size:
+            feasible_add = unselected[problem.cost[unselected] <= problem.budget - x @ problem.cost]
+            if feasible_add.size:
+                top = feasible_add[np.argsort(-bcr[feasible_add])[: max(1, min(8, feasible_add.size))]]
+                x[int(rng.choice(top))] = 1
+                changed = True
+        elif move == 1 and selected.size > 1:
+            bottom = selected[np.argsort(bcr[selected])[: max(1, min(8, selected.size))]]
+            x[int(rng.choice(bottom))] = 0
+            changed = True
+        elif selected.size and unselected.size:
+            bottom = selected[np.argsort(bcr[selected])[: max(1, min(8, selected.size))]]
+            removed = int(rng.choice(bottom))
+            x[removed] = 0
+            feasible_add = unselected[problem.cost[unselected] <= problem.budget - x @ problem.cost]
+            feasible_add = feasible_add[feasible_add != removed]
+            if feasible_add.size:
+                top = feasible_add[np.argsort(-bcr[feasible_add])[: max(1, min(8, feasible_add.size))]]
+                x[int(rng.choice(top))] = 1
+                changed = True
+            else:
+                x[removed] = 1
+        if changed:
+            archive = reduce_archive(np.vstack([archive, x]))
+    return archive
+
+
 # ---------------------------------------------------------------------------
 # Method registry
 # ---------------------------------------------------------------------------
@@ -908,6 +1067,7 @@ def p5_methods() -> list[MethodSpec]:
     return [
         MethodSpec("TRACE-MOEA", "proposed", "custom", "NSGA-II core + preference coevolution + budget repair + decision trace archive.", engine=trace_cfg),
         MethodSpec("NSGA-II", "baseline", "pymoo", "pymoo NSGA-II, binary encoding, constrained.", pymoo_name="NSGA-II"),
+        MethodSpec("R-NSGA-II", "baseline", "pymoo", "Reference-point NSGA-II using the scenario-derived aspiration point.", pymoo_name="R-NSGA-II"),
         MethodSpec("MOEA/D", "baseline", "pymoo", "pymoo MOEA/D, Tchebycheff decomposition, penalty for budget.", pymoo_name="MOEA/D"),
         MethodSpec("AHP-TOPSIS", "baseline", "point", "AHP-derived weights + TOPSIS closeness ranking + greedy fill.", point_kind="ahp_topsis"),
         MethodSpec("Weighted Sum", "baseline", "point", "Weighted-score ranking + greedy fill.", point_kind="weighted_sum"),
@@ -925,22 +1085,31 @@ def p5_methods() -> list[MethodSpec]:
 
 
 def p6_methods() -> list[MethodSpec]:
-    bilo = EngineConfig(repair=True, forward_ls=True, backward_ls=True, dependency_moves=True, trace=True)
+    bilo = EngineConfig(
+        repair=True,
+        forward_ls=True,
+        backward_ls=True,
+        backward_mode="substitute",
+        dependency_moves=True,
+        trace=True,
+    )
     return [
-        MethodSpec("BiLo-NSGA", "proposed", "custom", "NSGA-II core + bidirectional local search + dependency moves + feasibility recovery.", engine=bilo),
+        MethodSpec("BiLo-NSGA", "proposed", "custom", "NSGA-II core + forward insertion + atomic backward-forward substitution + dependency moves + feasibility recovery.", engine=bilo),
         MethodSpec("NSGA-II", "baseline", "pymoo", "pymoo NSGA-II, binary encoding, constrained.", pymoo_name="NSGA-II"),
         MethodSpec("NSGA-III", "baseline", "pymoo", "pymoo NSGA-III with Das-Dennis reference directions.", pymoo_name="NSGA-III"),
         MethodSpec("MOEA/D", "baseline", "pymoo", "pymoo MOEA/D, penalty for budget.", pymoo_name="MOEA/D"),
         MethodSpec("Greedy BCR", "baseline", "point", "Benefit-cost-ratio greedy under budget.", point_kind="greedy_bcr"),
         MethodSpec("AHP-TOPSIS", "baseline", "point", "AHP-derived weights + TOPSIS ranking + greedy fill.", point_kind="ahp_topsis"),
         MethodSpec("Random Feasible", "baseline", "point", "Random permutation greedy fill (no penalties).", point_kind="random"),
-        MethodSpec("Ablation-NoForwardSearch", "ablation", "custom", "Forward insertion disabled.", engine=EngineConfig(repair=True, forward_ls=False, backward_ls=True, dependency_moves=True, trace=True)),
+        MethodSpec("Pareto Local Search", "baseline", "pls", "Multi-start Pareto local search with add, delete, and swap moves under a fixed 1600-neighbour budget."),
+        MethodSpec("Ablation-NoForwardSearch", "ablation", "custom", "Forward insertion disabled.", engine=EngineConfig(repair=True, forward_ls=False, backward_ls=True, backward_mode="substitute", dependency_moves=True, trace=True)),
         MethodSpec("Ablation-NoBackwardSearch", "ablation", "custom", "Backward deletion disabled.", engine=EngineConfig(repair=True, forward_ls=True, backward_ls=False, dependency_moves=True, trace=True)),
+        MethodSpec("Ablation-LegacyDeletion", "ablation", "custom", "Atomic substitution replaced by the legacy standalone greedy deletion.", engine=EngineConfig(repair=True, forward_ls=True, backward_ls=True, backward_mode="delete", dependency_moves=True, trace=True)),
         MethodSpec("Ablation-RandomMutationOnly", "ablation", "custom", "Local search replaced by high-rate random mutation.", engine=EngineConfig(repair=True, forward_ls=False, backward_ls=False, random_mutation_only=True, trace=True)),
-        MethodSpec("Ablation-NoDependencyMoves", "ablation", "custom", "Dependency-aware move bonus disabled.", engine=EngineConfig(repair=True, forward_ls=True, backward_ls=True, dependency_moves=False, trace=True)),
-        MethodSpec("Ablation-NoFeasibilityRecovery", "ablation", "custom", "Budget repair disabled.", engine=EngineConfig(repair=False, forward_ls=True, backward_ls=True, dependency_moves=True, trace=True)),
+        MethodSpec("Ablation-NoDependencyMoves", "ablation", "custom", "Dependency-aware move bonus disabled.", engine=EngineConfig(repair=True, forward_ls=True, backward_ls=True, backward_mode="substitute", dependency_moves=False, trace=True)),
+        MethodSpec("Ablation-NoFeasibilityRecovery", "ablation", "custom", "Budget repair disabled.", engine=EngineConfig(repair=False, forward_ls=True, backward_ls=True, backward_mode="substitute", dependency_moves=True, trace=True)),
         MethodSpec("Ablation-WeightedRankingOnly", "ablation", "point", "Weighted ranking without evolution.", point_kind="weighted_sum"),
-        MethodSpec("Ablation-ShallowLocalSearch", "ablation", "custom", "Local-search depth reduced to 2.", engine=EngineConfig(repair=True, forward_ls=True, backward_ls=True, dependency_moves=True, trace=True, ls_depth=2)),
+        MethodSpec("Ablation-ShallowLocalSearch", "ablation", "custom", "Local-search depth reduced to 2.", engine=EngineConfig(repair=True, forward_ls=True, backward_ls=True, backward_mode="substitute", dependency_moves=True, trace=True, ls_depth=2)),
         MethodSpec("Ablation-LowDependencyDensity", "ablation", "custom", "Dependency graph thinned (every 3rd candidate isolated).", engine=bilo, pool_transform="low_dependency"),
         MethodSpec("Ablation-LooseBudget", "ablation", "custom", "Search at 1.2x budget, evaluated at the true budget.", engine=bilo, pool_transform="loose_budget"),
     ]
@@ -1005,7 +1174,9 @@ def run_method(
         move_count = result.move_count
         events = result.trace_events
     elif spec.runner == "pymoo":
-        X = run_pymoo_baseline(eval_problem, spec.pymoo_name, seed)
+        X = run_pymoo_baseline(eval_problem, spec.pymoo_name, seed, weights=weights)
+    elif spec.runner == "pls":
+        X = run_pareto_local_search(eval_problem, seed)
     else:
         if spec.point_kind == "greedy_bcr":
             X = run_greedy_bcr(eval_problem, weights)
@@ -1048,6 +1219,10 @@ def trace_metrics(events: list[dict], front_X: np.ndarray) -> dict[str, float]:
     for event in events:
         if "item" in event:
             traced_items.add(int(event["item"]))
+        if "removed" in event:
+            traced_items.add(int(event["removed"]))
+        if "inserted" in event:
+            traced_items.add(int(event["inserted"]))
         for item in event.get("items", []):
             traced_items.add(int(item))
     selected = {int(i) for i in np.where(front_X.sum(axis=0) > 0)[0]}
@@ -1063,6 +1238,7 @@ def run_paper(paper: str, root: Path, methods: list[MethodSpec], experiments: tu
         pool = experiment_pool(experiment, all_candidates)
         budget = budget_for(experiment, paper)
         base_problem = PortfolioProblem(pool, paper, budget)
+        weights = experiment_weights(experiment, paper)
         lo, hi = normalization_bounds(base_problem)
         bounds_cache[experiment] = (lo, hi)
         for spec in methods:
@@ -1075,6 +1251,7 @@ def run_paper(paper: str, root: Path, methods: list[MethodSpec], experiments: tu
                 hv = hypervolume(front_F, lo, hi)
                 comp = compromise_metrics(eval_problem, front_X, front_F, lo, hi)
                 trace = trace_metrics(events, front_X)
+                pref_distance = achievement_distance(front_F, eval_problem, weights) if paper == "p5" else float("nan")
                 runtime = time.perf_counter() - start
                 rows.append(
                     {
@@ -1093,6 +1270,7 @@ def run_paper(paper: str, root: Path, methods: list[MethodSpec], experiments: tu
                         "local_move_count": str(move_count),
                         "trace_event_count": f"{trace['trace_event_count']:.0f}",
                         "decision_coverage": f"{trace['decision_coverage']:.8f}",
+                        "preference_achievement_distance": f"{pref_distance:.8f}",
                         "runtime_s": f"{runtime:.6f}",
                         "source_status": STATUS,
                     }
@@ -1120,6 +1298,11 @@ def aggregate(rows: list[dict[str, str]], paper: str) -> list[dict[str, str]]:
                 "mean_portfolio_size": f"{np.mean([float(r['portfolio_size']) for r in group]):.4f}",
                 "mean_local_move_count": f"{np.mean([float(r['local_move_count']) for r in group]):.4f}",
                 "mean_decision_coverage": f"{np.mean([float(r['decision_coverage']) for r in group]):.8f}",
+                "mean_preference_achievement_distance": (
+                    f"{np.nanmean([float(r['preference_achievement_distance']) for r in group]):.8f}"
+                    if paper == "p5"
+                    else "NA"
+                ),
                 "mean_runtime_s": f"{np.mean([float(r['runtime_s']) for r in group]):.6f}",
                 "runs": str(len(group)),
             }
