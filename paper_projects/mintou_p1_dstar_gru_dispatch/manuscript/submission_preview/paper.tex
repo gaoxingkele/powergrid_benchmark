@@ -128,8 +128,10 @@ eight baselines and five mechanism controls. Retrieval improves 1-hour
 mean absolute error relative to the prespecified retrieval-removal and
 retrieval-degradation controls, but reduces 24-hour onset-warning
 performance relative to no-retrieval and raw-feature-retrieval variants.
-Persistence achieves the lowest overall mean absolute error at both
-horizons, whereas ridge regression leads 24-hour onset detection. A
+Persistence has the lowest 1-hour mean absolute error. At 24 hours,
+SmallBank has the lowest mean absolute error but zero event F1;
+raw-feature kNN is the strongest non-degenerate mean-absolute-error
+reference, and ridge regression leads onset detection. A
 fixed-cap transport check on NREL-118 produces no positive target hours,
 indicating that the policy-derived task requires system-specific
 calibration. The benchmark therefore reveals a horizon-dependent role
@@ -191,8 +193,8 @@ assumed to be uniformly beneficial. The contributions are:
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \textbf{A reproducible, method-agnostic public curtailment-risk
-  benchmark.} A fixed reference operating policy (70\% SNSP-type
+  \textbf{A reproducible, method-agnostic curtailment-risk benchmark on
+  public data.} A fixed reference operating policy (70\% SNSP-type
   acceptance cap) converts the full-year RTS-GMLC day-ahead series into
   a reference-policy curtailment-risk proxy target that no method can
   influence. It is not an observed dispatch-curtailment record. An
@@ -220,10 +222,12 @@ assumed to be uniformly beneficial. The contributions are:
   non-retrieval LSTM and MLP baselines (Holm-adjusted p ≤ 0.0041); the
   TCN contrast is unresolved by the prespecified unpaired test. At 24 h,
   removing retrieval or using raw-feature retrieval significantly
-  improves onset F1 (Holm-adjusted p ≤ 0.0040). Persistence leading
-  overall MAE and ridge regression leading day-ahead onset detection
-  further show why benchmark conclusions must be metric- and
-  horizon-specific (Section VI).
+  improves onset F1 (Holm-adjusted p ≤ 0.0040). Persistence leading 1 h
+  MAE, SmallBank's degenerate 24 h MAE lead with zero event F1,
+  raw-feature kNN as the strongest non-degenerate 24 h MAE reference,
+  and ridge regression leading day-ahead onset detection further show
+  why benchmark conclusions must be metric- and horizon-specific
+  (Section VI).
 \end{enumerate}
 
 Together, these contributions turn a sparse proxy series into a
@@ -333,8 +337,10 @@ seasonal-naive are included as first-class methods; event and onset
 metrics complement aggregate error on the sparse target; and
 learned-method comparisons use temporal splits, multiple seeds, and
 multiplicity correction. It also shapes interpretation. Persistence
-leading overall MAE is consistent with the M-competition record and
-therefore provides a useful validity check on the protocol.
+leading 1 h MAE is consistent with the M-competition record and therefore
+provides a useful validity check on the protocol; the 24 h SmallBank and
+raw-kNN results require the separate event-aware interpretation given in
+Section VI.
 
 \subsection{D. Gap statement}\label{d.-gap-statement}
 
@@ -1245,8 +1251,8 @@ requirements.
 
 \section{IX. Conclusion}\label{ix.-conclusion}
 
-This paper develops a reproducible public benchmark for curtailment-risk
-decision support on RTS-GMLC. A method-independent proxy target follows
+This paper develops a reproducible benchmark for curtailment-risk
+decision support from public RTS-GMLC inputs. A method-independent proxy target follows
 a fixed 70\% SNSP-type reference policy, and an onset slice complements
 aggregate error with the transition behavior most relevant to early
 warning.
@@ -1256,15 +1262,15 @@ h MAE relative to the prespecified retrieval-removal and
 retrieval-degradation controls (Holm \(p\leq0.0041\)). The same
 mechanism reduces 24 h onset-warning performance, where no-retrieval and
 raw-feature-retrieval variants perform better (Holm \(p\leq0.0040\)).
-Persistence leads aggregate MAE, ridge regression leads day-ahead onset
-detection, and a near-climatology ablation shows that low MAE can
-coexist with zero event F1. The central result is therefore a
+Persistence leads 1 h MAE; at 24 h, SmallBank has the lowest MAE but zero
+event F1, while raw-feature kNN is the strongest non-degenerate MAE
+reference. Ridge regression leads day-ahead onset detection. The central result is therefore a
 cross-horizon reversal in retrieval utility, not a universal ranking of
 forecasting architectures.
 
 The fixed-cap NREL-118 check produces no positive target hours, so
 cross-system use requires policy recalibration before predictive
-comparison. Within its tested scope, the benchmark provides a public,
+comparison. Within its tested scope, the benchmark provides an inspectable,
 statistically controlled basis for developing models that must balance
 continuation accuracy, event detection, and onset warning.
 
