@@ -1,7 +1,8 @@
 ﻿# mintou_p1_dstar_gru_dispatch — 投稿评审工作目录
 
-- **论文标题**: Digital-Twin Siamese GRU for Similarity-Aware Multi-Objective Power Grid Dispatch under Load and Topology Uncertainty
-- **算法**: DSTAR-GRU (Digital-twin Siamese Temporal Alignment and Retrieval GRU)
+- **论文标题**: A Reproducible Retrospective Curtailment-Risk Benchmark and GRU Learned-Space Retrieval Study on RTS-GMLC
+- **论文方法名**: GRU-LSR (GRU learned-space retrieval); `DSTAR-GRU` 仅保留为冻结实验表中的历史标识
+- **任务边界**: 基于按交付时刻索引的 RTS-GMLC `DAY_AHEAD_*` 场景序列进行 1 h/24 h 回溯滞后预测；现有资产没有预测发布时间或数据版本字段，因此不主张运营日前预测、调度或数字孪生能力
 - **目标期刊**: IEEE Access（备选: Electronics；本目录同时评估 MDPI Energies）
 - **本文件夹用途**: 存放该论文面向期刊投稿的评审与修改完善方案（`JOURNAL_REVIEW.md`），基于 ARA 工程证据对照期刊画像产出差距分析与优先级行动清单。
 - **ARA 源路径**: `papers/mintou/mintou_p1_dstar_gru_dispatch`（PAPER.md、logic/、evidence/、src/）
@@ -12,6 +13,7 @@
 |---|---|
 | `README.md` | 本说明 |
 | `JOURNAL_REVIEW.md` | IEEE Access vs MDPI Energies 匹配度对比、写作修改清单、实验设计缺口、数据集缺口、P0/P1/P2 行动清单 |
+| `manuscript/TABLE_TO_CONFIG_MANIFEST.md` | 正文表格到 v6 配置、冻结结果、信息可见性与 v5/v6 来源的映射 |
 
 
 ## Round 2 评审产出 (2026-07-14)
