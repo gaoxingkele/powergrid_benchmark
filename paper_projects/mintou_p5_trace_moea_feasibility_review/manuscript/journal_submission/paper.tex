@@ -39,7 +39,7 @@ The paper makes three evidence-bounded contributions:
 \item
   \textbf{Run-level event co-occurrence summaries separated from optimization.} Each main-run row reports total event count and final-front candidate co-occurrence coverage for in-memory repair-drop and preference-best-response payloads. These fields are quarantined from objectives and selection. They measure event production and set overlap only; the current evidence package retains neither payload order nor stable project identifiers, replacement flags, or evicted portfolios.
 \item
-  \textbf{A reproducible, comparison-bounded evaluation.} Seven review scenarios, 30 seeded runs per stochastic method, component controls, a matched three-budget scan, a one-output comparison, and prespecified bound/reference and formulation/preference sensitivity checks separate global front quality from compromise selection. The complete method improves pooled proxy hypervolume over NSGA-II and the implemented R-NSGA-II control under the reported metric, whereas the direct preference-ablation effect is unresolved and deterministic-rule ordering is normalization-dependent. NERC and MTEP16 diagnostics remain descriptive external-consistency checks rather than expert-validated review performance.
+  \textbf{A reproducible, comparison-bounded evaluation.} Seven review scenarios, 30 seeded runs per stochastic method, component and combined-configuration controls, a matched three-budget scan, a one-output comparison, and prespecified bound/reference and formulation/preference sensitivity checks separate global front quality from compromise selection. The complete method improves pooled proxy hypervolume over NSGA-II and the implemented R-NSGA-II control under the reported metric, whereas the direct preference-ablation effect is unresolved and deterministic-rule ordering is normalization-dependent. NERC and MTEP16 diagnostics remain descriptive external-consistency checks rather than expert-validated review performance.
 \end{enumerate}
 
 The contribution is the measured integration of constrained portfolio search, adaptive preference elitism, deterministic budget repair, and run-level event co-occurrence summaries. These properties are reported separately: the 0.17\% preference-ablation difference does not establish an optimization benefit from adaptation, and event co-occurrence coverage does not measure value in contested human decisions.
@@ -260,6 +260,8 @@ w'_k=\frac{|w_k+\varepsilon_k|}{\|w_k+\varepsilon_k\|_1},\qquad
 
 where the absolute value is componentwise; this is the executed absolute-value-plus-renormalization rule, not Euclidean projection. From the \(2K\) original and perturbed candidates, one weight is seeded uniformly at random and the remaining weights are added greedily by maximum distance from the already retained response set. This is a randomized greedy max--min heuristic, not a global dispersion optimum.
 
+The five-objective mapping above applies directly to TRACE-MOEA and controls that retain all five search objectives. In \texttt{NoReliabilityFeatures}, \texttt{NoRenewableFeatures}, and \texttt{NoScheduleRisk}, the preserved implementation removes one objective coordinate but initializes the first scenario-derived preference vector by truncating its first four entries rather than remapping weights to the surviving objective indices; the other seven vectors are sampled directly in four dimensions. Each named objective-hiding condition therefore changes both objective visibility and the first-vector parameterization. These three conditions are combined-configuration stress tests, not isolated objective ablations.
+
 Budget repair uses the code-level load-support attribute \(\ell_j\) and the quality index \(q_j\):
 
 \[
@@ -296,7 +298,7 @@ The layer maintains \(K=8\) objective-weight vectors \(w_1,\ldots,w_K\) on the f
   \textbf{Adaptive re-selection.} Every five generations, the \(K\) current and \(K\) absolute-value-perturbed weights are evaluated on the same generation-local normalized union. A seeded uniformly random candidate starts the retained set; greedy max--min response dispersion then adds weights until \(K\) remain. Exact dispersion ties use the first candidate returned by \texttt{argmax}. The procedure is stochastic and greedy, and neither the initial candidate nor the retained-vector indices are exported.
 \end{itemize}
 
-The layer is designed for review settings in which a decision maker cannot specify exact reference points in advance, an assumption common in preference-guided EMO (Section 2.2). It identifies weighting directions that yield distinct feasible portfolios and can preserve representatives from those directions. Whether this mechanism improves hypervolume is evaluated separately; Section 6.2 shows that its isolated pooled effect is small and unresolved after cross-scenario correction.
+The layer is designed for review settings in which a decision maker cannot specify exact reference points in advance, an assumption common in preference-guided EMO (Section 2.2). It identifies weighting directions that yield distinct feasible portfolios and can preserve representatives from those directions. Whether this mechanism improves hypervolume is evaluated separately; Section 6.2 shows that its isolated pooled effect is small and unresolved after cross-scenario correction. This rationale is an algorithmic design hypothesis, not a validated theory of human preference elicitation or reviewer behavior; no interaction data were collected.
 
 \subsection{Budget Repair}\label{budget-repair}
 
@@ -404,17 +406,17 @@ Greedy BCR & Baseline & Benefit-cost ratio greedy fill under budget \\
 Random Feasible & Baseline & Random-permutation greedy fill \\
 Ablation-NoFeasibilityRepair & Ablation & Repair disabled; constraint domination only \\
 Ablation-NoPreferenceRanking & Ablation & Preference-adaptive layer disabled \\
-Ablation-NoReliabilityFeatures & Ablation & Reliability objective hidden from search (evaluation unchanged) \\
-Ablation-NoRenewableFeatures & Ablation & Renewable objective hidden from search \\
-Ablation-NoScheduleRisk & Ablation & Risk objective hidden from search \\
+Ablation-NoReliabilityFeatures & Combined control & Reliability objective hidden; preserved first-vector truncation also changes the surviving weight mapping \\
+Ablation-NoRenewableFeatures & Combined control & Renewable objective hidden; preserved first-vector truncation also changes the surviving weight mapping \\
+Ablation-NoScheduleRisk & Combined control & Risk objective hidden; preserved first-vector truncation also changes the surviving weight mapping \\
 Ablation-SingleObjective & Ablation & Search on scalarized weighted sum \\
-Ablation-NSGA2Only & Ablation & Bare kernel: no repair, no preference layer, no event records \\
+Ablation-NSGA2Only & Combined control & Bare kernel: no repair, no preference layer, no event records \\
 Ablation-SmallProjectPool & Ablation & Candidate pool reduced to one third (\textasciitilde{}40 candidates) \\
 \bottomrule
 \end{tabularx}
 \end{table*}
 
-Three ablations (NoReliabilityFeatures, NoRenewableFeatures, NoScheduleRisk) hide one objective from the search while the evaluation remains the full five-objective hypervolume; they measure how critical each review dimension is for the optimizer. Three ablations remove algorithmic components (NoFeasibilityRepair, NoPreferenceRanking, NSGA2Only), and two stress the problem structure (SingleObjective, SmallProjectPool).
+Three combined controls (\texttt{NoReliabilityFeatures}, \texttt{NoRenewableFeatures}, and \texttt{NoScheduleRisk}) hide one objective from the search while evaluation remains the full five-objective hypervolume. Because the preserved implementation also truncates rather than remaps the first scenario-derived preference vector, their outcomes identify the joint effect of objective hiding and that parameterization change; they do not isolate the importance of the named objective. Three ablations remove algorithmic components (\texttt{NoFeasibilityRepair}, \texttt{NoPreferenceRanking}, and the combined \texttt{NSGA2Only} control), and two stress the problem structure (\texttt{SingleObjective} and \texttt{SmallProjectPool}).
 
 \subsection{Protocol, Metric, and Statistics}\label{protocol-metric-and-statistics}
 
@@ -422,7 +424,7 @@ The archive contains 16 methods x 7 scenarios x 30 invocations, or 3360 rows. Tw
 
 The metric is the standard hypervolume of the feasible non-dominated front. Objective values are normalized by fixed per-scenario bounds computed once from a seeded, method-independent reference set consisting of the empty portfolio, all singleton portfolios, and 2048 random feasible portfolios. Singleton rows are not feasibility-filtered, so a singleton whose synthetic cost exceeds the budget can widen the empirical bounds even though it cannot enter a feasible returned front. If \(m_j\) and \(M_j\) are the reference-set minimum and maximum, the executed bounds are padded by 5\%: \(l_j=m_j-0.05(M_j-m_j)\) and \(u_j=M_j+0.05(M_j-m_j)\). These are empirical reference bounds, not theoretical ideal and nadir values. The reference point is 1.1 in each normalized dimension. An experiment that returns no feasible portfolio scores zero. The three deterministic ranking rules produce one portfolio per scenario and appear as single markers in Figure 2. Random Feasible is stochastic and is analyzed by seed.
 
-Seed-level inference uses two-sided Mann--Whitney U tests comparing TRACE-MOEA with each of the twelve stochastic opponents per scenario (\(n=30\) per group). P-values are Holm-corrected within that 12-comparison scenario family, with significance at \(\alpha=0.05\). We report rank-biserial effect sizes and 5000-resample bootstrap confidence intervals for mean differences. The intervals are pointwise and are not multiplicity-adjusted. Comparisons with the three deterministic rules are descriptive point gaps and are not assigned inferential p-values. For each component-level ablation discussed across all seven scenarios, the raw scenario p-values receive a second Holm correction over those seven contrasts. The pooled means across heterogeneous scenarios are descriptive and are not assigned a pooled hypothesis test.
+Seed-level inference uses two-sided Mann--Whitney U tests comparing TRACE-MOEA with each of the twelve stochastic opponents per scenario (\(n=30\) per group). P-values are Holm-corrected within that 12-comparison scenario family, with significance at \(\alpha=0.05\). We report rank-biserial effect sizes and 5000-resample bootstrap confidence intervals for mean differences. The intervals are pointwise and are not multiplicity-adjusted. Comparisons with the three deterministic rules are descriptive point gaps and are not assigned inferential p-values. For each named ablation family discussed across all seven scenarios, the raw scenario p-values receive a second Holm correction over those seven contrasts. This correction does not turn a combined configuration into an isolated component estimand. The pooled means across heterogeneous scenarios are descriptive and are not assigned a pooled hypothesis test.
 
 To remove implementation ambiguity, objective \(j\) is normalized with method-independent bounds \((l_j,u_j)\) as
 
@@ -439,7 +441,7 @@ HV(\mathcal{P})=\mu_5\!\left(\bigcup_{x\in\mathcal{P}}[\tilde F(x),z^{\mathrm{re
 For two seed samples with ranks \(R_i\), the first-sample statistic is
 
 \[
-U_1=n_1n_2+\frac{n_1(n_1+1)}{2}-\sum_{i=1}^{n_1}R_i,
+U_1=\sum_{i=1}^{n_1}R_i-\frac{n_1(n_1+1)}{2},
 \]
 
 and ordered raw p-values are adjusted monotonically by
@@ -481,16 +483,16 @@ The primary pooled proxy result is a mean feasible-front hypervolume of 0.17425 
 Method & Role & Mean HV & Std HV & Mean Runtime (s) & Event Records/Run & Position Co-occurrence \\
 \midrule
 \textbf{TRACE-MOEA} & \textbf{Proposed} & \textbf{0.17425} & \textbf{0.00635} & \textbf{0.113} & \textbf{1126} & \textbf{0.986} \\
-Ablation-NoScheduleRisk & Ablation & 0.17403 & 0.00702 & 0.107 & 1125 & 0.986 \\
+Ablation-NoScheduleRisk & Combined control & 0.17403 & 0.00702 & 0.107 & 1125 & 0.986 \\
 Ablation-NoPreferenceRanking & Ablation & 0.17396 & 0.00564 & 0.109 & 803 & 0.966 \\
 Ablation-NoFeasibilityRepair & Ablation & 0.17300 & 0.00652 & 0.106 & 320 & 0.865 \\
 NSGA-II & Baseline & 0.17270 & 0.00642 & 0.146 & --- & --- \\
-Ablation-NSGA2Only & Ablation & 0.17249 & 0.00652 & 0.102 & --- & --- \\
-Ablation-NoRenewableFeatures & Ablation & 0.16930 & 0.00375 & 0.106 & 919 & 0.964 \\
+Ablation-NSGA2Only & Combined control & 0.17249 & 0.00652 & 0.102 & --- & --- \\
+Ablation-NoRenewableFeatures & Combined control & 0.16930 & 0.00375 & 0.106 & 919 & 0.964 \\
 AHP-TOPSIS & Baseline & 0.13468 & 0.00269 & 0.065 & --- & --- \\
 R-NSGA-II & Baseline & 0.11980 & 0.02671 & 0.192 & --- & --- \\
 Ablation-SingleObjective & Ablation & 0.11617 & 0.02637 & 0.112 & 1611 & 0.984 \\
-Ablation-NoReliabilityFeatures & Ablation & 0.09081 & 0.02124 & 0.106 & 915 & 0.977 \\
+Ablation-NoReliabilityFeatures & Combined control & 0.09081 & 0.02124 & 0.106 & 915 & 0.977 \\
 Random Feasible & Baseline & 0.08064 & 0.02261 & 0.065 & --- & --- \\
 Ablation-SmallProjectPool & Ablation & 0.06920 & 0.01280 & 0.079 & 654 & 0.970 \\
 Greedy BCR & Baseline & 0.05576 & 0.03248 & 0.065 & --- & --- \\
@@ -540,13 +542,13 @@ The pattern is consistent with, but does not prove, the design hypothesis. Gains
 \caption{Pooled mean hypervolume of the full method and the eight ablations (error bars = one standard deviation). Two annotations identify the results that most constrain architectural interpretation.}\label{fig:3}
 \end{figure*}
 
-Figure 3 orders the attribution. The dominant effects are related to objective visibility: hiding the reliability objective from search costs 47.9\% of the pooled hypervolume (0.09081 vs.~0.17425); scalarizing all objectives into a single weighted sum costs 33.3\% (0.11617); hiding the renewable objective costs 2.8\% (0.16930); and cutting the candidate pool to one third costs 60.3\% (0.06920). The five-dimensional review structure itself --- not any single algorithmic trick --- carries most of the task difficulty.
+Figure 3 orders the observed configuration contrasts. The largest differences occur for the \texttt{NoReliabilityFeatures} combined control (47.9\% lower pooled hypervolume; 0.09081 vs.~0.17425), the single-objective formulation (33.3\% lower; 0.11617), the \texttt{NoRenewableFeatures} combined control (2.8\% lower; 0.16930), and the one-third candidate pool (60.3\% lower; 0.06920). The objective-hiding contrasts jointly change a search coordinate and the first-vector weight mapping, so they cannot identify the effect of objective visibility alone. The results show that these tested configurations materially affect the proxy task; they do not attribute the difference to a single named objective.
 
 Among the component-level ablations, disabling budget repair (NoFeasibilityRepair) costs 0.72\% of pooled hypervolume and reduces event--final-front candidate-position co-occurrence coverage from 0.986 to 0.865. This identifies the contribution of repair-drop positions to the set-overlap statistic; it does not validate human usefulness. Disabling all review-specific components at once (NSGA2Only, the bare kernel) costs 1.01\% (0.17249 vs.~0.17425).
 
-The component results constrain the algorithmic claim. Removing preference adaptation (NoPreferenceRanking) changes pooled hypervolume by only 0.17\%. The full method wins the renewable scenario under the within-scenario family (\(p_{Holm}=0.0206\)), but no preference-ablation contrast remains significant after a second Holm correction across the seven scenarios (\(p=0.0722\) for that cell). Removing schedule risk changes pooled hypervolume by 0.13\%. The risk-blind variant is higher in traceability\_evaluation (\(p_{Holm}=0.0219\) within scenario), but that contrast also falls just outside the cross-scenario threshold (\(p=0.0510\)). These are exploratory mechanism patterns rather than resolved component effects.
+The component results constrain the algorithmic claim. Removing preference adaptation (\texttt{NoPreferenceRanking}) changes pooled hypervolume by only 0.17\%. The full method wins the renewable scenario under the within-scenario family (\(p_{Holm}=0.0206\)), but no preference-ablation contrast remains significant after a second Holm correction across the seven scenarios (\(p=0.0722\) for that cell). The \texttt{NoScheduleRisk} combined control changes pooled hypervolume by 0.13\%. It is higher in \texttt{traceability\_evaluation} (\(p_{Holm}=0.0219\) within scenario), but that contrast also falls just outside the cross-scenario threshold (\(p=0.0510\)). Because the control changes both risk-objective visibility and the first-vector mapping, this is an exploratory configuration pattern rather than an isolated schedule-risk effect.
 
-Two readings follow. The schedule-risk objective enters as a portfolio mean, producing a weak search gradient and, in one scenario, an adverse difference. Preference-selected best responses also overlap substantially with portfolios already preserved by constraint-dominated crowding, consistent with evidence that preference guidance is not automatically beneficial {[}20{]}. The complete TRACE-MOEA has the highest pooled hypervolume among the tested external baselines and no significant per-scenario loss, but its margin over its leanest viable variant is small. A hypervolume-only user could disable preference adaptation with little measured loss. The observed trade-off is a reduction in candidate-position co-occurrence coverage (0.966 versus 0.986). Because actual replacement and eviction are not counted, the release cannot show which weighting directions changed the population.
+Two readings follow. The preserved schedule-risk control cannot distinguish a weak gradient from its altered preference-vector mapping, so no schedule-risk mechanism is assigned. Preference-selected best responses also overlap substantially with portfolios already preserved by constraint-dominated crowding, consistent with evidence that preference guidance is not automatically beneficial {[}20{]}. The complete TRACE-MOEA has the highest pooled hypervolume among the tested external baselines and no significant per-scenario loss, but its margin over its leanest viable variant is small. A hypervolume-only user could disable preference adaptation with little measured loss. The observed trade-off is a reduction in candidate-position co-occurrence coverage (0.966 versus 0.986). Because actual replacement and eviction are not counted, the release cannot show which weighting directions changed the population.
 
 \subsection{Implemented Run-Level Event Records and Candidate Co-Occurrence}\label{implemented-run-level-event-records-and-candidate-co-occurrence}
 
@@ -738,7 +740,7 @@ The two diagnostics answer different questions. Figure 7 shows the computation a
 
 \section{Discussion}\label{discussion}
 
-\textbf{Preference guidance and the constrained kernel.} The three significant comparisons with NSGA-II occur in preference-emphasized scenarios (Table 5), but the direct NoPreferenceRanking ablation is unresolved after correction across its seven scenarios. Preference-selected best responses appear to overlap portfolios already preserved by crowding, which may explain the small marginal effect of the adaptive layer. The prespecified scan reinforces this conditional reading: \(K=4\) is slightly positive in mean full-front HV, \(K=16\) slightly negative, and reliability, renewable, and traceability seed profiles do not move in one direction. The traceability scenario also favors the risk-blind variant within its scenario family, but the contrast falls just outside the second cross-scenario correction. Update cadence remains untested, and none of these descriptive cells resolves an isolated preference-layer effect.
+\textbf{Preference guidance and the constrained kernel.} The three significant comparisons with NSGA-II occur in preference-emphasized scenarios (Table 5), but the direct \texttt{NoPreferenceRanking} ablation is unresolved after correction across its seven scenarios. Preference-selected best responses appear to overlap portfolios already preserved by crowding, which may explain the small marginal effect of the adaptive layer. The prespecified scan reinforces this conditional reading: \(K=4\) is slightly positive in mean full-front HV, \(K=16\) slightly negative, and reliability, renewable, and traceability seed profiles do not move in one direction. The traceability scenario also favors the \texttt{NoScheduleRisk} combined control within its scenario family, but the contrast falls just outside the second cross-scenario correction and cannot be assigned to schedule risk alone. Update cadence remains untested, and none of these descriptive cells resolves an isolated preference-layer effect.
 
 \textbf{Normalization and output matching.} The reported clipped empirical metric mixes feasible random portfolios with unfiltered singleton bounds. Clipping affects 9.79\% of rerun front points, and the deterministic-rule ordering changes under expanded versus analytic bounds. The proposed method remains slightly above NoPreferenceRanking in the tested schemes, but that stability does not transfer to a general claim against point-valued MCDA rules. The matched one-output comparison also shows distinct reliability, renewable, risk, cost, and cardinality trade-offs rather than a dominating recommendation. Hypervolume is appropriate for front coverage; it should not be read as a matched decision-output utility score.
 
@@ -756,7 +758,7 @@ Against AHP-TOPSIS, the reported clipped full-front hypervolume gap is 29.4\%, a
 
 \section{Limitations}\label{limitations}
 
-Nine limitations constrain the scope of the claims in this paper.
+Ten limitations constrain the scope of the claims in this paper.
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -778,6 +780,8 @@ Nine limitations constrain the scope of the claims in this paper.
   \textbf{Library-default baseline state is incompletely recorded.} R-NSGA-II is passed the disclosed raw reference point, \texttt{epsilon=0.01}, population 40, and \texttt{n\_gen=40}, but the pymoo version, Boolean-operator probabilities, internal normalization mode, and per-generation ideal/nadir values were not serialized in the original configuration. The stage runtime could not rerun the recorded comparator fronts under a compatible library ABI, so only preserved comparator rows enter the matched-output analysis and no alternative library version is substituted. Exact survival-state replay cannot be certified.
 \item
   \textbf{One direct preference-based comparator is not a family survey.} R-NSGA-II closes the absence of a reference-point control and is evaluated under the same nominal population, generations, constraints, and three budget levels. However, the study does not include RVEA, NSGA-III with preference articulation, or interactive decision-maker feedback. The result supports TRACE-MOEA against the implemented R-NSGA-II configuration, not superiority over the broader preference-based EMO family.
+\item
+  \textbf{Objective-hiding controls are combined perturbations.} \texttt{NoReliabilityFeatures}, \texttt{NoRenewableFeatures}, and \texttt{NoScheduleRisk} remove one search objective but the preserved implementation truncates the first scenario-derived preference vector rather than remapping it to the surviving coordinates. Their full-front hypervolume contrasts therefore estimate the joint effect of objective hiding and that weight-mapping change. No isolated reliability-, renewable-, or schedule-risk contribution is identified by those runs.
 \end{enumerate}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
@@ -790,7 +794,7 @@ On the five-objective, 120-project proxy benchmark, TRACE-MOEA attains a descrip
 
 The NERC consistency backtest yields priority-capture ratios of 1.34--1.55. The MISO MTEP16 backtest yields broad capture of 1.070--1.079 and a raw point-biserial correlation up to 0.169. Because the public-record tests do not preserve portfolio dependence or a comparison family, these values support descriptive external consistency rather than confirmatory above-chance alignment.
 
-Adaptive preference elitism changes reported pooled hypervolume by 0.17\%, but its direct effect is unresolved after Holm correction across seven scenarios (minimum adjusted \(p=0.0722\)). TRACE-MOEA remains slightly above NoPreferenceRanking under the tested empirical, expanded, analytic, and alternative-reference schemes, while formulation and preference sensitivity includes adverse and near-null cells. The deterministic-rule order changes with normalization, and 9.79\% of rerun front points are clipped by the reported empirical bounds. Its measured record-level effect is the addition of preference-best-response records and a change in event--front position co-occurrence; actual replacement is not counted. The schedule-risk contrast is likewise unresolved, and the external checks remain descriptive. The evidence therefore supports a budget-constrained proxy-search framework with implemented run-level event records and co-occurrence summaries, not normalization-invariant decision superiority. Stable-ID lineage and replay evidence, expert labels, electrical checks, and human evaluation remain necessary before claims about chronology, review effectiveness, or deployment.
+Adaptive preference elitism changes reported pooled hypervolume by 0.17\%, but its direct effect is unresolved after Holm correction across seven scenarios (minimum adjusted \(p=0.0722\)). TRACE-MOEA remains slightly above \texttt{NoPreferenceRanking} under the tested empirical, expanded, analytic, and alternative-reference schemes, while formulation and preference sensitivity includes adverse and near-null cells. The deterministic-rule order changes with normalization, and 9.79\% of rerun front points are clipped by the reported empirical bounds. Its measured record-level effect is the addition of preference-best-response records and a change in event--front position co-occurrence; actual replacement is not counted. The \texttt{NoScheduleRisk} combined-control contrast is likewise unresolved and cannot isolate a schedule-risk contribution; the external checks remain descriptive. The evidence therefore supports a budget-constrained proxy-search framework with implemented run-level event records and co-occurrence summaries, not normalization-invariant decision superiority. Stable-ID lineage and replay evidence, expert labels, electrical checks, and human evaluation remain necessary before claims about chronology, review effectiveness, or deployment.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 

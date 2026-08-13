@@ -69,9 +69,15 @@ TRACE-MOEA, NSGA-II, and R-NSGA-II use the disclosed population size of 40,
 five-objective Das--Dennis directions; the run archive does not retain `n_eval`,
 so identical objective-call budgets are not claimed. Methods receive the same
 scenario candidate pool and budget, except for the explicitly labeled
-SmallProjectPool ablation. Other ablations deliberately hide or disable the
-component named in the ablation while evaluation remains on the full fixed
-objective space. R-NSGA-II is the direct implemented preference-family control.
+SmallProjectPool ablation. `NoFeasibilityRepair` and `NoPreferenceRanking`
+disable their named components while evaluation remains on the full fixed
+objective space. The three objective-hiding conditions are not isolated
+ablations: `NoReliabilityFeatures`, `NoRenewableFeatures`, and
+`NoScheduleRisk` remove one search coordinate, but the preserved implementation
+also truncates the first scenario-derived preference vector to four leading
+entries rather than remapping it to the surviving objective indices. Their
+estimand is therefore the joint effect of objective hiding and that first-vector
+parameterization change. R-NSGA-II is the direct implemented preference-family control.
 The three-budget control keeps the nominal population, generation limit,
 scenario weights, and seed count fixed while changing budget multiplier and
 method. Its raw R-NSGA-II reference point is recomputed from each budget's
@@ -140,10 +146,12 @@ external-consistency checks.
   compliance-share TRACE cell is below its matched NoPreferenceRanking control
   by 0.000795. Some matched single-output effects move opposite the full-front
   effects. These descriptive results do not establish a preference-layer cause.
-- The NoScheduleRisk ablation has a slightly lower pooled mean overall but is
-  higher in `traceability_evaluation` under the within-scenario family. That
-  adverse full-method contrast does not survive the second correction
-  (cross-scenario-adjusted p = 0.0510).
+- The `NoScheduleRisk` combined control has a slightly lower pooled mean overall
+  but is higher in `traceability_evaluation` under the within-scenario family.
+  That adverse full-method contrast does not survive the second correction
+  (cross-scenario-adjusted p = 0.0510). Because risk-objective visibility and
+  the first preference-vector mapping change together, the run does not identify
+  an isolated schedule-risk effect.
 - The 98.6% value is a software-level set overlap between final-front pool-local
   positions and generated event positions. It is not evidence of explanation
   quality, faster review, more consistent decisions, contestability, or
@@ -199,6 +207,16 @@ $-3.35\times10^{-17}$). That amendment changes the clipping count but not any
 hypervolume. No failed seed is omitted, no result is selected for appearance,
 and the existing public-record backtests are not rerun or promoted beyond
 descriptive scope.
+
+The three-round closure rechecked the implementation contract against the
+archived configuration and result tables. It corrected the displayed
+first-sample Mann--Whitney statistic to
+$U_1=\sum_iR_i-n_1(n_1+1)/2$ without changing archived p-values or effects, and
+it reclassified the three objective-hiding conditions as combined controls.
+`manuscript/THREE_ROUND_SCIENTIFIC_CLOSURE.md` records the logic,
+methodology--statistics, and theory--innovation dispositions. The current
+artifact manifest records the closure documents and regenerated derived-table
+hashes; it does not treat the manifest as new experimental evidence.
 
 The host ABI cannot execute new pymoo 0.6.2 fronts with its `moocore`
 dependency. Consequently, the new full-front recomputations are restricted to

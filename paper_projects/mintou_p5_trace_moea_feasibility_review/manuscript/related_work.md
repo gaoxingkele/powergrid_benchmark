@@ -6,6 +6,13 @@ Every DOI below was resolved against the Crossref REST API on 2026-07-16
 Phrasing is written independently of the sibling p6 (BiLo-NSGA) manuscript to keep the
 two texts CrossCheck-safe; only unavoidable classic references overlap.
 
+**Status notice.** This is an internal historical literature worksheet. The
+claim-authoritative synthesis is Section 2 of `MANUSCRIPT.md`, and scientific
+closure is recorded in `THREE_ROUND_SCIENTIFIC_CLOSURE.md`. Planning language
+below is bounded by those files and is not evidence for lineage, replay,
+explanation quality, human preference validity, deployment, or novelty by
+exhaustive absence.
+
 ---
 
 ## Thread A — Power grid investment portfolio optimization and feasibility-review MCDM
@@ -36,8 +43,9 @@ review boards actually use when they certify project feasibility.
 **What Thread A leaves open.** Expansion planning optimizes network variables, not candidate
 subsets; MCDM appraisal scores candidates one at a time and cannot represent budget crowding-out
 or cross-project trade-offs; RPM-style exact portfolio methods handle small pools with additive
-value only. None of these lines yields, for a 100+ candidate grid review, a portfolio-level search
-whose intermediate decisions remain individually inspectable.
+value only. These differences motivate the present portfolio-level proxy search, but the released
+event fields expose only run-level count and pool-position co-occurrence rather than individually
+inspectable intermediate decisions.
 
 ---
 
@@ -72,9 +80,10 @@ and adaptive preference articulation.
 decision maker who supplies reference points or aspiration levels, and (ii) continuous benchmark
 geometry. Adaptive-preference mechanisms (RVEA-style) tune vectors to objective-space shape, not
 to a combinatorial review task; and the literature's own audit (Li et al. 2020) warns that
-preference layers may contribute little — a warning our ablation results confirm and quantify on
-a constrained binary portfolio problem. No prior work couples an adaptive preference population
-with constraint repair and a decision archive for budget-constrained grid project review.
+preference layers may contribute little — consistent with the unresolved direct preference-layer
+effect in this constrained binary portfolio benchmark. The paper evaluates a combination of
+adaptive preference elitism, deterministic repair, and bounded event summaries; it does not claim
+that this combination establishes isolated component novelty or a decision archive.
 
 ---
 
@@ -92,32 +101,30 @@ for optimization/metaheuristics, provenance models, and algorithmic audit practi
 4. **Bacardit, J.; Brownlee, A.E.I.; Cagnoni, S.; Iacca, G.; McCall, J.; Walker, D.** The intersection of evolutionary computation and explainable AI. In *Proceedings of GECCO 2022 Companion*; pp. 1757–1762. https://doi.org/10.1145/3520304.3533974
    - Position paper defining "explainable metaheuristics"; explicitly lists search-trajectory explanation as an open research direction rather than an available technique.
 5. **Herschel, M.; Diestelkämper, R.; Ben Lahmar, H.** A survey on provenance: What for? What form? What from? *The VLDB Journal* **2017**, *26*(6), 881–906. https://doi.org/10.1007/s00778-017-0486-1
-   - Provenance taxonomy (why/how/where); our per-run decision archive instantiates "how-provenance" for an evolutionary search process.
+   - Provenance taxonomy (why/how/where); the present count-and-overlap summaries fall short of process provenance because stable identifiers, ordered payloads, and state transitions are absent.
 6. **Moreau, L.; Groth, P.; Cheney, J.; Lebo, T.; Miles, S.** The rationale of PROV. *Journal of Web Semantics* **2015**, *35*, 235–257. https://doi.org/10.1016/j.websem.2015.04.001
    - The W3C PROV design rationale: standardized, machine-readable derivation records; the conceptual template for evidence-linked review trails.
 7. **Raji, I.D.; Smart, A.; White, R.N.; et al.** Closing the AI accountability gap: defining an end-to-end framework for internal algorithmic auditing. In *Proceedings of FAT\* 2020*; pp. 33–44. https://doi.org/10.1145/3351095.3372873
-   - Institutional audit framing: accountability requires artifacts produced *during* the process, not only outcome documentation — the requirement our archive is built to satisfy for portfolio review.
+   - Institutional audit framing motivates artifacts produced during a process. The present release does not satisfy an end-to-end audit framework because it retains only aggregate run-level fields.
 
 **What Thread C leaves open.** XAI concentrates on learned predictors; explainable-metaheuristics
 work is programmatic, with search-trajectory explanation named as open; provenance standards say
 *how* to record derivations but are silent on *what* an evolutionary review search should record.
-No published system emits a per-decision, evidence-linked archive from inside a constrained MOEA
-and reports its coverage descriptively without letting it contaminate the performance metric.
+The present implementation quarantines its run-level event summaries from the performance metric;
+stable-ID ordered records, state snapshots, lineage, and replay remain open requirements.
 
 ---
 
 ## Gap statement
 
-Across the three threads, the specific opening this paper occupies is: **grid investment review needs
-a portfolio-level optimizer whose (i) preference structure adapts during the run instead of being
-fixed a priori or elicited from an absent decision maker, (ii) budget feasibility is restored by an
-explicit repair operator rather than penalties, and (iii) entire decision path is exported as an
-auditable archive — evaluated with a method-independent metric and, additionally, checked against
-external real-world records (NERC reliability reports; MISO MTEP16 project outcomes) rather than
-only against the benchmark's own objectives.** Thread A supplies auditable but portfolio-blind
-scoring and portfolio-aware but small-scale exact methods; Thread B supplies preference machinery
-tuned for continuous benchmarks with an explicit decision maker; Thread C supplies audit principles
-without an optimization instantiation. TRACE-MOEA is built at the intersection of the three.
+Across the three threads, the bounded opening evaluated here is a budget-constrained portfolio
+proxy that combines adaptive preference elitism, explicit repair, and performance-quarantined
+run-level event summaries under a method-independent metric. NERC and MISO MTEP16 checks provide
+descriptive external-consistency views rather than expert validation. Thread A motivates portfolio
+selection, Thread B supplies preference machinery and cautions about weak preference effects, and
+Thread C identifies provenance requirements that the current aggregate event fields do not meet.
+TRACE-MOEA evaluates their integration; it does not establish isolated component novelty, an
+auditable decision path, or a validated model of reviewer preference.
 
 ## Distinction from the sibling method BiLo-NSGA [sibling]
 
@@ -141,6 +148,8 @@ pipeline, and we separate the two studies on both axes so that neither text nor 
   reliability reports and MISO MTEP16 historical project outcomes. BiLo-NSGA poses a
   four-objective problem where the **hard budget envelope** is the organizing question (budget
   multiplier scans, loose-budget stress tests) and no external-outcome backtest is attempted.
-- **Shared artifact, declared.** Only the candidate-pool generation code is shared; problem
-  dimensionality, method internals, scenario axes, statistics, and external validation are
-  paper-specific. The shared pipeline is declared in the Data Availability statement of both papers.
+- **Shared artifact, declared.** Candidate-generation code, source corpora, common benchmark and
+  evaluation utilities, and public-record backtest infrastructure are shared. Problem formulation,
+  configurations, executions, run outputs, selected portfolios, comparisons, and claims are
+  paper-specific. The shared infrastructure is disclosed and is not claimed as TRACE-MOEA's
+  independent contribution.

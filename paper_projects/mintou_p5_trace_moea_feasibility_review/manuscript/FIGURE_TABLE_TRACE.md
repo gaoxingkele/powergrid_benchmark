@@ -7,7 +7,7 @@ This internal map records the accepted input and regenerated artifact behind eac
 | Table 4 | `derived_tables/p5_main_leaderboard.csv` | Main run rows | Pooled descriptive summary; deterministic rows represent seven unique outputs |
 | Figure 2 | `figures/fig_hv_boxplot.svg` and `.png` | Main run rows | Seed distributions for stochastic methods; deterministic methods shown as unique-output markers |
 | Table 5 | `derived_tables/p5_nsga2_scenario_comparison.csv` | Main inference rows | Two-sided Mann--Whitney U; Holm across 12 stochastic opponents within scenario |
-| Figure 3 | `figures/fig_ablation.svg` and `.png` | Main run and component-inference rows | Pooled effects descriptive; scenario tests retain their stated multiplicity families |
+| Figure 3 | `figures/fig_ablation.svg` and `.png` | Main run and named-configuration inference rows | Pooled effects descriptive; objective-hiding rows are combined controls; scenario tests retain their stated multiplicity families |
 | Figure 4 | `figures/fig_event_record_diagnostics.svg` and `.png` | Main run rows | Descriptive implemented-record count and pool-position co-occurrence; no lineage or replay claim |
 | Table 6 | `derived_tables/p5_matched_budget_controls.csv` | Accepted three-budget summary and inference rows | Hypervolume Holm family contains two comparators within each budget; preference distance descriptive |
 | Figure 5 | `figures/fig_preference_budget_controls.svg` and `.png` | Accepted three-budget summary rows | Hypervolume and preference distance kept in separate panels |

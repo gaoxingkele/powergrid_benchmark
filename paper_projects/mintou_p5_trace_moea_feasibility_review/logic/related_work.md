@@ -2,6 +2,12 @@
 
 > Auto-extracted draft, 2026-07-14. Source: 10 external target-journal comparator papers under `ara_collections/target_journal_related/papers/tj_p5_*`. **Review, group, and refine before submission** — this is a structured draft, not a finished literature review.
 
+> **Closure status:** historical discovery scaffold only. It contains incomplete
+> metadata and absence-based positioning language, so it is not claim evidence.
+> Use `manuscript/MANUSCRIPT.md` Section 2 and
+> `manuscript/THREE_ROUND_SCIENTIFIC_CLOSURE.md` for the reviewed positioning and
+> contribution boundary.
+
 ## Positioning
 
 This work (p5) sits among 10 recently published comparator papers in the project's target-journal collection. The following survey groups them by method/theme and highlights what this paper uniquely contributes.
