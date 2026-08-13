@@ -12,11 +12,11 @@
      Figures: ./figures/ (print-resolution PNG plus PDF/SVG evidence figures;
      regenerate Figures 1--3 and 5 with figures/make_figures.py and Figure 4 with
      scripts/mintou/generate_evidence_gap_figures.py)
-     Naming policy: the mechanism is described as "preference-adaptive" throughout;
-     no "coevolution" terminology is used, consistent with ROUND2_REVIEW.md finding CL2.
+     Naming policy: the mechanism is described as "adaptive preference elitism",
+     consistent with the measured operation and ROUND2_REVIEW.md finding CL2.
      All AUTHOR INPUT REQUIRED markers below must be completed before submission. -->
 
-# TRACE-MOEA: Traceable Multi-Objective Portfolio Optimization for Power-Grid Investment Review
+# TRACE-MOEA: Constrained Power-Grid Portfolio Search with Adaptive Preference Elitism, Budget Repair, and Run-Level Intervention-Event Records
 
 **Authors:** Yubin Lin (林宇彬), Jiyu Li (李继宇), Xiaofei Ruan (阮筱菲), Xiaoyu Huang (黄晓予), Dishan Yang (杨迪珊)
 **Affiliations:** Economic and Technological Research Institute of State Grid Fujian Electric Power Co., Ltd., Fuzhou 350000, Fujian, China
@@ -24,9 +24,9 @@
 
 ## Abstract
 
-Utilities reviewing large grid-project queues need portfolio-aware optimization together with a record of the interventions that shape each recommendation. TRACE-MOEA combines preference-guided ranking, deterministic budget repair, and a quarantined decision trace that records repair drops and preference-elite injections without entering the evaluation metric. On a reproducible five-objective benchmark of 120 candidate projects, the method reaches pooled mean hypervolume 0.17425 across seven review scenarios and 30 seeds per stochastic method, 0.89% above NSGA-II (0.17270). Among 28 comparisons with four stochastic baselines, TRACE-MOEA has 27 positive mean differences and 24 Holm-significant wins, with no significant loss; 21 gaps against three deterministic ranking rules are descriptive and all favor TRACE-MOEA. A separate 270-run budget scan yields higher hypervolume than R-NSGA-II and NSGA-II at all three tested budgets. Component attribution is narrower: removing preference adaptation changes pooled hypervolume by 0.17%, and the direct contrast is unresolved after cross-scenario correction. The decision trace covers 98.6% of projects in returned fronts, but its effect on human review remains untested. Public reliability and project-outcome checks provide descriptive external consistency rather than validated review performance.
+Utilities reviewing large grid-project queues need constrained portfolio search and a record of the search interventions associated with each run. TRACE-MOEA combines adaptive preference elitism with deterministic budget repair. Its released run table reports counts and final-front project coverage for generated `repair_drop` and `preference_elite` events; no event statistic enters evaluation. On a reproducible five-objective benchmark of 120 candidate projects, the method reaches pooled mean hypervolume 0.17425 across seven review scenarios and 30 seeds per stochastic method, 0.89% above NSGA-II (0.17270). Among 28 comparisons with four stochastic baselines, TRACE-MOEA has 27 positive mean differences and 24 Holm-significant wins, with no significant loss; 21 gaps against three deterministic ranking rules are descriptive and all favor TRACE-MOEA. A separate 270-run budget scan yields higher hypervolume than R-NSGA-II and NSGA-II at all three tested budgets. Component attribution is narrower: removing preference adaptation changes pooled hypervolume by 0.17%, and the direct contrast is unresolved after cross-scenario correction. The run-level records associate 98.6% of projects in returned fronts with at least one generated event, but ordered event payloads are not released and effects on human review remain untested. Public reliability and project-outcome checks provide descriptive external consistency rather than validated review performance.
 
-**Keywords:** power grid investment review; project portfolio selection; multi-objective evolutionary algorithm; preference adaptation; decision traceability; hypervolume; external validity backtest
+**Keywords:** power grid investment review; constrained portfolio search; multi-objective evolutionary algorithm; adaptive preference elitism; budget repair; run-level event records; hypervolume
 
 ---
 
@@ -36,19 +36,19 @@ Grid operators face more candidate investments than available capital can suppor
 
 The instruments that boards actually use come from multi-criteria decision analysis (MCDA). The AHP and TOPSIS families dominate energy investment appraisal [3,4] and continue to be refined for grid asset prioritization at this journal [5]. Their strength is procedural transparency: weights, pairwise judgments, and closeness scores can all be minuted. Their structural weakness is independent project scoring, which overlooks budget crowding-out and portfolio-level trade-offs. Exact portfolio methods such as Robust Portfolio Modeling address this issue for small pools [6,7], but richer dependencies and larger combinatorial pools can make them computationally difficult. MOEAs offer scalable approximate search [8,9], although a converged front alone does not explain why a project appears in a recommendation.
 
-TRACE-MOEA is designed to produce both portfolios and review evidence. A preference-adaptive layer maintains objective-weight vectors and injects their best-response portfolios as elites. Every five generations, the vectors are perturbed and retained according to the dispersion of their induced responses. Deterministic repair removes low-benefit selections until the budget is met. A quarantined archive timestamps repair drops and preference-elite injections; no trace statistic enters an objective, constraint, or selection decision.
+TRACE-MOEA is designed to search for budget-constrained portfolios while instrumenting two review-specific operations. An adaptive preference-elitism layer maintains objective-weight vectors and protects their best-response portfolios; every five generations, the vectors are perturbed and retained according to the dispersion of their induced responses. Deterministic repair removes low-benefit selections until the budget is met. During a run, the implementation generates repair-drop and preference-elite event payloads. The released evidence reduces those payloads to per-run event counts and final-front project coverage, and no event statistic enters an objective, constraint, or selection decision.
 
 Because genuine utility review records with feasibility labels are confidential, evaluation is conducted on a reproducible proxy benchmark. The pool of 120 projects is generated by published deterministic rules from RTS-GMLC zones, SimBench networks, and metadata from 40 cached public NERC reliability reports. Seven scenarios cover portfolio optimization, distribution-only review, reliability and renewable preferences, budget tightening, preference-aware support, and traceability. A five-objective formulation encodes the investment-effectiveness lens. A two-rung external-consistency ladder then checks the selected portfolios against a NERC-derived rule and against historical MISO MTEP16 project outcomes.
 
-The paper makes three contributions:
+The paper makes three evidence-bounded contributions:
 
-1. **An inspectable portfolio-search architecture.** TRACE-MOEA combines a constrained non-dominated sorting kernel with preference-vector updates and deterministic budget repair. A quarantined output channel records preference-elite injections and repair drops without feeding trace variables back into the objectives, constraints, or selection rule.
+1. **A constrained portfolio-search architecture.** TRACE-MOEA combines a constrained non-dominated sorting kernel with adaptive preference elitism and deterministic budget repair. The title names these implemented mechanisms; it does not imply that the preference layer has a resolved independent effect.
 
-2. **A reproducible evaluation for large grid-project queues.** The five-objective benchmark contains 120 candidates in six archetypes derived from RTS-GMLC, SimBench, and public NERC metadata. Seven review scenarios, 30 seeded runs, general-purpose and preference-based optimizers, component controls, and a matched three-budget scan evaluate front quality, preference distance, computation, and trace production.
+2. **Run-level intervention-event records separated from optimization.** Each main-run row reports event count and final-front project coverage for in-memory repair-drop and preference-elite payloads. These fields are quarantined from objectives and selection. They measure event production and coverage only; the current evidence package does not retain the ordered payloads needed for a released project-level audit trail.
 
-3. **A separation of optimization quality, component effects, and external consistency.** The complete framework improves pooled proxy hypervolume over NSGA-II and the implemented R-NSGA-II control, whereas the preference-layer removal is unresolved. The trace covers 98.6% of projects in returned fronts. NERC and MTEP16 diagnostics then test whether selected portfolios conflict with public risk and outcome records without treating those checks as expert-validated review performance.
+3. **A reproducible, comparison-bounded evaluation.** Seven review scenarios, 30 seeded runs per stochastic method, component controls, and a matched three-budget scan separate global front quality, preference distance, budget-repair effects, and run-level event summaries. The complete method improves pooled proxy hypervolume over NSGA-II and the implemented R-NSGA-II control, whereas the direct preference-ablation effect is unresolved. NERC and MTEP16 diagnostics remain descriptive external-consistency checks rather than expert-validated review performance.
 
-The contribution is an inspectable portfolio-search workflow. The optimizer produces competitive proxy fronts under the tested review scenarios, and the trace supplies a machine-readable history of preference protection and repair drops. These properties are measured separately: the 0.17% preference-ablation difference does not establish an optimization benefit from adaptation, and trace coverage does not measure its value in contested human decisions.
+The contribution is the measured integration of constrained portfolio search, adaptive preference elitism, deterministic budget repair, and run-level intervention-event summaries. These properties are reported separately: the 0.17% preference-ablation difference does not establish an optimization benefit from adaptation, and trace coverage does not measure value in contested human decisions.
 
 Section 2 situates the work in three literatures. Section 3 defines the problem and the public benchmark. Section 4 details the algorithm. Section 5 describes the experimental protocol, Section 6 the results, Section 7 the discussion, Section 8 the limitations, and Section 9 concludes.
 
@@ -64,25 +64,25 @@ Transmission expansion planning treats the network topology itself as the decisi
 
 For this sub-problem, the energy-domain literature relies heavily on MCDA. The surveys of Wang et al. [3] and Kumar et al. [4] document the use of AHP and TOPSIS across energy investment appraisal tasks, and this tradition remains active: recent studies combine fuzzy-AHP with distribution-transformer maintenance priorities [5] and explainable multi-criteria scoring with strategic energy-investment ranking [33]. Portfolio-explicit alternatives exist in operational research. Robust Portfolio Modeling (RPM) computes non-dominated project portfolios under incomplete preference information [6] and has been applied to infrastructure maintenance programming [7].
 
-Recent power-system planning studies have strengthened the application layer through coordinated transmission-storage planning [29], interruption-cost estimation for reliability investment [30], grid-side storage investment-return analysis [31], and hybrid exact-heuristic treatment of non-analytical investment costs [32]. These studies provide increasingly detailed engineering or economic validation, but they optimize system expansion or asset configuration rather than a reviewable selection process for a large, pre-specified project queue. Hybrid grid-investment models also couple risk and benefit dimensions using MCDA fronts [11]. The remaining gap is therefore not portfolio optimization alone. It is the combination of portfolio-level search over more than one hundred candidates, online preference adaptation, active budget repair, and an exported decision record that can be inspected independently of the optimization metric.
+Recent power-system planning studies have strengthened the application layer through coordinated transmission-storage planning [29], interruption-cost estimation for reliability investment [30], grid-side storage investment-return analysis [31], and hybrid exact-heuristic treatment of non-analytical investment costs [32]. These studies provide increasingly detailed engineering or economic validation, but they optimize system expansion or asset configuration rather than a reviewable selection process for a large, pre-specified project queue. Hybrid grid-investment models also couple risk and benefit dimensions using MCDA fronts [11]. The present study addresses a narrower combination: portfolio-level search over more than one hundred candidates, adaptive preference elitism, active budget repair, and run-level intervention-event summaries reported independently of the optimization metric.
 
 ### 2.2. Preference-Guided Evolutionary Multi-Objective Optimization
 
 Dominance-based MOEAs [8] and decomposition-based ones [9,12] treat all trade-off directions as equally interesting, which motivated two decades of research on preference injection into evolutionary multi-objective optimization. Representative approaches include reference-point guidance [13], achievement-scalarizing function methods [14], preference-modified dominance relations [15], and comprehensive taxonomies of a priori, interactive, and a posteriori preference articulation [16,17].
 
-Two developments in this thread are particularly relevant to the present design. RVEA demonstrated that reference vectors can be adapted during the run to the geometry of the objective space [18], establishing run-time preference adaptation as a legitimate mechanism--though on continuous benchmarks with no constraint repair and no decision recording. The second is the field's empirical evaluation of preference guidance. Li et al. [19] showed that measuring preference-based EMO fairly is itself a hard problem, and a subsequent holistic study found that reference-point guidance can degrade search performance on some problem classes [20]. The present results extend that caution to a constrained binary portfolio problem: the preference-adaptive layer contributes only weakly on top of a well-repaired constrained kernel. What no existing work in this thread provides is the specific combination required here: adaptive preference structure on a budget-repaired combinatorial problem, with the preference decisions retained for downstream review rather than discarded after optimization.
+Two developments in this thread are particularly relevant to the present design. RVEA demonstrated that reference vectors can be adapted during the run to the geometry of the objective space [18], establishing run-time preference adaptation as a legitimate mechanism--though on continuous benchmarks with no constraint repair and no decision recording. The second is the field's empirical evaluation of preference guidance. Li et al. [19] showed that measuring preference-based EMO fairly is itself a hard problem, and a subsequent holistic study found that reference-point guidance can degrade search performance on some problem classes [20]. The present results extend that caution to a constrained binary portfolio problem: the adaptive preference-elitism layer contributes only weakly on top of a well-repaired constrained kernel. The study evaluates that mechanism together with deterministic budget repair and separately reported run-level event summaries; it does not claim that any one component is new in isolation.
 
 ### 2.3. Traceability and Explainability of Algorithmic Decisions
 
 The explainable AI (XAI) literature has matured a vocabulary of transparency and post-hoc explanation [21] and an account of what human decision-makers accept as explanations [22], but the object of study is typically the learned predictor rather than the optimization pipeline. The energy-domain XAI survey of Machlev et al. [23] finds applications concentrated in forecasting and security assessment, not in optimization. For metaheuristics specifically, explainability has been identified as an open research direction rather than an available toolbox [24].
 
-Provenance research supplies taxonomies of why, how, and where records are generated [25], while the W3C PROV recommendation standardizes derivation records [26]. The algorithmic-accountability literature further distinguishes process artifacts generated during computation from post-hoc reconstructions [27]. TRACE-MOEA applies these ideas inside an MOEA: the decision trace records search interventions as they occur and is quarantined from the evaluation objective.
+Provenance research supplies taxonomies of why, how, and where records are generated [25], while the W3C PROV recommendation standardizes derivation records [26]. The algorithmic-accountability literature further distinguishes process artifacts generated during computation from post-hoc reconstructions [27]. TRACE-MOEA generates repair-drop and preference-elite payloads during each run and quarantines their aggregate reporting fields from the evaluation objective. The current release preserves counts and coverage rather than a PROV-compliant or ordered project-level record.
 
 ### 2.4. Differentiation from the Companion Study
 
-BiLo-NSGA [28] uses the same public candidate generator but a different mechanism. It modifies variation through insertion, substitution, and dependency-aware local moves under a hard budget. TRACE-MOEA acts at selection and recording through preference elitism, repair, and a decision trace. It also adds a compliance-and-evidence objective and uses review-preference scenarios. Both papers apply independently executed NERC and MTEP16 checks to paper-specific selected portfolios. They share source corpora and public backtest records, but not method operators, optimization runs, selected portfolios, or inferential claims.
+The companion project `mintou_p6_bilonsga_project_review` (BiLo-NSGA [28]) uses the same public candidate generator and common benchmark, evaluation, and public-record backtest infrastructure but poses a different mechanism question. It modifies variation through insertion, substitution, and dependency-aware local moves under a hard budget. TRACE-MOEA studies selection-stage adaptive preference elitism, deterministic repair, and run-level intervention-event summaries in a five-objective review formulation. The projects share infrastructure and source records; their configurations, executions, run outputs, selected portfolios, statistical comparisons, and claims remain paper-specific.
 
-The study targets the intersection of four requirements: search over more than 100 grid candidates, adaptive preference coverage, explicit budget repair, and a decision trace quarantined from evaluation. It also tests whether selected portfolios align with public project outcomes rather than only with the benchmark objectives. Its empirical scope is the public proxy and the two external-consistency checks; expert validation of real utility review remains future work.
+The independent TRACE-MOEA question concerns four measured elements: constrained search over more than 100 grid candidates, adaptive preference elitism, explicit budget repair, and run-level intervention-event summaries quarantined from evaluation. It also tests whether selected portfolios align with public project outcomes rather than only with the benchmark objectives. Its empirical scope is the public proxy and two descriptive external-consistency checks; expert validation of real utility review remains future work.
 
 ---
 
@@ -173,19 +173,19 @@ Seven experiments vary the candidate pool composition and the assumed stakeholde
 
 ### 3.4. Shared-Pipeline Declaration
 
-The candidate-generation code of Section 3.2 is a single versioned artifact used by this paper and by the companion BiLo-NSGA study [28]. Everything above the pool — the five-objective formulation (the companion uses four objectives), the scenario definitions, the method implementations, the statistical protocol, and the external backtests — is specific to this paper. The Data Availability statement records the pipeline location and version.
+The candidate-generation code of Section 3.2 is a shared artifact used by this paper and by the companion project `mintou_p6_bilonsga_project_review` (BiLo-NSGA [28]). The projects also share source corpora, common execution and evaluation utilities, and public-record backtest infrastructure. The five-objective p5 formulation, p5 scenario and method configurations, executions, run outputs, selected portfolios, statistical comparisons, and claims are paper-specific. The Data Availability statement records this boundary.
 
 ---
 
 ## 4. TRACE-MOEA
 
-Figure 1 separates optimization state from trace state. Preference-guided responses and deterministic budget repair operate around a constrained NSGA-II kernel, while their review-specific events are copied through one-way links to an append-only decision trace. The trace has no return edge: no event count, coverage statistic, or event attribute enters an objective, constraint, fitness, or selection rule.
+Figure 1 separates optimization state from event-reporting state. Adaptive preference elitism and deterministic budget repair operate around a constrained NSGA-II kernel, while their event payloads are appended to an in-memory per-run list. The event channel has no return edge: no event count, coverage statistic, or event attribute enters an objective, constraint, fitness, or selection rule.
 
-![Figure 1. TRACE-MOEA optimization and quarantined decision-trace architecture.](figures/fig_architecture.png)
+![Figure 1. TRACE-MOEA optimization and quarantined run-level event architecture.](figures/fig_architecture.png)
 
-**Figure 1.** TRACE-MOEA architecture and quarantine invariant. Dashed one-way arrows write preference-elite and repair-drop events to the trace archive. The external checks assess returned portfolios but do not train or tune the optimizer.
+**Figure 1.** TRACE-MOEA architecture and quarantine invariant. Dashed one-way arrows write preference-elite and repair-drop payloads to the in-memory event stream; released run rows retain count and coverage summaries. The external checks assess returned portfolios but do not train or tune the optimizer.
 
-The algorithm augments a constrained non-dominated sorting kernel with three switchable components: the preference-adaptive ranking layer, the budget repair operator, and the decision trace. Each design choice is exercised by a dedicated ablation in Section 6.2.
+The algorithm augments a constrained non-dominated sorting kernel with two switchable search components, adaptive preference elitism and deterministic budget repair, and instruments both with a quarantined per-run event stream. Component ablations and the bare-kernel control separate their optimization and event-summary behavior in Section 6.2.
 
 **Formal definitions.** A portfolio is \(x\in\{0,1\}^{n}\), with minimized five-objective vector and budget violation
 
@@ -234,7 +234,7 @@ b_{j,\mathrm{comp}}+b_{j,\mathrm{evid}}}{c_j},
 j^-=\operatorname*{arg\,min}_{j:x_j=1}r_j,
 $$
 
-and repeats \(x_{j^-}\leftarrow0\) until \(v_B(x)=0\). If \(A_t\) is the trace state and \(e_t\) a repair-drop or preference-elite event, quarantine is the one-way transition
+and repeats \(x_{j^-}\leftarrow0\) until \(v_B(x)=0\). If \(A_t\) is the in-memory event state and \(e_t\) a repair-drop or preference-elite payload, quarantine is the one-way transition
 
 $$
 A_{t+1}=A_t\mathbin{\|}e_t,\qquad
@@ -242,7 +242,7 @@ F(x),\,v_B(x),\,\psi_k(x),\,\operatorname{Select}(R_t)
 \ \perp\ A_{t+1}.
 $$
 
-The independence symbol states an implementation invariant: archive contents are absent from every optimization input, not a probabilistic claim. Standard hypervolume is
+The independence symbol states an implementation invariant: event contents are absent from every optimization input, not a probabilistic claim. Standard hypervolume is
 
 $$
 HV(\mathcal P;r)=\lambda_5\!\left(
@@ -255,29 +255,29 @@ with method-independent bounds and reference point fixed before comparisons.
 
 Portfolios are binary vectors evolved by uniform crossover (crossover probability 0.9) and bit-flip mutation at rate 1/n, with constraint-dominated non-dominated sorting (feasible solutions dominate infeasible ones; infeasible solutions are ordered by the magnitude of budget violation) and crowding-distance truncation. The population size is 40 and the generation limit is 40. Initialization uses a low-density strategy (3–15% selection probability per candidate) so that early portfolios begin near the fundable region. The kernel is intentionally unremarkable: the paper's claims rest on the three review-specific components described below, not on exotic selection machinery.
 
-### 4.2. Preference-Adaptive Ranking Layer
+### 4.2. Adaptive Preference Elitism
 
 The layer maintains K = 8 objective-weight vectors w_1, ..., w_K on the five-dimensional simplex. One vector is initialized from the scenario's stakeholder weighting (Table 2); the remaining seven are sampled from a symmetric Dirichlet(1) distribution. The layer acts twice per generation cycle:
 
-- **Preference elitism.** For each weight vector w_k, the union of parents and offspring is scored by the weighted sum of min-max-normalized objectives plus a violation penalty for infeasible portfolios. The best-response portfolio (the one with lowest scalarized score) is injected into the next population if it was dropped during non-dominated sorting and crowding-distance truncation. Each injection is logged as an archive event carrying the weight-vector index and the portfolio's project identifiers.
+- **Preference elitism.** For each weight vector w_k, the union of parents and offspring is scored by the weighted sum of min-max-normalized objectives plus a violation penalty for infeasible portfolios. The best-response portfolio (the one with lowest scalarized score) replaces a selected portfolio only if it was dropped during non-dominated sorting and crowding-distance truncation. Independently of whether replacement is needed, the implementation appends a `preference_elite` payload carrying the generation, weight-vector index, and best-response project identifiers. The resulting 320 records per run (8 vectors x 40 generations) are best-response records, not counts of actual replacements.
 
 - **Adaptive re-selection.** Every five generations, the current vector set is perturbed with independent Gaussian noise (sigma = 0.1, followed by renormalization to the simplex). The best responses of all K original and K perturbed vectors are computed on the current generation's combined parent-offspring pool, and the K vectors whose responses are maximally spread in the normalized objective space (determined by greedy max-min dispersion selection) survive into the next five-generation window.
 
-The layer is designed for review settings in which a decision maker cannot specify exact reference points in advance, an assumption common in preference-guided EMO (Section 2.2). It identifies weighting directions that yield distinct feasible portfolios and preserves representatives from those directions. Whether this mechanism improves hypervolume is evaluated separately; Section 6.2 shows that its isolated pooled effect is small.
+The layer is designed for review settings in which a decision maker cannot specify exact reference points in advance, an assumption common in preference-guided EMO (Section 2.2). It identifies weighting directions that yield distinct feasible portfolios and can preserve representatives from those directions. Whether this mechanism improves hypervolume is evaluated separately; Section 6.2 shows that its isolated pooled effect is small and unresolved after cross-scenario correction.
 
 ### 4.3. Budget Repair
 
-Any initial or offspring portfolio that exceeds the budget is repaired by iteratively dropping the selected project with the lowest equal-weight benefit-to-cost ratio (summed reliability, renewable, compliance, and evidence benefits divided by cost) until the portfolio becomes affordable. Each drop event is recorded in the archive with the generation number and the project identifier. The repair operator is deterministic: given the same portfolio, the drop sequence is identical across seeds.
+Any initial or offspring portfolio that exceeds the budget is repaired by iteratively dropping the selected project with the lowest equal-weight benefit-to-cost ratio (summed reliability, renewable, compliance, and evidence benefits divided by cost) until the portfolio becomes affordable. Each executed drop appends an in-memory event with the generation number and project identifier. The repair operator is deterministic: given the same portfolio, the drop sequence is identical across seeds.
 
 The purpose of explicit repair is to keep the population inside the fundable region where the review question is actually posed, rather than leaving constraint pressure to selection alone. The ablation `Ablation-NoFeasibilityRepair` disables this operator and relies entirely on constraint-dominated sorting for budget feasibility.
 
-### 4.4. Decision Trace Archive
+### 4.4. Run-Level Intervention-Event Records
 
-The archive is an append-only log of two event types: `repair_drop` (from Section 4.3) and `preference_elite` (from Section 4.2). Each event carries the generation number, the affected project identifiers, and for preference-elite events the responsible weight-vector index. Three properties define the archive's role:
+Within each run, the implementation appends two payload types to an in-memory list: `repair_drop` (from Section 4.3) and `preference_elite` (from Section 4.2). A repair payload carries the generation and dropped project identifier. A preference payload carries the generation, weight-vector index, and best-response project identifiers. Three properties define the evidence role of these events:
 
-- **Completeness for the mechanisms that alter portfolios outside standard variation.** Every repair drop and every preference injection is recorded. Standard crossover and mutation operations are not logged because they are the domain-general search operators; the archive captures the review-specific interventions.
-- **Quarantine.** No archive statistic — not count, not coverage, not entropy — appears in any objective function, constraint inequality, or selection criterion. The archive is purely descriptive, reported separately in Section 6.3.
-- **Descriptive reporting.** Across all 210 proposed-method runs (7 scenarios x 30 seeds), the archive averages 1126 events per run, and 98.6% of the projects present in the final feasible non-dominated front appear in at least one recorded event (evidence: `real_project_review_leaderboard.csv`, row 2, trace columns). This means that for nearly any project that a reviewer sees recommended, the archive can answer when it was protected by which preference direction and which competing projects were dropped during budget repair.
+- **Defined scope.** Every executed repair drop produces one event, and every weight vector produces one preference-elite record per generation. Standard crossover and mutation are not logged. A preference-elite record identifies a best response but does not by itself establish that replacement occurred.
+- **Quarantine.** No event statistic (count, coverage, or payload attribute) appears in any objective function, constraint inequality, or selection criterion. The event fields are descriptive and are reported separately in Section 6.3.
+- **Released run-level summary.** The evidence package does not persist the ordered payload list. Each run row retains `trace_event_count` and `decision_coverage`, where coverage is the fraction of projects in the final feasible front named by at least one generated payload. Across 210 proposed-method runs (7 scenarios x 30 seeds), the mean is 1126 events and 98.6% coverage (evidence: `real_project_review_results.csv` and `real_project_review_leaderboard.csv`). These values quantify event production and association with final-front projects; they do not provide a released project-level chronology.
 
 ### 4.5. Algorithm Outline
 
@@ -294,13 +294,13 @@ TRACE-MOEA(pool, budget, seed):
     survivors = constraint-dominated NDS + crowding truncation
                 over (parents union offspring)                  // Section 4.1
     for each weight vector w in preferences:
-      inject w's best-response portfolio into survivors         // Section 4.2
-      log preference_elite event with w index and project IDs
+      if absent, replace one survivor with w's best response     // Section 4.2
+      append preference_elite record with w index and project IDs
     end for
     every 5 generations:
       perturb preferences (Gaussian, sigma = 0.1, renormalize)
       keep K vectors with max-min dispersion of best responses  // Section 4.2
-  return feasible non-dominated front + decision archive         // Section 4.4
+  return feasible front + in-memory events; write run count/coverage // Section 4.4
 ```
 
 ---
@@ -317,7 +317,7 @@ Evolutionary baselines (NSGA-II, R-NSGA-II, and MOEA/D) are pymoo reference impl
 
 | Method | Role | One-line Description |
 |---|---|---|
-| TRACE-MOEA | Proposed | Constrained kernel + preference-adaptive layer + budget repair + trace archive |
+| TRACE-MOEA | Proposed | Constrained kernel + adaptive preference elitism + budget repair + run-level event summaries |
 | NSGA-II | Baseline | pymoo, constrained, binary encoding |
 | R-NSGA-II | Baseline | reference-point NSGA-II using the declared scenario preference point |
 | MOEA/D | Baseline | pymoo, Tchebycheff decomposition, budget violation as penalty |
@@ -378,7 +378,7 @@ The evaluation depends only on candidate attributes and fixed normalization boun
 
 Table 4 reports the pooled leaderboard across all seven scenarios. TRACE-MOEA leads the table with mean hypervolume 0.17425 (standard deviation 0.00635), +0.89% over NSGA-II (0.17270) and +29.4% over AHP-TOPSIS (0.13468). Across four stochastic baselines and seven scenarios, TRACE-MOEA has 27 positive mean differences in 28 comparisons; 24 are Holm-significant wins and none is a significant loss. All 21 descriptive gaps against the three deterministic ranking rules favor TRACE-MOEA. R-NSGA-II provides the direct preference-based control and is retained despite its lower pooled hypervolume.
 
-**Table 4.** Pooled leaderboard over seven scenarios. Stochastic methods have 210 runs; deterministic-rule rows summarize seven unique outputs retained as 210 repeated provenance rows. Trace and decision-coverage columns are descriptive only.
+**Table 4.** Pooled leaderboard over seven scenarios. Stochastic methods have 210 runs; deterministic-rule rows summarize seven unique outputs retained as 210 repeated provenance rows. Event-count and decision-coverage columns are run-level descriptive summaries only.
 
 | Method | Role | Mean HV | Std HV | Mean Runtime (s) | Trace Events/Run | Decision Coverage |
 |---|---|---|---|---|---|---|
@@ -429,25 +429,25 @@ The pattern is consistent with, but does not prove, the design hypothesis. Gains
 
 Figure 3 orders the attribution. The dominant effects are related to objective visibility: hiding the reliability objective from search costs 47.9% of the pooled hypervolume (0.09081 vs. 0.17425); scalarizing all objectives into a single weighted sum costs 33.3% (0.11617); hiding the renewable objective costs 2.8% (0.16930); and cutting the candidate pool to one third costs 60.3% (0.06920). The five-dimensional review structure itself — not any single algorithmic trick — carries most of the task difficulty.
 
-Among the component-level ablations, disabling budget repair (NoFeasibilityRepair) costs 0.72% of pooled hypervolume and drops decision-trace coverage from 0.986 to 0.865, confirming that repair events are a material part of the recorded intervention history. Disabling all review-specific components at once (NSGA2Only, the bare kernel) costs 1.01% (0.17249 vs. 0.17425).
+Among the component-level ablations, disabling budget repair (NoFeasibilityRepair) costs 0.72% of pooled hypervolume and reduces event-associated final-front coverage from 0.986 to 0.865. This identifies the contribution of repair-drop payloads to the coverage statistic; it does not validate the records' human usefulness. Disabling all review-specific components at once (NSGA2Only, the bare kernel) costs 1.01% (0.17249 vs. 0.17425).
 
 The component results constrain the algorithmic claim. Removing preference adaptation (NoPreferenceRanking) changes pooled hypervolume by only 0.17%. The full method wins the renewable scenario under the within-scenario family ($p_{Holm}=0.0206$), but no preference-ablation contrast remains significant after a second Holm correction across the seven scenarios ($p=0.0722$ for that cell). Removing schedule risk changes pooled hypervolume by 0.13%. The risk-blind variant is higher in traceability_evaluation ($p_{Holm}=0.0219$ within scenario), but that contrast also falls just outside the cross-scenario threshold ($p=0.0510$). These are exploratory mechanism patterns rather than resolved component effects.
 
-Two readings follow. The schedule-risk objective enters as a portfolio mean, producing a weak search gradient and, in one scenario, an adverse difference. Preference-injected portfolios also overlap substantially with those already preserved by constraint-dominated crowding, consistent with evidence that preference guidance is not automatically beneficial [20]. The complete TRACE-MOEA has the highest pooled hypervolume among the tested external baselines and no significant per-scenario loss, but its margin over its leanest viable variant is small. A hypervolume-only user could disable preference adaptation with little measured loss. The trade-off is reduced trace coverage (0.966 versus 0.986) and removal of records identifying which weighting directions shaped the returned front.
+Two readings follow. The schedule-risk objective enters as a portfolio mean, producing a weak search gradient and, in one scenario, an adverse difference. Preference-selected best responses also overlap substantially with portfolios already preserved by constraint-dominated crowding, consistent with evidence that preference guidance is not automatically beneficial [20]. The complete TRACE-MOEA has the highest pooled hypervolume among the tested external baselines and no significant per-scenario loss, but its margin over its leanest viable variant is small. A hypervolume-only user could disable preference adaptation with little measured loss. The observed trade-off is a reduction in event-associated project coverage (0.966 versus 0.986); the current release does not preserve the ordered payloads needed to reconstruct which weighting directions altered the population.
 
-### 6.3. Decision-Trace Production and Coverage
+### 6.3. Run-Level Event Production and Coverage
 
-Because no trace statistic enters any ranking, trace production is reported descriptively. Across the 210 proposed-method runs, the trace averages 1126 events per run (standard deviation 210 events), and 98.6% of the projects appearing in the returned feasible non-dominated front are covered by at least one event that names them.
+Because no event statistic enters any ranking, event production is reported descriptively. Across the 210 proposed-method runs, each released run row reports event count and final-front project coverage. TRACE-MOEA averages 1126.25 events per run (sample standard deviation 134.86): a mean 806.25 repair-drop events plus exactly 320 preference-elite records (8 vectors x 40 generations). The fixed 320 records identify best responses and are emitted whether or not population replacement is required; they are not an injection count. Mean coverage is 98.6%, meaning that 98.6% of projects appearing in a returned feasible non-dominated front are named by at least one generated payload.
 
-The two trace-bearing ablations bracket the sources. Without the preference-adaptive layer (NoPreferenceRanking), the archive records only repair-drop events and achieves a mean coverage of 96.6%. Without the repair operator (NoFeasibilityRepair), the archive records only preference-elite events and achieves coverage of 86.5%. The complete method's 98.6% coverage thus arises from the combination of the two mechanisms, each filling coverage gaps left by the other.
+The two event-bearing ablations bracket the sources. Without adaptive preference elitism (NoPreferenceRanking), the run records summarize only repair-drop events and achieve mean coverage of 96.6%. Without the repair operator (NoFeasibilityRepair), each run retains the fixed 320 preference-elite records and achieves coverage of 86.5%. The complete method's 98.6% coverage is the joint descriptive coverage of both event types. These ablations do not isolate the value of a released ordered event history because no such payload history is present in the evidence package.
 
-We do not claim that the archive improves review outcomes or that 98.6% coverage is the correct target. Validating whether the archive helps review boards make faster or more consistent decisions would require a human-subjects study that has not been performed (Section 8). The descriptive claim is limited to a near-complete, per-project record of review-specific interventions. Archive variables are quarantined from the evaluation function; this does not imply zero computational or human-review cost.
+We do not claim that the event summaries improve review outcomes or that 98.6% coverage is the correct target. Validating whether event records help review boards make faster or more consistent decisions would require a human-subjects study that has not been performed (Section 8). The released evidence supports only run-level count and coverage claims. Ordered payloads would have to be serialized and released before a reader could audit project-level chronology. Event variables are quarantined from the evaluation function; this does not imply zero computational or human-review cost.
 
-Figure 4 makes the trace mechanism measurable without turning it into an optimization objective. Removing preference ranking reduces both the number of recorded events and project coverage moderately. Removing repair sharply reduces both quantities because repair-drop events disappear. The bare kernel has neither trace channel. These are diagnostic differences in trace production; they do not imply that a larger record improves portfolio quality or human review.
+Figure 4 makes event production measurable without turning it into an optimization objective. Removing preference elitism reduces both recorded event count and project coverage. Removing repair eliminates repair-drop events and leaves the fixed preference-elite records. The bare kernel has neither event channel. These are diagnostic differences in event production; they do not imply that a larger record improves portfolio quality or human review.
 
-![Figure 4. Decision-trace diagnostics for the full method and trace-bearing ablations.](figures/fig_trace_diagnostics.png)
+![Figure 4. Run-level event diagnostics for the full method and event-bearing ablations.](figures/fig_trace_diagnostics.png)
 
-**Figure 4.** Decision-trace diagnostics pooled across seven scenarios and 30 seeds (210 runs per configuration). (a) Fraction of projects in the final feasible front covered by at least one recorded event; (b) number of logged events per run. Boxes are descriptive. Trace statistics are quarantined from all objectives, constraints, and selection decisions.
+**Figure 4.** Run-level event diagnostics pooled across seven scenarios and 30 seeds (210 runs per configuration). (a) Fraction of projects in the final feasible front named by at least one generated event payload; (b) number of generated events summarized in each run row. Boxes are descriptive. Event statistics are quarantined from all objectives, constraints, and selection decisions.
 
 ### 6.4. Matched-Budget Preference Controls
 
@@ -499,13 +499,13 @@ Five boundary conditions restrict the interpretation of Rung 2. First, the MTEP1
 
 ### 6.6. Search-Effort and Outcome-Sensitivity Diagnostics
 
-Figure 7 relates optimization quality to the computation and trace production required to obtain it. TRACE-MOEA averages 0.17425 hypervolume, 0.1130 s, 806 accepted preference-guided moves, 1126 trace events, and 0.986 project coverage per run. Removing preference ranking leaves 0.17396 hypervolume while reducing the trace to about 803 events; disabling repair removes accepted repair moves and lowers coverage to 0.865. NSGA-II attains 0.17270 at 0.1456 s without a project-level decision trace. Event count remains descriptive and is not an optimization objective.
+Figure 7 relates optimization quality to computation and event production. TRACE-MOEA averages 0.17425 hypervolume, 0.1130 s, 806 repair-drop events, 1126 total generated events, and 0.986 project coverage per run. Removing preference elitism leaves 0.17396 hypervolume and about 803 repair-drop events; disabling repair leaves 320 preference-elite records and lowers coverage to 0.865. NSGA-II attains 0.17270 at 0.1456 s without an instrumented event record. Event count remains descriptive and is not an optimization objective.
 
-![Figure 7. Search effort, trace coverage, and hypervolume for TRACE-MOEA and controls.](figures/fig_search_audit_efficiency.png)
+![Figure 7. Search effort, event coverage, and hypervolume for TRACE-MOEA and controls.](figures/fig_search_audit_efficiency.png)
 
-**Figure 7.** Pooled search-and-trace profile over seven scenarios and 30 seeds per method. Hypervolume, runtime, accepted moves, trace events, and coverage retain their native units; the panels should not be read as a scalar composite score.
+**Figure 7.** Pooled search-and-event profile over seven scenarios and 30 seeds per method. Hypervolume, runtime, repair-drop count, total event count, and coverage retain their native units; the panels should not be read as a scalar composite score.
 
-The diagnostic clarifies the practical trade-off. TRACE-MOEA is faster than the tested NSGA-II implementation at this small problem size, but deterministic baselines remain orders of magnitude cheaper. The method's additional product is the trace archive: 98.6% coverage means that almost every project represented in the returned fronts has at least one recorded decision event. Coverage is a software-level completeness measure, not evidence that human reviewers find the explanations sufficient.
+The diagnostic clarifies the practical trade-off. TRACE-MOEA is faster than the tested NSGA-II implementation at this small problem size, but deterministic baselines remain orders of magnitude cheaper. Its additional released product is a run-level event summary: 98.6% coverage means that almost every project represented in the returned fronts is named by at least one generated event payload. Coverage is a software-level association measure, not a released chronology and not evidence that human reviewers find the records sufficient.
 
 Figure 8 re-expresses the MTEP16 result without collapsing broad and strict labels. Broad capture is 1.079 and 1.070 in the benchmark and reliability-driven scenarios, respectively, whereas strict capture is 1.014 and 1.000. The broad view supplies statistical power by treating unresolved projects as non-built; the strict view avoids that uncertain label but contains only 19 withdrawals in the full inventory. Their divergence is not a robustness success: it quantifies the outcome-definition sensitivity that bounds the external-validity claim.
 
@@ -513,19 +513,19 @@ Figure 8 re-expresses the MTEP16 result without collapsing broad and strict labe
 
 **Figure 8.** MTEP16 outcome-capture ratios for the two review scenarios. The dashed line denotes parity with uniform selection. Broad labels include unresolved projects among negatives; strict labels compare built projects only with explicit withdrawals. Proposed-method highlighting is visual identification and does not override the reported significance tests.
 
-The two diagnostics answer different questions. Figure 7 shows the computation and trace volume associated with the proxy-objective result, whereas Figure 8 shows how the external-consistency result depends on the definition of the negative class. Their aggregate tables are retained under `manuscript/derived_tables/` for independent recomputation.
+The two diagnostics answer different questions. Figure 7 shows the computation and run-level event volume associated with the proxy-objective result, whereas Figure 8 shows how the external-consistency result depends on the definition of the negative class. Their aggregate tables are retained under `manuscript/derived_tables/` for independent recomputation.
 
 ---
 
 ## 7. Discussion
 
-**Preference guidance and the constrained kernel.** The three significant comparisons with NSGA-II occur in preference-emphasized scenarios (Table 5), but the direct NoPreferenceRanking ablation is unresolved after correction across its seven scenarios. Preference-injected portfolios appear to overlap those already preserved by crowding, which may explain the small marginal effect of the adaptive layer. The traceability scenario also favors the risk-blind variant within its scenario family, but the contrast falls just outside the second cross-scenario correction. These patterns motivate targeted tests of preference-vector count and update cadence rather than attribution to a single component.
+**Preference guidance and the constrained kernel.** The three significant comparisons with NSGA-II occur in preference-emphasized scenarios (Table 5), but the direct NoPreferenceRanking ablation is unresolved after correction across its seven scenarios. Preference-selected best responses appear to overlap portfolios already preserved by crowding, which may explain the small marginal effect of the adaptive layer. The traceability scenario also favors the risk-blind variant within its scenario family, but the contrast falls just outside the second cross-scenario correction. These patterns motivate targeted tests of preference-vector count and update cadence rather than attribution to a single component.
 
 **Public-record consistency.** AHP-TOPSIS is favored on the NERC view partly because its reliability attributes overlap the priority rule. The MTEP view measures capture within an already-approved plan and is constrained by its high build rate. The two diagnostics show that optimized portfolios retain some alignment with public records, but they do not establish review accuracy.
 
-**Relation to the companion study.** BiLo-NSGA [28] asks how variation-stage, project-vocabulary local moves behave under hard budgets. TRACE-MOEA studies selection-stage preference adaptation and a quarantined decision trace. The problem formulations differ in dimensionality (five objectives versus four), operators, scenarios, and optimization records. Both papers use separately executed NERC and MTEP16 consistency checks on their own selected portfolios. Sharing the candidate generator and public source records makes data derivation comparable; it does not make the algorithmic evidence interchangeable.
+**Relation to the companion study.** The companion project `mintou_p6_bilonsga_project_review` (BiLo-NSGA [28]) asks how variation-stage, project-vocabulary local moves behave under hard budgets. TRACE-MOEA studies selection-stage adaptive preference elitism, deterministic repair, and run-level event summaries. The projects share candidate generation, source corpora, common benchmark and evaluation utilities, and public-record backtest infrastructure. Their formulations, configurations, executions, run outputs, selected portfolios, comparisons, and claims remain paper-specific, so shared infrastructure does not make the algorithmic evidence interchangeable.
 
-**Use in a planning workflow.** Against NSGA-II, the pooled hypervolume gain is below 1%. TRACE-MOEA additionally supplies per-project intervention records unavailable from the baselines in Table 3. These records allow an analyst to inspect which projects were inserted through preference protection or removed during budget repair. Whether that inspection improves review time, consistency, or contestability requires human evaluation.
+**Use in a planning workflow.** Against NSGA-II, the pooled hypervolume gain is below 1%. TRACE-MOEA additionally supplies run-level event-count and final-front coverage fields unavailable from the baselines in Table 3. The current release does not preserve the ordered payloads needed to inspect the exact project-level intervention sequence. Whether a future payload release improves review time, consistency, or contestability requires human evaluation.
 
 The direct R-NSGA-II comparison changes what can be claimed about preference guidance. TRACE-MOEA performs better on this benchmark in both front coverage and mean preference distance, including across the three frozen budgets, but the result is not evidence that adaptive weights are universally better than reference points. R-NSGA-II uses one declared point and one matched configuration; different points, normalization, or niching parameters could change its behavior. The defensible advance is that a direct preference-family control now exists and the proposed method survives it under the disclosed setup.
 
@@ -543,7 +543,7 @@ Seven limitations constrain the scope of the claims in this paper.
 
 3. **Uncalibrated economics.** Candidate costs are synthetic units derived from network aggregates (branch ratings, generator capacities, line lengths); benefits are engineering proxies derived from the same aggregates. No engineering-economic conclusion — in currencies, rates of return, tariffs, or cost-effectiveness thresholds — can be drawn from this paper, and none is offered.
 
-4. **Traceability is measured, not validated.** The decision archive's coverage (98.6%) shows that the record is nearly complete, and its quarantine prevents trace statistics from entering objectives, selection, or the reported metric. Whether the archive actually improves board decisions, review speed, stakeholder contestability, or regulatory compliance requires a human-subjects study that has not been performed.
+4. **Run-level event coverage is measured, not validated.** Mean coverage is 98.6%, and quarantine prevents event statistics from entering objectives, selection, or the reported metric. The released run table contains counts and coverage but not ordered event payloads, so it is not a released project-level audit trail. Whether fuller records improve board decisions, review speed, stakeholder contestability, or regulatory compliance requires a human-subjects study that has not been performed.
 
 5. **Single benchmark family with no electrical verification.** All seven scenarios instantiate one 120-candidate pool derived from one combination of public sources. Portfolio feasibility is budgetary (the repair operator enforces the cost constraint) but not electrical: no candidate portfolio has been checked for AC power-flow feasibility using the cached SimBench or RTS-GMLC network models. A second, independently constructed pool and an OPF-based feasibility check of recommended portfolios are natural extensions.
 
@@ -555,13 +555,13 @@ Seven limitations constrain the scope of the claims in this paper.
 
 ## 9. Conclusions
 
-TRACE-MOEA combines a preference-adaptive weight-vector population, deterministic budget repair, and a quarantined decision trace archive. The archive records review-specific interventions without entering the evaluation, while repair maintains budget feasibility throughout search.
+TRACE-MOEA combines constrained portfolio search, adaptive preference elitism, deterministic budget repair, and quarantined run-level intervention-event summaries. Repair maintains the proxy cost budget, while event count and final-front coverage remain outside the objectives and selection rule.
 
-On the five-objective, 120-project proxy benchmark, TRACE-MOEA attains pooled mean hypervolume 0.17425, 0.89% above NSGA-II (0.17270). Across four stochastic baselines and seven scenarios, it has 27 positive mean differences in 28 comparisons, 24 Holm-significant wins, and no significant loss. Twenty-one deterministic-rule gaps are descriptive and all favor TRACE-MOEA. In the separate 270-run scan, TRACE-MOEA significantly exceeds R-NSGA-II and NSGA-II at all three budgets while retaining the lowest descriptive preference distance. The archive covers 98.6% of recommended projects and remains quarantined from the metric.
+On the five-objective, 120-project proxy benchmark, TRACE-MOEA attains pooled mean hypervolume 0.17425, 0.89% above NSGA-II (0.17270). Across four stochastic baselines and seven scenarios, it has 27 positive mean differences in 28 comparisons, 24 Holm-significant wins, and no significant loss. Twenty-one deterministic-rule gaps are descriptive and all favor TRACE-MOEA. In the separate 270-run scan, TRACE-MOEA significantly exceeds R-NSGA-II and NSGA-II at all three budgets while retaining the lowest descriptive preference distance. Its 210 main run rows average 1126 generated events and 98.6% final-front project coverage; these are summary fields, not a released ordered event history.
 
 The NERC consistency backtest yields priority-capture ratios of 1.34–1.55. The MISO MTEP16 backtest yields broad capture of 1.070–1.079 and a raw point-biserial correlation up to 0.169. Because the public-record tests do not preserve portfolio dependence or a comparison family, these values support descriptive external consistency rather than confirmatory above-chance alignment.
 
-The preference-adaptive layer changes pooled hypervolume by 0.17%, but its direct effect is unresolved after cross-scenario correction. Its observable function is to add preference-labeled interventions to the decision trace. The schedule-risk contrast is likewise unresolved after the second correction, and the external checks remain descriptive. The method is therefore supported as a traceable portfolio-optimization framework on the public proxy; expert-labeled utility data and human evaluation of the trace remain necessary before drawing conclusions about review effectiveness.
+Adaptive preference elitism changes pooled hypervolume by 0.17%, but its direct effect is unresolved after cross-scenario correction. Its measured record-level effect is the addition of 320 preference-elite best-response records per run and a change in event-associated project coverage. The schedule-risk contrast is likewise unresolved after the second correction, and the external checks remain descriptive. The evidence therefore supports a budget-constrained portfolio-search framework with run-level event summaries on the public proxy. Expert-labeled utility data, serialized event payloads, electrical checks, and human evaluation remain necessary before drawing conclusions about review effectiveness or deployment.
 
 ---
 
@@ -585,7 +585,7 @@ Not applicable.
 
 All data sources used in this study are publicly accessible. RTS-GMLC source data is available at https://github.com/GridMod/RTS-GMLC. The SimBench complete mixed dataset is available at https://simbench.de. NERC reliability reports are available at https://www.nerc.com; only report metadata is used in this study, and a manifest with official URLs and SHA-256 checksums is released in place of redistributed PDF files. MISO MTEP16 Appendix A and B project records, subsequent quarterly status snapshots, and the 2026 MISO in-service and active-project portal lists are available at https://www.misoenergy.org.
 
-The candidate-derivation pipeline, TRACE-MOEA implementation, baseline and ablation configurations, 3360 main per-run records, the 270-run three-budget control scan, inference tables, backtest analyses, and figure scripts are included in the supplementary package and are available from the corresponding author. A persistent public archive can be supplied before publication, subject to third-party redistribution terms. The companion BiLo-NSGA study [28] shares the candidate generator, NERC source corpus, and public MTEP16 records. Algorithm implementations, problem objectives, scenario definitions, run records, selected portfolios, and reported comparisons are paper-specific.
+The candidate-derivation pipeline, TRACE-MOEA implementation, baseline and ablation configurations, 3360 main per-run records, the 270-run three-budget control scan, inference tables, backtest analyses, and figure scripts are included in the supplementary package and are available from the corresponding author. The main run records contain event counts and final-front coverage, not ordered event payloads. A persistent public archive can be supplied before publication, subject to third-party redistribution terms. The companion project `mintou_p6_bilonsga_project_review` (BiLo-NSGA [28]) shares candidate generation, source corpora, common benchmark and evaluation utilities, and public-record backtest infrastructure. Paper-specific configurations, executions, run outputs, selected portfolios, comparisons, and claims are not shared evidence.
 
 ## Acknowledgments
 
