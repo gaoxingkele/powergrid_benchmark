@@ -1,0 +1,150 @@
+{
+  "analysis_unit": "one seeded method-scenario run for stochastic methods; one unique method-scenario output for deterministic rules",
+  "candidate_pool": "the existing public 120-candidate P5 pool, filtered only by the seven registered scenario definitions",
+  "deterministic_methods": [
+    "AHP-TOPSIS",
+    "Weighted Sum",
+    "Greedy BCR"
+  ],
+  "external_public_record_backtests": "not rerun; existing NERC and MTEP checks remain descriptive because no portfolio-level randomization family is introduced",
+  "hypervolume_schemes": [
+    {
+      "bounds": "the shared fixed seeded bounds with 5% padding",
+      "clip_normalized_objectives_to_0_1": true,
+      "id": "reported_empirical_ref1p1_clipped",
+      "reference_point": 1.1
+    },
+    {
+      "bounds": "the shared fixed seeded bounds with 5% padding",
+      "clip_normalized_objectives_to_0_1": false,
+      "id": "reported_empirical_ref1p1_unclipped",
+      "reference_point": 1.1
+    },
+    {
+      "bounds": "shared bounds expanded by 25% of their padded span on both sides",
+      "clip_normalized_objectives_to_0_1": false,
+      "id": "expanded_empirical_ref1p1_unclipped",
+      "reference_point": 1.1
+    },
+    {
+      "bounds": "definition-derived conservative bounds",
+      "clip_normalized_objectives_to_0_1": false,
+      "id": "analytic_ref1p1_unclipped",
+      "reference_point": 1.1
+    },
+    {
+      "bounds": "definition-derived conservative bounds",
+      "clip_normalized_objectives_to_0_1": false,
+      "id": "analytic_ref1p2_unclipped",
+      "reference_point": 1.2
+    }
+  ],
+  "matched_output": {
+    "cardinality": 1,
+    "inference": "descriptive; deterministic outputs are not replicated",
+    "primary_readout": "single-point hypervolume under analytic bounds with reference point 1.2 in every normalized objective",
+    "rule": "minimize the maximum of five equally weighted analytic-bound-normalized minimization objectives; break ties by normalized objective sum and then front row order"
+  },
+  "scenarios": [
+    "benchmark_portfolio_optimization",
+    "distribution_project_review",
+    "reliability_driven_review",
+    "renewable_accommodation_review",
+    "budget_ranking_stability",
+    "preference_aware_support",
+    "traceability_evaluation"
+  ],
+  "seeds_per_stochastic_cell": 30,
+  "sensitivity": {
+    "cells": [
+      {
+        "factor": "reference",
+        "id": "registered",
+        "n_preferences": 8,
+        "preference_profile": "balanced",
+        "quality_compliance_share": 0.5,
+        "risk_aggregation": "mean"
+      },
+      {
+        "factor": "formulation",
+        "id": "risk_max",
+        "n_preferences": 8,
+        "preference_profile": "balanced",
+        "quality_compliance_share": 0.5,
+        "risk_aggregation": "max"
+      },
+      {
+        "factor": "formulation",
+        "id": "quality_compliance_025",
+        "n_preferences": 8,
+        "preference_profile": "balanced",
+        "quality_compliance_share": 0.25,
+        "risk_aggregation": "mean"
+      },
+      {
+        "factor": "formulation",
+        "id": "quality_compliance_075",
+        "n_preferences": 8,
+        "preference_profile": "balanced",
+        "quality_compliance_share": 0.75,
+        "risk_aggregation": "mean"
+      },
+      {
+        "factor": "preference",
+        "id": "preferences_k4",
+        "n_preferences": 4,
+        "preference_profile": "balanced",
+        "quality_compliance_share": 0.5,
+        "risk_aggregation": "mean"
+      },
+      {
+        "factor": "preference",
+        "id": "preferences_k16",
+        "n_preferences": 16,
+        "preference_profile": "balanced",
+        "quality_compliance_share": 0.5,
+        "risk_aggregation": "mean"
+      },
+      {
+        "factor": "preference",
+        "id": "profile_reliability",
+        "n_preferences": 8,
+        "preference_profile": "reliability",
+        "quality_compliance_share": 0.5,
+        "risk_aggregation": "mean"
+      },
+      {
+        "factor": "preference",
+        "id": "profile_renewable",
+        "n_preferences": 8,
+        "preference_profile": "renewable",
+        "quality_compliance_share": 0.5,
+        "risk_aggregation": "mean"
+      },
+      {
+        "factor": "preference",
+        "id": "profile_traceability",
+        "n_preferences": 8,
+        "preference_profile": "traceability",
+        "quality_compliance_share": 0.5,
+        "risk_aggregation": "mean"
+      }
+    ],
+    "design": "one factor at a time around the registered formulation",
+    "inference": "descriptive; no p-values",
+    "primary_metric": "full feasible-front hypervolume under analytic bounds and reference point 1.2",
+    "scenario": "benchmark_portfolio_optimization",
+    "secondary_metric": "matched single-point hypervolume under the same bounds and reference point",
+    "seed_schedule": "700000 + 7919 * seed_index, common across cells and methods",
+    "seeds_per_cell": 30
+  },
+  "shared_code_policy": "no shared P5/P6 source edit is authorized or required; regress the shared test suite after the stage-local run",
+  "stage": "p5_s3_matched_sensitivity",
+  "status": "prespecified_before_execution",
+  "stochastic_methods": [
+    "TRACE-MOEA",
+    "NSGA-II",
+    "R-NSGA-II",
+    "MOEA/D"
+  ]
+}

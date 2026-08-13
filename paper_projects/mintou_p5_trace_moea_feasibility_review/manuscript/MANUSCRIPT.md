@@ -9,6 +9,7 @@
        papers/mintou/mintou_p5_trace_moea_feasibility_review/evidence/tables/real_budget_sensitivity_075x.csv
        papers/mintou/mintou_p5_trace_moea_feasibility_review/evidence/tables/real_budget_sensitivity_075x_significance.csv
        papers/mintou/mintou_p5_trace_moea_feasibility_review/src/configs/real_project_review_config.json
+       experiments/p5_s3_matched_sensitivity/runs/primary_v4/
      Figures: ./figures/ (print-resolution PNG plus PDF/SVG evidence figures;
      regenerate Figures 1--3 and 5 with figures/make_figures.py and Figure 4 with
      scripts/mintou/generate_evidence_gap_figures.py)
@@ -24,7 +25,7 @@
 
 ## Abstract
 
-Utilities reviewing large grid-project queues need constrained portfolio search and inspectable summaries of the search events generated in each run. TRACE-MOEA combines adaptive preference elitism with deterministic budget repair. Its released run rows retain only total event count and pool-local candidate co-occurrence coverage for generated `repair_drop` and `preference_elite` records; payloads, replacement flags, stable project identifiers, and event order are not retained. No event statistic enters evaluation. On a reproducible five-objective benchmark of 120 candidate projects, the method reaches pooled mean hypervolume 0.17425 across seven review scenarios and 30 seeds per stochastic method, 0.89% above NSGA-II (0.17270). Among 28 comparisons with four stochastic baselines, TRACE-MOEA has 27 positive mean differences and 24 Holm-significant wins, with no significant loss; 21 gaps against three deterministic ranking rules are descriptive and all favor TRACE-MOEA. A separate 270-run budget scan yields higher hypervolume than R-NSGA-II and NSGA-II at all three tested budgets. Removing preference adaptation changes pooled hypervolume by 0.17%, and the direct contrast is unresolved after cross-scenario correction. Across main TRACE-MOEA runs, 98.6% of pool-local candidate positions represented in returned fronts co-occur with at least one generated event; this is not replay evidence, and effects on human review remain untested.
+Utilities reviewing large grid-project queues need constrained portfolio search and inspectable summaries of the search events generated in each run. TRACE-MOEA combines adaptive preference elitism with deterministic budget repair. Released rows retain only event count and pool-local candidate co-occurrence for generated repair and preference records; payloads, replacement flags, stable identifiers, and event order are absent. No event statistic enters evaluation. On a reproducible five-objective, 120-project benchmark, TRACE-MOEA reaches pooled mean hypervolume 0.17425 across seven scenarios and 30 seeds, 0.89% above NSGA-II (0.17270). It has 27 positive mean differences in 28 stochastic-baseline comparisons and 24 Holm-significant wins, with no significant loss. The 21 deterministic-rule gaps favor TRACE-MOEA only under the reported clipped full-front metric. A matched one-output analysis instead exposes objective trade-offs without a universal ordering. Among 16,216 rerun front points, the reported empirical bounds clip 9.79%, 25%-expanded bounds clip 0.95%, and conservative analytic bounds clip none. TRACE-MOEA remains slightly above NoPreferenceRanking under the tested bound/reference schemes, but deterministic ordering changes with normalization. A prespecified formulation/preference scan includes adverse and near-null cells. Removing preference adaptation changes reported pooled hypervolume by 0.17%, with its direct effect unresolved. Main TRACE-MOEA runs show 98.6% event--front position co-occurrence; this is not replay or human-review evidence.
 
 **Keywords:** power grid investment review; constrained portfolio search; multi-objective evolutionary algorithm; adaptive preference elitism; budget repair; event co-occurrence summary; hypervolume
 
@@ -46,7 +47,7 @@ The paper makes three evidence-bounded contributions:
 
 2. **Run-level event co-occurrence summaries separated from optimization.** Each main-run row reports total event count and final-front candidate co-occurrence coverage for in-memory repair-drop and preference-best-response payloads. These fields are quarantined from objectives and selection. They measure event production and set overlap only; the current evidence package retains neither payload order nor stable project identifiers, replacement flags, or evicted portfolios.
 
-3. **A reproducible, comparison-bounded evaluation.** Seven review scenarios, 30 seeded runs per stochastic method, component controls, and a matched three-budget scan separate global front quality, preference distance, budget-repair effects, and run-level event summaries. The complete method improves pooled proxy hypervolume over NSGA-II and the implemented R-NSGA-II control, whereas the direct preference-ablation effect is unresolved. NERC and MTEP16 diagnostics remain descriptive external-consistency checks rather than expert-validated review performance.
+3. **A reproducible, comparison-bounded evaluation.** Seven review scenarios, 30 seeded runs per stochastic method, component controls, a matched three-budget scan, a one-output comparison, and prespecified bound/reference and formulation/preference sensitivity checks separate global front quality from compromise selection. The complete method improves pooled proxy hypervolume over NSGA-II and the implemented R-NSGA-II control under the reported metric, whereas the direct preference-ablation effect is unresolved and deterministic-rule ordering is normalization-dependent. NERC and MTEP16 diagnostics remain descriptive external-consistency checks rather than expert-validated review performance.
 
 The contribution is the measured integration of constrained portfolio search, adaptive preference elitism, deterministic budget repair, and run-level event co-occurrence summaries. These properties are reported separately: the 0.17% preference-ablation difference does not establish an optimization benefit from adaptation, and event co-occurrence coverage does not measure value in contested human decisions.
 
@@ -338,7 +339,7 @@ TRACE-MOEA(pool, B, seed):
 
 ### 4.6. Configuration and Reproducibility Boundary
 
-The generated JSON configuration records the seven experiment names, method names, 30 seeds, population size 40, generation limit 40, and the fixed hypervolume protocol. It does not serialize $K=8$, $\lambda_{\mathrm{pref}}=10$, the $U(0.03,0.15)$ initialization density, mutation rate $1/n$, five-generation update cadence, perturbation scale 0.1, random eviction, tie behavior, or trace schema. Those executed values are constants in the archived implementation and are disclosed above; the JSON alone is not a complete replay contract. Its legacy method description says "preference coevolution" and "decision trace archive": here the former denotes only weight perturbation/reselection plus elitism, and the latter denotes the ephemeral in-memory event list, not a released archive. The released run rows also omit objective-evaluation counts and actual preference-replacement counts. No rerun is introduced in this narrative stage.
+The generated main-run JSON configuration records the seven experiment names, method names, 30 seeds, population size 40, generation limit 40, and the fixed hypervolume protocol. It does not serialize $K=8$, $\lambda_{\mathrm{pref}}=10$, the $U(0.03,0.15)$ initialization density, mutation rate $1/n$, five-generation update cadence, perturbation scale 0.1, random eviction, tie behavior, or trace schema. Those executed values are constants in the archived implementation and are disclosed above; the JSON alone is not a complete replay contract. Its legacy method description says "preference coevolution" and "decision trace archive": here the former denotes only weight perturbation/reselection plus elitism, and the latter denotes the ephemeral in-memory event list, not a released archive. The released run rows also omit objective-evaluation counts and actual preference-replacement counts. The new matched-output and sensitivity stage has its own frozen machine-readable configuration, failed/superseded run history, final `primary_v4` directory, and independent exact `reproduction_v1` directory; it does not repair missing state in the original runs.
 
 ---
 
@@ -387,7 +388,7 @@ Three ablations (NoReliabilityFeatures, NoRenewableFeatures, NoScheduleRisk) hid
 
 The archive contains 16 methods x 7 scenarios x 30 invocations, or 3360 rows. Twelve opponents are stochastic: four baselines (NSGA-II, R-NSGA-II, MOEA/D, and Random Feasible) and eight ablations. AHP-TOPSIS, Weighted Sum, and Greedy BCR are deterministic rules. Their 30 identical invocations are retained for a rectangular provenance table but provide an effective sample size of one per scenario. The candidate pool, budget, and scenario weights are fixed within each scenario.
 
-The metric is the standard hypervolume of the feasible non-dominated front. Objective values are normalized by fixed per-scenario bounds computed once from a seeded, method-independent reference set consisting of the empty portfolio, all singleton portfolios, and 2048 random feasible portfolios. If $m_j$ and $M_j$ are the reference-set minimum and maximum, the executed bounds are padded by 5%: $l_j=m_j-0.05(M_j-m_j)$ and $u_j=M_j+0.05(M_j-m_j)$. These are empirical reference bounds, not theoretical ideal and nadir values. The reference point is 1.1 in each normalized dimension. An experiment that returns no feasible portfolio scores zero. The three deterministic ranking rules produce one portfolio per scenario and appear as single markers in Figure 2. Random Feasible is stochastic and is analyzed by seed.
+The metric is the standard hypervolume of the feasible non-dominated front. Objective values are normalized by fixed per-scenario bounds computed once from a seeded, method-independent reference set consisting of the empty portfolio, all singleton portfolios, and 2048 random feasible portfolios. Singleton rows are not feasibility-filtered, so a singleton whose synthetic cost exceeds the budget can widen the empirical bounds even though it cannot enter a feasible returned front. If $m_j$ and $M_j$ are the reference-set minimum and maximum, the executed bounds are padded by 5%: $l_j=m_j-0.05(M_j-m_j)$ and $u_j=M_j+0.05(M_j-m_j)$. These are empirical reference bounds, not theoretical ideal and nadir values. The reference point is 1.1 in each normalized dimension. An experiment that returns no feasible portfolio scores zero. The three deterministic ranking rules produce one portfolio per scenario and appear as single markers in Figure 2. Random Feasible is stochastic and is analyzed by seed.
 
 Seed-level inference uses two-sided Mann--Whitney U tests comparing TRACE-MOEA with each of the twelve stochastic opponents per scenario ($n=30$ per group). P-values are Holm-corrected within that stochastic family, with significance at $\alpha=0.05$. We report rank-biserial effect sizes and 5000-resample bootstrap confidence intervals for mean differences. Comparisons with the three deterministic rules are descriptive point gaps and are not assigned inferential p-values. The corrected table is available at `evidence/tables/real_project_review_inference_v2.csv`; the original rectangular significance table is retained only as computational provenance.
 
@@ -417,13 +418,26 @@ $$
 
 The evaluation depends only on candidate attributes and fixed normalization bounds; preference vectors, trace variables, and method-owned parameters do not enter the hypervolume metric. This separation is necessary because the trace is an output to be inspected, not a reward to be optimized.
 
+The matched-output extension consumes the compromise already selected in every preserved main-run row by the shared minimum-normalized-objective-sum rule. It retains 30 seeded rows for each of TRACE-MOEA, NSGA-II, R-NSGA-II, and MOEA/D, but collapses each deterministic rule to one unique method--scenario output, yielding 861 analysis rows. Because the quality coordinate of the selected compromise was not serialized, the matched analysis reports the available cost index, reliability, renewable support, risk, and portfolio size rather than reconstructing a single-point hypervolume. Full-front hypervolume is retained only as context.
+
+The bound/reference rerun covers TRACE-MOEA, NoPreferenceRanking, and the three deterministic rules: $2\times7\times30+3\times7=441$ unique runs. Besides the reported clipped score, it computes the same empirical normalization without clipping, bounds expanded by 25% of their padded span on both sides, conservative definition-derived bounds, and reference points 1.1 and 1.2. For cost $c$, additive reliability $r$, additive renewable support $g$, portfolio risk $\rho$, quality $q$, and budget $B$, the conservative bounds are
+
+$$
+l^A=(0,-\textstyle\sum_i r_i,-\textstyle\sum_i g_i,\min\{1,\min_i\rho_i\},-\max_i q_i),\qquad
+u^A=(B,0,0,\max\{1,\max_i\rho_i\},0).
+$$
+
+Clipping incidence uses a $10^{-12}$ numerical tolerance; the worst strict analytic-bound underflow before applying that tolerance was $-3.36\times10^{-17}$. All 441 reported-HV cells reproduce the preserved values at eight decimals, and a second output directory matches all 17 path-independent artifacts byte-for-byte.
+
+Finally, a one-factor-at-a-time sensitivity scan uses 30 common seeds per cell. It varies risk aggregation (portfolio mean versus maximum), the compliance share in the quality objective (0.25, 0.50, 0.75), preference-vector count ($K=4,8,16$), and the seeded preference profile (balanced, reliability, renewable, traceability). All nine TRACE cells are reported; NoPreferenceRanking is rerun for the registered and three formulation cells, yielding 390 runs. The primary sensitivity readout is analytic-bound full-front hypervolume at reference point 1.2, with a matched single-point readout secondary. No p-values are computed. The public-record backtests are not rerun and retain their descriptive scope because no portfolio-level randomization family is introduced. New pymoo 0.6.2 front reruns could not be executed under one compatible `moocore`/CFFI host ABI, so the stage does not substitute another pymoo version or extend bound sensitivity to those preserved comparator fronts.
+
 ---
 
 ## 6. Results
 
 ### 6.1. Main Comparison
 
-Table 4 reports the pooled leaderboard across all seven scenarios. TRACE-MOEA leads the table with mean hypervolume 0.17425 (standard deviation 0.00635), +0.89% over NSGA-II (0.17270) and +29.4% over AHP-TOPSIS (0.13468). Across four stochastic baselines and seven scenarios, TRACE-MOEA has 27 positive mean differences in 28 comparisons; 24 are Holm-significant wins and none is a significant loss. All 21 descriptive gaps against the three deterministic ranking rules favor TRACE-MOEA. R-NSGA-II provides the direct preference-based control and is retained despite its lower pooled hypervolume.
+Table 4 reports the pooled leaderboard across all seven scenarios. TRACE-MOEA leads the table with mean hypervolume 0.17425 (standard deviation 0.00635), +0.89% over NSGA-II (0.17270) and +29.4% over AHP-TOPSIS (0.13468). Across four stochastic baselines and seven scenarios, TRACE-MOEA has 27 positive mean differences in 28 comparisons; 24 are Holm-significant wins and none is a significant loss. All 21 descriptive gaps against the three deterministic ranking rules favor TRACE-MOEA under the reported clipped full-front metric. R-NSGA-II provides the direct preference-based control and is retained despite its lower pooled hypervolume.
 
 **Table 4.** Pooled leaderboard over seven scenarios. Stochastic methods have 210 runs; deterministic-rule rows summarize seven unique outputs retained as 210 repeated provenance rows. Event-count and decision-coverage columns are run-level descriptive summaries only.
 
@@ -527,7 +541,62 @@ Hypervolume rises with budget for all three methods. TRACE-MOEA significantly ex
 
 **Figure 5.** Hypervolume and preference-achievement distance for TRACE-MOEA, NSGA-II, and R-NSGA-II at 0.75, 1.00, and 1.25 times the nominal budget. Error bars show one standard deviation over 30 seeds. The two panels keep global front coverage and distance to the declared preference point conceptually separate.
 
-### 6.5. Public-Record Consistency Checks
+### 6.5. Matched Output, Hypervolume Bounds, and Prespecified Sensitivity
+
+The preserved matched-output analysis applies the same compromise rule already executed in the main pipeline and retains one selected portfolio per run. It therefore avoids comparing a many-point evolutionary front directly with a one-point deterministic output. Table 7 reports scenario-balanced means of the available compromise attributes. No row dominates the others: AHP-TOPSIS has the largest reliability total, Greedy BCR the largest renewable total, and MOEA/D the lowest risk and cost index largely because its compromise contains fewer than one project on average across scenarios. TRACE-MOEA occupies a different trade-off, not a universal optimum. The full-front hypervolume gaps against deterministic rules remain valid for their reported metric but do not establish matched-output superiority.
+
+**Table 7.** Matched one-output comparison using the preserved shared compromise rule. Stochastic rows average 30 seeds within each scenario and then seven scenario means; deterministic rows contain seven unique outputs. Objectives retain their native proxy scales.
+
+| Method | Type | Cost index | Reliability | Renewable | Risk | Portfolio size |
+|---|---|---:|---:|---:|---:|---:|
+| TRACE-MOEA | stochastic MOEA | 0.9136 | 25.5790 | 33.1729 | 0.2778 | 14.07 |
+| NSGA-II | stochastic MOEA | 0.9341 | 24.7311 | 19.2924 | 0.2718 | 13.54 |
+| R-NSGA-II | stochastic MOEA | 0.9779 | 14.8568 | 69.4005 | 0.2295 | 13.30 |
+| MOEA/D | stochastic MOEA | 0.0581 | 0.3028 | 12.0026 | 0.1318 | 0.83 |
+| AHP-TOPSIS | deterministic | 0.9866 | 35.1204 | 0.4155 | 0.3203 | 14.29 |
+| Weighted Sum | deterministic | 0.9756 | 4.3834 | 41.7845 | 0.3664 | 5.43 |
+| Greedy BCR | deterministic | 0.9715 | 7.6598 | 156.3509 | 0.2157 | 13.29 |
+
+The bound audit identifies a load-bearing normalization choice. In the full-pool benchmark scenario, the padded empirical cost interval is $[-36881.68,774515.23]$ even though the feasible budget is 1160, because the reference set includes unfiltered singletons. Table 8 reports the complete five-coordinate vectors for that scenario; all seven scenario vectors are released in `normalization/bounds.csv`.
+
+**Table 8.** Hypervolume bounds in the benchmark scenario. Coordinate order is cost, negative reliability, negative renewable support, risk, and negative quality.
+
+| Scheme | Lower-bound vector | Upper-bound vector |
+|---|---|---|
+| Reported empirical | $(-36881.678,-22.6339,-9308.767,0.08041,-0.945)$ | $(774515.233,1.0778,443.275,1.04379,0.045)$ |
+| 25%-expanded empirical | $(-239730.906,-28.5618,-11746.777,-0.16044,-1.1925)$ | $(977364.461,7.0057,2881.285,1.28464,0.2925)$ |
+| Conservative analytic | $(0,-124.4391,-11002.521,0.1242,-0.900)$ | $(1160,0,0,1,0)$ |
+
+Across the 16,216 non-dominated points returned by the 441 reruns, 1587 (9.79%) fall outside at least one reported empirical $[0,1]$ coordinate and are clipped. The 25%-expanded bounds reduce this count to 154 (0.95%), while the analytic bounds have zero excursions beyond the $10^{-12}$ tolerance. Removing clipping changes values materially: Table 9 shows that AHP-TOPSIS exceeds TRACE-MOEA under the unclipped and expanded empirical schemes, whereas TRACE-MOEA exceeds it under analytic bounds. Thus the reported 29.4% full-front gap over AHP-TOPSIS is not normalization-invariant. TRACE-MOEA remains above NoPreferenceRanking under every tested scheme, but the difference ranges from 0.000291 under the reported clipped score to 0.000431 under analytic bounds at reference 1.1 and 0.001040 at reference 1.2. These are descriptive sensitivity differences; the existing corrected component test remains unresolved.
+
+**Table 9.** Scenario-balanced mean hypervolume under bound, clipping, and reference-point sensitivity. The deterministic methods return one point per scenario.
+
+| Method | Reported clipped, ref 1.1 | Reported unclipped, ref 1.1 | Expanded unclipped, ref 1.1 | Analytic, ref 1.1 | Analytic, ref 1.2 |
+|---|---:|---:|---:|---:|---:|
+| TRACE-MOEA | 0.174247 | 0.198818 | 0.213194 | 0.032181 | 0.118820 |
+| NoPreferenceRanking | 0.173956 | 0.196180 | 0.211522 | 0.031750 | 0.117779 |
+| AHP-TOPSIS | 0.134678 | 0.208164 | 0.226665 | 0.005168 | 0.028036 |
+| Weighted Sum | 0.041048 | 0.041048 | 0.069712 | 0.001781 | 0.012253 |
+| Greedy BCR | 0.055756 | 0.061968 | 0.091315 | 0.002664 | 0.016538 |
+
+The one-factor-at-a-time scan further limits mechanism attribution. Relative to the registered TRACE cell (mean analytic-bound HV 0.105439 at reference 1.2), maximum rather than mean portfolio risk lowers mean HV by 6.88%, a 0.75 compliance share lowers it by 2.30%, $K=16$ lowers it by 0.12%, and the reliability profile lowers it by 0.43%. The 0.25 compliance share, $K=4$, renewable profile, and traceability profile increase the mean by 1.35%, 0.25%, 0.98%, and 0.41%, respectively. In the 0.75-compliance formulation, TRACE is 0.000795 below its formulation-matched NoPreferenceRanking control. The secondary one-output metric can move oppositely to full-front HV (for example, the renewable profile raises full-front HV but lowers matched single-point HV by 0.000727). Table 10 reports every prespecified cell; none was filtered by direction.
+
+**Table 10.** Prespecified TRACE sensitivity relative to the registered cell; the last column compares TRACE with the matching NoPreferenceRanking formulation (or the registered control for preference-only changes). No p-values are computed.
+
+| Cell | Factor | Mean-HV change | Percent change | TRACE minus no-preference MOEA |
+|---|---|---:|---:|---:|
+| Maximum risk aggregation | formulation | -0.007257 | -6.88% | 0.003155 |
+| Compliance share 0.25 | formulation | 0.001423 | 1.35% | 0.000394 |
+| Compliance share 0.75 | formulation | -0.002426 | -2.30% | -0.000795 |
+| $K=4$ | preference | 0.000262 | 0.25% | 0.001475 |
+| $K=16$ | preference | -0.000128 | -0.12% | 0.001084 |
+| Reliability profile | preference | -0.000457 | -0.43% | 0.000755 |
+| Renewable profile | preference | 0.001035 | 0.98% | 0.002248 |
+| Traceability profile | preference | 0.000433 | 0.41% | 0.001646 |
+
+The new runs do not change the external-consistency evidentiary level. Neither NERC nor MTEP16 is rerun, and no portfolio-preserving randomization family is added; their associations therefore remain descriptive.
+
+### 6.6. Public-Record Consistency Checks
 
 Hypervolume measures optimization quality on the proxy objectives; it does not establish that selected portfolios identify real grid risk or predict project outcomes. We therefore add two external-consistency checks. Both are descriptive because the NERC rule overlaps the construction corpus and the MTEP project-level tests do not preserve portfolio dependence or a confirmatory comparison family.
 
@@ -545,7 +614,7 @@ TRACE-MOEA's broad capture is 1.079 in the benchmark scenario and 1.070 in the r
 
 Five boundary conditions restrict the interpretation of Rung 2. First, the MTEP16 approved pool is approximately 98% built within the strictly labeled subset, so the backtest measures alignment within an already board-approved plan. Second, the `unresolved` class may contain projects re-scoped under new identifiers. Third, the pool contains almost no renewable or storage projects, so this rung provides no evidence for renewable-related objectives. Fourth, appendix status is decision-time information correlated with broad outcomes. Fifth, the raw project-level association tests do not preserve dependence induced by portfolio selection. Within these limits, the backtest shows descriptive contact with real outcomes; it does not establish above-chance portfolio performance, best alignment, or engineering-economic effectiveness.
 
-### 6.6. Search-Effort and Outcome-Sensitivity Diagnostics
+### 6.7. Search-Effort and Outcome-Sensitivity Diagnostics
 
 Figure 7 relates optimization quality to computation and event production. TRACE-MOEA averages 0.17425 hypervolume, 0.1130 s, 806 repair-drop records, 1126 total generated records, and 0.986 position co-occurrence per run. Removing preference elitism leaves 0.17396 hypervolume and about 803 repair-drop records; disabling repair leaves 320 preference-best-response records and lowers co-occurrence to 0.865. NSGA-II attains 0.17270 at 0.1456 s without an instrumented event list. Event count remains descriptive and is not an optimization objective.
 
@@ -567,7 +636,9 @@ The two diagnostics answer different questions. Figure 7 shows the computation a
 
 ## 7. Discussion
 
-**Preference guidance and the constrained kernel.** The three significant comparisons with NSGA-II occur in preference-emphasized scenarios (Table 5), but the direct NoPreferenceRanking ablation is unresolved after correction across its seven scenarios. Preference-selected best responses appear to overlap portfolios already preserved by crowding, which may explain the small marginal effect of the adaptive layer. The traceability scenario also favors the risk-blind variant within its scenario family, but the contrast falls just outside the second cross-scenario correction. These patterns motivate targeted tests of preference-vector count and update cadence rather than attribution to a single component.
+**Preference guidance and the constrained kernel.** The three significant comparisons with NSGA-II occur in preference-emphasized scenarios (Table 5), but the direct NoPreferenceRanking ablation is unresolved after correction across its seven scenarios. Preference-selected best responses appear to overlap portfolios already preserved by crowding, which may explain the small marginal effect of the adaptive layer. The prespecified scan reinforces this conditional reading: $K=4$ is slightly positive in mean full-front HV, $K=16$ slightly negative, and reliability, renewable, and traceability seed profiles do not move in one direction. The traceability scenario also favors the risk-blind variant within its scenario family, but the contrast falls just outside the second cross-scenario correction. Update cadence remains untested, and none of these descriptive cells resolves an isolated preference-layer effect.
+
+**Normalization and output matching.** The reported clipped empirical metric mixes feasible random portfolios with unfiltered singleton bounds. Clipping affects 9.79% of rerun front points, and the deterministic-rule ordering changes under expanded versus analytic bounds. The proposed method remains slightly above NoPreferenceRanking in the tested schemes, but that stability does not transfer to a general claim against point-valued MCDA rules. The matched one-output comparison also shows distinct reliability, renewable, risk, cost, and cardinality trade-offs rather than a dominating recommendation. Hypervolume is appropriate for front coverage; it should not be read as a matched decision-output utility score.
 
 **Public-record consistency.** AHP-TOPSIS is favored on the NERC view partly because its reliability attributes overlap the priority rule. The MTEP view measures capture within an already-approved plan and is constrained by its high build rate. The two diagnostics show that optimized portfolios retain some alignment with public records, but they do not establish review accuracy.
 
@@ -577,13 +648,13 @@ The two diagnostics answer different questions. Figure 7 shows the computation a
 
 The direct R-NSGA-II comparison changes what can be claimed about preference guidance. TRACE-MOEA performs better on this benchmark in both front coverage and mean preference distance, including across the three frozen budgets, but the result is not evidence that adaptive weights are universally better than reference points. R-NSGA-II uses one declared point and one matched configuration; different points, normalization, or niching parameters could change its behavior. The defensible advance is that a direct preference-family control now exists and the proposed method survives it under the disclosed setup.
 
-Against AHP-TOPSIS, the portfolio-level hypervolume gain is 29.4%, and both backtests show that the optimized portfolios do not lose all alignment with documented risk. This comparison remains a proxy-objective result, not proof of superior utility decisions. Mean runtime is 0.113 s per run, so seed ensembles and budget what-if analyses are inexpensive at the tested scale. Deterministic repair also ensures that each returned portfolio satisfies the benchmark budget.
+Against AHP-TOPSIS, the reported clipped full-front hypervolume gap is 29.4%, and both backtests show that the optimized portfolios do not lose all alignment with documented risk. The gap reverses under the expanded unclipped empirical bounds and favors TRACE-MOEA again under conservative analytic bounds, so it is not a normalization-invariant ranking. The matched one-output attributes likewise do not establish a universal winner. Mean runtime is 0.113 s per original main run, so seed ensembles and budget what-if analyses were inexpensive at the tested scale. Deterministic repair also ensures that each returned portfolio satisfies the benchmark budget.
 
 ---
 
 ## 8. Limitations
 
-Eight limitations constrain the scope of the claims in this paper.
+Nine limitations constrain the scope of the claims in this paper.
 
 1. **Proxy task without expert ground truth.** All main-benchmark claims address algorithmic performance on a reproducible public proxy whose objectives are engineering proxies. No expert-labeled review outcomes exist. An annotated subset with inter-rater agreement and rank correlation against the proxy objectives remains undone. The NERC and MTEP checks assess descriptive alignment but do not validate review correctness.
 
@@ -595,11 +666,13 @@ Eight limitations constrain the scope of the claims in this paper.
 
 5. **Single benchmark family with no electrical verification.** All seven scenarios instantiate one 120-candidate pool derived from one combination of public sources. Portfolio feasibility is budgetary (the repair operator enforces the cost constraint) but not electrical: no candidate portfolio has been checked for AC power-flow feasibility using the cached SimBench or RTS-GMLC network models. A second, independently constructed pool and an OPF-based feasibility check of recommended portfolios are natural extensions.
 
-6. **Preference-layer hyperparameters remain fixed.** The adaptive layer was tested with $K=8$ weight vectors and one update cadence (every five generations). The three-level budget scan tests constraint tightness and includes a direct preference-based control, but it does not vary $K$, update cadence, objective weights, or pool size. The design has been evaluated at the tested budgets; the direct optimization benefit of the preference layer remains unresolved.
+6. **Preference sensitivity is descriptive and incomplete.** The new scan varies $K\in\{4,8,16\}$ and four seed profiles, and reports both favorable and adverse cells. It does not vary the five-generation update cadence, perturbation scale, eviction rule, penalty, or pool size, and it uses one benchmark scenario with common seeds. These results do not identify a causal preference-layer contribution; the corrected direct ablation remains unresolved.
 
-7. **Library-default baseline state is incompletely archived.** R-NSGA-II is passed the disclosed raw reference point, `epsilon=0.01`, population 40, and `n_gen=40`, but the pymoo version, Boolean-operator probabilities, internal normalization mode, and per-generation ideal/nadir values were not serialized. The observed result remains valid for the executed configuration, but exact survival-state replay cannot be certified from the available configuration alone.
+7. **Hypervolume normalization is load-bearing.** The empirical reference set includes unfiltered singleton portfolios, its full-pool cost upper bound is far above the feasible budget, and 9.79% of rerun front points require clipping. Expanded and analytic recomputations preserve only the small TRACE--NoPreference ordering, not the deterministic-rule ordering. The headline score remains the preregistered reported metric, but cross-family superiority is not claimed to be normalization-invariant.
 
-8. **One direct preference-based comparator is not a family survey.** R-NSGA-II closes the absence of a reference-point control and is evaluated under the same nominal population, generations, constraints, and three budget levels. However, the study does not include RVEA, NSGA-III with preference articulation, or interactive decision-maker feedback. The result supports TRACE-MOEA against the implemented R-NSGA-II configuration, not superiority over the broader preference-based EMO family.
+8. **Library-default baseline state is incompletely archived.** R-NSGA-II is passed the disclosed raw reference point, `epsilon=0.01`, population 40, and `n_gen=40`, but the pymoo version, Boolean-operator probabilities, internal normalization mode, and per-generation ideal/nadir values were not serialized in the original JSON. The host used for the new stage could not rerun pymoo 0.6.2 fronts under one compatible `moocore`/CFFI ABI, so only preserved comparator rows enter the matched-output analysis and no alternative library version is substituted. Exact survival-state replay cannot be certified.
+
+9. **One direct preference-based comparator is not a family survey.** R-NSGA-II closes the absence of a reference-point control and is evaluated under the same nominal population, generations, constraints, and three budget levels. However, the study does not include RVEA, NSGA-III with preference articulation, or interactive decision-maker feedback. The result supports TRACE-MOEA against the implemented R-NSGA-II configuration, not superiority over the broader preference-based EMO family.
 
 ---
 
@@ -607,11 +680,11 @@ Eight limitations constrain the scope of the claims in this paper.
 
 TRACE-MOEA combines constrained portfolio search, adaptive preference elitism, deterministic budget repair, and quarantined run-level event co-occurrence summaries. Repair maintains the proxy cost budget, while event count and final-front position overlap remain outside the objectives and selection rule.
 
-On the five-objective, 120-project proxy benchmark, TRACE-MOEA attains pooled mean hypervolume 0.17425, 0.89% above NSGA-II (0.17270). Across four stochastic baselines and seven scenarios, it has 27 positive mean differences in 28 comparisons, 24 Holm-significant wins, and no significant loss. Twenty-one deterministic-rule gaps are descriptive and all favor TRACE-MOEA. In the separate 270-run scan, TRACE-MOEA significantly exceeds R-NSGA-II and NSGA-II at all three budgets while retaining the lowest descriptive preference distance. Its 210 main run rows average 1126 generated records and 98.6% final-front candidate-position co-occurrence; these are run summaries, not stable-ID or ordered replay evidence.
+On the five-objective, 120-project proxy benchmark, TRACE-MOEA attains reported pooled mean hypervolume 0.17425, 0.89% above NSGA-II (0.17270). Across four stochastic baselines and seven scenarios, it has 27 positive mean differences in 28 comparisons, 24 Holm-significant wins, and no significant loss. Twenty-one deterministic-rule full-front gaps are descriptive and favor TRACE-MOEA under the reported clipped metric; matched one-output attributes instead show competing trade-offs. In the separate 270-run scan, TRACE-MOEA significantly exceeds R-NSGA-II and NSGA-II at all three budgets while retaining the lowest descriptive preference distance. Its 210 main run rows average 1126 generated records and 98.6% final-front candidate-position co-occurrence; these are run summaries, not stable-ID or ordered replay evidence.
 
 The NERC consistency backtest yields priority-capture ratios of 1.34–1.55. The MISO MTEP16 backtest yields broad capture of 1.070–1.079 and a raw point-biserial correlation up to 0.169. Because the public-record tests do not preserve portfolio dependence or a comparison family, these values support descriptive external consistency rather than confirmatory above-chance alignment.
 
-Adaptive preference elitism changes pooled hypervolume by 0.17%, but its direct effect is unresolved after cross-scenario correction. Its measured record-level effect is the addition of 320 preference-best-response records per run and a change in event--front position co-occurrence; actual replacement is not counted. The schedule-risk contrast is likewise unresolved after the second correction, and the external checks remain descriptive. The evidence therefore supports a budget-constrained portfolio-search framework with run-level event co-occurrence summaries on the public proxy. Stable-ID payload serialization and replay checks, expert-labeled utility data, electrical checks, and human evaluation remain necessary before drawing conclusions about chronology, review effectiveness, or deployment.
+Adaptive preference elitism changes reported pooled hypervolume by 0.17%, but its direct effect is unresolved after cross-scenario correction. TRACE-MOEA remains slightly above NoPreferenceRanking under the tested empirical, expanded, analytic, and alternative-reference schemes, while formulation and preference sensitivity includes adverse and near-null cells. The deterministic-rule order changes with normalization, and 9.79% of rerun front points are clipped by the reported empirical bounds. Its measured record-level effect is the addition of preference-best-response records and a change in event--front position co-occurrence; actual replacement is not counted. The schedule-risk contrast is likewise unresolved, and the external checks remain descriptive. The evidence therefore supports a budget-constrained proxy-search framework with run-level event co-occurrence summaries, not normalization-invariant decision superiority. Stable-ID replay evidence, expert labels, electrical checks, and human evaluation remain necessary before claims about chronology, review effectiveness, or deployment.
 
 ---
 
@@ -635,7 +708,7 @@ Not applicable.
 
 All data sources used in this study are publicly accessible. RTS-GMLC source data is available at https://github.com/GridMod/RTS-GMLC. The SimBench complete mixed dataset is available at https://simbench.de. NERC reliability reports are available at https://www.nerc.com; only report metadata is used in this study, and a manifest with official URLs and SHA-256 checksums is released in place of redistributed PDF files. MISO MTEP16 Appendix A and B project records, subsequent quarterly status snapshots, and the 2026 MISO in-service and active-project portal lists are available at https://www.misoenergy.org.
 
-The candidate-derivation pipeline, TRACE-MOEA implementation, baseline and ablation configurations, 3360 main per-run records, the 270-run three-budget control scan, inference tables, backtest analyses, and figure scripts are included in the supplementary package and are available from the corresponding author. The JSON records population, generations, methods, and evaluation but is not a complete hyperparameter manifest. Main run rows contain only event count and final-front pool-position co-occurrence, not payloads, stable IDs, replacement flags, or state history. A persistent public archive can be supplied before publication, subject to third-party redistribution terms. The companion project `mintou_p6_bilonsga_project_review` (BiLo-NSGA [28]) shares candidate generation, source corpora, common benchmark and evaluation utilities, and public-record backtest infrastructure. Paper-specific configurations, executions, run outputs, selected portfolios, comparisons, and claims are not shared evidence.
+The candidate-derivation pipeline, TRACE-MOEA implementation, baseline and ablation configurations, 3360 main per-run records, the 270-run three-budget control scan, inference tables, backtest analyses, figure scripts, and the stage-local matched-output/normalization/sensitivity package are included in the supplementary package and are available from the corresponding author. The new package contains 861 preserved matched-output analysis rows, 441 front-level bound/reference reruns, 390 sensitivity runs, failed/superseded run history, and an independent exact reproduction directory. The original JSON records population, generations, methods, and evaluation but is not a complete hyperparameter manifest. Main run rows contain only event count and final-front pool-position co-occurrence, not payloads, stable IDs, replacement flags, or state history. A persistent public archive can be supplied before publication, subject to third-party redistribution terms. The companion project `mintou_p6_bilonsga_project_review` (BiLo-NSGA [28]) shares candidate generation, source corpora, common benchmark and evaluation utilities, and public-record backtest infrastructure. Paper-specific configurations, executions, run outputs, selected portfolios, comparisons, and claims are not shared evidence.
 
 ## Acknowledgments
 
