@@ -1,0 +1,162 @@
+{
+  "stage": "p5_s3_matched_sensitivity",
+  "status": "prespecified_before_execution",
+  "prespecification_amendment": "After primary_v1 stopped before candidate construction, bind the documented read-only public-data cache. After primary_v2 stopped before a method-cell result, preserve the recorded pymoo 0.6.2 comparator rows for the all-method matched-cardinality analysis and restrict new front-level reruns to shared custom-engine and deterministic methods; no observed result informed either amendment. After primary_v3, classify clipping incidence with a 1e-12 numerical tolerance because the only analytic-bound excursions were negative roundoff no larger than 3.36e-17; hypervolume values and scientific factors are unchanged.",
+  "clipping_incidence_tolerance": 1e-12,
+  "input_data_root": "D:/aicoding/powergrid_benchmark/data/public_datasets",
+  "analysis_unit": "one seeded method-scenario run for stochastic methods; one unique method-scenario output for deterministic rules",
+  "candidate_pool": "the existing public 120-candidate P5 pool, filtered only by the seven registered scenario definitions",
+  "scenarios": [
+    "benchmark_portfolio_optimization",
+    "distribution_project_review",
+    "reliability_driven_review",
+    "renewable_accommodation_review",
+    "budget_ranking_stability",
+    "preference_aware_support",
+    "traceability_evaluation"
+  ],
+  "stochastic_methods": [
+    "TRACE-MOEA",
+    "NSGA-II",
+    "R-NSGA-II",
+    "MOEA/D"
+  ],
+  "deterministic_methods": [
+    "AHP-TOPSIS",
+    "Weighted Sum",
+    "Greedy BCR"
+  ],
+  "normalization_rerun_methods": [
+    "TRACE-MOEA",
+    "Ablation-NoPreferenceRanking",
+    "AHP-TOPSIS",
+    "Weighted Sum",
+    "Greedy BCR"
+  ],
+  "seeds_per_stochastic_cell": 30,
+  "matched_output": {
+    "cardinality": 1,
+    "rule": "consume the one compromise already selected in each preserved run by the shared minimum normalized-objective-sum rule",
+    "primary_readout": "compromise cost index, reliability, renewable support, risk, and portfolio size; full-front hypervolume is retained only as context",
+    "source": "preserved pymoo 0.6.2 main-run rows; deterministic rows deduplicated to one unique method-scenario output",
+    "inference": "descriptive; deterministic outputs are not replicated"
+  },
+  "hypervolume_schemes": [
+    {
+      "id": "reported_empirical_ref1p1_clipped",
+      "bounds": "the shared fixed seeded bounds with 5% padding",
+      "reference_point": 1.1,
+      "clip_normalized_objectives_to_0_1": true
+    },
+    {
+      "id": "reported_empirical_ref1p1_unclipped",
+      "bounds": "the shared fixed seeded bounds with 5% padding",
+      "reference_point": 1.1,
+      "clip_normalized_objectives_to_0_1": false
+    },
+    {
+      "id": "expanded_empirical_ref1p1_unclipped",
+      "bounds": "shared bounds expanded by 25% of their padded span on both sides",
+      "reference_point": 1.1,
+      "clip_normalized_objectives_to_0_1": false
+    },
+    {
+      "id": "analytic_ref1p1_unclipped",
+      "bounds": "definition-derived conservative bounds",
+      "reference_point": 1.1,
+      "clip_normalized_objectives_to_0_1": false
+    },
+    {
+      "id": "analytic_ref1p2_unclipped",
+      "bounds": "definition-derived conservative bounds",
+      "reference_point": 1.2,
+      "clip_normalized_objectives_to_0_1": false
+    }
+  ],
+  "sensitivity": {
+    "scenario": "benchmark_portfolio_optimization",
+    "design": "one factor at a time around the registered formulation",
+    "seeds_per_cell": 30,
+    "seed_schedule": "700000 + 7919 * seed_index, common across cells and methods",
+    "primary_metric": "full feasible-front hypervolume under analytic bounds and reference point 1.2",
+    "secondary_metric": "matched single-point hypervolume under the same bounds and reference point for the new custom-engine subset",
+    "inference": "descriptive; no p-values",
+    "cells": [
+      {
+        "id": "registered",
+        "factor": "reference",
+        "risk_aggregation": "mean",
+        "quality_compliance_share": 0.5,
+        "n_preferences": 8,
+        "preference_profile": "balanced"
+      },
+      {
+        "id": "risk_max",
+        "factor": "formulation",
+        "risk_aggregation": "max",
+        "quality_compliance_share": 0.5,
+        "n_preferences": 8,
+        "preference_profile": "balanced"
+      },
+      {
+        "id": "quality_compliance_025",
+        "factor": "formulation",
+        "risk_aggregation": "mean",
+        "quality_compliance_share": 0.25,
+        "n_preferences": 8,
+        "preference_profile": "balanced"
+      },
+      {
+        "id": "quality_compliance_075",
+        "factor": "formulation",
+        "risk_aggregation": "mean",
+        "quality_compliance_share": 0.75,
+        "n_preferences": 8,
+        "preference_profile": "balanced"
+      },
+      {
+        "id": "preferences_k4",
+        "factor": "preference",
+        "risk_aggregation": "mean",
+        "quality_compliance_share": 0.5,
+        "n_preferences": 4,
+        "preference_profile": "balanced"
+      },
+      {
+        "id": "preferences_k16",
+        "factor": "preference",
+        "risk_aggregation": "mean",
+        "quality_compliance_share": 0.5,
+        "n_preferences": 16,
+        "preference_profile": "balanced"
+      },
+      {
+        "id": "profile_reliability",
+        "factor": "preference",
+        "risk_aggregation": "mean",
+        "quality_compliance_share": 0.5,
+        "n_preferences": 8,
+        "preference_profile": "reliability"
+      },
+      {
+        "id": "profile_renewable",
+        "factor": "preference",
+        "risk_aggregation": "mean",
+        "quality_compliance_share": 0.5,
+        "n_preferences": 8,
+        "preference_profile": "renewable"
+      },
+      {
+        "id": "profile_traceability",
+        "factor": "preference",
+        "risk_aggregation": "mean",
+        "quality_compliance_share": 0.5,
+        "n_preferences": 8,
+        "preference_profile": "traceability"
+      }
+    ]
+  },
+  "external_public_record_backtests": "not rerun; existing NERC and MTEP checks remain descriptive because no portfolio-level randomization family is introduced",
+  "runtime_limitation": "new pymoo 0.6.2 front reruns are unavailable because cached moocore/CFFI wheels do not share one host ABI; no different pymoo version is substituted",
+  "shared_code_policy": "no shared P5/P6 source edit is authorized or required; regress the shared test suite after the stage-local run"
+}
