@@ -17,9 +17,9 @@ The former title ending, "for Distribution Network Expansion Planning," was broa
 
 ## Primary Estimand and Analysis Unit
 
-The primary reporting target is the within-scenario distribution of standard hypervolume for each stochastic method on the fixed proxy objective. Between-method magnitude is reported as mean hypervolume difference or relative mean margin; inference uses two-sided Mann--Whitney U tests with Holm correction within each scenario. The seeded optimizer run is the analysis unit (`n = 30` per stochastic method and scenario). Pooled means over seven heterogeneous scenarios are descriptive summaries, not a separate replicated estimand.
+The primary reporting target is the within-experiment distribution of standard hypervolume for each stochastic method on the fixed proxy objective. Between-method magnitude is reported as mean hypervolume difference or relative mean margin; inference uses two-sided Mann--Whitney U tests with Holm correction within each deterministic planning experiment. The seeded optimizer run is the analysis unit (`n = 30` per stochastic method and experiment). Pooled means over seven heterogeneous planning experiments are descriptive summaries, not a separate replicated estimand.
 
-The deterministic Weighted Sum method has one effective output per scenario. Its repeated archive invocations are provenance rows, not independent observations, so its seven comparisons are descriptive and receive no seed-level p-values.
+The deterministic Weighted Sum method has one effective output per planning experiment. Its repeated archive invocations are provenance rows, not independent observations, so its seven comparisons are descriptive and receive no seed-level p-values.
 
 The AC stage answers a different, secondary question: whether one seed-0 compromise composition per method and selected planning experiment remains feasible after a deterministic mapping onto four MV networks and six operating/stress cases. Its 72 binary cases per method are generated from three plan compositions rather than 72 independent optimizer runs. This stage supports descriptive transfer and failure-pattern statements, not a powered causal or method-superiority estimand.
 
@@ -27,19 +27,33 @@ The AC stage answers a different, secondary question: whether one seed-0 comprom
 
 | Item | Contract recorded in the manuscript |
 |---|---|
-| Stochastic repetition | 30 independently derived seeds per method and proxy scenario. |
-| Population budget | Population 40 and 40 generations for population-based methods. |
+| Stochastic repetition | 30 independently derived seeds per stochastic method and deterministic planning experiment. |
+| Search horizon | 40 generations; population 40 except MOEA/D's 35 reference-direction members. Generated-candidate counts are specified for the in-house engines, while comparable pymoo `n_eval` counters were not retained. |
 | Objective visibility | Identical five-objective proxy and budget definition across methods; fixed, method-independent hypervolume normalization. |
-| Confirmatory comparison family | Twelve stochastic opponents within each scenario, Holm-corrected at 0.05. |
-| Deterministic comparator | Weighted Sum is an `n = 1` point comparison per scenario. |
+| Confirmatory comparison family | Twelve stochastic opponents within each planning experiment, Holm-corrected at 0.05. |
+| Deterministic comparator | Weighted Sum is an `n = 1` point comparison per planning experiment. |
 | Sensitivity sweep | 10 seeds per point; displayed p-values are nominal and multiplicity-unadjusted, so the sweep is exploratory. |
 | Electrical inspection | One seed-0 compromise composition for each of three experiments, mapped to four networks and six cases; descriptive only. |
 
 The isolated worktree contains the manuscript, figures, figure-generation source, and the derived summaries `p3_pooled_efficiency.csv` and `p3_ac_margin_diagnostics.csv`. The master manuscript points to a larger evidence tree and machine-readable configurations in the source project, but the raw 2940-run archive, inference tables, and configurations are not copied into this worktree. This narrative stage therefore records the claim contract from the available assets and does not claim a fresh audit of every run or p-value. Before submission, the supplementary evidence package named in the Data Availability Statement must be checked against the final manuscript.
 
+The complete method specification in this revision was checked read-only against repository-tracked source and configuration artifacts: `src/powergrid_benchmark/mintou_real_planning.py`, `src/powergrid_benchmark/mintou_real_project_review.py`, `src/powergrid_benchmark/mintou_pandapower_validation.py`, and the P3 planning and AC JSON configurations. No source, configuration, run, or result artifact was changed. The resulting contract records:
+
+- every candidate formula, objective floor/cap, unit boundary, descriptive target, and experiment-level exclusion;
+- exact repair weights $(0.12,0.02,5,2,2)$, resilience-field inclusion, DER-support exclusion, and index-based ties;
+- continuous-genome decoding, phenotype-only repair, crossover clipping, feasible tolerances, and front truncation ties;
+- baseline scalar penalties, the MOEA/D $10^4v$ objective penalty, post-search baseline repair, and search-mask behavior;
+- fixed-seed normalization-reference construction, 5% bounds, hypervolume clipping, reference point 1.1, and unclipped equal-sum compromise selection;
+- generated-candidate counts where source control permits them and an explicit limitation that comparable pymoo `n_eval` counters were not retained; and
+- deterministic terminology separating planning experiments, stochastic optimizer seeds, and fixed AC operating cases.
+
+Two precision corrections follow from that audit. First, NSGA-II+Repair applies repair only to the returned NSGA-II population; it is not a variation-time matched-repair search. Second, the archived AC evidence used by this manuscript contains four SimBench MV networks and 72 cases per method. A later source revision lists additional CIGRE/IEEE networks, but those unarchived extensions are not claimed here.
+
+The available run configuration does not pin the pymoo package version and does not override the Boolean crossover/mutation probabilities used by NSGA-II and MOEA/D. The manuscript therefore records those settings as uncertified library defaults rather than inventing numerical probabilities.
+
 ## Negative and Null Results
 
-- **Adaptation bundle unresolved:** Ablation-FixedDE is nominally 0.60% higher in pooled proxy hypervolume, and the contrast is unresolved in all seven scenarios. The paper cannot claim that parameter-and-strategy adaptation improves proxy accuracy.
+- **Adaptation bundle unresolved:** Ablation-FixedDE is nominally 0.60% higher in pooled proxy hypervolume, and the contrast is unresolved in all seven planning experiments. The paper cannot claim that parameter-and-strategy adaptation improves proxy accuracy.
 - **No component-level causal separation:** FixedDE disables parameter adaptation and the strategy pool together. It supports only a joint conclusion and cannot identify either subcomponent as helpful or harmful.
 - **NoDER near-null/problem-variant result:** Ablation-NoDER is nominally 0.12% higher in pooled proxy hypervolume and changes the candidate pool rather than one algorithmic operator; it is not component attribution.
 - **Proxy--physics disagreement:** CARS-MODE leads the implemented external controls on proxy hypervolume but is mid-pack in the descriptive AC-feasibility ranking (0.611 versus 0.667 for NSGA-II and 0.681 for Standard DE).
@@ -56,7 +70,7 @@ The independent CARS-MODE question is: **under a fixed SimBench-derived proxy be
 
 ## New or Rerun Experiments
 
-No experiment was added, rerun, filtered, or retuned in this stage. No numerical result, p-value, seed count, effect direction, or AC-feasibility rate was changed. The work is a narrative identity and disclosure revision based on the current manuscript, derived tables, and figure source.
+No experiment was added, rerun, filtered, or retuned in this stage. No numerical result, p-value, seed count, effect direction, or AC-feasibility rate was changed. The work is a narrative method-contract revision based on the current manuscript, derived tables, figure source, and read-only inspection of repository-tracked implementation/configuration artifacts.
 
 Future experiments named in the manuscript remain future work: nodal action-aligned siting and sizing, multi-seed AC mapping, monetary calibration, a second benchmark family, parameter-only and strategy-only controls, and additional multi-objective DE controls. They are not evidence for the current claims.
 
