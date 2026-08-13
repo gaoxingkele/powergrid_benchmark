@@ -164,6 +164,19 @@ def generate_tables(frames: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
         )
         .sort_values("mean_hypervolume", ascending=False)
     )
+    leaderboard["interpretation_scope"] = leaderboard["method"].map(
+        {
+            "TRACE-MOEA": "proposed integration",
+            "Ablation-NoFeasibilityRepair": "direct repair ablation",
+            "Ablation-NoPreferenceRanking": "direct preference-layer ablation",
+            "Ablation-NoReliabilityFeatures": "combined objective hiding and first-vector mapping change",
+            "Ablation-NoRenewableFeatures": "combined objective hiding and first-vector mapping change",
+            "Ablation-NoScheduleRisk": "combined objective hiding and first-vector mapping change",
+            "Ablation-SingleObjective": "formulation stress test",
+            "Ablation-NSGA2Only": "joint removal of review-specific components",
+            "Ablation-SmallProjectPool": "candidate-pool stress test",
+        }
+    ).fillna("external baseline")
     write_csv(leaderboard, "p5_main_leaderboard.csv")
 
     nsga = inference[inference["opponent"] == "NSGA-II"].copy()
@@ -182,7 +195,15 @@ def generate_tables(frames: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
         component["p_holm_across_seven_scenarios"] < 0.05
     )
     component["within_scenario_family"] = "12 stochastic opponents"
-    component["across_scenario_family"] = "7 raw scenario contrasts per component"
+    component["across_scenario_family"] = "7 raw scenario contrasts per named configuration"
+    component["estimand_scope"] = component["opponent"].map(
+        {
+            "Ablation-NoPreferenceRanking": "direct preference-layer ablation",
+            "Ablation-NoScheduleRisk": (
+                "combined risk-objective hiding and first-vector mapping change"
+            ),
+        }
+    )
     write_csv(component, "p5_component_multiplicity.csv")
 
     budget_summary = frames["preference_budget_summary"].copy()
@@ -651,13 +672,13 @@ def fig_hv_boxplot(runs: pd.DataFrame) -> None:
 def fig_ablation(runs: pd.DataFrame, component: pd.DataFrame) -> None:
     labels = {
         "TRACE-MOEA": "TRACE-MOEA (full)",
-        "Ablation-NoScheduleRisk": "No schedule-risk objective",
+        "Ablation-NoScheduleRisk": "No risk + weight-map change",
         "Ablation-NoPreferenceRanking": "No preference adaptation",
         "Ablation-NoFeasibilityRepair": "No budget repair",
         "Ablation-NSGA2Only": "Bare constrained kernel",
-        "Ablation-NoRenewableFeatures": "No renewable objective",
+        "Ablation-NoRenewableFeatures": "No renewable + weight-map change",
         "Ablation-SingleObjective": "Scalarized single objective",
-        "Ablation-NoReliabilityFeatures": "No reliability objective",
+        "Ablation-NoReliabilityFeatures": "No reliability + weight-map change",
         "Ablation-SmallProjectPool": "One-third candidate pool",
     }
     summary = (
