@@ -3,8 +3,8 @@
 - Origin Skill: experiment-agent
 - Origin Mode: run
 - Origin Date: 2026-08-13T08:53:11Z
-- Verification Status: UNVERIFIED
-- Version Label: p1_s3_fair_v1_exp_result_v1
+- Verification Status: SCIENTIFIC OUTPUTS REPRODUCED IN A SEPARATE EXECUTION
+- Version Label: p1_s3_fair_v1_exp_result_v2
 - Upstream Dependencies: frozen v6 task definition; hashed RTS-GMLC load/wind/PV/branch inputs
 
 # Experiment Result
@@ -79,8 +79,13 @@ manifest.
 - `run_manifest.json`
 - `logs/run.log`
 
-No independent rerun has been performed, so this run artifact remains
-`UNVERIFIED` under the experiment workflow's reproducibility status rules.
-The required evidence acceptance command passed after supplying the read-only
-source workspace for the shared regression module absent from this checkout;
-the failed and successful import attempts are documented in `logs/README.md`.
+A separate execution is recorded in
+`../independent_rerun_20260813/INDEPENDENT_RERUN_VERIFICATION.md`. All 510
+non-timing fields reproduced, and the leaderboard, paired-comparison,
+cap-sensitivity, and policy-audit tables are byte-identical. The raw result
+tables differ in wall-clock runtime. Both executions used the same RTX 3090,
+so this is a reproducibility check rather than external replication or
+cross-hardware validation. The required evidence acceptance command passed
+after supplying the read-only source workspace for the shared regression
+module absent from this checkout; the failed and successful import attempts
+are documented in `logs/README.md`.
