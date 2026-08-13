@@ -16,7 +16,7 @@
 \AuthorNames{Linyao Zhang, Jieyun Zheng, Zhanghuang Zhang, Shiyuan Ni, Guilian Wu}
 \address{Economic and Technological Research Institute of State Grid Fujian Electric Power Co., Ltd., Fuzhou 350000, Fujian, China}
 \corres{Correspondence: zjy\_0701@163.com (J. Zheng)}
-\abstract{Distribution utilities allocate limited budgets among feeder reinforcement, distributed-energy-resource installations, storage, and automation upgrades. This optimizer study represents those choices with a SimBench-derived mixed-voltage portfolio proxy; it does not evaluate action-aligned expansion decisions. CARS-MODE is a binary multi-objective differential evolution algorithm combining self-adaptive control parameters, a success-driven two-strategy mutation pool, constraint-aware budget repair, and crowding-based diversity preservation. On the reproducible proxy benchmark with 18 subnetworks, 72 candidate actions, five objectives, and seven scenarios, CARS-MODE attains pooled mean hypervolume 0.04218, 6.22\% above NSGA-II with matched budget repair. After removing deterministic-output pseudo-replication, it has a higher mean in all 56 stochastic-baseline comparisons and 55 remain significant after within-scenario Holm correction; seven Weighted Sum point comparisons are reported descriptively. Direct DE controls are also separated: CARS-MODE exceeds GDE3 and NSDE by 8.57\% and 8.52\%, respectively, with significant wins in all 14 scenario-level comparisons. A combined fixed-parameter, single-strategy control is nominally 0.60\% higher and remains unresolved in all seven scenarios, so the proxy evidence does not attribute the gain to the parameter-and-strategy adaptation bundle. A composition-level alternating-current check on four SimBench medium-voltage networks shows that proxy ranking is not electrical ranking: CARS-MODE reaches a feasible rate of 0.611, compared with 0.500 without planning and 0.667 for NSGA-II. The study therefore supports the constrained multi-objective framework on the tested proxy while treating adaptation and physical transfer as bounded findings.}
+\abstract{Distribution utilities allocate limited budgets among feeder reinforcement, distributed-energy-resource installations, storage, and automation upgrades. This optimizer study represents those choices with a SimBench-derived mixed-voltage portfolio proxy; it does not evaluate action-aligned expansion decisions. CARS-MODE is a binary multi-objective differential evolution algorithm combining self-adaptive control parameters, a success-driven two-strategy mutation pool, constraint-aware budget repair, and crowding-based diversity preservation. On the reproducible proxy benchmark with 18 subnetworks, 72 candidate actions, five objectives, and seven deterministic planning experiments, CARS-MODE attains pooled mean hypervolume 0.04218, 6.22\% above NSGA-II with returned-population budget repair. After removing deterministic-output pseudo-replication, it has a higher mean in all 56 stochastic-baseline comparisons and 55 remain significant after within-experiment Holm correction; seven Weighted Sum point comparisons are reported descriptively. Direct DE controls are also separated: CARS-MODE exceeds GDE3 and NSDE by 8.57\% and 8.52\%, respectively, with significant wins in all 14 experiment-level comparisons. A combined fixed-parameter, single-strategy control is nominally 0.60\% higher and remains unresolved in all seven experiments, so the proxy evidence does not attribute the gain to the parameter-and-strategy adaptation bundle. A composition-level alternating-current check on four SimBench medium-voltage networks shows that proxy ranking is not electrical ranking: CARS-MODE reaches a feasible rate of 0.611, compared with 0.500 without planning and 0.667 for NSGA-II. The study therefore supports the constrained multi-objective framework on the tested proxy while treating adaptation and physical transfer as bounded findings.}
 \keyword{distribution-planning portfolio proxy; distributed energy resources; energy storage; multi-objective optimization; differential evolution; self-adaptive parameter control; constraint handling; SimBench}
 \providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \begin{document}
@@ -26,11 +26,11 @@ The distribution grid turns the energy transition into an investment problem. Ph
 
 Evolutionary multi-objective algorithms are widely used in this literature, but two practical frictions persist. The first is algorithmic: differential evolution (DE) is sensitive to its control parameters and mutation strategy {[}1{]}, and the planning problem is binary, budget-constrained, and rugged. A single fixed DE configuration can therefore stall. Self-adaptive DE variants (jDE {[}2{]}, SaDE {[}3{]}) addressed this limitation on continuous benchmarks two decades ago, whereas many energy-planning studies still use either fixed-parameter DE or an off-the-shelf NSGA-II. The second friction is evidential: studies based on private networks or unchecked objective proxies are difficult to reproduce and easy to over-interpret. Comparative optimizer research emphasizes consistent evaluation protocols {[}4{]}. In this study, repeated-run statistical comparisons are therefore paired with an explicit power-flow check of the surrogate planning objectives.
 
-CARS-MODE is a binary multi-objective DE with four switchable mechanisms. It self-adapts each individual's scale factor \(F\) and crossover rate \(CR\) in the jDE manner. A success-driven pool selects between rand/1 and best/1 mutation, deterministic repair removes low-benefit actions until the budget is met, and crowding truncation preserves front diversity.
+CARS-MODE is a binary multi-objective DE with four implemented mechanisms grouped into three controls. It self-adapts each individual's scale factor \(F\) and crossover rate \(CR\) in the jDE manner. A success-driven pool selects between rand/1 and best/1 mutation, deterministic repair removes low-benefit actions until the budget is met, and crowding truncation preserves front diversity. The current FixedDE control disables the parameter controller and strategy pool jointly.
 
 The evidence uses public data and reproducible implementations. SimBench deterministically supplies the benchmark {[}5{]}, while nine baselines and four ablations use real algorithm implementations, including pymoo references where available {[}6{]}. Standard hypervolume is computed under fixed method-independent normalization. Every stochastic method uses 30 seeded runs and Holm-corrected Mann--Whitney tests; the deterministic Weighted Sum rule is compared descriptively.
 
-The study uses a two-level evaluation. The planning objectives are engineering indices computed from SimBench subnet statistics --- fast enough to support a rigorous statistical protocol, but proxies nonetheless. At the second level, the compromise plan composition of every method is mapped onto four real SimBench MV networks and checked with pandapower AC load flow {[}7{]} across six stress scenarios (peak load, load growth, extreme growth, high DER infeed, and an N-1 contingency). The resulting disagreement between proxy ranking and electrical feasibility is treated as an empirical finding.
+The study uses a two-level evaluation. The planning objectives are engineering indices computed from SimBench subnet statistics---fast enough to support a rigorous statistical protocol, but proxies nonetheless. At the second level, the run-index-0 compromise-plan composition of every method is mapped onto four real SimBench MV networks and checked with pandapower AC load flow {[}7{]} across six fixed operating cases (base, peak load, load growth, extreme growth, high DER infeed, and an \(N-1\) contingency). The resulting disagreement between proxy ranking and electrical feasibility is treated as a descriptive finding.
 
 Accordingly, this is an optimizer study on a SimBench-derived mixed-voltage portfolio proxy, not an action-aligned distribution expansion study. The candidate attributes are generated from subnet statistics, and the AC stage maps portfolio compositions onto separate networks rather than evaluating the optimizer's selected actions at their original nodes.
 
@@ -42,9 +42,9 @@ The contributions of this paper are:
 \item
   \textbf{A constraint-aware multi-objective DE framework with testable mechanism groups on a portfolio proxy.} CARS-MODE integrates jDE parameter control, a success-driven two-strategy pool, deterministic budget repair, and crowding diversity. Repair and diversity are removed individually; a combined control replaces adaptive parameters and the strategy pool with fixed \(F/CR\) and rand/1. The design therefore separates the framework-level proxy result from repair and diversity effects while testing parameter-and-strategy adaptation as a bundle (Section 4).
 \item
-  \textbf{A reproducible public mixed-voltage portfolio-proxy benchmark with a method-independent evaluation protocol.} Seven proxy scenarios (candidate-pool, load-growth, and budget variants) over 72 candidate actions derived from SimBench subnet statistics; standard hypervolume under fixed seeded normalization bounds; 30 seeds per method and scenario (Sections 2 and 5). The benchmark does not provide nodal, monetarily calibrated expansion actions.
+  \textbf{A reproducible public mixed-voltage portfolio-proxy benchmark with a method-independent evaluation protocol.} Seven deterministic planning experiments (candidate-pool, load-factor, and budget variants) over at most 72 candidate actions derived from SimBench subnet statistics; standard hypervolume under fixed seeded normalization bounds; 30 seeds per stochastic method and experiment (Sections 2 and 5). The benchmark does not provide nodal, monetarily calibrated expansion actions.
 \item
-  \textbf{A statistically grounded proxy-front result against direct controls.} CARS-MODE attains pooled mean hypervolume 0.04218, 6.22\% above NSGA-II with matched repair (0.03971), and records 55 significant wins among 56 stochastic-baseline comparisons. Seven comparisons with the deterministic Weighted Sum rule are descriptive and favor CARS-MODE in mean HV. Its margins over GDE3 and NSDE are 8.57\% and 8.52\%, with significant separation in every scenario; these are hypervolume results on the proxy, not evidence of superior expansion actions (Sections 6.1 and 6.6).
+  \textbf{A statistically grounded proxy-front result against direct controls.} CARS-MODE attains pooled mean hypervolume 0.04218, 6.22\% above NSGA-II with returned-population repair (0.03971), and records 55 significant wins among 56 stochastic-baseline comparisons. Seven comparisons with the deterministic Weighted Sum rule are descriptive and favor CARS-MODE in mean HV. Its margins over GDE3 and NSDE are 8.57\% and 8.52\%, with significant separation in every planning experiment; these are hypervolume results on the proxy, not evidence of superior expansion actions (Sections 6.1 and 6.6).
 \item
   \textbf{A two-level component and validity analysis.} Budget repair (-6.84\% when removed) and diversity preservation (-33.56\%) carry the proxy gain, whereas the combined parameter-and-strategy adaptation bundle is unresolved (FixedDE +0.60\% in pooled mean). The pandapower composition check identifies a proxy--physics disagreement and a descriptive full-versus-FixedDE difference (0.611 versus 0.569 overall AC feasibility), but it does not overturn the unresolved proxy contrast or identify either adaptive subcomponent as the causal source (Sections 6.2--6.3).
 \end{enumerate}
@@ -94,7 +94,7 @@ Alrashidi et al. [16] & DG/CB/EVCS planning & classification-based global optimi
 Qi et al. [17] & resilience-driven storage planning & enhanced beluga whale optimization & yes & n.r. & n.r. & n.r. & n.r. \\
 Demirbas et al. [18] & transmission expansion & enhanced coati optimization & n.r. & n.r. & n.r. & n.r. & n.r. \\
 Cadena-Albuja et al. [19] & economic dispatch & DE (comparative study) & -- & n.r. & n.r. & n.r. & n/a \\
-CARS-MODE (this work) & distribution planning portfolios & binary multi-objective DE & yes & yes / yes & yes (greedy budget repair) & yes (one switch per run) & yes (pandapower, four MV networks) \\
+CARS-MODE (this work) & distribution planning portfolios & binary multi-objective DE & yes & yes / yes & yes (greedy budget repair) & repair/diversity separate; adaptive bundle joint & yes (pandapower, four MV networks) \\
 \bottomrule
 \end{tabularx}
 \end{table*}
@@ -109,19 +109,19 @@ The companion project \texttt{mintou\_p4\_shield\_resilience\_planning} belongs 
 
 \subsection{Planning Portfolios as Multi-Objective Binary Selection}\label{planning-portfolios-as-multi-objective-binary-selection}
 
-Let \(\mathcal{A} = \{a_1, \dots, a_n\}\) be a pool of candidate planning actions. Each action belongs to one of four kinds --- feeder \textbf{reinforcement}, \textbf{storage} installation, \textbf{DER} installation, and \textbf{automation} --- and carries an investment cost \(k_i\) plus five benefit attributes: loss reduction, voltage-risk reduction, hosting-capacity gain, reliability gain, and DER-support share. A plan is a binary vector \(x \in \{0,1\}^n\). The planner minimizes five objectives simultaneously:
+Let \(\mathcal{A} = \{a_1, \dots, a_n\}\) be a pool of candidate planning actions. Each action belongs to one of four kinds---feeder \textbf{reinforcement}, \textbf{storage} installation, \textbf{DER} installation, and \textbf{automation}---and carries synthetic cost \(c_i\), four P3 objective-benefit attributes, and two inherited fields (resilience gain and DER-support score). A plan is a binary vector \(x \in \{0,1\}^n\). The planner minimizes five objectives simultaneously:
 
 \[
 \min_{x \in \{0,1\}^n} F(x) = \big( C(x),\; L(x),\; U(x),\; -H(x),\; -R(x) \big),
 \]
 
-where \(C\) is total investment cost, \(L\) a network loss index, \(U\) a voltage-risk index, \(H\) the DER hosting-capacity index, and \(R\) a reliability index; all five are analytic functions of the selected actions' attributes and the scenario's load multiplier (Section 3.2 gives their provenance). The single hard constraint is the budget:
+where \(C\) is total synthetic cost, \(L\) a network loss index, \(U\) a voltage-risk index, \(H\) the DER hosting-capacity index, and \(R\) a reliability index; all five are analytic functions of selected-action attributes and the planning experiment's fixed load factor (Section 3.2 gives their provenance). The single hard constraint is the budget:
 
 \[
-\textstyle\sum_i k_i x_i \le B, \qquad v(x) = \max\big(0, (\textstyle\sum_i k_i x_i - B)/B\big),
+\textstyle\sum_i c_i x_i \le B, \qquad v(x) = \max\big(0, (\textstyle\sum_i c_i x_i - B)/B\big),
 \]
 
-with \(B = 980\) cost units at the nominal level, scaled per scenario. The budget is the only hard constraint. Voltage risk and hosting capacity remain objectives because their target levels are not jointly satisfiable within this proxy budget; treating them as constraints would incorrectly label every method infeasible. Any residual target shortfall is therefore reported as a property of the compromise portfolio rather than hidden inside the feasibility definition.
+with \(B = 980\) synthetic cost units at the nominal level and experiment-specific factors 0.82, 1.00, or 1.20. The budget is the only hard constraint. Voltage risk and hosting capacity remain objectives because their target levels are not jointly satisfiable within this proxy budget; treating them as constraints would incorrectly label every method infeasible. Any residual target shortfall is therefore reported as a property of the compromise portfolio rather than hidden inside the feasibility definition.
 
 A plan \(x\) dominates \(x'\) when it is no worse in all five objectives and better in at least one. The feasible non-dominated front contains mutually non-dominating plans that respect the budget. Hypervolume measures the normalized objective-space volume dominated by that front relative to a fixed reference point, rewarding both convergence and spread {[}20{]}.
 
@@ -153,33 +153,96 @@ Nominal budget $B$ & 980 cost units (synthetic, not monetarily calibrated) \\
 \end{tabularx}
 \end{table*}
 
+\textbf{Complete candidate contract.} For subnet \(s\), the source aggregates are active load \(P_s\) {[}MW{]}, reactive load \(Q_s\) {[}MVAr{]}, load count \(N_s^{L}\) {[}count{]}, installed renewable capacity \(G_s\) {[}MW{]}, line length \(D_s\) {[}km{]}, line count \(N_s^{\ell}\) {[}count{]}, and mean recorded maximum loading \(\bar\rho_s\) {[}percent{]}. Only subnets with \(P_s>0\) and \(N_s^{\ell}>0\) are eligible. The implementation ranks them by the mixed-unit proxy \(P_s+0.2D_s\) and retains the first 18. This ranking is a deterministic data-reduction heuristic, not a physical stress index. Define
+
+\[
+\sigma_s=\frac{P_s}{\max(0.2,D_s)},\qquad
+d_s=\max(0,0.55P_s-G_s).
+\]
+
+The constant 0.55 defines a synthetic renewable-gap target used only to generate attributes; it is not presented as a grid-code, utility, or policy threshold. For every retained subnet, the deterministic generator creates four attribute tuples in the order \((c,a^L,a^U,a^H,a^R,a^S,a^{\mathrm{DER}})\):
+
+\begin{itemize}
+\tightlist
+\item
+  reinforcement: \[
+  (60+4.5D_s+7P_s,\ 0.012D_s+0.020\sigma_s,\ 0.020+0.006\sigma_s,\ 0.06d_s,\ 0.018N_s^{\ell},\ 0.016N_s^{\ell},\ 0.20);
+  \]
+\item
+  storage: \[
+  (50+16\sqrt{P_s+1},\ 0.025\sqrt{P_s+1},\ 0.018\sqrt{\sigma_s+1},\ 0.12d_s+0.08P_s,\ 0.055\sqrt{N_s^L+1},\ 0.070\sqrt{N_s^L+1},\ 0.80);
+  \]
+\item
+  DER: \[
+  (45+10\sqrt{P_s+1},\ 0.018\sqrt{P_s+1},\ 0.012,\ 0.18d_s+0.10P_s,\ 0.020\sqrt{N_s^L+1},\ 0.028\sqrt{N_s^L+1},\ 1.00);
+  \]
+\item
+  automation: \[
+  (38+1.8N_s^{\ell},\ 0.006N_s^{\ell},\ 0.010\sqrt{\sigma_s+1},\ 0.025d_s,\ 0.085\sqrt{N_s^{\ell}+1},\ 0.115\sqrt{N_s^{\ell}+1},\ 0.35).
+  \]
+\end{itemize}
+
+The coefficients convert the physical source columns into \textbf{synthetic proxy points}: only \(c\) has synthetic cost units, \(a^{\mathrm{DER}}\) is a dimensionless support score, and the five planning benefits plus the inherited resilience benefit are dimensionless index contributions. Consequently, the expressions must not be read as MW, MWh, reliability hours, or monetary estimates. \(Q_s\) and \(\bar\rho_s\) are retained in the source profile but do not enter the P3 candidate or objective equations.
+
+The P3 objective mapping is also deterministic. Let \(P_\Sigma=\sum_sP_s\), \(D_\Sigma=\sum_sD_s\), and let \(\lambda_e\) be the load factor of planning experiment \(e\). The baseline indices and hosting denominator are
+
+\[
+L_0=0.12+0.015\frac{D_\Sigma}{\max(1,P_\Sigma)},\qquad
+U_0=0.18+0.010\frac{P_\Sigma}{\max(1,D_\Sigma)},\qquad
+D_H=0.08P_\Sigma.
+\]
+
+For a decoded plan \(x\), the five minimized proxy objectives are
+
+\[
+\begin{aligned}
+C(x)&=\sum_j c_jx_j,\\
+L_e(x)&=\max\!\left(0.015,L_0\lambda_e-\frac{\sum_j a_j^Lx_j}{120}\right),\\
+U_e(x)&=\max\!\left(0.005,U_0\lambda_e-\frac{\sum_j a_j^Ux_j}{10}\right),\\
+H_e(x)&=\min\!\left(1,\frac{\sum_j a_j^Hx_j}{\max(1,D_H)}\right),\\
+R_e(x)&=\min\!\left(1,0.35+\frac{\sum_j a_j^Rx_j}{28}\right),\\
+F_e(x)&=(C(x),L_e(x),U_e(x),-H_e(x),-R_e(x)).
+\end{aligned}
+\]
+
+The floors 0.015 and 0.005 and the caps at 1 are part of the proxy definition, not observed engineering limits. The generated resilience gain \(a^S\) is not a P3 objective, but the shared implementation does use it in the repair and deterministic Weighted Sum scores (Sections 4.3 and 5.1); omitting that fact would make those procedures irreproducible. A separate descriptive DER-readiness index is
+
+\[
+D^{\mathrm{DER}}(x)=\min\!\left(1,
+\frac{\sum_j a_j^{\mathrm{DER}}x_j}{0.62\max(1,\sum_jx_j)}\right).
+\]
+
+Neither \(D^{\mathrm{DER}}\) nor the generated resilience attribute enters hypervolume. Hosting and DER-readiness shortfalls are exported only for the selected compromise as \([t_H-H_e(x)]_+\) and \([t_D-D^{\mathrm{DER}}(x)]_+\); the targets are descriptive and never become feasibility gates or method-specific scores.
+
 We state plainly what this construction is: a \emph{reproducible public proxy} for portfolio-level distribution planning. The objective indices are engineering-plausible functions of real network statistics, not AC power-flow results --- which is exactly why Section 6.3 validates the outcome plans with pandapower load flow, and why Section 8 lists the remaining distance to an engineering-grade planning claim.
 
-\subsection{Planning Scenarios}\label{planning-scenarios}
+\subsection{Deterministic Planning Experiments}\label{deterministic-planning-experiments}
 
-Seven experiments exercise the pool along three axes --- candidate-pool composition, load growth, and budget tightness --- with an identical evaluation protocol throughout (Table 3). The planning stage itself is deterministic (a single nominal operating scenario per experiment); stochastic stress enters at the AC validation stage (Section 5.4).
+Seven experiments exercise the pool along three axes---candidate-pool composition, load factor, and budget tightness---with an identical reporting protocol throughout (Table 3). Both the proxy operating point and the later AC stress cases are deterministic; stochasticity comes only from the optimizer seed for methods that use random variation.
 
 \begin{table*}[t]
 \centering
-\footnotesize
+\scriptsize
 \setlength{\tabcolsep}{3pt}
-\caption{The seven planning scenarios.}\label{tab:3}
-\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
+\caption{The seven deterministic planning experiments and descriptive targets.}\label{tab:3}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
 \toprule
-Experiment & Budget factor & Load factor & Pool restriction \\
+Experiment & Budget factor & Load factor $\lambda_e$ & Search dimension $n$ & Pool restriction & $t_H$ & $t_D$ \\
 \midrule
-base\_distribution\_planning & 1.00 & 1.0 & none \\
-der\_siting\_sizing & 1.00 & 1.0 & storage candidates excluded \\
-storage\_allocation & 1.00 & 1.0 & DER candidates excluded \\
-load\_growth\_expansion & 1.00 & 1.3 & none \\
-pareto\_quality & 1.00 & 1.0 & none (independent replicate) \\
-constraint\_repair & 0.82 & 1.0 & none (tight budget) \\
-runtime\_scalability & 1.20 & 1.0 & none (loose budget) \\
+base\_distribution\_planning & 1.00 & 1.0 & 72 & none & 0.018 & 0.48 \\
+der\_siting\_sizing & 1.00 & 1.0 & 54 & storage candidates excluded before all methods run & 0.025 & 0.56 \\
+storage\_allocation & 1.00 & 1.0 & 54 & DER candidates excluded before all methods run & 0.025 & 0.56 \\
+load\_growth\_expansion & 1.00 & 1.3 & 72 & none & 0.025 & 0.48 \\
+pareto\_quality & 1.00 & 1.0 & 72 & none (independent optimizer seed stream) & 0.018 & 0.48 \\
+constraint\_repair & 0.82 & 1.0 & 72 & none (tight budget) & 0.018 & 0.48 \\
+runtime\_scalability & 1.20 & 1.0 & 72 & none (loose budget) & 0.018 & 0.48 \\
 \bottomrule
 \end{tabularx}
 \end{table*}
 
 Two design notes. First, \texttt{pareto\_quality} intentionally replicates the base configuration under an independent per-method seed stream (seeds are derived by hashing the experiment and method identifiers), so it functions as an internal replication check; its results track the base experiment closely (Section 6.1). Second, the two budget variants (0.82x, 1.20x) probe the repair mechanism and the loose-budget regime respectively; the ``runtime scalability'' name is retained from an earlier benchmark version but used only for its budget role, and we do not make runtime-scaling claims from it.
+
+Terminology is fixed as follows. A \textbf{planning experiment} is one deterministic proxy-problem configuration from Table 3 and contains exactly one objective-evaluation operating point \((\lambda_e,1,0)\) for load, DER, and outage multipliers. A \textbf{seeded run} is one stochastic optimizer repetition on that fixed experiment; the seed does not create a load or outage scenario. An \textbf{AC operating case} in Section 5.4 is one fixed combination of validation network and load/DER/\(N-1\) setting. Those AC cases are deterministic stress tests, not random scenarios or independent optimizer replications. The shared configuration class serializes inherited ranges for load \((0.95,1.25)\), DER \((0.7,1.3)\), and outage \((0,0.25)\), and the shared module defines a 16-scenario constant, but the P3 branch bypasses all four settings and returns the single point above; they generate no P3 scenario samples. \texttt{use\_expected\_loss} is false in every P3 experiment, so the P3 loss objective is \(L_e\), not an outage-weighted expected-loss variant. The values \(t_H\) and \(t_D\) are implementation-recorded descriptive targets used only to export shortfalls. The available evidence does not supply a utility-calibration rationale for 0.018/0.025, 0.48/0.56, or the 55\% renewable-gap constant; they are disclosed benchmark design choices and do not affect feasibility, hypervolume, or compromise selection.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -193,34 +256,36 @@ Figure 1 summarizes one generation and separates adaptive search from feasibilit
 \caption{CARS-MODE architecture. The feedback arrow denotes the next generation. Standard hypervolume and AC power-flow validation are readouts of the archived solutions and do not affect strategy-success updates.}\label{fig:1}
 \end{figure*}
 
-CARS-MODE is a binary multi-objective DE organized so that each named mechanism is one switch in the code, which makes the ablation study of Section 6.2 a clean attribution. A continuous genome \(g \in [0,1]^n\) is thresholded at 0.5 into a plan vector; initial genomes are sparse (about 8\% of genes above threshold) so that the search starts among affordable plans.
+CARS-MODE is a binary multi-objective DE with explicit switches for repair and crowding diversity and one \textbf{joint} switch for parameter-and-strategy adaptation. Accordingly, NoRepair and NoDiversity are operator controls, FixedDE is a combined controller control, and NoDER is a search-space variant; the latter two cannot identify individual adaptive effects. The continuous genome has dimension \(n=72\) except in the two 54-candidate planning experiments. Initially \(g_{ij}\sim U(0,0.45)\), after which each coordinate is independently overwritten with \(0.75\) with probability 0.08. Thus approximately 8\% of initial coordinates decode as selected.
 
-\textbf{Formal definitions.} A real genome \(g_i\in[0,1]^n\) is decoded into a binary plan and assigned budget violation
+\textbf{Formal definitions.} A real genome \(g_i\in[0,1]^n\) is decoded into a binary phenotype and assigned normalized budget violation
 
 \[
-x_{ij}=\mathbb I[g_{ij}\geq0.5],\qquad
-v(x_i)=\max\!\left(0,\sum_{j=1}^{n}c_jx_{ij}-B\right).
+x_{ij}=\mathbb I[g_{ij}>0.5],\qquad
+v(x_i)=\max\!\left(0,\frac{\sum_{j=1}^{n}c_jx_{ij}-B}{B}\right).
 \]
 
-The per-individual jDE controls are resampled by
+The strict \(>0.5\) decoder is the CARS-MODE and Standard-DE rule. GDE3 and NSDE use the implementation's \(\geq0.5\) decoder, and the Boolean algorithms do not require a threshold. If repair changes \(x_i\), it does \textbf{not} write the removed bits back to \(g_i\); environmental selection stores the selected continuous genome together with its repaired phenotype, and the genome is decoded and repaired again after later variation.
+
+The implementation uses one joint resampling gate \(Z_i\sim\operatorname{Bernoulli}(\tau)\) per individual and generation:
 
 \[
-F_i'=\begin{cases}0.1+0.8U_1,&U_2<\tau,\\F_i,&\text{otherwise},\end{cases}
+F_i'=\begin{cases}0.1+0.8U_1,&Z_i=1,\\F_i,&Z_i=0,\end{cases}
 \qquad
-CR_i'=\begin{cases}U_3,&U_4<\tau,\\CR_i,&\text{otherwise},\end{cases}
+CR_i'=\begin{cases}U_2,&Z_i=1,\\CR_i,&Z_i=0,\end{cases}
 \]
 
-with independent \(U_k\sim U(0,1)\). The two mutation candidates are
+with independent \(U_1,U_2\sim U(0,1)\). Thus \(F_i\) and \(CR_i\) are either both redrawn or both retained. For each target, \(r_1,r_2,r_3\) are sampled without replacement from the population; the implementation does not separately exclude the target index \(i\). The two mutation candidates are
 
 \[
 m_i^{\mathrm{rand}}=g_{r_1}+F_i'(g_{r_2}-g_{r_3}),
 \]
 
 \[
-m_i^{\mathrm{best}}=g_b+F_i'(g_{r_1}-g_{r_2}),\qquad g_b\in\mathcal F_1^{\mathrm{feas}},
+m_i^{\mathrm{best}}=g_b+F_i'(g_{r_2}-g_{r_3}),\qquad g_b\in\mathcal F_1,
 \]
 
-followed by clipped binomial crossover,
+where \(g_b\) is sampled uniformly from the first constraint-dominated front (feasible members precede infeasible ones). Binomial crossover forces one randomly selected coordinate to come from the mutant, and the resulting trial is clipped coordinate-wise:
 
 \[
 u_{ij}=\begin{cases}\operatorname{clip}(m_{ij},0,1),&
@@ -229,23 +294,26 @@ g_{ij},&\text{otherwise}.
 \end{cases}
 \]
 
-If \(s_k^{(t)}\) is the decayed success mass of strategy \(k\), its sampling probability is
+The strategy masses start at \((s_{\mathrm{rand}}^{(0)},s_{\mathrm{best}}^{(0)})=(1,1)\). If \(n_k^{(t)}\) trials generated by strategy \(k\) strictly improve their paired parents in generation \(t\), the exact update and next-generation probability are
 
 \[
-p_k^{(t)}=\frac{\max(s_k^{(t)},0.2)}
-{\sum_{\ell\in\{\mathrm{rand},\mathrm{best}\}}\max(s_\ell^{(t)},0.2)},
+s_k^{(t+1)}=\max\!\left(0.2,0.95\,[s_k^{(t)}+n_k^{(t)}]\right),
 \qquad
-s_k^{(t+1)}=0.95s_k^{(t)}+\mathbb I[\text{accepted success by }k].
+p_k^{(t+1)}=\frac{s_k^{(t+1)}}{s_{\mathrm{rand}}^{(t+1)}+s_{\mathrm{best}}^{(t+1)}}.
 \]
+
+A paired trial is credited when its violation is lower by more than \(10^{-12}\), or when violations agree within \(10^{-12}\) and it is no worse in every proxy objective and strictly better in at least one. Because the success counter is updated before multiplication by 0.95, the decay applies to both the previous mass and the current successes.
 
 For an over-budget decoded plan, repair repeatedly removes
 
 \[
-j^-=\operatorname*{arg\,min}_{j:x_j=1}
-\frac{\sum_{q=1}^{Q}\omega_q b_{jq}}{c_j}
+b_j=\frac{a_j^L}{0.12}+\frac{a_j^U}{0.02}+\frac{a_j^H}{5}
++\frac{a_j^R}{2}+\frac{a_j^S}{2},\qquad
+q_j=\frac{b_j}{\max(c_j,1)},\qquad
+j^-=\operatorname*{arg\,min}_{j:x_j=1}q_j
 \]
 
-until \(v(x)=0\). Constraint dominance is defined by
+until the raw cost is no greater than \(B\). The denominators \((0.12,0.02,5,2,2)\) are the exact fixed repair weights. They were not learned, tuned by method, or justified by a monetary calibration; they scale heterogeneous proxy gains for this benchmark. DER-support is absent from repair, while the inherited resilience attribute is included. If several selected actions have the same minimum score, NumPy's first minimum is removed: the lowest candidate index, where candidates follow retained-subnet rank and the within-subnet order reinforcement, storage, DER, automation. Constraint dominance is defined by
 
 \[
 x\prec_c y\iff
@@ -254,16 +322,18 @@ x\prec_c y\iff
 [v(x),v(y)>0\land v(x)<v(y)].
 \]
 
-Finally, with fixed normalization and reference point \(r\), reported hypervolume is
+Environmental sorting treats \(v\leq10^{-12}\) as feasible. Final reporting uses the slightly looser numerical filter \(v\leq10^{-9}\), removes duplicate binary plans, and retains the non-dominated objective rows. In the last partially admitted front, standard crowding distance is sorted in descending order; equal distances have no additional scientific tie criterion and follow the array order returned by NumPy. The NoDiversity control instead uses a seeded random permutation for this truncation.
+
+Finally, with clipped normalized objective vector \(z(x)\) and fixed reference point \(r\), reported hypervolume is
 
 \[
 HV(\mathcal P;r)=\lambda_Q\!\left(\bigcup_{x\in\mathcal P}
-[f_1(x),r_1]\times\cdots\times[f_Q(x),r_Q]\right).
+[z_1(x),r_1]\times\cdots\times[z_Q(x),r_Q]\right).
 \]
 
 \subsection{jDE Self-Adaptive Control Parameters}\label{jde-self-adaptive-control-parameters}
 
-Each individual carries its own \((F_i, CR_i)\), initialized at \((0.5, 0.9)\). In every generation, an individual redraws \(F_i \sim U(0.1, 0.9)\) and \(CR_i \sim U(0, 1)\) with probability \(\tau = 0.1\) {[}2{]}. Per-individual parameter carrying allows settings associated with surviving trials to persist, while stochastic resampling continues to explore the ranges. The sensitivity study in Section 6.4 sweeps \(\tau\) and finds a flat response.
+The two control arrays \((F_i,CR_i)\) are initialized at \((0.5,0.9)\) and updated together: in every generation, the joint gate redraws \(F_i\sim U(0.1,0.9)\) and \(CR_i\sim U(0,1)\) with probability \(\tau=0.1\) {[}2{]}. A source-level detail limits the usual ``per-individual'' interpretation: environmental selection reorders the genomes and phenotypes, but the implementation does not apply the survivor indices to the \(F/CR\) arrays. The controls therefore persist by population slot, not as heritable fields attached to the selected genome. The sensitivity study in Section 6.4 sweeps \(\tau\) and finds a flat response. This controller and the strategy pool share the FixedDE switch, so that control estimates neither feature separately.
 
 \subsection{Success-Driven Two-Strategy Pool}\label{success-driven-two-strategy-pool}
 
@@ -271,7 +341,7 @@ Mutation chooses between DE/rand/1 (a uniformly drawn base vector) and DE/best/1
 
 \subsection{Constraint-Aware Budget Repair}\label{constraint-aware-budget-repair}
 
-Every decoded plan that exceeds the budget is repaired deterministically. The selected action with the lowest aggregate benefit-to-cost ratio is removed repeatedly until the plan is affordable. This avoids spending evaluations and selection slots on penalty-carrying plans and concentrates search near the budget boundary. The 0.82x scenario directly stresses this mechanism.
+Every decoded plan that exceeds the budget is repaired deterministically using the fixed \(q_j\) score and candidate-index tie rule above. The selected action with the lowest score is removed repeatedly until the plan is affordable. This avoids spending selection slots on penalty-carrying phenotypes and concentrates search near the budget boundary. The 0.82x planning experiment directly stresses this mechanism.
 
 \subsection{Crowding-Based Diversity Preservation}\label{crowding-based-diversity-preservation}
 
@@ -281,16 +351,22 @@ Environmental selection is elitist (\(\mu + \lambda\)): parents and trials are p
 
 \begin{verbatim}
 CARS-MODE(pool, budget, seed):
-  initialize 40 sparse genomes in [0,1]^72; per-individual F=0.5, CR=0.9
-  decode (threshold 0.5) and repair each plan to budget            # 4.3
+  n <- 72, or 54 after an experiment-level kind exclusion
+  initialize 40 genomes U(0,0.45); overwrite each gene by 0.75 with prob 0.08
+  initialize F_i=0.5, CR_i=0.9 and strategy masses (1,1)
+  decode with x_j = I[g_j > 0.5]; repair phenotype only            # 4.3
   for gen = 1 .. 40:
+    evaluate current repaired phenotypes and form constraint fronts
     for each individual i:
-      with prob 0.1 resample F_i ~ U(0.1,0.9), CR_i ~ U(0,1)       # 4.1
+      with one prob-0.1 gate, resample both slot controls F_i, CR_i # 4.1
       pick strategy rand/1 or best/1 by success mass               # 4.2
-      mutate + binomial crossover -> trial genome; decode + repair # 4.3
-    update strategy success masses (constraint-domination test)    # 4.2
+      mutate + forced-binomial crossover; clip genome to [0,1]
+      decode trial with strict >0.5; repair phenotype only          # 4.3
+    credit paired constraint improvements; decay/floor masses       # 4.2
     (mu+lambda) selection: constraint-domination NDS + crowding    # 4.4
-  return feasible non-dominated front of the final population
+    carry each selected genome together with its repaired phenotype
+    retain F/CR by array slot (the source does not reorder them by survivor)
+  deduplicate final feasible phenotypes and return their ND front
 \end{verbatim}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
@@ -299,7 +375,7 @@ CARS-MODE(pool, budget, seed):
 
 \subsection{Methods Compared}\label{methods-compared}
 
-Table 4 lists the fourteen methods: CARS-MODE, nine baselines, and four ablations. NSGA-II, NSGA-II with matched repair, MOEA/D, GDE3, and NSDE are pymoo implementations {[}6{]} on the identical constrained problem; the two direct DE controls operate in \([0,1]\) and use the same fixed 0.5 binary decoder. GA, binary PSO {[}31{]}, and standard DE optimize a normalized weighted-sum scalarization with a violation penalty; Weighted Sum is a greedy benefit fill under budget. Every reported comparison therefore uses executed algorithms on the same method-independent objective definition.
+Table 4 lists the fourteen methods: CARS-MODE, nine baselines, and four ablations. NSGA-II, NSGA-II with returned-population repair, MOEA/D, GDE3, and NSDE are pymoo implementations {[}6{]}. GDE3 and NSDE operate in \([0,1]^n\) and decode with \(g_j\geq0.5\); Standard DE and CARS-MODE use the strict \(g_j>0.5\) rule. GA, binary PSO {[}31{]}, and Standard DE optimize the same equally weighted normalized scalarization with a violation penalty. Weighted Sum is a deterministic greedy point rule. All final plans are evaluated by the method-independent proxy objectives, but their search-time constraint handling differs as disclosed below.
 
 \begin{table*}[t]
 \centering
@@ -312,7 +388,7 @@ Method & Role & Description \\
 \midrule
 CARS-MODE & proposed & binary MODE: jDE self-adaptive F/CR + two-strategy pool + budget repair + crowding \\
 NSGA-II & baseline & pymoo NSGA-II, binary encoding, constrained \\
-NSGA-II+Repair & baseline & NSGA-II followed by the same deterministic budget-repair rule used by CARS-MODE \\
+NSGA-II+Repair & baseline & constrained NSGA-II; the same deterministic budget repair is applied only to its returned population \\
 MOEA/D & baseline & pymoo MOEA/D, budget as penalty \\
 GDE3 & baseline & generalized differential evolution with constraint domination and fixed binary decoding \\
 NSDE & baseline & nondominated-sorting differential evolution with fixed binary decoding and sampled $F$ \\
@@ -320,42 +396,92 @@ Standard DE & baseline & binary DE/rand/1/bin, fixed F = 0.5, CR = 0.9, scalariz
 PSO & baseline & binary PSO (sigmoid velocity), scalarized \\
 GA & baseline & single-objective GA, tournament + uniform crossover, scalarized \\
 Weighted Sum & baseline & weighted-benefit greedy fill under budget \\
-Ablation-FixedDE & ablation & F = 0.5, CR = 0.9 fixed; single rand/1 strategy (adaptation off) \\
-Ablation-NoRepair & ablation & budget repair disabled (violation-penalized search) \\
+Ablation-FixedDE & ablation & joint control: $F = 0.5$, $CR = 0.9$, and only rand/1; parameter and strategy adaptation are both off \\
+Ablation-NoRepair & ablation & budget repair disabled; feasibility-first constraint domination remains active \\
 Ablation-NoDiversity & ablation & crowding replaced by random tie-break \\
 Ablation-NoDER & ablation & DER and storage candidates removed from the search pool \\
 \bottomrule
 \end{tabularx}
 \end{table*}
 
-Ablation-NoDER is a \emph{problem-variant} probe rather than an operator switch: excluded candidates receive prohibitive cost in the search problem only, while evaluation stays in the full objective space, so its hypervolumes remain comparable. We flag this asymmetry wherever it matters (Section 6.2).
+Ablation-NoDER is a \emph{problem-variant} probe rather than an operator switch. DER and storage columns receive search-only cost \(10^9\) and are zeroed by a Boolean mask after search; final objective evaluation and normalization use the original full experiment pool. By contrast, the \texttt{der\_siting\_sizing} and \texttt{storage\_allocation} exclusions in Table 3 remove one action kind from the problem for \textbf{every} method before search, leaving 54 variables. NoDER leaves only reinforcement and automation selectable (36 variables in either full or restricted experiment) and cannot support component attribution.
+
+\textbf{Baseline encoding, constraint, and constant contract.} The shared scalar score used by GA, PSO, and Standard DE is
+
+\[
+S(x)=\sum_{q=1}^{5}\frac{f_q(x)-\ell_q}{\max(u_q-\ell_q,10^{-9})}+10v(x),
+\]
+
+with the fixed bounds from Section 5.3 and no clipping of these search scores. Their single returned best plan is repaired once after search before the feasible-front calculation. GA uses row-wise initial density \(U(0.03,0.18)\), binary tournaments of size 2, coordinate-wise uniform crossover probability 0.5, bit-flip probability \(1.5/n\), and elitist best-40 replacement. PSO uses the same initial-density range, initial velocity \(N(0,0.1)\), inertia 0.72, cognitive and social coefficients 1.49, velocity clipping to \([-6,6]\) before the logistic transform, and personal/global-best replacement under \(S\). Standard DE uses the CARS-MODE sparse initialization, DE/rand/1/bin with \(F=0.5\), \(CR=0.9\), one forced mutant coordinate, genome clipping to \([0,1]\), and the strict decoder.
+
+NSGA-II uses one explicit inequality \(G=v(x)\) with Boolean two-point crossover and bit-flip mutation. Their probabilities were not overridden, and the available run configuration does not pin a pymoo version; exact library-default probabilities therefore cannot be certified as archival constants. NSGA-II+Repair runs that same constrained search and repairs only the returned population. GDE3 uses DE/rand/1/bin with \(F=0.5\), \(CR=0.9\) and \(G=v(x)\); NSDE uses the same variant and \(CR=0.9\) with pymoo's sampled \(F\in[0.3,0.9]\), also with \(G=v(x)\). MOEA/D uses 35 Das--Dennis reference directions (five objectives, three partitions), 10 neighbors, neighbor-mating probability 0.7, and the Boolean operators; because this pymoo configuration does not expose an inequality constraint, it minimizes \(F(x)+10^4v(x)\mathbf 1\) instead. These are configuration-specific controls, not claims about the algorithm families in general.
+
+The deterministic Weighted Sum rule sorts by the \textbf{un-divided} benefit \(b_j\) defined in Section 4 (not \(q_j\)), then scans that order and adds an action only if its cost fits the remaining budget. Its five fixed benefit scales are therefore \((0.12,0.02,5,2,2)\), including resilience and excluding DER support. Equal benefits have no authored secondary criterion; the implementation uses the order returned by NumPy's descending \texttt{argsort}. This point rule is feasible by construction and has one effective output per planning experiment.
 
 \subsection{Protocol}\label{protocol}
 
-Each stochastic method runs \textbf{30 independent seeds} per experiment. Weighted Sum is deterministic: the uniform 2940-row implementation archive retains its repeated invocations, but its effective inferential sample size is one per experiment. Thus, seed-level tests cover twelve stochastic opponents; the seven Weighted Sum gaps are descriptive. All population-based methods share population 40 and 40 generations. Stochastic seeds are derived by hashing the (paper, experiment, method) triple with the run index, so method cells do not share a random stream.
+Each stochastic method runs \textbf{30 independently derived seeds} per planning experiment. For zero-based run index \(h\), the implementation computes the SHA-1 digest of \texttt{p3\textbar{}experiment\textbar{}method} and sets
+
+\[
+\operatorname{seed}(h)=200000+7919h+\big(\operatorname{int}(\text{first six hex digits},16)\bmod4096\big).
+\]
+
+Thus method cells do not share a random stream. The archive has \(14\times7\times30=2940\) rows: 2730 seeded stochastic runs and 210 repeated invocations of Weighted Sum. Because Weighted Sum is deterministic, those 210 provenance rows reduce to seven effective outputs, one per experiment, and are not treated as independent observations. Seed-level tests therefore cover the twelve stochastic opponents of CARS-MODE; the seven Weighted Sum gaps are descriptive.
+
+The configured evolutionary horizon is 40 generations. CARS-MODE, NSGA-II, NSGA-II+Repair, GDE3, NSDE, GA, PSO, and Standard DE use population 40; MOEA/D instead has 35 members because its population is the set of 35 reference directions. For the four in-house iterative engines (CARS-MODE, GA, PSO, Standard DE), a run contains 40 initial candidates plus \(40\times40\) newly generated trials/positions, or 1640 generated candidate phenotypes. CARS-MODE's uncached implementation nevertheless processes 4800 objective rows during search---40 current parents plus the 80-row parent--trial union in each generation---so ``generated candidates'' and raw objective-function row calls are not the same quantity. The pymoo methods are configured with \texttt{n\_gen=40}; exact \texttt{n\_eval} counters were not retained in the evidence archive, so we do not claim identical objective-call budgets for them. Normalization-reference evaluations are method-independent and cached per planning experiment rather than charged to a method's generated-candidate count.
 
 \subsection{Evaluation Metric and Statistics}\label{evaluation-metric-and-statistics}
 
-The primary metric is the \textbf{standard hypervolume} of the feasible non-dominated front, computed with pymoo's exact indicator. Objectives use fixed per-experiment normalization bounds obtained from a seeded reference sample: the empty plan, all 72 single-action plans, and 2048 random feasible plans, followed by a 5\% margin. The reference point is 1.1 in every normalized dimension. The metric contains no method-aware term, and an empty feasible front scores zero. We compare CARS-MODE with each stochastic opponent using two-sided \textbf{Mann--Whitney U tests} per experiment (\(n = 30\) per group) and apply \textbf{Holm correction} over the twelve eligible opponents within each experiment {[}32{]} at \(\alpha = 0.05\). Rank-biserial correlation and 5000-resample bootstrap intervals quantify effect size and mean-difference uncertainty. Weighted Sum is reported as an \(n=1\) point comparison without a seed-level p-value.
+The primary metric is the \textbf{standard hypervolume} of the feasible non-dominated front, computed with pymoo's exact indicator. Bounds are constructed separately for each planning experiment with fixed random seed 20260713 and without inspecting any method output. The reference set contains the empty plan, every single-action plan (\(n=72\) or 54), and 2048 random feasible plans. For each random plan, density \(\rho\sim U(0.02,0.30)\) first proposes independent Bernoulli\((\rho)\) bits; a random candidate permutation is then scanned and a proposed action is retained only when its cumulative cost remains within \(B\). Thus the bound-construction set contains \(1+n+2048\) evaluated plans.
+
+For objective \(q\), let \(a_q\) and \(b_q\) be the minimum and maximum over that set and \(d_q=\max(b_q-a_q,10^{-9})\). The stored bounds, normalized coordinate, clipping, and hypervolume reference are
+
+\[
+\ell_q=a_q-0.05d_q,\qquad u_q=b_q+0.05d_q,\qquad
+z_q(x)=\operatorname{clip}\!\left(\frac{f_q(x)-\ell_q}{\max(u_q-\ell_q,10^{-9})},0,1\right),
+\qquad r=(1.1,1.1,1.1,1.1,1.1).
+\]
+
+Only the hypervolume input is clipped to \([0,1]^5\); raw objectives, scalar-search scores, and compromise scores are not. Hypervolume is the exact volume dominated by the clipped feasible non-dominated points and bounded by \(r\), and an empty feasible front scores zero. The metric contains no method-aware term.
+
+For AC export, the compromise is selected separately inside each run. On the deduplicated feasible non-dominated front, define the \textbf{unclipped} equal-weight score
+
+\[
+A(x)=\sum_{q=1}^{5}\frac{f_q(x)-\ell_q}{\max(u_q-\ell_q,10^{-9})},\qquad
+x^{\star}=\operatorname*{arg\,min}_{x\in\mathcal P^{\mathrm{feas}}}A(x).
+\]
+
+This is a minimum normalized-sum compromise, not a knee detector or a planner-supplied preference. If scores tie, \texttt{argmin} selects the first row after the implementation's lexicographic binary deduplication. The AC stage takes \(x^{\star}\) from archive run index 0 for each method and each of the three selected planning experiments; no cross-seed consensus is formed.
+
+We compare CARS-MODE with each stochastic opponent using two-sided \textbf{Mann--Whitney U tests} per experiment (\(n = 30\) per group) and apply \textbf{Holm correction} over the twelve eligible opponents within each experiment {[}32{]} at \(\alpha = 0.05\). Rank-biserial correlation and 5000-resample bootstrap intervals quantify effect size and mean-difference uncertainty. Weighted Sum is reported as an \(n=1\) point comparison without a seed-level p-value.
 
 \subsection{AC Load-Flow Validation Protocol}\label{ac-load-flow-validation-protocol}
 
-Because the planning objectives are proxies, a separate stage validates outcomes electrically. For the base, DER-siting, and storage-allocation experiments, the seed-0 compromise plan is reduced to counts of reinforcement, storage, DER, and automation actions. Fixed rules map each composition onto four SimBench MV networks: rural, semi-urban, urban, and commercial. Reinforcement parallels the most-loaded lines; storage attaches to the weakest-voltage load buses and injects or absorbs 3\% of net load; DER adds PV equal to 4\% of net load at the highest-load buses; automation has no steady-state effect.
+Because the planning objectives are proxies, a separate stage inspects outcomes electrically. For the base, DER-siting, and storage-allocation planning experiments, the run-index-0 compromise is reduced to counts \((k_{\mathrm{reinforcement}},k_{\mathrm{storage}},k_{\mathrm{DER}},k_{\mathrm{automation}})\) and mapped independently onto the archived configuration's four SimBench MV networks: rural, semi-urban, urban, and commercial. For each network--case pair, active and reactive loads are first multiplied by \(\lambda_{\mathrm{AC}}\) and existing static-generation active power by \(\delta_{\mathrm{AC}}\). A pre-plan power flow then supplies the deterministic ranking used by the mapping:
 
-Pandapower AC power flow {[}7{]} is solved under base, 1.3x peak, 1.5x growth, 1.8x extreme growth, 2.5x high DER, and growth-plus-\(N-1\) scenarios. The design yields \(4\times6\times3=72\) cases per method. A case is AC-feasible when power flow converges, all bus voltages remain within \([0.95,1.05]\) pu, and line loading does not exceed 100\%. The No-Plan reference uses the same cases without any action. Because fixed rules choose buses, this stage validates plan compositions rather than nodal siting (Sections 7--8).
+\begin{itemize}
+\tightlist
+\item
+  reinforcement increments the \texttt{parallel} count by one on each of the \(k_{\mathrm{reinforcement}}\) most-loaded lines;
+\item
+  storage is placed at the \(k_{\mathrm{storage}}\) weakest-voltage load buses, each with \(q=0\) and \(p=+0.03P_{\mathrm{case}}\) MW when \(\delta_{\mathrm{AC}}\leq1\) (discharge) or \(p=-0.03P_{\mathrm{case}}\) MW when \(\delta_{\mathrm{AC}}>1\) (charge);
+\item
+  DER is placed at the \(k_{\mathrm{DER}}\) highest-active-load buses, each with \(q=0\) and \(p=0.04P_{\mathrm{case}}\delta_{\mathrm{AC}}\) MW; and
+\item
+  automation is recorded in the composition but has no steady-state electrical effect.
+\end{itemize}
 
-The fixed normalization used by the hypervolume implementation can be written as
+Here \(P_{\mathrm{case}}\) is total active load after the case load multiplier. If a requested count exceeds the available ranked elements, array slicing maps only the available elements. The mapping is common to all methods but is compositional and case-dependent, not action-aligned nodal siting.
 
-\[
-\tilde f_q(x)=\frac{f_q(x)-\ell_q}{u_q-\ell_q+\epsilon},
-\qquad r_q=1.1,
-\]
+The archived validation fixes the operating-case tuples \((\lambda_{\mathrm{AC}},\delta_{\mathrm{AC}},I_{N-1})\) as follows: base \((1.0,1.0,0)\), peak load \((1.3,1.0,0)\), load growth \((1.5,1.0,0)\), extreme growth \((1.8,1.0,0)\), high DER \((0.5,2.5,0)\), and growth plus \(N-1\) outage \((1.5,1.0,1)\).
 
-where \((\ell_q,u_q)\) are fixed before any method output is inspected. The evaluated front is therefore
+For the \(N-1\) case, the mapping removes the highest-loaded line whose outage leaves every bus supplied; if no such line is found, the implementation records no outage. Pandapower AC power flow {[}7{]} is then solved. The design yields \(3\) planning experiments \(\times4\) networks \(\times6\) fixed operating cases \(=72\) binary outcomes per method. These outcomes share three plan compositions and are not 72 independent optimizer replications. A case is AC-feasible when power flow converges, all bus voltages remain within \([0.95,1.05]\) pu, and every line loading is at most 100\%. The No-Plan reference uses the same cases without mapped actions.
+
+For completeness, the reported optimization front before normalization is
 
 \[
 \mathcal P_a^{\mathrm{feas}}=
-\operatorname{ND}\{F(x):x\in\mathcal X_a,\ v(x)=0\},
+\operatorname{ND}\{F(x):x\in\mathcal X_a,\ v(x)\leq10^{-9}\},
 \qquad n_a^{\mathrm{front}}=|\mathcal P_a^{\mathrm{feas}}|.
 \]
 
@@ -425,12 +551,12 @@ MOEA/D & baseline & 0.00047 & 0.00000 & 1.0 & 0.350 \\
 \end{tabularx}
 \end{table*}
 
-CARS-MODE attains a pooled mean hypervolume of 0.04218 (std 0.00381), 6.22\% above the strongest like-for-like baseline NSGA-II+Repair (0.03971, NSGA-II augmented with the same budget repair) and 6.34\% above plain NSGA-II (0.03966). Repair alone changes NSGA-II by 0.11\% on this benchmark. Across eight stochastic baselines and seven scenarios, CARS-MODE has a higher mean in all 56 cells; 55 differences remain significant after within-scenario Holm correction. The only unresolved stochastic-baseline comparison is NSGA-II+Repair in storage\_allocation. The deterministic Weighted Sum rule is lower in all seven descriptive comparisons and receives no seed-level p-value. This pattern supports the complete search framework against the implemented controls but does not isolate adaptation: Ablation-FixedDE remains nominally ahead of the full method. MOEA/D's penalty-based configuration collapses to the empty plan on this problem; we report that implementation-specific failure without generalizing it to decomposition methods.
+CARS-MODE attains a pooled mean hypervolume of 0.04218 (std 0.00381), 6.22\% above NSGA-II+Repair (0.03971, constrained NSGA-II with post-search returned-population repair) and 6.34\% above plain NSGA-II (0.03966). Repair alone changes NSGA-II by 0.11\% on this benchmark. Across eight stochastic baselines and seven planning experiments, CARS-MODE has a higher mean in all 56 cells; 55 differences remain significant after within-experiment Holm correction. The only unresolved stochastic-baseline comparison is NSGA-II+Repair in storage\_allocation. The deterministic Weighted Sum rule is lower in all seven descriptive comparisons and receives no seed-level p-value. This pattern supports the complete search framework against the implemented controls but does not isolate adaptation: Ablation-FixedDE remains nominally ahead of the full method. MOEA/D's penalty-based configuration collapses to the empty plan on this problem; we report that implementation-specific failure without generalizing it to decomposition methods.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.94\textwidth]{figures/fig_hv_boxplot.png}
-\caption{Hypervolume distributions (30 seeds per box) across the seven planning scenarios for CARS-MODE and the original six baselines. The matched-repair and direct DE controls are reported numerically in Table 5 and Figure 9.}\label{fig:2}
+\caption{Hypervolume distributions (30 seeds per box) across the seven deterministic planning experiments for CARS-MODE and the original six baselines. The returned-population-repair and direct DE controls are reported numerically in Table 5 and Figure 9.}\label{fig:2}
 \end{figure*}
 
 Table 6 breaks out the only competitive baseline, NSGA-II.
@@ -455,7 +581,7 @@ storage\_allocation & 0.04362 & 0.04282 & 0.00080 [0.00024, 0.00136] & 0.398 & 0
 \end{tabularx}
 \end{table*}
 
-The margin is significant in all seven scenarios, largest under the 0.82x budget (+9.84\%) and smallest on the storage-only pool (+1.87\%). The pareto\_quality seeded repeat within the same benchmark family reproduces a positive margin (+6.55\% versus +7.75\% in the base setting); it is not an independent-dataset replication. CARS-MODE uses about 1.5x NSGA-II's runtime (0.119 s versus 0.077 s per run) and returns slightly smaller feasible fronts (38.6 versus 40.0 plans on average).
+The margin is significant in all seven planning experiments, largest under the 0.82x budget (+9.84\%) and smallest on the storage-only pool (+1.87\%). The pareto\_quality seeded repeat within the same benchmark family reproduces a positive margin (+6.55\% versus +7.75\% in the base setting); it is not an independent-dataset replication. CARS-MODE uses about 1.5x NSGA-II's runtime (0.119 s versus 0.077 s per run) and returns slightly smaller feasible fronts (38.6 versus 40.0 plans on average).
 
 \subsection{Ablation Study}\label{ablation-study}
 
@@ -467,9 +593,9 @@ Figure 3 compares the full method with the four ablations (pooled over 7 experim
 \caption{Mean hypervolume (+/- std) of CARS-MODE and the four ablations, pooled over all experiments and seeds. FixedDE is nominally higher and unresolved at the proxy level; under the fixed composition mapping, its descriptive AC-feasible rate is lower (Figure 4).}\label{fig:3}
 \end{figure*}
 
-Two components carry the proxy-level result. Removing budget repair costs 6.84\% of pooled hypervolume. It is significant in 6/7 experiments under the primary within-experiment opponent families and in 7/7 under the supplementary repair-specific Holm family across scenarios. Removing crowding diversity costs 33.56\% and is significant in 7/7 under both families, while front sizes fall from 38.6 to 8.1 and run-to-run variation increases. The FixedDE contrast is unresolved in 7/7 experiments under both families. The two family definitions and the complete effect table are retained in \texttt{real\_simbench\_planning\_inference\_v2.csv} and the cross-scenario audit.
+Two components carry the proxy-level result. Removing budget repair costs 6.84\% of pooled hypervolume. It is significant in 6/7 experiments under the primary within-experiment opponent families and in 7/7 under the supplementary repair-specific Holm family across experiments. Removing crowding diversity costs 33.56\% and is significant in 7/7 under both families, while front sizes fall from 38.6 to 8.1 and run-to-run variation increases. The FixedDE contrast is unresolved in 7/7 experiments under both families. The two family definitions and the complete effect table are retained in \texttt{real\_simbench\_planning\_inference\_v2.csv} and the cross-experiment audit.
 
-\textbf{The combined adaptation bundle does not improve the proxy indicator.} Ablation-FixedDE fixes \(F = 0.5\) and \(CR = 0.9\) and replaces the two-strategy pool with rand/1. It attains a pooled mean of 0.04243, \textbf{0.60\% above the full method}. The difference is not Holm-significant in any of the seven experiments (adjusted p = 0.22--0.76, all nominally favoring FixedDE). Because this control changes parameter adaptation and strategy selection together, it does not identify their individual effects. Ablation-NoDER is similarly close (+0.12\% pooled): the full method loses significantly in the tight-budget and DER-siting scenarios and wins significantly in the loose-budget scenario. NoDER changes the candidate pool rather than an algorithmic component and is not used for component attribution. The FixedDE result does not support retaining the adaptive bundle for proxy accuracy; Section 6.3 treats the AC observations only as exploratory evidence for a possible secondary role.
+\textbf{The combined adaptation bundle does not improve the proxy indicator.} Ablation-FixedDE fixes \(F = 0.5\) and \(CR = 0.9\) and replaces the two-strategy pool with rand/1. It attains a pooled mean of 0.04243, \textbf{0.60\% above the full method}. The difference is not Holm-significant in any of the seven experiments (adjusted p = 0.22--0.76, all nominally favoring FixedDE). Because this control changes parameter adaptation and strategy selection together, it does not identify their individual effects. Ablation-NoDER is similarly close (+0.12\% pooled): the full method loses significantly in the tight-budget and DER-siting experiments and wins significantly in the loose-budget experiment. NoDER changes the candidate pool rather than an algorithmic component and is not used for component attribution. The FixedDE result does not support retaining the adaptive bundle for proxy accuracy; Section 6.3 treats the AC observations only as exploratory evidence for a possible secondary role.
 
 \subsection{AC Load-Flow Validation and the HV--AC Trade-Off}\label{ac-load-flow-validation-and-the-hvac-trade-off}
 
@@ -479,7 +605,7 @@ Table 7 and Figure 4 report the pandapower validation of every method's compromi
 \centering
 \scriptsize
 \setlength{\tabcolsep}{3pt}
-\caption{AC validation summary. Stress-only excludes the base scenario (60 cases).}\label{tab:7}
+\caption{AC validation summary. Stress-only excludes the base operating case (60 cases).}\label{tab:7}
 \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
 \toprule
 Method & Role & AC-feasible rate & Stress-only rate & Mean min voltage (pu) & Mean max line loading (\%) \\
@@ -502,7 +628,7 @@ Weighted Sum & baseline & 0.500 & 0.400 & 0.9636 & 88.4 \\
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.94\textwidth]{figures/fig_ac_validation.png}
-\caption{AC-feasible rate (all scenarios, upper bar; stress-only, lower bar) per method over 72 pandapower cases on four SimBench MV networks. The dashed line is the No-Plan reference (0.50).}\label{fig:4}
+\caption{AC-feasible rate (all operating cases, upper bar; stress-only, lower bar) per method over 72 pandapower cases on four SimBench MV networks. The dashed line is the No-Plan reference (0.50).}\label{fig:4}
 \end{figure*}
 
 Three readings, in decreasing order of comfort for the proposed method.
@@ -511,9 +637,9 @@ First, most non-empty compromise plans improve the displayed AC diagnostics rela
 
 Second, \textbf{the proxy-hypervolume ranking does not transfer to the AC ranking.} CARS-MODE is mid-pack in the composition-level check: Standard DE reaches 0.681 AC feasibility, NSGA-II 0.667, GA 0.639, and CARS-MODE 0.611. The seed-0 CARS-MODE compromise contains 6 reinforcement, 7 storage, 1 DER, and 0 automation actions, whereas NSGA-II contains 5/4/6/0 and Standard DE 7/4/2/0. Under the common deterministic mapping, storage-rich compositions coincide with rural over-voltage and less reinforcement in urban growth cases. This is a descriptive composition pattern, not nodal causality or a randomized component effect. In storage\_allocation, CARS-MODE and NSGA-II have the same 8-reinforcement/5-storage composition, so 24 of their 72 AC cases coincide by construction. The 6.34\% proxy-HV margin over plain NSGA-II (6.22\% over NSGA-II+Repair) therefore provides no guarantee of AC-rank transfer.
 
-Third, the AC inspection changes the interpretation of the adaptation ablation. \textbf{Ablation-FixedDE, the nominal proxy winner (+0.60\%, n.s.), has an overall AC-feasible rate of 0.569 versus 0.611 for the full method} (stress-only 0.517 versus 0.567). Under stress-only scenarios, Ablation-NoDiversity is lower still (0.483). In the base experiment, FixedDE selects eight storage actions compared with seven for CARS-MODE, and the additional mapped injection coincides with greater rural-network over-voltage. Conversely, NoRepair loses 6.84\% proxy hypervolume yet matches NSGA-II's AC rate of 0.667. These observations show that proxy and AC assessments capture different properties. Because the AC stage contains one compromise plan per method and experiment (72 binary outcomes per method), it supports a qualitative hypothesis about adaptation rather than a statistically powered component claim (Section 8).
+Third, the AC inspection changes the interpretation of the joint-controller control. \textbf{Ablation-FixedDE, the nominal proxy winner (+0.60\%, n.s.), has an overall AC-feasible rate of 0.569 versus 0.611 for the full method} (stress-only 0.517 versus 0.567). Under stress-only operating cases, Ablation-NoDiversity is lower still (0.483). In the base experiment, FixedDE selects eight storage actions compared with seven for CARS-MODE, and the additional mapped injection coincides with greater rural-network over-voltage. Conversely, NoRepair loses 6.84\% proxy hypervolume yet matches NSGA-II's AC rate of 0.667. These observations show that proxy and AC assessments capture different properties. Because the AC stage contains one run-index-0 compromise per method and selected experiment (72 dependent binary outcomes per method), it supports a qualitative hypothesis about the \textbf{joint adaptation bundle}, not a statistically powered component claim (Section 8).
 
-In the high-DER stress scenario, the No-Plan reference has an AC-feasible rate of 0.25, exceeding NSGA-II, PSO, and Ablation-NoRepair (all 0). This pattern is a \textbf{mapping-rule artifact}, not evidence that no planning is preferable. The AC validation sets DER injection proportional to the number of DER actions and applies a 2.5x penetration factor. Plans with more DER actions therefore inject more PV and incur more voltage violations. CARS-MODE contains one DER action, whereas NSGA-II contains six and produces severe over-voltage under this mapping. This regularity is a limitation of the composition-level validation (Section 8).
+In the high-DER stress case, the No-Plan reference has an AC-feasible rate of 0.25, exceeding NSGA-II, PSO, and Ablation-NoRepair (all 0). This pattern is a \textbf{mapping-rule artifact}, not evidence that no planning is preferable. The AC validation sets DER injection proportional to the number of DER actions and applies a 2.5x DER factor at 0.5x load. Plans with more DER actions therefore inject more PV and incur more voltage violations. CARS-MODE contains one DER action, whereas NSGA-II contains six and produces severe over-voltage under this mapping. This regularity is a limitation of the composition-level validation (Section 8).
 
 \subsection{Parameter Sensitivity Analysis}\label{parameter-sensitivity-analysis}
 
@@ -545,12 +671,12 @@ resampling prob. $\tau$ & 0.2 & 0.0416 +/- 0.0011 & 0.0385 & 0.0002 \\
 
 At every swept point CARS-MODE's mean hypervolume is above the corresponding NSGA-II reference (smallest absolute margin 0.0022), so no mean-rank reversal appears in the tested range. The nominal p-values are shown for transparency but do not define a confirmatory family. The \(\tau\) axis has a 2.3\% spread and the \(N_p\) axis a 10.5\% spread. The defaults (\(N_p=40\), \(\tau=0.1\)) are not the best observed points, reducing concern that the displayed configuration was selected at a visible peak.
 
-The proxy indicator and AC-feasibility results differ partly because the algorithms return different compromise compositions. Figure 6 summarizes those compositions across the seven planning scenarios. CARS-MODE allocates more actions to storage than the three comparison methods shown, whereas Standard DE allocates more to reinforcement. This visualization supports the composition-based explanation in Section 6.3, but it does not establish nodal electrical causality: placement is imposed later by a common deterministic mapping.
+The proxy indicator and AC-feasibility results differ partly because the algorithms return different compromise compositions. Figure 6 summarizes those compositions across the seven planning experiments. CARS-MODE allocates more actions to storage than the three comparison methods shown, whereas Standard DE allocates more to reinforcement. This visualization supports the composition-based explanation in Section 6.3, but it does not establish nodal electrical causality: placement is imposed later by a common deterministic mapping.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.94\textwidth]{figures/fig_portfolio_composition.png}
-\caption{Mean number of reinforcement, storage, DER, and automation actions in the selected compromise plans across seven scenarios. Bars are descriptive aggregates from the archived composition table. They identify portfolio differences before the common composition-to-network mapping and should not be interpreted as nodal siting decisions or independent AC-feasibility tests.}\label{fig:6}
+\caption{Mean number of reinforcement, storage, DER, and automation actions in the selected run-index-0 compromise plans across seven planning experiments. Bars are descriptive aggregates from the archived composition table. They identify portfolio differences before the common composition-to-network mapping and should not be interpreted as nodal siting decisions or independent AC-feasibility tests.}\label{fig:6}
 \end{figure*}
 
 \subsection{Quality--Cost and AC-Margin Diagnostics}\label{qualitycost-and-ac-margin-diagnostics}
@@ -575,23 +701,23 @@ Together, Figures 7 and 8 delimit the two levels of evidence. The combined adapt
 
 \subsection{Direct Multi-Objective DE Controls}\label{direct-multi-objective-de-controls}
 
-GDE3 and NSDE close the most consequential gap in the original baseline set because both retain differential-evolution variation and Pareto-based environmental selection. Their pooled hypervolumes are 0.03885 and 0.03887, respectively, compared with 0.04218 for CARS-MODE. The corresponding relative margins are 8.57\% over GDE3 and 8.52\% over NSDE. CARS-MODE has a higher mean and a Holm-significant difference against both direct controls in every one of the seven scenarios (14 of 14 comparisons). Figure 9 reports the scenario-level means without collapsing the heterogeneous scenario effects into a single rank.
+GDE3 and NSDE close the most consequential gap in the original baseline set because both retain differential-evolution variation and Pareto-based environmental selection. Their pooled hypervolumes are 0.03885 and 0.03887, respectively, compared with 0.04218 for CARS-MODE. The corresponding relative margins are 8.57\% over GDE3 and 8.52\% over NSDE. CARS-MODE has a higher mean and a Holm-significant difference against both direct controls in every one of the seven planning experiments (14 of 14 comparisons). Figure 9 reports the experiment-level means without collapsing the heterogeneous experiment effects into a single rank.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.94\textwidth]{figures/fig_direct_de_controls.png}
-\caption{Mean hypervolume over 30 seeds for CARS-MODE, GDE3, and NSDE in each scenario. All fourteen CARS-MODE-versus-control tests are significant after Holm correction within scenario. These comparisons strengthen the framework-level result but do not rescue a component-level adaptation claim, because the fixed-parameter ablation remains statistically inseparable from the full method.}\label{fig:9}
+\caption{Mean hypervolume over 30 seeds for CARS-MODE, GDE3, and NSDE in each planning experiment. All fourteen CARS-MODE-versus-control tests are significant after Holm correction within experiment. These comparisons strengthen the framework-level result but do not rescue a component-level adaptation claim, because the combined FixedDE control remains statistically inseparable from the full method.}\label{fig:9}
 \end{figure*}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
 \section{Discussion}\label{discussion}
 
-\textbf{What the two-level evaluation supports.} CARS-MODE attains higher proxy hypervolume than every external baseline tested, including matched-repair NSGA-II, GDE3, and NSDE. The FixedDE ablation is nominally higher and statistically unresolved, so the evidence does not attribute the gain to adaptation. The AC layer shows that selected plans can improve several network diagnostics while also demonstrating that proxy rank does not determine electrical rank. The 6.22\% proxy advantage over the strongest matched baseline followed by a mid-pack AC rank is the discrepancy that a proxy-only study would miss.
+\textbf{What the two-level evaluation supports.} CARS-MODE attains higher proxy hypervolume than every external baseline tested, including NSGA-II with returned-population repair, GDE3, and NSDE. The FixedDE ablation is nominally higher and statistically unresolved, so the evidence does not attribute the gain to adaptation. The AC layer shows that selected plans can improve several network diagnostics while also demonstrating that proxy rank does not determine electrical rank. The 6.22\% proxy advantage over the strongest implemented baseline followed by a mid-pack AC rank is the discrepancy that a proxy-only study would miss.
 
-\textbf{Why the adaptive controller remains exploratory.} FixedDE is nominally 0.60\% higher at the proxy level, and the contrast remains unresolved in all seven scenarios, so the primary evidence does not show a gain from jointly adapting parameters and strategies. The current control cannot determine whether one adaptive subcomponent helps while the other hurts. The AC inspection suggests a possible secondary role: FixedDE selects one additional storage action in the base experiment (8 versus 7), and the mapped plan coincides with greater over-voltage in the rural network and less reinforcement in urban growth cases. This pattern is insufficient for a causal claim but motivates future electrically integrated search. More generally, proxy and external validation can assign different apparent value to a mechanism group; the corresponding contrast for budget repair (-6.84\% proxy, AC-neutral in aggregate) reinforces the need to report both levels.
+\textbf{Why the adaptive controller remains exploratory.} FixedDE is nominally 0.60\% higher at the proxy level, and the contrast remains unresolved in all seven planning experiments, so the primary evidence does not show a gain from jointly adapting parameters and strategies. The current control cannot determine whether one adaptive subcomponent helps while the other hurts. The AC inspection suggests a possible secondary role for the bundle: FixedDE selects one additional storage action in the base experiment (8 versus 7), and the mapped plan coincides with greater over-voltage in the rural network and less reinforcement in urban growth cases. This pattern is insufficient for a causal claim but motivates future electrically integrated search. More generally, proxy and external validation can assign different apparent value to a mechanism group; the corresponding contrast for budget repair (-6.84\% proxy, AC-neutral in aggregate) reinforces the need to report both levels.
 
-\textbf{Why the complete framework can outperform controls without an adaptation effect.} Removing diversity or repair reduces the effective set of feasible trade-off solutions, whereas fixing the DE parameters leaves that set almost unchanged. The direct GDE3 and NSDE comparisons show that the complete constrained-search pipeline is competitive relative to other multi-objective DE implementations, but the FixedDE result prevents attribution of that margin to adaptation. The framework-level and component-level conclusions are therefore distinct: the implemented combination performs well on the proxy benchmark, while repair and diversity--not adaptive control--are the mechanisms resolved by the ablations.
+\textbf{Why the complete framework can outperform controls without a resolved adaptation-bundle effect.} Removing diversity or repair reduces the effective set of feasible trade-off solutions, whereas jointly fixing the DE parameters and restricting mutation to rand/1 leaves that set almost unchanged. The direct GDE3 and NSDE comparisons show that the complete constrained-search pipeline is competitive relative to other multi-objective DE implementations, but the FixedDE result prevents attribution of that margin to either adaptive subcomponent. The framework-level and component-level conclusions are therefore distinct: the implemented combination performs well on the proxy benchmark, while repair and diversity---not adaptive control---are the mechanisms resolved by the ablations.
 
 \textbf{Practical reading for planners.} All runtimes are sub-second at the tested scale. Front-returning methods provide a trade-off set and dominate the scalarized controls on proxy hypervolume, but the AC composition check does not preserve that ordering; Standard DE has the highest mapped AC-feasible rate. CARS-MODE has its largest proxy margin under the tight budget (9.84\%), yet its portfolios are not electrically dominant. The proxy front should therefore serve as a candidate-generation stage whose survivors undergo power-flow checks.
 
@@ -605,17 +731,17 @@ We state the boundaries of this study explicitly.
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \textbf{Composition-level, not nodal, planning.} The optimizer selects subnet-level actions, and the AC validation maps plan \emph{compositions} onto concrete networks with fixed rules that choose buses by stress heuristics. Node-level siting and sizing --- where method differentiation at the electrical layer would have to be demonstrated --- is not performed, and the AC stage's per-method sample (72 binary cases from one compromise plan per experiment) supports qualitative patterns, not significance tests. Consequently, the high-DER scenario's No-Plan advantage is a mapping-rule artifact (Section 6.3) rather than a genuine electrical finding.
+  \textbf{Composition-level, not nodal, planning.} The optimizer selects subnet-level actions, and the AC validation maps plan \emph{compositions} onto concrete networks with fixed rules that choose buses by stress heuristics. Node-level siting and sizing---where method differentiation at the electrical layer would have to be demonstrated---is not performed, and the AC stage's per-method sample (72 dependent binary cases from one run-index-0 compromise in each of three planning experiments) supports qualitative patterns, not significance tests. Consequently, the high-DER case's No-Plan advantage is a mapping-rule artifact (Section 6.3) rather than a general electrical finding.
 \item
   \textbf{Proxy objectives.} The five planning objectives are analytic indices of SimBench subnet statistics, not power-flow quantities; Section 6.3 measures, rather than assumes, their relation to AC feasibility, and finds it imperfect. Claims about ``planning quality'' in this paper mean proxy hypervolume unless explicitly stated otherwise.
 \item
   \textbf{Costs are not monetarily calibrated.} Candidate costs are synthetic cost units derived from network statistics. No engineering-economic conclusion (payback, deferral value) can be drawn before calibration against published utility investment figures.
 \item
-  \textbf{Single benchmark family.} All seven scenarios derive from one SimBench network family. Standard distribution test systems (IEEE 33/69-bus) with nodal candidates are the natural second family and remain future work.
+  \textbf{Single benchmark family.} All seven planning experiments derive from one SimBench network family. Standard distribution test systems (IEEE 33/69-bus) with nodal candidates are the natural second family and remain future work.
 \item
-  \textbf{Deterministic planning stage.} The planning-stage evaluation uses a single nominal operating point per scenario; stochastic load/DER/outage variation enters only at the AC validation stage. A scenario-stochastic planning stage would strengthen the robustness reading.
+  \textbf{Deterministic operating conditions.} Each planning experiment uses one fixed proxy operating point, and the AC layer uses six fixed operating/stress cases. Only optimizer initialization and variation are stochastic. A planning stage with sampled load/DER/outage scenarios would strengthen the robustness reading.
 \item
-  \textbf{Baseline configuration caveats.} MOEA/D's failure here is a failure of the specific penalty-based pymoo configuration on this problem; a tuned decomposition method might be competitive, and the comparison should not be quoted against MOEA/D generally.
+  \textbf{Baseline configuration caveats.} MOEA/D's failure here is a failure of the specific penalty-based pymoo configuration on this problem; a tuned decomposition method might be competitive, and the comparison should not be quoted against MOEA/D generally. The available run configuration also does not pin the pymoo version, so library-default Boolean crossover/mutation probabilities for NSGA-II/MOEA/D cannot be reconstructed as certified archival constants.
 \item
   \textbf{The direct DE comparison is still bounded.} GDE3 and NSDE now provide Pareto-based multi-objective DE controls under the same population and generation budget, but JADE-, SHADE-, and L-SHADE-derived multi-objective implementations remain absent. The evidence supports CARS-MODE against the nine implemented baselines, not the entire adaptive-DE family.
 \end{enumerate}
@@ -624,11 +750,11 @@ We state the boundaries of this study explicitly.
 
 \section{Conclusions}\label{conclusions}
 
-This study evaluates a constraint-aware, strategy-pool multi-objective DE on a SimBench-derived mixed-voltage portfolio proxy for distribution planning. It does not evaluate action-aligned, nodal expansion decisions. On this proxy benchmark, CARS-MODE exceeds NSGA-II with matched repair by 6.22\% pooled hypervolume across seven scenarios and 30 seeds per stochastic method. It has a higher mean in all 56 stochastic-baseline comparisons; 55 are Holm-significant. Seven additional deterministic Weighted Sum comparisons are descriptive and favor CARS-MODE. Direct comparisons with GDE3 and NSDE yield margins of 8.57\% and 8.52\%, with significant wins in all fourteen scenario-level tests.
+This study evaluates a constraint-aware, strategy-pool multi-objective DE on a SimBench-derived mixed-voltage portfolio proxy for distribution planning. It does not evaluate action-aligned, nodal expansion decisions. On this proxy benchmark, CARS-MODE exceeds NSGA-II with returned-population repair by 6.22\% pooled hypervolume across seven deterministic planning experiments and 30 seeds per stochastic method. It has a higher mean in all 56 stochastic-baseline comparisons; 55 are Holm-significant. Seven additional deterministic Weighted Sum comparisons are descriptive and favor CARS-MODE. Direct comparisons with GDE3 and NSDE yield margins of 8.57\% and 8.52\%, with significant wins in all fourteen experiment-level tests.
 
 The component and electrical results impose a narrower interpretation. Budget repair and crowding diversity carry the proxy gain, decreasing hypervolume by 6.84\% and 33.56\% when removed. The combined parameter-and-strategy adaptation bundle is unresolved: its fixed-parameter, single-strategy control is 0.60\% higher in pooled mean. In the descriptive pandapower composition check, the corresponding seed-0 plan maps to 0.569 overall AC feasibility versus 0.611 for the full method; this observation does not identify either adaptive subcomponent as the cause. The proxy winner is itself mid-pack electrically.
 
-CARS-MODE is therefore supported as a consistently higher-HV optimizer on the seven tested proxy scenarios, not as a superior action-aligned expansion planner. Its parameter-and-strategy controller is an implemented but empirically unresolved bundle, whereas repair and diversity carry the measured proxy gains. Separate parameter-only and strategy-only controls remain necessary for finer attribution. The disagreement between a 6.22\% matched-baseline proxy advantage and the mid-pack AC rank is the central validity finding: proxy fronts should generate candidates for electrical checking rather than substitute for it. Nodal siting, multi-seed AC mapping, monetary calibration, a second benchmark family, and further multi-objective DE controls remain necessary extensions.
+CARS-MODE is therefore supported as a consistently higher-HV optimizer than the implemented external controls on the seven tested planning experiments, not as a superior action-aligned expansion planner. Its parameter-and-strategy controller is an implemented but empirically unresolved bundle, whereas repair and diversity carry the measured proxy gains. Separate parameter-only and strategy-only controls remain necessary for finer attribution. The disagreement between a 6.22\% returned-population-repair baseline proxy advantage and the mid-pack AC rank is the central validity finding: proxy fronts should generate candidates for electrical checking rather than substitute for it. Nodal siting, multi-seed AC mapping, monetary calibration, a second benchmark family, and further multi-objective DE controls remain necessary extensions.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
