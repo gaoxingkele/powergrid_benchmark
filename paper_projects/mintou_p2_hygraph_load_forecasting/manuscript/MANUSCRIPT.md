@@ -14,10 +14,11 @@
 **Authors:** Jieyun Zheng (郑洁云), Linyao Zhang (张林垚), Zhanghuang Zhang (张章煌), Zhuolin Chen (陈卓琳), Ying Shi (施莹)
 **Affiliations:** Economic and Technological Research Institute of State Grid Fujian Electric Power Co., Ltd., Fuzhou 350000, Fujian, China
 **Correspondence:** zjy_0701@163.com (J. Zheng)
+**Metadata status:** [AUTHOR INPUT REQUIRED: verify author spelling and order, affiliation, correspondence details, and rendered non-Latin names against author-approved records.]
 
 ## Abstract
 
-Cross-correlated regional load series motivate graph and attention mechanisms, but fixed-split accuracy tables can confound cross-series information with head capacity and temporal selection. CSA-LoadNet combines a shared temporal encoder, cross-series attention, and a compact prediction head for scalar 24-position-ahead multi-region load forecasting. On one fixed split, ten-seed means favored the full model over MLP and a smaller-head TemporalOnly ablation; that seed variation is conditional on the selected split. The matched OPSD evaluation uses eight quarterly rolling origins and five common seeds, averaging seeds within each origin before inference. The proposed arm reaches mean origin-level MAPE 0.03664 and WAPE 0.03678, versus 0.03689 and 0.03711 for a target-only matched-context control; neither difference separates (MAPE Holm p = 0.984; WAPE raw p = 0.227). Uniform cross-series, Euclidean-distance, and learned-scale variants also remain unresolved after primary-family correction. A capacity-matched independent-encoder arm is worse, but its narrower per-series hidden layers and lower encoder arithmetic prevent attribution to sharing alone. On the separately scoped exact Ausgrid hierarchy, DLinear retains lower error than CSA-LoadNet under common OLS reconciliation. Thus the fixed-split aggregation attribution is not confirmed under the capacity-matched rolling-origin estimand, and no tested weighting form is established as superior.
+Cross-correlated regional load series motivate graph and attention mechanisms, but fixed-split accuracy tables can confound cross-series information with head capacity and temporal selection. CSA-LoadNet combines a shared temporal encoder, cross-series attention, and a compact prediction head for scalar 24-position-ahead multi-region load forecasting. On one fixed split, ten-seed means favored the full model over MLP and a smaller-head TemporalOnly ablation; that seed variation is conditional on the selected split. The matched OPSD evaluation uses eight quarterly rolling-origin blocks and five common seeds, averaging seeds within block before inference. The proposed arm reaches mean block-level MAPE 0.03664 and WAPE 0.03678, versus 0.03689 and 0.03711 for a target-only matched-context control; neither difference separates (MAPE Holm p = 0.984; WAPE raw p = 0.227). Comparisons with uniform cross-series, Euclidean-distance, and fixed-scale controls also remain unresolved after primary-family correction. A parameter-matched independent-encoder arm is worse, but its narrower per-series hidden layers and lower encoder arithmetic prevent attribution to sharing alone. On the separately scoped exact Ausgrid hierarchy, DLinear retains lower error than CSA-LoadNet under common OLS reconciliation. Thus the fixed-split aggregation attribution is not confirmed under the matched rolling-origin estimand, and no tested weighting form is established as superior.
 
 **Keywords:** 24-step-ahead point forecasting; multi-region load; cross-series attention; matched controls; rolling-origin evaluation; negative results; open power system data
 
@@ -33,15 +34,15 @@ A parallel line of evidence cautions against equating architectural complexity w
 
 These findings leave a component-level question unresolved. Cross-series models are often evaluated as complete architectures, making it difficult to determine whether aggregation itself helps, whether a particular weighting geometry matters, and whether any gain persists across horizons and aggregation structures.
 
-CSA-LoadNet is a compact neural forecaster in which a shared encoder processes each region's load history and cross-series attention aggregates the other encodings. Attention weights can use Poincaré distance with a fixed or learned inverse-temperature, Euclidean distance with the same scale convention, or equal averaging. The implementation does not make the metric curvature depend on this scale. Each mechanism is an independent switch.
+CSA-LoadNet is a compact neural forecaster in which a shared encoder processes each region's load history and cross-series attention aggregates the other encodings. Attention weights can use Poincaré distance with a fixed or learned inverse-temperature, Euclidean distance with the same scale convention, or equal averaging. The implementation does not make the metric curvature depend on this scale. These are executable configuration choices; whether a comparison isolates one mechanism depends on the matched-control boundaries specified below.
 
-The fixed-split component matrix contains the full model and five single-switch ablations. Because its TemporalOnly arm also has a smaller head and all conclusions came from one split, the rolling-origin comparison narrows scope to OPSD lead 24 and introduces matched target-only, uniform-neighbor, Euclidean, fixed-scale, and independent-encoder controls at eight origins. Five seeds are averaged within origin, and exact paired sign-flip tests use origin as the outer unit. The targeted MLP and multi-dataset fixed-split results remain contextual evidence rather than equal-strength confirmation.
+The fixed-split component matrix contains the full model and five executable ablation variants. Because its TemporalOnly arm also has a smaller head and all conclusions came from one split, the rolling-origin comparison narrows scope to OPSD lead 24 and introduces matched target-only, uniform-neighbor, Euclidean, fixed-scale, and independent-encoder controls at eight quarterly blocks. Five seeds are averaged within block, and exact paired sign-flip tests use the block as the outer unit. The targeted MLP and multi-dataset fixed-split results remain contextual evidence rather than equal-strength confirmation.
 
 The paper makes three contributions:
 
 1. **A capacity- and head-matched component design.** The target-only and uniform-neighbor arms retain the complete 48-dimensional context slot, 100--64--1 head, 29,815 instantiated parameters, optimizer, seeds, epochs, and parameterized attention computation. They separate cross-series content from the smaller-head defect of the fixed-split TemporalOnly switch.
-2. **A temporally replicated analysis with an appropriate outer unit.** Eight quarterly OPSD origins are evaluated with five common seeds; MAPE is primary and WAPE secondary. Seeds are averaged within method--origin before exact paired inference, so neither hourly targets nor optimization runs are treated as independent temporal replications.
-3. **A bounded negative component map.** The fixed-split aggregation signal does not separate from the matched target-only control across rolling origins. Learned Poincaré weighting does not separate from uniform or Euclidean cross-series context after correction, while the shared-versus-independent result remains confounded by hidden-width allocation. Short-horizon, SimBench, and exact-hierarchy results retain their adverse or unresolved scope.
+2. **A multi-origin analysis with an appropriate outer unit.** Eight quarterly OPSD evaluation blocks are assessed with five common seeds; MAPE is primary and WAPE secondary. Seeds are averaged within method--block before exact paired inference, so neither forecast targets nor optimization runs are treated as independent temporal replications. The blocks have disjoint test indices but share one record and nested training histories.
+3. **A bounded negative component map.** The fixed-split aggregation signal does not separate from the matched target-only control across rolling-origin blocks. Learned Poincaré weighting does not separate from uniform or Euclidean cross-series context after correction, while the shared-versus-independent result remains confounded by hidden-width allocation. The combined weighting controls support only a family-level non-advantage conclusion, not identification of a best mechanism. Short-horizon, SimBench, and exact-hierarchy results retain their adverse or unresolved scope.
 
 The paper is organized as follows. Section 2 reviews the three research threads the study draws on. Section 3 describes the datasets, tasks, and split protocol. Section 4 specifies CSA-LoadNet and its ablation switches. Section 5 details baselines, training, and statistics. Section 6 reports results, Section 7 interprets the setting-dependent component evidence, Section 8 states limitations, and Section 9 concludes.
 
@@ -146,9 +147,24 @@ Bottom-up, top-down, and OLS projection reconciliation are evaluated separately 
 
 Forecasting comparisons are sensitive to temporal leakage [8,26]. The sample origins are not shuffled across the train/test boundary. Per-series z-normalization means and sample standard deviations (`torch.std` with correction 1, clamped below at $10^{-6}$) are computed from raw values at indices \([0,b)\); this pre-test segment includes the later validation portion and is therefore a **training-segment**, not fit-subset, transformation. The final 15% of strided training origins by time is used to choose the lowest-validation-loss checkpoint. All test origins are evaluated without stride.
 
-The rolling-origin experiment uses eight quarterly OPSD origins at `2017-01-01`, `2017-04-01`, `2017-07-01`, `2017-10-01`, `2018-01-01`, `2018-04-01`, `2018-07-01`, and `2018-10-01` UTC. Each origin evaluates the next 672 processed origins (nominally 28 days), with six target-series forecasts per origin and no test stride. Training origins use stride 3 and must have their lead-24 target strictly before the rolling origin. Normalization is recomputed from rows strictly before each origin, the last 15% of eligible strided origins supplies validation, and all eight epochs are completed before the lowest-validation-loss checkpoint is restored. The parser scanned 35,043 source rows, discarded 43 rows missing at least one selected country value, and retained the frozen first 35,000 valid rows. Consequently, the nominal “24 h” horizon is exactly a 24-processed-position lead but can differ from 24 elapsed UTC hours around a discarded row; target UTC dates are retained for audit.
+The rolling-origin experiment uses eight quarterly OPSD block anchors at `2017-01-01`, `2017-04-01`, `2017-07-01`, `2017-10-01`, `2018-01-01`, `2018-04-01`, `2018-07-01`, and `2018-10-01` UTC. Each anchor defines one evaluation block containing 672 consecutive forecast-origin indices (nominally 28 days), with six target-series forecasts per forecast origin and no test stride. The eight test blocks are disjoint; their expanding training histories are nested within the same six-country record. Training origins use stride 3 and must have their lead-24 target strictly before the block anchor. Normalization is recomputed from rows strictly before each anchor, the last 15% of eligible strided origins supplies validation, and all eight epochs are completed before the lowest-validation-loss checkpoint is restored. The parser scanned 35,043 source rows, discarded 43 rows missing at least one selected country value, and retained the frozen first 35,000 valid rows. Consequently, the nominal “24 h” horizon is exactly a 24-processed-position lead but can differ from 24 elapsed UTC hours around a discarded row; date-aggregated target audits are retained, but discarded timestamps and a missingness-sensitivity analysis are not.
 
 The cyclic covariates are derived from array position rather than parsed civil time: `hour = (t+h) mod 24` and `day-of-week = floor((t+h)/24) mod 7`, each encoded by sine and cosine. They should therefore be read as sequence-phase features. The implementation neither localizes timestamps nor supplies holidays or daylight-saving indicators. For reconciliation, only the top-down leaf proportions are fitted, using leaf energy at indices \([0,b)\); bottom-up uses no fitted proportions and OLS depends only on the fixed summing matrix. Dataset row-validity filtering occurs before the split, and the full-record Ausgrid structural selection is the exception disclosed above. These distinctions replace a blanket leakage-free claim.
+
+### 3.4. Operational Definitions and Evidence Scope
+
+The following terms are used operationally rather than as broader performance or causal claims.
+
+| Term | Meaning in this study | Does not mean |
+|---|---|---|
+| Processed position | One row retained or constructed after the dataset-specific parsing rule | One uninterrupted elapsed hour at every dataset location |
+| Forecast origin | The processed index \(t\) ending a 168-position history and producing one scalar target at \(t+h\) | A complete 24-value next-day forecast |
+| Rolling-origin block | One quarterly OPSD anchor plus its 672 consecutive forecast origins; seeds are averaged within this block | An independent weather year, system, or deployment replication |
+| Outer analysis unit | One of the eight rolling-origin blocks used to form a paired method difference | A seed, target series, day, or individual forecast target |
+| Matched control | A control with the declared common head, context width, parameter count, data exposure, optimizer, epoch, batch, seed, and executed-path budget | Equality of wall-clock time or fairness to every historical external baseline |
+| Combined ablation conclusion | A statement licensed jointly by the uniform, Euclidean, and fixed-scale comparisons in the frozen primary family | Identification of the best weight form or a causal effect of one mechanism |
+| Not separable | The executed comparison did not cross its declared decision threshold | Equivalence, no effect, or evidence that the methods are interchangeable |
+| Exact hierarchy and coherence | Aggregate targets are deterministic sums of the 12 leaves, and reconciliation enforces those identities | Superior forecast accuracy, physical-network feasibility, or deployment value |
 
 ---
 
@@ -160,7 +176,7 @@ Figure 1 gives the complete forecasting path. Load histories enter the shared te
 
 **Figure 1.** CSA-LoadNet data and model flow. The lower strip identifies independent evaluation datasets; it is not an input path. Poincare, Euclidean, and equal-weight attention share the same encoder, fusion, head, and training protocol.
 
-CSA-LoadNet (Cross-Series Attention Load Forecasting Network) is intentionally small: a shared temporal encoder, one cross-series attention block, and a compact prediction head. The design goal is not architectural novelty for its own sake but a testbed in which every mechanism is an independent switch, so that the component analysis of Section 6.2–6.3 attributes effects cleanly.
+CSA-LoadNet (Cross-Series Attention Load Forecasting Network) is intentionally small: a shared temporal encoder, one cross-series attention block, and a compact prediction head. The design goal is not architectural novelty for its own sake but a testbed exposing explicit component switches. A switch is an executable intervention, not automatically a clean causal isolator: the matched target-self and weighting controls support the context and weight-form questions, whereas the independent-encoder comparison remains confounded by width allocation and arithmetic.
 
 **Formal definitions.** For series \(i\), the 168-position history is standardized with statistics from the pre-test training segment \([0,b)\), including the validation portion,
 
@@ -229,15 +245,15 @@ The prediction head concatenates the target encoding, aggregated context, and th
 
 ### 4.4. Ablation Switches
 
-Five single-switch variants isolate each mechanism:
+Five historical executable variants probe component sensitivity, but they do not all isolate a mechanism under equal capacity:
 
-- **TemporalOnly:** removes the aggregation module entirely; the head sees only $h_i$ and the four sequence-phase features. This is the switch that tests whether cross-series aggregation contributes at all.
+- **TemporalOnly:** removes the aggregation module entirely; the head sees only $h_i$ and the four sequence-phase features. Because this also changes the head from 100--64--1 to 52--64--1, it is a combined aggregation-and-head-capacity ablation on the fixed split, not the authoritative isolation of aggregation.
 - **Euclidean weights:** replaces the Poincaré distance with Euclidean distance in the same weight formula.
 - **Equal-weight neighbors:** replaces learned attention with uniform averaging over the pool.
 - **Fixed distance scale:** sets $\tau_i=1$ instead of learning it; it does not change metric curvature.
 - **No sequence-phase features:** removes the four cyclic index features from the head.
 
-The middle three switches jointly probe the *form* of the aggregation weights; TemporalOnly probes the *existence* of aggregation; the no-sequence-phase switch probes the orthogonal phase-feature channel.
+The middle three switches jointly probe the *form* of the aggregation weights; their joint result can reject a claimed learned-weight advantage but cannot identify a best individual mechanism when contrasts do not separate. TemporalOnly historically probes the *existence* of aggregation together with a head-capacity change; the rolling-origin target-self control supplies the matched aggregation-existence comparison. The no-sequence-phase switch probes the orthogonal phase-feature channel with a correspondingly smaller head.
 
 The rolling-origin study adds controls that repair the fixed-split head mismatch. **TargetSelfContext-Matched** replaces the neighbor aggregate presented to the head with the value-mapped target encoding; **UniformCrossSeries-Matched** averages the other five encoded series. Both retain the 48-dimensional context slot, 100--64--1 head, all 29,815 instantiated parameters, and the complete parameterized distance/attention path as a zero-weight audit computation. Euclidean and fixed-scale controls use the same head and capacity. These controls match the declared optimization, seed, epoch, batch, and executed parameterized computation budget; they do not claim identical wall-clock timing.
 
@@ -277,13 +293,13 @@ Table 3 discloses the recorded training settings. Architectures are fixed across
 
 | Setting | Value |
 |---|---|
-| Lookback window | 168 h |
+| Lookback window | 168 processed positions |
 | Temporal encoder | shared MLP 168 → 96 → 48 |
 | Series embedding dimension | 8 |
 | Inverse-temperature / distance scale | $\tau_i=\mathrm{softplus}(\kappa_i) + 0.1$, learnable per target; the fixed-distance-scale control sets $\tau_i=1$ |
 | Head | concat[target encoding, aggregated context, four sequence-phase values] → 64 → 1 |
 | Optimizer / loss | Adam, lr $10^{-3}$ / MSE on per-series z-normalized targets |
-| Batch size | 512 |
+| Batch size | 512 for fixed-split and exact-hierarchy studies; 2048 for rolling-origin OPSD |
 | Epochs | model-specific maxima in Table 2; every epoch is run and the lowest-validation-loss checkpoint is restored |
 | Training-sample stride | OPSD/SimBench: 3 for every model. Ausgrid: 6 for CSA variants, 3 for external baselines. Test origins are never strided |
 | Checkpoint selection | validation = final 15% of strided training origins by time; best-validation state restored after the fixed epoch budget |
@@ -298,13 +314,13 @@ In the rolling-origin OPSD study, the six component arms use five common seeds {
 
 ### 5.3. Statistical Methodology
 
-The rolling-origin confirmatory family contains five OPSD lead-24 contrasts: CSA-Poincaré-Shared against target-self context, uniform cross-series context, Euclidean weighting, fixed scale, and the independent-encoder control. For method $a$, rolling origin $o$, and seed $s$, let $e_{aos}$ denote error. The seed runs are first averaged within origin,
+The rolling-origin confirmatory family contains five OPSD lead-24 contrasts: CSA-Poincaré-Shared against target-self context, uniform cross-series context, Euclidean weighting, fixed scale, and the independent-encoder control. Here \(o\) indexes one quarterly evaluation block, not one of the 672 forecast origins inside it. For method $a$, block $o$, and seed $s$, let $e_{aos}$ denote error. The seed runs are first averaged within block,
 
 $$
 \bar e_{ao}=\frac{1}{5}\sum_{s=1}^{5}e_{aos},
 $$
 
-and inference uses the eight paired origin differences $d_o=\bar e_{\mathrm{CSA},o}-\bar e_{b,o}$. The exact two-sided sign-flip p-value enumerates all $2^8$ sign assignments to the mean of $d_o$. Holm adjustment covers the five MAPE contrasts. Pointwise 95% percentile intervals use 20,000 deterministic resamples of the eight origins. WAPE is the frozen secondary metric and is reported with unadjusted sign-flip p-values; MAE, RMSE, and sMAPE are descriptive. No equivalence margin was specified. Forecast hours, target series, days, and seeds are therefore not promoted to independent inferential replicates.
+and inference uses the eight paired block differences $d_o=\bar e_{\mathrm{CSA},o}-\bar e_{b,o}$. The exact two-sided sign-flip p-value enumerates all $2^8$ sign assignments to the mean of $d_o$ and relies on sign-exchangeability of the block differences under the no-effect null. Holm adjustment covers the five MAPE contrasts. Pointwise 95% percentile intervals use 20,000 deterministic resamples of the eight blocks; because the blocks share one record and nested training histories, these intervals are descriptive uncertainty summaries rather than evidence of independent weather-year replication. WAPE is the frozen secondary metric and is reported with unadjusted sign-flip p-values; MAE, RMSE, and sMAPE are descriptive. No equivalence margin was specified. Forecast positions, target series, days, and seeds are therefore not promoted to independent inferential replicates.
 
 The fixed-split set--CSA-LoadNet, its five ablations, and MLP--was run for ten seeds per dataset/horizon on OPSD and SimBench. Each block contains six proposed-versus-opponent comparisons. On the exact Ausgrid hierarchy, all eleven models use the same ten seeds under four reconciliation regimes. Those analyses use two-sided Mann--Whitney U tests with Holm correction and seed-paired sign-flip sensitivity tests. Their standard deviations and seed-level tests quantify optimization variation conditional on the corresponding single temporal split; seeds are not temporal replications. They remain useful scope and baseline context, but the rolling-origin matched family governs the aggregation-existence claim.
 
@@ -365,9 +381,9 @@ The first result is the favorable but split-conditional signal that motivated th
 
 The three fixed-split weight-form controls remain within ±0.4% of the full model and do not separate from it. The no-sequence-phase variant has the lowest nominal mean, but its comparison is unresolved. MLP was selected from a three-seed architecture screen on the same fixed trajectory, so the selected-comparator result is not treated as test-set-blind model selection.
 
-The second result is the rolling-origin reassessment. Table 5 averages five matched seeds within each of eight quarterly origins and uses the origin as the inferential unit. CSA-LoadNet has mean MAPE 0.036640 and WAPE 0.036775, versus 0.036894 and 0.037109 for target-self context. The proposed-minus-control differences are -0.000253 MAPE (pointwise origin-bootstrap 95% interval [-0.000669, 0.000232], raw exact p = 0.328, Holm p = 0.984) and -0.000334 WAPE ([-0.000778, 0.000153], raw p = 0.227). Using the target-self mean as denominator, the MAPE reduction is 0.69%. Six of eight origin means favor the proposed arm, but the comparison does not separate. The fixed-split aggregation attribution is therefore not confirmed by the capacity- and head-matched rolling-origin estimand.
+The second result is the rolling-origin reassessment. Table 5 averages five matched seeds within each of eight quarterly blocks and uses the block as the inferential unit. CSA-LoadNet has mean MAPE 0.036640 and WAPE 0.036775, versus 0.036894 and 0.037109 for target-self context. The proposed-minus-control differences are -0.000253 MAPE (pointwise block-bootstrap 95% interval [-0.000669, 0.000232], raw exact p = 0.328, Holm p = 0.984) and -0.000334 WAPE ([-0.000778, 0.000153], raw p = 0.227). Using the target-self mean as denominator, the MAPE reduction is 0.69%. Six of eight block means favor the proposed arm, but the comparison does not separate. The fixed-split aggregation attribution is therefore not confirmed by the matched target-self rolling-origin comparison.
 
-**Table 5.** OPSD lead-24 rolling-origin controls regenerated in `derived_tables/p2_rolling_origin_controls.csv`. Values are mean ± standard deviation across eight origin means after averaging five matched seeds within each origin. MAPE Holm p-values cover the five frozen primary contrasts; WAPE p-values are unadjusted secondary results. Differences are CSA-LoadNet minus control, so negative values favor the proposed arm.
+**Table 5.** OPSD lead-24 rolling-origin controls regenerated in `derived_tables/p2_rolling_origin_controls.csv`. Values are mean ± standard deviation across eight block means after averaging five matched seeds within each block. MAPE Holm p-values cover the five frozen primary contrasts; WAPE p-values are unadjusted secondary results. Differences are CSA-LoadNet minus control, so negative values favor the proposed arm.
 
 | Rank / 6 | Method | MAPE ± origin SD | WAPE ± origin SD | MAPE difference | Holm p | WAPE difference | Raw WAPE p |
 |---:|---|---:|---:|---:|---:|---:|---:|
@@ -382,7 +398,7 @@ The fixed-scale arm has the lowest nominal mean and lower WAPE at every origin, 
 
 ![Figure 2. Fixed-split and rolling-origin OPSD lead-24 leaderboards.](figures/fig_leaderboard.png)
 
-**Figure 2.** Split-sensitive OPSD lead-24 leaderboards. (**a**) The fixed-split panel shows mean ± seed SD over ten optimization seeds conditional on one temporal split. (**b**) The rolling panel shows mean ± SD across eight origin means after averaging five matched seeds within each origin. Rank ordering is descriptive; inference follows the scope-specific tests in Tables 4--5. The fixed-split separation from the smaller-head TemporalOnly arm does not reproduce against the matched target-self control across origins.
+**Figure 2.** Split-sensitive OPSD lead-24 leaderboards. (**a**) The fixed-split panel shows mean ± seed SD over ten optimization seeds conditional on one temporal split. (**b**) The rolling panel shows mean ± SD across eight block means after averaging five matched seeds within each block. Rank ordering is descriptive; inference follows the scope-specific tests in Tables 4--5. The fixed-split separation from the smaller-head TemporalOnly arm does not reproduce against the matched target-self control across blocks.
 
 ### 6.2. Component Decisions Across Evidence Scopes
 
@@ -390,7 +406,7 @@ Figure 3 places the fixed-split, rolling-origin, and exact-hierarchy component d
 
 ![Figure 3. Scope-specific proposed-versus-control decisions.](figures/fig_component.png)
 
-**Figure 3.** Proposed-versus-control decisions after scope-specific Holm correction. Fixed-split and exact-hierarchy cells use seed-level Mann--Whitney U tests with ten seeds conditional on one split. The rolling-origin cells use exact sign-flip tests over eight origin means after five-seed averaging. The OPSD lead-24 fixed split contains wins against MLP and the smaller-head TemporalOnly arm; OPSD lead 1 contains a loss to MLP. The matched target-self and all tested weighting-form comparisons are unresolved in the rolling-origin primary family. The exact-hierarchy DLinear comparison is reported separately in Section 6.4.
+**Figure 3.** Proposed-versus-control decisions after scope-specific Holm correction. Fixed-split and exact-hierarchy cells use seed-level Mann--Whitney U tests with ten seeds conditional on one split. The rolling-origin cells use exact sign-flip tests over eight block means after five-seed averaging. The OPSD lead-24 fixed split contains wins against MLP and the smaller-head TemporalOnly arm; OPSD lead 1 contains a loss to MLP. The matched target-self and all tested weighting-form comparisons are unresolved in the rolling-origin primary family. The exact-hierarchy DLinear comparison is reported separately in Section 6.4.
 
 The matrix records why stronger controls were needed. At the OPSD fixed split, both the selected external comparison and the smaller-head TemporalOnly comparison separate. At the lead-1 settings, TemporalOnly is nominally worse than the full model but the differences are not significant (OPSD, p = 0.188; SimBench, p = 0.271). The aggregation signal is also absent at SimBench lead 24 and in the exact-hierarchy TemporalOnly comparison (p = 1 in both), with TemporalOnly nominally ahead at SimBench lead 24. No tested weight-form comparison separates after primary-family correction. Table 5 supersedes the fixed-split TemporalOnly cell for the aggregation-existence claim.
 
@@ -402,7 +418,7 @@ The matched rolling-origin analysis changes the fixed-split attribution. Cross-s
 - **Poincaré vs. uniform neighbor averaging:** not separable in the rolling-origin family (mean MAPE difference -0.000066, Holm p = 0.984). Learned scores do not demonstrably improve on informative uniform cross-series context.
 - **Learnable vs. fixed inverse-temperature:** fixed scale is nominally better at seven of eight origins on MAPE and all eight on WAPE. The primary MAPE result does not survive Holm correction (p = 0.0625); secondary WAPE has raw p = 0.0078 but was not multiplicity-adjusted. This is a retained adverse trend, not evidence for the learned scale and not a curvature comparison.
 
-The joint conclusion is consequently narrower: neither the existence of cross-series context nor the learned weighting form is established by the matched rolling-origin primary family. Uniform neighbor averaging and target-self context are empirically competitive options, not demonstrated equivalents. The Poincaré embedding remains an implementation option rather than a supported contribution. The discrepancy with the favorable fixed split illustrates why optimization seeds on one trajectory cannot substitute for temporal replication.
+The joint conclusion is consequently narrower: neither the existence of cross-series context nor a learned weighting advantage is established by the matched rolling-origin primary family. The aggregation-existence conclusion comes from the matched target-self comparison; the combined uniform, Euclidean, and fixed-scale controls license only the family-level statement that no tested learned-weight advantage is established. They do not identify the best weight form or decompose the null among distance geometry and scale. Uniform neighbor averaging and target-self context are empirically competitive options, not demonstrated equivalents. The Poincaré embedding remains an implementation option rather than a supported contribution. The discrepancy with the favorable fixed split illustrates why optimization seeds on one trajectory cannot substitute for evaluation at multiple temporal blocks.
 
 The result is specific to six OPSD series, lead 24, eight quarterly origins, and the frozen budget. Larger pools, sparser cross-correlations, or genuinely tree-structured populations might differ (Section 8). Because no equivalence margin was specified, the unresolved variants are not proven equivalent. The five-seed rolling-origin study also does not retest the MLP comparison, which remains a selected fixed-split result.
 
@@ -439,13 +455,13 @@ The result strengthens the boundary claim rather than the method claim. On the e
 
 ### 6.5. Short-Horizon and SimBench Boundaries
 
-The remaining cells of Figure 3 complete the boundary map. On OPSD 1 h, the MLP significantly beats CSA-LoadNet (0.010155 versus 0.010689 mean MAPE; primary Holm $p=0.0348$). The supplementary paired sensitivity agrees: CSA-minus-MLP MAPE is 0.000534 (pointwise 95% CI [0.000248, 0.000826], paired Holm $p=0.0469$). At this lead time, recent target history may dominate the aggregation context. On SimBench, neither horizon separates from the MLP. The proposed mean is only trivially lower at 1 h (0.033349 versus 0.033385 nMAE; $p=1$), whereas the MLP mean is lower at 24 h (0.058591 versus 0.060662; $p=0.084$). We therefore make no SimBench superiority or parity claim.
+The remaining cells of Figure 3 complete the boundary map. At OPSD lead 1, the MLP significantly beats CSA-LoadNet (0.010155 versus 0.010689 mean MAPE; primary Holm $p=0.0348$). The supplementary paired sensitivity agrees: CSA-minus-MLP MAPE is 0.000534 (pointwise 95% CI [0.000248, 0.000826], paired Holm $p=0.0469$). At this lead, recent target history may dominate the aggregation context. On SimBench, neither lead separates from the MLP. The proposed mean is only trivially lower at lead 1 (0.033349 versus 0.033385 nMAE; $p=1$), whereas the MLP mean is lower at lead 24 (0.058591 versus 0.060662; $p=0.084$). Because SimBench positions are constructed from retained quarter-hours and carry naive labels, these are lead-position results rather than guaranteed elapsed-hour effects. We therefore make no SimBench superiority or parity claim.
 
-Figure 6 expresses six paired relative-error summaries with the denominator made explicit. For each point, the denominator is the comparator error in the same paired unit. Fixed-split and exact-hierarchy points summarize seed-paired percentages conditional on one split; the rolling-origin point summarizes eight origin-paired percentages after five-seed averaging. Positive values favor CSA-LoadNet. Only the selected OPSD lead-24 fixed-split comparison combines a positive mean effect with corrected significance. OPSD lead 1, SimBench lead 24, and exact-hierarchy Ausgrid favor the named comparators; SimBench lead 1 is near zero. The rolling-origin percentage is descriptive and does not replace the origin-level test in Table 5.
+Figure 6 expresses six paired relative-error summaries with the denominator made explicit. For each point, the denominator is the comparator error in the same paired unit. Fixed-split and exact-hierarchy points summarize seed-paired percentages conditional on one split; the rolling-origin point summarizes eight block-paired percentages after five-seed averaging. Positive values favor CSA-LoadNet. Only the selected OPSD lead-24 fixed-split comparison combines a positive mean effect with corrected significance. OPSD lead 1, SimBench lead 24, and exact-hierarchy Ausgrid favor the named comparators; SimBench lead 1 is near zero. The rolling-origin percentage is descriptive and does not replace the block-level test in Table 5.
 
 ![Figure 6. Paired relative primary-error changes for CSA-LoadNet across evidence scopes.](figures/fig_cross_dataset_effects.png)
 
-**Figure 6.** Paired relative reduction in each setting's primary error for CSA-LoadNet against the named comparator. Points show means and error bars show standard deviations. Fixed-split and hierarchy error bars represent seed variation conditional on one split; the rolling-origin error bar represents variation across eight origin means after seed averaging. Positive values favor CSA-LoadNet. Percentages use the paired comparator error as denominator and are descriptive effect displays, not the test statistic.
+**Figure 6.** Paired relative reduction in each setting's primary error for CSA-LoadNet against the named comparator. Points show means and error bars show standard deviations. Fixed-split and hierarchy error bars represent seed variation conditional on one split; the rolling-origin error bar represents variation across eight block means after seed averaging. Positive values favor CSA-LoadNet. Percentages use the paired comparator error as denominator and are descriptive effect displays, not the test statistic.
 
 ### 6.6. Cross-Setting Rank and Compute Profiles
 
@@ -453,7 +469,7 @@ Figure 7 reports current ranks for six scope-specific rosters. CSA-LoadNet ranks
 
 ![Figure 7. Model ranks within each of six scope-specific method rosters.](figures/fig_cross_setting_ranks.png)
 
-**Figure 7.** Ranks by scope-specific primary error, regenerated in `derived_tables/p2_cross_setting_ranks.csv`. Rank 1 is the lowest mean error within a column; each cell reports rank/roster size. Dashes mark methods absent from an experiment. Fixed-split columns use ten-seed means conditional on one split, the rolling column uses means across eight origin means, and the Ausgrid column uses the exact hierarchy with OLS reconciliation.
+**Figure 7.** Ranks by scope-specific primary error, regenerated in `derived_tables/p2_cross_setting_ranks.csv`. Rank 1 is the lowest mean error within a column; each cell reports rank/roster size. Dashes mark methods absent from an experiment. Fixed-split columns use ten-seed means conditional on one split, the rolling column uses means across eight block means, and the Ausgrid column uses the exact hierarchy with OLS reconciliation.
 
 The run-time profile in Figure 8 supplies the computational counterpart. It places each CSA-LoadNet setting on a logarithmic runtime axis and annotates the dataset-specific primary error. The vertical lanes separate settings and have no quantitative scale; annotated error values use different metrics and must not be compared across datasets.
 
@@ -467,12 +483,12 @@ The run-time profile in Figure 8 supplies the computational counterpart. It plac
 |---|---|---|---|
 | OPSD, lead 1 fixed split | Rank 5/7; 5.26% higher mean MAPE than MLP | Significant loss | Short-horizon boundary; seed inference conditional on one split |
 | OPSD, lead 24 fixed split | Rank 4/7; 4.07% lower mean MAPE than selected MLP | Significant win | Selected-comparator result on one split |
-| OPSD, lead 24 rolling origins | Rank 2/6; 0.69% lower mean MAPE than matched target-self | Not separable | Aggregation-existence claim not confirmed |
+| OPSD, lead 24 rolling blocks | Rank 2/6; 0.69% lower mean MAPE than matched target-self | Not separable | Aggregation-existence claim not confirmed |
 | SimBench, lead 1 fixed split | Rank 2/7; 0.11% lower mean normalized MAE than MLP | Not separable | No superiority or equivalence claim |
 | SimBench, lead 24 fixed split | Rank 5/7; 3.53% higher mean normalized MAE than MLP | Not separable | Adverse nominal ordering |
 | Ausgrid, lead 24 exact hierarchy | Rank 6/11; 3.22% higher mean hierarchy-weighted sMAPE than DLinear under OLS | Significant loss | Coherence achieved; no accuracy-superiority claim |
 
-The table and rank profile separate two levels of evidence. The selected MLP comparison remains favorable on one fixed split, but cross-series aggregation does not separate from the capacity-matched target-self control over eight rolling origins. The tested attention parameterizations likewise remain unresolved. The evidence supports a component-evaluation result, not an aggregation-performance claim.
+The table and rank profile separate two levels of evidence. The selected MLP comparison remains favorable on one fixed split, but cross-series aggregation does not separate from the capacity-matched target-self control over eight rolling blocks. The tested attention parameterizations likewise remain unresolved. The evidence supports a component-evaluation result, not an aggregation-performance claim.
 
 ---
 
@@ -492,19 +508,19 @@ The fixed-split horizon asymmetry admits a hypothesis but not a demonstrated mec
 
 ### 7.3. Implications for the Cross-Series Forecasting Literature
 
-Our results neither reject cross-series modeling nor support an aggregation or weighting advantage. On the fixed split, CSA-LoadNet's mean MAPE is 6.49% lower than the smaller-head TemporalOnly mean, using TemporalOnly as the denominator. Across rolling origins, it is only 0.69% lower than the matched target-self mean, using target-self as the denominator, and the contrast is unresolved. No primary-family weighting-form difference is established; equivalence within a prespecified tolerance was not tested. This discrepancy shows why mechanism claims require both matched component controls and temporal replication. Runtime evidence is interpreted only within a common execution environment.
+Our results neither reject cross-series modeling nor support an aggregation or weighting advantage. On the fixed split, CSA-LoadNet's mean MAPE is 6.49% lower than the smaller-head TemporalOnly mean, using TemporalOnly as the denominator. Across rolling-origin blocks, it is only 0.69% lower than the matched target-self mean, using target-self as the denominator, and the contrast is unresolved. No primary-family weighting-form difference is established; equivalence within a prespecified tolerance was not tested. This discrepancy shows why mechanism claims require both matched component controls and evaluation at multiple temporal blocks. Runtime evidence is interpreted only within a common execution environment.
 
 ---
 
 ## 8. Limitations
 
-1. **No aggregation superiority claim survives the matched temporal analysis.** The fixed split favors CSA-LoadNet over the selected MLP and smaller-head TemporalOnly arms, but the matched target-self contrast over eight rolling origins is unresolved (MAPE Holm $p=0.984$; secondary WAPE raw $p=0.227$). The experiment predicts one scalar at lead 24 and does not score a 24-point next-day trajectory. The OPSD lead-1 comparison favors MLP, and neither SimBench lead separates from MLP.
+1. **No aggregation superiority claim survives the matched temporal analysis.** The fixed split favors CSA-LoadNet over the selected MLP and smaller-head TemporalOnly arms, but the matched target-self contrast over eight rolling blocks is unresolved (MAPE Holm $p=0.984$; secondary WAPE raw $p=0.227$). The experiment predicts one scalar at lead 24 and does not score a 24-point next-day trajectory. The OPSD lead-1 comparison favors MLP, and neither SimBench lead separates from MLP.
 2. **The method does not transfer to the exact customer/region/system hierarchy as implemented.** Under common OLS reconciliation, CSA-LoadNet significantly loses to DLinear (Holm $p<0.001$), while its contrasts against MLP, TCN, and PatchTST-lite remain unresolved under the primary family. Bottom-up, top-down, and OLS reconciliation satisfy the accounting identities, but coherence does not establish forecaster accuracy. MinT with covariance shrinkage and end-to-end coherence-constrained training remain untested.
 3. **The weight-form inseparability is a bounded negative.** Learned Poincaré weighting does not separate from uniform or Euclidean context in the rolling-origin primary family, consistent with fixed-split nulls across pools of 6, 8, and 17 series. Fixed scale is nominally better in the rolling-origin study (MAPE Holm $p=0.0625$; secondary WAPE raw $p=0.0078$), so the data do not favor learned scaling. No equivalence margin was specified.
 4. **Only the rolling-origin shared-encoder component arms are parameter- and head-matched.** External-model counts range from 338 to 70,597 and epoch budgets differ. On Ausgrid, CSA variants use stride 6 while external baselines use stride 3, so the methods receive unequal training-example exposure. The independent-encoder arm matches total parameters but changes hidden widths and uses substantially less encoder arithmetic. Neither the fixed-split rankings nor the shared-encoder contrast is a fully capacity-and-compute-controlled causal comparison.
 5. **Ausgrid structural selection sees the full record.** The completeness filter and top-energy leaf ranking use all three years before the chronological split. This does not train model parameters on test targets, but it is not a train-only selection design and may favor continuous, high-consumption customers. Only one deterministic grouping is tested.
 6. **Timestamp and missingness handling are limited.** OPSD is kept in UTC, whereas SimBench and constructed Ausgrid labels have no represented timezone and receive no daylight-saving adjustment. Sequence-phase covariates come from row indices rather than parsed timestamps. The rolling-origin OPSD audit records 43 discarded source rows before reaching 35,000 retained rows, so a 24-position lead is not always 24 elapsed UTC hours around gaps. SimBench discard counts remain unavailable, and Ausgrid blank half-hours are set to zero. Sensitivity to these choices is untested.
-7. **Temporal replication remains within one observed record.** The eight quarterly origins span 2017--2018, use adjacent portions of the same six country series, and are not independent weather-year or system replications. The exact sign-flip test assumes exchangeable origin differences; quarterly spacing reduces test-block overlap but does not establish independence. MLP selection used the fixed test trajectory and was excluded from the rolling-origin confirmatory family.
+7. **Multi-block evidence remains within one observed record.** The eight quarterly blocks span 2017--2018 and use the same six country series. Their 672-origin test blocks are disjoint, but they are not independent weather-year or system replications: the series are shared and later training histories contain earlier observations. The exact sign-flip test therefore relies on sign-exchangeability of block-level paired differences rather than proven block independence. MLP selection used the fixed test trajectory and was excluded from the rolling-origin confirmatory family.
 8. **No exogenous weather or operational covariates are used.** All models forecast from load history and four row-index phase features. Weather-aware extensions, holidays, localized civil time, dispatch consequences, and deployment remain untested.
 9. **The rolling-origin experiment has not been independently replicated.** The accepted records, frozen configuration, origin tables, and analysis code are retained in the supplementary evidence, but a separately executed replication remains unavailable.
 
@@ -512,7 +528,7 @@ Our results neither reject cross-series modeling nor support an aggregation or w
 
 ## 9. Conclusions
 
-This study tests which components of a cross-series attention forecaster remain supported after capacity matching and temporal replication. The OPSD fixed split favors CSA-LoadNet over a selected MLP and a smaller-head TemporalOnly arm, but the eight-origin analysis does not separate it from a matched target-self context: mean MAPE is 0.036640 versus 0.036894 (Holm $p=0.984$), and mean WAPE is 0.036775 versus 0.037109 (raw $p=0.227$). The fixed-split aggregation attribution is therefore not confirmed under the rolling-origin estimand.
+This study tests which components of a cross-series attention forecaster remain supported after capacity matching and evaluation at multiple temporal blocks. The OPSD fixed split favors CSA-LoadNet over a selected MLP and a smaller-head TemporalOnly arm, but the eight-block analysis does not separate it from a matched target-self context: mean MAPE is 0.036640 versus 0.036894 (Holm $p=0.984$), and mean WAPE is 0.036775 versus 0.037109 (raw $p=0.227$). The fixed-split aggregation attribution is therefore not confirmed under the rolling-origin estimand.
 
 The form of the aggregation weights is likewise unsupported as a differentiator. Learned Poincaré weights do not separate from uniform or Euclidean context after correction, and fixed scaling is nominally better rather than worse. The shared encoder beats the parameter-matched independent arm, but width allocation and arithmetic differ, precluding a sharing claim. OPSD lead-1 and SimBench findings remain adverse or unresolved. On the exact hierarchy under common OLS reconciliation, DLinear retains the accuracy advantage: CSA-LoadNet's mean error is 3.22% higher using DLinear's mean as the denominator (Holm $p=0.000985$). Reconciliation supplies coherence, not accuracy superiority. The resulting contribution is a matched null result, an empirical limit on weighting complexity, and a separation between forecast accuracy and structural coherence.
 
@@ -520,7 +536,7 @@ The form of the aggregation weights is likewise unsupported as a differentiator.
 
 ## Author Contributions
 
-[AUTHOR INPUT REQUIRED: assign the CRediT roles to Jieyun Zheng, Linyao Zhang, Zhanghuang Zhang, Zhuolin Chen, and Ying Shi, and obtain approval from every author.] All authors have read and agreed to the published version of the manuscript.
+[AUTHOR INPUT REQUIRED: assign verified CRediT roles to Jieyun Zheng, Linyao Zhang, Zhanghuang Zhang, Zhuolin Chen, and Ying Shi; obtain every author's approval; and insert the author-approved responsibility statement.]
 
 ## Funding
 
@@ -536,22 +552,23 @@ Not applicable.
 
 ## Data Availability Statement
 
-All datasets used in this study are public: the Open Power System Data 60 min package (https://open-power-system-data.org) [29], SimBench load profiles (https://simbench.de) [30], and Ausgrid solar-home electricity data (https://www.ausgrid.com.au) [24]. The supplementary package contains the CSA-LoadNet implementation and configurations; 280 fixed-split non-hierarchical decision-set records; 440 exact-hierarchy model--reconciliation records; and the accepted rolling-origin evidence comprising 240 method--origin--seed rows, 6,750 forecast-day audit rows, origin-level inference, and a validation report. These assets are available from the corresponding author. A persistent public archive can be supplied before publication, subject to source-data terms.
+All datasets used in this study are public: the Open Power System Data 60 min package (https://open-power-system-data.org) [29], SimBench load profiles (https://simbench.de) [30], and Ausgrid solar-home electricity data (https://www.ausgrid.com.au) [24]. The supplementary package contains the CSA-LoadNet implementation and configurations; 280 fixed-split non-hierarchical decision-set records; 440 exact-hierarchy model--reconciliation records; and the accepted rolling-origin evidence comprising 240 method--block--seed rows, 6,750 date-aggregated forecast-target audit rows, block-level inference, and a validation report. [AUTHOR INPUT REQUIRED: confirm the package-access wording and deposit a persistent public archive before adding a repository URL or DOI.] No persistent public archive is verified in the current evidence.
 
 ## Acknowledgments
 
-During the preparation of this manuscript, the authors used Claude (Anthropic) for language drafting and editing and for assistance in preparing analysis and figure-generation code. All experimental designs, data processing steps, numerical results, statistical analyses, and conclusions were specified, executed, and verified by the authors. The authors reviewed and revised all assisted content and take full responsibility for the publication.
+[AUTHOR INPUT REQUIRED: confirm the final acknowledgment and venue-compliant generative-AI disclosure, including the tool, purposes, author review, and responsibility statement.] The internal preparation record indicates use of Claude (Anthropic) for language drafting and editing and for assistance with analysis and figure-generation code, but author approval of the submission wording is not verified in this worktree.
 
 ## Conflicts of Interest
 
-The authors declare no conflicts of interest.
+[AUTHOR INPUT REQUIRED: insert the author-confirmed conflict-of-interest statement.]
 
 ---
 
 ## References
 
 <!-- MDPI numbered style, ordered by first appearance in the text.
-     All DOIs verified against the Crossref API on 2026-07-16. -->
+     A prior internal record reports Crossref DOI checks on 2026-07-16.
+     This S5 closure did not independently reverify the full bibliography or claim-to-source alignment. -->
 
 1. Li, J.; Li, J.; Li, J.; Zhang, G. Bayesian-Optimized GCN-BiLSTM-Adaboost Model for Power-Load Forecasting. *Electronics* **2025**, *14*(16), 3332. https://doi.org/10.3390/electronics14163332
 2. Zhou, H.; Ai, Q.; Li, R. Short-Term Multi-Energy Load Forecasting Method Based on Transformer Spatio-Temporal Graph Neural Network. *Energies* **2025**, *18*(17), 4466. https://doi.org/10.3390/en18174466

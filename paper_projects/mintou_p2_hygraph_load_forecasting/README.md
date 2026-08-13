@@ -15,6 +15,7 @@
 - `README.md` — 本说明文件
 - `JOURNAL_REVIEW.md` — 期刊匹配度对比（IEEE Access vs Energies vs 现目标 Electronics）、写作修改清单、实验设计缺口、数据集缺口、P0/P1/P2 优先级行动清单
 - `manuscript/DEEP_REVISION_EVIDENCE.md` — 当前标题、任务、组件、指标、负面结果及人工阻塞项的证据合同
+- `manuscript/P2_S5_THREE_ROUND_CLOSURE.md` — 逻辑、方法统计与理论创新三轮对抗审查记录，以及仍未验证的外部检查和人工阻塞项
 
 ## ARA 工程源路径
 

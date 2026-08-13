@@ -335,6 +335,7 @@ def mdpi_tex(spec: Spec, meta: dict[str, str], body: str, abstract: str) -> str:
     return rf"""\documentclass[{spec.journal_option},article,submit,moreauthors]{{Definitions/mdpi}}
 \usepackage{{tabularx}}
 \usepackage{{array}}
+\usepackage{{longtable}}
 \firstpage{{1}}
 \pubvolume{{1}}
 \issuenum{{1}}
