@@ -1,0 +1,124 @@
+{
+  "run_id": "p4_s3_boundary_20260813",
+  "stage": "p4_s3_boundary_experiments",
+  "predeclared_date": "2026-08-13",
+  "status": "predeclared_before_execution",
+  "scientific_scope": "One-at-a-time boundary analysis of the reconciled p4 proxy; these runs supplement and do not replace the archived main comparison.",
+  "source_profile": "evidence/source/p4_s3_simbench_subnet_profile.csv",
+  "raw_source": {
+    "dataset": "SimBench complete mixed all-voltage network 1-complete_data-mixed-all-0-sw",
+    "files": {
+      "Load.csv": "c2516f9585bd859d0747fbb6172a31d73b9b8e2ab0e95313723f1e19564edda0",
+      "Line.csv": "dd74a338dbd71babca671ac57820863a2828506815cf2947a0679cd950481e60",
+      "RES.csv": "270cc62786f1a3da8f236352d446a6e5052ec89ca5769f4f834dc36760ef8056"
+    }
+  },
+  "equation_contract": {
+    "objectives": [
+      "cost",
+      "mean loss index",
+      "mean voltage-risk index",
+      "negative reliability proxy",
+      "negative mean survivability proxy"
+    ],
+    "hard_constraint": "sum_i c_i x_i <= 920 * budget_factor",
+    "survivability": "min(1, 0.42 * (1 - outage_severity) + survivability_action_scale * sum_i g_i x_i / 24)",
+    "inactive_configured_coordinate": "DER-output multiplier; it remains generated but does not enter any p4 objective",
+    "repair_boundary": "The repair score remains fixed, including g_i/2; survivability_action_scale changes only the displayed survivability equation."
+  },
+  "methods": [
+    "SHIELD-MOEA",
+    "NSGA-II+Repair",
+    "Control-GAOnly",
+    "Control-DEOnly",
+    "Control-FixedWorstK"
+  ],
+  "settings": [
+    {
+      "setting_id": "reference",
+      "axis": "reference",
+      "budget_factor": 1.0,
+      "scenario_count": 16,
+      "screen_k": 4,
+      "survivability_action_scale": 1.0
+    },
+    {
+      "setting_id": "budget_tight_0p82",
+      "axis": "budget_tightness",
+      "budget_factor": 0.82,
+      "scenario_count": 16,
+      "screen_k": 4,
+      "survivability_action_scale": 1.0
+    },
+    {
+      "setting_id": "budget_loose_1p20",
+      "axis": "budget_tightness",
+      "budget_factor": 1.2,
+      "scenario_count": 16,
+      "screen_k": 4,
+      "survivability_action_scale": 1.0
+    },
+    {
+      "setting_id": "scenarios_8",
+      "axis": "scenario_count",
+      "budget_factor": 1.0,
+      "scenario_count": 8,
+      "screen_k": 2,
+      "survivability_action_scale": 1.0
+    },
+    {
+      "setting_id": "scenarios_32",
+      "axis": "scenario_count",
+      "budget_factor": 1.0,
+      "scenario_count": 32,
+      "screen_k": 8,
+      "survivability_action_scale": 1.0
+    },
+    {
+      "setting_id": "resilience_scale_0p75",
+      "axis": "survivability_action_scale",
+      "budget_factor": 1.0,
+      "scenario_count": 16,
+      "screen_k": 4,
+      "survivability_action_scale": 0.75
+    },
+    {
+      "setting_id": "resilience_scale_1p25",
+      "axis": "survivability_action_scale",
+      "budget_factor": 1.0,
+      "scenario_count": 16,
+      "screen_k": 4,
+      "survivability_action_scale": 1.25
+    }
+  ],
+  "scenario_protocol": {
+    "search_seed": 2026081301,
+    "evaluation_seed": 2026081302,
+    "load_range": [0.95, 1.25],
+    "der_range_inactive_for_p4": [0.7, 1.3],
+    "outage_range": [0.0, 0.25],
+    "scenario_count_rule": "Search and evaluation use the declared count; screen_k is one quarter of that count."
+  },
+  "optimizer_protocol": {
+    "seeds_per_method_setting": 30,
+    "population_size": 40,
+    "generations": 40,
+    "screen_every": 5,
+    "seed_formula": "310000 + 7919 * seed_index + int(SHA1(run_id|setting_id|method)[0:6],16) mod 4096",
+    "comparison_samples": "Method-specific seed hashes create independent, not paired, optimizer samples."
+  },
+  "hypervolume_protocol": {
+    "bounds": "For each setting, one method-independent evaluation reference sample: empty plan, every singleton, and 2048 seeded random budget-feasible plans; 5% span margin.",
+    "bounds_seed": 20260713,
+    "front": "Budget-feasible unique plans, non-dominated in raw mean-objective space.",
+    "primary": "Affine normalization, componentwise clipping to [0,1], exact hypervolume at reference point (1.1,...,1.1).",
+    "clipping_audit": "Recompute exact hypervolume from the same raw front without [0,1] clipping; points not dominated by the reference point cannot contribute.",
+    "alternative_reference_point": [1.2, 1.2, 1.2, 1.2, 1.2]
+  },
+  "analysis_protocol": {
+    "primary_gap": "SHIELD-MOEA minus NSGA-II+Repair mean hypervolume within each setting.",
+    "mechanism_gaps": "SHIELD-MOEA minus each GA-only, DE-only, and fixed-worst-K control within each setting.",
+    "uncertainty": "Pointwise, multiplicity-unadjusted 95% percentile bootstrap interval for the independent-sample mean difference; 5000 resamples with comparison-derived fixed seeds.",
+    "claim_boundary": "Exploratory boundary evidence; no equivalence claim and no replacement of the main archive."
+  }
+}
