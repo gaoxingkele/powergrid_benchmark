@@ -10,8 +10,8 @@ Evaluation of GRU Learned-Space Retrieval on RTS-GMLC**.
 | Reproducible | The completed manifest hashes the configuration, script, four source files, and six outputs. A separate execution reproduced all 510 non-timing fields and the four scientific derived tables byte-for-byte. | This is computational reproduction on the same GPU and source files, not external-investigator or cross-hardware replication. |
 | Retrospective | A 48-row query ending at benchmark index $s$ predicts the proxy at delivery row $s+h$, $h\in\{1,24\}$. | Issue timestamps, as-of mappings, and source vintages are absent; no operational day-ahead claim is licensed. |
 | Curtailment-risk | A fixed SNSP-type acceptance rule converts load, wind, and PV into a method-independent rate. | The label is a proxy, not observed curtailment, operator action, OPF/UC output, or economic outcome. |
-| Benchmark | Common target, phase gate, lags, metrics, baselines, controls, and statistics are executable and manifest-bound. | One RTS-GMLC system and weather year identify every result. |
-| Fair evaluation | Fit, selection, calibration, and test phases are disjoint and horizon-embargoed. GRU retrieval controls share the selected checkpoint within each objective. | The fair run covers a mechanism subset, not the full historical 14-method roster. |
+| Benchmark | Common target, phase gate, lags, metrics, baselines, controls, and statistics are executable and manifest-bound. | One RTS-GMLC system and the first 8760 of 8784 source rows identify every result; recorded delivery keys end on December 30, so this is not a complete calendar year. |
+| Fair evaluation | Fit, selection, calibration, and test target sets are disjoint. A horizon offset ensures each downstream query endpoint reaches its phase boundary; the preceding 47 historical rows may remain in the earlier phase. GRU retrieval controls share the head-selected checkpoint within each objective. | The fair run covers a mechanism subset, not the full historical 14-method roster or joint checkpoint/weight optimization. |
 | GRU learned-space retrieval | The same forecasting-trained GRU encoder maps query and fit-bank windows; $k=8$ retrieved targets are combined with the head by selected or fixed weights. | No contrastive/Siamese loss, digital twin, live synchronization, or deployment is implemented. |
 
 ## Aligned contributions
@@ -19,8 +19,9 @@ Evaluation of GRU Learned-Space Retrieval on RTS-GMLC**.
 1. The benchmark contribution is a method-independent retrospective proxy task
    with an explicit information boundary and a privileged target-hour visibility
    audit.
-2. The method contribution is a checkpoint-matched comparison of retrieval-only,
-   equal-blend, and head-only predictions under two selection objectives.
+2. The method contribution is a head-first, checkpoint-matched comparison of
+   retrieval-only, equal-blend, and head-only predictions under two selection
+   objectives.
 3. The result contribution is conditional: retrieval lowers MAE relative to the
    matched head at both lags, Persistence remains lower-MAE at the primary cap,
    onset-targeted selection is inapplicable, and cap crossings are descriptive.
@@ -28,10 +29,12 @@ Evaluation of GRU Learned-Space Retrieval on RTS-GMLC**.
 # Primary Estimand and Analysis Unit
 
 The primary estimand is the mean paired within-seed treatment-minus-control
-difference at cap 0.70, conditional on the fixed RTS-GMLC system-year, temporal
-gate, feature/metric definitions, checkpoint budget, retrieval bank, selection
-objective, and lag. Six frozen GRU contrasts per lag compare selected retrieval,
-fixed 0.5 blending, and the matched head for MAE or onset F1.
+difference at cap 0.70, conditional on the fixed 8760-row RTS-GMLC sequence,
+temporal gate, feature/metric definitions, checkpoint budget, retrieval bank,
+selection objective, and lag. For each objective and seed, the GRU-head
+checkpoint is selected first; the head-weight grid and all retrieval controls
+then share that checkpoint. Six frozen GRU contrasts per lag compare selected
+retrieval, fixed 0.5 blending, and the matched head for MAE or onset F1.
 
 The analysis unit is one paired method-seed run. Ten common training seeds are
 available. The 2627 (1 h) and 2604 (24 h) test delivery targets, including 57
@@ -42,6 +45,13 @@ blocks, years, systems, policies, vintages, operators, or deployments.
 The primary test is the two-sided exact sign-flip test. Holm adjustment is
 applied over the frozen six-contrast family separately within each lag.
 Deterministic methods and cross-cap comparisons have no seed-based p-value.
+The test's inferential interpretation assumes sign-exchangeability of paired
+differences under the no-effect null; the common algorithmic seeds are not
+randomized experimental assignments.
+The mean paired difference is the scale-specific effect estimate. No confidence
+interval over seeds or resampling interval over hours, onset blocks, years, or
+systems is available; the exact p-values and win/tie counts describe only the
+ten frozen training seeds.
 
 # Comparison Budget and Data Visibility
 
@@ -56,17 +66,20 @@ Deterministic methods and cross-cap comparisons have no seed-based p-value.
 
 The source loader retains delivery calendar keys. It does not retain forecast
 issue time, an as-of mapping, release identifier, or revision/vintage field.
-The fair gate prevents artifact building from using downstream delivery phases,
-but it cannot establish an operational issue-time gate.
+The horizon offsets ensure that a downstream target's query endpoint has reached
+the downstream phase boundary. They do not require all 48 historical rows in a
+query window to lie in that phase; earlier-phase history within the window is
+permitted. The gate prevents artifact building from using downstream delivery
+phases, but it cannot establish an operational issue-time gate.
 
 ## Frozen comparison budget
 
 | Item | Budget | Scope |
 |---|---|---|
-| Data | First 8760 aligned rows of the hashed RTS-GMLC load/wind/PV files plus static branch data | One system and weather year |
+| Data | First 8760 aligned rows of 8784-row hashed RTS-GMLC load/wind/PV files plus static branch data | One system and one truncated sequence; manifest delivery keys end on December 30 |
 | Lags/caps | 1 h and 24 h; cap 0.70 primary; 0.60/0.80 sensitivity | Cross-cap values are descriptive |
 | GRU | hidden 48, 20 epochs, checkpoints 5/10/15/20, ten common seeds | Training randomness only |
-| Retrieval | fit-only bank, $k=8$, selected grid plus fixed head weights 0/0.5/1 | Checkpoint shared across controls within objective |
+| Retrieval | fit-only bank, $k=8$, selected grid plus fixed head weights 0/0.5/1 | GRU-head checkpoint selected first and shared across controls within objective; no joint checkpoint/weight optimization |
 | Baselines | Persistence, Seasonal-24h, objective-selected Ridge | Deterministic descriptive references |
 | Privileged control | Target-hour direct policy transform | Construction/visibility audit, not a forecast |
 | Inference | Six paired GRU contrasts per lag | Exact sign flip plus within-lag Holm |
@@ -99,9 +112,14 @@ but it cannot establish an operational issue-time gate.
 8. **The fair subset cannot identify a full-roster winner.** It does not rerun
    MLP, LSTM, DLinear, TCN, raw-feature kNN, SmallBank, encoder, or topology
    ablations under the fair gate.
-9. No result covers another system-year, observed curtailment, forecast vintages,
+9. No result covers another complete year or system, observed curtailment, forecast vintages,
    OPF/UC feasibility, probabilistic forecasts, operators, deployment, or
    economic outcomes.
+10. **The learned representation is not causally isolated.** Raw-feature kNN,
+    randomized-encoder retrieval, alternative distances, and $k$ sensitivity
+    were not rerun under the fair gate. The paired result supports the
+    implemented retrieval path relative to its matched head, not a causal
+    advantage of learned geometry over generic neighbor averaging.
 
 # Shared Assets and Independent Contribution
 
@@ -116,6 +134,19 @@ but it cannot establish an operational issue-time gate.
   benchmark plus a matched within-pipeline retrieval evaluation. No independent
   authorship, external reproduction, deployment, or companion-paper fact is
   inferred.
+- The literature positioning is bounded to the cited corpus. No systematic
+  review, exhaustive state-of-the-art exclusion, or external domain-expert
+  validation was executed; those checks remain **UNVERIFIED** and the manuscript
+  makes no SOTA or expert-review claim.
+- Live official IEEE Access author guidance was checked on 2026-08-13 for the
+  required template/source-PDF match, AI-text disclosure, submitting-author
+  ORCID, and all-author biographies. Whether the local template bundle is the
+  latest publisher bundle remains **UNVERIFIED** until the submitting authors
+  download and compare the current official package.
+- Metadata/content spot checks support references [4], [5], [6], [9], and [13].
+  A complete content-level audit of all 30 references was not available in this
+  closure and remains **UNVERIFIED**; no unchecked reference is promoted into a
+  stronger novelty or causal claim.
 - No companion paper is named by the project acceptance contract. Authors must
   disclose any shared code, text, figures, or evidence rather than relying on
   repository inference.
@@ -125,14 +156,16 @@ but it cannot establish an operational issue-time gate.
 The append-only fair namespace completed with 510 rows on 2026-08-13. It
 executed:
 
-1. A symmetric fit/selection/calibration/test gate with horizon embargoes.
-2. MAE- and onset-F1-targeted checkpoint/hyperparameter arms.
+1. A symmetric fit/selection/calibration/test target gate with horizon-offset
+   query endpoints; earlier-phase history inside the 48-row window is allowed.
+2. MAE- and onset-F1-targeted arms using head-first checkpoint selection and
+   subsequent head-weight selection.
 3. Retrieval-only, equal-blend, head-only, and selected-head-weight controls
    sharing the selected checkpoint within objective.
 4. Ten common GRU seeds and paired exact sign-flip inference at cap 0.70.
 5. Persistence, Seasonal-24h, objective-selected Ridge, and the privileged
    target-hour direct transform.
-6. Method-level reruns at caps 0.60 and 0.80 on the same system-year.
+6. Method-level reruns at caps 0.60 and 0.80 on the same fixed 8760-row sequence.
 
 A separate execution rerun used the same frozen script/config/source hashes and
 seeds. All non-timing fields in all 510 rows matched, and the four scientific
@@ -162,10 +195,14 @@ version chronology are retained in `SUPPLEMENTARY_METHODS_AND_AUDIT.md`.
   files, and an issue-to-delivery archive if operational language is desired.
 - **AUTHOR INPUT REQUIRED:** disclose any shared code, text, figures, data
   preparation, or evidence tables with another manuscript.
+- **AUTHOR INPUT REQUIRED:** run or commission the final similarity/plagiarism
+  screen and external domain-expert review if the authors require those checks;
+  both are currently **UNVERIFIED**.
 
 Scientific blockers that wording cannot resolve are absent issue/vintage
 metadata, absent observed-curtailment labels, zero positive onset support in
-all fair selection/calibration phases, absent full-roster fair rerun, absent
-cross-system/year units, and absent physical/user/deployment validation.
+all fair selection/calibration phases, absent full-roster fair rerun, the
+truncated single-sequence design, absent cross-system/complete-year units, and
+absent physical/user/deployment validation.
 Changing temporal boundaries after seeing test outcomes to obtain positive
 onsets or a favorable result is not permitted.

@@ -28,9 +28,14 @@ metadata and are not publication claims.
 | RTS-GMLC PV `DAY_AHEAD_pv.csv` | 8784 rows / 842651 bytes | `bfede6e558df5ea0f244b6326940a4ee0b95138643aa8a062897c67134c9c185` |
 | RTS-GMLC `branch.csv` | 120 branches / 7263 bytes | `2f8f80f6f95ca46c2997646d56892436b50d7fb81163b680d06767bc3c1b179f` |
 
-The aligned experiment uses the first 8760 delivery rows. The first and last
-manifest delivery keys are 2020-01-01 period 1 and 2020-12-30 period 24. These
-are delivery keys; issue times and data vintages remain unavailable.
+The source files contain 8784 rows, while the aligned experiment intentionally
+preserves the historical construction by using their first 8760 delivery rows.
+The first and last manifest delivery keys are 2020-01-01 period 1 and
+2020-12-30 period 24. The executed sequence is therefore not a complete
+calendar year. These are delivery keys; issue times and data vintages remain
+unavailable. The frozen manifest's `cap_sensitivity_scope` retains the earlier
+label "same system and weather year"; the recorded row counts and delivery keys
+are authoritative, and publication-facing text uses "fixed 8760-row sequence."
 
 ## S3. Primary environment and determinism boundary
 
@@ -100,7 +105,7 @@ primary run. The timing-bearing raw result files are not byte-identical:
 
 This supports reproduction of the scientific outputs by a separate execution.
 It is not an external-investigator replication, a cross-hardware test, or
-evidence beyond the original system-year and information boundary.
+evidence beyond the original fixed 8760-row sequence and information boundary.
 
 ## S7. Legacy version history
 
@@ -142,6 +147,13 @@ v6/NREL scientific results.
 - No issue-time/vintage archive exists.
 - No independent investigator or cross-hardware replication exists.
 - No full legacy 14-method rerun under the fair gate exists.
+- No raw-feature k-NN, randomized-encoder, alternative-distance, or $k$-sensitivity
+  rerun under the fair gate exists; learned-space causality is not identified.
 - No pre-test onset positives exist in any executed cap/lag arm.
+- The experiment uses a truncated first-8760-row sequence rather than all 8784
+  source rows or a complete calendar year.
 - No observed-curtailment, OPF/UC, probabilistic, operator, deployment, or
   economic-outcome validation exists.
+- Full-reference content verification, similarity/plagiarism screening, an
+  external domain-expert review, and confirmation that the local IEEE Access
+  class bundle matches the latest official download remain unverified.
