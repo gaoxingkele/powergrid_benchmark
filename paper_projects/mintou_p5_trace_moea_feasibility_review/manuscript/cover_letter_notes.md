@@ -22,11 +22,11 @@ they are two papers rather than one.
 
 | Axis | TRACE-MOEA (this paper, p5) | BiLo-NSGA (companion, p6) |
 |---|---|---|
-| Mechanism stage | Selection and repair: adaptive preference elitism, deterministic budget repair, quarantined run-level event summaries | Variation: bidirectional local search — forward insertion under budget slack, deletion of weak selections, dependency-aware move bonuses |
+| Mechanism stage | Selection and repair: adaptive preference elitism, deterministic budget repair, quarantined run-level event co-occurrence summaries | Variation: bidirectional local search — forward insertion under budget slack, deletion of weak selections, dependency-aware move bonuses |
 | Problem formulation | Five objectives (adds compliance-and-evidence quality) | Four objectives |
 | Scenario axes | Review preferences (reliability, renewable, traceability, preference emphasis) | Budget multipliers and pool scaling |
 | External validation | Paper-specific NERC and MTEP16 checks, interpreted descriptively | Companion-specific scope; confirm from its evidence package before describing it in the letter |
-| Research question | How does constrained five-objective search behave with adaptive preference elitism, deterministic repair, and run-level intervention-event summaries? | How far can budget-vocabulary local moves extend portfolio quality under hard budget scans? |
+| Research question | How does constrained five-objective search behave with adaptive preference elitism, deterministic repair, and run-level event co-occurrence summaries? | How far can budget-vocabulary local moves extend portfolio quality under hard budget scans? |
 
 ## 3. Candidate budget-response contrast (companion verification required)
 

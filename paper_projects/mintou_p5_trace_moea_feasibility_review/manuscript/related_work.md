@@ -125,10 +125,12 @@ The companion paper in our research program, BiLo-NSGA, works on the same public
 pipeline, and we separate the two studies on both axes so that neither text nor claims overlap:
 
 - **Mechanism.** TRACE-MOEA augments a constrained non-dominated sorting kernel with three
-  components that act at *selection and archiving* level: a **preference-adaptive** weight-vector
-  population (periodically perturbed and re-selected by best-response dispersion, injecting one
-  elite per preference vector each generation), a benefit–cost **budget repair** operator, and a
-  **decision trace archive** that logs repair drops and preference-elite injections. BiLo-NSGA
+  components that act at *selection and event-generation* level: a **preference-adaptive**
+  weight-vector population (periodically perturbed and re-selected by best-response dispersion;
+  an absent best-response row can replace a seeded-random selected slot), a proxy-score **budget
+  repair** operator, and an in-memory event list that generates repair-drop and
+  preference-best-response records and releases only run-level count and pool-position
+  co-occurrence. BiLo-NSGA
   instead concentrates its contribution at *variation* level: a bidirectional local search
   (forward insertion under budget slack, backward deletion of weak selections) with
   dependency-aware move bonuses. Neither method contains the other's core operator.

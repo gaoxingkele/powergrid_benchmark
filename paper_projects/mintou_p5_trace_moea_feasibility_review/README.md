@@ -2,8 +2,8 @@
 
 ## 论文
 
-- **标题**: TRACE-MOEA: Constrained Power-Grid Portfolio Search with Adaptive Preference Elitism, Budget Repair, and Run-Level Intervention-Event Records
-- **算法**: TRACE-MOEA（约束非支配排序核心 + 自适应偏好精英保留 + 确定性预算修复 + 运行级干预事件记录）
+- **标题**: TRACE-MOEA: Constrained Power-Grid Portfolio Search with Adaptive Preference Elitism, Budget Repair, and Run-Level Event Co-Occurrence Summaries
+- **算法**: TRACE-MOEA（约束非支配排序核心 + 自适应偏好精英保留 + 确定性预算修复 + 运行级事件共现汇总）
 - **任务**: 公开代理基准上的硬预算电网投资组合搜索与运行级事件记录
 - **目标期刊**: MDPI Energies
 - **当前状态**: `public_rts_simbench_nerc_project_review_v3_direct_family_controls`；相对 NSGA-II 的汇总平均 HV 差为 +0.89%，偏好消融的独立效应未解决
