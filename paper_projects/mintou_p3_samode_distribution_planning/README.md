@@ -2,11 +2,11 @@
 
 ## 论文信息
 
-- **论文标题**: Self-Adaptive Multi-Objective Differential Evolution for Reproducible Distribution Network Planning with DER and Storage Integration
+- **论文标题**: CARS-MODE: Constraint-Aware Repair and Strategy-Pool Multi-Objective Differential Evolution on a SimBench-Derived Mixed-Voltage Portfolio Proxy
 - **算法**: CARS-MODE (Constraint-Aware Repair and Strategy-adaptive Multi-Objective Differential Evolution) — 约束感知修复 + 策略自适应多目标差分进化
-- **任务**: 配电网扩展规划、DER 选址定容、储能配置的多目标优化
+- **任务**: SimBench 衍生的混合电压等级配电规划组合代理上的多目标优化；不是动作对齐的配电网扩展研究
 - **目标期刊**: MDPI Energies（首选）；MDPI Applied Sciences（备选）；本目录同时评估 IEEE Access 的可行性
-- **当前证据状态**: SimBench DER/storage stress v5 公共基准，proxy hypervolume 0.55322842，超最强基线 NSGA-II 0.46%、超最强消融 FixedDE 0.19%；narrow_promising_public_signal
+- **当前证据状态**: SimBench 衍生混合电压等级组合代理，汇总 proxy hypervolume 0.04218；相对 NSGA-II+Repair 高 6.22%，但 FixedDE 名义上高 0.60% 且七个场景均未解决；AC 可行率 0.611、处于中游。证据只支持代理优化器结论。
 
 ## 本文件夹用途
 
