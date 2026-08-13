@@ -1,0 +1,178 @@
+{
+  "schema_version": "1.0",
+  "run_id": "p3_s4_results_narrative_20260813",
+  "stage": "p3_s4_results_narrative",
+  "created_date": "2026-08-13",
+  "analysis_kind": "deterministic narrative aggregation; no new optimizer or AC runs",
+  "canonical": true,
+  "upstream_run_id": "p3_s3_planning_validation_20260813",
+  "sources": {
+    "upstream_manifest": {
+      "path": "evidence/runs/p3_s3_planning_validation_20260813/manifest.json",
+      "sha256": "b8a0769e6b4933674c9f5fa5ff16e39c311e57284d80ce9e91df351654d9dd1b"
+    },
+    "run_metrics": {
+      "path": "evidence/runs/p3_s3_planning_validation_20260813/hv_diagnostics/run_metrics.csv",
+      "sha256": "de54fbdf17a7631c358b3a500daf1f6a77067332c4992be3d477fccf27a2e1ae",
+      "expected_rows": 2940
+    },
+    "inference": {
+      "path": "evidence/runs/p3_s3_planning_validation_20260813/hv_diagnostics/inference.csv",
+      "sha256": "65f91fccaa2d9ba17246dd83a697f05ab841a25ec56de625670b8115e7c90cfb",
+      "expected_rows": 252
+    },
+    "compromise_compositions": {
+      "path": "evidence/runs/p3_s3_planning_validation_20260813/optimizer_rerun/all_seed_compromise_compositions.csv",
+      "sha256": "c0cccbd53075e08783b989dcfd72b1afb4c41fcf50e18354ccc83cb6073633ae",
+      "expected_rows": 2940
+    },
+    "ac_common_panel": {
+      "path": "evidence/runs/p3_s3_planning_validation_20260813/physical_diagnostic/ac_common_panel_vs_no_plan.csv",
+      "sha256": "b37f44a614d118b7b781164955c4c11c390181e5a69b955555b09b7face35b90",
+      "expected_rows": 11
+    }
+  },
+  "configuration_contract": [
+    {
+      "configuration_id": "base",
+      "label": "Base + internal replicate",
+      "short_label": "Base",
+      "budget_factor": 1.0,
+      "load_factor": 1.0,
+      "search_dimension": 72,
+      "pool_restriction": "none",
+      "seed_blocks": ["base_distribution_planning", "pareto_quality"],
+      "replication_rule": "pareto_quality is an independent optimizer-seed replication of base_distribution_planning, not a seventh configuration"
+    },
+    {
+      "configuration_id": "der_only_pool",
+      "label": "DER-only candidate pool",
+      "short_label": "DER pool",
+      "budget_factor": 1.0,
+      "load_factor": 1.0,
+      "search_dimension": 54,
+      "pool_restriction": "storage candidates excluded for every method",
+      "seed_blocks": ["der_siting_sizing"]
+    },
+    {
+      "configuration_id": "storage_only_pool",
+      "label": "Storage-only candidate pool",
+      "short_label": "Storage pool",
+      "budget_factor": 1.0,
+      "load_factor": 1.0,
+      "search_dimension": 54,
+      "pool_restriction": "DER candidates excluded for every method",
+      "seed_blocks": ["storage_allocation"]
+    },
+    {
+      "configuration_id": "load_growth",
+      "label": "Load-growth configuration",
+      "short_label": "Load 1.3x",
+      "budget_factor": 1.0,
+      "load_factor": 1.3,
+      "search_dimension": 72,
+      "pool_restriction": "none",
+      "seed_blocks": ["load_growth_expansion"]
+    },
+    {
+      "configuration_id": "tight_budget",
+      "label": "Tight-budget configuration",
+      "short_label": "Budget 0.82x",
+      "budget_factor": 0.82,
+      "load_factor": 1.0,
+      "search_dimension": 72,
+      "pool_restriction": "none",
+      "seed_blocks": ["constraint_repair"]
+    },
+    {
+      "configuration_id": "loose_budget",
+      "label": "Loose-budget configuration",
+      "short_label": "Budget 1.20x",
+      "budget_factor": 1.2,
+      "load_factor": 1.0,
+      "search_dimension": 72,
+      "pool_restriction": "none",
+      "seed_blocks": ["runtime_scalability"]
+    }
+  ],
+  "aggregation_contract": {
+    "configuration_count": 6,
+    "seed_block_count": 7,
+    "base_replication": "pool the two 30-run base seed blocks only for the base configuration's descriptive mean",
+    "cross_configuration_summary": "equal weight for each of the six distinct configurations",
+    "inference": "retain the seven experiment-labelled seed blocks and Holm families from the upstream evidence; do not relabel the base replicate as an independent configuration",
+    "weighted_sum": "one effective deterministic output per seed block; repeated rectangular rows are not replicates",
+    "runtime": "rerun-environment provenance only; excluded from engineering-value claims"
+  },
+  "metric_contract": {
+    "legacy_hv_sampled_clip_ref110": {"direction": "higher", "scope": "archived normalization only"},
+    "analytic_hv_ref110": {"direction": "higher", "scope": "unclipped equation-derived envelopes"},
+    "analytic_hv_ref105": {"direction": "higher", "scope": "unclipped equation-derived envelopes"},
+    "igd_plus_common_reference": {"direction": "lower", "scope": "empirical common-reference diagnostic; not independent"}
+  },
+  "primary_comparators": ["NSGA-II+Repair", "Ablation-FixedDE"],
+  "direct_de_controls": ["GDE3", "NSDE"],
+  "ac_scope": {
+    "label": "illustrative composition diagnostic",
+    "unit": "dependent fixed network/case row from three run-index-0 compositions per method",
+    "not_supported": [
+      "optimizer-seed AC uncertainty",
+      "nodal action feasibility",
+      "physical-feasibility probability",
+      "electrical superiority",
+      "monetary decision value"
+    ]
+  },
+  "literal_summary_provenance": {
+    "archived_ac_summary": "transcribed without numerical change from the accepted P3 S3 manuscript Table 7 and its derived AC-margin table; no new power flow",
+    "sensitivity_summary": "transcribed without numerical change from the accepted manuscript Table 8; historical exploratory study, not a P3 S4 rerun"
+  },
+  "archived_ac_summary": [
+    {"method": "NoPlan", "method_role": "reference", "ac_feasible_rate": 0.5, "stress_ac_feasible_rate": 0.4, "mean_min_voltage_pu": 0.9619, "mean_max_line_loading_pct": 90.8, "median_max_line_loading_pct": 84.0396, "p95_max_line_loading_pct": 147.4256},
+    {"method": "Standard DE", "method_role": "baseline", "ac_feasible_rate": 0.6805555556, "stress_ac_feasible_rate": 0.6166666667, "mean_min_voltage_pu": 0.9731, "mean_max_line_loading_pct": 63.5, "median_max_line_loading_pct": 65.9063, "p95_max_line_loading_pct": 102.12016},
+    {"method": "NSGA-II", "method_role": "baseline", "ac_feasible_rate": 0.6666666667, "stress_ac_feasible_rate": 0.6, "mean_min_voltage_pu": 0.9739, "mean_max_line_loading_pct": 75.6, "median_max_line_loading_pct": 73.68835, "p95_max_line_loading_pct": 128.08776},
+    {"method": "Ablation-NoRepair", "method_role": "ablation", "ac_feasible_rate": 0.6666666667, "stress_ac_feasible_rate": 0.6, "mean_min_voltage_pu": 0.9735, "mean_max_line_loading_pct": 70.5, "median_max_line_loading_pct": 69.7094, "p95_max_line_loading_pct": 112.381495},
+    {"method": "Ablation-NoDER", "method_role": "ablation", "ac_feasible_rate": 0.6666666667, "stress_ac_feasible_rate": 0.6, "mean_min_voltage_pu": 0.9697, "mean_max_line_loading_pct": 56.8, "median_max_line_loading_pct": 53.8843, "p95_max_line_loading_pct": 87.138835},
+    {"method": "GA", "method_role": "baseline", "ac_feasible_rate": 0.6388888889, "stress_ac_feasible_rate": 0.5666666667, "mean_min_voltage_pu": 0.972, "mean_max_line_loading_pct": 66.7, "median_max_line_loading_pct": 65.25725, "p95_max_line_loading_pct": 120.114325},
+    {"method": "CARS-MODE", "method_role": "proposed", "ac_feasible_rate": 0.6111111111, "stress_ac_feasible_rate": 0.5666666667, "mean_min_voltage_pu": 0.9729, "mean_max_line_loading_pct": 76.6, "median_max_line_loading_pct": 74.44365, "p95_max_line_loading_pct": 134.35886},
+    {"method": "PSO", "method_role": "baseline", "ac_feasible_rate": 0.6111111111, "stress_ac_feasible_rate": 0.5333333333, "mean_min_voltage_pu": 0.9716, "mean_max_line_loading_pct": 75.7, "median_max_line_loading_pct": 73.81315, "p95_max_line_loading_pct": 136.89234},
+    {"method": "Ablation-FixedDE", "method_role": "ablation", "ac_feasible_rate": 0.5694444444, "stress_ac_feasible_rate": 0.5166666667, "mean_min_voltage_pu": 0.972, "mean_max_line_loading_pct": 73.7, "median_max_line_loading_pct": 68.38475, "p95_max_line_loading_pct": 150.80774},
+    {"method": "Ablation-NoDiversity", "method_role": "ablation", "ac_feasible_rate": 0.5694444444, "stress_ac_feasible_rate": 0.4833333333, "mean_min_voltage_pu": 0.9681, "mean_max_line_loading_pct": 69.9, "median_max_line_loading_pct": 73.0443, "p95_max_line_loading_pct": 116.870905},
+    {"method": "MOEA/D", "method_role": "baseline", "ac_feasible_rate": 0.5, "stress_ac_feasible_rate": 0.4, "mean_min_voltage_pu": 0.9619, "mean_max_line_loading_pct": 90.8, "median_max_line_loading_pct": 84.0396, "p95_max_line_loading_pct": 147.4256},
+    {"method": "Weighted Sum", "method_role": "baseline", "ac_feasible_rate": 0.5, "stress_ac_feasible_rate": 0.4, "mean_min_voltage_pu": 0.9636, "mean_max_line_loading_pct": 88.4, "median_max_line_loading_pct": 87.8114, "p95_max_line_loading_pct": 143.75119}
+  ],
+  "sensitivity_summary": [
+    {"axis": "population_size", "value": 20, "label": "20", "cars_mean": 0.0382, "cars_std": 0.0018, "nsga_reference": 0.0329, "nominal_p": 0.0010},
+    {"axis": "population_size", "value": 40, "label": "40 (default)", "cars_mean": 0.0409, "cars_std": 0.0016, "nsga_reference": 0.0385, "nominal_p": 0.0058},
+    {"axis": "population_size", "value": 60, "label": "60", "cars_mean": 0.0425, "cars_std": 0.0007, "nsga_reference": 0.0399, "nominal_p": 0.0002},
+    {"axis": "tau", "value": 0.05, "label": "0.05", "cars_mean": 0.0407, "cars_std": 0.0008, "nsga_reference": 0.0385, "nominal_p": 0.0006},
+    {"axis": "tau", "value": 0.1, "label": "0.10 (default)", "cars_mean": 0.0410, "cars_std": 0.0016, "nsga_reference": 0.0385, "nominal_p": 0.0036},
+    {"axis": "tau", "value": 0.2, "label": "0.20", "cars_mean": 0.0416, "cars_std": 0.0011, "nsga_reference": 0.0385, "nominal_p": 0.0002}
+  ],
+  "artifact_outputs": {
+    "tables": [
+      "manuscript/derived_tables/p3_configuration_contract.csv",
+      "manuscript/derived_tables/p3_configuration_metric_means.csv",
+      "manuscript/derived_tables/p3_configuration_effects.csv",
+      "manuscript/derived_tables/p3_configuration_weighted_leaderboard.csv",
+      "manuscript/derived_tables/p3_hv_reference_robustness.csv",
+      "manuscript/derived_tables/p3_pooled_efficiency.csv",
+      "manuscript/derived_tables/p3_portfolio_composition_config_weighted.csv",
+      "manuscript/derived_tables/p3_ac_common_panel_vs_no_plan.csv",
+      "manuscript/derived_tables/p3_ac_decision_value.csv",
+      "manuscript/derived_tables/p3_ac_margin_diagnostics.csv",
+      "manuscript/derived_tables/p3_sensitivity.csv"
+    ],
+    "figures": [
+      "manuscript/figures/fig_configuration_effects.png",
+      "manuscript/figures/fig_ablation.png",
+      "manuscript/figures/fig_ac_validation.png",
+      "manuscript/figures/fig_sensitivity.png",
+      "manuscript/figures/fig_portfolio_composition.png",
+      "manuscript/figures/fig_decision_value.png",
+      "manuscript/figures/fig_ac_margin_distribution.png",
+      "manuscript/figures/fig_direct_de_controls.png"
+    ],
+    "static_non_result_figure": "manuscript/figures/fig_architecture.png"
+  }
+}
