@@ -1,9 +1,9 @@
-﻿# mintou_p2 — HyG-LoadFormer 投稿评审工作目录
+﻿# mintou_p2 — CSA-LoadNet 投稿评审工作目录
 
 ## 论文信息
 
-- **论文标题**: Hyperbolic Graph Neural Forecasting for Hierarchical Power Load Prediction in Smart Dispatch Systems
-- **算法**: HyG-LoadFormer (Hyperbolic Graph Load Forecasting Transformer)
+- **论文标题**: Cross-Series Aggregation in Day-Ahead Multi-Region Power Load Forecasting: A Component-Level Evaluation
+- **算法**: CSA-LoadNet（历史证据标签：`HyG-LoadFormer (neural)`）
 - **论文编号**: mintou_p2
 - **当前目标期刊**: Electronics (MDPI)；备选 Applied Sciences (MDPI)
 - **本次评估对象**: IEEE Access 与 MDPI Energies（对比是否改投）
@@ -14,6 +14,7 @@
 
 - `README.md` — 本说明文件
 - `JOURNAL_REVIEW.md` — 期刊匹配度对比（IEEE Access vs Energies vs 现目标 Electronics）、写作修改清单、实验设计缺口、数据集缺口、P0/P1/P2 优先级行动清单
+- `manuscript/DEEP_REVISION_EVIDENCE.md` — 当前标题、任务、组件、指标、负面结果及人工阻塞项的证据合同
 
 ## ARA 工程源路径
 
@@ -27,7 +28,7 @@
 
 ## 关键结论速览
 
-24h/day-ahead 是本文唯一可作主张的强信号（OPSD 固定切分 MAPE 0.0397 vs 最强基线 0.0563，rolling +39.16%）；1h 短时预测在 OPSD/SimBench 上均为记录在案的 limitation，投稿主张必须限定为 day-ahead 层级负荷预测。详见 `JOURNAL_REVIEW.md`。
+当前稿件只把 OPSD 24 h 作为显著的正面单元：CSA-LoadNet 相对 MLP 和无聚合消融均有经 Holm 校正的差异。OPSD 1 h 为显著负面结果，SimBench 未建立相对 MLP 的优势，精确 Ausgrid 层级上低于 DLinear；所有已测试聚合权重形式均未分离。因此主线是“特定 day-ahead 场景中的跨序列聚合效应”，不是双曲权重、曲率或普遍预测优势。证据范围及本隔离工作树中的数据可见性见 `manuscript/DEEP_REVISION_EVIDENCE.md`。
 
 
 ## Round 2 评审产出 (2026-07-14)

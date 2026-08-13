@@ -11,13 +11,13 @@
        papers/mintou/mintou_p2_hygraph_load_forecasting/evidence/source/real_{opsd,simbench}_source_profile.csv
      Binding claim boundary: logic/claims.md (Route A). Prohibited: any hyperbolic-geometry
      advantage claim, any 1h-horizon advantage claim, any hierarchical-scenario advantage
-     claim, any "smart dispatch" narrative.
+     claim, or any downstream dispatch-performance claim.
      Figures live in ./figures/ (print-resolution PNG plus PDF/SVG evidence figures;
      regenerate the core figures with figures/make_figures.py and the exact-
      hierarchy enhancement figures with scripts/mintou/make_above_mean_enhancement_figures.py).
      AUTHOR INPUT REQUIRED markers must be resolved before submission. -->
 
-# Cross-Series Attention Neural Forecasting for Day-Ahead Multi-Region Power Load Prediction
+# Cross-Series Aggregation in Day-Ahead Multi-Region Power Load Forecasting: A Component-Level Evaluation
 
 **Authors:** Jieyun Zheng (郑洁云), Linyao Zhang (张林垚), Zhanghuang Zhang (张章煌), Zhuolin Chen (陈卓琳), Ying Shi (施莹)
 **Affiliations:** Economic and Technological Research Institute of State Grid Fujian Electric Power Co., Ltd., Fuzhou 350000, Fujian, China
@@ -475,7 +475,7 @@ Not applicable.
 
 ## Data Availability Statement
 
-All datasets used in this study are public: the Open Power System Data 60 min package (https://open-power-system-data.org) [29], SimBench load profiles (https://simbench.de) [30], and Ausgrid solar-home electricity data (https://www.ausgrid.com.au) [24]. The CSA-LoadNet implementation, configurations, 420 non-hierarchical decision-set records, 440 exact-hierarchy model--reconciliation records, effect and interval tables, paired-sensitivity results, split/source profiles, and figure scripts are included in the supplementary package and are available from the corresponding author. A persistent public archive can be supplied before publication, subject to source-data terms. Archived CSV files use the historical full-configuration label `HyG-LoadFormer (neural)`, whose one-to-one mapping to CSA-LoadNet is documented in the evidence README.
+All datasets used in this study are public: the Open Power System Data 60 min package (https://open-power-system-data.org) [29], SimBench load profiles (https://simbench.de) [30], and Ausgrid solar-home electricity data (https://www.ausgrid.com.au) [24]. The CSA-LoadNet implementation, configurations, 280 non-hierarchical decision-set records, 440 exact-hierarchy model--reconciliation records, effect and interval tables, paired-sensitivity results, split/source profiles, and figure scripts are included in the supplementary package and are available from the corresponding author. A persistent public archive can be supplied before publication, subject to source-data terms. Archived CSV files use the historical full-configuration label `HyG-LoadFormer (neural)`, whose one-to-one mapping to CSA-LoadNet is documented in the evidence README.
 
 ## Acknowledgments
 
