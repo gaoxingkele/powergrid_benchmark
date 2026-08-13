@@ -6,14 +6,16 @@
 - **算法**: CARS-MODE (Constraint-Aware Repair and Strategy-adaptive Multi-Objective Differential Evolution) — 约束感知修复 + 策略自适应多目标差分进化
 - **任务**: SimBench 衍生的混合电压等级配电规划组合代理上的多目标优化；不是动作对齐的配电网扩展研究
 - **目标期刊**: MDPI Energies（首选）；MDPI Applied Sciences（备选）；本目录同时评估 IEEE Access 的可行性
-- **当前证据状态**: SimBench 衍生混合电压等级组合代理，汇总 proxy hypervolume 0.04218；相对 NSGA-II+Repair 高 6.22%，但 FixedDE 名义上高 0.60% 且七个场景均未解决；AC 可行率 0.611、处于中游。证据只支持代理优化器结论。
+- **当前证据状态**: 2940 次精确复现实验匹配归档的 sampled-bound/clipped hypervolume（CARS-MODE 0.04218，相对 NSGA-II+Repair 高 6.22%），但审计发现 2281 个低于下界而被裁剪的坐标。采用不裁剪的解析可行边界与参考点 1.05 后，CARS-MODE 为 0.00043362、NSGA-II+Repair 为 0.00043374，CARS-MODE 总体排名第 4；common-reference IGD+ 排名第 5。FixedDE 仍领先，适应机制未解决。AC 可行率 0.611 仅为归档 seed-0 组合诊断，不具备多种子或层级不确定性。证据支持可复现的约束搜索与诊断流程，不支持一致的优化器或电气优越性。
 
 ## 本文件夹用途
 
-投稿前评审与修改规划工作目录，不存放论文源码或实验数据：
+投稿前评审、验证与修改工作目录。P3 S3 新验证证据保存在 `evidence/runs/p3_s3_planning_validation_20260813/`：
 
 - `README.md` — 本文件，工程索引
 - `JOURNAL_REVIEW.md` — IEEE Access vs MDPI Energies 双刊差距评估与修改完善方案（中文）
+- `manuscript/` — 与新参考点/裁剪审计对齐的论文、深度修订证据合同及派生表
+- `scripts/` — 只读调用共享 P3 规划实现的精确复现与诊断脚本；未改写共享 P3/P4 代码
 
 ## ARA 源工程路径
 
