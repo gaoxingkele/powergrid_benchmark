@@ -17,9 +17,9 @@ The title deliberately names the proxy as the experimental object. The supported
 
 ## Primary Estimand and Analysis Unit
 
-The archived primary estimand is the within-seed-block distribution of sampled-bound, clipped hypervolume for each stochastic method. The optimizer seed is the analysis unit (`n = 30` per stochastic method and seed block). The archive contains six distinct deterministic configurations and seven seed blocks because `pareto_quality` independently replicates the base configuration. Two-sided Mann--Whitney U tests compare CARS-MODE with twelve stochastic opponents, with Holm correction within each seed block.
+The archived primary estimand is the within-seed-block distribution of sampled-bound, clipped hypervolume for each stochastic method. The optimizer seed is the within-configuration analysis unit (`n = 30` per stochastic method and seed block). The archive contains six distinct deterministic configurations and seven seed blocks because `pareto_quality` independently replicates the base configuration. Two-sided Mann--Whitney U tests compare CARS-MODE with twelve stochastic opponents, with Holm correction within each seed block.
 
-This stage makes configuration-specific effects primary. The two 30-run base seed blocks are pooled only for the base configuration's descriptive mean; the six configuration means then receive equal weight in cross-configuration summaries. Inferential results retain all seven seed blocks and their original Holm families. Three robustness estimands are evaluated on every preserved rerun front: unclipped analytic-bound hypervolume at reference 1.10, the same hypervolume at alternative reference 1.05, and common-reference IGD+ against the empirical non-dominated union within each seed block. The three metric definitions are robustness families; no multiplicity claim is made across them.
+This stage makes configuration-specific effects primary. The two 30-run base seed blocks are pooled only for the base configuration's descriptive mean; the six configuration means then receive equal weight in cross-configuration summaries. Thus the deterministic planning configuration is the unit for cross-configuration generalization, while optimizer seeds remain the units for within-block inference. Because the six configurations are a fixed benchmark set rather than sampled grids, cross-configuration ranks and effects remain descriptive and receive no population-level p-value. Inferential results retain all seven seed blocks and their original Holm families. Three robustness estimands are evaluated on every preserved rerun front: unclipped analytic-bound hypervolume at reference 1.10, the same hypervolume at alternative reference 1.05, and common-reference IGD+ against the empirical non-dominated union within each seed block. The three metric definitions are robustness families; no multiplicity claim is made across them.
 
 Weighted Sum has one effective deterministic output per seed block. Its 30 repeated archive rows per block preserve rectangular provenance and are not inferential replicates.
 
@@ -31,6 +31,7 @@ The AC layer addresses a different question. It contains one run-index-0 comprom
 |---|---|
 | Main optimizer archive | 14 methods x (6 configurations + 1 base replicate) x 30 rows = 2940; 2730 seeded stochastic runs and 210 deterministic Weighted Sum provenance rows. |
 | Search horizon | 40 generations; population 40 except MOEA/D's 35 reference-direction members. Comparable pymoo evaluation counters were not archived. |
+| Pareto-control fairness | GDE3 and NSDE match the Pareto-based DE search class, population 40, and 40-generation horizon. They are not claimed as strict equal-function-evaluation controls because comparable `n_eval` counters were not archived. |
 | Legacy metric | Method-independent sampled reference set, 5% expanded sampled bounds, clipping to `[0,1]^5`, reference `1.10` in every coordinate. |
 | Analytic metric | Equation-derived feasible envelopes, no clipping, references `1.10` and `1.05`; no optimizer output constructs the bounds. |
 | Common-reference metric | IGD+ against the empirical non-dominated union of all methods and seeds within each seed block; complementary, not independent. |
@@ -49,8 +50,9 @@ The rerun used the existing planning source read-only. No shared P3/P4 source, c
 - **Adaptation bundle unresolved.** FixedDE is nominally higher than CARS-MODE under all equal-configuration summaries: 0.60% for sampled-bound/clipped HV, 0.52% for analytic HV at reference 1.05, and 1.31% for common-reference IGD+. The joint control does not establish a benefit from parameter-and-strategy adaptation and cannot separate its two parts.
 - **NoDER is a problem variant.** It ranks first under the analytic and common-reference diagnostics, but it removes DER/storage decisions and cannot support algorithmic component attribution.
 - **Direct-control evidence weakens under robustness metrics.** Sampled-bound/clipped HV favors CARS-MODE over GDE3 and NSDE in all seven seed blocks spanning six configurations. Under analytic HV only one of seven contrasts against each is Holm-significant in the favorable direction; common-reference IGD+ favors CARS-MODE by mean in four of seven against each, with one significant favorable contrast.
-- **AC remains illustrative.** CARS-MODE has archived AC-feasible rate 0.611 versus 0.500 for No-Plan and 0.667 for NSGA-II. In the matched common panel it changes 11 rows from infeasible to feasible and 3 in the reverse direction, but these are dependent fixed-case rows from seed-0 compositions. GDE3, NSDE, and NSGA-II+Repair have no archived AC rows.
+- **AC remains illustrative.** CARS-MODE has an archived AC-feasible case fraction of 0.611 versus 0.500 for No-Plan and 0.667 for NSGA-II. In the matched common panel it changes 11 rows from infeasible to feasible and 3 in the reverse direction, but these are dependent fixed-case rows from seed-0 compositions. GDE3, NSDE, and NSGA-II+Repair have no archived AC rows.
 - **Mapped high-DER reversal and MOEA/D failure retain narrow scopes.** The No-Plan reversal in one high-DER case is a composition-mapping artifact. The tested penalty-based MOEA/D configuration returns the empty plan; neither observation generalizes to the algorithm family or deployed planning.
+- **Configuration labels required correction without changing evidence.** The `der_siting_sizing` block excludes storage but retains reinforcement and automation, and `storage_allocation` excludes DER but retains reinforcement and automation. P3 S5 replaced the misleading "DER-only"/"Storage-only" display labels with storage-excluded/DER-excluded labels; no run, number, or ordering changed.
 
 ## Shared Assets and Independent Contribution
 
@@ -70,6 +72,8 @@ That upstream stage added deterministic evaluations of those fronts:
 - seed-level Mann--Whitney/Holm tables for each robustness metric.
 
 P3 S4 runs no new optimizer or AC experiment. It adds only a deterministic narrative aggregation: six configuration means, an internal-replication rule for the two base seed blocks, equal-configuration summaries, configuration-specific effect tables, and figures regenerated from one hashed manifest. The all-seed compromise compositions remain non-AC evidence. No method, parameter, seed, bound, reference, or result was selected to improve CARS-MODE's apparent ranking; the unfavorable and null findings are retained.
+
+P3 S5 likewise runs no optimizer or AC experiment. It performs logic, methodology--statistics, and theory--innovation closure reviews; corrects configuration and NoDER descriptions against the hashed source; makes the two analysis-unit levels explicit; narrows the innovation claim; and regenerates tables/figures from the existing canonical manifest. The review and disposition ledger is `manuscript/P3_S5_THREE_ROUND_CLOSURE.md`.
 
 ## Unresolved Human Blockers
 
