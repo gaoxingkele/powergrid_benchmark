@@ -171,9 +171,9 @@ decision support, and it keeps being re-proposed at single tasks and fixed horiz
 Siamese metric learning, retrieval keeps being validated at *one task and one (or one narrow
 band of) horizon at a time*, each on its own data. No work evaluates a retrieval mechanism
 across forecast horizons on a common public benchmark against matched non-retrieval controls —
-so whether retrieval helps or hurts as the horizon grows is undocumented. This paper's central
-component finding (significantly beneficial at 1 h, significantly harmful for 24 h onset
-warning) is exactly the kind of result that cannot exist without such an evaluation.
+so whether retrieval helps or hurts as the lag horizon grows is undocumented. This paper's central
+component finding (significantly beneficial at 1 h, significantly harmful for 24 h lag onset
+detection) is exactly the kind of result that cannot exist without such an evaluation.
 
 ---
 
@@ -262,16 +262,17 @@ and reporting that outcome is evidence of protocol integrity, not framework fail
 ## Gap statement
 
 At the intersection of the three threads, two specific artifacts are missing. **(G1)** There is
-no reproducible, public curtailment-risk early-warning benchmark: curtailment studies quantify
-retrospectively (Thread A, 1–5) or forecast continuous proxies on private single-system data
-(A7–A8), and none defines an event/onset evaluation slice for the operationally relevant warning
-moments, publishes the full task-construction code, or applies a seeded statistical protocol.
+no reproducible, public curtailment-risk benchmark with a transition slice: curtailment studies
+quantify retrospectively (Thread A, 1–5) or forecast continuous proxies on private single-system
+data (A7–A8), and none combines an event/onset evaluation slice, executable task construction,
+and a seeded statistical protocol.
 **(G2)** Retrieval-based (similar-day/analogue/case-based) decision support, though repeatedly
 proposed for power systems since 1988 (Thread B), has never been systematically characterized
 across forecast horizons on a common public benchmark with matched non-retrieval controls —
 whether retrieval helps or hurts is horizon-dependent and undocumented. This paper addresses G1
-with a method-agnostic benchmark (full-year RTS-GMLC, fixed 70% SNSP-type reference policy,
-onset-slice protocol, 10-seed Mann-Whitney/Holm statistics) and G2 with a complete
-characterization of a learned-embedding Siamese retrieval framework on it, including
-significance-backed evidence in both directions and honest negative findings, with the
-evaluation discipline of Thread C built into the protocol.
+with a method-agnostic retrospective benchmark (full-year RTS-GMLC, fixed 70% SNSP-type
+reference rule, onset-slice protocol, 10-seed Mann-Whitney/Holm statistics) and G2 with a
+characterization of shared-encoder learned-space retrieval, including evidence in both
+directions and the negative findings required by the evaluation discipline of Thread C. The
+executed assets do not record issue timestamps or data vintages, so this gap claim does not
+extend to an operational day-ahead benchmark.
