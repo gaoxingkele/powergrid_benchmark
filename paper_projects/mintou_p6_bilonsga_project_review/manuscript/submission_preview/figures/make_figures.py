@@ -77,7 +77,7 @@ EXPERIMENT_LABELS = {
     "budget_constrained_selection": "Budget-constrained\nselection (0.88x)",
     "reliability_prioritized_review": "Reliability-prioritized\nreview",
     "renewable_accommodation_review": "Renewable-accommodation\nreview",
-    "dependency_constrained_review": "Dependency-constrained\nreview",
+    "dependency_constrained_review": "Group-filtered\nreview",
     "local_move_explainability": "Local-move\nexplainability",
     "ranking_robustness": "Ranking\nrobustness",
     "budget_sensitivity": "Budget\nsensitivity (0.75x)",
@@ -87,9 +87,9 @@ EXPERIMENT_ORDER = list(EXPERIMENT_LABELS)
 
 ABLATION_LABELS = {
     "Ablation-NoBackwardSearch": "No backward search",
-    "Ablation-LowDependencyDensity": "Low dependency density",
+    "Ablation-LowDependencyDensity": "Isolated group labels",
     "Ablation-ShallowLocalSearch": "Shallow local search",
-    "Ablation-NoDependencyMoves": "No dependency moves",
+    "Ablation-NoDependencyMoves": "No group bonus",
     "Ablation-RandomMutationOnly": "Random mutation only",
     "Ablation-NoForwardSearch": "No forward search",
     "Ablation-NoFeasibilityRecovery": "No feasibility recovery",

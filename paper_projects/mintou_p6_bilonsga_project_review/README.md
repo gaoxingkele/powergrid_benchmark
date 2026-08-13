@@ -3,10 +3,10 @@
 ## 论文信息
 
 - **标题**: BiLo-NSGA: Budget-Aware Project-Level Local Moves with Accepted-Move Logging for Power-Grid Portfolio Optimization
-- **算法**: BiLo-NSGA — 在非支配排序框架中测试预算感知的项目级插入与原子替换，并记录已提交的局部移动和确定性修复事件；名称不扩展为“bidirectional”性能主张
+- **算法**: BiLo-NSGA — 在自定义约束非支配排序框架中测试预算感知的项目级插入与原子替换；1.06 倍“dependency”机制仅是同组标签的候选排序启发式，不是依赖收益或约束
 - **当前目标期刊**: Applied Sciences (MDPI)；manifest 备选: IEEE Access
 - **本次评估对象**: IEEE Access vs MDPI Energies 差距对比，及是否保留 Applied Sciences
-- **当前状态**: P6 local-search evidence contract — 以标准 hypervolume、场景内比较和实际运行级事件日志为边界；不主张前向支配、依赖协同效应、审计完整性或推荐路径
+- **当前状态**: P6 method contract — 以标准 hypervolume、场景内比较、accepted-local-move/repair 计数和最终前沿位置共现为边界；运行行不保留事件载荷、谱系或 replay 状态，不主张前向支配、依赖协同效应、审计完整性或推荐路径
 
 ## 本文件夹用途
 

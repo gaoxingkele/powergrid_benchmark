@@ -11,58 +11,59 @@ These notes are the p6-side mirror of
 the differentiation table and evidence pointers are kept consistent between
 the two files.
 
-## 1. What the two manuscripts share — and the only thing they share
+## 1. What the two manuscripts share
 
-- A single versioned candidate-generation pipeline that derives a public,
+- A versioned candidate-generation pipeline that derives a public,
   reproducible pool of 120 grid investment candidates from RTS-GMLC, SimBench,
   and NERC reliability-report metadata. This sharing is declared explicitly in
   Section 3.2 / Section 2.4 and in the Data Availability statement of both
   manuscripts.
-- Nothing else is shared: no algorithmic operator, no problem formulation, no
-  scenario design, no external backtest design, and (to be confirmed by an
-  iThenticate self-check before submission) no overlapping sentences.
+- The source corpora, common benchmark/evaluation utilities, and public-record
+  backtest infrastructure are also shared. The formulations, method
+  configurations, executions, run outputs, selected portfolios, comparisons,
+  and claims are paper-specific. Textual independence remains to be confirmed
+  by an iThenticate self-check before submission.
 
 ## 2. How the two manuscripts differ
 
 | Axis | BiLo-NSGA (this paper, p6) | TRACE-MOEA (companion, p5) |
 |---|---|---|
-| Mechanism stage | Variation: bidirectional local search — forward insertion under budget slack, backward deletion, dependency-aware move bonuses, feasibility recovery, audit-trail logging | Selection and archiving: preference-adaptive elitism, deterministic budget repair, quarantined decision trace archive |
+| Mechanism stage | Variation: forward insertion under budget slack, atomic delete--insert substitution, heuristic 1.06 group-label bonus, deterministic feasibility recovery, and accepted-move/repair counters | Selection: preference-adaptive elitism, deterministic budget repair, and run-level event co-occurrence summaries |
 | Problem formulation | Four objectives; budget as first-class hard constraint | Five objectives (adds compliance-and-evidence quality) |
-| Scenario axes | Budget multipliers (0.75x–1.20x) and pool scaling | Review preferences (reliability, renewable, traceability, preference emphasis) |
-| External validation | NERC rule backtest + MISO MTEP16 real built/withdrawn outcomes (broad capture 1.084, point-biserial r = 0.105, p = 0.0006) | Two-rung external-validity ladder on the same NERC + MISO MTEP16 anchors, with its own capture statistics |
-| Research question | How far can budget-vocabulary local moves extend portfolio quality under hard budget scans? | Can search produce review-grade, auditable justification material at no metric cost? |
+| Scenario axes | Budget multipliers (0.75x–1.20x) and pool scaling | Review preferences (reliability, renewable, and preference emphasis) |
+| External consistency | P6-specific NERC and MTEP16 analyses; broad MTEP16 capture 1.071 and raw point-biserial r = 0.088 in the flagship scenario, both descriptive | Separate P5 analyses on the same public source families, with paper-specific configurations and results |
+| Research question | How do project-vocabulary local moves behave under a hard budget on the proxy benchmark? | How does adaptive preference elitism behave with deterministic repair and separately reported event summaries? |
 
-## 3. The 0.75x budget reversal: hard evidence that the mechanisms are distinct
+## 3. Budget-response evidence and its boundary
 
-The strongest argument that the two papers validate different mechanisms —
-rather than describing one method twice — is that the same budget perturbation
-moves their results in opposite directions:
+The two papers ask different mechanism questions, but their budget results are
+not a controlled cross-paper experiment. The P6 points change scenario weights
+and random streams as well as budget, while the P5 scan has its own formulation
+and configuration. The cover letter may report the patterns, but must not call
+their contrast a causal validation of mechanism independence.
 
 - **BiLo-NSGA's margin over NSGA-II SHRINKS to nothing under a tight budget.**
   In this paper's 0.75x budget_sensitivity experiment, BiLo-NSGA scores mean
-  HV 0.16013 vs. NSGA-II 0.16067 — a -0.33% margin, not significant (raw
-  p = 0.67, Holm p = 1.0). Mechanistic reading: forward insertion converts
-  budget slack into projects; when the envelope tightens, the insertion
-  vocabulary starves. The margin widens monotonically with headroom, reaching
-  +3.40% at the 1.20x envelope. (Evidence:
+  HV 0.15965 vs. NSGA-II 0.16067 — a -0.64% nominal margin with Holm
+  p = 1.0. Forward insertion can use residual slack, so scarcity is a plausible
+  explanation, not a demonstrated mechanism. The cross-scenario margin reaches
+  +3.30% in the 1.20x large-pool-labeled setting. (Evidence:
   `papers/mintou/mintou_p6_bilonsga_project_review/evidence/tables/real_project_review_significance.csv`,
   budget_sensitivity row.)
 
-- **TRACE-MOEA's margin over NSGA-II GROWS under the same tightening.** At
-  0.75x, TRACE-MOEA reaches mean HV 0.16606 vs. NSGA-II 0.16378, +1.39%,
-  larger than its +0.89% pooled margin at the standard envelope. Mechanistic
-  reading: its deterministic repair operator is most valuable exactly when the
-  budget constraint binds hardest. (Evidence:
+- **The companion reports a different budget pattern under its own protocol.**
+  The exact P5 values and comparison family should be copied from the approved
+  companion manuscript at submission time, rather than inferred from P6.
+  Deterministic repair is a plausible explanation for that pattern, not a
+  component attribution. (Evidence:
   `papers/mintou/mintou_p5_trace_moea_feasibility_review/evidence/tables/real_budget_sensitivity_075x.csv`
   and `..._significance.csv`, 15 methods x 30 seeds.)
 
-One knob, two opposite responses: insertion-based variation machinery requires
-slack while repair-based selection machinery thrives under scarcity. The two
-papers therefore probe complementary regions of the design space, and each
-result set would be unpublishable as a subsection of the other without losing
-its evidential meaning. This paper additionally reports the asymmetry finding
-honestly in its own abstract (the backward pass is retained for audit
-completeness and substitution semantics, not hypervolume).
+The defensible differentiation rests on the implemented stages, formulations,
+configurations, and paper-specific executions, not on an unadjusted comparison
+of their effect sizes. This paper reports its asymmetry directly: atomic
+substitution is retained as a paired move representation, not as an accuracy,
+dependency, audit-completeness, lineage, or replay claim.
 
 ## 4. Practical points for the letter
 
@@ -71,7 +72,8 @@ completeness and substitution semantics, not hypervolume).
 - Note the shared-pipeline declaration in both Data Availability statements
   and the planned iThenticate cross-check (target: zero overlapping
   sentences).
-- Both evidence packages are released in full, including deprecated pipeline
-  revisions retained for transparency.
+- Describe the availability of each evidence package exactly as verified at
+  submission. The current P6 run rows contain event count and pool-position
+  co-occurrence, not event payloads or replay state.
 - Suggested reviewers may overlap; flag this so the editor can decide whether
   to use the same or disjoint reviewer pools.
