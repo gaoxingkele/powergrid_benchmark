@@ -2,7 +2,7 @@
 
 ## 论文信息
 
-- **论文标题**: Cross-Series Aggregation for 24-Hour-Ahead Point Forecasting of Multi-Region Power Load: A Component-Level Evaluation
+- **论文标题**: Cross-Series Context for 24-Step-Ahead Point Forecasting of Multi-Region Power Load: A Matched Rolling-Origin Component Evaluation
 - **算法**: CSA-LoadNet（历史证据标签：`HyG-LoadFormer (neural)`）
 - **论文编号**: mintou_p2
 - **当前目标期刊**: Electronics (MDPI)；备选 Applied Sciences (MDPI)
@@ -28,7 +28,7 @@
 
 ## 关键结论速览
 
-当前稿件只把 OPSD 的 24 小时超前**单点**预测作为显著正面单元：CSA-LoadNet 相对 MLP 和无聚合消融均有经 Holm 校正的差异；该任务不是次日 24 点轨迹预测。OPSD 1 h 为显著负面结果，SimBench 未建立相对 MLP 的优势，精确 Ausgrid 层级上低于 DLinear；所有已测试聚合权重形式均未分离。实现中的缩放量是注意力逆温度/距离尺度，不是曲率参数。Ausgrid 全记录叶节点筛选与不相等训练 stride 等限制见 `manuscript/DEEP_REVISION_EVIDENCE.md`。
+新 `p2_s3_identifiable_v1` 证据把 OPSD lead-24 的主比较改为八个季度 rolling origins、每 origin 五个共同 seeds、origin 为外层分析单位。29,815 参数且 head/优化/执行路径匹配的 target-self control 与 CSA-Poincaré-Shared 未分离（MAPE Holm p=0.984；WAPE raw p=0.227），所以早期固定切分对较小 head TemporalOnly 的正面归因不再支持“aggregation helps”主张。uniform、Euclidean 与 learned-scale 权重仍未建立优势；fixed-scale 呈不利名义趋势。shared-vs-independent control 虽有差异，但独立 encoder 改变 hidden width 与计算量，不能归因为 sharing。OPSD lead 1、SimBench、精确 Ausgrid、缺行后的 24-position 时间语义及其他限制见 `manuscript/DEEP_REVISION_EVIDENCE.md`。
 
 
 ## Round 2 评审产出 (2026-07-14)
