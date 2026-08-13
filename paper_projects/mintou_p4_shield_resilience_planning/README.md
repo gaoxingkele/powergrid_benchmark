@@ -29,6 +29,8 @@
 
 当前稿件使用 2640 条主档案记录（每个随机方法在 8 个实验标签下各 30 次调用）和 1296 个组合级 AC 案例。SHIELD-MOEA 的汇总平均标准 hypervolume 为 `0.27396193`，相对仅在最终种群执行事后修复的 NSGA-II 为 `+5.09%`，相对 plain NSGA-II 为 `+5.56%`。八个实验标签只对应五种实际生效的 p4 代理配置；配置中的 DER 输出乘数不进入 p4 的五个优化/评分目标，因此 `der_uncertainty` 不能作为 DER 输出不确定性证据。完整边界见 `manuscript/DEEP_REVISION_EVIDENCE.md` 和 `manuscript/EQUATION_IMPLEMENTATION_CONTRACT.md`。
 
+阶段 `p4_s3_boundary_experiments` 另增 1050 条预声明、不可覆盖的边界运行（7 个预算/场景数/生存性系数设置 × 5 个方法 × 30 个种子）。在主评分定义下，SHIELD-MOEA 相对 NSGA-II+Repair 的组内均值差在七个设置中均为正（`+3.46%` 至 `+7.20%`）；但 1050 个前沿中有 441 个触发低侧裁剪，且裁剪会改变差值幅度。替代参考点 `1.2^5` 与不裁剪审计均未改变各组比较方向。新运行、边界表和哈希清单位于本工作树的 `evidence/`，预声明配置和本地运行器位于 `experiments/`。这些补充运行不替代历史主档案，也不改变 p3 声明。
+
 `manuscript/MANUSCRIPT.md` 是唯一规范稿源；`manuscript/journal_submission/` 是由规范稿生成的当前投稿工件目录。`manuscript/submission_preview/` 是本阶段之前生成的旧预览，不应作为当前科学主张的来源。构建状态与不可用依赖见 `manuscript/ARTIFACT_STATUS.md`。
 
 
