@@ -1,30 +1,55 @@
 {
-  "_note": "Series-level sensitivity of the benchmark target to the SNSP-type acceptance cap. Recomputed from the same delivery-indexed RTS-GMLC DAY_AHEAD_* scenario inputs as build_series() in src/powergrid_benchmark/mintou_real_curtailment.py (8760 h; onset threshold 0.02; test split = final 30%). The assets do not record issue timestamps or data vintages. Model-level re-evaluation at 0.60/0.80 is future work; manuscript model results use the v6 archive at cap 0.70, with v5 retained only for provenance.",
-  "cap_0.60": {
-    "nonzero_share_pct": 14.16,
-    "ge_onset_thr_share_pct": 13.31,
-    "mean_rate": 0.02514,
-    "max_rate": 0.4714,
-    "curtailed_energy_share_pct": 5.85,
-    "onsets_test_h1": 68,
-    "onsets_test_h24": 263
-  },
-  "cap_0.70": {
-    "nonzero_share_pct": 8.24,
-    "ge_onset_thr_share_pct": 7.56,
-    "mean_rate": 0.0107,
-    "max_rate": 0.3834,
-    "curtailed_energy_share_pct": 2.68,
-    "onsets_test_h1": 57,
-    "onsets_test_h24": 172
-  },
-  "cap_0.80": {
-    "nonzero_share_pct": 3.94,
-    "ge_onset_thr_share_pct": 3.52,
-    "mean_rate": 0.00355,
-    "max_rate": 0.2953,
-    "curtailed_energy_share_pct": 0.95,
-    "onsets_test_h1": 31,
-    "onsets_test_h24": 86
-  }
+  "source_manifest": "experiments/p1_s3_fair_v1/run_manifest.json",
+  "source_manifest_sha256": "2731211b980f56b986dac329488dea8a805e821043beab95a294c31b6da562c9",
+  "scope": "descriptive method-level reruns on the same RTS-GMLC system and weather year; no cross-cap p-values",
+  "selected_gru_lsr_vs_persistence": [
+    {
+      "cap": "0.60",
+      "horizon_hours": "1",
+      "gru_lsr_selected_mae": "0.0132670505",
+      "persistence_mae": "0.0133698806",
+      "gru_minus_persistence": "-0.0001028301",
+      "descriptive_winner": "GRU-LSR"
+    },
+    {
+      "cap": "0.60",
+      "horizon_hours": "24",
+      "gru_lsr_selected_mae": "0.0438427457",
+      "persistence_mae": "0.0430179825",
+      "gru_minus_persistence": "0.0008247632",
+      "descriptive_winner": "Persistence"
+    },
+    {
+      "cap": "0.70",
+      "horizon_hours": "1",
+      "gru_lsr_selected_mae": "0.0077739132",
+      "persistence_mae": "0.0069079419",
+      "gru_minus_persistence": "0.0008659713",
+      "descriptive_winner": "Persistence"
+    },
+    {
+      "cap": "0.70",
+      "horizon_hours": "24",
+      "gru_lsr_selected_mae": "0.0207685688",
+      "persistence_mae": "0.0205465079",
+      "gru_minus_persistence": "0.0002220609",
+      "descriptive_winner": "Persistence"
+    },
+    {
+      "cap": "0.80",
+      "horizon_hours": "1",
+      "gru_lsr_selected_mae": "0.0035605614",
+      "persistence_mae": "0.0028058103",
+      "gru_minus_persistence": "0.0007547511",
+      "descriptive_winner": "Persistence"
+    },
+    {
+      "cap": "0.80",
+      "horizon_hours": "24",
+      "gru_lsr_selected_mae": "0.0079053461",
+      "persistence_mae": "0.0080446881",
+      "gru_minus_persistence": "-0.0001393420",
+      "descriptive_winner": "GRU-LSR"
+    }
+  ]
 }

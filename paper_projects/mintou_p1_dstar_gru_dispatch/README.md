@@ -1,6 +1,6 @@
 ﻿# mintou_p1_dstar_gru_dispatch — 投稿评审工作目录
 
-- **论文标题**: A Reproducible Retrospective Curtailment-Risk Benchmark and GRU Learned-Space Retrieval Study on RTS-GMLC
+- **论文标题**: A Reproducible Retrospective Curtailment-Risk Benchmark and Fair Evaluation of GRU Learned-Space Retrieval on RTS-GMLC
 - **论文方法名**: GRU-LSR (GRU learned-space retrieval); `DSTAR-GRU` 仅保留为冻结实验表中的历史标识
 - **任务边界**: 基于按交付时刻索引的 RTS-GMLC `DAY_AHEAD_*` 场景序列进行 1 h/24 h 回溯滞后预测；现有资产没有预测发布时间或数据版本字段，因此不主张运营日前预测、调度或数字孪生能力
 - **目标期刊**: IEEE Access（备选: Electronics；本目录同时评估 MDPI Energies）
@@ -13,7 +13,11 @@
 |---|---|
 | `README.md` | 本说明 |
 | `JOURNAL_REVIEW.md` | IEEE Access vs MDPI Energies 匹配度对比、写作修改清单、实验设计缺口、数据集缺口、P0/P1/P2 行动清单 |
-| `manuscript/TABLE_TO_CONFIG_MANIFEST.md` | 正文表格到 v6 配置、冻结结果、信息可见性与 v5/v6 来源的映射 |
+| `manuscript/MANUSCRIPT.md` | 以研究问题组织、由公平运行结果支撑的正文 |
+| `manuscript/TABLE_TO_CONFIG_MANIFEST.md` | 正文表格和图片到公平运行清单与冻结输出的映射 |
+| `manuscript/DEEP_REVISION_EVIDENCE.md` | 标题、估计量、比较预算、负结果与未解决人工占位符的证据契约 |
+| `manuscript/SUPPLEMENTARY_METHODS_AND_AUDIT.md` | 运行环境、版本历史、复现核查与详尽审计记录 |
+| `experiments/p1_s3_fair_v1/run_manifest.json` | 当前正文结果的冻结运行清单与输出哈希 |
 
 
 ## Round 2 评审产出 (2026-07-14)
