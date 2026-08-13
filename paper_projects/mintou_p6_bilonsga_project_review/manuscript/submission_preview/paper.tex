@@ -84,7 +84,7 @@
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same}
 \hypersetup{
-  pdftitle={BiLo-NSGA: Project-Level Local Search for Budget-Constrained Power-Grid Portfolio Optimization},
+  pdftitle={BiLo-NSGA: Budget-Aware Project-Level Local Moves with Accepted-Move Logging for Power-Grid Portfolio Optimization},
   colorlinks=true,
   linkcolor={blue},
   filecolor={Maroon},
@@ -92,8 +92,8 @@
   urlcolor={blue},
   pdfcreator={LaTeX via pandoc}}
 
-\title{BiLo-NSGA: Project-Level Local Search for Budget-Constrained
-Power-Grid Portfolio Optimization}
+\title{BiLo-NSGA: Budget-Aware Project-Level Local Moves with
+Accepted-Move Logging for Power-Grid Portfolio Optimization}
 \author{}
 \date{}
 
@@ -116,9 +116,10 @@ State Grid Fujian Electric Power Co., Ltd., Fuzhou 350000, Fujian, China
 Utility review boards must select grid investment portfolios under hard
 annual budgets, yet independent project scores ignore portfolio
 interactions and generic evolutionary operators do not express changes
-in review terms. BiLo-NSGA embeds forward insertion, atomic
+in review terms. BiLo-NSGA embeds budget-aware forward insertion, atomic
 delete--insert substitution, dependency-aware bonuses, and feasibility
-recovery within non-dominated sorting while recording accepted moves. On
+recovery within non-dominated sorting; it logs committed local moves and
+deterministic repair drops. On
 a reproducible benchmark with 120 candidates, eight scenarios, and 30
 seeds per stochastic method, BiLo-NSGA attains pooled mean hypervolume
 0.17190, 1.12\% above NSGA-II. Across five stochastic baselines, it has
@@ -130,14 +131,14 @@ Component evidence is asymmetric: removing forward insertion is harmful
 in three scenarios under the primary family, although the ablation has
 the higher pooled mean, whereas atomic substitution and standalone
 deletion are unresolved. Public reliability and MTEP16 backtests provide
-descriptive external consistency. The evidence supports project-level
-local search with scenario-dependent forward-side effects; atomic
-substitution contributes reviewable replacement semantics rather than a
-demonstrated accuracy gain.
+descriptive external consistency. The evidence supports budget-aware
+project-level local moves with scenario-dependent forward-side effects;
+the event log is not a recommendation lineage, and atomic substitution
+has no demonstrated accuracy gain.
 
 \textbf{Keywords:} power grid investment planning; project portfolio
 selection; budget constraint; multi-objective evolutionary optimization;
-NSGA-II; local search; decision traceability
+NSGA-II; local search; search-event logging
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -156,13 +157,13 @@ inter-project dependencies.
 
 Current review practice balances traceability against portfolio
 interaction. AHP/TOPSIS-style scoring exposes each ranking step but
-evaluates projects independently, omitting budget crowding-out,
-dependency synergies, and conditional marginal value. Multi-objective
+evaluates projects independently, omitting budget crowding-out, modeled
+dependencies, and conditional marginal value. Multi-objective
 evolutionary algorithms (MOEAs) search portfolios directly, but generic
 bit-level variation and unrecorded search trajectories provide limited
-decision-level provenance. Grid planning departments and investment
-review boards require both portfolio-level optimization and a reviewable
-account of the moves producing a recommendation.
+decision-level provenance. BiLo-NSGA therefore tests whether budget-aware
+project-level moves can improve the benchmark objective while emitting a
+run-level record of committed search events.
 
 BiLo-NSGA retains a standard NSGA-II kernel and changes the variation
 stage through project-level local search. The forward pass inserts an
@@ -171,9 +172,9 @@ operation is an atomic substitution: it tentatively removes a weak
 selected project, inserts the strongest affordable replacement, and
 accepts or rejects the pair as one move. Dependency bonuses guide
 insertions toward open project groups, deterministic recovery repairs
-budget violations, and every accepted insertion, substitution, or repair
-drop is logged. The trail therefore records project decisions rather
-than abstract numeric perturbations.
+budget violations, and every committed insertion or substitution and
+every repair drop is logged. This run-level event log spans explored
+offspring; it is not the parent--child lineage of a recommended portfolio.
 
 The local-operator evidence is asymmetric. Removing forward insertion is
 harmful in three scenarios under the primary family, but the ablation
@@ -181,8 +182,9 @@ has the higher pooled mean because other settings move nominally in its
 favor. Removing atomic substitution raises the pooled mean by 0.61\%,
 but the contrast remains unresolved under the declared family; replacing
 it with legacy standalone deletion raises the pooled mean by 0.22\%, and
-that contrast also remains unresolved. Substitution is retained for
-review semantics, not claimed as an accuracy mechanism. A budget-indexed
+that contrast also remains unresolved. Substitution is retained as a
+paired remove--insert event, not claimed as an accuracy mechanism or a
+validated reviewer aid. A budget-indexed
 cross-scenario diagnostic ranges from a -0.64\% NSGA-II margin at 0.75x
 to +3.30\% in the 1.20x large-pool-labeled setting. Because scalar
 weights also vary, this is a boundary description rather than a causal
@@ -195,9 +197,9 @@ deterministically from RTS-GMLC production-cost data, SimBench
 distribution-network data, and cached public NERC report metadata. Eight
 scenarios vary the budget (0.75x--1.20x nominal), candidate-pool
 composition, and dependency structure. The candidate-derivation pipeline
-is shared with the methodologically distinct TRACE-MOEA study {[}33{]};
-Section 2.4 and the Data Availability statement disclose this
-relationship.
+is shared with the methodologically distinct TRACE-MOEA companion project,
+\texttt{mintou\_p5\_trace\_moea\_feasibility\_review} {[}33{]}; Section
+2.4 and the Data Availability statement disclose this relationship.
 
 The contributions of this paper are:
 
@@ -205,17 +207,22 @@ The contributions of this paper are:
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \textbf{A budget-aware local search expressed in project-review
-  operations.} BiLo-NSGA defines forward insertion, atomic
+  \textbf{Budget-aware project-level local moves with accepted-move
+  logging.} BiLo-NSGA defines forward insertion, atomic
   delete--insert substitution, dependency-aware scoring, and feasibility
-  recovery within non-dominated sorting. Accepted moves are recorded,
-  and 99.6\% of projects appearing in the final front are covered by at
-  least one logged operation (Section 4; Table 4).
+  recovery within non-dominated sorting. The run-level log contains
+  committed insertions and substitutions plus repair drops; it is not an
+  audit trail or recommendation lineage. The retained summary reports
+  3668 logged events per run and 99.6\% final-front project coverage on
+  average (Section 4; Table 7), which measures archive production rather
+  than explanation quality.
 \item
-  \textbf{A reproducible public benchmark for budget-constrained grid
-  project review.} 120 candidates derived from RTS-GMLC + SimBench +
-  NERC report metadata, eight scenarios, four budget levels, with the
-  full generation code released (Section 3).
+  \textbf{A shared public benchmark used to isolate the local-search
+  question.} The 120-candidate generator and public source corpora are
+  shared with \texttt{mintou\_p5\_trace\_moea\_feasibility\_review}; this
+  paper's hard-budget formulation, BiLo-NSGA implementation, scenarios,
+  run records, selected portfolios, and comparisons are reported as
+  paper-specific (Sections 2.4 and 3.4).
 \item
   \textbf{A statistically grounded evaluation against seven baselines
   and ten ablations.} The archive contains 4320 method--scenario
@@ -317,13 +324,16 @@ Portfolio-scheduling studies also combine NSGA-II with Pareto local
 search {[}31{]}. More recent methods tailor local refinement to
 cardinality and pre-assignment constraints {[}32{]}. However, these
 hybrids neither express moves as adding, removing, or substituting a
-reviewable project nor retain the accepted move sequence. BiLo-NSGA
-treats that domain-level trajectory as a traceable output.
+named project nor report a run-level log of committed move events.
+BiLo-NSGA retains that event log as an output, without claiming that it
+reconstructs a final-portfolio lineage.
 
 \subsection{2.4. Relation to TRACE-MOEA and Gap
 Statement}\label{relation-to-trace-moea-and-gap-statement}
 
-TRACE-MOEA {[}33{]} addresses power-grid project review through
+The companion project
+\texttt{mintou\_p5\_trace\_moea\_feasibility\_review} (TRACE-MOEA)
+{[}33{]} addresses power-grid project review through
 preference-adaptive ranking, review-rule repair, and a trace archive.
 Its contribution acts at selection and ranking. BiLo-NSGA instead
 changes variation through forward insertion, atomic substitution,
@@ -334,13 +344,14 @@ scenario definitions, run archives, selected portfolios, and reported
 comparisons are paper-specific.
 
 The resulting gap is specific. Existing knapsack MOEAs generally handle
-budgets through penalties or post-variation repair. Grid MCDM is
-traceable but portfolio-blind, and memetic MOEAs express refinement
-numerically rather than as reviewable project decisions. BiLo-NSGA
+budgets through penalties or post-variation repair. Grid MCDM exposes
+scoring steps but is portfolio-blind, and memetic MOEAs express
+refinement numerically rather than as named project edits. BiLo-NSGA
 combines non-dominated sorting with forward insertion, atomic
-replacement, feasibility recovery, and a per-move decision trace. The
-claim concerns this intersection rather than universal superiority over
-memetic optimization.
+replacement, feasibility recovery, and a run-level move/repair event
+log. The claim concerns this intersection rather than universal
+superiority over memetic optimization or validated recommendation
+provenance.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -500,9 +511,10 @@ diagnostic rather than a controlled budget-only experiment.
 \subsection{3.4. Shared Public Benchmark
 Statement}\label{shared-public-benchmark-statement}
 
-The Section 3.2 candidate pipeline is shared with TRACE-MOEA {[}33{]}.
-Both studies also use the same public NERC corpus and MTEP16 source
-records for separately executed consistency checks. Problem objectives,
+The Section 3.2 candidate pipeline is shared with the companion project
+\texttt{mintou\_p5\_trace\_moea\_feasibility\_review} (TRACE-MOEA)
+{[}33{]}. Both studies also use the same public NERC corpus and MTEP16
+source records for separately executed consistency checks. Problem objectives,
 method implementations, scenarios, run records, selected portfolios, and
 reported comparisons are specific to each paper.
 
@@ -516,8 +528,8 @@ spends useful slack. Atomic substitution removes one weak selection and
 evaluates one affordable replacement before either change can be
 committed. The candidates then compete under the same constrained
 non-dominated sorting rule as the baseline kernel. Forward insertion
-produces the only significant local-operator gains; substitution
-supplies review semantics without a demonstrated hypervolume gain.
+produces the only significant local-operator gains; substitution emits a
+paired remove--insert event without a demonstrated hypervolume gain.
 
 \pandocbounded{\includegraphics[keepaspectratio]{figures/fig_architecture.png}}
 
@@ -658,19 +670,21 @@ repaired deterministically. The selected project with the lowest
 benefit-to-cost ratio is removed until the portfolio is affordable.
 Because each step removes one selected project and the empty portfolio
 is feasible, repair terminates after at most \(\|x\|_0\) drops. Each
-restoration step is recorded in the decision trace.
+restoration step is recorded as a repair event.
 
-\subsection{4.6. Per-Move Decision Trace}\label{per-move-decision-trace}
+\subsection{4.6. Accepted-Move and Repair-Event
+Log}\label{accepted-move-and-repair-event-log}
 
-Every accepted move--\texttt{forward\_insert},
-\texttt{backward\_substitute}, and \texttt{repair\_drop}--is logged with
-its generation and project identifier(s). A substitution record stores
-both the removed and inserted project. The trail is a pure output: no
-trace statistic enters any objective, constraint, or selection decision.
-BiLo-NSGA logs on average 3668 moves per run, and 99.6\% of projects
-appearing in the final non-dominated front are covered by at least one
-logged move (Table 4). These values measure archive production, not
-explanation quality.
+Every committed local move--\texttt{forward\_insert} and
+\texttt{backward\_substitute}--and every deterministic
+\texttt{repair\_drop} is appended to a run-level event log with its
+generation and project identifier(s). A substitution event stores both
+the removed and inserted project. The log is a pure output: no log
+statistic enters any objective, constraint, or selection decision. The
+retained derived table reports 3668 events per run and 99.6\% coverage on
+average (Table 7). It does not retain a parent--child lineage to a final
+portfolio, so these values do not measure audit completeness,
+explanation quality, or recommendation provenance.
 
 \subsection{4.7. Algorithm Summary}\label{algorithm-summary}
 
@@ -689,7 +703,7 @@ BiLo-NSGA(pool, budget, seed):
                       insert best affordable replacement, accept pair only
                       if fitness improves (log backward_substitute)
     environmental selection: constraint-dominated NDS + crowding (top 40)       # 4.1
-  return feasible non-dominated front + decision trace                          # 4.6
+  return feasible non-dominated front + run-level move/repair event log         # 4.6
 \end{verbatim}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
@@ -1049,16 +1063,16 @@ and none of the eight differences is significant. The legacy
 standalone-deletion rule reaches 0.17228, 0.22\% above the full method,
 and is likewise inseparable in all eight scenarios. Feasibility recovery
 already removes weak projects after violations, leaving few replacements
-that improve the scalar acceptance score. The atomic rule is more
-faithful to project substitution, but the experiment supports its
-semantics, not its accuracy.
+that improve the scalar acceptance score. The atomic rule encodes removal
+and insertion as one committed event; the experiment does not demonstrate
+accuracy gain or reviewer utility.
 
-The substitution operator is retained because a single logged
-remove--insert pair is reviewable and cannot leave a deletion-only
-intermediate portfolio. A forward-only variant remains the
-evidence-supported lean implementation when that replacement semantic is
-unnecessary. Alternative acceptance based on dominance or bounded
-look-ahead is a redesign target, not part of the present claim.
+The substitution operator records a single remove--insert pair and cannot
+leave a deletion-only intermediate portfolio. Because the no-forward
+control has the higher pooled mean while the full method wins in three
+scenarios, the evidence does not select a preferred configuration.
+Alternative acceptance based on dominance or bounded look-ahead is a
+redesign target, not part of the present claim.
 
 Figure 5 separates move production from optimization quality. The new
 atomic substitution raises archive coverage relative to the no-backward
@@ -1071,7 +1085,7 @@ move count is intrinsically better.
 
 \textbf{Figure 5.} Local-search diagnostics pooled over eight
 experiments and 30 seeds (240 runs per configuration). (a) Logged
-accepted moves per run; (b) seed-level mean-front hypervolume. Boxes are
+committed-move and repair events per run; (b) seed-level mean-front hypervolume. Boxes are
 descriptive aggregates. Formal component decisions use per-experiment
 Holm-adjusted tests.
 
@@ -1275,12 +1289,13 @@ We state the caveats that limit the strength of this backtest.
 Diagnostics}\label{search-effort-and-outcome-definition-diagnostics}
 
 The method's pooled gain over NSGA-II is modest, so computation and
-trace production are shown beside hypervolume. BiLo-NSGA averages
-0.17190 hypervolume, 0.2188 s, 3668 accepted local-search events, and
-0.996 decision coverage. NSGA-II averages 0.17000 at 0.0798 s and emits
-no move trace. Thus, the 1.12\% pooled hypervolume margin costs a
-2.74-fold runtime factor in the tested implementation, while the trace
-is an additional decision-support output rather than free metadata.
+event-log production are shown beside hypervolume. BiLo-NSGA averages
+0.17190 hypervolume, 0.2188 s, 3668 logged committed-move and repair
+events, and 0.996 final-front project coverage. NSGA-II averages 0.17000
+at 0.0798 s and emits no comparable event log. Thus, the 1.12\% pooled
+hypervolume margin costs a 2.74-fold runtime factor in the tested
+implementation; the log is not evidence that a final recommendation can
+be reconstructed.
 
 \pandocbounded{\includegraphics[keepaspectratio]{figures/fig_search_audit_efficiency.png}}
 
@@ -1305,7 +1320,7 @@ Mean HV
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
 Runtime (s)
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
-Accepted/logged moves
+Logged move/repair events
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
 Coverage
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
@@ -1406,9 +1421,10 @@ patterns rather than a proved mechanism.
 The operator effects depend on the scenario. The no-forward ablation has
 a higher pooled mean, yet the full method wins significantly in three
 scenarios; no corresponding significant gain exists for atomic
-substitution. The full substitution rule is retained for reviewable
-replacement semantics. A look-ahead or dominance-based acceptance rule
-is the appropriate redesign target.
+substitution. The full substitution rule is retained because it emits
+one paired replacement event, not because the study demonstrates
+reviewer utility. A look-ahead or dominance-based acceptance rule is the
+appropriate redesign target.
 
 \textbf{What the external-consistency checks add.} The NERC rule check
 (Section 6.4) shows concentration on documented risk patterns but
@@ -1420,22 +1436,26 @@ optimized portfolios immediately contradict two public-record views;
 they do not replace expert-labeled feasibility outcomes or calibrated
 costs.
 
-\textbf{Positioning against TRACE-MOEA.} The companion study {[}33{]}
-uses a preference-adaptive ranking layer, repair, and a trace archive
+\textbf{Positioning against TRACE-MOEA.} The companion project
+\texttt{mintou\_p5\_trace\_moea\_feasibility\_review} {[}33{]} uses a
+preference-adaptive ranking layer, repair, and a trace archive
 over the same public candidate pipeline. BiLo-NSGA instead studies
 project-vocabulary variation under a hard budget. Its central questions
-concern forward insertion, atomic substitution, and the 6.35\% cost of
-budget-blind search. The methods share candidate generation but not
+concern forward insertion, atomic substitution, and budget-indexed
+cross-scenario behavior. The methods share candidate generation but not
 their core operators, scenario design, or analyses.
 
 \textbf{Practical implications.} The method's NSGA-II margin ranges from
 -0.64\% at 0.75x to +3.30\% at 1.20x, with a 2.74x runtime factor; all
-evolutionary runs remain sub-second. A forward-only implementation is
-defensible where the review process does not require atomic replacement
-records. Pareto Local Search is a useful direct comparator but is
-substantially weaker and slower under the matched neighbor budget.
+evolutionary runs remain sub-second. The no-forward control is faster and
+has a higher pooled mean, while the full method has three significant
+scenario wins and additionally emits atomic replacement events. This
+study does not validate the event log with reviewers and therefore does
+not support a configuration recommendation. Pareto Local Search is a
+useful direct comparator but is substantially weaker and slower under the
+matched neighbor budget.
 
-The recorded move history covers 99.6\% of projects in the returned
+The aggregate event log covers 99.6\% of projects in the returned
 fronts with at least one operation, but explanation sufficiency has not
 been validated with human evaluators. If single-criterion regulatory
 alignment is dominant, AHP-TOPSIS remains competitive. The MTEP16
@@ -1545,9 +1565,10 @@ We state the boundaries of this study explicitly.
 
 \section{9. Conclusions}\label{conclusions}
 
-BiLo-NSGA defines local-search moves in project-review terms: insertion
+BiLo-NSGA defines budget-aware local moves in project-review terms: insertion
 under slack, atomic delete--insert substitution, dependency-aware
-bonuses, feasibility recovery, and per-move logging. On the
+bonuses, feasibility recovery, and run-level logging of committed moves
+and repair drops. On the
 120-candidate public proxy benchmark, it improves pooled hypervolume
 over NSGA-II by 1.12\%. Across five stochastic baselines, it records 36
 significant wins among 40 comparisons and no significant loss; 16
@@ -1569,10 +1590,11 @@ move-history statistics never enter optimization ranking.
 The NERC and MTEP16 backtests provide descriptive external consistency.
 MTEP16 broad capture is 1.071 and the raw point-biserial association is
 0.088; strict-label ordering is unresolved. The study consequently
-supports BiLo-NSGA as a project-level local-search framework on the
-public proxy benchmark, with forward-only search as the lean
-configuration when atomic replacement records are unnecessary. Expert
-labels, calibrated costs, a second benchmark family, broader
+supports BiLo-NSGA as a budget-aware project-level local-search framework
+on the public proxy benchmark. It does not establish forward dominance,
+dependency synergy, audit completeness, a recommendation path, or a
+preferred deployment configuration. Expert labels, calibrated costs, a
+second benchmark family, broader
 local-search comparisons, and load-flow verification remain necessary to
 evaluate practical review effectiveness.
 
@@ -1613,8 +1635,10 @@ scripts are included in the supplementary review package and are
 available from the corresponding author. Pre-atomic-substitution
 backtests remain explicitly suffixed and excluded. A persistent public
 archive can be supplied before publication, subject to third-party
-redistribution terms. TRACE-MOEA shares the versioned candidate
-generator, NERC source corpus, and public MTEP16 records. Problem
+redistribution terms. The companion project
+\texttt{mintou\_p5\_trace\_moea\_feasibility\_review} (TRACE-MOEA)
+shares the versioned candidate generator, NERC source corpus, and public
+MTEP16 records. Problem
 objectives, algorithm implementations, scenarios, run archives, selected
 portfolios, and reported comparisons are paper-specific.
 
