@@ -238,9 +238,9 @@ foreach ($Definition in $MechanismDefinitions) {
         labels_tested = $SigRows.Count
         full_mean_runtime_s = Format-Decimal $FullRuntime.mean
         ablation_mean_runtime_s = Format-Decimal $OpponentRuntime.mean
-        full_static_objective_rows = if ($Definition.key -eq 'screening') { [int]$Manifest.screening_workload.screened_total_static_objective_rows } else { '' }
-        ablation_static_objective_rows = if ($Definition.key -eq 'screening') { [int]$Manifest.screening_workload.no_screen_total_static_objective_rows } else { '' }
-        static_row_reduction_pct = if ($Definition.key -eq 'screening') { Format-Decimal (100.0 * (Get-Double $Manifest.screening_workload.static_row_reduction_fraction)) 2 } else { '' }
+        full_optimization_loop_objective_rows = if ($Definition.key -eq 'screening') { [int]$Manifest.screening_workload.screened_total_static_objective_rows } else { '' }
+        ablation_optimization_loop_objective_rows = if ($Definition.key -eq 'screening') { [int]$Manifest.screening_workload.no_screen_total_static_objective_rows } else { '' }
+        optimization_loop_row_reduction_pct = if ($Definition.key -eq 'screening') { Format-Decimal (100.0 * (Get-Double $Manifest.screening_workload.static_row_reduction_fraction)) 2 } else { '' }
         supported_conclusion = $Definition.conclusion
     }
 }
@@ -458,7 +458,7 @@ function Draw-RepairScreeningFigure {
     $InkBrush = [System.Drawing.SolidBrush]::new($Ink)
     $MutedBrush = [System.Drawing.SolidBrush]::new($Muted)
     $BlueBrush = [System.Drawing.SolidBrush]::new($Blue)
-    Draw-TextCentered $G 'Mechanism evidence: repair drives quality; screening changes workload' $Title $InkBrush 900 25
+    Draw-TextCentered $G 'Mechanism evidence: repair drives quality; screening changes loop workload' $Title $InkBrush 900 25
     Draw-TextCentered $G 'Pooled proxy HV is descriptive over eight archived blocks; Holm decisions are within label' $Subtitle $MutedBrush 900 75
 
     $Left = 360.0; $Top = 160.0; $Width = 850.0; $Height = 610.0
@@ -500,7 +500,7 @@ function Draw-RepairScreeningFigure {
 
     $PanelLeft = 1280.0; $PanelTop = 190.0; $PanelWidth = 450.0; $PanelHeight = 400.0
     $G.DrawRectangle([System.Drawing.Pen]::new($GrayMid, 2), $PanelLeft, $PanelTop, $PanelWidth, $PanelHeight)
-    Draw-TextCentered $G 'Screening workload' $AxisFont $InkBrush ($PanelLeft + $PanelWidth / 2) ($PanelTop + 20)
+    Draw-TextCentered $G 'Optimization-loop rows' $AxisFont $InkBrush ($PanelLeft + $PanelWidth / 2) ($PanelTop + 20)
     $NoScreenRows = [double]$Manifest.screening_workload.no_screen_total_static_objective_rows
     $ScreenRows = [double]$Manifest.screening_workload.screened_total_static_objective_rows
     $MaxRows = 55000.0
@@ -516,10 +516,10 @@ function Draw-RepairScreeningFigure {
         $G.FillRectangle([System.Drawing.SolidBrush]::new($Entry.color), $BarLeft, $Entry.y - 18, $Length, 36)
         $G.DrawString(('{0:N0}' -f $Entry.value), $SmallBold, $InkBrush, $BarLeft + $Length + 8, $Entry.y - 13)
     }
-    Draw-TextCentered $G '65% fewer static objective rows' $SmallBold $BlueBrush ($PanelLeft + $PanelWidth / 2) ($PanelTop + 320)
-    Draw-TextCentered $G 'not an instrumented call counter' $Small $MutedBrush ($PanelLeft + $PanelWidth / 2) ($PanelTop + 352)
+    Draw-TextCentered $G '65% fewer loop objective rows' $SmallBold $BlueBrush ($PanelLeft + $PanelWidth / 2) ($PanelTop + 320)
+    Draw-TextCentered $G 'bounds/final evaluation excluded' $Small $MutedBrush ($PanelLeft + $PanelWidth / 2) ($PanelTop + 352)
 
-    Draw-TextCentered $G 'Quality-call asymmetry: screening uses fewer analytic plan-scenario rows, but no held-out-HV difference is detected against no screening.' $SmallBold $InkBrush 900 875
+    Draw-TextCentered $G 'Quality-workload asymmetry: screening uses fewer optimization-loop rows, but no held-out-HV difference is detected against no screening.' $SmallBold $InkBrush 900 875
     Draw-TextCentered $G 'Equivalence was not tested; archived runtime is 0.0889 s with screening versus 0.0792 s without it, so no wall-clock saving is claimed.' $Small $MutedBrush 900 910
     Save-Canvas $Canvas $Path
 }
@@ -536,14 +536,14 @@ function Draw-ScreeningQualityCallsFigure {
     $InkBrush = [System.Drawing.SolidBrush]::new($Ink)
     $MutedBrush = [System.Drawing.SolidBrush]::new($Muted)
     $BlueBrush = [System.Drawing.SolidBrush]::new($Blue)
-    Draw-TextCentered $G 'Screening quality-call asymmetry' $Title $InkBrush 800 25
-    Draw-TextCentered $G 'Quality is held-out proxy HV; workload is static plan-scenario objective-row arithmetic' $Subtitle $MutedBrush 800 75
+    Draw-TextCentered $G 'Screening quality-workload asymmetry' $Title $InkBrush 800 25
+    Draw-TextCentered $G 'Quality is held-out proxy HV; workload is optimization-loop plan-scenario row arithmetic' $Subtitle $MutedBrush 800 75
 
     $PanelTop = 160.0; $PanelHeight = 430.0
     $G.DrawRectangle([System.Drawing.Pen]::new($GrayMid, 2), 80, $PanelTop, 680, $PanelHeight)
     $G.DrawRectangle([System.Drawing.Pen]::new($GrayMid, 2), 840, $PanelTop, 680, $PanelHeight)
     Draw-TextCentered $G '(a) Held-out proxy quality' $AxisFont $InkBrush 420 ($PanelTop + 18)
-    Draw-TextCentered $G '(b) Search-phase objective rows' $AxisFont $InkBrush 1180 ($PanelTop + 18)
+    Draw-TextCentered $G '(b) Optimization-loop objective rows' $AxisFont $InkBrush 1180 ($PanelTop + 18)
 
     $ScreenRow = @($MechanismRows | Where-Object mechanism -eq 'screening')[0]
     $FullMean = Get-Double $ScreenRow.full_mean_hv
@@ -573,10 +573,10 @@ function Draw-ScreeningQualityCallsFigure {
         $G.FillRectangle([System.Drawing.SolidBrush]::new($Entry.color), $CallBaseX, $Entry.y - 22, $Length, 44)
         $G.DrawString(('{0:N0}' -f $Entry.value), $SmallBold, $InkBrush, $CallBaseX + $Length + 8, $Entry.y - 14)
     }
-    Draw-TextCentered $G '65% lower static arithmetic' $SmallBold $BlueBrush 1180 ($PanelTop + 340)
-    Draw-TextCentered $G 'No instrumented objective-call counter' $Small $MutedBrush 1180 ($PanelTop + 375)
+    Draw-TextCentered $G '65% lower loop-row arithmetic' $SmallBold $BlueBrush 1180 ($PanelTop + 340)
+    Draw-TextCentered $G 'Bounds/final evaluation excluded' $Small $MutedBrush 1180 ($PanelTop + 375)
     Draw-TextCentered $G 'Archived wall-clock runtime is higher with screening (0.0889 s vs 0.0792 s); neither a quality gain nor a runtime saving is resolved.' $SmallBold $InkBrush 800 670
-    Draw-TextCentered $G 'The call reduction and null quality result answer different estimands and must be reported together.' $Small $MutedBrush 800 710
+    Draw-TextCentered $G 'The loop-row reduction and null quality result answer different estimands and must be reported together.' $Small $MutedBrush 800 710
     Save-Canvas $Canvas $Path
 }
 
