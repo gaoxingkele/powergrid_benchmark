@@ -6,7 +6,7 @@
 - **算法**: BiLo-NSGA — 在自定义约束非支配排序框架中测试预算感知的项目级插入与原子替换；1.06 倍“dependency”机制仅是同组标签的候选排序启发式，不是依赖收益或约束
 - **当前目标期刊**: Applied Sciences (MDPI)；manifest 备选: IEEE Access
 - **本次评估对象**: IEEE Access vs MDPI Energies 差距对比，及是否保留 Applied Sciences
-- **当前状态**: P6 method contract — 以标准 hypervolume、场景内比较、accepted-local-move/repair 计数和最终前沿位置共现为边界；运行行不保留事件载荷、谱系或 replay 状态，不主张前向支配、依赖协同效应、审计完整性或推荐路径
+- **当前状态**: P6 matched effort — 新的不可覆盖运行在相同 3200 个“种群目标评估 + 已评估局部提案”总预算和单独的 0.20 s 搜索时限下比较 BiLo-NSGA、完整声明的阶段内 NSGA-II 与 Pareto Local Search；等评估主结果中 BiLo-NSGA 低于 NSGA-II，旧 1.12% 优势仅保留为未匹配历史证据。事件字段仍不支持谱系、replay、审计完整性或推荐路径。
 
 ## 本文件夹用途
 
