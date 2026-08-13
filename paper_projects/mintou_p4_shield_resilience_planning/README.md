@@ -2,9 +2,9 @@
 
 ## 论文信息
 
-- **标题**: Scenario-Aware Hybrid Multi-Objective Evolution for Resilient Distribution Network Planning under DER and Load Uncertainty
+- **标题**: SHIELD-MOEA: Scenario Screening with Disjoint Evaluation for Distribution-Network Resilience Planning
 - **算法**: SHIELD-MOEA（Scenario-screened Hybrid Evolution for Load-serving Distribution Resilience）
-- **任务**: DER / 负荷 / 停电场景不确定性下的配电网韧性规划（多目标进化优化）
+- **任务**: 负荷 / 停电代理场景下的配电网韧性规划（多目标进化优化），并以独立 AC 组合测试覆盖 DER 运行工况
 - **目标期刊**: MDPI Energies（首选）
 - **备选期刊**: IEEE Access
 
@@ -25,9 +25,11 @@
 - 组合上下文: `D:\aicoding\powergrid_benchmark\papers\mintou\portfolio_status.md`
 - 本地数据集缓存: `D:\aicoding\powergrid_benchmark\data\public_datasets\CACHE_STATUS.md`
 
-## 当前证据快照（2026-07）
+## 当前证据快照（2026-08）
 
-SimBench 衍生韧性规划 v2 公共基准：SHIELD-MOEA 平均 hypervolume proxy `0.79432775`，领先最强 baseline MOEA/D `+2.78%`、最强 ablation NoScenarioScreen `+3.26%`；尚无 AC/pandapower 潮流可行性验证与场景方差/重复实验，为提交前必须补齐的边界（详见 `JOURNAL_REVIEW.md`）。
+当前稿件使用 2640 条主档案记录（每个随机方法在 8 个实验标签下各 30 次调用）和 1296 个组合级 AC 案例。SHIELD-MOEA 的汇总平均标准 hypervolume 为 `0.27396193`，相对仅在最终种群执行事后修复的 NSGA-II 为 `+5.09%`，相对 plain NSGA-II 为 `+5.56%`。八个实验标签只对应五种实际生效的 p4 代理配置；配置中的 DER 输出乘数不进入 p4 的五个优化/评分目标，因此 `der_uncertainty` 不能作为 DER 输出不确定性证据。完整边界见 `manuscript/DEEP_REVISION_EVIDENCE.md` 和 `manuscript/EQUATION_IMPLEMENTATION_CONTRACT.md`。
+
+`manuscript/MANUSCRIPT.md` 是唯一规范稿源；`manuscript/journal_submission/` 是由规范稿生成的当前投稿工件目录。`manuscript/submission_preview/` 是本阶段之前生成的旧预览，不应作为当前科学主张的来源。构建状态与不可用依赖见 `manuscript/ARTIFACT_STATUS.md`。
 
 
 ## Round 2 评审产出 (2026-07-14)

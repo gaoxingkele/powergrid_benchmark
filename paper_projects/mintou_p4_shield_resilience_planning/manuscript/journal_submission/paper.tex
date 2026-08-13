@@ -16,8 +16,8 @@
 \AuthorNames{Author Details Required before Submission}
 \address{[AUTHOR INPUT REQUIRED: complete institutional addresses]}
 \corres{Correspondence: [AUTHOR INPUT REQUIRED: corresponding author name and e-mail]}
-\abstract{Distribution network planning under load, distributed-energy-resource, and outage uncertainty requires portfolios that remain useful as binding stresses change. SHIELD-MOEA extends non-dominated sorting with selective worst-scenario screening and disjoint scenario draws for search and final evaluation. On a reproducible SimBench-derived benchmark with 72 candidate actions, five objectives, and eight uncertainty experiments, the method reaches pooled mean hypervolume 0.2740 over 30 seeded runs per stochastic method. This is 5.09\% above the strongest repair-matched baseline and 5.56\% above plain NSGA-II. All 32 comparisons with four stochastic baselines are Holm-significant wins; sixteen gaps to two deterministic rules are descriptive and favor SHIELD-MOEA. The margin persists for sampled worst-envelope hypervolume (+5.36\%) and under evaluation stresses outside the search ranges (+6.04\%). Feasibility repair carries the main measured gain. Screening reduces recorded search-phase plan--scenario evaluations by 65\%, although no front-quality difference is detected against no screening; hybrid variation and periodic re-screening are also unresolved against simpler controls. A 1296-case composition-level AC check across six networks yields aggregate feasibility 0.685, compared with 0.389 without planning and 0.694 for matched-repair NSGA-II. The evidence supports a disjoint-evaluation planning workflow and selective scenario exposure, while identifying repair--rather than every named operator--as the resolved performance mechanism.}
-\keyword{distribution network planning; power system resilience; scenario screening; multi-objective evolutionary optimization; DER uncertainty; NSGA-II; SimBench; AC power flow validation}
+\abstract{Distribution network planning under load and outage uncertainty requires portfolios that remain useful as binding stresses change. SHIELD-MOEA extends non-dominated sorting with selective worst-scenario screening and disjoint scenario draws for search and final evaluation. On a SimBench-derived benchmark with 72 candidate actions, five objectives, and eight archived experiment labels, the method reaches pooled mean hypervolume 0.2740 over 30 seeded runs per stochastic method. The eight labels represent five active proxy configurations because the configured DER-output multiplier does not enter any p4 optimization or scoring objective; the \texttt{der\_uncertainty} block is therefore an inactive-factor replicate, not DER-uncertainty evidence. The pooled result is 5.09\% above NSGA-II with post-hoc final-population repair and 5.56\% above plain NSGA-II. All 32 comparisons with four stochastic baselines are Holm-significant wins; sixteen gaps to two deterministic rules are descriptive and favor SHIELD-MOEA. The margin persists for sampled worst-envelope hypervolume (+5.36\%) and under held-out load/outage ranges (+6.04\%). Feasibility repair carries the main measured gain. Static code-path accounting gives 65\% fewer search-phase plan--scenario objective rows with screening, although no front-quality difference is detected against no screening; hybrid variation and periodic re-screening are also unresolved against simpler controls. A 1296-case composition-level AC check across six networks yields aggregate feasibility 0.685, compared with 0.389 without planning and 0.694 for post-hoc-repaired NSGA-II. The evidence supports a disjoint-evaluation workflow under the implemented load/outage proxies while identifying repair--rather than every named operator--as the resolved performance mechanism.}
+\keyword{distribution network planning; power system resilience; scenario screening; multi-objective evolutionary optimization; DER integration actions; NSGA-II; SimBench; AC power flow validation}
 \providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \begin{document}
 \section{Introduction}\label{introduction}
@@ -28,7 +28,7 @@ Current methods leave a gap at the interface between the optimizer and the uncer
 
 This paper proposes SHIELD-MOEA, a scenario-selective extension of non-dominated sorting for distribution resilience planning. The algorithm retains a standard multi-objective backbone--crowding-based selection, hybrid GA/DE variation, and greedy feasibility repair--and places its contribution at the optimizer--uncertainty interface. Every few generations, it identifies the \(K\) scenarios on which the current population performs worst and uses them for search-phase fitness. The final front is evaluated on a complete scenario set generated with disjoint random seeds, preventing direct reuse of search realizations in the reported score. We report mean and sampled worst-envelope hypervolume and supplement the proxy evaluation with pandapower AC power flow.
 
-Real resilience-investment records are utility-internal, so evaluation uses a reproducible SimBench-derived benchmark {[}7{]}. Statistics from the 18 highest-stress subnets generate 72 candidate actions. Eight experiments vary load, DER, and outage uncertainty, including an unseen-stress setting whose evaluation scenarios are harsher than the search scenarios. Candidate generation is shared with CARS-MODE (Section 2.4), as declared in the Data Availability Statement.
+Real resilience-investment records are utility-internal, so evaluation uses a SimBench-derived proxy benchmark {[}7{]}. Statistics from the 18 highest-ranked subnets generate 72 candidate actions. The archive has eight experiment labels but only five active proxy configurations: four labels share the reference objective configuration under different optimizer seed streams, including \texttt{der\_uncertainty}, because the configured DER-output multiplier is inactive in the p4 objective vector. The unseen-stress setting changes held-out load and outage ranges that do enter the proxy; its changed DER range does not. Shared infrastructure with CARS-MODE is declared in Section 2.4 and the Data Availability Statement.
 
 The contributions of this paper are:
 
@@ -38,14 +38,14 @@ The contributions of this paper are:
 \item
   \textbf{A disjoint-evaluation protocol for scenario-aware evolutionary planning.} SHIELD-MOEA scores final fronts on scenario draws not used during search, preventing direct reuse of the realizations that guided optimization. An unseen-range experiment provides an additional test of search-range specialization (Sections 4.3 and 4.6).
 \item
-  \textbf{A selective worst-\(K\) screening mechanism with quantified evaluation economy.} At the default configuration, screening reduces recorded search-phase plan--scenario evaluations by 65\% (51,200 to 17,920). No front-quality difference is detected against no screening, and periodic re-screening remains unresolved against a fixed generation-1 subset; screening is therefore an exposure-and-economy mechanism rather than a demonstrated quality mechanism (Section 6.3).
+  \textbf{A selective worst-\(K\) screening mechanism with quantified code-path economy.} At the default configuration, static accounting of evaluated objective-array rows falls by 65\% (51,200 to 17,920). No front-quality difference is detected against no screening, and periodic re-screening remains unresolved against a fixed generation-1 subset; screening is therefore an exposure-and-call-count mechanism rather than a demonstrated quality or wall-clock mechanism (Section 6.3).
 \item
-  \textbf{A statistically grounded framework result with component attribution.} Over eight experiments and 30 seeds per stochastic method, SHIELD-MOEA reaches pooled mean hypervolume 0.2740, +5.09\% over matched-repair NSGA-II and +5.56\% over plain NSGA-II, with 32/32 Holm-significant stochastic-baseline wins. Repair is the dominant resolved component (-8.10\% when removed), whereas hybrid variation, dynamic re-screening, and the explicit resilience objective remain unresolved against their direct controls (Sections 6.1 and 6.3).
+  \textbf{A statistically grounded framework result with bounded component attribution.} Across eight archived labels and 30 seeds per stochastic method, SHIELD-MOEA reaches pooled mean hypervolume 0.2740, +5.09\% over post-hoc-repaired NSGA-II and +5.56\% over plain NSGA-II, with 32/32 Holm-significant stochastic-baseline wins. The pooled summary mixes five active configurations and four reference-configuration seed blocks. Within the implemented SHIELD stack, repair is the dominant resolved component (-8.10\% when removed), whereas hybrid variation, dynamic re-screening, and removing survivability from environmental selection remain unresolved against their controls (Sections 6.1 and 6.3).
 \item
-  \textbf{Sampled-envelope, sensitivity, and cross-family AC diagnostics.} The method retains +5.36\% sampled worst-envelope HV and +6.04\% in the unseen-range experiment. A 1296-case pandapower check across six networks yields aggregate feasibility 0.685 versus 0.389 without planning, while matched-repair NSGA-II reaches 0.694. A one-at-a-time parameter sweep reports the setting at which separation from NSGA-II is lost (\(N_p=60\), \(p=0.104\)) rather than presenting only favorable points (Sections 6.2, 6.4, and 6.5).
+  \textbf{Sampled-envelope, sensitivity, and cross-family AC diagnostics.} The method retains +5.36\% sampled worst-envelope HV and +6.04\% when held-out load and outage ranges move beyond the search ranges; the simultaneously changed DER range is inactive in the p4 proxy. A 1296-case pandapower check across six networks yields aggregate feasibility 0.685 versus 0.389 without planning, while post-hoc-repaired NSGA-II reaches 0.694. A one-at-a-time parameter sweep reports the setting at which separation from NSGA-II is lost (\(N_p=60\), \(p=0.104\)) rather than presenting only favorable points (Sections 6.2, 6.4, and 6.5).
 \end{enumerate}
 
-Screening concentrates search-phase effort on difficult scenarios. At the default setting, it removes 65\% of plan--scenario evaluations without a detected change in mean front quality; the screening-off ablation differs by -0.48\%, and periodic re-screening does not outperform a generation-1 fixed worst-\(K\) set. Because the present objectives are closed-form, the call reduction does not translate into lower wall-clock time at this scale. Screening therefore supplies selective exposure and evaluation economy, while repair carries the resolved component gain.
+Screening concentrates search-phase effort on scenarios difficult under the implemented load/outage proxy. At the default setting, static code-path accounting is 65\% lower without a detected change in mean front quality; the screening-off ablation is 0.48\% lower, and periodic re-screening does not outperform a generation-1 fixed worst-\(K\) set. Because the objectives are closed-form and no runtime counter records the analytic call total, this arithmetic does not establish a wall-clock saving. Screening therefore supplies selective exposure and a computed objective-row reduction, while repair carries the resolved component gain.
 
 The paper proceeds as follows. Section 2 reviews related work. Section 3 defines the planning problem and the public benchmark. Section 4 describes SHIELD-MOEA. Section 5 gives the experimental protocol. Section 6 reports results, Section 7 discusses them, Section 8 states limitations, and Section 9 concludes.
 
@@ -83,7 +83,7 @@ SHIELD-MOEA instead treats the evaluated scenario subset as a search-time quanti
 
 \subsection{Relation to CARS-MODE and Gap Statement}\label{relation-to-cars-mode-and-gap-statement}
 
-CARS-MODE {[}42{]} also studies evolutionary distribution planning on public benchmark-derived portfolios. It adapts DE control parameters and repairs budget violations in an economic DER-and-storage setting. SHIELD-MOEA instead studies the optimizer--uncertainty interface. Its NSGA-II kernel combines GA/DE variation and repair, while screening supplies search scenarios that remain disjoint from the final scoring draws. Load, DER, and outage perturbations define the resilience setting. Only candidate generation is shared; the methods and claims are independent.
+CARS-MODE {[}42{]} also studies evolutionary distribution planning on public benchmark-derived portfolios. It adapts DE control parameters and repairs budget violations in an economic DER-and-storage setting. SHIELD-MOEA instead studies the optimizer--uncertainty interface. Its NSGA-II-style kernel combines GA/DE variation and repair, while screening supplies search scenarios that remain disjoint from final scoring draws. The current p4 proxy responds to load and outage coordinates; its configured DER-output coordinate is inactive, although DER-oriented actions remain in the candidate pool and DER stress is present in the separate AC layer. The studies share the SimBench extraction, 72-action builder, binary-plan and budget representation, evaluation/statistics utilities, seeded archive machinery, and AC composition-mapping infrastructure. Their research questions, method-specific search configurations, run archives, and conclusions remain separate.
 
 The gap lies at the interface of search and uncertainty. Resilience studies often grade a robust solution or Pareto front on the same scenarios that guide optimization. Offline reduction is blind to the evolving population, while hybrid MOEAs usually adapt operators rather than exposure. SHIELD-MOEA combines worst-scenario screening, disjoint-draw final scoring, and sampled worst-case hypervolume reporting. The fixed worst-\(K\) control determines whether the adaptive update, rather than screening alone, is necessary.
 
@@ -93,7 +93,7 @@ The gap lies at the interface of search and uncertainty. Resilience studies ofte
 
 \subsection{Resilience-Oriented Planning as Scenario-Aware Multi-Objective Selection}\label{resilience-oriented-planning-as-scenario-aware-multi-objective-selection}
 
-Let \(\mathcal{A}=\{a_1,\ldots,a_n\}\) be the candidate-action pool. Action \(a_i\) has cost \(k_i\) and effect coefficients \((l_i,u_i,h_i,r_i,g_i)\) for loss reduction, voltage-risk reduction, hosting-capacity gain, reliability gain, and resilience gain. These coefficients are derived from public network statistics as described in Section 3.2. A plan is a binary vector \(x\in\{0,1\}^n\). Uncertainty is represented by \(s=(\lambda,\delta,\sigma)\), where \(\lambda\) is a load multiplier, \(\delta\) is a DER-output multiplier, and \(\sigma\in[0,1]\) is outage severity.
+Let \(\mathcal{A}=\{a_1,\ldots,a_n\}\) be the candidate-action pool. Action \(a_i\) has synthetic cost \(c_i\) and coefficients \((l_i,u_i,h_i,r_i,g_i,d_i)\) for loss reduction, voltage-risk reduction, hosting-capacity gain, reliability gain, survivability gain, and a DER-readiness diagnostic. These coefficients are derived from public network statistics as described in Section 3.2. A plan is a binary vector \(x\in\{0,1\}^n\). The configured scenario is \(s=(\lambda,\delta,\sigma)\), where \(\lambda\) is a load multiplier, \(\delta\) is a DER-output multiplier, and \(\sigma\in[0,1]\) is outage severity.
 
 For plan \(x\) under scenario \(s\), the benchmark defines
 
@@ -101,18 +101,19 @@ For plan \(x\) under scenario \(s\), the benchmark defines
 \begin{aligned}
 L(x,s)&=\max\!\left(0.015,L_0\lambda-\frac{1}{120}\sum_{i=1}^{n}l_i x_i\right),\\
 U(x,s)&=\max\!\left(0.005,U_0\lambda-\frac{1}{10}\sum_{i=1}^{n}u_i x_i\right),\\
+H(x,s)&=\min\!\left(1,\frac{\sum_{i=1}^{n}h_i x_i}{\max(1,H_0\delta)}\right),\\
 R(x)&=\min\!\left(1,0.35+\frac{1}{28}\sum_{i=1}^{n}r_i x_i\right),\\
 S(x,s)&=\min\!\left(1,0.42(1-\sigma)+\frac{1}{24}\sum_{i=1}^{n}g_i x_i\right).
 \end{aligned}
 \]
 
-Here, \(L_0\) and \(U_0\) are network-level coefficients computed once from aggregate SimBench statistics. \(L\) is a loss index, \(U\) is a voltage-risk index, \(R\) is a reliability proxy, and \(S\) is a survivability proxy. The restoration-aware experiment replaces \(L\) with
+Here, for total selected-source load \(P_\Sigma\) and line length \(D_\Sigma\), the implementation sets \(L_0=0.12+0.015D_\Sigma/\max(1,P_\Sigma)\), \(U_0=0.18+0.010P_\Sigma/\max(1,D_\Sigma)\), and \(H_0=0.45P_\Sigma\). \(L\) is a loss index, \(U\) is a voltage-risk index, \(H\) is a hosting diagnostic, \(R\) is a scenario-invariant reliability proxy, and \(S\) is a survivability proxy driven only by outage severity and selected actions. The experiment labeled \texttt{restoration\_aware\_evaluation} replaces \(L\) by \(L^e\) during both search and evaluation:
 
 \[
 L^{e}(x,s)=L(x,s)\left[1+0.30\sigma\bigl(1-S(x,s)\bigr)\right],
 \]
 
-which couples loss exposure to plan survivability. With investment cost \(C(x)=\sum_{i=1}^{n}k_i x_i\) and scenario set \(\mathcal{S}\), the five-objective problem is
+which couples loss exposure to plan survivability. With investment cost \(C(x)=\sum_{i=1}^{n}c_i x_i\) and scenario set \(\mathcal{S}\), the implemented p4 five-objective problem is
 
 \[
 \begin{aligned}
@@ -124,44 +125,77 @@ F(x)=\Big(&C(x),\ \mathbb{E}_{s\in\mathcal{S}}[L(x,s)],\
 \end{aligned}
 \]
 
-The budget \(B\) is the only hard constraint, and violation is measured as relative budget overrun. \(L\), \(U\), \(R\), and \(S\) are transparent engineering proxies rather than power-flow solutions. Electrical claims are therefore delegated to the separate AC validation in Section 6.5.
+The budget \(B\) is the only hard constraint, and violation is measured as relative budget overrun. The p4 objective vector omits \(H\), so \(\delta\) does not affect p4 search objectives, held-out objectives, hypervolume, or compromise choice. The coefficient \(h_i\) is nevertheless implemented in \(H\) and enters the repair and Weighted Sum heuristics specified below; it is not an advertised p4 objective. DER-output variation becomes active only in the separate AC operating scenarios. Accordingly, \(L\), \(U\), \(R\), and \(S\) are transparent engineering proxies rather than power-flow solutions, and the \texttt{der\_uncertainty} planning label is not evidence of DER-output robustness.
 
 \subsection{Candidate Pool Derived from SimBench}\label{candidate-pool-derived-from-simbench}
 
-Candidate attributes derive deterministically from the SimBench complete mixed dataset {[}7{]}. The 18 subnets with the highest combined load and line-length stress are extracted from the load, line, and RES tables. Each supplies reinforcement, storage, DER-integration, and automation actions. Cost and effect coefficients are analytic functions of load, reactive load, line length, line count, renewable capacity, and loading.
+Candidate attributes derive deterministically from the SimBench complete mixed dataset {[}7{]}. Eligible subnets are ranked by \(p_j+0.2\ell_j\), where \(p_j\) is total active load and \(\ell_j\) is total line length; the highest 18 each supply reinforcement, storage, DER-integration, and automation actions. Reactive load and the extracted average loading field are not used by the candidate builder. Let \(m_j\) be line count, \(n_j\) load count, \(e_j\) renewable capacity, \(\tau_j=p_j/\max(0.2,\ell_j)\), and \(q_j=\max(0,0.55p_j-e_j)\). In the attribute order \((c_i,l_i,u_i,h_i,r_i,g_i,d_i)\), the four exact implemented constructions are
 
-The resulting pool contains \(n=72\) candidates under nominal budget \(B=920\), which makes roughly one sixth of the pool affordable. Every attribute traces to public data through published rules. The pool is a reproducible proxy rather than a costed engineering catalog, and its cost unit is synthetic (Section 8).
+\[
+\begin{aligned}
+\text{reinforcement: }(&60+4.5\ell_j+7p_j,
+0.012\ell_j+0.020\tau_j,
+0.020+0.006\tau_j,
+0.06q_j,
+0.018m_j,
+0.016m_j,
+0.20),\\
+\text{storage: }(&50+16\sqrt{p_j+1},
+0.025\sqrt{p_j+1},
+0.018\sqrt{\tau_j+1},
+0.12q_j+0.08p_j,
+0.055\sqrt{n_j+1},
+0.070\sqrt{n_j+1},
+0.80),\\
+\text{DER integration: }(&45+10\sqrt{p_j+1},
+0.018\sqrt{p_j+1},
+0.012,
+0.18q_j+0.10p_j,
+0.020\sqrt{n_j+1},
+0.028\sqrt{n_j+1},
+1.00),\\
+\text{automation: }(&38+1.8m_j,
+0.006m_j,
+0.010\sqrt{\tau_j+1},
+0.025q_j,
+0.085\sqrt{m_j+1},
+0.115\sqrt{m_j+1},
+0.35).
+\end{aligned}
+\]
 
-\subsection{Scenario Model and the Eight Experiments}\label{scenario-model-and-the-eight-experiments}
+The resulting pool contains \(n=72\) candidates under nominal budget \(B=920\). Every attribute traces to the listed public-data fields through these rules, but the pool is a proxy rather than a costed engineering catalog and its cost unit is synthetic (Section 8).
 
-Each experiment fixes ranges for the three scenario coordinates and draws \textbar S\textbar{} = 16 scenarios uniformly with a fixed seed. Two independent scenario sets exist per experiment: a search set (seed A) that methods may use during optimization, and an evaluation set (seed B, disjoint) on which every reported metric is computed. Table 1 lists the eight experiments.
+\subsection{Scenario Model and the Eight Archive Labels}\label{scenario-model-and-the-eight-archive-labels}
+
+Each label fixes ranges for the three configured scenario coordinates and draws \(|\mathcal S|=16\) scenarios uniformly. The search draw uses NumPy seed 20260713 and the evaluation draw seed 20260714; these two matrices are fixed and common to all methods and optimizer runs under a label. Table 1 lists the eight archived labels and distinguishes configured changes from changes that actually enter the p4 objective vector.
 
 \begin{table*}[t]
 \centering
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\caption{The eight experiments. Ranges are uniform sampling intervals for (load multiplier lambda, DER multiplier delta, outage severity sigma).}\label{tab:1}
+\caption{The eight archive labels. Ranges are uniform sampling intervals for (load multiplier lambda, DER multiplier delta, outage severity sigma).}\label{tab:1}
 \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
 \toprule
-Experiment & lambda range & delta range & sigma range & Distinguishing feature \\
+Experiment label & lambda range & delta range & sigma range & Implemented p4 effect \\
 \midrule
-deterministic\_vs\_scenario & 0.95-1.25 & 0.7-1.3 & 0.00-0.25 & reference uncertainty setting \\
-der\_uncertainty & 0.95-1.25 & 0.4-1.7 & 0.00-0.25 & widened DER volatility \\
+deterministic\_vs\_scenario & 0.95-1.25 & 0.7-1.3 & 0.00-0.25 & reference proxy configuration \\
+der\_uncertainty & 0.95-1.25 & 0.4-1.7 & 0.00-0.25 & inactive-factor replicate: $\delta$ is not consumed by p4 objectives \\
 load\_uncertainty & 0.85-1.45 & 0.7-1.3 & 0.00-0.25 & widened load band \\
 outage\_contingency & 0.95-1.25 & 0.7-1.3 & 0.10-0.55 & elevated outage severity \\
-restoration\_aware\_evaluation & 0.95-1.25 & 0.7-1.3 & 0.10-0.55 & expected-loss objective L\textasciicircum{}e \\
-scenario\_screening\_efficiency & 0.95-1.25 & 0.7-1.3 & 0.00-0.25 & screening-workload accounting \\
-pareto\_quality & 0.95-1.25 & 0.7-1.3 & 0.00-0.25 & front-quality replicate \\
-unseen\_stress\_generalization & 0.95-1.25 (search) & 0.7-1.3 (search) & 0.00-0.25 (search) & evaluation from non-overlapping ranges: lambda in [1.3,1.6], delta in [1.4,1.9], sigma in [0.4,0.7] \\
+restoration\_aware\_evaluation & 0.95-1.25 & 0.7-1.3 & 0.10-0.55 & $L^e$ replaces $L$ in search and evaluation \\
+scenario\_screening\_efficiency & 0.95-1.25 & 0.7-1.3 & 0.00-0.25 & reference proxy configuration under a separate optimizer seed stream \\
+pareto\_quality & 0.95-1.25 & 0.7-1.3 & 0.00-0.25 & reference proxy configuration under a separate optimizer seed stream \\
+unseen\_stress\_generalization & 0.95-1.25 (search) & 0.7-1.3 (search) & 0.00-0.25 (search) & evaluation uses $\lambda\in[1.3,1.6]$, $\delta\in[1.4,1.9]$, $\sigma\in[0.4,0.7]$; only the $\lambda$ and $\sigma$ shifts affect p4 scores \\
 \bottomrule
 \end{tabularx}
 \end{table*}
 
-The last experiment is the strictest test of the disjoint-evaluation design: its evaluation scenarios are drawn from ranges that never intersect the search ranges, so any method that has specialized to its training scenarios is penalized at scoring time.
+Thus the eight labels represent five active proxy configurations: the reference configuration is repeated under four labels with method- and label-specific optimizer seeds, and four additional labels activate load widening, outage widening, the \(L^e\) objective, or held-out load/outage ranges. The last label tests distribution shift in the two active scenario coordinates; its non-overlapping \(\delta\) range adds no p4 planning stress.
 
 \subsection{Shared Public Benchmark Statement}\label{shared-public-benchmark-statement}
 
-The SimBench-derived candidate-generation code is one versioned public artifact shared between this paper and the companion CARS-MODE study {[}42{]}, so that the two methodologically independent algorithms remain comparable on a common footing. Everything downstream -- the scenario model, the uncertainty experiments, the screening mechanism under test, the evaluation protocol, and all analyses -- is specific to this paper.
+This paper and CARS-MODE {[}42{]} use a shared planning runner, SimBench subnet extraction and 72-action builder, binary-plan representation, budget handling utilities, fixed-bound hypervolume helpers, seeded archive/statistics machinery, and AC composition mapper. Four proxy coordinates are common; CARS-MODE uses hosting capacity as its fifth objective, whereas p4 uses survivability. The paper-specific assets are the research question, method branch and controls, configurations, run archives, comparisons, and conclusions. Shared code and evaluation infrastructure do not make either paper's results evidence for the other.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -175,29 +209,30 @@ Figure 1 closes the method's scenario-search loop. Each population induces a wor
 \caption{SHIELD-MOEA architecture. Scenario screening is population dependent; the feedback arrow denotes generational updating. The two validation branches use held-out stress scenarios or AC power flow and do not feed into selection.}\label{fig:1}
 \end{figure*}
 
-SHIELD-MOEA exposes screening, repair, outage information, and the resilience objective as individual switches in the main ablation study. Additional matched controls compare hybrid variation with GA-only and DE-only search and periodic re-screening with a fixed generation-1 worst-\(K\) subset. This separation permits direct attribution for the main switches and targeted tests of the two multi-option mechanisms. The method is a resilience-oriented extension of NSGA-II {[}30{]}: it retains constraint-dominated non-dominated sorting and crowding-distance selection, and adds hybrid variation, scenario screening, and feasibility repair.
+SHIELD-MOEA exposes screening, repair, outage information, and survivability in environmental selection as individual switches in the main ablation study. Additional within-SHIELD controls compare hybrid variation with GA-only and DE-only offspring and periodic re-screening with a fixed generation-1 worst-\(K\) subset. These controls support only the operator scopes stated in Sections 4.2--4.5. The method is a resilience-oriented extension of NSGA-II {[}30{]}: it retains constraint-dominated non-dominated sorting and crowding-distance selection, and adds hybrid variation, scenario screening, and feasibility repair.
 
 \textbf{Formal definitions.} For binary plan \(x\), cost feasibility is
 
 \[
-C(x)=\sum_{j=1}^{n}c_jx_j,\qquad v_B(x)=\max(0,C(x)-B).
+C(x)=\sum_{j=1}^{n}c_jx_j,\qquad v_B(x)=\frac{\max(0,C(x)-B)}{B}.
 \]
 
-Let \(f_q(x;s)\) be minimized objective \(q\) under search scenario \(s\). At a screening generation, population-level scenario severity is
+Let \(l_q^{\mathrm{search}}\) and \(u_q^{\mathrm{search}}\) be fixed bounds generated on the search problem from the reference-plan sample in Section 5.3. At a screening generation, the implemented population-level scenario score is
 
 \[
-\rho_t(s)=\frac{1}{|P_t|}\sum_{x\in P_t}
-\sum_{q=1}^{Q}\omega_q\,\tilde f_q(x;s),
+\rho_t(s)=\frac{1}{|P_t|}\sum_{x\in P_t}\left[
+\sum_{q=1}^{5}\frac{f_q(x;s)-l_q^{\mathrm{search}}}
+{u_q^{\mathrm{search}}-l_q^{\mathrm{search}}}+10v_B(x)\right].
 \]
 
-and the active subset is the worst \(K\) scenarios,
+The active subset is the worst \(K\) scenarios,
 
 \[
 \mathcal S_t^{K}=\operatorname*{arg\,max}_{\substack{\mathcal A\subseteq\mathcal S_{\mathrm{search}}\\|\mathcal A|=K}}
 \sum_{s\in\mathcal A}\rho_t(s).
 \]
 
-Between screening generations the active set is held fixed. Search fitness averages over that set,
+These screening normalizations are not clipped and use equal unit weights; cost and reliability add scenario-constant offsets, while \(\lambda\) and \(\sigma\) determine the scenario ordering and \(\delta\) has no p4 effect. Between screening generations the active set is held fixed. Environmental selection uses the objective average over that set,
 
 \[
 \bar f_q^{\,K}(x;t)=\frac{1}{K}\sum_{s\in\mathcal S_t^K}f_q(x;s).
@@ -214,15 +249,16 @@ o_j^{GA}\leftarrow1-o_j^{GA}\ \text{with probability }1/n .
 For the DE channel, a relaxed donor is formed and mapped to a stochastic bit,
 
 \[
-z=g_{r_1}+F(g_{r_2}-g_{r_3}),\qquad
-o_j^{DE}\sim\operatorname{Bernoulli}\!\left(0.08+0.82\,\mathbb I[z_j\geq0.5]\right).
+z=x_{r_1}+0.5(x_{r_2}-x_{r_3}),\qquad
+o_j^{DE}\sim\operatorname{Bernoulli}\!\left(0.08+0.82\,\mathbb I[z_j>0.5]\right).
 \]
 
-Repair removes the least aggregate benefit per cost,
+Repair uses the code's fixed, p4-independent candidate score
 
 \[
-j^-=\operatorname*{arg\,min}_{j:x_j=1}
-\frac{\sum_q\omega_q b_{jq}}{c_j},\qquad x_{j^-}\leftarrow0,
+b_j=\frac{l_j}{0.12}+\frac{u_j}{0.02}+\frac{h_j}{5}
++\frac{r_j}{2}+\frac{g_j}{2},\qquad
+j^-=\operatorname*{arg\,min}_{j:x_j=1}\frac{b_j}{c_j},\qquad x_{j^-}\leftarrow0,
 \]
 
 repeating until \(v_B(x)=0\). Held-out evaluation forms both mean and componentwise-worst objective vectors,
@@ -233,7 +269,7 @@ f_q^{\mathrm{mean}}(x)=\frac{1}{|\mathcal S_{\mathrm{eval}}|}
 f_q^{\mathrm{worst}}(x)=\max_{s\in\mathcal S_{\mathrm{eval}}}f_q(x;s).
 \]
 
-Their hypervolumes use separately prespecified normalization bounds and the standard dominated-volume definition,
+The mean-front plans are evaluated under both aggregations. Hypervolume alone applies clipped fixed-bound normalization, separately for mean and worst aggregations, followed by the standard dominated-volume definition,
 
 \[
 HV_z(\mathcal P;r_z)=\lambda_Q\!\left(
@@ -242,39 +278,39 @@ HV_z(\mathcal P;r_z)=\lambda_Q\!\left(
 z\in\{\mathrm{mean},\mathrm{worst}\}.
 \]
 
-Under the implemented schedule, the objective-call count is
+Under the implemented schedule, static counting of objective-array rows implied by the code path gives
 
 \[
 C_{\mathrm{screened}}=GN_uK+N_rN_p|\mathcal S|=12{,}800+5{,}120=17{,}920,
 \]
 
-where union evaluation and ranking-round evaluation are disjoint terms. This is an implementation objective-call count, not a wall-clock claim.
+where union evaluation and ranking-round evaluation are disjoint terms. The implementation does not maintain a runtime call counter, so this is reproducible code-path arithmetic rather than an instrumented measurement or wall-clock claim.
 
 \subsection{Non-Dominated Sorting Kernel (NSGA-II Framework)}\label{non-dominated-sorting-kernel-nsga-ii-framework}
 
-The kernel maintains a population of 40 binary plans over 40 generations. Environmental selection is constraint-dominated non-dominated sorting (feasible plans dominate infeasible ones; infeasible plans compare by budget violation) with crowding-distance truncation, following the standard NSGA-II procedure {[}30{]}. Initial plans are sparse random selections (3-18\% density) repaired to the budget. Rationale: a standard, well-understood kernel ensures that whatever advantage appears is attributable to the scenario interface, not to bespoke selection machinery.
+The kernel maintains a population of 40 binary plans over 40 generations. Environmental selection is constraint-dominated non-dominated sorting (feasible plans dominate infeasible ones; infeasible plans compare by relative budget violation) with crowding-distance truncation, following the standard NSGA-II procedure {[}30{]}. Initial plans are sparse random selections (3-18\% density) and are repaired before generation 1 when repair is enabled. The baseline operator and repair-timing differences are stated in Section 5.1, so a framework-level margin is not attributed to the scenario interface alone.
 
 \subsection{Hybrid GA/DE Variation}\label{hybrid-gade-variation}
 
-Each generation produces 40 offspring. Half use uniform crossover followed by bit-flip mutation at rate \(1/n\). The other half use binary rand/1 differential evolution in relaxed space, followed by stochastic bit sampling with probabilities 0.9 and 0.08 for high and low activation. GA recombination preserves co-selected action blocks, while DE introduces direction-informed variation. Section 6.3 tests whether this hybrid improves on DE-only and GA-only controls.
+Each generation produces 40 offspring. Half use uniform crossover followed by bit-flip mutation at rate \(1/n\). The other half use the displayed DE-style relaxed donor followed by stochastic bit sampling with probabilities 0.9 and 0.08 above and below the strict 0.5 threshold. The three donor indices are sampled independently with replacement, so this channel is not a canonical distinct-index DE/rand/1 implementation. Section 6.3 compares this hybrid with controls that select GA-only or DE-only offspring while otherwise retaining the same SHIELD code path.
 
 \subsection{Worst-K Scenario Screening (The Adaptive Interface)}\label{worst-k-scenario-screening-the-adaptive-interface}
 
-At generation 1 and every \(T_s = 5\) generations thereafter, the algorithm evaluates the current population on each of 16 search scenarios, ranks scenarios by the population's mean normalized scalarized objective (worst first), and retains the top \(K = 4\). Until the next screening event, parent--offspring selection uses only the active set. Let \(N_p=40\), \(N_u=2N_p=80\), \(G=40\), \(|\mathcal S|=16\), and \(N_r=8\) screening rounds (generations 1, 6, \ldots, 36). The unscreened code path records \(C_{\rm full}=G N_u|\mathcal S|=51{,}200\) plan--scenario evaluations. The screened path records the disjoint terms \(C_{\rm active}=G N_uK=12{,}800\) for union selection and \(C_{\rm rank}=N_rN_p|\mathcal S|=5{,}120\) for ranking the current population, totaling \(17{,}920\). Thus screening reduces this implementation counter by 65\%; wall-clock savings are evaluated separately.
+At generation 1 and every \(T_s = 5\) generations thereafter, the algorithm evaluates the current population on each of 16 search scenarios, ranks scenarios by \(\rho_t(s)\) (worst first), and retains the top \(K = 4\). Until the next screening event, parent--offspring selection uses only the active set. Let \(N_p=40\), \(N_u=2N_p=80\), \(G=40\), \(|\mathcal S|=16\), and \(N_r=8\) screening rounds (generations 1, 6, \ldots, 36). The unscreened path implies \(C_{\rm full}=G N_u|\mathcal S|=51{,}200\) objective rows. The screened path implies disjoint terms \(C_{\rm active}=G N_uK=12{,}800\) for union selection and \(C_{\rm rank}=N_rN_p|\mathcal S|=5{,}120\) for ranking the current population, totaling \(17{,}920\). Thus the static path count is 65\% lower; wall-clock behavior is evaluated separately.
 
 \subsection{Feasibility Repair}\label{feasibility-repair}
 
-Every initial and offspring plan exceeding the budget is repaired greedily: the selected action with the worst aggregate benefit-to-cost ratio is dropped repeatedly until the plan is affordable. Rationale: under a hard budget, penalty-carrying infeasible plans waste population slots and blur dominance comparisons; repair keeps the entire population in the fundable region. The ablation study shows this operator carries the largest share of the method's advantage (Section 6.3).
+For SHIELD-MOEA, every initial and offspring plan exceeding the budget is repaired greedily with \(b_j/c_j\) before environmental selection. The NoRepair ablation skips both timings. The comparator labeled NSGA-II+Repair is different: it runs constrained NSGA-II without repair during search and applies the same drop rule only to the returned population. The ablation therefore identifies the implemented SHIELD repair schedule, while the NSGA-II comparison is rule-matched only at post-processing, not timing-matched.
 
 \subsection{Resilience Objective and Outage Awareness in Search}\label{resilience-objective-and-outage-awareness-in-search}
 
-The survivability objective -S(x,s) is part of the search-phase objective vector by default; the corresponding ablation hides this column from selection while leaving the final five-objective evaluation untouched. A second, sharper ablation zeroes the outage severity sigma during search only, making the search outage-blind while the evaluation still stresses the plans. These two switches let us ask separately whether seeing the survivability trade-off and experiencing outage stress during search matter -- and the answers turn out to differ (Sections 6.3 and 6.5).
+The survivability objective \(-S(x,s)\) is part of environmental selection by default. \texttt{Ablation-NoResilienceObj} drops this column from parent--offspring environmental selection but, as implemented, the worst-\(K\) screening score \(\rho_t\) still uses all five objectives. Its result therefore tests removal from environmental selection, not complete removal of survivability information from search. \texttt{Ablation-NoOutage} instead sets \(\sigma=0\) throughout search, affecting both screening and environmental selection while leaving evaluation unchanged. The scope of each contrast is retained in Sections 6.3 and 6.5.
 
 \subsection{Direct-Reuse-Leakage-Controlled Evaluation and Worst-Envelope Rationale}\label{direct-reuse-leakage-controlled-evaluation-and-worst-envelope-rationale}
 
-No method -- proposed, baseline, or ablation -- is ever scored on scenarios it searched on. The evaluation scenario set is drawn with a disjoint random seed (and, in the unseen-stress experiment, from disjoint ranges); hypervolume is computed on the feasible non-dominated front of each method's final population against this set alone. Screening therefore influences which plans are found, but has no channel into how they are graded.
+No method--proposed, baseline, or ablation--is scored on the fixed scenarios it searched on. The evaluation scenario matrix is drawn with seed 20260714 rather than the search seed 20260713. In the unseen-stress label, the active load and outage ranges are also disjoint; the changed DER range is inert in the proxy. The final population is re-evaluated on this held-out matrix, filtered for budget feasibility, and reduced to a non-dominated front in raw objective space before any hypervolume normalization. Screening influences which plans are found but has no access to the held-out matrix.
 
-We report two hypervolume variants. The standard mean hypervolume averages each objective over the 16 evaluation scenarios, then computes the dominated volume. The worst-case hypervolume takes the per-objective worst value over the 16 evaluation scenarios before computing the dominated volume. This is a deliberate design choice, not a standard metric: in a resilience context, a plan whose mean performance is high but whose tail scenario is poor (e.g., a plan that collapses under the single worst stress combination) is an unacceptable plan. The worst-case readout is, however, more conservative and its bounds depend on the scenario sample; we present it as a complementary diagnostic to the mean metric, not as a replacement. The two metrics are computed under separate fixed normalization bounds (Section 5.3) and are comparable within their respective columns only.
+We report two hypervolume variants. Standard mean hypervolume averages each objective over the 16 evaluation scenarios. The sampled worst-envelope readout reuses the plans on the mean-objective non-dominated front and replaces each scenario-dependent objective by its componentwise maximum over those 16 scenarios before hypervolume calculation; it does not construct or optimize a separate worst-objective front. This is a sample-dependent diagnostic rather than a bound on tail behavior. The two metrics use separate fixed normalization bounds (Section 5.3) and are comparable across methods only within their respective columns.
 
 \subsection{Algorithm Summary}\label{algorithm-summary}
 
@@ -287,12 +323,13 @@ SHIELD-MOEA(candidates, budget, search_scenarios, seed):
       score each search scenario by population-mean scalarized fitness
       active <- worst 4 scenarios
     offspring <- 20 by uniform crossover + bit-flip (1/n)             # 4.2
-                 + 20 by binary DE (rand/1, stochastic thresholding)
+                 + 20 by the implemented DE-style stochastic donor
     repair offspring to budget                                        # 4.4
     F <- five-objective values of parents+offspring on active         # 4.5
     population <- constraint-dominated NDS + crowding (top 40)        # 4.1
-  return feasible non-dominated front, evaluated on the DISJOINT
-         evaluation scenario set only                                 # 4.6
+  return final population
+  wrapper re-evaluates it on the DISJOINT evaluation scenarios,
+          filters budget-feasible plans, and extracts the raw-objective front # 4.6
 \end{verbatim}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
@@ -301,7 +338,7 @@ SHIELD-MOEA(candidates, budget, search_scenarios, seed):
 
 \subsection{Methods Compared}\label{methods-compared}
 
-Table 2 lists eleven methods: SHIELD-MOEA, six baselines, and four single-switch ablations. Evolutionary baselines use reference implementations from pymoo {[}43{]}, run on the identical binary problem with the same population size and generation count and with access to all 16 search scenarios.
+Table 2 lists eleven methods: SHIELD-MOEA, six baselines, and four single-switch ablations. Pymoo supplies NSGA-II and MOEA/D {[}43{]}. All methods see the same binary problem and fixed search-scenario matrix within a label, but their operators, constraint handling, returned object, repair timing, and--for MOEA/D--population size are not identical.
 
 \begin{table*}[t]
 \centering
@@ -313,15 +350,15 @@ Table 2 lists eleven methods: SHIELD-MOEA, six baselines, and four single-switch
 Method & Role & Description \\
 \midrule
 SHIELD-MOEA & proposed & NSGA-II-style kernel + GA/DE hybrid variation + worst-K scenario screening + repair \\
-NSGA-II & baseline & pymoo NSGA-II, binary encoding, budget as constraint, full scenario set \\
-NSGA-II+Repair & baseline & NSGA-II followed by the same deterministic budget-repair rule as SHIELD-MOEA \\
-MOEA/D & baseline & pymoo MOEA/D, budget as penalty \\
-GA & baseline & single-objective GA on the normalized scalarized objective \\
-Weighted Sum & baseline & weighted-benefit greedy fill under budget \\
+NSGA-II & baseline & pymoo NSGA-II, population 40, sparse Boolean sampling, two-point crossover, bit-flip mutation, budget constraint, all 16 search scenarios \\
+NSGA-II+Repair & baseline & the same constrained NSGA-II, followed by SHIELD's drop rule on the returned population only; no repair during search \\
+MOEA/D & baseline & pymoo MOEA/D with 35 Das--Dennis reference directions, two-point crossover, bit-flip mutation, and $10^4v_B$ objective penalty \\
+GA & baseline & single returned point from tournament/uniform-crossover GA with mutation $1.5/n$, unclipped normalized-sum fitness plus $10v_B$, and post-hoc repair \\
+Weighted Sum & baseline & one deterministic greedy point ordered by $b_j$ from Section 4.4 (not $b_j/c_j$ and not a front-level weighted-sum solve) \\
 Deterministic Planning & baseline & cost-first greedy fill under budget \\
 Ablation-NoScenarioScreen & ablation & search on all 16 scenarios (screening off) \\
 Ablation-NoRepair & ablation & feasibility repair disabled \\
-Ablation-NoResilienceObj & ablation & survivability column hidden from search selection \\
+Ablation-NoResilienceObj & ablation & survivability column removed from environmental selection; five-objective screening score retained \\
 Ablation-NoOutage & ablation & outage severity zeroed during search; evaluation unchanged \\
 \bottomrule
 \end{tabularx}
@@ -329,30 +366,37 @@ Ablation-NoOutage & ablation & outage severity zeroed during search; evaluation 
 
 \subsection{Protocol}\label{protocol}
 
-Each stochastic method runs 30 independent seeds per experiment. Weighted Sum and Deterministic Planning are deterministic: the uniform 2640-row implementation archive retains repeated invocations, but each rule has one effective observation per experiment. The seed-level inferential family therefore contains eight stochastic opponents, including four stochastic baselines and four ablations; sixteen deterministic baseline gaps are descriptive. Seeds are derived from a hash of (experiment, method, seed index), and all population-based methods use population 40 and 40 generations.
+Each stochastic method runs 30 independent optimizer seed indices \(r\in\{0,\ldots,29\}\) per experiment label. The archive stores \(r\), while the actual NumPy seed is reconstructed as
+
+\[
+\operatorname{seed}(m,e,r)=200000+7919r+
+\left(\operatorname{int}(\operatorname{SHA1}(\texttt{p4}|e|m)_{1:6},16)\bmod4096\right).
+\]
+
+Because the method name enters the hash, methods do not share paired random-number streams; the Mann--Whitney tests are unpaired. Weighted Sum and Deterministic Planning ignore this seed: the uniform 2640-row archive retains 30 repeated invocations per label, but inference treats each rule as one effective result per label. The seed-level family contains eight stochastic opponents--four stochastic baselines and four ablations--and the sixteen deterministic gaps are descriptive. SHIELD-MOEA, NSGA-II, NSGA-II+Repair, and GA use population 40 and 40 generations. The configured MOEA/D uses 35 reference directions and hence 35 individuals for 40 generations, rather than the nominal population-40 value recorded at the top level of the JSON configuration.
 
 \subsection{Metrics and Statistics}\label{metrics-and-statistics}
 
-The headline metric is the standard hypervolume of the feasible non-dominated front on the evaluation scenario set, computed with pymoo's exact indicator at reference point 1.1 per normalized dimension. Objective normalization uses fixed, method-independent bounds computed once per experiment from a seeded reference sample (the empty plan, all 72 single-action plans, and 2048 random budget-feasible plans, with a 5\% margin), so no method's own output can stretch or shrink the scale. The worst-case hypervolume applies the same construction to the per-objective worst value over the 16 evaluation scenarios, under its own fixed bounds; it is comparable across methods within the worst-case column (not against the mean column, whose normalization differs). An empty feasible front scores zero.
+The headline metric is standard hypervolume of the budget-feasible raw-objective non-dominated front on the evaluation scenario matrix, computed with pymoo's exact indicator at reference point 1.1 per normalized dimension. Objective bounds are computed once per active evaluation problem from a reference-plan sample generated with NumPy seed 20260713: the empty plan, all 72 single-action plans, and 2048 random plans greedily restricted to the budget, followed by a 5\% span margin. No method output sets these bounds. Hypervolume normalization is clipped to \([0,1]\); search scalarization and compromise selection use the corresponding affine values without clipping. The worst-envelope hypervolume evaluates the mean-front plans using per-objective maxima over the 16 evaluation scenarios and its own fixed bounds. An empty feasible front scores zero.
 
-Statistical comparisons are two-sided Mann--Whitney U tests between SHIELD-MOEA and each of eight stochastic opponents per experiment (\(n=30\) per group), with Holm correction {[}44{]} within each experiment. Rank-biserial correlation and 5000-resample bootstrap intervals report effect size and mean-difference uncertainty. The deterministic rules receive point comparisons without seed-level p-values. All reported conclusions use the method-independent standard hypervolume defined below.
+Statistical comparisons are two-sided Mann--Whitney U tests between SHIELD-MOEA and each of eight stochastic opponents per archive label (\(n=30\) per group), with Holm correction {[}44{]} within each label. Rank-biserial correlation and 5000-resample bootstrap intervals report effect size and mean-difference uncertainty. The deterministic rules receive point comparisons without seed-level p-values. All reported conclusions use the method-independent standard hypervolume defined below.
 
-For reproducibility, the transformations between raw objectives, fronts, statistics, and the AC check are specified explicitly. For objective \(j\), the fixed reference sample supplies lower and upper bounds \(l_j\) and \(u_j\); every feasible objective vector is mapped by
+For reproducibility, the transformations between raw objectives, fronts, statistics, and the AC check are specified explicitly. The final front is first formed in raw objective space:
 
 \[
-\tilde f_j(x)=\min\!\left\{1,\max\!\left[0,\frac{f_j(x)-l_j}{u_j-l_j}\right]\right\}.
+\mathcal{P}_{mer}=\left\{x\in\mathcal{X}_{mer}:C(x)\leq B,\ \nexists y\in\mathcal{X}_{mer}\text{ with }F(y)\prec F(x)\right\}.
 \]
 
-The feasible non-dominated set returned by method \(m\) in experiment \(e\) and seed \(r\) is
+For objective \(j\), the evaluation reference sample supplies \(l_j\) and \(u_j\). Hypervolume then uses
 
 \[
-\mathcal{P}_{mer}=\left\{x\in\mathcal{X}_{mer}:C(x)\leq B,\ \nexists y\in\mathcal{X}_{mer}\text{ with }\tilde F(y)\prec\tilde F(x)\right\}.
+\widehat f_j(x)=\min\!\left\{1,\max\!\left[0,\frac{f_j(x)-l_j}{u_j-l_j}\right]\right\}.
 \]
 
 With reference point \(z^{\mathrm{ref}}=(1.1,\ldots,1.1)\), the primary score is the dominated union volume
 
 \[
-HV(\mathcal{P}_{mer})=\lambda_d\!\left(\bigcup_{x\in\mathcal{P}_{mer}}[\tilde F(x),z^{\mathrm{ref}}]\right),
+HV(\mathcal{P}_{mer})=\lambda_d\!\left(\bigcup_{x\in\mathcal{P}_{mer}}[\widehat F(x),z^{\mathrm{ref}}]\right),
 \]
 
 where \(\lambda_d\) denotes \(d\)-dimensional Lebesgue measure. The tail-oriented readout replaces each scenario-dependent objective by its observed maximum on the frozen evaluation scenarios,
@@ -361,19 +405,26 @@ where \(\lambda_d\) denotes \(d\)-dimensional Lebesgue measure. The tail-oriente
 f_j^{\mathrm{wc}}(x)=\max_{s\in\mathcal{S}_{\mathrm{eval}}}f_j(x,s),
 \]
 
-before applying the same fixed-bound hypervolume construction. For two seed samples of size \(n_1\) and \(n_2\), the reported rank statistic is
+before applying the same fixed-bound hypervolume construction to the same \(\mathcal P_{mer}\) plans. The exported compromise is selected from the mean-objective front by an equal-weight affine sum without clipping,
+
+\[
+x_{mer}^{\star}=\operatorname*{arg\,min}_{x\in\mathcal P_{mer}}
+\sum_{j=1}^{5}\frac{f_j(x)-l_j}{u_j-l_j}.
+\]
+
+Only the counts of the four action kinds for \(r=0\) are exported to the AC mapper; nodal identities are discarded, and the first minimum is used if the array order contains a tie. For two seed samples of size \(n_1\) and \(n_2\), the reported rank statistic is
 
 \[
 U_1=n_1n_2+\frac{n_1(n_1+1)}{2}-\sum_{i=1}^{n_1}R_i,
 \]
 
-and the monotone Holm adjustment over the \(M\) within-experiment comparisons is
+and the monotone Holm adjustment over the \(M\) within-label comparisons is
 
 \[
 p^{\mathrm{Holm}}_{(i)}=\max_{k\leq i}\min\!\left\{1,(M-k+1)p_{(k)}\right\}.
 \]
 
-Finally, screening workload is reported independently of wall-clock time. Including both active-set union evaluation and the full-set ranking rounds, the recorded reduction relative to full-scenario union evaluation is
+Finally, screening workload is reported independently of wall-clock time. Including both active-set union evaluation and full-set ranking rounds, the static code-path reduction relative to full-scenario union evaluation is
 
 \[
 \eta_{\mathrm{screen}}=1-\frac{GN_uK+N_rN_p|\mathcal S|}{GN_u|\mathcal S|}=1-\frac{17{,}920}{51{,}200}=0.65.
@@ -391,13 +442,13 @@ I_{\mathrm{AC}}=I(\mathrm{converged})\,I\!\left(0.95\leq V_b\leq1.05\ \forall b\
 
 \subsection{Main Comparison}\label{main-comparison}
 
-Table 3 pools all 8 experiments x 30 seeds; Figure 2 shows the per-experiment distributions for the six main methods and the pooled mean-versus-worst-case panel.
+Table 3 pools all 8 labels \(\times\) 30 seed indices; Figure 2 shows label-level distributions for the six main methods and the pooled mean-versus-worst-envelope panel. This pooled view weights the reference proxy configuration four times because \texttt{deterministic\_vs\_scenario}, \texttt{der\_uncertainty}, \texttt{scenario\_screening\_efficiency}, and \texttt{pareto\_quality} differ only in optimizer seed streams under the p4 equations. It is therefore descriptive over archived blocks, not an equally weighted average over eight distinct uncertainty regimes.
 
 \begin{table*}[t]
 \centering
 \scriptsize
 \setlength{\tabcolsep}{3pt}
-\caption{Pooled leaderboard across eight experiments. Stochastic methods have 240 runs; deterministic rules summarize eight unique outputs retained as 240 repeated provenance rows.}\label{tab:3}
+\caption{Pooled leaderboard across eight archive labels. Stochastic methods have 240 runs; deterministic rules summarize eight unique outputs retained as 240 repeated provenance rows.}\label{tab:3}
 \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
 \toprule
 Method & Role & Mean HV & Std & Worst-case HV & Mean front size & Mean runtime (s) \\
@@ -417,7 +468,7 @@ MOEA/D & baseline & 0.00047 & 0.00002 & 0.00047 & 1.0 & 0.450 \\
 \end{tabularx}
 \end{table*}
 
-SHIELD-MOEA attains pooled mean hypervolume 0.27396 (std 0.02700), 5.09\% above NSGA-II+Repair (0.26070) and 5.56\% above plain NSGA-II. Repair explains part of the advantage, but targeted controls do not assign the remainder uniquely to screening or hybrid variation. All 32 comparisons with four stochastic baselines are Holm-significant wins, with no significant loss to any stochastic opponent. Weighted Sum and Deterministic Planning are lower in all sixteen descriptive experiment-level gaps and receive no seed-level tests.
+SHIELD-MOEA attains pooled mean hypervolume 0.27396 (std 0.02700), 5.09\% above NSGA-II with post-hoc final-population repair (0.26070) and 5.56\% above plain NSGA-II. Repair explains part of the advantage, but targeted controls do not assign the remainder uniquely to screening or hybrid variation. All 32 comparisons with four stochastic baselines are Holm-significant wins, with no significant loss to any stochastic opponent. Weighted Sum and Deterministic Planning are lower in all sixteen descriptive label-level gaps and receive no seed-level tests.
 
 \begin{table*}[t]
 \centering
@@ -440,14 +491,14 @@ unseen\_stress\_generalization & 0.24650 & 0.23247 & 0.01403 [0.00761, 0.02033] 
 \end{tabularx}
 \end{table*}
 
-The margin is largest in outage\_contingency (+6.97\%) and der\_uncertainty (+6.54\%) and remains positive in unseen\_stress\_generalization (+6.04\%). The latter tests resistance to the frozen search ranges; it does not certify absence of scenario-distribution specialization.
+The margin is largest in \texttt{outage\_contingency} (+6.97\%) and in the inactive-factor block labeled \texttt{der\_uncertainty} (+6.54\%), and remains positive in \texttt{unseen\_stress\_generalization} (+6.04\%). The \texttt{der\_uncertainty} margin cannot be attributed to \(\delta\) because that coordinate is unused by p4 objectives; it reflects another optimizer seed stream on the reference proxy. The unseen-stress label tests changed held-out load and outage ranges, not DER-output shift, and does not certify absence of scenario-distribution specialization.
 
 Three baseline behaviors deserve honest annotation rather than silence. First, MOEA/D collapses on this problem (pooled HV 0.00047): with the budget handled as a penalty, its decomposition weights drive it to near-empty portfolios (mean selected actions 0.004). We report it as configured and note that a constraint-domination variant might fare better; the competitive comparison is carried by NSGA-II. Second, the single-solution methods (GA, Weighted Sum, Deterministic Planning) return one plan by construction, so their hypervolume measures the quality of a point, not a front. Third, runtimes are of the same order for the population methods (SHIELD-MOEA 0.089 s vs.~NSGA-II 0.092 s per run at this instance size); no efficiency claim is made from wall-clock at this scale.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.94\textwidth]{figures/fig_hv_boxplot.png}
-\caption{Hypervolume distributions across eight experiments (30 seeds per box for stochastic methods); deterministic rules are point estimates. The bottom panel pairs each method's pooled mean HV (filled) with its sampled worst-envelope HV (open).}\label{fig:2}
+\caption{Hypervolume distributions across eight archive labels (30 seeds per box for stochastic methods); deterministic rules are point estimates. The panel text “DER uncertainty” is the preserved archive identifier, not an active-factor claim: $\delta$ is absent from p4 objectives. The bottom panel pairs each method's pooled mean HV (filled) with its sampled worst-envelope HV (open).}\label{fig:2}
 \end{figure*}
 
 \subsection{Sampled Worst-Envelope Readout}\label{sampled-worst-envelope-readout}
@@ -461,30 +512,30 @@ Figure 3 compares the full method against the four single-switch ablations, pool
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.94\textwidth]{figures/fig_ablation.png}
-\caption{Mean hypervolume (+/- std over 8 experiments x 30 seeds) of SHIELD-MOEA and the four ablations. Callouts give the relative difference to the full method and the number of experiments (out of 8) in which the difference is Holm-significant.}\label{fig:3}
+\caption{Mean hypervolume (+/- std over 8 archive labels $\times$ 30 seed indices) of SHIELD-MOEA and the four ablations. The plotted legacy label “No resilience objective” means removal of survivability from environmental selection only; screening retains the five-objective scalar. Callouts give the relative difference to the full method and the number of labels (out of 8) in which the difference is Holm-significant.}\label{fig:3}
 \end{figure*}
 
 The attribution, stated without embellishment:
 
 \begin{itemize}
 \item
-  \textbf{Feasibility repair is the main contributor.} Disabling it costs 8.10\% of pooled hypervolume (0.25176 vs.~0.27396) and is Holm-significant in all 8 experiments. Without repair, offspring that overshoot the budget survive as infeasible passengers, and the feasible front the evaluator extracts is built from a thinner effective population.
+  \textbf{SHIELD's repair schedule is the main contributor.} Disabling it costs 8.10\% of pooled hypervolume (0.25176 vs.~0.27396) and is Holm-significant in all 8 labels. Without repair, infeasible plans can occupy slots when too few feasible solutions are available, thinning the feasible population evaluated at the end.
 \item
-  \textbf{Outage exposure is associated with a larger AC composition difference in outage-heavy settings.} Under the primary within-experiment opponent families, zeroing outage severity is significant in outage\_contingency (\(p=0.032\)) and restoration\_aware\_evaluation (\(p=0.009\)). Under the supplementary outage-ablation family across eight experiments, only restoration\_aware\_evaluation remains significant (\(p=0.024\); outage\_contingency \(p=0.075\)). The fixed-mapping AC layer shows a descriptive composition difference (Section 6.5), not a seeded causal effect.
+  \textbf{Outage exposure is associated with a larger AC composition difference in outage-heavy settings.} Under the primary within-label opponent families, zeroing outage severity is significant in \texttt{outage\_contingency} (\(p=0.032\)) and \texttt{restoration\_aware\_evaluation} (\(p=0.009\)). Under the supplementary outage-ablation family across eight labels, only \texttt{restoration\_aware\_evaluation} remains significant (\(p=0.024\); \texttt{outage\_contingency} \(p=0.075\)). The fixed-mapping AC layer shows a descriptive composition difference (Section 6.5), not a seeded causal effect.
 \item
-  \textbf{Scenario screening reduces recorded evaluations without a resolved front-quality difference.} The screening-off ablation is nominally 0.48\% higher and is unresolved in every experiment. Screening removes 65\% of the implementation's plan--scenario objective calls (Section 4.3), but equivalence was not tested. At this instance size, bookkeeping offsets the call reduction in wall-clock time (0.089 s versus 0.079 s per run); a deployment-time saving remains a hypothesis for simulators with expensive scenario evaluation.
+  \textbf{Scenario screening has a lower static call count without a resolved front-quality difference.} The screening-off ablation is nominally 0.48\% lower and is unresolved in every label. Static code-path arithmetic is 65\% lower for screening (Section 4.3), but the implementation does not instrument that count and equivalence was not tested. At this instance size, the full method is slower in the archived runtimes (0.089 s versus 0.079 s per run); a deployment-time saving remains a hypothesis for simulators with expensive scenario evaluation.
 \item
-  \textbf{The explicit resilience objective does not raise mean hypervolume -- a negative result we retain in the headline.} Hiding the survivability column from search selection yields a pooled mean of 0.27467, nominally +0.26\% above the full method, not Holm-significant in any experiment (0/8; the per-experiment mean difference ranges from -0.0035 to +0.0039 in absolute HV, i.e., the sign itself is unstable). The mechanistic reading is that survivability, as constructed, is correlated with the reliability objective through shared resilience-bearing actions (storage, automation), so four-objective search selects nearly the same plans. We keep the objective because it exposes the cost-survivability trade-off explicitly on the returned front -- a decision-support property the planner loses otherwise -- but we do not claim it improves search quality.
+  \textbf{Removing survivability from environmental selection does not raise mean hypervolume.} The ablation yields pooled mean 0.27467, nominally +0.26\% above the full method, and is not Holm-significant in any label (0/8; the label-level mean difference ranges from -0.0035 to +0.0039 in absolute HV). This is not a complete no-survivability-search ablation because the five-objective screening score remains active. The supported conclusion is limited to environmental selection: retaining the survivability column exposes a cost--survivability decision coordinate, but no search-quality gain is detected for that use.
 \end{itemize}
 
-\textbf{Targeted variation and screening controls.} Three additional controls use the identical eight experiments, 30 seeds, population, generations, search/evaluation split, normalization, and evaluation budget (720 runs). Pooled mean HV is 0.27425 for DE-only, 0.27408 for a worst-\(K\) set fixed after generation 1, 0.27396 for SHIELD-MOEA, and 0.27014 for GA-only. After Holm correction within each experiment, the full hybrid significantly exceeds GA-only in 3/8 experiments and is inseparable in the other five; it is inseparable from DE-only and fixed worst-\(K\) in all eight. Thus the data support neither a hybrid-variation gain nor a dynamic-re-screening gain. The narrower interpretation is that the full stack is strong relative to the external baselines, repair is load-bearing, and screening reduces objective-call count; DE-only and one-shot worst-\(K\) are credible engineering simplifications on this benchmark.
+\textbf{Targeted variation and screening controls.} Three additional controls use the same eight labels, 30 seed indices, population, generations, search/evaluation split, normalization, and evaluation schedule (720 runs). Pooled mean HV is 0.27425 for DE-only, 0.27408 for a worst-\(K\) set fixed after generation 1, 0.27396 for SHIELD-MOEA, and 0.27014 for GA-only. After Holm correction within each label, the full hybrid significantly exceeds GA-only in 3/8 labels and is inseparable in the other five; it is inseparable from DE-only and fixed worst-\(K\) in all eight. Thus the data support neither a hybrid-variation gain nor a dynamic-re-screening gain. The narrower interpretation is that the full stack is strong relative to the external baselines, repair is load-bearing, and screening has a lower static objective-row count; DE-only and one-shot worst-\(K\) are credible engineering simplifications on this benchmark.
 
-Figure 4 shows the seed-level distributions for those controls. The pooled view is descriptive because scenario-specific scales differ; the formal verdict remains the per-experiment Holm analysis. It nevertheless makes both null results visible: the full method overlaps DE-only and fixed worst-K, while GA-only is lower in only part of the experiment set.
+Figure 4 shows the seed-level distributions for those controls. The pooled view is descriptive because label-specific scales differ; the formal verdict remains the within-label Holm analysis. It nevertheless makes both null results visible: the full method overlaps DE-only and fixed worst-\(K\), while GA-only is lower in only part of the archive.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.94\textwidth]{figures/fig_mechanism_controls.png}
-\caption{Seed-level mechanism controls across eight experiments (240 runs per method). (a) Mean-front hypervolume; (b) worst-case hypervolume. Boxes pool experiments and seeds and are therefore descriptive. Per-experiment Holm tests show no separation between the full method and DE-only or fixed worst-K in 8/8 experiments; the full method exceeds GA-only in 3/8.}\label{fig:4}
+\caption{Seed-level mechanism controls across eight archive labels (240 runs per method). (a) Mean-front hypervolume; (b) sampled worst-envelope hypervolume. Boxes pool labels and seeds and are therefore descriptive. Within-label Holm tests show no separation between the full method and DE-only or fixed worst-$K$ in 8/8 labels; the full method exceeds GA-only in 3/8.}\label{fig:4}
 \end{figure*}
 
 \subsection{Parameter Sensitivity Analysis}\label{parameter-sensitivity-analysis}
@@ -525,9 +576,9 @@ SHIELD-MOEA has a higher mean than NSGA-II at all nine parameter points, with a 
 
 \subsection{AC Power-Flow Validation on Six Distribution Networks}\label{ac-power-flow-validation-on-six-distribution-networks}
 
-Hypervolume on proxy objectives cannot certify electrical feasibility. The seed-0 compromise composition from each method and experiment is therefore mapped onto four SimBench MV networks (rural, semi-urban, urban, and commercial), the CIGRE MV benchmark, and the IEEE 33-bus feeder. Fixed rules parallel the most-loaded lines, attach storage to the weakest-voltage load buses at $\pm$3\% of net load, and add PV equal to 4\% of net load at the highest-load buses. Automation has no steady-state effect. The identical mapping logic is used across network families; no per-network optimizer tuning is performed.
+Hypervolume on proxy objectives cannot certify electrical feasibility. For three selected archive labels, the \(r=0\) equal-sum compromise is reduced to counts of reinforcement, storage, DER, and automation actions and mapped onto four SimBench MV networks (rural, semi-urban, urban, and commercial), the CIGRE MV benchmark, and the IEEE 33-bus feeder. Fixed rules parallel the most-loaded lines, attach storage to the weakest-voltage load buses at $\pm$3\% of net load, and add PV equal to 4\% of net load at the highest-load buses. Automation has no steady-state effect. The original candidate identities are not transported, the identical mapping logic is used across network families, and no per-network optimizer tuning is performed.
 
-Pandapower {[}45{]} solves AC power flow under base, 1.3x peak, 1.5x growth, 1.8x extreme growth, high-DER backfeed, and 1.5x growth with an \(N-1\) outage. The AC layer covers deterministic\_vs\_scenario, der\_uncertainty, and outage\_contingency, which expose the reference, widened DER, and elevated outage axes. A case is feasible when power flow converges, voltages remain within \([0.95,1.05]\) pu, and line loading does not exceed 100\%.
+Pandapower {[}45{]} solves AC power flow under base, 1.3x peak, 1.5x growth, 1.8x extreme growth, high-DER backfeed, and 1.5x growth with an \(N-1\) outage. The selected planning labels are \texttt{deterministic\_vs\_scenario}, \texttt{der\_uncertainty}, and \texttt{outage\_contingency}; the middle label supplies a separate \(r=0\) optimizer composition but is not a DER-aware planning result because \(\delta\) is inactive in p4. DER-output stress enters here through the high-DER AC operating case. A case is feasible when power flow converges, voltages remain within \([0.95,1.05]\) pu, and line loading does not exceed 100\%.
 
 Each of the twelve planning/reference configurations faces \(3\times6\times6=108\) cases, for 1296 AC solves in total. The readout is a qualitative composition-level consistency check, not a seeded replication of the proxy comparison. Table 6 reports the aggregate results; Section 6.7 separates the network families.
 
@@ -566,7 +617,7 @@ Three findings, in decreasing order of importance:
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \item
-  \textbf{The plans improve aggregate feasibility but do not lead the field.} SHIELD-MOEA's compositions are AC-feasible in 68.5\% of cases (62.2\% under stress-only), against a no-plan reference of 38.9\% (33.3\% stress-only). Mean minimum voltage improves from 0.940 to 0.969 pu and mean maximum loading falls from 78.6\% to 52.7\%. Matched-repair NSGA-II is slightly higher in feasibility (69.4\%), so no AC-superiority claim is made.
+  \textbf{The mapped compositions improve aggregate feasibility but do not lead the field.} SHIELD-MOEA's compositions are AC-feasible in 68.5\% of cases (62.2\% under stress-only), against a no-plan reference of 38.9\% (33.3\% stress-only). Mean minimum voltage improves from 0.940 to 0.969 pu and mean maximum loading falls from 78.6\% to 52.7\%. Post-hoc-repaired NSGA-II is slightly higher in feasibility (69.4\%), so no AC-superiority claim is made.
 \item
   \textbf{Outage-aware search is the component the physics layer differentiates.} The NoOutage ablation--identical except that search never experiences outage severity--drops to an AC-feasible rate of 0.574 (0.533 stress-only), while mean maximum loading rises to 67.0\%. This is composition-level differential evidence, not a seeded causal estimate; it shows that the proxy-level ablation understates a physically relevant change.
 \item
@@ -575,12 +626,12 @@ Three findings, in decreasing order of importance:
 
 \subsection{Quality--Cost and Resilience-Composition Diagnostics}\label{qualitycost-and-resilience-composition-diagnostics}
 
-The pooled leaderboard alone cannot distinguish a method that is accurate but computationally wasteful from one that obtains a comparable front with less scenario exposure. Figure 7 therefore places each principal method in the mean-hypervolume/runtime plane using all archived experiment-seed records. The chart is descriptive: runtimes are sub-second and proxy evaluation is vectorized, so the horizontal coordinate is not a deployment benchmark. It nevertheless shows that SHIELD-MOEA occupies the high-hypervolume region with a runtime comparable to NSGA-II, whereas the penalty-based MOEA/D configuration is both slower and ineffective on the constrained binary problem. The strongest nominal result belongs to the NoResilienceObjective ablation, not to the full method; its difference from SHIELD-MOEA is only 0.26\%, and the contrast remains unresolved in all eight experiments.
+The pooled leaderboard alone cannot distinguish a method that is accurate but computationally wasteful from one that obtains a comparable front with less scenario exposure. Figure 7 therefore places each principal method in the mean-hypervolume/runtime plane using all archived label--seed records. The chart is descriptive: runtimes are sub-second and proxy evaluation is vectorized, so the horizontal coordinate is not a deployment benchmark. It nevertheless shows that SHIELD-MOEA occupies the high-hypervolume region with a runtime comparable to NSGA-II, whereas the configured 35-member penalty-based MOEA/D is both slower and ineffective on this constrained binary problem. The strongest nominal result belongs to the NoResilienceObjective ablation, not to the full method; its difference from SHIELD-MOEA is only 0.26\%, and the contrast remains unresolved in all eight labels.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.94\textwidth]{figures/fig_quality_cost_tradeoff.png}
-\caption{Mean hypervolume versus mean runtime over the eight experiments and 30 seeds. Marker area represents mean feasible-front size. The proposed method is highlighted for identification, not to imply statistical dominance over the neighboring ablations.}\label{fig:7}
+\caption{Mean hypervolume versus mean runtime over the eight archive labels and 30 seed indices. Marker area represents mean feasible-front size. The proposed method is highlighted for identification, not to imply statistical dominance over the neighboring ablations.}\label{fig:7}
 \end{figure*}
 
 \begin{table*}[t]
@@ -600,7 +651,7 @@ NoRepair & 0.25176 & 0.0583 & -8.10\% & repair is load-bearing \\
 \end{tabularx}
 \end{table*}
 
-Tables 3 and 7 use the same archived run records, with Table 7 retaining more decimals for selected methods. With \(K=4\) of 16 scenarios, active-set union evaluation is 75\% smaller than full-scenario union evaluation. Eight full-set ranking rounds add 5120 calls, yielding 17,920 calls versus 51,200 (65\% lower). These are objective-call counts, not measured energy or time savings.
+Tables 3 and 7 use the same archived run records, with Table 7 retaining more decimals for selected methods. With \(K=4\) of 16 scenarios, active-set union evaluation is 75\% smaller than full-scenario union evaluation. Eight full-set ranking rounds add 5120 objective rows, yielding a static total of 17,920 rows versus 51,200 (65\% lower). These are code-path objective-row counts, not instrumented calls or measured energy or time savings.
 
 Figure 8 separates the mean robustness score from its reliability and survivability components. SHIELD-MOEA has pooled reliability 0.9958, survivability 0.9940, and worst-case HV 0.2691. NSGA-II has slightly higher reliability (0.9972) but lower worst-case HV (0.2554); NoScenarioScreen has slightly higher survivability (0.9954) and a similar worst-case HV (0.2680). These crossed rankings are exactly why the paper does not describe the explicit resilience objective or dynamic screening as independently accuracy-improving mechanisms.
 
@@ -619,38 +670,38 @@ Figure 8 separates the mean robustness score from its reliability and survivabil
 \toprule
 Question & Evaluated comparison & Statistical result & Supported conclusion \\
 \midrule
-Is repair necessary? & SHIELD vs. NoRepair & significant in 8/8 experiments & yes, for front quality \\
-Is a front-quality difference detected for screening? & SHIELD vs. NoScenarioScreen & no significant difference in 8/8 & no difference detected; equivalence not tested \\
-Is periodic re-screening better than a fixed worst-$K$ set? & SHIELD vs. fixed generation-1 worst-$K$ & no significant difference in 8/8 & not established \\
-Does hybrid variation beat DE-only? & SHIELD vs. DE-only & no significant difference in 8/8 & not established \\
+Is SHIELD's repair schedule necessary? & SHIELD vs. NoRepair & significant in 8/8 labels & yes, for front quality in this stack \\
+Is a front-quality difference detected for screening? & SHIELD vs. NoScenarioScreen & no significant difference in 8/8 labels & no difference detected; equivalence not tested \\
+Is periodic re-screening better than a fixed worst-$K$ set? & SHIELD vs. fixed generation-1 worst-$K$ & no significant difference in 8/8 labels & not established \\
+Does hybrid variation beat DE-only? & SHIELD vs. DE-only & no significant difference in 8/8 labels & not established \\
 Does outage exposure matter electrically? & SHIELD vs. NoOutage in AC layer & feasible rate 0.685 vs. 0.574 & supported as a composition-level check \\
 \bottomrule
 \end{tabularx}
 \end{table*}
 
-Taken together, the diagnostics define the supported mechanism claims. The full pipeline is competitive in proxy quality and has higher sampled worst-case HV than the tested stochastic baselines, but the current instance is too cheap for a wall-clock speed claim. Its supported elements are deterministic repair, measured scenario-call reduction, disjoint-draw scoring, and a descriptive outage-aware composition check. Hybridization and periodic re-screening remain unresolved design choices awaiting a harder simulator-backed benchmark.
+Taken together, the diagnostics define the supported mechanism claims. The full pipeline is competitive in proxy quality and has higher sampled worst-envelope HV than the tested stochastic baselines, but the current instance is too cheap for a wall-clock speed claim. Its supported elements are SHIELD's deterministic repair schedule, lower static scenario-row arithmetic, disjoint-draw scoring, and a descriptive outage-aware composition check. Hybridization and periodic re-screening remain unresolved design choices awaiting a harder simulator-backed benchmark.
 
 \subsection{Cross-Family AC Transportability}\label{cross-family-ac-transportability}
 
-Figure 9 separates the expanded AC evidence by network family. On the four SimBench networks, SHIELD-MOEA retains the original 0.708 feasible rate. On CIGRE MV it reaches 0.944, compared with 0.167 for no planning, but matched-repair NSGA-II reaches 1.000. On IEEE 33-bus, both SHIELD-MOEA and matched-repair NSGA-II reach only 0.333, compared with 0.167 for no planning. The low absolute IEEE rate shows that a composition rule calibrated on SimBench does not automatically transfer to a radial feeder, even when it improves on doing nothing.
+Figure 9 separates the expanded AC evidence by network family. On the four SimBench networks, SHIELD-MOEA retains the original 0.708 feasible rate. On CIGRE MV it reaches 0.944, compared with 0.167 for no planning, but post-hoc-repaired NSGA-II reaches 1.000. On IEEE 33-bus, both SHIELD-MOEA and post-hoc-repaired NSGA-II reach only 0.333, compared with 0.167 for no planning. The low absolute IEEE rate shows that a composition rule calibrated on SimBench does not automatically transfer to a radial feeder, even when it improves on doing nothing.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.94\textwidth]{figures/fig_cross_family_ac.png}
-\caption{AC-feasible rates and mean minimum bus voltage by network family for the no-plan reference, SHIELD-MOEA, and NSGA-II with matched repair. The dashed voltage line marks the 0.95 pu criterion. Each family uses the same three planning experiments and six operating scenarios. SHIELD-MOEA improves over no planning in every family but does not outperform the matched-repair comparator.}\label{fig:9}
+\caption{AC-feasible rates and mean minimum bus voltage by network family for the no-plan reference, SHIELD-MOEA, and NSGA-II with post-hoc final-population repair. The dashed voltage line marks the 0.95 pu criterion. Each family uses the same three planning-label compositions and six operating scenarios. SHIELD-MOEA improves over no planning in every family but does not outperform this comparator.}\label{fig:9}
 \end{figure*}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
 \section{Discussion}\label{discussion}
 
-\textbf{What the evidence supports, component by component.} The framework-level result is a 5.56\% pooled margin over plain NSGA-II, 32/32 significant stochastic-baseline comparisons, and positive margins in the sampled worst-case and unseen-range diagnostics. Repair contributes most. Screening reduces recorded calls by 65\%, while no quality difference is detected against no screening; periodic re-screening does not beat a fixed generation-1 worst-\(K\) set. Hybrid GA/DE does not beat DE-only. The AC composition check shows a lower feasibility rate when outage exposure is removed (0.574 versus 0.685), but this fixed-mapping difference is descriptive rather than a seeded causal estimate. The method should therefore be read as an evaluated pipeline with repair and direct-reuse leakage control, not as evidence that every named operator is necessary.
+\textbf{What the evidence supports, component by component.} The framework-level result is a 5.56\% pooled margin over plain NSGA-II, 32/32 significant stochastic-baseline comparisons across eight archived labels, and positive margins in the sampled worst-envelope and held-out-load/outage diagnostics. The pooled result is not an eight-regime DER/load/outage estimate because four labels share the reference p4 configuration. Repair contributes most within SHIELD. Screening has 65\% lower static code-path arithmetic while no quality difference is detected against no screening; periodic re-screening does not beat a fixed generation-1 worst-\(K\) set, and hybrid GA/DE does not beat DE-only. The AC composition check shows a lower feasibility rate when outage exposure is removed (0.574 versus 0.685), but this fixed-mapping difference is descriptive rather than a seeded causal estimate. The method should therefore be read as an evaluated load/outage-proxy pipeline with repair and direct-reuse leakage control, not as evidence for DER-output robustness or for the necessity of every named operator.
 
 \textbf{Scenario selection as a design axis.} Screening reduces objective calls, and no quality difference is detected against no screening; equivalence is not established. Dynamic updates also do not outperform a fixed generation-1 worst-\(K\) set. The supported design principle is selective search evaluation with a disjoint scoring set, not periodic adaptation itself. Using one scenario sample for both search decisions and final grading would leave the reported score vulnerable to scenario overfitting.
 
-\textbf{Positioning against CARS-MODE.} The companion study {[}42{]} shares only the candidate-derivation pipeline; it self-adapts operator parameters for an economically framed DER-integration problem, while this paper holds operators fixed and makes scenario exposure adaptive for a resilience-framed problem. Neither method contains the other's mechanism.
+\textbf{Positioning against CARS-MODE.} The companion study {[}42{]} shares the planning runner, candidate derivation, binary-plan representation, evaluation/statistics utilities, seeded archive machinery, and AC mapping. It self-adapts operator parameters for an economically framed DER-integration problem, while this paper fixes the SHIELD operator parameters and studies scenario exposure for a survivability-framed proxy. The method-specific configurations, archives, comparisons, and conclusions are independent even though the infrastructure is not.
 
-\textbf{Practitioner reading.} The full pipeline produces 4.8--7.0\% higher mean hypervolume than matched NSGA-II across the tested regimes. Ablations associate most of this difference with repair rather than screening or hybrid variation. The selected compromise plans have AC-feasible rates within the range of the strongest alternatives and avoid the loading pattern observed for cost-first selection. Removing outage exposure leaves proxy quality nearly unchanged but reduces AC feasibility in the displayed cases, supporting its inclusion when resilience is the planning objective.
+\textbf{Practitioner reading.} The full pipeline produces 4.8--7.0\% higher mean hypervolume than post-hoc-repaired NSGA-II across the archived labels, not eight distinct regimes. Ablations associate most of the framework difference with SHIELD's repair schedule rather than screening or hybrid variation. The selected compromise compositions have AC-feasible rates within the range of the strongest alternatives and avoid the loading pattern observed for cost-first selection. Removing outage exposure leaves proxy quality nearly unchanged but reduces AC feasibility in the displayed cases, supporting its inclusion when resilience is the planning objective.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -661,32 +712,38 @@ We state the boundaries of this study explicitly.
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \item
-  \textbf{Recovery and restoration are not modeled.} The scenario coordinate sigma scales a survivability proxy, and the planning stage does not model post-event restoration, network reconfiguration, or intentional islanding. The N-1 contingency appears only in the AC validation layer. An element-level N-k sampling model with fragility-curve-driven failures and post-event restoration optimization -- in the tradition of {[}10,11{]} -- would deepen the resilience claim and simultaneously decorrelate survivability from reliability (Section 6.3).
+  \textbf{DER-output uncertainty is configured but inactive in the p4 proxy.} The multiplier \(\delta\) enters the hosting diagnostic \(H\), which is omitted from the p4 objective vector. It therefore does not affect p4 search, held-out hypervolume, or compromise choice. The \texttt{der\_uncertainty} label is a reference-configuration replicate under different optimizer seeds, and the \(\delta\) shift in \texttt{unseen\_stress\_generalization} is also inactive. Only the AC high-DER case evaluates electrical DER-output stress.
+\item
+  \textbf{Eight archive labels are not eight distinct proxy regimes.} Four labels share the reference p4 objective configuration; the pooled mean and 32/32 comparison count weight that configuration four times. They summarize the archive and should not be interpreted as broad coverage of eight distinct uncertainty mechanisms.
+\item
+  \textbf{Recovery and restoration are not modeled.} The scenario coordinate \(\sigma\) scales a survivability proxy, and the planning stage does not model post-event restoration, network reconfiguration, or intentional islanding. Despite its name, \texttt{restoration\_aware\_evaluation} applies \(L^e\) in both search and scoring. The \(N-1\) contingency appears only in the AC validation layer. An element-level \(N-k\) sampling model with fragility-curve-driven failures and post-event restoration optimization--in the tradition of {[}10,11{]}--would deepen the resilience claim and simultaneously decorrelate survivability from reliability (Section 6.3).
 \item
   \textbf{Costs are synthetic.} Candidate costs are analytic functions of subnet statistics in an uncalibrated cost unit; no engineering-economic conclusion (payback, budget sizing) should be drawn before calibration against published utility investment data.
 \item
-  \textbf{Single planning benchmark family.} All eight optimization experiments instantiate one 72-candidate pool from one SimBench-derived extraction. CIGRE MV and IEEE 33-bus extend only the AC validation layer; they do not provide independently optimized candidate pools. The component attribution therefore remains specific to the SimBench-derived planning problem.
+  \textbf{Single planning benchmark family.} All optimization labels instantiate one 72-candidate pool from one SimBench complete-mixed extraction. CIGRE MV and IEEE 33-bus extend only the AC validation layer; they do not provide independently optimized candidate pools. The component attribution therefore remains specific to the SimBench-derived planning proxy.
 \item
-  \textbf{The AC layer validates plan compositions, not nodal designs.} Compositions are mapped to six networks by fixed placement rules. A nodal siting/sizing formulation on each feeder would provide a stronger transfer test and may change the low IEEE 33-bus feasible rates.
+  \textbf{The AC layer validates mapped action-kind counts, not plans or nodal designs.} Only seed-index-0 compromise counts are transported to six networks, and fixed rules reconstruct locations. A nodal siting/sizing formulation on each feeder would provide a stronger transfer test and may change the low IEEE 33-bus feasible rates.
 \item
-  \textbf{Statistical caveats are part of the record.} The advantage over NSGA-II loses significance at population size 60 in the sensitivity sweep (p = 0.104), the scenario-screening ablation remains unresolved in all eight experiments, and the NoResilienceObj ablation nominally exceeds the full method; none of these facts is smoothed over in Sections 6.3 and 6.4.
+  \textbf{Statistical caveats are part of the record.} The advantage over NSGA-II loses significance at population size 60 in the sensitivity sweep (\(p=0.104\)), the scenario-screening ablation remains unresolved in all eight labels, and the NoResilienceObj ablation nominally exceeds the full method. Moreover, NoResilienceObj retains survivability in scenario screening, so it tests environmental selection only.
 \item
-  \textbf{Proxy objectives.} The planning-stage objectives are engineering proxies; all electrical statements rest on the pandapower validation layer, and claims outside its coverage (six networks, six scenarios, composition granularity) are not made.
+  \textbf{Proxy objectives and normalization choices bound the claims.} The planning-stage objectives are engineering proxies. Raw objectives define dominance; clipping occurs only inside hypervolume, while search scalarization and compromise choice are unclipped. All electrical statements rest on the pandapower composition layer and do not extend beyond its six networks, six operating cases, and fixed mapping.
 \item
-  \textbf{The worst-case hypervolume is sample-dependent.} As a single-sample worst-case readout over 16 scenarios, it does not bound the true extremal performance of any plan; it is a diagnostic complement to the mean metric, not a certification of robustness.
+  \textbf{The sampled worst-envelope hypervolume is sample-dependent.} It evaluates componentwise maxima over 16 held-out scenarios on the mean-front plans; it neither constructs a worst-objective front nor bounds unobserved tail behavior.
 \item
-  \textbf{Hybrid and dynamic-screening necessity are not established.} The dedicated controls now exist, but they return null results: hybrid GA/DE is statistically inseparable from DE-only, and periodic re-screening is inseparable from a fixed generation-1 worst-K set in all eight experiments. These mechanisms remain motivated defaults, not demonstrated sources of the headline gain.
+  \textbf{Hybrid and dynamic-screening necessity are not established.} The archived controls return null results: hybrid GA/DE is statistically inseparable from DE-only, and periodic re-screening is inseparable from a fixed generation-1 worst-\(K\) set in all eight labels. These mechanisms remain motivated defaults, not demonstrated sources of the headline gain.
+\item
+  \textbf{The strongest repaired NSGA-II comparator is not timing-matched.} Its repair is applied only after constrained NSGA-II returns its final population, whereas SHIELD repairs initialization and every offspring batch before selection. The 5.09\% margin is therefore a framework comparison against post-hoc-repaired NSGA-II, not an isolated repair-timing contrast.
 \end{enumerate}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
 \section{Conclusions}\label{conclusions}
 
-This paper asked how an evolutionary resilience-planning method can use selective scenario exposure without grading final fronts on the same realizations that guided search. SHIELD-MOEA combines worst-\(K\) screening with disjoint search and evaluation draws and reports sampled worst-envelope hypervolume alongside the mean. The experiments support this separation as a reproducible evaluation design; periodic updating itself does not improve front quality relative to a fixed worst-\(K\) control.
+This paper asked how an evolutionary resilience-planning proxy can use selective scenario exposure without grading final fronts on the same realizations that guided search. SHIELD-MOEA combines worst-\(K\) screening with disjoint search and evaluation draws and reports sampled worst-envelope hypervolume alongside the mean. The archive supports this separation as an implemented evaluation design under active load and outage coordinates; it does not supply DER-output-uncertainty evidence, and periodic updating itself does not improve front quality relative to a fixed worst-\(K\) control.
 
-The full method has pooled mean hypervolume 5.09\% above matched-repair NSGA-II and 5.56\% above plain NSGA-II over eight experiments and 30 seeds per stochastic method. It wins all 32 Holm-corrected comparisons with stochastic baselines; sixteen additional deterministic-rule gaps are descriptive and favor SHIELD-MOEA. The method retains a 6.04\% mean margin on unseen stress and a 5.36\% margin on sampled worst-case hypervolume. Across four SimBench networks, CIGRE MV, and IEEE 33-bus, its mapped compositions improve aggregate AC feasibility over no planning (0.685 versus 0.389) but trail matched-repair NSGA-II (0.694).
+The full method has pooled mean hypervolume 5.09\% above post-hoc-repaired NSGA-II and 5.56\% above plain NSGA-II over eight archived labels and 30 seed indices per stochastic method. It wins all 32 Holm-corrected comparisons with stochastic baselines; sixteen additional deterministic-rule gaps are descriptive and favor SHIELD-MOEA. Because four labels share the reference proxy configuration, these counts do not represent eight distinct regimes. The method retains a 6.04\% mean margin under held-out load/outage ranges and a 5.36\% margin on sampled worst-envelope hypervolume. Across four SimBench networks, CIGRE MV, and IEEE 33-bus, its mapped compositions improve aggregate AC feasibility over no planning (0.685 versus 0.389) but trail post-hoc-repaired NSGA-II (0.694).
 
-Component attribution is narrower. Repair contributes most. Screening reduces recorded objective calls; no mean-hypervolume difference is detected, and equivalence is not established. Dynamic re-screening does not beat fixed worst-\(K\); hybrid variation does not beat DE-only; and the resilience objective is a decision-support feature rather than a performance feature. Under the fixed composition mapping, removing outage-aware search reduces six-network AC feasibility from 0.685 to 0.574 and raises mean maximum loading from 52.7\% to 67.0\%.
+Component attribution is narrower. SHIELD's initialization-and-offspring repair contributes most within its own ablation. Screening has lower static objective-row arithmetic; no mean-hypervolume difference is detected, and equivalence is not established. Dynamic re-screening does not beat fixed worst-\(K\); hybrid variation does not beat DE-only; and survivability in environmental selection is a decision-support feature rather than a detected performance feature. Under the fixed composition mapping, removing outage-aware search reduces six-network AC feasibility from 0.685 to 0.574 and raises mean maximum loading from 52.7\% to 67.0\%.
 
 Post-event recovery, element-level \(N-k\) modeling, monetary calibration, a second independently optimized benchmark system, and nodal AC differentiation remain necessary extensions. Within the tested setting, the main contribution is a scenario-selective planning workflow with disjoint final evaluation, a resolved repair effect, and explicit evidence on where screening and hybridization do not add quality.
 
@@ -710,7 +767,7 @@ Not applicable.
 
 \section*{Data Availability Statement}
 
-All data used in this study are public. Candidate and scenario experiments derive from the SimBench complete mixed network \texttt{1-complete\_data-mixed-all-0-sw} (https://simbench.de), while AC validation uses four SimBench MV networks, CIGRE MV, and IEEE 33-bus through pandapower (https://www.pandapower.org). The benchmark code, SHIELD-MOEA implementation, configurations, 2640 main implementation records, 720 targeted-control records, effect and interval tables, cross-scenario ablations, sensitivity sweep, 1296 AC-case records, and figure scripts are included in the supplementary package and are available from the corresponding author. The deterministic rules are treated as \(n=1\) per experiment for inference. A persistent public archive can be supplied before publication, subject to source-data terms. Only candidate generation is shared with CARS-MODE {[}42{]}; problem formulations, algorithms, run archives, and reported comparisons are paper-specific.
+The source networks are public: candidate construction uses SimBench complete mixed network \texttt{1-complete\_data-mixed-all-0-sw} (https://simbench.de), and the AC layer uses four SimBench MV networks, CIGRE MV, and IEEE 33-bus through pandapower (https://www.pandapower.org). This manuscript package contains the derived manuscript tables and figure scripts. A complete executable supplement containing the benchmark runner, its imported shared hypervolume/non-dominance helper, controlling JSON configurations, 2640 main records, 720 targeted-control records, inference/effect tables, sensitivity records, 1296 AC-case records, and control-run orchestration has not yet been assembled in this package; a persistent release URL/DOI and source-data terms require author confirmation. The deterministic rules are treated as \(n=1\) per label for inference. The shared-infrastructure boundary with CARS-MODE {[}42{]} includes the planning runner, source extraction and candidate builder, binary-plan/budget structures, evaluation/statistics utilities, seeded archive machinery, and AC mapping; the research questions, method-specific configurations, run archives, comparisons, and conclusions are paper-specific.
 
 \section*{Acknowledgments}
 
