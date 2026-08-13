@@ -19,9 +19,11 @@
 **Primary analysis:** paired exact sign-flip tests over ten common seeds at cap 0.70, Holm-adjusted within each horizon
 
 The run used disjoint fit, selection, calibration, and test phases with
-horizon embargoes. Ridge penalties, GRU checkpoints, and retrieval blends used
-selection rows only; thresholds used calibration rows only. Raw-source and
-output hashes, the exact command, and the environment are in
+horizon-offset query endpoints. The offset does not require all 48 input rows
+to lie in the downstream phase. Ridge penalties used selection rows; GRU-head
+checkpoints were selected first and retrieval blends second on the same
+selection rows; thresholds used calibration rows only. Raw-source and output
+hashes, the exact command, and the environment are in
 `run_manifest.json`.
 
 ## Primary cap-0.70 findings
@@ -51,11 +53,18 @@ The perfect continuous direct transform does not achieve onset F1 of one
 classifier flags ongoing high-curtailment rows as well as transitions. This is
 a metric-definition limitation, not direct-control prediction error.
 
-Cap sensitivity is descriptive on the same system/year. The selected GRU
-condition is slightly lower-MAE than Persistence only at cap 0.60/1 h and cap
-0.80/24 h; Persistence is lower in the other four cap/lag cells. The fair run
-does not contain the complete v6 method roster and cannot establish a new
-overall leaderboard.
+Cap sensitivity is descriptive on the same system and fixed 8760-row sequence.
+The selected GRU condition is slightly lower-MAE than Persistence only at cap
+0.60/1 h and cap 0.80/24 h; Persistence is lower in the other four cap/lag
+cells. The fair run does not contain the complete v6 method roster and cannot
+establish a new overall leaderboard.
+
+The source files contain 8784 rows, but the frozen historical construction uses
+their first 8760 and the manifest delivery keys end on December 30. Accordingly,
+the cap sensitivity above is on one fixed truncated sequence, not a complete
+calendar year. The fair controls also do not identify a causal benefit of the
+learned embedding: raw-feature k-NN, randomized-space retrieval, alternative
+distances, and $k$ sensitivity were not rerun under this gate.
 
 ## Environment anomaly retained
 

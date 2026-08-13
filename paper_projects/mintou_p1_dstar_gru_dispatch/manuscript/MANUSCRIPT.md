@@ -14,7 +14,7 @@
 
 ## Abstract
 
-Public curtailment-forecasting evaluations remain fragmented across private data, task-specific targets, and incomparable protocols. We build a retrospective benchmark from 8760 delivery-row-indexed RTS-GMLC observations. A fixed 70% system-non-synchronous-penetration-type acceptance rule defines a method-independent proxy, and a transition slice identifies onsets. Source files lack forecast issue timestamps and data-vintage identifiers, so the 1 h and 24 h tasks are retrospective lags, not operational forecasts. The fair run separates fit, checkpoint/hyperparameter selection, threshold calibration, and test with horizon embargoes across ten common GRU seeds. At the primary cap, mean-absolute-error (MAE) selection chooses retrieval-only (head weight zero) for every seed. Against the matched GRU head, retrieval lowers MAE at 1 h (mean paired difference -0.00496069) and 24 h (-0.00220055), with Holm-adjusted exact sign-flip p = 0.01171875 at each lag. This component result does not establish overall superiority: Persistence remains lower-MAE than selected GRU-LSR at both lags (0.00690794 versus 0.00777391 at 1 h; 0.02054651 versus 0.02076857 at 24 h). Onset-targeted selection is not estimable because selection and calibration contain zero positive onsets at both lags; the selected condition consequently equals the head (p = 1). A fixed 0.5 blend raises onset F1 at 1 h under that fallback but is null at 24 h, so neither comparison validates onset-targeted retrieval. Cap-level crossings are descriptive within one system-year. The benchmark supports a paired MAE mechanism result while preserving horizon- and metric-specific negative findings and a non-operational scope.
+Public curtailment-forecasting evaluations remain fragmented across private data, task-specific targets, and incomparable protocols. We build a retrospective benchmark from the first 8760 delivery-row-indexed observations in hashed 8784-row RTS-GMLC source files. A fixed 70% system-non-synchronous-penetration-type acceptance rule defines a method-independent proxy, and a transition slice identifies onsets. Source files lack forecast issue timestamps and data-vintage identifiers, so the 1 h and 24 h tasks are retrospective lags, not operational forecasts. The fair run separates fit, head-first checkpoint/hyperparameter selection, threshold calibration, and test with horizon-offset target boundaries across ten common GRU seeds. At the primary cap, mean-absolute-error (MAE) selection chooses retrieval-only (head weight zero) for every seed. Against the matched GRU head, retrieval lowers MAE at 1 h (mean paired difference -0.00496069) and 24 h (-0.00220055), with Holm-adjusted exact sign-flip p = 0.01171875 at each lag. This component result does not establish overall superiority: Persistence remains lower-MAE than selected GRU-LSR at both lags (0.00690794 versus 0.00777391 at 1 h; 0.02054651 versus 0.02076857 at 24 h). Onset-targeted selection is not estimable because selection and calibration contain zero positive onsets at both lags; the selected condition consequently equals the head (p = 1). A fixed 0.5 blend raises onset F1 at 1 h under that fallback but is null at 24 h, so neither comparison validates onset-targeted retrieval. Cap-level crossings are descriptive within the same 8760-row sequence. The benchmark supports a paired MAE mechanism result while preserving horizon- and metric-specific negative findings and a non-operational scope.
 
 **Index Terms** — renewable energy curtailment, benchmark, reproducibility, analogue retrieval, time-series forecasting, transition detection, RTS-GMLC, naive baselines
 
@@ -24,21 +24,23 @@ Public curtailment-forecasting evaluations remain fragmented across private data
 
 High instantaneous wind and solar shares can force curtailment when acceptance limits bind. International reviews document volumes and causes across multiple systems [1], national studies identify their drivers [2], and planning analyses show that some curtailment can be economically rational [3]. One explicit mechanism is the system non-synchronous penetration (SNSP) limit used on the all-island Irish system for frequency stability [4]. When the cap binds, curtailment follows from load and renewable trajectories, making cap-driven risk forecastable. Day-ahead SNSP forecasting has accordingly been demonstrated on Irish system data [5].
 
-Anticipating curtailment, however, currently has no shared measurement infrastructure. Each study forecasts its own signal on its own (usually private) data with its own evaluation conventions; no public benchmark defines the task, few protocols isolate *onset* rows where curtailment emerges after quiet conditions, and statistical practice is thin. This absence is consequential because curtailment series are sparse and highly persistent: 91.8% of the hours in our benchmark have zero proxy curtailment. Forecasting-methodology research further shows that, on such series, evaluations without strong naive baselines and temporally separated tests can overstate the value of learned methods [7], [8]. A public test system suitable for a retrospective benchmark exists: RTS-GMLC provides a full year of time-synchronized day-ahead scenario series for load, wind, and solar with open licensing [6]. Its rows are indexed by delivery time, but the inspected experimental assets do not preserve forecast issue times or vintages.
+Within the curtailment-forecasting studies cited here, evaluations use task-specific signals, datasets, and protocols; the reviewed corpus does not document a released benchmark that combines an onset slice with seeded inference. The onset slice is sparse in the held-out primary-cap data: 57 of 2627 targets at 1 h and 172 of 2604 targets at 24 h. Forecasting-methodology research shows why strong naive baselines and temporally separated tests matter on sparse, persistent series [7], [8]. RTS-GMLC supplies time-synchronized day-ahead scenario series for load, wind, and solar [6]. The completed run uses the first 8760 of 8784 aligned source rows, whose recorded delivery keys end on December 30; it is not a complete calendar-year sample. The inspected assets also do not preserve forecast issue times or vintages.
 
-A second, older gap concerns how forecasting models should use historical analogues. Retrieving similar past situations is a recurring idea in power-system forecasting and decision support. Its uses range from similar-day load forecasting in early expert systems and case-based reasoning for network operations [10] to analog ensembles in weather and renewable forecasting [9] and, more recently, metric learning on power signals. Yet every one of these lines validates retrieval at a single task and a fixed horizon on its own data. Whether the *same* retrieval mechanism helps or hurts as the lag horizon changes has not been measured under controlled conditions in the studies reviewed here.
+A second, older gap concerns how forecasting models should use historical analogues. Retrieving similar past situations is a recurring idea in power-system forecasting and decision support. Its uses range from similar-day load forecasting in early expert systems and case-based reasoning for network operations [10] to analog ensembles in weather and renewable forecasting [9] and learned similarity on power signals. The cited studies validate retrieval on study-specific tasks and horizons. Within this bounded corpus, we did not identify a checkpoint-matched comparison of the same retrieval path at 1 h and 24 h. This is a search-bounded positioning statement, not an exhaustive state-of-the-art exclusion.
 
 This paper evaluates retrieval as a conditional mechanism rather than assuming that it is uniformly useful. Three research questions organize the study:
 
 - **RQ1:** Under a symmetric temporal gate and MAE-based selection, does learned-space retrieval improve continuous proxy MAE relative to its matched GRU head at 1 h and 24 h?
 - **RQ2:** Does the available pre-test support permit a valid onset-targeted retrieval estimate, and what metric-specific results remain when the declared fallback is triggered?
-- **RQ3:** Do the descriptive GRU-LSR-versus-Persistence orderings remain unchanged when the acceptance cap is varied on the same system-year?
+- **RQ3:** Do the descriptive GRU-LSR-versus-Persistence orderings remain unchanged when the acceptance cap is varied on the same fixed 8760-row sequence?
 
 The contributions follow those questions:
 
-1. **A method-agnostic retrospective benchmark with an explicit information boundary.** The fixed proxy target is separated from model fitting. Fit, selection, calibration, and test phases are disjoint and horizon-embargoed. A target-hour direct transform is retained as a privileged visibility audit, not a forecaster.
-2. **A matched retrieval-control design.** GRU-LSR uses a shared frozen GRU encoder, a fit-only $k=8$ target bank, and selected or fixed head weights. Selected retrieval, fixed 0.5 blending, and the head share checkpoints within each objective, and inference is paired by training seed.
-3. **An evidence-ranked result that keeps failures in scope.** The fair run supports lower MAE for retrieval relative to the matched head at both lags, but Persistence remains lower-MAE at the primary cap. Zero pre-test onset support makes onset-targeted selection inapplicable, and cap crossings remain descriptive within one system-year.
+1. **A method-agnostic retrospective benchmark with an explicit information boundary.** The fixed proxy target is separated from model fitting. Fit, selection, calibration, and test target sets are disjoint, and horizon offsets place each downstream query endpoint within its phase. A target-hour direct transform is retained as a privileged visibility audit, not a forecaster.
+2. **A matched retrieval-control design.** GRU-LSR uses a shared frozen GRU encoder, a fit-only $k=8$ target bank, and selected or fixed head weights. For each objective, the GRU-head checkpoint is selected first; retrieval weights and matched controls then share that checkpoint, and inference is paired by training seed.
+3. **An evidence-ranked result that keeps failures in scope.** The fair run supports lower MAE for retrieval relative to the matched head at both lags, but Persistence remains lower-MAE at the primary cap. Zero pre-test onset support makes onset-targeted selection inapplicable, and cap crossings remain descriptive within one fixed source sequence.
+
+The method claim is deliberately incremental. GRU-LSR introduces no new GRU cell, similarity loss, or neighbor rule; the contribution is the auditable benchmark and checkpoint-matched mechanism evaluation. Because raw-feature and randomized-encoder retrieval controls were not rerun under the fair gate, the experiment identifies the evaluated retrieval prediction path relative to its head, not a causal advantage of learned-space geometry over alternative retrieval spaces.
 
 Section II reviews the relevant literature. Sections III--V define the benchmark, model, and fair comparison. Section VI answers the research questions in evidential order, and Sections VII--IX interpret the findings, limitations, and conclusion.
 
@@ -50,11 +52,11 @@ Section II reviews the relevant literature. Sections III--V define the benchmark
 
 The empirical curtailment literature is predominantly retrospective. Bird et al. [1] review international levels, causes, and mitigation, while Luo et al. [2] analyze China's Three-North wind curtailment. Yasuda et al. [11] relate annual curtailment rate to renewable share, Frew et al. [3] study economically optimal marginal curtailment, and Newbery [12] examines Irish wind build-out against interconnection and storage. These studies quantify or explain curtailment rather than predict its short-horizon onset.
 
-The predictive strand is thin and system-specific. O'Sullivan et al. [4] establish the frequency-stability basis of the Irish SNSP limit — the operational cap that makes curtailment a deterministic function of load and renewable trajectories once it binds. Cardo-Miota et al. [5] forecast day-ahead SNSP trajectories for the same system with a machine-learning pipeline, the closest existing work to curtailment-risk early warning; the target is a continuous penetration signal on one system's data, without a released benchmark or an event-level protocol. Hadian and Naderkhani [13] compare classical and deep models for curtailment time-series point forecasting, finding GRU best, again without reusable evaluation assets. Related net-load forecasting work [14] anticipates the accommodation problem but does not map forecasts to curtailment-risk events. Across the studies reviewed here, we found no public curtailment-risk benchmark that combines an onset-oriented evaluation slice with seeded statistics. The benchmark introduced here is designed to fill that documented gap.
+The predictive strand in the cited corpus is system-specific. O'Sullivan et al. [4] establish the frequency-stability basis of the Irish SNSP limit — an operational constraint that motivates cap-based risk. Cardo-Miota et al. [5] forecast day-ahead SNSP trajectories for the same system with a machine-learning pipeline; its continuous penetration target makes it a close comparator in this corpus, but it does not use the onset protocol studied here. Hadian and Naderkhani [13] compare classical and deep models for curtailment time-series point forecasting on CAISO data and report GRU as the lowest-error model among their evaluated conditions. Related net-load forecasting work [14] anticipates the accommodation problem but does not map forecasts to the transition target defined here. The benchmark contribution is therefore positioned against this cited set; it does not claim an exhaustive literature search, state-of-the-art exclusion, or external expert validation.
 
 ### B. Retrieval, analogues, and metric learning in power system decision support
 
-Reasoning from similar past operating states is a recurring proposal with a long pedigree. Rahman and Bhatnagar [15] encoded similar-day operator heuristics in a 1988 expert-system load forecaster; Mandal et al. [16] retrieved Euclidean similar days to drive several-hour-ahead neural load forecasting; Lora et al. [17] forecast next-day market prices purely by weighted nearest neighbors over historical price trajectories. Case-based reasoning carried the idea into operations proper: Xu et al. [10] run the full retrieve–reuse–revise–retain cycle over network operating cases for coordinated voltage control. In weather-driven forecasting, the analog ensemble of Delle Monache et al. [9] retrieves the most similar past forecasts and uses their verifying observations as a predictive distribution, with successful transfers to wind power [18] and solar power [19]. Most recently, metric learning has replaced hand-crafted similarity: Siamese networks learn embeddings for appliance identification in non-intrusive load monitoring [20] and, combined with k-NN, for power-quality disturbance classification [21].
+Reasoning from similar past operating states is a recurring proposal with a long pedigree. Rahman and Bhatnagar [15] encoded similar-day operator heuristics in a 1988 expert-system load forecaster; Mandal et al. [16] retrieved Euclidean similar days to drive several-hour-ahead neural load forecasting; Lora et al. [17] forecast next-day market prices purely by weighted nearest neighbors over historical price trajectories. Case-based reasoning carried the idea into operations proper: Xu et al. [10] run the full retrieve–reuse–revise–retain cycle over network operating cases for coordinated voltage control. In weather-driven forecasting, the analog ensemble of Delle Monache et al. [9] retrieves the most similar past forecasts and uses their verifying observations as a predictive distribution, with transfers to wind power [18] and solar power [19]. Other work learns similarity through Siamese embeddings for appliance identification [20] and power-quality disturbance classification with k-NN [21]. GRU-LSR does not use a Siamese, contrastive, or pairwise objective; its space is learned only through the forecasting loss.
 
 Across the reviewed retrieval studies, validation is typically confined to one task and one horizon or narrow horizon band on study-specific data. Matched non-retrieval controls are also uncommon, leaving the contribution of retrieval itself difficult to isolate. This paper therefore compares retrieval-only, equal-blend, and head-only predictions at 1 h and 24 h under a shared temporal gate. It also reports when the data cannot support an objective-matched onset comparison.
 
@@ -70,7 +72,7 @@ This literature motivates three design choices: persistence and seasonal-naive a
 
 ### D. Gap statement
 
-At the intersection, two gaps emerge from the literature reviewed here. **(G1)** We found no reproducible public curtailment-risk benchmark that combines a transition protocol with seeded statistics; existing curtailment work is commonly retrospective or uses continuous proxies from private single-system data. **(G2)** Learned-space retrieval has not been evaluated at multiple lags on a common public benchmark with checkpoint-matched retrieval controls and an explicit record of pre-test event support. Contribution 1 addresses G1 within a retrospective scope, while Contributions 2–3 address G2 through the implemented fair comparison and its negative onset-support finding.
+At the intersection, two gaps emerge from the bounded literature set reviewed here. **(G1)** The cited studies do not document a released curtailment-risk benchmark that combines a transition protocol with seeded statistics. **(G2)** Within the cited retrieval studies, we did not identify a multiple-lag public-benchmark evaluation with checkpoint-matched retrieval controls and an explicit record of pre-test event support. Contribution 1 addresses G1 within a retrospective scope, while Contributions 2–3 address G2 through the implemented comparison and its negative onset-support finding. Because no systematic-review protocol or independent domain-expert audit was executed, G1 and G2 are corpus-bounded positioning claims rather than proof of global novelty.
 
 ---
 
@@ -78,7 +80,7 @@ At the intersection, two gaps emerge from the literature reviewed here. **(G1)**
 
 ### A. Method-independent task construction
 
-The benchmark uses 8760 aligned RTS-GMLC delivery rows [6]. System-aggregated load, wind, and solar define a fixed curtailment-risk proxy rather than observed dispatch curtailment. For renewable availability $r_t$, load $d_t$, and acceptance cap $c$, the accepted amount and proxy rate are
+The benchmark uses the first 8760 aligned delivery rows from hashed RTS-GMLC files that each contain 8784 source rows [6]. The manifest records delivery keys from January 1 through December 30, so the executed subset is not described as a complete calendar year. System-aggregated load, wind, and solar define a fixed curtailment-risk proxy rather than observed dispatch curtailment. For renewable availability $r_t$, load $d_t$, and acceptance cap $c$, the accepted amount and proxy rate are
 
 $$
 u_t = \min(r_t, c d_t), \qquad
@@ -87,11 +89,17 @@ $$
 
 The primary cap is $c=0.70$; $c\in\{0.60,0.80\}$ is used only for descriptive sensitivity. The cap is a benchmark policy parameter motivated by SNSP-class operating limits [4], not a universal physical limit. The target is computed once before fitting and is shared by every condition.
 
-Each query contains 48 delivery rows of seven features: load, wind, PV, net load, load ramp, renewable share, and a static branch-rating stress proxy. A window ending at row $s$ predicts the target at delivery row $t=s+h$, where $h\in\{1,24\}$. The source rows contain calendar delivery keys but no forecast-issue timestamp, as-of mapping, release identifier, or vintage. Accordingly, $s$ is a benchmark index and $h$ is a retrospective lag. Neither task is evidence of an operational forecast issued for delivery at $t$.
+Each query contains 48 delivery rows of seven features: load, wind, PV, nonnegative net load, net-load ramp, renewable share, and an engineered branch-informed stress feature. Let $n_t=\max(0,d_t-r_t)$, let $R=\sum_j R_j$ be the sum of positive branch contingency ratings, and let $\bar o=\sum_j R_j(o^{\mathrm{perm}}_j+o^{\mathrm{tran}}_j)/R$. The seventh feature is
+
+$$
+z_t=\min\!\left(1,\;0.55\frac{d_t}{R}+0.25\bar o+0.20\frac{|n_t-n_{t-1}|}{\max(1,d_t)}\right).
+$$
+
+This is an engineered input constructed from static branch aggregates and delivery-row load dynamics; it is not a power-flow, contingency, or feasibility calculation. A window ending at row $s$ predicts the target at delivery row $t=s+h$, where $h\in\{1,24\}$. The source rows contain calendar delivery keys but no forecast-issue timestamp, as-of mapping, release identifier, or vintage. Accordingly, $s$ is a benchmark index and $h$ is a retrospective lag. Neither task is evidence of an operational forecast issued for delivery at $t$.
 
 ### B. Disjoint temporal gate
 
-The completed fair run divides delivery targets into fit (first 50%), selection (next 10%), calibration (next 10%), and test (final 30%) phases. Horizon embargoes exclude targets whose query would cross a preceding phase boundary. Feature normalization, model fitting, and the retrieval bank use fit rows only. Ridge penalties, GRU checkpoints, and retrieval head weights use selection rows only. Detection thresholds use calibration rows only. Test rows are scored once after all artifacts are frozen (Fig. 1).
+The completed fair run places delivery-row boundaries at 4380, 5256, and 6132. Fit targets are below 4380; selection targets start at $4380+h$; calibration targets start at $5256+h$; and test targets start at $6132+h$. These horizon offsets ensure that a query endpoint $s=t-h$ has reached the downstream phase boundary. They do not require all 48 historical rows in a query window to lie in the downstream phase; earlier-phase history within that window is permitted. Feature normalization, model fitting, and the retrieval bank use fit delivery rows only. Ridge penalties and GRU-head checkpoints use selection rows only; with the selected checkpoint fixed, retrieval head weights use the same selection rows. Detection thresholds use calibration rows only. Test rows are scored once after all artifacts are frozen (Fig. 1).
 
 ![Figure 1. Fair temporal gate and onset support.](figures/fig_benchmark_overview.png)
 
@@ -118,7 +126,7 @@ The target-hour `DirectPolicyTransform-Privileged` condition applies the proxy e
 
 ### D. Descriptive cap sensitivity
 
-The complete fair subset is rerun at caps 0.60, 0.70, and 0.80 on the same RTS-GMLC system and weather year. These are method-level scope checks, not independent system-year replications. No cross-cap p-values are computed, and no cap is selected after comparing test performance.
+The complete fair subset is rerun at caps 0.60, 0.70, and 0.80 on the same RTS-GMLC system and fixed 8760-row sequence. These are method-level scope checks, not independent system or year replications. No cross-cap p-values are computed, and no cap is selected after comparing test performance.
 
 ---
 
@@ -144,13 +152,13 @@ $$
 
 **Fig. 2.** Fair-run architecture and information flow. The target-hour direct transform is a privileged visibility audit outside the lag-forecasting path. Selection and calibration are distinct, and held-out inference is paired by training seed.
 
-The paper-facing name is **GRU learned-space retrieval (GRU-LSR)**. The historical string `DSTAR-GRU` is retained only in legacy supplementary archives. The fair run evaluates the conditions in Table 2. For each selection objective and seed, all GRU blend controls share the selected checkpoint, so head-versus-retrieval contrasts do not confound checkpoint choice. Fixed $\alpha=0$, 0.5, and 1 isolate retrieval-only, equal blending, and head-only prediction. The selected condition searches the same grid declared before execution. Persistence, Seasonal-24h, and Ridge are comparison baselines. The privileged direct transform is not ranked as a forecaster.
+The paper-facing name is **GRU learned-space retrieval (GRU-LSR)**. The historical string `DSTAR-GRU` is retained only in legacy supplementary archives. The fair run evaluates the conditions in Table 2. For each objective and seed, the checkpoint is first selected using GRU-head predictions on selection rows. That checkpoint is then frozen while the head-weight grid is evaluated, and all blend controls share it. Head-versus-retrieval contrasts therefore do not confound checkpoint choice, but they remain conditional on a head-selected checkpoint rather than a jointly retrieval-optimized checkpoint. Fixed $\alpha=0$, 0.5, and 1 isolate retrieval-only, equal blending, and head-only prediction. Persistence, Seasonal-24h, and Ridge are comparison baselines. The privileged direct transform is not ranked as a forecaster.
 
 **Table 2.** Fair-run conditions from `config.json` and `run_results.csv`.
 
 | Condition | Role | Frozen information use |
 |---|---|---|
-| GRU-LSR selected | Proposed condition | Selection-chosen checkpoint and $\alpha$; fit-only learned-space bank |
+| GRU-LSR selected | Proposed condition | GRU-head checkpoint selected first, then $\alpha$; fit-only learned-space bank |
 | GRU-LSR Fixed0 | Mechanism control | Retrieval only ($\alpha=0$), same selected checkpoint |
 | GRU-LSR Fixed0.5 | Mechanism control | Equal head/retrieval blend, same selected checkpoint |
 | GRU-LSR Fixed1 | Mechanism control | GRU head only ($\alpha=1$), same selected checkpoint |
@@ -161,13 +169,15 @@ The paper-facing name is **GRU learned-space retrieval (GRU-LSR)**. The historic
 
 The fair subset does not rerun the complete legacy v6 roster. It therefore cannot identify a new overall winner among the historical 14 methods or renew the old ablation claims. Those earlier results remain supplementary historical evidence and are not mixed into the fair-run statistical family.
 
+This boundary also applies to mechanism attribution. The matched controls vary the prediction path after freezing a head-selected checkpoint; they do not compare learned-space retrieval with raw-feature k-NN, a randomized encoder, alternative distances, or a separately tuned $k$. Consequently, the experiment evaluates the complete GRU-LSR procedure but cannot decompose its retrieval gain into representation geometry, neighbor averaging, or regularization by fit-bank targets.
+
 ---
 
 ## V. Experimental Setup
 
 ### A. Comparison budget and fairness
 
-The GRU has one layer, hidden size 48, a linear head, a 20-epoch ceiling, and checkpoints at epochs 5, 10, 15, and 20. Ten common seeds are used. Training minimizes MSE with the frozen Adam equations, learning rate $10^{-3}$, batch size 256, and predictions clipped to $[0,1]$. The retrieval bank is fit-only and uses $k=8$. The head-weight grid is $\{1,0.8,0.6,0.5,0.4,0.2,0\}$. Ridge searches seven frozen penalties from $10^{-6}$ to 10. Both objective arms receive the same data phases and candidate budgets.
+The GRU has one layer, hidden size 48, a linear head, a 20-epoch ceiling, and checkpoints at epochs 5, 10, 15, and 20. Ten common seeds are used. Training minimizes MSE with the frozen Adam equations, learning rate $10^{-3}$, batch size 256, and predictions clipped to $[0,1]$. The retrieval bank is fit-only and uses $k=8$. The head-weight grid is $\{1,0.8,0.6,0.5,0.4,0.2,0\}$. Ridge searches seven frozen penalties from $10^{-6}$ to 10. Both objective arms receive the same data phases and candidate budgets. The frozen sequence is head-checkpoint selection followed by head-weight selection, not joint checkpoint/weight optimization.
 
 **Table 3.** Frozen fair-run hyperparameters and statistical contract.
 
@@ -176,17 +186,17 @@ The GRU has one layer, hidden size 48, a linear head, a 20-epoch ceiling, and ch
 | Series / input | 8760 delivery rows; 48-row windows; seven features |
 | Retrospective lags | 1 h and 24 h |
 | Caps | 0.70 primary; 0.60 and 0.80 descriptive sensitivity |
-| Temporal phases | 50% fit / 10% selection / 10% calibration / 30% test, with horizon embargoes |
+| Temporal phases | boundaries at 50% / 60% / 70%; downstream query endpoint offset by $h$; earlier history in a 48-row window permitted |
 | GRU | one layer; hidden 48; epochs 20; checkpoints 5/10/15/20 |
 | Training | MSE; Adam; learning rate $10^{-3}$; batch 256; ten common seeds |
-| Retrieval | fit-only bank; Euclidean $k=8$; selected and fixed $\alpha\in\{0,0.5,1\}$ controls |
+| Retrieval | fit-only bank; Euclidean $k=8$; head-first checkpoint selection; selected and fixed $\alpha\in\{0,0.5,1\}$ controls |
 | Selection objectives | MAE and onset F1 |
 | Primary analysis | six paired GRU contrasts per lag at cap 0.70 |
 | Test / multiplicity | two-sided exact sign-flip; Holm within each lag |
 
 ### B. Estimand and analysis unit
 
-The primary estimand is the mean paired within-seed treatment-minus-control difference, conditional on the fixed system-year, cap, data phases, feature/metric definitions, checkpoint budget, retrieval bank, and lag. The analysis unit is one paired method-seed run. The 2627 and 2604 test targets at 1 h and 24 h are reused across seeds and are not treated as independent replicates. The exact sign-flip test enumerates sign assignments over the ten paired differences. Holm adjustment covers the frozen six-contrast family separately within each lag. Lower differences favor treatment for MAE; higher differences favor treatment for onset F1.
+The primary estimand is the mean paired within-seed treatment-minus-control difference, conditional on the fixed 8760-row sequence, cap, data phases, feature/metric definitions, head-first checkpoint-selection budget, retrieval bank, and lag. The analysis unit is one paired method-seed run. The 2627 and 2604 test targets at 1 h and 24 h are reused across seeds and are not treated as independent replicates. The two-sided sign-flip calculation enumerates all $2^{10}$ sign assignments of the ten paired differences. Its inferential interpretation assumes that, under a no-effect null for training randomness, the paired differences are sign-exchangeable across the frozen seeds; the seeds were common algorithmic initializations, not randomized experimental assignments. Holm adjustment covers the frozen six-contrast family separately within each lag. Lower differences favor treatment for MAE; higher differences favor treatment for onset F1. The mean paired difference is the scale-specific effect estimate. No confidence interval over seeds or data-resampling interval is available; the exact p-values and win/tie counts characterize only the ten frozen training seeds.
 
 Persistence, Seasonal-24h, the target-selected Ridge conditions, and the direct transform have one deterministic row per cap and lag. Their comparisons are descriptive and receive no seed-based p-value. Cross-cap comparisons are also descriptive. Seed uncertainty covers training randomness only; it does not cover hours, onset events, years, systems, vintages, or deployments.
 
@@ -268,7 +278,7 @@ No stable ordering appears across the six cap-by-lag cells (Table 6 and Fig. 5).
 
 ![Figure 5. Descriptive cap sensitivity.](figures/fig_metric_rank_profile.png)
 
-**Fig. 5.** Selected GRU-LSR minus Persistence MAE at each cap and retrospective lag. Negative values favor GRU-LSR. The values are descriptive scope checks on one system-year; no cross-cap inferential claim is made.
+**Fig. 5.** Selected GRU-LSR minus Persistence MAE at each cap and retrospective lag. Negative values favor GRU-LSR. The values are descriptive scope checks on one fixed 8760-row sequence; no cross-cap inferential claim is made.
 
 The evidence hierarchy is therefore unambiguous. The strongest result is the paired within-seed MAE improvement over the matched GRU head. Persistence remains the lower-MAE primary-cap reference. Onset-targeted selection is unsupported, with a 1 h diagnostic fixed-blend improvement and a 24 h null result retained under that qualification. Cap crossings are descriptive only.
 
@@ -278,9 +288,11 @@ The evidence hierarchy is therefore unambiguous. The strongest result is the pai
 
 ### A. What the paired MAE result supports
 
-Retrieval-only prediction improves on the matched GRU head in every seed at both retrospective lags. Because each comparison shares a selected checkpoint, the result isolates the prediction path more cleanly than a comparison between independently tuned models. It supports the proposition that averaging fit-bank targets from forecasting-trained embeddings can reduce the head's continuous proxy error on this fixed system-year.
+Retrieval-only prediction improves on the matched GRU head in every seed at both retrospective lags. Because each comparison shares the head-selected checkpoint, the result isolates the prediction path more cleanly than a comparison between independently tuned models. It supports the proposition that averaging fit-bank targets from forecasting-trained embeddings can reduce the head's continuous proxy error on this fixed sequence, conditional on the head-first selection design.
 
 The selected head weight of zero narrows the interpretation. The evidence favors the retrieval estimator, not a synergistic mixture of retrieval and the parametric head. Fixed 0.5 blending is better than the head but worse than retrieval-only in all MAE pairs. Claims that the blend combines complementary strengths would therefore exceed the executed result.
+
+The same evidence does not establish that the *learned space* is the cause of the improvement. A parsimonious alternative is that fit-bank target averaging supplies nonparametric smoothing relative to the linear head, independent of whether the forecasting-trained embedding is uniquely useful. A fair raw-feature k-NN or randomized-space control would be required to separate those explanations. The present contribution is therefore an evaluation of GRU-LSR as implemented, not a new representation-learning theory or a state-of-the-art retrieval claim.
 
 ### B. Why the onset question remains unanswered
 
@@ -294,7 +306,7 @@ Persistence remains lower-MAE than MAE-selected GRU-LSR at both primary-cap lags
 
 ### D. Information and application boundary
 
-The analysis unit is a paired seed run, and all results condition on one RTS-GMLC system and one weather year. Repeated hourly targets provide the evaluation surface but not independent replication. The direct transform demonstrates that target-hour scenario rows can reconstruct the proxy exactly, while the missing issuance and vintage fields prevent an operational information gate from being audited. The benchmark supports retrospective mechanism comparison only. It supplies no evidence about day-ahead deployment, operator decisions, economic value, dispatch feasibility, or performance under revised forecast vintages.
+The analysis unit is a paired seed run, and all results condition on one RTS-GMLC system and the first 8760 rows of the hashed 8784-row source files. Repeated hourly targets provide the evaluation surface but not independent replication. The direct transform demonstrates that target-hour scenario rows can reconstruct the proxy exactly, while the missing issuance and vintage fields prevent an operational information gate from being audited. The benchmark supports retrospective mechanism comparison only. It supplies no evidence about day-ahead deployment, operator decisions, economic value, dispatch feasibility, or performance under revised forecast vintages.
 
 ---
 
@@ -303,23 +315,24 @@ The analysis unit is a paired seed run, and all results condition on one RTS-GML
 1. **Retrospective information only.** Source issue timestamps, as-of mappings, and data vintages are absent. The 1 h and 24 h tasks are delivery-row lag evaluations, not operational forecasts.
 2. **Policy-derived proxy.** The target is defined by a fixed SNSP-type acceptance rule. It is not observed curtailment, an operator action, an AC-OPF solution, or a unit-commitment outcome.
 3. **Zero pre-test onset support.** Every selection and calibration phase has zero positive onsets at both lags and all caps. Onset-targeted selection and threshold calibration use fallbacks and do not identify an onset effect.
-4. **Single system and weather year.** No cross-year or cross-system accuracy result is available. Cap sensitivity reuses the same system-year and is descriptive.
-5. **Training-seed analysis unit.** The ten pairs measure training randomness only. They do not quantify uncertainty across hours, onset blocks, years, systems, policies, or deployments.
+4. **Single system and truncated source sequence.** The run uses the first 8760 of 8784 hashed source rows and ends on December 30, so it is not a complete calendar-year evaluation. No cross-year or cross-system accuracy result is available. Cap sensitivity reuses this sequence and is descriptive.
+5. **Training-seed analysis unit and sign-flip assumption.** The ten pairs measure training randomness only. The sign-flip interpretation requires sign-exchangeability of paired differences under the no-effect null; the seeds are algorithmic initializations rather than randomized experimental assignments. The analysis does not quantify uncertainty across hours, onset blocks, years, systems, policies, or deployments, and no interval estimate over those units is available.
 6. **Fair subset rather than full legacy roster.** The fair run does not rerun MLP, LSTM, DLinear, TCN, raw-feature kNN, SmallBank, encoder, or topology ablations. It cannot renew a full 14-method leaderboard or identify an overall fair-run winner.
-7. **Point-prediction metrics.** Probabilistic calibration, utility-weighted errors, and event-block resampling are outside the executed protocol. The inherited onset classifier also does not encode the quiet-state prerequisite in its predicted-positive rule.
-8. **No physical or user validation.** Nothing in the evidence establishes network feasibility, operator usefulness, deployment safety, or economic outcomes.
+7. **Limited mechanism attribution.** Raw-feature k-NN, randomized-encoder retrieval, alternative distances, and $k$ sensitivity were not rerun under the fair gate. The paired result isolates the implemented retrieval prediction path from its head, but not learned geometry from generic neighbor averaging or smoothing.
+8. **Point-prediction metrics.** Probabilistic calibration, utility-weighted errors, and event-block resampling are outside the executed protocol. The inherited onset classifier also does not encode the quiet-state prerequisite in its predicted-positive rule.
+9. **No physical or user validation.** Nothing in the evidence establishes network feasibility, operator usefulness, deployment safety, or economic outcomes.
 
 ---
 
 ## IX. Conclusion
 
-This study provides a manifest-bound retrospective curtailment-risk benchmark and a fair matched evaluation of GRU learned-space retrieval on one RTS-GMLC system-year. The target is method-independent, and the fair run separates fit, selection, calibration, test, and privileged visibility-control roles.
+This study provides a manifest-bound retrospective curtailment-risk benchmark and a fair matched evaluation of GRU learned-space retrieval on one RTS-GMLC system and a fixed 8760-row source sequence. The target is method-independent, and the fair run separates fit, head-first selection, calibration, test, and privileged visibility-control roles.
 
 For continuous proxy error, MAE selection chooses retrieval only in all ten seeds. Relative to the matched GRU head, retrieval lowers MAE at both 1 h and 24 h retrospective lags (Holm-adjusted exact sign-flip $p=0.01171875$ at each lag). The claim remains component-specific: Persistence is lower-MAE than selected GRU-LSR at the primary cap at both lags, and fixed 0.5 blending is worse than retrieval-only.
 
-For onset detection, the fair data do not support target-matched selection because selection and calibration contain zero positive onsets at both lags. Selected GRU-LSR consequently equals the head ($p=1$). A fixed 0.5 blend improves onset F1 at 1 h under the fallback, while the 24 h comparison is null; neither result validates onset-targeted retrieval. The direct transform's subunit onset F1 despite zero continuous error further exposes a metric-definition limitation. Across caps, GRU-LSR-versus-Persistence crossings are descriptive within the same system-year.
+For onset detection, the fair data do not support target-matched selection because selection and calibration contain zero positive onsets at both lags. Selected GRU-LSR consequently equals the head ($p=1$). A fixed 0.5 blend improves onset F1 at 1 h under the fallback, while the 24 h comparison is null; neither result validates onset-targeted retrieval. The direct transform's subunit onset F1 despite zero continuous error further exposes a metric-definition limitation. Across caps, GRU-LSR-versus-Persistence crossings are descriptive within the same fixed sequence.
 
-The evidence therefore supports a paired MAE retrieval effect, not general forecasting superiority, an onset benefit, or operational readiness. Stronger conclusions require issue-time/vintage-aware inputs, positive pre-test onset support, additional system-year units, and physical or user-centered validation.
+The evidence therefore supports a paired MAE effect for the implemented retrieval path relative to its matched head, not a causal advantage of learned geometry, general forecasting superiority, an onset benefit, or operational readiness. Stronger conclusions require raw/randomized retrieval controls, issue-time/vintage-aware inputs, positive pre-test onset support, additional complete year and system units, and physical or user-centered validation.
 
 ---
 

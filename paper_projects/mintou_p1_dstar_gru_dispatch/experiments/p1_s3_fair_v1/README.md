@@ -4,13 +4,15 @@
 does not write to `../../papers/.../evidence` and does not rename or remove any
 prior run.
 
-The run applies one symmetric information gate to Ridge and the learned GRU
-conditions: fit-only normalization and fitting, selection-only checkpoint,
-ridge-penalty, and blend choice, calibration-only onset thresholds, and a
-horizon embargo before every downstream phase. The same selected GRU
+The run applies one symmetric target-phase gate to Ridge and the learned GRU
+conditions: fit-only normalization and fitting, selection-only ridge penalty,
+GRU-head checkpoint and subsequent blend choice, calibration-only onset
+thresholds, and horizon-offset query endpoints before every downstream phase.
+The offset does not require all 48 input rows to lie in the downstream phase;
+earlier-phase history in the window is permitted. The same head-selected GRU
 checkpoint is used for retrieval-on, retrieval-off, and fixed-blend controls.
 This separates retrieval presence from the MAE versus onset-F1 selection
-objective.
+objective, conditional on the head-first checkpoint rule.
 
 The `DirectPolicyTransform-Privileged` control is included because the three
 inspected `DAY_AHEAD_*` files contain load, wind, and PV rows for each target
@@ -20,8 +22,10 @@ happens if target-hour inputs are admitted, but it is not an operational
 forecast because the source has no issue timestamp, as-of mapping, or vintage.
 
 Cap 0.70 is primary. Caps 0.60 and 0.80 are method-level sensitivity reruns on
-the same source series and protocol. Cross-cap differences are descriptive;
-they are not additional independent weather years or systems.
+the same source series and protocol. The source files have 8784 rows, but the
+frozen construction uses their first 8760 and ends on December 30; it is not a
+complete calendar-year sample. Cross-cap differences are descriptive and are
+not additional independent years or systems.
 
 ## Frozen command
 
@@ -45,5 +49,6 @@ $env:PYTHONPATH='D:\aicoding\powergrid_benchmark\.venv_mintou_cuda\Lib\site-pack
 - `run_manifest.json`: hashes, environment, completion state, and output index.
 - `EXPERIMENT_RESULT.md`: evidence-bound run report with a Material Passport.
 
-Do not merge these results into the manuscript narrative during this stage;
-that is the separately approved P1 S4 objective.
+The later P1 S4 manuscript integration and P1 S5 scientific-closure stages use
+this completed namespace as the sole source of main-result claims; the frozen
+run itself remains unchanged.

@@ -233,7 +233,7 @@ def draw_overview(run_rows: list[dict[str, str]], manifest: dict[str, Any]) -> I
         draw.rectangle((cursor, y0, cursor + width, y1), fill=color, outline=SURFACE, width=5)
         centered(draw, (cursor, y0, cursor + width, y1), f"{name}\n{int(fraction*100)}%", fill=SURFACE, face=F_BODY_BOLD)
         cursor += width
-    draw.text((115, 500), "Fit-only normalization/model/bank | selection-only checkpoint, lambda, alpha | calibration-only threshold | held-out scoring", fill=MUTED, font=F_SMALL)
+    draw.text((115, 500), "Fit-only normalization/model/bank | selection-only lambda and head checkpoint, then alpha | calibration-only threshold | held-out scoring", fill=MUTED, font=F_SMALL)
 
     # Panel B: support counts from one representative row per cap/horizon.
     draw.text((100, 590), "(b) Positive onset counts by phase", fill=INK, font=F_SUBTITLE)
@@ -277,26 +277,29 @@ def draw_architecture(config: dict[str, Any]) -> Image.Image:
         "Manifest-bound GRU learned-space retrieval evaluation",
         "The direct transform is a visibility audit; it is not on the lag-forecasting path.",
     )
-    box(draw, (90, 300, 430, 510), "RTS-GMLC\ndelivery rows", outline=BLUE, fill=LIGHT_BLUE)
-    box(draw, (520, 250, 900, 465), "48-row query\nwindow", outline=TEAL, fill=LIGHT_TEAL)
-    box(draw, (520, 555, 900, 770), "Fixed policy\nproxy target", outline=ORANGE, fill=LIGHT_ORANGE)
-    box(draw, (1000, 250, 1380, 465), "Fit-only GRU\nencoder + head", outline=TEAL, fill=LIGHT_TEAL)
-    box(draw, (1000, 555, 1380, 770), f"Fit-only bank\nk={config['retrieval']['k_neighbors']}", outline=TEAL, fill=LIGHT_TEAL)
-    box(draw, (1480, 330, 1840, 690), "alpha controls\n0 / 0.5 / 1\n+ selected alpha", outline=PURPLE, fill="#f2edf9")
-    box(draw, (1940, 260, 2310, 500), "Selection\ncheckpoint / alpha", outline=TEAL, fill=LIGHT_TEAL)
-    box(draw, (1940, 585, 2310, 825), "Calibration\ndetection threshold", outline=ORANGE, fill=LIGHT_ORANGE)
-    arrow(draw, (430, 405), (520, 355))
-    arrow(draw, (430, 405), (520, 665))
-    arrow(draw, (900, 355), (1000, 355))
-    arrow(draw, (900, 665), (1000, 665))
-    arrow(draw, (1380, 355), (1480, 445))
-    arrow(draw, (1380, 665), (1480, 575))
-    arrow(draw, (1840, 445), (1940, 380))
-    arrow(draw, (1840, 575), (1940, 700))
-    box(draw, (1030, 930, 1840, 1150), "Held-out test: MAE + onset metrics\npaired seed-run contrasts; Holm within lag", outline=BLUE, fill=LIGHT_BLUE)
-    arrow(draw, (2125, 825), (1840, 1035))
-    box(draw, (120, 990, 760, 1220), "Privileged direct transform\nuses target-hour rows\n(zero MAE by construction)", outline=RED, fill=LIGHT_RED)
-    arrow(draw, (520, 770), (520, 990), RED)
+    box(draw, (90, 300, 410, 510), "RTS-GMLC\ndelivery rows", outline=BLUE, fill=LIGHT_BLUE)
+    box(draw, (490, 210, 830, 410), "48-row query\nwindow", outline=TEAL, fill=LIGHT_TEAL)
+    box(draw, (490, 540, 830, 740), "Fixed policy\nproxy target", outline=ORANGE, fill=LIGHT_ORANGE)
+    box(draw, (920, 300, 1260, 510), "Fit-only GRU\ncandidate checkpoints", outline=TEAL, fill=LIGHT_TEAL)
+    box(draw, (1350, 210, 1710, 420), "Selection step 1\nhead checkpoint", outline=TEAL, fill=LIGHT_TEAL)
+    box(draw, (1800, 210, 2260, 420), "Frozen selected\nencoder + head", outline=TEAL, fill=LIGHT_TEAL)
+    box(draw, (1290, 560, 1770, 800), f"Selected encoder + fit-only bank\nk={config['retrieval']['k_neighbors']}\nalpha candidates 0 / 0.5 / 1", outline=PURPLE, fill="#f2edf9")
+    box(draw, (1870, 560, 2260, 800), "Selection step 2\nalpha", outline=TEAL, fill=LIGHT_TEAL)
+    box(draw, (1290, 930, 1690, 1140), "Calibration\ndetection threshold", outline=ORANGE, fill=LIGHT_ORANGE)
+    box(draw, (1810, 930, 2280, 1140), "Held-out test\nMAE + onset metrics\npaired seed-run contrasts", outline=BLUE, fill=LIGHT_BLUE)
+    arrow(draw, (410, 405), (490, 310))
+    arrow(draw, (410, 405), (490, 640))
+    arrow(draw, (830, 310), (920, 385))
+    arrow(draw, (830, 640), (920, 455))
+    arrow(draw, (1260, 385), (1350, 315))
+    arrow(draw, (1710, 315), (1800, 315))
+    arrow(draw, (2030, 420), (1660, 560))
+    arrow(draw, (830, 640), (1290, 680))
+    arrow(draw, (1770, 680), (1870, 680))
+    arrow(draw, (2065, 800), (1690, 1035))
+    arrow(draw, (1690, 1035), (1810, 1035))
+    box(draw, (120, 980, 760, 1200), "Privileged direct transform\nuses target-hour rows\n(zero MAE by construction)", outline=RED, fill=LIGHT_RED)
+    arrow(draw, (660, 740), (500, 980), RED)
     draw.text((105, 1310), "Scope boundary: source issue timestamps and vintages are absent; every 1 h/24 h result is a retrospective delivery-row lag result.", fill=RED, font=F_BODY_BOLD)
     return image
 
@@ -428,7 +431,7 @@ def draw_seed_pairs(run_rows: list[dict[str, str]]) -> Image.Image:
 
 def draw_cap_sensitivity(cap_rows: list[dict[str, str]]) -> Image.Image:
     image, draw = new_canvas(
-        "RQ3: descriptive cap sensitivity on one system-year",
+        "RQ3: descriptive cap sensitivity on one fixed sequence",
         "Difference = MAE-selected GRU-LSR minus Persistence; negative favors GRU-LSR. No cross-cap inference is performed.",
     )
     index = {(row["cap"], int(row["horizon_hours"]), row["method"], row["selection_objective"], row["blend_mode"]): row for row in cap_rows}
@@ -563,7 +566,7 @@ def write_derived_tables(
         json.dumps({
             "source_manifest": str(MANIFEST_PATH.relative_to(PROJECT)).replace("\\", "/"),
             "source_manifest_sha256": sha256(MANIFEST_PATH),
-            "scope": "descriptive method-level reruns on the same RTS-GMLC system and weather year; no cross-cap p-values",
+            "scope": "descriptive method-level reruns on the same RTS-GMLC system and fixed 8760-row sequence; no cross-cap p-values",
             "selected_gru_lsr_vs_persistence": cap_summary,
         }, indent=2) + "\n",
         encoding="utf-8",

@@ -13,12 +13,14 @@ details are retained in `SUPPLEMENTARY_METHODS_AND_AUDIT.md`.
 | Run namespace | `p1_s3_fair_v1` |
 | Completed result rows | 510 |
 | Primary cap | 0.70 |
-| Sensitivity caps | 0.60 and 0.80, descriptive on the same system-year |
+| Source sequence | First 8760 of 8784 aligned rows; manifest delivery keys end on December 30 |
+| Sensitivity caps | 0.60 and 0.80, descriptive on the same fixed 8760-row sequence |
 | Retrospective lags | 1 h and 24 h |
 | Seeded unit | Paired GRU method-seed run; ten common seeds |
 | Primary test | Two-sided exact paired sign-flip test |
 | Multiplicity | Holm over six frozen GRU contrasts separately within each lag |
-| Information boundary | Delivery-row data; forecast issue time and source vintage unavailable |
+| Information boundary | Delivery-row data; forecast issue time and source vintage unavailable; horizon offsets gate query endpoints, not all 48 rows in a window |
+| Selection order | GRU-head checkpoint first, then head-weight grid; matched controls share the head-selected checkpoint |
 | Independent execution check | All 510 non-timing fields identical; four scientific derived tables byte-identical |
 
 The run manifest validates the exact configuration, script, four RTS-GMLC
@@ -29,14 +31,17 @@ the output hash/byte checks before regenerating figures or derived tables.
 
 | Phase | Executed rule | Allowed use | Main-text binding |
 |---|---|---|---|
-| Fit | Targets below delivery row 4380, with the horizon embargo applied to constructed samples | Feature normalization, Ridge coefficients, GRU parameters, retrieval bank | Sections III-B and V-A |
-| Selection | Targets from `4380+h` to 5255 | Ridge penalty, GRU checkpoint, selected head weight | Sections III-B/C and IV |
+| Fit | Targets below delivery row 4380 | Feature normalization, Ridge coefficients, GRU parameters, retrieval bank | Sections III-B and V-A |
+| Selection | Targets from `4380+h` to 5255 | Ridge penalty; GRU-head checkpoint first, then selected head weight | Sections III-B/C and IV |
 | Calibration | Targets from `5256+h` to 6131 | Detection threshold only | Sections III-B/C |
 | Test | Targets at or after `6132+h` | Scoring only | Sections V-B and VI |
 
 The source files expose calendar delivery rows but not forecast issue
 timestamps, an as-of mapping, release identifiers, or data-vintage fields.
-Every result is therefore a retrospective delivery-row lag result.
+Every result is therefore a retrospective delivery-row lag result. The
+horizon offsets ensure that each downstream query endpoint has reached its
+phase boundary; earlier-phase history within the 48-row input window is
+permitted by the executed code.
 
 ## Manuscript table bindings
 
@@ -44,10 +49,10 @@ Every result is therefore a retrospective delivery-row lag result.
 |---|---|---|---|
 | Table 1: phase/onset counts | Horizon-specific fit, selection, calibration, test, and onset counts | `derived_tables/fair_onset_support.csv`, derived from `results/run_results.csv` | Delivery-target counts; not independent inferential units |
 | Table 2: fair conditions | GRU selected/fixed blends, deterministic baselines, privileged control | `experiments/p1_s3_fair_v1/config.json` and `results/run_results.csv` | Fair subset only; not the legacy 14-method roster |
-| Table 3: hyperparameters/statistics | Frozen data split, GRU, retrieval, objective, and test settings | `experiments/p1_s3_fair_v1/config.json` | Runtime/environment omitted from main text |
+| Table 3: hyperparameters/statistics | Frozen data split, GRU, head-first selection order, retrieval, objective, and test settings | `experiments/p1_s3_fair_v1/config.json` plus executable order in `run_fair_experiments.py` | Runtime/environment omitted from main text |
 | Table 4: primary-cap MAE | Mean/SD, head weight, seed count | `derived_tables/fair_primary_cap_summary.csv`, derived from `results/leaderboard.csv` | Deterministic rows are descriptive and have no seed p-value |
 | Table 5: onset diagnostics | Six paired onset-F1 contrasts | `derived_tables/fair_paired_contrasts.csv` / `results/paired_primary.csv` | Qualified by zero selection/calibration onsets |
-| Table 6: cap sensitivity | Selected GRU-LSR and Persistence MAE in six cap-by-lag cells | `derived_tables/fair_cap_selected_vs_persistence.csv` / `results/cap_sensitivity.csv` | Same system/year; no cross-cap inference |
+| Table 6: cap sensitivity | Selected GRU-LSR and Persistence MAE in six cap-by-lag cells | `derived_tables/fair_cap_selected_vs_persistence.csv` / `results/cap_sensitivity.csv` | Same fixed sequence; no cross-cap inference |
 
 ## Figure bindings
 
@@ -73,7 +78,8 @@ hashes and the validated input hashes are recorded in
 | Selected onset condition equals the head | `paired_primary.csv`: difference 0, ten ties, Holm p=1 | Inapplicability evidence, not proof of no onset effect |
 | Fixed 0.5 onset-F1 effect is positive at 1 h and null at 24 h | `paired_primary.csv` | Diagnostic under the unsupported onset arm |
 | Direct transform has zero continuous error but onset F1 below one | `policy_transform_audit.csv` and `leaderboard.csv` | Metric-definition limitation; direct condition is privileged |
-| Cap ordering crosses in two of six cells | `fair_cap_selected_vs_persistence.csv` | Same-series descriptive sensitivity only |
+| Cap ordering crosses in two of six cells | `fair_cap_selected_vs_persistence.csv` | Same-sequence descriptive sensitivity only |
+| Learned-space causality is unidentified | Fair run lacks raw-feature k-NN, randomized-encoder retrieval, alternative-distance, and $k$-sensitivity controls | Supports the implemented retrieval path versus its head, not a causal advantage of learned geometry |
 
 ## Legacy evidence boundary
 
