@@ -1,0 +1,133 @@
+{
+  "stage": "p6_s3_matched_effort",
+  "status": "prespecified_before_execution",
+  "input_data_root": "D:/aicoding/powergrid_benchmark/data/public_datasets",
+  "analysis_unit": "one seeded method-scenario invocation",
+  "candidate_pool": "the shared public 120-candidate P6 proxy pool, filtered only by the eight registered scenario definitions",
+  "scenarios": [
+    "budget_constrained_selection",
+    "reliability_prioritized_review",
+    "renewable_accommodation_review",
+    "dependency_constrained_review",
+    "local_move_explainability",
+    "ranking_robustness",
+    "budget_sensitivity",
+    "project_pool_scalability"
+  ],
+  "methods": [
+    "BiLo-NSGA",
+    "NSGA-II",
+    "Pareto Local Search"
+  ],
+  "seeds_per_method_scenario": 30,
+  "seed_schedule": "900000 + 7919 * seed_index + first_6_hex(sha1('p6_s3|' + scenario)) modulo 4096; common across methods",
+  "population_size": 40,
+  "protocols": {
+    "matched_evaluation": {
+      "total_evaluation_units": 3200,
+      "unit_definition": "one scored initialization/offspring candidate or one evaluated local proposal; local proposals are not double-counted as population evaluations",
+      "primary_metric": "standard feasible-front hypervolume under the registered empirical bounds, clipping to [0,1], and reference point (1.1,1.1,1.1,1.1)"
+    },
+    "matched_time": {
+      "search_time_limit_seconds": 0.2,
+      "deadline_check": "before every candidate or local-proposal evaluation; ranking may cause a small recorded overshoot",
+      "metric_timing": "front extraction and hypervolume calculation occur after the common search deadline"
+    }
+  },
+  "implementations": {
+    "BiLo-NSGA": {
+      "source_semantics": "shared custom kernel: low-density initialization, uniform crossover, bit mutation 1/n, deterministic budget repair, first-half offspring local search, constraint non-dominated selection",
+      "local_depth": 8,
+      "backward_proposals": 4,
+      "local_violation_penalty": 10.0,
+      "dependency_group_order_bonus": 1.06,
+      "backward_mode": "atomic delete-insert substitution"
+    },
+    "NSGA-II": {
+      "implementation": "stage-local fully specified constrained NSGA-II",
+      "selection": "binary tournament by constraint rank, crowding distance, then seeded random tie break",
+      "crossover": "two-point crossover with probability 0.9",
+      "mutation": "independent bit flip with probability 1/n",
+      "repair": false,
+      "host_limitation": "recorded pymoo 0.6.2 is unavailable; installed pymoo 0.4.1 is used only for its pure-Python hypervolume indicator, not optimization"
+    },
+    "Pareto Local Search": {
+      "implementation": "stage-local budget-metered form of the disclosed multi-start add/delete/swap PLS",
+      "starts": 40,
+      "archive_limit": 40,
+      "move_cycle": ["add", "delete", "swap"],
+      "repair": "deterministic shared budget repair for starts"
+    }
+  },
+  "multiplicity": {
+    "primary_family": "16 matched-evaluation BiLo-NSGA contrasts: 2 comparators x 8 scenarios",
+    "secondary_family": "16 matched-time BiLo-NSGA contrasts: 2 comparators x 8 scenarios",
+    "test": "exact two-sided paired sign test across the 30 common seed indices; zero differences omitted",
+    "correction": "Holm within each declared family",
+    "alpha": 0.05
+  },
+  "hypervolume_schemes": [
+    {
+      "id": "reported_empirical_ref1p1_clipped",
+      "bounds": "shared fixed seeded bounds with 5% padding",
+      "reference_point": 1.1,
+      "clip": true
+    },
+    {
+      "id": "reported_empirical_ref1p1_unclipped",
+      "bounds": "shared fixed seeded bounds with 5% padding",
+      "reference_point": 1.1,
+      "clip": false
+    },
+    {
+      "id": "expanded_empirical_ref1p1_unclipped",
+      "bounds": "reported bounds expanded by 25% of their padded span on both sides",
+      "reference_point": 1.1,
+      "clip": false
+    },
+    {
+      "id": "analytic_ref1p05_unclipped",
+      "bounds": "definition-derived conservative feasible bounds",
+      "reference_point": 1.05,
+      "clip": false
+    },
+    {
+      "id": "analytic_ref1p1_unclipped",
+      "bounds": "definition-derived conservative feasible bounds",
+      "reference_point": 1.1,
+      "clip": false
+    },
+    {
+      "id": "analytic_ref1p2_unclipped",
+      "bounds": "definition-derived conservative feasible bounds",
+      "reference_point": 1.2,
+      "clip": false
+    }
+  ],
+  "local_sensitivity": {
+    "protocol": "matched_evaluation",
+    "scenarios": "all eight registered scenarios",
+    "seeds_per_cell": 10,
+    "design": "one factor at a time around the registered BiLo-NSGA local rule",
+    "inference": "descriptive; no p-values",
+    "cells": [
+      {"id": "registered", "factor": "reference", "local_depth": 8, "local_violation_penalty": 10.0, "dependency_group_order_bonus": 1.06},
+      {"id": "depth_2", "factor": "local_depth", "local_depth": 2, "local_violation_penalty": 10.0, "dependency_group_order_bonus": 1.06},
+      {"id": "depth_16", "factor": "local_depth", "local_depth": 16, "local_violation_penalty": 10.0, "dependency_group_order_bonus": 1.06},
+      {"id": "penalty_5", "factor": "local_violation_penalty", "local_depth": 8, "local_violation_penalty": 5.0, "dependency_group_order_bonus": 1.06},
+      {"id": "penalty_20", "factor": "local_violation_penalty", "local_depth": 8, "local_violation_penalty": 20.0, "dependency_group_order_bonus": 1.06},
+      {"id": "bonus_1p00", "factor": "dependency_group_order_bonus", "local_depth": 8, "local_violation_penalty": 10.0, "dependency_group_order_bonus": 1.0},
+      {"id": "bonus_1p12", "factor": "dependency_group_order_bonus", "local_depth": 8, "local_violation_penalty": 10.0, "dependency_group_order_bonus": 1.12}
+    ]
+  },
+  "source_contract": {
+    "shared_source_sha256": "1780647cc226e1c54a076863154945a9df53686f21ebadf9548c827a9081a4ba",
+    "p5_evidence_sha256": {
+      "evidence/runs/real_project_review_results.csv": "12c32586de768a21205f6c85f5864f1a3f6408aa02f7c910f30f2a0b19c84024",
+      "evidence/tables/real_project_review_leaderboard.csv": "0f5494c82070d4c5b0e13a8ff81e25712139986d5b9f8ef6e40ed86303142c3b",
+      "src/configs/real_project_review_config.json": "50e7b6c22e088edd5c387de24d15e590f7dfc5a43fd7fc598aaeadce87fd42bb"
+    },
+    "policy": "read shared source and inputs only; write all new artifacts under this stage directory; regress P5 hashes and the shared Mintou test suite"
+  }
+}
+

@@ -16,7 +16,7 @@
 \AuthorNames{Yubin Lin, Jingbo Zhang, Xiaoyu Huang, Dishan Yang, Jiyu Li}
 \address{Economic and Technological Research Institute of State Grid Fujian Electric Power Co., Ltd., Fuzhou 350000, Fujian, China}
 \corres{Correspondence: 18606932711@163.com (Y. Lin)}
-\abstract{Utility review boards must select grid investment portfolios under hard annual budgets, yet independent project scores ignore portfolio interactions and generic evolutionary operators do not express changes in review terms. BiLo-NSGA embeds budget-aware forward insertion, atomic delete--insert substitution, a heuristic dependency-group bonus, and feasibility recovery within a non-dominated-sorting framework; during each run it counts accepted local moves and deterministic repair drops. On a reproducible benchmark with 120 candidates, eight scenarios, and 30 seeds per stochastic method, BiLo-NSGA attains pooled mean hypervolume 0.17190, 1.12\% above NSGA-II. Across five stochastic baselines, it has 37 positive mean differences in 40 comparisons, 36 Holm-significant wins, and no significant loss; 16 gaps against two deterministic scoring rules are descriptive and favor BiLo-NSGA. A 1600-neighbor Pareto-local-search control is significantly lower in all eight scenarios. Component evidence is asymmetric: removing forward insertion is harmful in three scenarios under the primary family, although the ablation has the higher pooled mean, whereas atomic substitution and standalone deletion are unresolved. Public reliability and MTEP16 backtests provide descriptive external consistency. The evidence supports budget-aware project-level local moves with scenario-dependent forward-side effects; the released event fields are not a recommendation lineage or replay record, and neither atomic substitution nor the group bonus has a demonstrated accuracy gain.}
+\abstract{Utility review boards must select grid investment portfolios under hard annual budgets, yet generic evolutionary operators do not express changes in review terms. BiLo-NSGA embeds affordable insertion, atomic delete--insert substitution, a heuristic group-label bonus, and feasibility recovery within non-dominated sorting. We compare it with a fully specified NSGA-II and Pareto Local Search on 120 public-proxy candidates, eight scenarios, and 30 common seeds. Under an exact 3200-unit budget that charges every population-objective evaluation or evaluated local proposal, mean feasible-front hypervolume is 0.16277 for BiLo-NSGA, 0.17213 for NSGA-II, and 0.11626 for local search. BiLo-NSGA loses four of eight Holm-corrected NSGA-II contrasts and wins none, while exceeding local search in all eight. At equal 0.20-s search deadlines, the NSGA-II comparison has three significant wins, two losses, and three unresolved contrasts. Every final population is budget-feasible. Bound, clipping, reference-point, and local-parameter checks preserve the NSGA-II--BiLo--local-search pooled ordering but change gap magnitudes; depth two is descriptively 4.29\% above the registered local depth. Thus, matched evidence supports a feasible project-vocabulary search framework and a bounded local-search advantage, not superiority over NSGA-II. Event summaries are not lineage or replay records.}
 \keyword{power grid investment planning; project portfolio selection; budget constraint; multi-objective evolutionary optimization; NSGA-II; local search; accepted-move logging}
 \providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \begin{document}
@@ -28,7 +28,7 @@ Current review practice balances inspectable scoring against portfolio interacti
 
 BiLo-NSGA uses a custom non-dominated-sorting kernel with NSGA-II-style constrained environmental selection and changes the variation stage through project-level local search. The forward pass inserts an affordable project while budget slack remains. The backward-side operation is an atomic substitution: it tentatively removes a weak selected project, inserts the strongest affordable replacement, and accepts or rejects the pair as one move. A fixed 1.06 heuristic bonus favors an insertion whose group label is already present, and deterministic recovery repairs budget violations. Accepted insertions, accepted substitutions, and repair drops are appended to a transient run-level list. The released run rows retain only event count and final-front pool-position co-occurrence; they do not retain parent--child lineage, states sufficient for replay, or a recommendation path.
 
-The local-operator evidence is asymmetric. Removing forward insertion is harmful in three scenarios under the primary family, but the ablation has the higher pooled mean because other settings move nominally in its favor. Removing atomic substitution raises the pooled mean by 0.61\%, but the contrast remains unresolved under the declared family; replacing it with legacy standalone deletion raises the pooled mean by 0.22\%, and that contrast also remains unresolved. Substitution is retained as a paired remove--insert event, not claimed as an accuracy mechanism or a validated reviewer aid. A budget-indexed cross-scenario diagnostic ranges from a -0.64\% NSGA-II margin at 0.75x to +3.30\% in the 1.20x large-pool-labeled setting. Because scalar weights also vary, this is a boundary description rather than a causal budget effect.
+The local-operator evidence is asymmetric. In the earlier fixed-generation archive, removing forward insertion is harmful in three scenarios under that archive's family, but the ablation has the higher pooled mean because other settings move nominally in its favor. Removing atomic substitution raises the pooled mean by 0.61\%, but the contrast remains unresolved; replacing it with legacy standalone deletion raises the pooled mean by 0.22\%, and that contrast is also unresolved. The new matched-effort study sharpens the boundary: BiLo-NSGA is below NSGA-II under the exact combined evaluation budget, while equal-time comparisons vary by scenario. Substitution is retained as a paired remove--insert event, not claimed as an accuracy mechanism or a validated reviewer aid.
 
 A second obstacle is the scarcity of public grid investment-review records. We therefore construct a reproducible benchmark of 120 candidate projects in six archetypes. The candidates are derived deterministically from RTS-GMLC production-cost data, SimBench distribution-network data, and cached public NERC report metadata. Eight scenarios vary the budget (0.75x--1.20x nominal), candidate-pool composition, and group-label structure. The candidate-derivation pipeline is shared with the methodologically distinct TRACE-MOEA companion project, \texttt{mintou\_p5\_trace\_moea\_feasibility\_review} {[}33{]}; Section 2.4 and the Data Availability statement disclose this relationship.
 
@@ -42,9 +42,9 @@ The contributions of this paper are:
 \item
   \textbf{A shared public benchmark used to isolate the local-search question.} The 120-candidate generator and public source corpora are shared with \texttt{mintou\_p5\_trace\_moea\_feasibility\_review}; this paper's hard-budget formulation, BiLo-NSGA implementation, scenarios, run records, selected portfolios, and comparisons are reported as paper-specific (Sections 2.4 and 3.4).
 \item
-  \textbf{A statistically grounded evaluation against seven baselines and ten ablations.} The archive contains 4320 method--scenario invocations. In the inferential family, BiLo-NSGA is 1.12\% above NSGA-II and records 36 significant wins among 40 stochastic-baseline comparisons, with no significant loss. Sixteen deterministic-rule gaps are descriptive. A direct Pareto local-search control is significantly lower in all eight scenarios (Sections 6.1 and 6.7).
+  \textbf{Matched-evaluation and matched-time comparisons with explicit multiplicity.} A new immutable archive contains 1440 BiLo-NSGA, NSGA-II, and Pareto Local Search runs: 720 at exactly 3200 combined population-objective/local-proposal units and 720 at a common 0.20-s search deadline. The primary 16-contrast family shows four significant BiLo-NSGA losses to NSGA-II and eight wins over the bounded local search; the separately corrected time family is mixed (Section 6.8).
 \item
-  \textbf{Bounded operator attribution and external-consistency checks.} Forward insertion produces the only resolved local-operator gains; contrasts involving atomic substitution and legacy deletion remain unresolved under the declared comparison family, and neither beats the no-backward ablation. NERC and MTEP16 checks provide descriptive alignment rather than confirmatory review validity (Sections 6.3--6.5).
+  \textbf{Bound, clipping, reference-point, and local-rule sensitivity with bounded attribution.} Six hypervolume schemes and a seven-cell one-factor local scan retain adverse and null results. The pooled method ordering is stable across the schemes, but scale and gap magnitude are not; local depth two is descriptively stronger than the registered depth, while penalty changes are null because evaluated proposals remain feasible. Earlier atomic-substitution contrasts and the public-record checks remain unresolved or descriptive (Sections 6.3--6.5 and 6.8).
 \end{enumerate}
 
 The remainder of the paper is organized as follows. Section 2 reviews related work. Section 3 formalizes the problem and describes the public benchmark. Section 4 presents BiLo-NSGA. Section 5 details the experimental protocol. Section 6 reports results. Section 7 discusses the findings, Section 8 states limitations, and Section 9 concludes.
@@ -65,7 +65,7 @@ Portfolio studies respond with tailored search. Doerner et al.~{[}6{]} apply Par
 
 Grid investment research divides between expansion optimization and multi-criteria review. Optimization studies coordinate transmission and storage {[}10{]}, value reliability through interruption cost {[}11{]}, assess grid-side storage returns {[}12{]}, and balance battery investment against operating benefit {[}13{]}. These formulations usually size a specific asset class from a small set of alternatives rather than select from more than one hundred heterogeneous projects.
 
-Review practice commonly uses AHP {[}14{]} and TOPSIS {[}15{]}. Recent extensions add objective weighting and explainability {[}16{]}, while site-selection reviews show growing use of multi-objective optimization {[}17{]}. MCDM exposes scoring steps but scores projects largely independently, so it misses budget crowding-out and portfolio interaction. Simulation-based assessments of substations and commissioning delays {[}18{]} add network context but do not solve the portfolio search. The open gap examined here is therefore a portfolio-aware method with project-vocabulary local moves {[}19{]}.
+Review practice commonly uses AHP {[}14{]} and TOPSIS {[}15{]}. Recent extensions add objective weighting and explainability {[}16{]}, while site-selection reviews show growing use of multi-objective optimization {[}17{]}. MCDM exposes scoring steps but scores projects largely independently, so it misses budget crowding-out and dependencies. Simulation-based assessments of substations and commissioning delays {[}18{]} add network context but do not solve the portfolio search. The open gap examined here is therefore a portfolio-aware method whose committed project-level search events are recorded {[}19{]}.
 
 \subsection{Local-Search-Enhanced Multi-Objective Evolutionary Algorithms}\label{local-search-enhanced-multi-objective-evolutionary-algorithms}
 
@@ -150,7 +150,7 @@ Experiment & Budget multiplier & Candidate pool \\
 budget\_constrained\_selection & 0.88x & full pool (120) \\
 reliability\_prioritized\_review & 1.00x & reliability-related kinds only \\
 renewable\_accommodation\_review & 1.00x & renewable/storage kinds only \\
-dependency\_constrained\_review & 1.00x & group-size-at-least-two filter; no co-selection constraint \\
+dependency\_constrained\_review & 1.00x & filter retaining candidates whose group label occurs at least twice; no co-selection constraint \\
 local\_move\_explainability & 1.00x & full pool \\
 ranking\_robustness & 1.00x & full pool \\
 budget\_sensitivity & 0.75x & full pool \\
@@ -174,7 +174,7 @@ Figure 1 places two project-vocabulary moves between global offspring generation
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.94\textwidth]{figures/fig_architecture.png}
-\caption{BiLo-NSGA architecture. The feedback arrow denotes the next generation. ``Dependency-aware'' in the diagram denotes only the 1.06 group-label proposal bonus, not a dependency objective or constraint. The lower strip identifies sensitivity and external-consistency analyses rather than optimization inputs.}\label{fig:1}
+\caption{BiLo-NSGA architecture. The feedback arrow denotes the next generation. “Dependency-aware” in the diagram denotes only the 1.06 group-label proposal bonus, not a dependency objective or constraint. The lower strip identifies sensitivity and external-consistency analyses rather than optimization inputs.}\label{fig:1}
 \end{figure*}
 
 BiLo-NSGA is a memetic multi-objective algorithm: a custom non-dominated-sorting kernel provides global search and Pareto pressure, and project-vocabulary local moves provide budget-aware intensification. Accepted local moves and repair drops are counted separately from the optimization objectives. Each component below is individually switchable, enabling the one-switch and legacy-rule comparisons in Section 6.3.
@@ -186,11 +186,11 @@ s_B(x)=B-\sum_{j=1}^{n}c_jx_j,\qquad
 v_B(x)=\max\!\left(0,\frac{-s_B(x)}{B}\right).
 \]
 
-At generation \(t\), let \(P_t\) be the 40 parents and \(Y_t\) the 40 post-mutation children before repair or local search. The implementation freezes generation-local bounds
+At generation \(t\), let \(P_t\) be the 40 parents and \(Y_t\) the 40 post-mutation children \emph{before} repair or local search. The implementation freezes generation-local bounds
 
 \[
-L_q^{(t)}=\min_{z\in P_t\cup Y_t}f_q(z),\qquad
-H_q^{(t)}=\max_{z\in P_t\cup Y_t}f_q(z),
+L_q^{(t)}=\min_{z\in P_t\cup Y_t} f_q(z),\qquad
+H_q^{(t)}=\max_{z\in P_t\cup Y_t} f_q(z),
 \]
 
 and uses
@@ -288,13 +288,13 @@ Every initial or offspring portfolio that violates the budget is repaired determ
 
 Every accepted \texttt{forward\_insert} and \texttt{backward\_substitute}, and every deterministic \texttt{repair\_drop}, increments \texttt{local\_move\_count} and appends one in-memory event. Rejected proposals and attempted moves are neither counted nor logged. Events store a generation label and pool-local integer position; a substitution stores the removed and inserted positions. The list includes initialization repairs and events from offspring that may later be discarded. It has no child or parent identifier, before/after state, scalar value, acceptance delta, or final-portfolio link.
 
-The run writer does not serialize that event list. It retains \texttt{trace\_event\_count = len(events)} and \texttt{decision\_coverage}, defined as the fraction of pool-local positions occurring anywhere in the deduplicated final feasible front that also occur anywhere in the run's event-position set. Because tracing is enabled for BiLo-NSGA and each counted action creates one event, \texttt{local\_move\_count} and \texttt{trace\_event\_count} are identical in the retained rows. The derived table reports means of 3667.954 for both fields and 0.9964326 for position co-occurrence across 240 runs (Table 7). No counter enters an objective, constraint, local acceptance, or environmental selection. These fields measure event production and set co-occurrence, not attempted-move rate, causal attribution, chronology, audit completeness, explanation quality, lineage, or replay.
+The run writer does not serialize that event list. It retains \texttt{trace\_event\_count\ =\ len(events)} and \texttt{decision\_coverage}, defined as the fraction of pool-local positions occurring anywhere in the deduplicated final feasible front that also occur anywhere in the run's event-position set. Because tracing is enabled for BiLo-NSGA and each counted action creates one event, \texttt{local\_move\_count} and \texttt{trace\_event\_count} are identical in the retained rows. The derived table reports means of 3667.954 for both fields and 0.9964326 for position co-occurrence across 240 runs (Table 7). No counter enters an objective, constraint, local acceptance, or environmental selection. These fields measure event production and set co-occurrence, not attempted-move rate, causal attribution, chronology, audit completeness, explanation quality, lineage, or replay.
 
 \subsection{Algorithm Summary}\label{algorithm-summary}
 
 \begin{verbatim}
 BiLo-NSGA(pool, budget, seed):
-  for i = 1 .. 40:
+  for i = 1 .. 40:                                                             # 4.1
     draw density delta_i ~ Uniform(0.03, 0.15)
     draw each bit Bernoulli(delta_i); repair to budget and count/log each drop  # 4.5
   for gen = 1 .. 40:
@@ -332,9 +332,9 @@ Table 3 lists the eighteen methods: BiLo-NSGA, seven baselines spanning evolutio
 Method & Role & Description \\
 \midrule
 BiLo-NSGA & proposed & custom constrained NDS + forward insertion + atomic substitution + heuristic group bonus + deterministic repair \\
-NSGA-II & baseline & pymoo NSGA-II; normalized \(v_B\) passed as one inequality constraint \\
-NSGA-III & baseline & pymoo NSGA-III with 35 Das--Dennis directions and population 40; normalized \(v_B\) constraint \\
-MOEA/D & baseline & pymoo MOEA/D with 35 directions; no constraint interface, so \(10^4v_B\) is added to every objective \\
+NSGA-II & baseline & pymoo NSGA-II; normalized $v_B$ passed as one inequality constraint \\
+NSGA-III & baseline & pymoo NSGA-III with 35 Das--Dennis directions and population 40; normalized $v_B$ constraint \\
+MOEA/D & baseline & pymoo MOEA/D with 35 directions; no constraint interface, so $10^4v_B$ is added to every objective \\
 Greedy BCR & baseline & scenario-weighted benefit-cost order; add a project only while affordable \\
 AHP-TOPSIS & baseline & scenario-weighted TOPSIS order; greedy affordable fill \\
 Random Feasible & baseline & seeded random order; greedy affordable fill \\
@@ -405,19 +405,31 @@ For an experiment \(e\), the relative effect reported against NSGA-II is
 \Delta_e=100\,\frac{\overline{HV}_{e,\mathrm{BiLo}}-\overline{HV}_{e,\mathrm{NSGA-II}}}{\overline{HV}_{e,\mathrm{NSGA-II}}}\ \%.
 \]
 
+\subsection{Immutable Matched-Effort Protocol}\label{immutable-matched-effort-protocol}
+
+The fixed-generation archive above does not record function-evaluation counts and therefore cannot establish equal search effort. We consequently preregistered and executed a stage-local comparison of BiLo-NSGA, NSGA-II, and Pareto Local Search on the same eight scenario pools, budgets, objectives, and 30 seed indices. The complete design, implementation, input hashes, per-run rows, and validation record are under \texttt{experiments/p6\_s3\_matched\_effort/runs/primary\_v1/}; the runner refuses to overwrite an existing output directory.
+
+The primary protocol gives every method exactly \textbf{3200 search-evaluation units}. A unit is either one initialization/offspring candidate scored on the four objectives or one evaluated local proposal. A local proposal is not double-counted as a population evaluation. Budget repair and archive ranking use already visible candidate attributes and do not consume an objective-evaluation unit. Final-front extraction and hypervolume are readouts after search and do not feed selection. BiLo-NSGA preserves the disclosed low-density initialization, uniform crossover, \(1/n\) bit mutation, deterministic repair, first-half local refinement, atomic substitution, and constraint non-dominated selection. Pareto Local Search uses 40 repaired starts and the disclosed add/delete/swap cycle. Its 40 starts plus 3160 proposals consume the same total as the other methods.
+
+The recorded \texttt{pymoo==0.6.2} optimizer runtime is unavailable on this host, while the installed \texttt{pymoo==0.4.1} does not expose the committed import paths. Rather than silently substitute a library version, the stage implements and labels a fully specified constrained NSGA-II: binary tournament by constraint rank and crowding, 0.9-probability two-point crossover, \(1/n\) bit mutation, no repair, and constraint non-dominated environmental selection. Pymoo 0.4.1 is used only for its pure-Python hypervolume indicator. The matched NSGA-II result therefore applies to this disclosed implementation, not byte-for-byte reproduction of the earlier pymoo baseline.
+
+The secondary protocol runs the same cells to a common \textbf{0.20-s search deadline}, checked before every candidate or proposal evaluation. Environmental ranking can produce a small recorded overshoot; the observed range is 0.200004--0.201374 s. Method order rotates with seed index. Search runtime, total invocation runtime, population-objective evaluations, local-proposal evaluations, final-population feasibility, feasible-front size, and feasible-front hypervolume are retained per run.
+
+The primary multiplicity family comprises 16 paired contrasts: BiLo-NSGA versus two comparators in eight scenarios. Tests are exact two-sided paired sign tests over the 30 common seed indices, followed by one Holm correction. The 16 matched-time contrasts form a separate secondary family. Hypervolume and local-parameter sensitivity are descriptive and emit no p-values. The six hypervolume schemes cross the reported empirical bounds with clipping on/off, 25\%-expanded empirical bounds, conservative analytic bounds, and reference points 1.05, 1.1, and 1.2. The local scan changes one of depth \(\{2,8,16\}\), violation penalty \(\{5,10,20\}\), or group bonus \(\{1.00,1.06,1.12\}\) at a time, on all eight scenarios with ten common seeds per cell.
+
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
 \section{Results}\label{results}
 
-\subsection{Main Comparison}\label{main-comparison}
+\subsection{Legacy Fixed-Generation Comparison}\label{legacy-fixed-generation-comparison}
 
-Table 4 reports pooled summaries over eight experiments. Figure 2 shows the original distribution view, and Section 6.7 isolates the direct local-search control. Repeated deterministic-rule rows are summarized for provenance but are not treated as independent observations.
+Table 4 reports the previously archived fixed-generation summaries over eight experiments. This archive remains necessary for the broad baseline and ablation record, but its methods do not have verified equal objective-plus-proposal budgets. It is therefore historical context; Section 6.8 is the primary matched-effort comparison. Figure 2 shows the original distribution view, and Section 6.7 isolates the direct local-search control. Repeated deterministic-rule rows are summarized for provenance but are not treated as independent observations.
 
 \begin{table*}[t]
 \centering
 \scriptsize
 \setlength{\tabcolsep}{3pt}
-\caption{Pooled leaderboard across eight experiments. Stochastic methods have 240 runs; deterministic-rule summaries derive from eight unique outputs retained as 240 repeated provenance rows. Position co-occurrence is descriptive only.}\label{tab:4}
+\caption{Pooled leaderboard across eight experiments. Stochastic methods have 240 runs; deterministic-rule summaries derive from eight unique outputs retained as 240 repeated provenance rows. Final-front/event position co-occurrence is descriptive only.}\label{tab:4}
 \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
 \toprule
 Method & Role & Mean HV & Std & Mean runtime (s) & Position co-occurrence \\
@@ -444,7 +456,7 @@ MOEA/D & baseline & 0.02529 & 0.01404 & 0.308 & --- \\
 \end{tabularx}
 \end{table*}
 
-BiLo-NSGA attains pooled mean hypervolume 0.17190 (standard deviation 0.00861), \textbf{1.12\% above NSGA-II} (0.17000), 5.87\% above NSGA-III, and 23.9\% above AHP-TOPSIS. Across five stochastic baselines and eight scenarios, the method has 37 positive mean differences in 40 comparisons; 36 are Holm-significant wins and none is a significant loss. All eight comparisons with Pareto Local Search are significant. Sixteen additional gaps against AHP-TOPSIS and Greedy BCR are descriptive and favor BiLo-NSGA. The three adverse stochastic-baseline means remain non-significant, so the evidence supports a broad but not universal baseline advantage.
+In this legacy archive, BiLo-NSGA attains pooled mean hypervolume 0.17190 (standard deviation 0.00861), 1.12\% above the recorded pymoo NSGA-II (0.17000), 5.87\% above NSGA-III, and 23.9\% above AHP-TOPSIS. Across five stochastic baselines and eight scenarios, it has 37 positive mean differences in 40 comparisons; 36 are Holm-significant wins and none is a significant loss. These values describe the fixed-generation implementations and must not be read as an effort-controlled advantage. The new 3200-unit comparison reverses the pooled NSGA-II ordering (Section 6.8), so the manuscript's headline conclusion follows the matched result.
 
 \begin{figure*}[t]
 \centering
@@ -475,7 +487,7 @@ renewable\_accommodation\_review & 0.17262 & 0.17490 & -0.00228 [-0.00439, -0.00
 \end{tabularx}
 \end{table*}
 
-We state the trade-offs plainly. At the 0.75x budget and on the renewable-filtered pool, BiLo-NSGA is unresolved against NSGA-II, with nominal losses of 0.64\% and 1.31\%; the 0.88x mean gain also fails multiplicity correction. The intensification is not free: mean runtime is 0.219 s versus 0.080 s for NSGA-II (2.74x), while Pareto Local Search uses 1.416 s. BiLo-NSGA's feasible fronts remain slightly smaller than NSGA-II's (38.6 versus 40.0 portfolios on average), and its compromise portfolio spends more of the envelope. The method buys a modest average front-quality gain with additional local evaluation and reduced residual slack.
+In the legacy archive, the 0.75x and renewable-filtered comparisons are unresolved nominal losses and the 0.88x mean gain also fails multiplicity correction. Runtime is 0.219 s versus 0.080 s for NSGA-II, while Pareto Local Search uses 1.416 s. Because neither objective-call nor proposal counts were retained, this table cannot identify whether the 1.12\% pooled difference comes from search logic or unequal work. That unresolved fairness issue motivates Section 6.8.
 
 \subsection{Budget-Indexed Cross-Scenario Behavior}\label{budget-indexed-cross-scenario-behavior}
 
@@ -501,7 +513,7 @@ Figure 4 compares the full method with all ten ablations (pooled over 8 experime
 
 Removing evolution entirely reduces pooled hypervolume by 79.3\%. Disabling feasibility recovery costs 2.21\%, increases the standard deviation from 0.00861 to 0.01272, and lowers final-front/event position co-occurrence from 0.996 to 0.928. By contrast, several local-operator ablations have pooled means above the full model. This prevents pooled ranking from being used as component attribution and makes the scenario-level tests essential.
 
-\textbf{Forward insertion is the only local operator with resolved positive cells, but it is not universally beneficial.} Ablation-NoForwardSearch has pooled mean 0.17257, 0.39\% above the full method. Under the primary within-scenario family, the full method exceeds it in the dependency-constrained, local-move-explainability, and large-pool scenarios. An exploratory operator-specific Holm family across the eight scenarios also resolves reliability\_prioritized\_review (4/8), whereas the other four comparisons remain unresolved. The evidence therefore identifies scenario-dependent forward-side gains, not a pooled or universal benefit from insertion.
+\textbf{Forward insertion is the only local operator with resolved positive cells in the legacy archive, but it is not universally beneficial.} Ablation-NoForwardSearch has pooled mean 0.17257, 0.39\% above the full method. Under that archive's within-scenario family, the full method exceeds it in the dependency-constrained, local-move-explainability, and large-pool scenarios. An exploratory operator-specific Holm family across the eight scenarios also resolves reliability\_prioritized\_review (4/8), whereas the other four comparisons remain unresolved. The evidence therefore identifies scenario-dependent forward-side cells, not a pooled or universal benefit from insertion.
 
 \textbf{Atomic substitution has no demonstrated accuracy gain.} Ablation-NoBackwardSearch reaches 0.17294, 0.61\% above the full method, and none of the eight differences is significant. The legacy standalone-deletion rule reaches 0.17228, 0.22\% above the full method, and is likewise inseparable in all eight scenarios. Feasibility recovery already removes weak projects after violations, leaving few replacements that improve the scalar acceptance score. The atomic rule encodes removal and insertion as one committed event; the experiment does not demonstrate accuracy gain or reviewer utility.
 
@@ -601,12 +613,12 @@ We state the caveats that limit the strength of this backtest.
 
 \subsection{Search-Effort and Outcome-Definition Diagnostics}\label{search-effort-and-outcome-definition-diagnostics}
 
-The method's pooled gain over NSGA-II is modest, so computation and event-summary production are shown beside hypervolume. BiLo-NSGA averages 0.17190 hypervolume, 0.2188 s, 3668 accepted-move/repair events counted in memory, and 0.996 final-front/event position co-occurrence. NSGA-II averages 0.17000 at 0.0798 s and has no instrumented event list. Thus, the 1.12\% pooled hypervolume margin costs a 2.74-fold runtime factor in the tested implementation; the released count and overlap fields are additional outputs, not evidence that a final recommendation can be reconstructed.
+For the legacy fixed-generation archive, computation and event-summary production are shown beside hypervolume. BiLo-NSGA averages 0.17190 hypervolume, 0.2188 s, 3668 accepted-move/repair events counted in memory, and 0.996 final-front/event position co-occurrence. NSGA-II averages 0.17000 at 0.0798 s and has no instrumented event list. The historical 1.12\% margin and 2.74-fold runtime factor are not effort-controlled; Section 6.8 supplies the matched estimands. The released count and overlap fields are additional outputs, not evidence that a final recommendation can be reconstructed.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.94\textwidth]{figures/fig_search_audit_efficiency.png}
-\caption{Pooled search-and-event diagnostics over eight experiments and 30 seeds. The figure's historical ``trace'' label denotes run-level count and position co-occurrence only. Each panel retains its native unit; no composite score is formed from optimization quality and event volume.}\label{fig:7}
+\caption{Pooled search-and-event diagnostics over eight experiments and 30 seeds. The figure's historical "trace" label denotes run-level count and position co-occurrence only. Each panel retains its native unit; no composite score is formed from optimization quality and event volume.}\label{fig:7}
 \end{figure*}
 
 \begin{table*}[t]
@@ -638,11 +650,11 @@ Figure 8 exposes outcome-definition sensitivity. BiLo-NSGA's broad capture is 1.
 \caption{MTEP16 outcome-capture ratios for the proposed method and baselines. The dashed line denotes parity with uniform selection. Broad and strict labels are shown separately so that the high built-project base rate and unresolved-project assumption remain visible.}\label{fig:8}
 \end{figure*}
 
-These diagnostics assemble two decision-relevant views: optimization gain per unit of search and event production, and outcome consistency under competing label definitions. BiLo-NSGA improves the tested front modestly and produces dense run-level event counts, but the retained outputs are not move histories, atomic substitution is not supported as an accuracy mechanism, and the historical backtest remains descriptive.
+These legacy diagnostics assemble two views: fixed-generation optimization and event production, and outcome consistency under competing label definitions. They do not establish gain per equal unit of search. The retained outputs are not move histories, atomic substitution is not supported as an accuracy mechanism, and the historical backtest remains descriptive.
 
 \subsection{Direct Local-Search and Substitution Controls}\label{direct-local-search-and-substitution-controls}
 
-Pareto Local Search supplies a direct non-evolutionary neighborhood-search baseline with add, delete, and swap moves under 1600 evaluated neighbors per run. Its pooled hypervolume is 0.11636, compared with 0.17190 for BiLo-NSGA, and the proposed method is significantly higher in all eight scenarios after Holm correction. The numerical evaluation ceilings are matched, but computational work is not identical; PLS is slower in this implementation (1.416 s per run). The finding therefore applies to the disclosed PLS configuration rather than to Pareto local search as a family.
+In the legacy archive, Pareto Local Search supplies a direct non-evolutionary neighborhood-search baseline with add, delete, and swap moves under 1600 evaluated neighbors per run. Its pooled hypervolume is 0.11636, compared with 0.17190 for BiLo-NSGA, and the proposed method is significantly higher in all eight scenarios after Holm correction. The numerical ceilings do not capture BiLo-NSGA's local proposals, so this is not the exact combined-budget result. Section 6.8 reproduces the eight wins under both exact total units and equal time. The finding applies to the disclosed PLS configuration rather than to Pareto local search as a family.
 
 Figure 9 places that baseline beside the three operator controls. NoBackwardSearch (0.17294) and LegacyDeletion (0.17228) both have higher pooled means than the atomic full method, although no scenario-level comparison is significant. NoForwardSearch (0.17257) also has a higher pooled mean, while the full method has three significant scenario wins. The figure therefore closes a comparator gap without creating a bidirectional-gain claim.
 
@@ -652,11 +664,53 @@ Figure 9 places that baseline beside the three operator controls. NoBackwardSear
 \caption{Pooled hypervolume and scenario-level significance counts for BiLo-NSGA, Pareto Local Search, NoForwardSearch, NoBackwardSearch, and LegacyDeletion. The direct PLS control is separated in all eight scenarios; the three operator controls delimit the mechanism claim.}\label{fig:9}
 \end{figure*}
 
+\subsection{Matched-Evaluation, Matched-Time, and Sensitivity Results}\label{matched-evaluation-matched-time-and-sensitivity-results}
+
+\subsubsection{Exact Combined Evaluation Budget}\label{exact-combined-evaluation-budget}
+
+Table 8 reports the new primary comparison. All 720 method--scenario--seed runs consume exactly 3200 units, all final populations are budget-feasible, and every feasible front is nonempty. BiLo-NSGA spends on average 918.9 units on initialization/offspring scoring and 2281.1 on local proposals. NSGA-II spends all 3200 on population candidates; Pareto Local Search spends 40 on starts and 3160 on proposals. Thus, the total is identical while the allocation is algorithm-specific, as required by their search structures.
+
+\begin{table*}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\caption{Mean feasible-front hypervolume under exactly 3200 combined evaluation units (30 common seeds per cell). A dagger marks a Holm-significant BiLo-NSGA contrast in the declared 16-test primary family; all four daggers against NSGA-II are losses and all eight against PLS are wins.}\label{tab:8}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
+\toprule
+Scenario & BiLo-NSGA & NSGA-II & Pareto Local Search \\
+\midrule
+budget\_constrained\_selection & 0.14899 & 0.16987$^{\dagger}$ & 0.10517$^{\dagger}$ \\
+reliability\_prioritized\_review & 0.16634 & 0.17006 & 0.11574$^{\dagger}$ \\
+renewable\_accommodation\_review & 0.16745 & 0.17569$^{\dagger}$ & 0.12537$^{\dagger}$ \\
+dependency\_constrained\_review & 0.16840 & 0.17024 & 0.11595$^{\dagger}$ \\
+local\_move\_explainability & 0.16357 & 0.17419 & 0.12190$^{\dagger}$ \\
+ranking\_robustness & 0.16755 & 0.17389$^{\dagger}$ & 0.11507$^{\dagger}$ \\
+budget\_sensitivity & 0.14404 & 0.16587$^{\dagger}$ & 0.10016$^{\dagger}$ \\
+project\_pool\_scalability & 0.17578 & 0.17723 & 0.13071$^{\dagger}$ \\
+\textbf{Pooled descriptive mean} & \textbf{0.16277} & \textbf{0.17213} & \textbf{0.11626} \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+The pooled BiLo-NSGA mean is 5.44\% below NSGA-II and 40.00\% above Pareto Local Search. Against NSGA-II, every scenario mean is negative; the budget-constrained, renewable, ranking-robustness, and 0.75x-budget contrasts survive Holm correction, while the other four are unresolved. Against Pareto Local Search, all 30 paired differences are positive in every scenario and all eight contrasts survive correction. The result supports a bounded advantage over this PLS configuration but directly rejects an equal-evaluation NSGA-II superiority claim.
+
+The runtime readout does not rescue an efficiency claim under this protocol. Mean search time is 0.1163 s for BiLo-NSGA, 0.1975 s for NSGA-II, and 0.2598 s for PLS on this host, but algorithms allocate the same total units to operations of different computational cost. Runtime is consequently paired with, not substituted for, the evaluation-budget estimand.
+
+\subsubsection{Equal Search Deadlines}\label{equal-search-deadlines}
+
+At the common 0.20-s deadline, pooled means are 0.17098 for BiLo-NSGA, 0.17221 for NSGA-II, and 0.11593 for PLS. BiLo-NSGA receives more combined units on average (5601.1) than NSGA-II (3290.8) or PLS (2504.6) because its local proposal/scoring path is cheaper on this implementation. The NSGA-II contrast is heterogeneous: BiLo-NSGA has significant wins in reliability-prioritized, dependency-constrained, and project-pool-scalability settings; significant losses in budget-constrained selection and the 0.75x budget; and unresolved renewable, local-move, and ranking-robustness contrasts. All eight PLS contrasts favor BiLo-NSGA. This separately corrected family supports scenario-dependent equal-time behavior, not an overall NSGA-II win or loss.
+
+\subsubsection{Hypervolume and Local-Rule Sensitivity}\label{hypervolume-and-local-rule-sensitivity}
+
+Across the 720 matched-evaluation fronts, the reported empirical bounds place 1121 of 28,061 front points (3.99\%) outside \([0,1]\) before clipping. Expanding those bounds by 25\% reduces the count to 197 (0.70\%); the conservative analytic bounds contain every point within the declared \(10^{-12}\) tolerance. Pooled means change materially with the scale: the reported clipped values are 0.16277, 0.17213, and 0.11626 for BiLo-NSGA, NSGA-II, and PLS; reported bounds without clipping give 0.16547, 0.20209, and 0.11626; analytic bounds at reference 1.1 give 0.02584, 0.02854, and 0.02278. Analytic reference points 1.05 and 1.2 change the absolute volumes again. The pooled ordering NSGA-II--BiLo-NSGA--PLS is stable across all six schemes, but neither the numerical scale nor the gap magnitude is normalization-invariant.
+
+The seven-cell local scan is descriptive and retains every adverse or null cell. Relative to registered depth 8, depth 2 raises the scenario-balanced mean by 0.00691 (4.29\%) and depth 16 by 0.00035 (0.22\%). Changing the group-order bonus from 1.06 to 1.00 changes the mean by -0.00023 (-0.15\%); 1.12 changes it by +0.00016 (+0.10\%). Penalties 5, 10, and 20 produce identical rows because all locally evaluated proposals are feasible, so the violation term is zero. These results identify depth 8 as an unoptimized fixed choice and provide no measured accuracy benefit for the 1.06 bonus. They are not used to replace or retune the immutable primary run.
+
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
 \section{Discussion}\label{discussion}
 
-\textbf{Why the resolved operator effects are forward-side.} Under deterministic repair, populations remain near the budget boundary. Forward insertion can exploit residual slack directly. Atomic substitution must find a removal, an affordable replacement, and a joint scalar improvement in one step, while repair has already removed many weak projects. This makes substitution opportunities rarer, but the explanation remains an inference from the observed event and ablation patterns rather than a proved mechanism.
+\textbf{Why the legacy operator effects are forward-side.} Under deterministic repair, populations remain near the budget boundary. Forward insertion can exploit residual slack directly. Atomic substitution must find a removal, an affordable replacement, and a joint scalar improvement in one step, while repair has already removed many weak projects. This makes substitution opportunities rarer, but the explanation remains an inference from the earlier event and ablation patterns rather than a proved mechanism. The matched-evaluation loss to NSGA-II prevents these component contrasts from being promoted to an overall algorithmic advantage.
 
 The operator effects depend on the scenario. The no-forward ablation has a higher pooled mean, yet the full method wins significantly in three scenarios; no corresponding significant gain exists for atomic substitution. The full substitution rule is retained because it emits one paired replacement event, not because the study demonstrates reviewer utility. A look-ahead or dominance-based acceptance rule is the appropriate redesign target.
 
@@ -664,7 +718,7 @@ The operator effects depend on the scenario. The no-forward ablation has a highe
 
 \textbf{Positioning against TRACE-MOEA.} The companion project \texttt{mintou\_p5\_trace\_moea\_feasibility\_review} {[}33{]} uses preference-adaptive elitism, deterministic repair, and run-level event co-occurrence summaries over the same public candidate pipeline. BiLo-NSGA instead studies project-vocabulary variation under a hard budget. Its central questions concern forward insertion, atomic substitution, and budget-indexed cross-scenario behavior. The methods share candidate generation and public-record infrastructure but not their core operators, configurations, executions, or analyses.
 
-\textbf{Practical implications.} The method's NSGA-II margin ranges from -0.64\% at 0.75x to +3.30\% at 1.20x, with a 2.74x runtime factor; all evolutionary runs remain sub-second. The no-forward control is faster and has a higher pooled mean, while the full method has three significant scenario wins and additionally counts accepted atomic replacement events. This study does not validate the event summaries with reviewers and therefore does not support a configuration recommendation. Pareto Local Search is a useful direct comparator but is substantially weaker and slower under the matched neighbor budget.
+\textbf{Practical implications.} Equal evaluation budgets favor the disclosed NSGA-II in pooled hypervolume and produce four significant BiLo-NSGA losses, while equal time produces three BiLo-NSGA wins, two losses, and three unresolved contrasts. This is a quality--allocation trade-off: BiLo-NSGA's inexpensive local proposals permit more scored moves per second, but spending most of a fixed unit budget on those proposals is less effective than NSGA-II's population evaluations in this study. Depth two is descriptively stronger than the registered depth eight, so the committed configuration should not be recommended without a separately registered tuning or validation study. Pareto Local Search remains weaker under both matched protocols, but only as the bounded implementation tested here.
 
 The 99.6\% statistic is the set overlap between pool-local positions appearing anywhere in the returned fronts and anywhere in the run's event-position set. It is not per-portfolio coverage or explanation sufficiency. If single-criterion regulatory alignment is dominant, AHP-TOPSIS remains competitive. The MTEP16 backtest supplies only weak-form evidence that BiLo-NSGA selections correlate with real outcomes.
 
@@ -687,7 +741,7 @@ The results identify five empirical extensions that would test the framework bey
   \emph{No load-flow verification} (Limitation 5). Next step: run a pandapower AC load-flow check on the compromise portfolios of the two reliability-oriented scenarios and report electrical-violation rates, upgrading portfolio feasibility from budgetary to physical.
 \end{enumerate}
 
-The ablation evidence motivates a method redesign. Future atomic substitution should test bounded look-ahead or dominance-based acceptance (Section 6.3). A sensitivity analysis of the local acceptance rule and heuristic group bonus would also characterize two remaining fixed design choices.
+The ablation and sensitivity evidence motivates a method redesign. Future atomic substitution should test bounded look-ahead or dominance-based acceptance (Section 6.3), and any depth change should be registered before rerunning the primary family. The completed penalty scan is null because proposals are feasible; future acceptance-rule work should therefore vary objective aggregation rather than the inactive violation coefficient. The small bonus effects provide no basis for retaining 1.06 as an accuracy-tuned value.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -708,22 +762,24 @@ We state the boundaries of this study explicitly.
 \item
   \textbf{No load-flow verification.} Portfolio feasibility is budgetary, not electrical; a pandapower-based load-flow check of selected portfolios is a natural robustness addition.
 \item
-  \textbf{The direct local-search comparison is still bounded.} Pareto Local Search adds a matched-budget add/delete/swap neighborhood baseline, and BiLo-NSGA significantly exceeds it in all eight scenarios. However, this is one implementation and does not cover the full family of memetic, large-neighborhood, or exact knapsack algorithms. No universal local-search superiority claim is made.
+  \textbf{The direct local-search comparison is still bounded.} Under both the exact 3200-unit and 0.20-s protocols, BiLo-NSGA significantly exceeds the disclosed add/delete/swap Pareto Local Search in all eight scenarios. However, this is one implementation and does not cover the full family of memetic, large-neighborhood, or exact knapsack algorithms. No universal local-search superiority claim is made.
 \item
-  \textbf{The dependency label is only a heuristic search feature.} The 1.06 multiplier changes insertion and replacement proposal order when a group label is already open. No joint benefit, precedence relation, or co-selection constraint is operationalized, and the LowDependencyDensity result is unresolved. The study therefore provides no evidence of dependency synergy or a benefit from modeling dependencies.
+  \textbf{The dependency label is only a heuristic search feature.} The 1.06 multiplier changes insertion and replacement proposal order when a group label is already open. No joint benefit, precedence relation, or co-selection constraint is operationalized. The matched sensitivity changes pooled mean hypervolume by only -0.15\% at 1.00 and +0.10\% at 1.12, descriptively; it does not establish an accuracy gain at 1.06 or dependency synergy.
 \item
-  \textbf{The generated configuration is not a complete replay manifest.} The JSON omits the local penalty, generation-local normalization, group bonus, positional offspring-selection rule, effective MOEA/D population, tie behavior, library versions, and pymoo operator defaults. The run rows serialize only event count and pool-position co-occurrence, not event payloads or population states. Source inspection can recover the executed rules, but exact environment-independent replay is not certified by the released configuration and run rows alone.
+  \textbf{The legacy generated configuration is not a complete replay manifest.} Its JSON omits the local penalty, generation-local normalization, group bonus, positional offspring-selection rule, effective MOEA/D population, tie behavior, library versions, and pymoo operator defaults. The new matched-effort package freezes those stage-local choices, source/input hashes, and per-run accounting, but neither archive serializes population states or event payloads. Exact event replay is not supported.
+\item
+  \textbf{The matched NSGA-II is stage-local.} The host cannot execute the recorded pymoo 0.6.2 optimizer and its installed pymoo 0.4.1 lacks the committed import paths. The new study therefore uses a fully specified stage-local constrained NSGA-II rather than silently changing a library version. Its results are valid for that disclosed implementation; equivalence to the earlier pymoo baseline is not claimed. Equal-time results are additionally machine-specific.
 \end{enumerate}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
 \section{Conclusions}\label{conclusions}
 
-BiLo-NSGA defines budget-aware local moves in project-review terms: insertion under slack, atomic delete--insert substitution, a heuristic group-label bonus, deterministic feasibility recovery, and run-level counting of accepted moves and repair drops. On the 120-candidate public proxy benchmark, it improves pooled hypervolume over NSGA-II by 1.12\%. Across five stochastic baselines, it records 36 significant wins among 40 comparisons and no significant loss; 16 deterministic-rule gaps are descriptive and favor BiLo-NSGA. Pareto Local Search is significantly lower in all eight scenarios. The NSGA-II margin ranges from -1.31\% to +3.30\% across settings.
+BiLo-NSGA defines budget-aware local moves in project-review terms: insertion under slack, atomic delete--insert substitution, a heuristic group-label bonus, deterministic feasibility recovery, and run-level counting of accepted moves and repair drops. The new effort-controlled evidence does not support superiority over NSGA-II. At exactly 3200 combined population-objective/local-proposal units, pooled feasible-front hypervolume is 0.16277 for BiLo-NSGA and 0.17213 for the fully specified stage-local NSGA-II. All eight mean differences are negative; four are Holm-significant losses and none is a significant win. The earlier 1.12\% fixed-generation advantage is therefore retained only as unmatched historical context.
 
-The component result is asymmetric. Under the primary within-scenario family, removing forward insertion is significantly harmful in three scenarios but raises the pooled mean. Removing atomic substitution raises the pooled mean by 0.61\%, and the contrasts involving atomic substitution and legacy deletion remain unresolved under the declared comparison family. Forward insertion therefore produces the only resolved local-operator gains. Atomic substitution supplies one paired accepted-event type, but its acceptance rule requires redesign before it can be presented as a performance mechanism; event count and position co-occurrence never enter optimization ranking.
+At equal 0.20-s search deadlines, the NSGA-II comparison is scenario-dependent: three significant wins, two significant losses, and three unresolved contrasts. BiLo-NSGA exceeds the bounded Pareto Local Search in all eight scenarios under both matched protocols, but no family-wide local-search claim follows. Every final population in the 1440 comparison runs is budget-feasible. Six bound/clipping/reference schemes preserve the pooled NSGA-II--BiLo--PLS ordering while changing scales and gaps; depth two is descriptively 4.29\% above the registered depth eight, the group-bonus effects are below 0.15\% in magnitude, and the feasible-proposal penalty scan is exactly null.
 
-The NERC and MTEP16 backtests provide descriptive external consistency. MTEP16 broad capture is 1.071 and the raw point-biserial association is 0.088; strict-label ordering is unresolved. The study consequently supports BiLo-NSGA as a budget-aware project-level local-search framework on the public proxy benchmark. It does not establish forward dominance, dependency synergy, audit completeness, lineage, replay, a recommendation path, or a preferred deployment configuration. Expert labels, calibrated costs, a second benchmark family, broader local-search comparisons, and load-flow verification remain necessary to evaluate practical review effectiveness.
+The earlier component, NERC, and MTEP16 analyses retain their narrower descriptive scope. The study supports BiLo-NSGA as a feasible project-vocabulary search framework on the public proxy benchmark and identifies a quality--effort boundary for its registered local allocation. It does not establish NSGA-II superiority, forward dominance, dependency synergy, audit completeness, lineage, replay, a recommendation path, or a preferred deployment configuration. Expert labels, calibrated costs, a second benchmark family, broader local-search comparisons, and load-flow verification remain necessary to evaluate practical review effectiveness.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -745,7 +801,7 @@ Not applicable.
 
 \section*{Data Availability Statement}
 
-All data used in this study are public. Candidate projects are derived from RTS-GMLC (https://github.com/GridMod/RTS-GMLC), SimBench (https://simbench.de), and metadata from public NERC reliability reports (https://www.nerc.com). MISO MTEP16 records are available through the MISO transmission-planning archive (https://www.misoenergy.org/planning/transmission-planning). The candidate pipeline, BiLo-NSGA implementation, generated configuration, 4320 per-run records, corrected inference tables, backtest data, and figure scripts are included in the supplementary review package and are available from the corresponding author. The JSON is not a complete hyperparameter or environment manifest, and the run rows retain event count and final-front/event position co-occurrence rather than event payloads or replay state. Pre-atomic-substitution backtests remain explicitly suffixed and excluded. A persistent public archive can be supplied before publication, subject to third-party redistribution terms. The companion project \texttt{mintou\_p5\_trace\_moea\_feasibility\_review} (TRACE-MOEA) shares the versioned candidate generator, source corpora, common benchmark/evaluation utilities, and public-record backtest infrastructure. Problem objectives, method configurations, executions, run outputs, selected portfolios, and reported comparisons are paper-specific.
+All data used in this study are public. Candidate projects are derived from RTS-GMLC (https://github.com/GridMod/RTS-GMLC), SimBench (https://simbench.de), and metadata from public NERC reliability reports (https://www.nerc.com). MISO MTEP16 records are available through the MISO transmission-planning archive (https://www.misoenergy.org/planning/transmission-planning). The supplementary review package contains the legacy 4320-run archive and the immutable matched-effort package at \texttt{experiments/p6\_s3\_matched\_effort/runs/primary\_v1/}: frozen configuration and environment, input hashes, 1440 per-run comparison rows, 4320 per-run hypervolume-sensitivity rows, 560 local-sensitivity rows, corrected inference, summaries, and validation. The legacy JSON is not a complete replay manifest; the new package records its stage-local parameters and accounting but still does not serialize event payloads or population states. Pre-atomic-substitution backtests remain explicitly suffixed and excluded. A persistent public archive can be supplied before publication, subject to third-party redistribution terms. The companion project \texttt{mintou\_p5\_trace\_moea\_feasibility\_review} (TRACE-MOEA) shares the versioned candidate generator, source corpora, common benchmark/evaluation utilities, and public-record backtest infrastructure. Its evidence files were hash-checked before and after the new run and were unchanged. Problem objectives, method configurations, executions, run outputs, selected portfolios, and reported comparisons are paper-specific.
 
 \section*{Acknowledgments}
 
