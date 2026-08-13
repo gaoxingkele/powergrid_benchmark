@@ -1,11 +1,8 @@
 % Options for packages loaded elsewhere
 \PassOptionsToPackage{unicode}{hyperref}
 \PassOptionsToPackage{hyphens}{url}
-\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
 \PassOptionsToPackage{space}{xeCJK}
 \documentclass[
-  10pt,
-  a4paper,
 ]{article}
 \usepackage{xcolor}
 \usepackage[margin=18mm]{geometry}
@@ -84,16 +81,12 @@
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same}
 \hypersetup{
-  pdftitle={Cross-Series Aggregation in Day-Ahead Multi-Region Power Load Forecasting: A Component-Level Evaluation},
-  colorlinks=true,
-  linkcolor={blue},
-  filecolor={Maroon},
-  citecolor={Blue},
-  urlcolor={blue},
+  pdftitle={Cross-Series Aggregation for 24-Hour-Ahead Point Forecasting of Multi-Region Power Load: A Component-Level Evaluation},
+  hidelinks,
   pdfcreator={LaTeX via pandoc}}
 
-\title{Cross-Series Aggregation in Day-Ahead Multi-Region Power Load
-Forecasting: A Component-Level Evaluation}
+\title{Cross-Series Aggregation for 24-Hour-Ahead Point Forecasting of
+Multi-Region Power Load: A Component-Level Evaluation}
 \author{}
 \date{}
 
@@ -101,7 +94,6 @@ Forecasting: A Component-Level Evaluation}
 \maketitle
 
 {
-\hypersetup{linkcolor=}
 \setcounter{tocdepth}{3}
 \tableofcontents
 }
@@ -111,45 +103,48 @@ Zhanghuang Zhang (张章煌), Zhuolin Chen (陈卓琳), Ying Shi (施莹)
 State Grid Fujian Electric Power Co., Ltd., Fuzhou 350000, Fujian, China
 \textbf{Correspondence:} zjy\_0701@163.com (J. Zheng)
 
-\section{Abstract}\label{abstract}
+\subsection{Abstract}\label{abstract}
 
 Cross-correlated regional load series motivate graph and attention
 mechanisms, but single-run accuracy tables rarely isolate whether
 cross-series aggregation itself contributes. CSA-LoadNet combines a
 shared temporal encoder, cross-series attention, and a compact
-prediction head for day-ahead multi-region load forecasting. Ten seeded
-runs under a leakage-free temporal protocol show that, on the
-six-country Open Power System Data benchmark, the full model improves
-24-hour mean absolute percentage error over a multilayer perceptron
-(0.0323 versus 0.0337; Holm-adjusted p = 0.0085) and over the
-no-aggregation ablation (0.0323 versus 0.0346; p = 0.0011). No
-difference among Poincaré, Euclidean, and equal-weight parameterizations
-is resolved at the available precision. We additionally rebuild Ausgrid
-as an exact 12-leaf, four-region, one-root hierarchy and evaluate
-independent, bottom-up, top-down, and OLS reconciliation with ten seeds
-for every method. DLinear with bottom-up reconciliation is best
-(hierarchy-weighted sMAPE 0.2802); CSA-LoadNet with OLS reaches 0.2895,
-while both coherent methods have zero structural violation. The results
-locate the resolved OPSD day-ahead gain in cross-series aggregation
-rather than in a particular weighting geometry, while distinguishing
-forecast accuracy from hierarchical coherence.
+prediction head for 24-hour-ahead multi-region load point forecasting.
+Each sample produces one scalar target per series, \(y_{i,t+24}\),
+rather than a 24-point next-day trajectory. Ten seeded runs under a
+fixed chronological protocol show that, on the six-country Open Power
+System Data benchmark, the full model improves mean absolute percentage
+error over a multilayer perceptron (0.0323 versus 0.0337; Holm-adjusted
+p = 0.0085) and over the no-aggregation ablation (0.0323 versus 0.0346;
+p = 0.0011). No difference among Poincaré, Euclidean, and equal-weight
+parameterizations is resolved at the available precision. We
+additionally rebuild Ausgrid as an exact 12-leaf, four-region, one-root
+hierarchy and evaluate unreconciled, bottom-up, top-down, and OLS
+forecasts with ten seeds for every method. DLinear with bottom-up
+reconciliation is best (hierarchy-weighted sMAPE 0.2802); CSA-LoadNet
+with OLS reaches 0.2895, and all three reconciled regimes have zero
+structural violation. The results locate the resolved OPSD 24-hour-ahead
+point-forecast gain in cross-series aggregation rather than in a
+particular weighting geometry, while distinguishing forecast accuracy
+from hierarchical coherence.
 
-\textbf{Keywords:} short-term load forecasting; day-ahead forecasting;
-multi-region load; cross-series attention; ablation study; statistical
-significance testing; negative results; open power system data
+\textbf{Keywords:} 24-hour-ahead point forecasting; multi-region load;
+cross-series attention; ablation study; statistical significance
+testing; negative results; open power system data
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\section{1. Introduction}\label{introduction}
+\subsection{1. Introduction}\label{introduction}
 
-Day-ahead load forecasts inform unit commitment, cross-border exchange
-scheduling, reserve dimensioning, and distribution-level flexibility
-procurement. In multi-region forecasting, such as countries in an
-interconnection or profile classes in a distribution network, the
-individual series share weather regimes, calendar structure, and
-economic rhythms. This raises a practical question: does cross-series
-information improve on forecasts constructed independently for each
-series?
+Load forecasts made 24 hours in advance can inform operational planning.
+The experiment reported here addresses the narrower task of predicting
+one load value at lead 24 for each hourly forecast origin; it does not
+produce the 24 hourly values of a next-day schedule. In multi-region
+forecasting, such as countries in an interconnection or profile classes
+in a distribution network, the individual series share weather regimes,
+calendar structure, and economic rhythms. This raises a practical
+question: does cross-series information improve on forecasts constructed
+independently for each series?
 
 Recent applied studies address this question with increasingly elaborate
 architectures. Graph convolutions, learned adjacency matrices,
@@ -173,8 +168,10 @@ across horizons and aggregation structures.
 CSA-LoadNet is a compact neural forecaster in which a shared encoder
 processes each region's load history and cross-series attention
 aggregates the other encodings. Attention weights can use Poincaré
-distance with fixed or learned curvature, Euclidean distance, or equal
-averaging. Each mechanism is an independent switch.
+distance with a fixed or learned inverse-temperature, Euclidean distance
+with the same scale convention, or equal averaging. The implementation
+does not make the metric curvature depend on this scale. Each mechanism
+is an independent switch.
 
 The primary component comparison contains the full model and five
 single-switch ablations. A targeted ten-seed comparison with MLP is
@@ -194,9 +191,10 @@ The paper makes three contributions:
 \item
   \textbf{A component-identifiable cross-series forecaster.} CSA-LoadNet
   separates the shared temporal encoder, cross-series aggregation,
-  distance weighting, and curvature choice into independently testable
-  switches. This design distinguishes the value of pooling other series
-  from the value of a particular weighting geometry.
+  distance weighting, and inverse-temperature choice into independently
+  testable switches. This design distinguishes the value of pooling
+  other series from the value of a particular weighting
+  parameterization.
 \item
   \textbf{A multi-setting evaluation of aggregation, horizon, and
   hierarchy.} Strict temporal splits are used on OPSD and SimBench at 1
@@ -204,12 +202,13 @@ The paper makes three contributions:
   hierarchy then compares independent forecasts with bottom-up,
   top-down, and OLS reconciliation under a common summing structure.
 \item
-  \textbf{An empirical map of where aggregation helps.} On OPSD at 24 h,
-  CSA-LoadNet improves over the targeted MLP comparator and the
-  no-aggregation ablation. The tested weight forms remain unresolved,
-  and the method does not lead at OPSD 1 h or on the exact Ausgrid
-  hierarchy. The result identifies a day-ahead aggregation effect while
-  separating forecast accuracy from structural coherence.
+  \textbf{An empirical map of where aggregation helps.} On the OPSD
+  24-hour-ahead point task, CSA-LoadNet improves over the targeted MLP
+  comparator and the no-aggregation ablation. The tested weight forms
+  remain unresolved, and the method does not lead at OPSD 1 h or on the
+  exact Ausgrid hierarchy. The result identifies a setting-specific
+  aggregation effect while separating forecast accuracy from structural
+  coherence.
 \end{enumerate}
 
 The paper is organized as follows. Section 2 reviews the three research
@@ -221,7 +220,7 @@ evidence, Section 8 states limitations, and Section 9 concludes.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\section{2. Related Work}\label{related-work}
+\subsection{2. Related Work}\label{related-work}
 
 Three threads frame this study: the deep-architecture lineage of
 short-term load forecasting, cross-series and graph-structured
@@ -229,8 +228,9 @@ forecasting, and rigorous evaluations that compare complex forecasters
 with simple baselines. An extended review with full citation context
 accompanies the released evidence package.
 
-\subsection{2.1. Deep Architectures for Short-Term and Day-Ahead Load
-Forecasting}\label{deep-architectures-for-short-term-and-day-ahead-load-forecasting}
+\subsubsection{2.1. Deep Architectures for Short-Term and 24-Hour-Ahead
+Load
+Forecasting}\label{deep-architectures-for-short-term-and-24-hour-ahead-load-forecasting}
 
 Recurrent networks were among the first deep models to displace
 classical load forecasters. Building on the LSTM cell {[}9{]}, Kong et
@@ -248,7 +248,7 @@ Evidence for the added component, however, is commonly limited to one
 accuracy table. Multi-seed distributions and component-level tests
 remain uncommon.
 
-\subsection{2.2. Cross-Series and Graph-Structured Load
+\subsubsection{2.2. Cross-Series and Graph-Structured Load
 Forecasting}\label{cross-series-and-graph-structured-load-forecasting}
 
 A second thread exploits correlation among regional or nodal series.
@@ -266,7 +266,7 @@ equal averaging under an identical seeded protocol. Consequently, the
 contribution of aggregation can be conflated with that of its
 parameterization.
 
-\subsection{2.3. Simple Baselines and Honest
+\subsubsection{2.3. Simple Baselines and Honest
 Evaluation}\label{simple-baselines-and-honest-evaluation}
 
 The third thread concerns evaluation discipline. Sound out-of-sample
@@ -285,10 +285,10 @@ survive. Section 6.3 applies that logic to the aggregation weight forms.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\section{3. Datasets, Tasks, and Split
+\subsection{3. Datasets, Tasks, and Split
 Protocol}\label{datasets-tasks-and-split-protocol}
 
-\subsection{3.1. Datasets and Forecast
+\subsubsection{3.1. Datasets and Forecast
 Tasks}\label{datasets-and-forecast-tasks}
 
 We evaluate on three public datasets chosen to span three distinct
@@ -322,26 +322,82 @@ Ausgrid
 Source & Open Power System Data, 60 min single-index time series
 {[}29{]} & SimBench complete mixed dataset, \texttt{LoadProfile.csv}
 {[}30{]} & Ausgrid solar-home half-hourly data {[}24{]} \\
-Series pool & 6 country loads: DE, FR, IT, ES, NL, PL & 8 load profiles:
-BL-H, G0-A, G0-M, G1-A, G1-B, G1-C, G2-A, G3-A (hourly aggregation) &
-Exact 17-node hierarchy: 12 highest-energy complete customers + four
-deterministic postcode groups formed only from those leaves + their
-exact system sum (hourly GC) \\
-Period used & 2015-01-01 to 2018-12-31 (35,000 hourly rows) & full year
-2016 (8760 h) & 2010-07 to 2013-06 (3 years) \\
-Train/test boundary & index 24,500 = 2017-10-19 03:00 (70\% train) &
-index 6132 = 2016-09-12 13:45 (70\% train) & 70\% chronological train \\
-Horizons & 1 h and 24 h & 1 h and 24 h & 24 h \\
+Series pool & 6 country loads: DE, FR, IT, ES, NL, PL & 8 profiles:
+BL-H, G0-A, G0-M, G1-A, G1-B, G1-C, G2-A, G3-A & Exact 17-node
+hierarchy: 12 named customer leaves, four sums of postcode-sorted
+three-leaf groups, and their exact system sum \\
+Processed period & 2015-01-01T01:00:00Z to 2018-12-31T01:00:00Z; first
+35,000 retained hourly rows & 01.01.2016 00:45 to 30.12.2016 23:45;
+first 8760 constructed hourly rows & 2010-07 to 2013-06; 26,304
+constructed hourly rows \\
+Forecast-origin boundary & index 24,500 = 2017-10-19T03:00:00Z & index
+6132 = 12.09.2016 13:45 & index 18,412 (70\% of 26,304) \\
+Point leads & 1 h and 24 h & 1 h and 24 h & 24 h \\
 Primary metric & MAPE & normalized MAE & sMAPE \\
 \end{longtable}
 
-Each horizon-h task predicts each series' load h hours beyond the
-forecast origin from the preceding 168 h of that pool's history; sliding
-the origin hourly across the test segment produces the full evaluation
-trajectory. The 24 h task is the day-ahead task around which this
-paper's claims are organized.
+For every dataset and lead \(h\), a sample is
+\((X_{t-167:t},y_{i,t+h})\): the model sees the inclusive 168-position
+history ending at origin index \(t\) and predicts one scalar for target
+series \(i\). Origins advance by one processed row. Thus the \(h=24\)
+experiment is \textbf{24-hour-ahead point forecasting}, not direct or
+recursive prediction of a 24-value next-day trajectory. The
+forecast-origin boundary is \(b=\lfloor0.7n\rfloor\): training origins
+satisfy \(168\leq t<b\), test origins satisfy \(b\leq t<n-h\), training
+labels end at \(b+h-1\), and test labels start at \(b+h\). Evaluation
+targets therefore do not overlap, although the history at the first test
+origins necessarily contains observations from the pre-target period.
 
-\subsection{3.2. Primary Metrics and Why They Differ per
+\textbf{OPSD cleaning and time contract.} The parser reads
+\texttt{utc\_timestamp} and the six named
+\texttt{*\_load\_actual\_entsoe\_transparency} columns. It retains a row
+only when all six cells are nonempty and parse as floating-point values,
+drops the entire row otherwise, and stops after 35,000 retained rows; it
+performs no interpolation or imputation. The retained-row count is
+recorded, but the number and location of discarded source rows are not,
+and hourly continuity is not revalidated after filtering. Timestamps
+carry \texttt{Z} and remain in UTC, so no duplicated or missing local
+daylight-saving hour is introduced and no country-local conversion is
+applied.
+
+\textbf{SimBench cleaning, aggregation, and time contract.} The parser
+selects the first eight header fields ending in \texttt{\_pload}, skips
+a 15-minute source row if any selected value fails numeric parsing, and
+takes the unweighted arithmetic mean of each successive four retained
+rows. The constructed hour is labeled by the fourth source row (for
+example, the first label is \texttt{00:45}); values are means, not
+energy sums. No interpolation is applied, and a discarded quarter-hour
+can cause a four-valid-row block to span a source-time gap. The source
+labels have no timezone field in the inspected profile or parser. They
+are kept as naive labels, with no daylight-saving conversion, and
+processing stops after 8760 constructed hours.
+
+\textbf{Ausgrid cleaning, aggregation, and time contract.} Only
+\texttt{GC} rows from the three annual files are used. Each pair of
+adjacent half-hour cells is summed to one hourly value; an empty
+half-hour cell is replaced by zero, whereas a malformed or short daily
+row is skipped. Dates are parsed in one of three declared day-month-year
+formats and checked for one-day contiguity. The processor creates the
+naive label \texttt{YYYY-MM-DDTHH:00} for slot pair \((2H,2H+1)\); it
+records no timezone and forces 24 constructed hourly slots per date, so
+no daylight-saving repeated or skipped hour is represented. Customers
+134, 104, 255, 141, 228, 147, 55, 131, 21, 82, 58, and 109 are the
+leaves. \texttt{region1} sums \{82, 147, 255\}, \texttt{region2} sums
+\{228, 109, 131\}, \texttt{region3} sums \{134, 141, 55\},
+\texttt{region4} sums \{21, 58, 104\}, and \texttt{system\_total} sums
+all 12 leaves. These are deterministic postcode-sorted groups, not
+claims that every leaf in a group has the same postcode.
+
+The Ausgrid structural filter is not train-only: the code first keeps
+the 299 customers having the maximum observed day count over the full
+three-year record and then selects the 12 highest total-energy customers
+using that full record. This uses future-period availability and energy
+for leaf selection. It does not expose test targets to model fitting or
+reconciliation, but it can favor continuously observed, high-consumption
+leaves and is retained as a data-visibility limitation. No result here
+is presented as evidence from a train-only leaf-selection design.
+
+\subsubsection{3.2. Primary Metrics and Why They Differ per
 Dataset}\label{primary-metrics-and-why-they-differ-per-dataset}
 
 The primary metric is chosen per dataset to avoid known metric
@@ -396,32 +452,50 @@ separately from forecasting accuracy. All significance tests in Section
 including MAE, RMSE, level-specific sMAPE, peak-load error, and
 coherence violation, are preserved in the evidence tables.
 
-\subsection{3.3. Leakage-Free Temporal
-Protocol}\label{leakage-free-temporal-protocol}
+\subsubsection{3.3. Temporal Protocol and Train-Only
+Operations}\label{temporal-protocol-and-train-only-operations}
 
-Forecasting comparisons are sensitive to temporal leakage {[}8,26{]}, so
-every preprocessing and selection step follows the chronological
-boundary in Table 1. The data are not shuffled, and no test-period
-observation enters training or model selection. Per-series
-z-normalization statistics are fitted on the training segment. Early
-stopping uses its final 15\% as a temporally later validation slice.
-Training samples are strided to fit the CPU budget (Section 5.2),
-whereas every test trajectory is evaluated in full. The released source
-profiles record the files, row counts, and boundary timestamps needed to
-reconstruct each split.
+Forecasting comparisons are sensitive to temporal leakage {[}8,26{]}.
+The sample origins are not shuffled across the train/test boundary.
+Per-series z-normalization means and sample standard deviations
+(\texttt{torch.std} with correction 1, clamped below at \(10^{-6}\)) are
+computed from raw values at indices \([0,b)\); this pre-test segment
+includes the later validation portion and is therefore a
+\textbf{training-segment}, not fit-subset, transformation. The final
+15\% of strided training origins by time is used to choose the
+lowest-validation-loss checkpoint. All test origins are evaluated
+without stride.
+
+The cyclic covariates are derived from array position rather than parsed
+civil time: \texttt{hour\ =\ (t+h)\ mod\ 24} and
+\texttt{day-of-week\ =\ floor((t+h)/24)\ mod\ 7}, each encoded by sine
+and cosine. They should therefore be read as sequence-phase features.
+The implementation neither localizes timestamps nor supplies holidays or
+daylight-saving indicators. For reconciliation, only the top-down leaf
+proportions are fitted, using leaf energy at indices \([0,b)\);
+bottom-up uses no fitted proportions and OLS depends only on the fixed
+summing matrix. Dataset row-validity filtering occurs before the split,
+and the full-record Ausgrid structural selection is the exception
+disclosed above. These distinctions replace a blanket leakage-free
+claim.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\section{4. CSA-LoadNet}\label{csa-loadnet}
+\subsection{4. CSA-LoadNet}\label{csa-loadnet}
 
-Figure 1 gives the complete forecasting path. Load histories and
-calendar variables enter a shared temporal encoder; target and context
-series are related only inside the cross-series attention block; and the
-fused representation enters the horizon-specific forecasting head. The
-three weight forms shown under the attention block are controlled
+Figure 1 gives the complete forecasting path. Load histories enter the
+shared temporal encoder; target and context series are related only
+inside the cross-series attention block; and the target encoding,
+context vector, and sequence-phase features enter the prediction head.
+The three weight forms shown under the attention block are controlled
 alternatives evaluated with the same downstream network.
 
+\begin{figure}
+\centering
 \pandocbounded{\includegraphics[keepaspectratio]{figures/fig_architecture.png}}
+\caption{Figure 1. End-to-end CSA-LoadNet architecture and evaluation
+assets.}
+\end{figure}
 
 \textbf{Figure 1.} CSA-LoadNet data and model flow. The lower strip
 identifies independent evaluation datasets; it is not an input path.
@@ -435,11 +509,12 @@ architectural novelty for its own sake but a testbed in which every
 mechanism is an independent switch, so that the component analysis of
 Section 6.2--6.3 attributes effects cleanly.
 
-\textbf{Formal definitions.} For series \(i\), the 168-hour history is
-standardized with fit-split statistics only,
+\textbf{Formal definitions.} For series \(i\), the 168-position history
+is standardized with statistics from the pre-test training segment
+\([0,b)\), including the validation portion,
 
 \[
-\tilde x_{i,t-\ell}=\frac{x_{i,t-\ell}-\mu_i^{\mathrm{fit}}}{\sigma_i^{\mathrm{fit}}+\epsilon},
+\tilde x_{i,t-\ell}=\frac{x_{i,t-\ell}-\mu_i^{\mathrm{train}}}{\max(\sigma_i^{\mathrm{train}},10^{-6})},
 \qquad \ell=0,\ldots,167.
 \]
 
@@ -450,20 +525,27 @@ h_i=W_2\,\phi(W_1\tilde X_{i,t}+b_1)+b_2,\qquad
 W_1\in\mathbb R^{96\times168},\; W_2\in\mathbb R^{48\times96},
 \]
 
-where \(\phi\) is ReLU. When hyperbolic weighting is enabled, embeddings
-are projected inside the unit ball and their Poincare distance is
+where \(\phi\) is ReLU. When Poincaré weighting is enabled, raw
+embeddings are projected inside a radius-0.95 unit ball and their
+fixed-curvature unit-ball distance is
 
 \[
-\bar e_i=\frac{\tanh(\|e_i\|_2)}{\|e_i\|_2+\epsilon}e_i,\qquad
+\bar e_i=0.95\,\frac{\tanh(\|e_i\|_2)}{\max(\|e_i\|_2,\epsilon)}e_i,\qquad
 d_{\mathbb B}(\bar e_i,\bar e_j)=
 \operatorname{arcosh}\!\left(1+
 2\frac{\|\bar e_i-\bar e_j\|_2^2}
 {(1-\|\bar e_i\|_2^2)(1-\|\bar e_j\|_2^2)}\right).
 \]
 
-The Euclidean control replaces \(d_{\mathbb B}\) by \(\|e_i-e_j\|_2\),
-and the equal-neighbor control fixes \(\alpha_{ij}=1/(m-1)\). For any
-weight form, context fusion is
+The Euclidean control replaces \(d_{\mathbb B}\) by
+\(\|\bar e_i-\bar e_j\|_2\), and the equal-neighbor control fixes
+\(\alpha_{ij}=1/(m-1)\). For either learned-distance control, the
+per-target score scale is
+\(\tau_i=\operatorname{softplus}(\kappa_i)+0.1\) and
+\(\alpha_{ij}=\operatorname{softmax}_{j\ne i}[-\tau_i d(\bar e_i,\bar e_j)]\).
+Because \(\tau_i\) multiplies a metric whose curvature is otherwise
+fixed, it is an inverse-temperature or distance-scale parameter, not
+curvature. For any weight form, context fusion is
 
 \[
 g_i=\sum_{j\ne i}\alpha_{ij}W_vh_j,\qquad
@@ -488,18 +570,19 @@ TemporalOnly ablation removes the quadratic terms. This complexity
 statement concerns the implemented dense pool, not sparse graph
 attention.
 
-\subsection{4.1. Shared Temporal Encoder}\label{shared-temporal-encoder}
+\subsubsection{4.1. Shared Temporal
+Encoder}\label{shared-temporal-encoder}
 
-For each series \(i\) in the pool, the past 168 hours of per-series
-z-normalized load are passed through a shared multilayer perceptron
-\(168 \to 96 \to 48\), yielding a temporal encoding
+For each series \(i\) in the pool, the past 168 processed positions of
+per-series z-normalized load are passed through a shared multilayer
+perceptron \(168 \to 96 \to 48\), yielding a temporal encoding
 \(h_i \in \mathbb{R}^{48}\). Sharing one encoder across all series
 follows the cross-learning principle established by panel forecasters
 such as DeepAR {[}11{]}: every series' history contributes gradient
-signal to the same temporal features, which matters when pools are small
-(6--17 series here).
+signal to the same temporal features. The evaluated pool sizes are 6, 8,
+and 17 series.
 
-\subsection{4.2. Cross-Series Attention
+\subsubsection{4.2. Cross-Series Attention
 Aggregation}\label{cross-series-attention-aggregation}
 
 Each series additionally owns a learned embedding
@@ -507,33 +590,35 @@ Each series additionally owns a learned embedding
 computes attention weights over the other series in the pool,
 
 \[
-\alpha_{ij} = \frac{\exp\!\big(-c_i \, d(e_i, e_j)\big)}{\sum_{k \neq i} \exp\!\big(-c_i \, d(e_i, e_k)\big)},
+\alpha_{ij} = \frac{\exp\!\big(-\tau_i \, d(\bar e_i, \bar e_j)\big)}{\sum_{k \neq i} \exp\!\big(-\tau_i \, d(\bar e_i, \bar e_k)\big)},
 \]
 
 and aggregates their value-mapped temporal encodings into a context
 vector \(g_i = \sum_{j \neq i} \alpha_{ij} \, W_v h_j\). In the default
-configuration, \(d(\cdot,\cdot)\) is the geodesic distance in a Poincaré
-ball and \(c_i = \mathrm{softplus}(\kappa_i) + 0.1\) is a per-target
-learnable inverse-temperature/curvature parameter. The Poincaré
-parameterization is one interchangeable option for producing
+configuration, \(d(\cdot,\cdot)\) is the fixed unit-ball Poincaré
+distance and \(\tau_i = \mathrm{softplus}(\kappa_i) + 0.1\) is a
+per-target learnable inverse-temperature. The code variable and archived
+ablation label use \texttt{kappa} and \texttt{FixedCurvature},
+respectively, but no curvature-dependent metric is implemented. The
+Poincaré parameterization is one interchangeable option for producing
 \(\alpha_{ij}\). Section 6.3 shows that it is statistically inseparable
 from Euclidean-distance and equal weights; accordingly, no geometric
 property is claimed as a contribution. The component under test is the
 aggregation step itself: whether \(g_i\) should exist at all.
 
-\subsection{4.3. Prediction Head and Calendar
-Features}\label{prediction-head-and-calendar-features}
+\subsubsection{4.3. Prediction Head and Sequence-Phase
+Features}\label{prediction-head-and-sequence-phase-features}
 
 The prediction head concatenates the target encoding, aggregated
-context, and a calendar vector derived from the forecast timestamp. A
-hidden layer of width 64 maps this vector to the scalar h-step-ahead
+context, and the four sequence-phase covariates defined in Section 3.3.
+A hidden layer of width 64 maps this vector to the scalar h-step-ahead
 prediction:
-\(\hat{y}_{i,t+h} = \mathrm{MLP}_{64}\big([\,h_i \,\|\, g_i \,\|\, \mathrm{cal}(t+h)\,]\big)\).
-The parameter count is held in the same budget class as the MLP baseline
-(Section 5.1), reducing capacity as an alternative explanation for
-accuracy differences.
+\(\hat{y}_{i,t+h} = \mathrm{MLP}_{64}\big([\,h_i \,\|\, g_i \,\|\, \mathrm{phase}(t+h)\,]\big)\).
+The exact instantiated parameter counts are reported in Section 5.1; the
+proposed configuration is close to, but not equal to, the MLP baseline's
+capacity.
 
-\subsection{4.4. Ablation Switches}\label{ablation-switches}
+\subsubsection{4.4. Ablation Switches}\label{ablation-switches}
 
 Five single-switch variants isolate each mechanism (configuration keys
 from \texttt{src/configs/real\_hyg\_neural\_config.json}):
@@ -542,9 +627,9 @@ from \texttt{src/configs/real\_hyg\_neural\_config.json}):
 \tightlist
 \item
   \textbf{TemporalOnly} (\texttt{no\_graph}): removes the aggregation
-  module entirely; the head sees only \(h_i\) and calendar features.
-  This is the switch that tests whether cross-series aggregation
-  contributes at all.
+  module entirely; the head sees only \(h_i\) and the four
+  sequence-phase features. This is the switch that tests whether
+  cross-series aggregation contributes at all.
 \item
   \textbf{Euclidean weights} (\texttt{euclidean}): replaces the Poincaré
   distance with Euclidean distance in the same weight formula.
@@ -552,85 +637,99 @@ from \texttt{src/configs/real\_hyg\_neural\_config.json}):
   \textbf{Equal-weight neighbors} (\texttt{equal\_neighbors}): replaces
   learned attention with uniform averaging over the pool.
 \item
-  \textbf{Fixed curvature} (\texttt{fixed\_curvature}): freezes \(c_i\)
-  instead of learning it.
+  \textbf{Fixed distance scale} (\texttt{fixed\_curvature}, historical
+  key): sets \(\tau_i=1\) instead of learning it; it does not change
+  metric curvature.
 \item
-  \textbf{No calendar} (\texttt{no\_calendar}): removes the calendar
-  feature vector from the head.
+  \textbf{No sequence-phase features} (\texttt{no\_calendar}, historical
+  key): removes the four cyclic index features from the head.
 \end{itemize}
 
 The middle three switches jointly probe the \emph{form} of the
 aggregation weights; TemporalOnly probes the \emph{existence} of
-aggregation; NoCalendar probes an orthogonal feature channel.
+aggregation; the historical NoCalendar switch probes the orthogonal
+sequence-phase channel.
 
-\subsection{4.5. Weighting Variants and Artifact
+\subsubsection{4.5. Weighting Variants and Artifact
 Labels}\label{weighting-variants-and-artifact-labels}
 
 The implementation exposes Poincaré, Euclidean, equal-weight,
-fixed-curvature, and learnable-curvature weighting variants through the
-ablation switches defined above. The empirical question is whether
-cross-series aggregation contributes and, separately, whether any tested
-weighting form is distinguishable. Some archived result tables use the
-earlier implementation label \texttt{HyG-LoadFormer\ (neural)} for the
-full configuration; the evidence README maps this label one-to-one to
-CSA-LoadNet. All manuscript claims use the component definitions rather
-than the historical name.
+fixed-scale, and learnable-scale weighting variants through the ablation
+switches defined above. The empirical question is whether cross-series
+aggregation contributes and, separately, whether any tested weighting
+form is distinguishable. Archived files retain two historical labels:
+\texttt{HyG-LoadFormer\ (neural)} maps one-to-one to CSA-LoadNet, and
+\texttt{Ablation-FixedCurvature\ (neural)} maps to the
+fixed-distance-scale control \(\tau_i=1\). These labels document
+provenance and are not descriptions of a curvature-dependent metric.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\section{5. Experimental Setup}\label{experimental-setup}
+\subsection{5. Experimental Setup}\label{experimental-setup}
 
-\subsection{5.1. Methods Compared}\label{methods-compared}
+\subsubsection{5.1. Methods Compared}\label{methods-compared}
 
-Table 2 lists the methods. The five external baselines are compact
-PyTorch implementations spanning the standard neural-forecasting
-families: MLP, LSTM {[}9,10{]}, TCN {[}12{]}, DLinear {[}5{]}, and a
-lightweight PatchTST variant (patch-based transformer, reduced depth to
-fit the shared CPU budget). All models --- proposed, ablations,
-baselines --- consume the same 168 h z-normalized inputs, the same
-splits, and the same full test sets.
+Table 2 lists the implemented capacities. Counts are exact source-level
+arithmetic over instantiated tensors, including the embedding, scale,
+and value-map tensors that remain instantiated in TemporalOnly even
+though its forward pass does not use aggregation. The five external
+baselines span MLP, LSTM {[}9,10{]}, TCN {[}12{]}, DLinear {[}5{]}, and
+a lightweight two-layer patch transformer. All models consume the same
+168-position normalized histories, split boundaries, and full test
+origins; they do not have identical parameter counts or epoch budgets.
 
 \textbf{Table 2.} Methods and roles.
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}@{}}
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 Method
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Role
+Role and implemented capacity
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Note
+Instantiated parameters for pools \(m=6/8/17\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Max epochs (OPSD--SimBench / Ausgrid)
 \end{minipage} \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-CSA-LoadNet & proposed & Section 4; evidence label
-\texttt{HyG-LoadFormer\ (neural)} \\
-TemporalOnly & ablation & aggregation removed \\
-Euclidean weights & ablation & weight-form switch \\
-Equal-weight neighbors & ablation & weight-form switch \\
-Fixed curvature & ablation & weight-form switch \\
-No calendar & ablation & calendar channel removed \\
-MLP & targeted baseline & selected from the preliminary compact-model
-screen for ten-seed confirmation \\
-LSTM & baseline & recurrent \\
-TCN & baseline & dilated causal convolutions \\
-DLinear & baseline & linear decomposition model {[}5{]} \\
-PatchTST-lite & baseline & patch transformer, reduced depth \\
+CSA-LoadNet & shared 168--96--48 encoder; \(m\times8\) embeddings; \(m\)
+scales; 48--48 value map; 100--64--1 head & 29,815 / 29,833 / 29,914 &
+15 / 10 \\
+Euclidean weights; Equal-weight neighbors; Fixed distance scale & same
+modules as CSA-LoadNet; one weight-form switch & 29,815 / 29,833 /
+29,914 & 15 / 10 \\
+TemporalOnly & aggregation omitted from forward pass; 52--64--1 head;
+unused aggregation tensors remain instantiated & 26,743 / 26,761 /
+26,842 & 15 / 10 \\
+No sequence-phase features & aggregation retained; 96--64--1 head &
+29,559 / 29,577 / 29,658 & 15 / 10 \\
+MLP & 172--128--64--1; targeted after the preliminary screen & 30,465 &
+20 / 20 \\
+LSTM & one layer, scalar input, hidden width 48; 52--1 head & 9,845 & 6
+/ 6 \\
+TCN & seven width-32 causal blocks, kernel 3, dilations 1--64; 36--1
+head & 18,853 & 10 / 10 \\
+DLinear & moving-average kernel 25; separate 168--1 trend and seasonal
+maps & 338 & 20 / 20 \\
+PatchTST-lite & patch 16, stride 8, 20 patches; width 64, four heads,
+feed-forward width 128, two encoder layers & 70,597 & 8 / 8 \\
 \end{longtable}
 
-\subsection{5.2. Training Protocol and Hyperparameter
+\subsubsection{5.2. Training Protocol and Hyperparameter
 Disclosure}\label{training-protocol-and-hyperparameter-disclosure}
 
-Table 3 discloses every training-relevant setting; none was tuned on
-test data, and the configuration is held fixed across datasets rather
-than optimized per benchmark. The only per-dataset deviations are the
-documented Ausgrid budget reductions (10 epochs, stride 6) required by
-the larger 17-series pool.
+Table 3 discloses the recorded training settings. Architectures are
+fixed across datasets in the inspected source. The targeted ten-seed MLP
+comparison was selected after a preliminary three-seed architecture
+screen on the same fixed test trajectory, so it is not represented as
+comparator selection made without test visibility.
 
 \textbf{Table 3.} Full hyperparameter disclosure (from
 \texttt{src/configs/real\_hyg\_neural\_config.json} and
@@ -652,37 +751,50 @@ Value
 Lookback window & 168 h \\
 Temporal encoder & shared MLP 168 → 96 → 48 \\
 Series embedding dimension & 8 \\
-Curvature/temperature & \(\mathrm{softplus}(\kappa_i) + 0.1\), learnable
-per target (frozen in the FixedCurvature ablation) \\
-Head & concat{[}target encoding, aggregated context, calendar{]} → 64 →
+Inverse-temperature / distance scale &
+\(\tau_i=\mathrm{softplus}(\kappa_i) + 0.1\), learnable per target; the
+historical FixedCurvature control sets \(\tau_i=1\) \\
+Head & concat{[}target encoding, aggregated context, four sequence-phase values{]} → 64 →
 1 \\
 Optimizer / loss & Adam, lr \(10^{-3}\) / MSE on per-series z-normalized
 targets \\
 Batch size & 512 \\
-Epochs & 15 (OPSD, SimBench); 10 (Ausgrid) \\
-Training-sample stride & 3 (OPSD, SimBench); 6 (Ausgrid); test sets
-never strided \\
-Early stopping & validation = final 15\% of training window by time;
-best-validation state restored \\
+Epochs & model-specific maxima in Table 2; every epoch is run and the
+lowest-validation-loss checkpoint is restored \\
+Training-sample stride & OPSD/SimBench: 3 for every model. Ausgrid: 6
+for CSA variants, 3 for external baselines. Test origins are never
+strided \\
+Checkpoint selection & validation = final 15\% of strided training
+origins by time; best-validation state restored after the fixed epoch
+budget \\
 Seeds (decision set) & 10: \{11, 23, 47, 59, 71, 83, 97, 109, 127,
 139\} \\
 Seeds (exact Ausgrid hierarchy) & same 10 seeds for every proposed,
 ablation, and baseline model \\
-Reconciliation & Base, Bottom-Up, Top-Down, OLS projection; parameters
-estimated without test targets \\
+Reconciliation & independent base forecasts, Bottom-Up,
+training-proportion Top-Down, and unweighted OLS projection; fully
+defined in Section 6.4 \\
 Hardware / framework & CPU for OPSD/SimBench; RTX 3090 with PyTorch
 2.13.0+cu130 for the v8 Ausgrid rerun \\
 \end{longtable}
 
-\textbf{Fairness statement.} Every model in a comparison shares the
-training regime, normalization, split boundaries, early-stopping rule,
-and computational budget class; the proposed model is held at the MLP
-baseline's parameter budget. The exact Ausgrid rerun moves all eleven
-models to the same GPU execution path and gives all of them the same ten
-seeds. Hardware changes between dataset blocks but never within a
-comparison block; runtime values are interpreted only within datasets.
+\textbf{Comparability statement.} Every model shares the origin split,
+training-segment normalization, four sequence-phase inputs where the
+architecture uses them, Adam learning rate, MSE objective, batch size,
+seed list for the decision comparisons, and complete test origins.
+Capacity and epoch budgets differ as disclosed in Table 2. On OPSD and
+SimBench every trained model uses stride 3. On Ausgrid all eleven models
+use the same GPU execution path and ten seeds, but CSA variants use
+stride 6 while external baselines use stride 3. The v8 CSV
+\texttt{train\_samples} field writes the stride-6 count for every method
+even though the baseline routine internally retains stride 3; it must
+not be used to claim equal training exposure. Runtime values are
+interpreted only within datasets. This asymmetry weakens causal
+attribution of the Ausgrid model ranking but does not reverse the
+reported adverse point estimates.
 
-\subsection{5.3. Statistical Methodology}\label{statistical-methodology}
+\subsubsection{5.3. Statistical
+Methodology}\label{statistical-methodology}
 
 The primary model set, CSA-LoadNet, its five ablations, and MLP, was run
 for ten seeds per dataset/horizon on OPSD and SimBench. Each block
@@ -736,10 +848,10 @@ promoted to a paired inferential comparison.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\section{6. Results}\label{results}
+\subsection{6. Results}\label{results}
 
-\subsection{6.1. Day-Ahead Main Result on
-OPSD}\label{day-ahead-main-result-on-opsd}
+\subsubsection{6.1. Main 24-Hour-Ahead Point Result on
+OPSD}\label{main-24-hour-ahead-point-result-on-opsd}
 
 Figure 2a and Table 4 present the OPSD 24 h leaderboard over ten seeds.
 CSA-LoadNet attains mean MAPE 0.032345 (std 0.000817), compared with
@@ -753,9 +865,9 @@ CSA-minus-MLP MAPE is -0.001371 (pointwise 95\% bootstrap CI
 {[}-0.001826, -0.000927{]}) and CSA-minus-TemporalOnly is -0.002246
 ({[}-0.002813, -0.001741{]}); both paired Holm p = 0.0117.
 
-\textbf{Table 4.} OPSD day-ahead (24 h) leaderboard: mean ± std MAPE
-over 10 seeds, with the Holm-adjusted p of the comparison against
-CSA-LoadNet (from \texttt{real\_opsd\_v7\_leaderboard.csv} and
+\textbf{Table 4.} OPSD 24-hour-ahead point-forecast leaderboard: mean ±
+std MAPE over 10 seeds, with the Holm-adjusted p of the comparison
+against CSA-LoadNet (from \texttt{real\_opsd\_v7\_leaderboard.csv} and
 \texttt{real\_p2\_v7\_significance.csv}).
 
 \begin{longtable}[]{@{}
@@ -780,9 +892,10 @@ Verdict
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-No calendar & 0.031873 & 0.000563 & 0.485 & not separable \\
+No sequence-phase features & 0.031873 & 0.000563 & 0.485 & not
+separable \\
 Euclidean weights & 0.032257 & 0.000738 & 1 & not separable \\
-Fixed curvature & 0.032302 & 0.000717 & 1 & not separable \\
+Fixed distance scale & 0.032302 & 0.000717 & 1 & not separable \\
 \textbf{CSA-LoadNet (proposed)} & \textbf{0.032345} & \textbf{0.000817}
 & --- & --- \\
 Equal-weight neighbors & 0.032469 & 0.000506 & 1 & not separable \\
@@ -791,21 +904,27 @@ TemporalOnly (no aggregation) & 0.034591 & 0.000251 & 0.0011 &
 \textbf{significant win} \\
 \end{longtable}
 
+\begin{figure}
+\centering
 \pandocbounded{\includegraphics[keepaspectratio]{figures/fig_leaderboard.png}}
+\caption{Figure 2. Merged 24-hour-ahead point-forecast leaderboards: (a)
+OPSD MAPE, (b) SimBench normalized MAE, mean ± std over 10 seeds.}
+\end{figure}
 
-\textbf{Figure 2.} Day-ahead (24 h) leaderboards on (\textbf{a}) OPSD
-(MAPE) and (\textbf{b}) SimBench (normalized MAE), mean ± std over 10
-seeds. On OPSD the proposed model separates significantly from the MLP
-baseline and the no-aggregation ablation; on SimBench no separation from
-the MLP is established and the MLP mean is ahead.
+\textbf{Figure 2.} The 24-hour-ahead point-forecast leaderboards on
+(\textbf{a}) OPSD (MAPE) and (\textbf{b}) SimBench (normalized MAE),
+mean ± std over 10 seeds. On OPSD the proposed model separates
+significantly from the MLP baseline and the no-aggregation ablation; on
+SimBench no separation from the MLP is established and the MLP mean is
+ahead.
 
-Two features of Table 4 constrain interpretation. NoCalendar has the
-best nominal mean at this horizon (0.031873), but its difference from
-the full model is not significant (\(p=0.485\)) and does not recur
-significantly elsewhere. The result suggests that the calendar channel
-may add little at 24 h, but it is not treated as a supported component
-finding. The three weight-form ablations also remain within ±0.4\% of
-the full model, foreshadowing Section 6.3.
+Two features of Table 4 constrain interpretation. The no-sequence-phase
+variant (historical label NoCalendar) has the best nominal mean at this
+horizon (0.031873), but its difference from the full model is not
+significant (\(p=0.485\)) and does not recur significantly elsewhere.
+The result leaves the sequence-phase contribution unresolved. The three
+weight-form ablations also remain within ±0.4\% of the full model,
+foreshadowing Section 6.3.
 
 For context, in the preliminary 3-seed v6 screen on the same OPSD 24 h
 split, TCN, PatchTST-lite, DLinear, and LSTM trail MLP (MAPE 0.0361,
@@ -814,14 +933,20 @@ motivated selecting MLP for the ten-seed decision set, but its
 four-method ordering is supporting evidence rather than equal-strength
 confirmatory inference.
 
-\subsection{6.2. Component Significance Across All
+\subsubsection{6.2. Component Significance Across All
 Settings}\label{component-significance-across-all-settings}
 
 Figure 3 condenses the complete decision analysis: every
 proposed-versus-opponent comparison in all five dataset/horizon
 settings, with its Holm-adjusted p-value and verdict.
 
+\begin{figure}
+\centering
 \pandocbounded{\includegraphics[keepaspectratio]{figures/fig_component.png}}
+\caption{Figure 3. Component significance matrix: CSA-LoadNet vs each
+opponent across five dataset/horizon settings, Mann--Whitney U with Holm
+correction, 10 seeds per cell.}
+\end{figure}
 
 \textbf{Figure 3.} Component-level significance summary (Mann--Whitney
 U, Holm-corrected, 10 seeds per cell). Exactly two non-hierarchical
@@ -840,13 +965,14 @@ SimBench, p = 0.271). The aggregation signal is also absent at SimBench
 SimBench 24 h. No weight-form comparison approaches significance; every
 Holm-adjusted p in that comparison family equals 1.
 
-\subsection{6.3. Aggregation Helps, but the Tested Weight Forms Do Not
+\subsubsection{6.3. Aggregation Helps, but the Tested Weight Forms Do
+Not
 Separate}\label{aggregation-helps-but-the-tested-weight-forms-do-not-separate}
 
 Cross-series aggregation and aggregation-weight form produce different
 empirical conclusions. The no-aggregation comparison separates on OPSD
 at 24 h, whereas the ten-seed comparisons among Poincaré, Euclidean,
-equal-weight, and curvature variants do not resolve a difference:
+equal-weight, and distance-scale variants do not resolve a difference:
 
 \begin{itemize}
 \tightlist
@@ -860,23 +986,24 @@ equal-weight, and curvature variants do not resolve a difference:
   whatever their geometry, do not demonstrably beat uniform pooling of
   the neighbor encodings at these pool sizes.
 \item
-  \textbf{Learnable vs.~fixed curvature:} not separable in any setting
-  (Holm p = 1 in all five). The adaptive-curvature parameter, the most
-  distinctive ingredient of the original design, has no measurable
-  effect.
+  \textbf{Learnable vs.~fixed inverse-temperature:} not separable in any
+  setting (Holm p = 1 in all five). The learned distance scale has no
+  measurable effect under the reported comparisons; this is not a
+  curvature comparison.
 \end{itemize}
 
 Together with the TemporalOnly separation in Section 6.1, the evidence
 supports a narrower attribution: cross-series aggregation is useful in
-the OPSD day-ahead setting, whereas no difference among the tested
-weighting schemes is resolved at the available statistical precision.
-Equal-weight neighbor averaging is therefore a simpler empirically
-competitive option, not a demonstrated equivalent of the learned weight
-forms. For graph-based load forecasting, the result shows why single-run
-point estimates are insufficient for component attribution. For this
-paper, it determines the claim structure: the Poincaré embedding is
-treated as an implementation option, and the contribution centers on the
-aggregation-existence comparison that survived testing.
+the OPSD 24-hour-ahead point setting, whereas no difference among the
+tested weighting schemes is resolved at the available statistical
+precision. Equal-weight neighbor averaging is therefore a simpler
+empirically competitive option, not a demonstrated equivalent of the
+learned weight forms. For graph-based load forecasting, the result shows
+why single-run point estimates are insufficient for component
+attribution. For this paper, it determines the claim structure: the
+Poincaré embedding is treated as an implementation option, and the
+contribution centers on the aggregation-existence comparison that
+survived testing.
 
 The weight-form result is specific to the tested pools, horizons, and
 training budget. Larger pools, sparser cross-correlations, or genuinely
@@ -886,7 +1013,7 @@ weighting-form difference was resolved after multiplicity correction.
 Because an equivalence margin was not specified, the simpler variants
 are empirically competitive rather than proven equivalent.
 
-\subsection{6.4. The Hierarchical Setting: Where the Method
+\subsubsection{6.4. The Hierarchical Setting: Where the Method
 Loses}\label{the-hierarchical-setting-where-the-method-loses}
 
 The Ausgrid experiment uses an exact hierarchy built from the 12
@@ -896,29 +1023,54 @@ each sum three leaves, and the root sums all 12. Figure 4 makes the
 every hour. Earlier non-exact aggregates are excluded from every result
 reported here.
 
+\begin{figure}
+\centering
 \pandocbounded{\includegraphics[keepaspectratio]{figures/fig_exact_hierarchy_design.png}}
+\caption{Figure 4. Exact Ausgrid hierarchy used by the corrected
+experiment.}
+\end{figure}
 
 \textbf{Figure 4.} Corrected Ausgrid hierarchy. The four intermediate
 series and the system total are deterministic sums of the same 12 leaves
 used by every forecasting method; no outside customer enters an
 aggregate.
 
-Each model first forecasts all 17 nodes independently. Base forecasts
-are then compared with bottom-up aggregation, top-down allocation using
-training-period leaf proportions, and the OLS projection
-\(S(S^{\mathsf T}S)^{-1}S^{\mathsf T}\hat Y\). Bottom-up and OLS are
-exactly coherent; the mean base-forecast coherence violation across the
-displayed methods is 0.035. Accuracy and coherence are not
-interchangeable. DLinear with bottom-up reconciliation is best at
-hierarchy-weighted sMAPE 0.28017, followed by DLinear with OLS at
-0.28047. CSA-LoadNet with OLS reaches 0.28949. Under the same OLS
-transformation, CSA-LoadNet significantly loses to DLinear (Holm
-\(p=0.000985\)), significantly beats LSTM (\(p=0.000913\)), and is
-unresolved against MLP, TCN, and PatchTST-lite. The paired
-CSA-minus-DLinear difference is 0.00902 (pointwise 95\% bootstrap CI
-{[}0.00606, 0.01215{]}, paired Holm p = 0.0195).
+Each trained model first produces an unreconciled matrix
+\(\hat Y^{\mathrm{base}}\in\mathbb R^{17\times T}\) in the node order 12
+leaves, \texttt{region1}--\texttt{region4}, and \texttt{system\_total}.
+Let \(S\in\{0,1\}^{17\times12}\) be the fixed summing matrix shown in
+Figure 4. Bottom-up discards the five aggregate-node base forecasts and
+returns \(\hat Y^{\mathrm{BU}}=S\hat Y^{\mathrm{base}}_{1:12,:}\).
+Top-down computes leaf proportions
+\(q_\ell=\sum_{t<b}y_{\ell t}/\sum_{r=1}^{12}\sum_{t<b}y_{rt}\) from the
+pre-test training segment, allocates the base root forecast as
+\(q\hat y^{\mathrm{base}}_{17,:}\), and returns
+\(\hat Y^{\mathrm{TD}}=S(q\hat y^{\mathrm{base}}_{17,:})\). OLS applies
+the unweighted, covariance-free projection
+\(P=S(S^{\mathsf T}S)^{-1}S^{\mathsf T}\) independently at every
+forecasted timestamp: \(\hat Y^{\mathrm{OLS}}=P\hat Y^{\mathrm{base}}\).
+No post-reconciliation clipping or refitting is implemented. Bottom-up,
+top-down, and OLS are all exactly coherent by construction; only
+top-down estimates proportions, and it uses no test targets.
 
+The mean base-forecast coherence violation across the displayed methods
+is 0.035. Accuracy and coherence are not interchangeable. DLinear with
+bottom-up reconciliation is best at hierarchy-weighted sMAPE 0.28017,
+followed by DLinear with OLS at 0.28047. CSA-LoadNet with OLS reaches
+0.28949. Under the same OLS transformation, CSA-LoadNet significantly
+loses to DLinear (Holm \(p=0.000985\)), significantly beats LSTM
+(\(p=0.000913\)), and is unresolved against MLP, TCN, and PatchTST-lite.
+The paired CSA-minus-DLinear difference is 0.00902 (pointwise 95\%
+bootstrap CI {[}0.00606, 0.01215{]}, paired Holm p = 0.0195). The
+Ausgrid capacity, epoch, and stride asymmetries in Section 5.2 qualify
+this model-ranking comparison.
+
+\begin{figure}
+\centering
 \pandocbounded{\includegraphics[keepaspectratio]{figures/fig_exact_hierarchy_reconciliation.png}}
+\caption{Figure 5. Accuracy and structural coherence on the corrected
+Ausgrid hierarchy.}
+\end{figure}
 
 \textbf{Figure 5.} (a) Hierarchy-weighted sMAPE under independent,
 bottom-up, and OLS-reconciled forecasts (ten seeds per model). (b) Mean
@@ -935,7 +1087,7 @@ using coherence constraints where accounting identities matter and
 reserving CSA-LoadNet for settings in which cross-series context, rather
 than hierarchy alone, carries predictive information.
 
-\subsection{6.5. Short-Horizon and SimBench
+\subsubsection{6.5. Short-Horizon and SimBench
 Boundaries}\label{short-horizon-and-simbench-boundaries}
 
 The remaining cells of Figure 3 complete the boundary map. On OPSD 1 h,
@@ -957,7 +1109,12 @@ comparators; SimBench 1 h is effectively zero, and SimBench 24 h trends
 against the proposed model. This cross-dataset view prevents the single
 favorable cell from being mistaken for general superiority.
 
+\begin{figure}
+\centering
 \pandocbounded{\includegraphics[keepaspectratio]{figures/fig_cross_dataset_effects.png}}
+\caption{Figure 6. Cross-dataset seed-paired relative primary-error
+changes for CSA-LoadNet.}
+\end{figure}
 
 \textbf{Figure 6.} Seed-paired relative reduction in each dataset's
 primary error for CSA-LoadNet against the named comparator. Bars show
@@ -967,7 +1124,7 @@ seeds; positive values favor CSA-LoadNet. The historical evidence label
 Inferential decisions use the Holm-adjusted tests and the corrected
 hierarchy table, not visual overlap.
 
-\subsection{6.6. Cross-Setting Rank and Compute
+\subsubsection{6.6. Cross-Setting Rank and Compute
 Profiles}\label{cross-setting-rank-and-compute-profiles}
 
 Figure 7 replaces selective pairwise reading with a complete current
@@ -981,7 +1138,12 @@ a setting and are not imputed. We do not form a cross-dataset average
 rank because MAPE, normalized MAE, and hierarchy-weighted sMAPE answer
 different scale questions.
 
+\begin{figure}
+\centering
 \pandocbounded{\includegraphics[keepaspectratio]{figures/fig_cross_setting_ranks.png}}
+\caption{Figure 7. Model ranks where reported over the five primary
+forecasting settings.}
+\end{figure}
 
 \textbf{Figure 7.} Ranks by dataset-specific primary error. Rank 1 is
 the lowest mean error within a column. Dashes mark methods absent from
@@ -997,7 +1159,12 @@ compared across datasets; the panel asks whether a reported accuracy
 cell is accompanied by an exceptional computational burden, not whether
 the error scales are interchangeable.
 
+\begin{figure}
+\centering
 \pandocbounded{\includegraphics[keepaspectratio]{figures/fig_compute_error_profile.png}}
+\caption{Figure 8. Dataset-specific compute and error profile of
+CSA-LoadNet.}
+\end{figure}
 
 \textbf{Figure 8.} Mean wall-clock time and dataset-specific primary
 error for CSA-LoadNet at each evaluated horizon. The x-axis is
@@ -1028,8 +1195,8 @@ Interpretation
 \bottomrule\noalign{}
 \endlastfoot
 OPSD, 1 h & Behind MLP & Significant loss & Short-horizon boundary \\
-OPSD, 24 h & Ahead of MLP & Significant win & Supported day-ahead
-result \\
+OPSD, 24 h & Ahead of MLP & Significant win & Supported 24-hour-ahead
+point result \\
 SimBench, 1 h & Approximately tied & Not separable & No superiority
 claim \\
 SimBench, 24 h & Behind MLP & Not separable & Adverse nominal trend \\
@@ -1038,25 +1205,27 @@ achieved; no accuracy-superiority claim \\
 \end{longtable}
 
 The table and rank profile locate the observed effect. Cross-series
-aggregation is supported in the OPSD day-ahead setting, accompanied by
-two adverse settings and two unresolved settings. The tested attention
-geometries do not extend this result to the other settings.
+aggregation is supported in the OPSD 24-hour-ahead point setting,
+accompanied by two adverse settings and two unresolved settings. The
+tested attention parameterizations do not extend this result to the
+other settings.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\section{7. Discussion}\label{discussion}
+\subsection{7. Discussion}\label{discussion}
 
-\subsection{7.1. Aggregation, Weighting, and Hierarchical
+\subsubsection{7.1. Aggregation, Weighting, and Hierarchical
 Coherence}\label{aggregation-weighting-and-hierarchical-coherence}
 
 The ten-seed component comparison supports cross-series aggregation over
 the no-aggregation control on OPSD at 24 h. The targeted MLP comparison
 separates in the same setting. By contrast, the analysis does not
-distinguish Poincaré, Euclidean, equal-weight, or curvature variants, so
-the observed benefit concerns aggregation rather than the geometry used
-to weight neighbors. The preliminary three-seed architecture screen
-explains the choice of MLP for confirmation but does not carry the same
-evidential weight.
+distinguish Poincaré, Euclidean, equal-weight, or inverse-temperature
+variants, so the observed benefit concerns aggregation rather than the
+parameterization used to weight neighbors. The preliminary three-seed
+architecture screen explains the choice of MLP for confirmation but does
+not carry the same evidential weight and creates comparator-selection
+visibility that a future preregistered study should avoid.
 
 The exact Ausgrid experiment answers a different question. It constructs
 all four regional aggregates and the root from the same 12 leaves and
@@ -1067,160 +1236,164 @@ can be enforced after forecasting; it is not evidence that the
 underlying forecaster is accurate.
 
 Taken together, the experiments locate rather than generalize the
-benefit. Pool context is useful in the OPSD day-ahead setting, whereas
-additional weighting complexity is unsupported at the evaluated pool
-sizes. Multiple temporal origins and independently repeated weather
+benefit. Pool context is useful in the OPSD 24-hour-ahead point setting,
+whereas additional weighting complexity is unsupported at the evaluated
+pool sizes. Multiple split positions and independently repeated weather
 years would test whether this pattern persists beyond the selected
-splits.
+split.
 
-\subsection{7.2. Why Aggregation Helps at 24 h and Not at 1
+\subsubsection{7.2. Why Aggregation Helps at 24 h and Not at 1
 h}\label{why-aggregation-helps-at-24-h-and-not-at-1-h}
 
 The horizon asymmetry in Figure 3 admits a simple reading. At one-hour
-lead, each country's own most recent observations carry nearly all
-recoverable information, and any capacity spent on pool context competes
-with capacity spent on the target's own dynamics --- hence a plain MLP
-on the target window wins outright. At day-ahead lead, the target's
-terminal observations are 24 h stale; what generalizes across that gap
-is shared structure --- synchronized daily and weekly shapes, common
-weather-driven regimes --- which is exactly what a pooled context vector
-over five neighboring national loads can supply. The TemporalOnly column
-supports this reading quantitatively: its deficit against the full model
-is decisive at OPSD 24 h (p = 0.0011), directionally present but
-non-significant at the 1 h settings, and absent on Ausgrid where the
-pool is uninformative. We offer this as an interpretation consistent
-with the evidence, not as a tested mechanism.
+lead, each country's own most recent observations may carry most
+recoverable information, and capacity spent on pool context can compete
+with capacity spent on the target's own dynamics. At a 24-hour lead, the
+terminal observation is 24 positions behind the scalar target;
+synchronized daily and weekly shapes are plausible information sources
+for a pooled context vector. The TemporalOnly deficit is decisive at
+OPSD 24 h (\(p=0.0011\)), directionally present but non-significant at
+the 1 h settings, and absent on Ausgrid. Because no weather variables or
+mechanism interventions are observed, this is an interpretation
+consistent with the evidence, not a tested mechanism.
 
-\subsection{7.3. Implications for the Cross-Series Forecasting
+\subsubsection{7.3. Implications for the Cross-Series Forecasting
 Literature}\label{implications-for-the-cross-series-forecasting-literature}
 
 Our results neither reject cross-series modeling nor support additional
-weighting complexity. In the OPSD multi-region day-ahead setting,
-aggregation improves MAPE by 6.5\% and survives both the prespecified
-test and paired sensitivity analysis. By contrast, no difference among
-the tested weight forms is resolved in any setting; equivalence within a
-prespecified tolerance was not tested. This contrast shows why mechanism
-claims require repeated component-level evaluation. In this study, the
-OPSD and SimBench decision sets were feasible on CPU, while the larger
-exact-hierarchy rerun used a single RTX 3090.
+weighting complexity. In the OPSD multi-region 24-hour-ahead point
+setting, aggregation improves MAPE by 6.5\% and survives both the
+declared primary test and paired sensitivity analysis. By contrast, no
+difference among the tested weight forms is resolved in any setting;
+equivalence within a prespecified tolerance was not tested. This
+contrast shows why mechanism claims require repeated component-level
+evaluation. In this study, the OPSD and SimBench decision sets were
+feasible on CPU, while the larger exact-hierarchy rerun used a single
+RTX 3090.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\section{8. Limitations}\label{limitations}
+\subsection{8. Limitations}\label{limitations}
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \textbf{Claims are confined to day-ahead, pool-level multi-region
-  forecasting.} The single significance-backed superiority result is
-  OPSD 24 h (vs.~MLP and vs.~the no-aggregation ablation). We make no
-  claim at the 1 h horizon --- on OPSD 1 h the method significantly
-  loses to the MLP (Holm p = 0.0348) --- and no claim on SimBench, where
-  both horizons are inseparable from the MLP (24 h: p = 0.084 with the
-  MLP mean ahead; 1 h: p = 1 with means nearly identical).
+  \textbf{Claims are confined to one scalar 24-hour-ahead point task.}
+  The single significance-backed superiority result is OPSD at lead 24
+  (vs.~MLP and vs.~the no-aggregation ablation). The experiment does not
+  produce or score a 24-point next-day trajectory. We make no claim at
+  the 1 h lead---on OPSD 1 h the method significantly loses to MLP (Holm
+  \(p=0.0348\))---and no claim on SimBench, where both leads are
+  inseparable from MLP (24 h: \(p=0.084\) with the MLP mean ahead; 1 h:
+  \(p=1\) with means nearly identical).
 \item
   \textbf{The method does not transfer to the exact
-  customer/region/system hierarchy as implemented.} Under the common OLS
+  customer/region/system hierarchy as implemented.} Under common OLS
   reconciliation, CSA-LoadNet significantly loses to DLinear (Holm
   \(p<0.001\)), while its contrasts against MLP, TCN, and PatchTST-lite
   remain unresolved under the primary family. Bottom-up, top-down, and
-  OLS reconciliation are included and the coherent variants satisfy the
-  accounting identities exactly, but reconciliation does not make the
-  proposed forecaster more accurate than the strongest linear baseline.
-  MinT with covariance shrinkage and end-to-end coherence-constrained
-  training remain untested.
+  OLS reconciliation satisfy the accounting identities, but coherence
+  does not establish forecaster accuracy. MinT with covariance shrinkage
+  and end-to-end coherence-constrained training remain untested.
 \item
   \textbf{The weight-form inseparability is a bounded negative.} It
-  holds for pools of 6--17 series on these three public benchmarks under
-  our training budget; larger pools, sparser correlation structure, or
-  genuinely tree-structured populations could separate the weight
-  parameterizations. Our finding licenses skepticism, not a universal
-  impossibility statement.
+  holds for pools of 6, 8, and 17 series on these three public
+  benchmarks under the reported budgets. Larger pools, sparser
+  correlation structure, or other populations could separate the
+  parameterizations. No equivalence margin was specified.
 \item
-  \textbf{Bounded training budgets.} All models, baselines included, use
-  compact configurations with bounded epochs and strided training
-  samples. OPSD and SimBench were trained on CPU and the exact Ausgrid
-  experiment on one RTX 3090. Budgets are matched within each comparison
-  block, but absolute errors and even rankings could change under
-  architecture-specific large-scale tuning.
+  \textbf{Capacity and training exposure are not matched.} Parameter
+  counts range from 338 (DLinear) to 70,597 (PatchTST-lite), and maximum
+  epochs differ by architecture. On Ausgrid, CSA variants use
+  training-origin stride 6 while external baselines use stride 3; the
+  run CSV records the stride-6 sample count for all methods despite that
+  source-code difference. The significant CSA--DLinear loss is therefore
+  a result under unequal exposure, not a capacity-controlled causal
+  comparison. Absolute errors and rankings could change under matched or
+  architecture-specific tuning.
 \item
-  \textbf{One fixed hierarchy and one temporal split.} The corrected
-  Ausgrid study removes the leaf/aggregate inconsistency and uses ten
-  seeds for every model, but it still tests one deterministic 12-leaf
-  grouping and one chronological split. Alternative geographic
-  groupings, rolling origins, and larger customer populations could
-  yield different reconciliation rankings.
+  \textbf{Ausgrid structural selection sees the full record.} The
+  completeness filter and top-energy leaf ranking use all three years
+  before the chronological split. This does not train model parameters
+  on test targets, but it is not a train-only selection design and may
+  favor continuous, high-consumption customers. Only one deterministic
+  grouping is tested.
 \item
-  \textbf{No exogenous weather inputs.} All models forecast from load
-  history and calendar information alone; weather-aware extensions
-  remain untested on real data in this study, and no claim about them is
-  made.
+  \textbf{Timestamp and missingness handling are limited.} OPSD is kept
+  in UTC, whereas SimBench and constructed Ausgrid labels have no
+  represented timezone and receive no daylight-saving adjustment.
+  Sequence-phase covariates come from row indices rather than parsed
+  timestamps. OPSD and SimBench invalid rows are dropped, Ausgrid blank
+  half-hours are set to zero, and discarded-row counts are not
+  preserved. Sensitivity to these choices is untested.
 \item
-  \textbf{Weather-year sensitivity is untested.} The OPSD conclusions
-  rest on a single chronological split of the 2015--2018 period, whose
-  test segment (October 2017 through December 2018, Table 1) spans
-  essentially one weather-year. Because all inputs are load history and
-  calendar features, an unusually mild or extreme weather-year could
-  shift both absolute errors and the size of the cross-series
-  aggregation benefit --- synchronized weather regimes are precisely the
-  shared structure we conjecture the pooled context exploits (Section
-  7.2). The findings have not been replicated across alternative
-  multi-year split positions, and we make no claim of weather-year
-  robustness.
+  \textbf{Comparator choice and temporal generalization are limited.}
+  MLP was targeted after a preliminary screen on the same fixed test
+  trajectory. The conclusions rest on one chronological split;
+  alternative split positions and independently repeated weather years
+  were not evaluated. The OPSD test targets cover late 2017 through
+  2018, so no weather-year robustness claim is made.
+\item
+  \textbf{No exogenous weather or operational covariates are used.} All
+  models forecast from load history and four row-index phase features.
+  Weather-aware extensions, holidays, localized civil time, dispatch
+  consequences, and deployment remain untested.
 \end{enumerate}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\section{9. Conclusions}\label{conclusions}
+\subsection{9. Conclusions}\label{conclusions}
 
 This study determines which components of a cross-series attention
 forecaster earn empirical support. On the public six-country OPSD
 benchmark, CSA-LoadNet significantly outperforms the ten-seed MLP
-comparator at 24 h (mean MAPE 0.0323 versus 0.0337; Holm \(p=0.0085\)).
-It also outperforms its no-aggregation ablation (Holm \(p=0.0011\)) over
-ten seeded runs under a leakage-free temporal protocol. The remaining
-four compact neural families were screened with three seeds and do not
-carry the same confirmatory weight. Cross-series aggregation is
-therefore supported only for the stated day-ahead multi-region setting.
+comparator for a scalar target 24 hours after each origin (mean MAPE
+0.0323 versus 0.0337; Holm \(p=0.0085\)). It also outperforms its
+no-aggregation ablation (Holm \(p=0.0011\)) over ten seeded runs on one
+fixed chronological split. The remaining four compact neural families
+were screened with three seeds and do not carry the same confirmatory
+weight. Cross-series aggregation is therefore supported only for the
+stated OPSD 24-hour-ahead point setting.
 
 The form of the aggregation weights is not supported as a
-differentiator. No difference among hyperbolic, Euclidean, equal-weight,
-and fixed-curvature variants is resolved in the tested non-hierarchical
-settings; equivalence was not tested. Outside the OPSD day-ahead
-setting, the method loses at 1 h on OPSD, does not separate from MLP on
-SimBench, and loses to DLinear on the exact Ausgrid hierarchy. Bottom-up
-and OLS reconciliation make forecasts coherent but do not change that
-ranking. The resulting contribution is a setting-specific aggregation
-effect, a clear separation between accuracy and coherence, and an
-empirical limit on additional weighting complexity. The public datasets,
-full configurations, per-seed results, and hierarchy construction are
-released to support reproduction and extension.
+differentiator. No difference among Poincaré-distance,
+Euclidean-distance, equal-weight, and fixed-distance-scale variants is
+resolved in the tested settings; equivalence was not tested. Outside the
+favorable OPSD cell, the method loses at 1 h on OPSD, does not separate
+from MLP on SimBench, and loses to DLinear on the exact Ausgrid
+hierarchy under unequal Ausgrid training-origin strides. Bottom-up,
+top-down, and OLS reconciliation make forecasts coherent but do not
+establish accuracy superiority. The resulting contribution is a
+setting-specific aggregation effect, a separation between accuracy and
+coherence, and an empirical limit on additional weighting complexity.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\section{Author Contributions}\label{author-contributions}
+\subsection{Author Contributions}\label{author-contributions}
 
 {[}AUTHOR INPUT REQUIRED: assign the CRediT roles to Jieyun Zheng,
 Linyao Zhang, Zhanghuang Zhang, Zhuolin Chen, and Ying Shi, and obtain
 approval from every author.{]} All authors have read and agreed to the
 published version of the manuscript.
 
-\section{Funding}\label{funding}
+\subsection{Funding}\label{funding}
 
 {[}AUTHOR INPUT REQUIRED: insert the verified funder, grant number, and
 APC funder, or state ``This research received no external funding.''{]}
 
-\section{Institutional Review Board
+\subsection{Institutional Review Board
 Statement}\label{institutional-review-board-statement}
 
 Not applicable.
 
-\section{Informed Consent Statement}\label{informed-consent-statement}
+\subsection{Informed Consent
+Statement}\label{informed-consent-statement}
 
 Not applicable.
 
-\section{Data Availability Statement}\label{data-availability-statement}
+\subsection{Data Availability
+Statement}\label{data-availability-statement}
 
 All datasets used in this study are public: the Open Power System Data
 60 min package (https://open-power-system-data.org) {[}29{]}, SimBench
@@ -1236,7 +1409,7 @@ CSV files use the historical full-configuration label
 \texttt{HyG-LoadFormer\ (neural)}, whose one-to-one mapping to
 CSA-LoadNet is documented in the evidence README.
 
-\section{Acknowledgments}\label{acknowledgments}
+\subsection{Acknowledgments}\label{acknowledgments}
 
 During the preparation of this manuscript, the authors used Claude
 (Anthropic) for language drafting and editing and for assistance in
@@ -1246,13 +1419,13 @@ conclusions were specified, executed, and verified by the authors. The
 authors reviewed and revised all assisted content and take full
 responsibility for the publication.
 
-\section{Conflicts of Interest}\label{conflicts-of-interest}
+\subsection{Conflicts of Interest}\label{conflicts-of-interest}
 
 The authors declare no conflicts of interest.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\section{References}\label{references}
+\subsection{References}\label{references}
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}

@@ -90,8 +90,8 @@ RENAME = {
     "Ablation-TemporalOnly (neural)": "TemporalOnly (no aggregation)",
     "Ablation-EuclideanGraph (neural)": "Euclidean weights",
     "Ablation-EqualNeighbors (neural)": "Equal-weight neighbors",
-    "Ablation-FixedCurvature (neural)": "Fixed curvature",
-    "Ablation-NoCalendar (neural)": "No calendar features",
+    "Ablation-FixedCurvature (neural)": "Fixed distance scale",
+    "Ablation-NoCalendar (neural)": "No sequence-phase features",
     "MLP": "MLP",
     "DLinear": "DLinear",
     "TCN": "TCN",
@@ -152,7 +152,7 @@ def fig_leaderboard() -> None:
     # honest significance verdicts live in the panel subtitles (no overlap
     # with bars) rather than floating annotations
     axes[0].set_title(
-        "(a) OPSD, day-ahead 24 h\nvs MLP: Holm p = 0.0085 (significant win)",
+        "(a) OPSD, 24-hour-ahead point\nvs MLP: Holm p = 0.0085 (significant win)",
         fontsize=8.0, pad=5)
     axes[0].set_xlim(0, 0.043)
 
@@ -161,7 +161,7 @@ def fig_leaderboard() -> None:
         "Normalized MAE (10 seeds; lower is better)",
     )
     axes[1].set_title(
-        "(b) SimBench, day-ahead 24 h\nvs MLP: p = 0.084 (not separable; MLP mean ahead)",
+        "(b) SimBench, 24-hour-ahead point\nvs MLP: p = 0.084 (not separable; MLP mean ahead)",
         fontsize=8.0, pad=5)
     axes[1].set_xlim(0, 0.078)
 
@@ -191,10 +191,10 @@ SETTINGS = [
 OPPONENT_ROWS = [
     ("MLP", "MLP (external baseline)"),
     ("Ablation-TemporalOnly (neural)", "TemporalOnly (no aggregation)"),
-    ("Ablation-NoCalendar (neural)", "No calendar features"),
+    ("Ablation-NoCalendar (neural)", "No sequence-phase features"),
     ("Ablation-EuclideanGraph (neural)", "Euclidean weights"),
     ("Ablation-EqualNeighbors (neural)", "Equal-weight neighbors"),
-    ("Ablation-FixedCurvature (neural)", "Fixed curvature"),
+    ("Ablation-FixedCurvature (neural)", "Fixed distance scale"),
 ]
 WEIGHT_FORM_ROWS = {3, 4, 5}  # indices of the weight-parameterization block
 
@@ -304,7 +304,7 @@ def fig_ausgrid() -> None:
     # honest verdict carried in the subtitle (kept clear of the bars):
     # DLinear is significantly ahead of the proposed method here.
     ax.set_title(
-        "Ausgrid solar-home hierarchy (17 series), day-ahead 24 h\n"
+        "Ausgrid solar-home hierarchy (17 series), 24-hour-ahead point\n"
         "DLinear vs CSA-LoadNet under OLS: Holm p = 0.000985 (proposed method loses)",
         fontsize=8.0, pad=5)
     ax.set_xlim(0, 0.34)

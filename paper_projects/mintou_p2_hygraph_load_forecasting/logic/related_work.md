@@ -3,7 +3,7 @@
 The authoritative literature review for this paper is **Section 2 of the manuscript**
 (`mintou_p2_hygraph_load_forecasting/manuscript/MANUSCRIPT.md`), organized in three threads:
 
-1. **Deep architectures for short-term and day-ahead load forecasting** (Section 2.1)
+1. **Deep architectures for short-term and 24-hour-ahead load forecasting** (Section 2.1)
 2. **Cross-series and graph-structured load forecasting** (Section 2.2) — including the gap this paper fills: no prior work tests whether its particular cross-series weighting beats trivial equal-weight averaging under an identical protocol with seed-level significance testing
 3. **Simple baselines and honest evaluation** (Section 2.3)
 

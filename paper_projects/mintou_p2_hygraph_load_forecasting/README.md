@@ -2,7 +2,7 @@
 
 ## 论文信息
 
-- **论文标题**: Cross-Series Aggregation in Day-Ahead Multi-Region Power Load Forecasting: A Component-Level Evaluation
+- **论文标题**: Cross-Series Aggregation for 24-Hour-Ahead Point Forecasting of Multi-Region Power Load: A Component-Level Evaluation
 - **算法**: CSA-LoadNet（历史证据标签：`HyG-LoadFormer (neural)`）
 - **论文编号**: mintou_p2
 - **当前目标期刊**: Electronics (MDPI)；备选 Applied Sciences (MDPI)
@@ -28,7 +28,7 @@
 
 ## 关键结论速览
 
-当前稿件只把 OPSD 24 h 作为显著的正面单元：CSA-LoadNet 相对 MLP 和无聚合消融均有经 Holm 校正的差异。OPSD 1 h 为显著负面结果，SimBench 未建立相对 MLP 的优势，精确 Ausgrid 层级上低于 DLinear；所有已测试聚合权重形式均未分离。因此主线是“特定 day-ahead 场景中的跨序列聚合效应”，不是双曲权重、曲率或普遍预测优势。证据范围及本隔离工作树中的数据可见性见 `manuscript/DEEP_REVISION_EVIDENCE.md`。
+当前稿件只把 OPSD 的 24 小时超前**单点**预测作为显著正面单元：CSA-LoadNet 相对 MLP 和无聚合消融均有经 Holm 校正的差异；该任务不是次日 24 点轨迹预测。OPSD 1 h 为显著负面结果，SimBench 未建立相对 MLP 的优势，精确 Ausgrid 层级上低于 DLinear；所有已测试聚合权重形式均未分离。实现中的缩放量是注意力逆温度/距离尺度，不是曲率参数。Ausgrid 全记录叶节点筛选与不相等训练 stride 等限制见 `manuscript/DEEP_REVISION_EVIDENCE.md`。
 
 
 ## Round 2 评审产出 (2026-07-14)
