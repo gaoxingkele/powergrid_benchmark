@@ -2,11 +2,11 @@
 
 ## 论文
 
-- **标题**: Hybrid Multi-Objective Evolution for Traceable Power Grid Feasibility Review and Investment Effectiveness Optimization
-- **算法**: TRACE-MOEA (Traceable Review-Aware Coevolutionary Multi-Objective Evolution)
-- **任务**: 可追溯电网项目可行性评审与投资有效性多目标优化
-- **目标期刊**: IEEE Access（主投）；MDPI Energies（备选）
-- **当前状态**: `project_original_public_benchmark_v1`，公开基准代理信号（+1.23% vs AHP-TOPSIS，+3.71% vs 最强消融）
+- **标题**: TRACE-MOEA: Constrained Power-Grid Portfolio Search with Adaptive Preference Elitism, Budget Repair, and Run-Level Intervention-Event Records
+- **算法**: TRACE-MOEA（约束非支配排序核心 + 自适应偏好精英保留 + 确定性预算修复 + 运行级干预事件记录）
+- **任务**: 公开代理基准上的硬预算电网投资组合搜索与运行级事件记录
+- **目标期刊**: MDPI Energies
+- **当前状态**: `public_rts_simbench_nerc_project_review_v3_direct_family_controls`；相对 NSGA-II 的汇总平均 HV 差为 +0.89%，偏好消融的独立效应未解决
 
 ## 本文件夹用途
 
@@ -16,6 +16,7 @@
 |---|---|
 | `README.md` | 本说明 |
 | `JOURNAL_REVIEW.md` | IEEE Access vs MDPI Energies 双刊差距评估、修改完善方案与 P0/P1/P2 行动清单（中文） |
+| `manuscript/DEEP_REVISION_EVIDENCE.md` | 标题、主估计量、比较预算、负结果、共享基础设施与人工阻塞项的证据契约 |
 
 ## ARA 源路径
 
