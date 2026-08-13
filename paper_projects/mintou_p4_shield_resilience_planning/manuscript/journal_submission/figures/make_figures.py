@@ -3,8 +3,8 @@
 Reads the real 30-seed evidence CSVs and writes three journal-ready PNG
 figures (300 dpi) into this directory:
 
-    fig_hv_boxplot.png      hypervolume boxplots, 8 experiments x 6 main
-                            methods, plus a pooled mean-vs-worst-case HV
+    fig_hv_boxplot.png      hypervolume boxplots, 8 archive labels x 6 main
+                            methods, plus a pooled mean-vs-worst-envelope HV
                             robustness panel (single shared axis, no dual axes)
     fig_ablation.png        4 single-switch ablations vs the full method,
                             with relative-difference and significance callouts
@@ -32,8 +32,20 @@ import pandas as pd
 # Paths
 # ---------------------------------------------------------------------------
 FIG_DIR = Path(__file__).resolve().parent
-REPO_ROOT = FIG_DIR.parents[2]
-EVIDENCE = REPO_ROOT / "papers" / "mintou" / "mintou_p4_shield_resilience_planning" / "evidence"
+PROJECT = "mintou_p4_shield_resilience_planning"
+
+
+def find_repo_root(start: Path) -> Path:
+    """Find the shared harness root from either figure-script copy."""
+    for candidate in (start, *start.parents):
+        evidence = candidate / "papers" / "mintou" / PROJECT / "evidence"
+        if evidence.is_dir():
+            return candidate
+    raise FileNotFoundError("shared Mintou evidence tree not found above figure directory")
+
+
+REPO_ROOT = find_repo_root(FIG_DIR)
+EVIDENCE = REPO_ROOT / "papers" / "mintou" / PROJECT / "evidence"
 RESULTS_CSV = EVIDENCE / "runs" / "real_simbench_planning_results.csv"
 SIGNIFICANCE_CSV = EVIDENCE / "tables" / "real_simbench_planning_significance.csv"
 AC_SUMMARY_CSV = EVIDENCE / "tables" / "real_ac_validation_summary.csv"
@@ -81,10 +93,10 @@ MAIN_LABELS = {
 
 EXPERIMENT_LABELS = {
     "deterministic_vs_scenario": "Deterministic vs.\nscenario",
-    "der_uncertainty": "DER\nuncertainty",
+    "der_uncertainty": "DER-factor label\n(inactive in p4 F)",
     "load_uncertainty": "Load\nuncertainty",
     "outage_contingency": "Outage\ncontingency",
-    "restoration_aware_evaluation": "Restoration-aware\nevaluation",
+    "restoration_aware_evaluation": "$L^e$ in search\nand evaluation",
     "scenario_screening_efficiency": "Scenario-screening\nefficiency",
     "pareto_quality": "Pareto\nquality",
     "unseen_stress_generalization": "Unseen-stress\ngeneralization",
@@ -92,7 +104,7 @@ EXPERIMENT_LABELS = {
 EXPERIMENT_ORDER = list(EXPERIMENT_LABELS)
 
 ABLATION_LABELS = {
-    "Ablation-NoResilienceObj": "No resilience objective",
+    "Ablation-NoResilienceObj": "No survivability in environmental selection",
     "Ablation-NoScenarioScreen": "No scenario screening",
     "Ablation-NoOutage": "No outage in search",
     "Ablation-NoRepair": "No feasibility repair",
@@ -105,7 +117,7 @@ def load_results() -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------------------
-# Figure 1: HV boxplots (8 experiments x 6 main methods) + robustness panel
+# Figure 1: HV boxplots (8 archive labels x 6 main methods) + envelope panel
 # ---------------------------------------------------------------------------
 def fig_hv_boxplot(df: pd.DataFrame) -> None:
     d = df[df["method"].isin(MAIN_METHODS)]
@@ -170,7 +182,7 @@ def fig_hv_boxplot(df: pd.DataFrame) -> None:
         axr.plot(i + dx, worst_hv, marker="o", markersize=6.0, markerfacecolor="white",
                  markeredgecolor=color, markeredgewidth=1.3, zorder=3)
     axr.annotate(
-        f"mean {pooled.loc[PROPOSED, 'hypervolume']:.3f} $\\rightarrow$ worst-case "
+        f"mean {pooled.loc[PROPOSED, 'hypervolume']:.3f} $\\rightarrow$ worst-envelope "
         f"{pooled.loc[PROPOSED, 'hypervolume_worst_case']:.3f}",
         (0 + dx, pooled.loc[PROPOSED, "hypervolume_worst_case"]), xytext=(-14, -30),
         textcoords="offset points", fontsize=6.8, color=BLUE_DARK,
@@ -179,7 +191,7 @@ def fig_hv_boxplot(df: pd.DataFrame) -> None:
     axr.set_xticks(x)
     axr.set_xticklabels([MAIN_LABELS.get(m, m) for m in MAIN_METHODS], fontsize=7.2)
     axr.set_ylabel("Hypervolume")
-    axr.set_title("Pooled mean vs. worst-case-over-scenarios hypervolume (8 experiments $\\times$ 30 seeds)",
+    axr.set_title("Pooled mean vs. sampled worst-envelope hypervolume (8 labels $\\times$ 30 seeds)",
                   fontsize=7.6, pad=4)
     axr.grid(axis="y", color=GRAY_FILL, linewidth=0.6)
     axr.set_axisbelow(True)
@@ -194,7 +206,7 @@ def fig_hv_boxplot(df: pd.DataFrame) -> None:
     gray_box = plt.Rectangle((0, 0), 1, 1, facecolor=GRAY_FILL, edgecolor=GRAY_DARK)
     fig.legend([blue_box, gray_box, filled, open_m],
                ["SHIELD-MOEA (proposed)", "Baselines",
-                "Mean HV (bottom panel)", "Worst-case HV (bottom panel)"],
+                "Mean HV (bottom panel)", "Worst-envelope HV (bottom panel)"],
                loc="upper center", ncol=4, frameon=False, bbox_to_anchor=(0.5, 0.98))
     fig.subplots_adjust(top=0.90)
     fig.savefig(FIG_DIR / "fig_hv_boxplot.png")
@@ -216,7 +228,7 @@ def fig_ablation(df: pd.DataFrame) -> None:
     order = [PROPOSED] + list(stats.loc[list(ABLATION_LABELS)]
                               .sort_values("mean", ascending=False).index)
 
-    # Holm-significant experiment counts per ablation (out of 8)
+    # Holm-significant label counts per ablation (out of 8)
     sig_counts = {}
     for m in ABLATION_LABELS:
         rows = sig[sig["comparison"] == f"{PROPOSED} vs {m}"]
@@ -238,7 +250,7 @@ def fig_ablation(df: pd.DataFrame) -> None:
         labels.append("SHIELD-MOEA (full)" if m == PROPOSED else ABLATION_LABELS[m])
     ax.set_yticks(y)
     ax.set_yticklabels(labels)
-    ax.set_xlabel("Hypervolume (mean $\\pm$ std over 8 experiments $\\times$ 30 seeds)")
+    ax.set_xlabel("Hypervolume (mean $\\pm$ std over 8 labels $\\times$ 30 seeds)")
     ax.grid(axis="x", color=GRAY_FILL, linewidth=0.6)
     ax.set_axisbelow(True)
     ax.tick_params(axis="y", length=0)
@@ -273,7 +285,7 @@ AC_ORDER = [
 ]
 AC_LABELS = {
     "Deterministic Planning": "Deterministic",
-    "Ablation-NoResilienceObj": "No resilience obj.",
+    "Ablation-NoResilienceObj": "No $S$ in selection",
     "Ablation-NoScenarioScreen": "No scenario screen",
     "Ablation-NoOutage": "No outage in search",
     "Ablation-NoRepair": "No repair",
