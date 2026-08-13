@@ -1,8 +1,9 @@
 # Manuscript artifact status
 
-- `MANUSCRIPT.md` is the current content master for the P2 S3 evidence stage.
-- `journal_submission/paper.tex` was regenerated from that master after the new rolling-origin results were incorporated.
-- `journal_submission/paper.pdf` was not regenerated because no TeX engine is available in this environment. It predates the P2 S3 claim correction and must not be used as the current manuscript.
-- Files under `submission_preview/` also predate P2 S3 and are presentation history, not current scientific evidence.
+- `MANUSCRIPT.md` is the current content master for the P2 S4 results-narrative stage.
+- `derived_tables/` and the result figures in `figures/` were regenerated deterministically by `figures/make_figures.py` after it verified the accepted rolling-origin manifest and its recorded outputs. `derived_tables/p2_artifact_manifest.json` records the source and output hashes.
+- `journal_submission/paper.tex`, `body.generated.md`, `body.generated.tex`, and its figure directory were regenerated or synchronized from the current master.
+- `submission_preview/paper.tex` and its figure directory were synchronized to the same current content.
+- The existing PDFs were not regenerated because the required `pdflatex` executable is unavailable in this environment. They predate the P2 S4 narrative and must not be used as current manuscript previews.
 
-The failed PDF build did not alter experiment outputs. The scientific acceptance check operates on the content master and evidence contract.
+The failed PDF compilation occurred after Markdown-to-TeX conversion and did not alter experiment outputs. The listed scientific acceptance check passes; the official journal acceptance remains environment-blocked at PDF compilation.
