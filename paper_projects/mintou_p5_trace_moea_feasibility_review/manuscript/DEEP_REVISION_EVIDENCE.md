@@ -50,7 +50,7 @@ registered benchmark scenario: nine TRACE-MOEA cells and four
 formulation-matched NoPreferenceRanking cells, with 30 common seeds per cell.
 All sensitivity contrasts are descriptive and no p-values are computed.
 
-Trace evidence has a different estimand and unit. For each TRACE-MOEA run, the
+Event-record evidence has a different estimand and unit. For each TRACE-MOEA run, the
 released record reports the number of generated records and the fraction of
 pool-local candidate positions represented in the deduplicated final feasible
 front that also occur somewhere in the run's generated event-position set.
@@ -77,16 +77,16 @@ scenario weights, and seed count fixed while changing budget multiplier and
 method. Its raw R-NSGA-II reference point is recomputed from each budget's
 frozen bounds.
 
-The generated JSON records population, generations, methods, and evaluation but
+The generated configuration records population, generations, methods, and evaluation but
 omits preference count, penalty, operator rates, adaptation constants, eviction,
-ties, and trace schema. R-NSGA-II receives the disclosed raw reference point and
+ties, and event-record schema. R-NSGA-II receives the disclosed raw reference point and
 `epsilon=0.01`, but the pymoo version, operator-default probabilities, internal
 normalization mode, and per-generation ideal/nadir values were not serialized.
 The fixed empirical bounds construct the reference point and evaluation metric;
-they are not claimed as the comparator's internal survival bounds. The JSON's
-legacy phrases "preference coevolution" and "decision trace archive" name the
-weight-update mechanism and ephemeral in-memory list; they do not establish a
-separate coevolving solution population or a released event archive.
+they are not claimed as the comparator's internal survival bounds. Legacy
+configuration terminology names the weight-update mechanism and an ephemeral
+in-memory event list; it does not establish a separate coevolving solution
+population or a released ordered event record.
 
 The deterministic MCDA and greedy methods do not share a stochastic
 function-evaluation budget, so their results remain descriptive. Runtime is
@@ -150,7 +150,7 @@ external-consistency checks.
   regulatory compliance.
 - Event payloads, stable candidate identifiers, replacement/eviction flags, and
   population snapshots are not present in the released run table. The package
-  therefore cannot support chronology or replay claims.
+  therefore cannot support lineage, chronology, or replay claims.
 - The public-record checks do not establish above-chance portfolio performance,
   engineering-economic effectiveness, or expert-validated review correctness.
 
