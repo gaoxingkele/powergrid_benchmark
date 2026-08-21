@@ -1,0 +1,108 @@
+tree:
+  - id: N01
+    type: question
+    support_level: explicit
+    source_refs: ["§1 Introduction", "§2 Related Work"]
+    title: "Can enhanced LSTM/GRU forecasting plus an intelligent control strategy improve distributed load levelling in resilient smart grids?"
+    description: >
+      Central question. Traditional forecasting and reactive ESS/DR fall short under
+      changing consumption patterns; the paper asks whether accurate recurrent forecasting
+      coupled to forecast-driven control improves peak shaving and stability.
+    children:
+      - id: N02
+        type: question
+        support_level: explicit
+        source_refs: ["§3.3 Proposed Model", "§3.4 Mathematical Model"]
+        title: "Which recurrent architecture forecasts hourly load best — LSTM or GRU?"
+        description: "Compare two gated recurrent architectures head-to-head on the same datasets."
+        children:
+          - id: N03
+            type: decision
+            support_level: explicit
+            source_refs: ["§3.1 Dataset Collection", "Table 1"]
+            title: "Use five regional PJM-style hourly datasets from Kaggle"
+            description: >
+              Chose AEP, COMED, DAYTON, DEOK, DOM (plus EKPC, NI, PJM_Load in qualitative plots)
+              to test cross-dataset applicability with features date/time, temperature, load, price.
+          - id: N04
+            type: decision
+            support_level: explicit
+            source_refs: ["§3.2 Data Pre-Processing", "Eqs. 1-2"]
+            title: "Min–max normalise each feature independently"
+            description: "Rescale features to [0,1] for comparable scale and faster convergence."
+          - id: N05
+            type: experiment
+            support_level: explicit
+            source_refs: ["§4.1", "Table 2", "Table 3"]
+            title: "Evaluate LSTM MSE and MAPE per dataset"
+            description: "LSTM MAPE 0.418%–0.667%; MSE 23.962–162.435 across the five datasets."
+            evidence: ["C01", "C03"]
+          - id: N06
+            type: experiment
+            support_level: explicit
+            source_refs: ["§4.2", "Table 4", "Table 5"]
+            title: "Evaluate GRU MSE and MAPE per dataset"
+            description: "GRU MAPE 0.391%–0.618%; MSE 22.988–138.292 across the five datasets."
+            evidence: ["C01", "C03"]
+          - id: N07
+            type: experiment
+            support_level: explicit
+            source_refs: ["§4.2(c)", "Table 6", "Figure 9"]
+            title: "Head-to-head LSTM vs GRU"
+            description: >
+              GRU MSE/MAPE below LSTM on every dataset, but by small margins; predictions track
+              actual load closely. Paper frames the two as near-equivalent, selection driven by
+              needs and computing limitations.
+            evidence: ["C02"]
+          - id: N08
+            type: dead_end
+            support_level: explicit
+            source_refs: ["§4.3", "Figure 10"]
+            title: "Grid-resilience ranking inverts the forecast-error ranking"
+            description: >
+              Despite GRU's lower forecast error, LSTM scores higher on the grid-resilience metric
+              at every dataset. The resilience score is never defined, so the inversion is an
+              unexplained observation rather than a resolved result.
+            evidence: ["C05"]
+      - id: N09
+        type: question
+        support_level: explicit
+        source_refs: ["§3.3.3", "§3.5"]
+        title: "How should forecasts drive control for load levelling?"
+        description: "Design a forecast-in-the-loop strategy dispatching ESS, DR, and DERs."
+        children:
+          - id: N10
+            type: decision
+            support_level: explicit
+            source_refs: ["§2", "§4.3", "refs [21], [22]"]
+            title: "Integrate ESS + DR + DER dispatch with predictive models"
+            description: >
+              Reuse conventional ESS/DR/DER but drive them proactively from real-time forecasts,
+              rather than reactively — the claimed novelty over traditional load balancing.
+          - id: N11
+            type: experiment
+            support_level: explicit
+            source_refs: ["§4.3", "Figure 8", "Figure 6", "Figure 7"]
+            title: "Simulate the intelligent control strategy"
+            description: >
+              ~10% average peak-load reduction (July 160→140 MW); voltage fluctuation narrowed
+              from 4–7.5% to 3–5%; conclusions cite up to 15% cost reduction and ~20% stability gain.
+            evidence: ["C04"]
+      - id: N12
+        type: dead_end
+        support_level: explicit
+        source_refs: ["§3.3", "Eq. 3", "Eq. 4", "§3.4 Eqs. 8,12"]
+        title: "Claimed cell/hidden-state 'modifications' equal the standard equations"
+        description: >
+          The printed 'modified' LSTM cell-state update (Eq. 3) and GRU hidden-state update (Eq. 4)
+          are algebraically identical to the standard forms (Eqs. 12, 8). The prose attention and
+          dynamic-gating mechanisms are never formalised — an unverifiable methodological novelty.
+      - id: N13
+        type: experiment
+        support_level: explicit
+        source_refs: ["§4.3", "Table 7"]
+        title: "Macro-level comparison against prior forecasting works"
+        description: >
+          Positions the proposed LSTM-GRU (low MSE/MAPE) against AMI, DNN+metaheuristic, LSTM-RNN,
+          cognitive, smart-meter, adaptive, and cloud methods; notes a generalisation limitation.
+        evidence: ["C01"]

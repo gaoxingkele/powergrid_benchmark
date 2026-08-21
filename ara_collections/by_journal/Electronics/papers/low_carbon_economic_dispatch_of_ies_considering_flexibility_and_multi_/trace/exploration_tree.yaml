@@ -1,0 +1,124 @@
+tree:
+  - id: N01
+    type: question
+    support_level: explicit
+    source_refs: ["§1 Introduction", "§1 contributions (1)-(3)"]
+    title: "Can IES dispatch jointly optimize economy AND flexibility while balancing multiple stakeholders and cutting carbon?"
+    description: >
+      Central research question. Prior work either optimizes multi-entity economics
+      while overlooking flexibility, or considers flexibility but favors a single
+      participant (Gap G1). The paper proposes a flexibility-aware, multi-entity,
+      low-carbon bi-level dispatch model.
+    children:
+      - id: N02
+        type: decision
+        support_level: explicit
+        source_refs: ["§2.1-§2.3", "Eq. (1)-(6)"]
+        title: "Quantify flexibility as normalized up/down supply margins per carrier"
+        description: >
+          Define flexibility demand from net-load increments (Eq.1) and supply margins
+          from conversion equipment, storage, demand response, and EVs (Eq.2-5),
+          normalized into a per-carrier index (Eq.6).
+        evidence: ["C06"]
+      - id: N03
+        type: decision
+        support_level: explicit
+        source_refs: ["§3", "Figure 1", "Figure 2"]
+        title: "Adopt a bi-level (Stackelberg) structure: operator leader, aggregator+EV followers"
+        description: >
+          Upper level maximizes operator revenue (Eq.7) + flexibility (Eq.11) with a
+          GCT-CET term; lower level minimizes aggregator cost (Eq.21) and maximizes EV
+          self-utility (Eq.19); coupled by prices (down) and quantities (up).
+        evidence: ["C01"]
+        children:
+          - id: N04
+            type: decision
+            support_level: explicit
+            source_refs: ["§3.3", "§3.3.1", "Eq. (26)-(31)", "Figure 3"]
+            title: "Solve upper level with improved PSO, lower level with CPLEX 12.10"
+            description: >
+              Standard PSO falls into local optima on the heavily equality-constrained
+              model (Gap G2). Improve PSO with adaptive inertia weight (Eq.26), sine
+              learning factors (Eq.27), and a four-subpopulation partition (Eq.28-31),
+              parameters tuned by DBO. Select a Pareto compromise via TOPSIS.
+            children:
+              - id: N05
+                type: experiment
+                support_level: explicit
+                source_refs: ["§4.3", "Table 7", "Figure 16"]
+                title: "Compare IPSO vs PSO vs DBO (30 runs, pop 50, 200 iter)"
+                description: >
+                  IPSO converges in 46 iterations to closeness 0.86 (PSO 100/0.80, DBO
+                  73/0.82); lowest variance and runtime. Verifies the diversity mechanism.
+                evidence: ["C09"]
+              - id: N06
+                type: dead_end
+                support_level: explicit
+                source_refs: ["§4.3", "Figure 16", "Table 7"]
+                title: "Plain PSO and DBO as solvers — rejected (weaker convergence/quality)"
+                description: >
+                  Standard PSO (100 iter, 0.80) and DBO (73 iter, 0.82) are used only as
+                  baselines; both are outperformed by IPSO and not adopted as the solver.
+                evidence: ["C09"]
+      - id: N07
+        type: experiment
+        support_level: explicit
+        source_refs: ["§4.2", "§4.2.1", "Table 5"]
+        title: "Five-scenario mechanism ablation"
+        description: >
+          Scenarios 1-5 progressively add: flexibility objective (2), EVs (3), carbon
+          trading (4), green-certificate trading (5). Isolates each mechanism's effect
+          on operator revenue, flexibility, emissions, and stakeholder costs.
+        children:
+          - id: N08
+            type: experiment
+            support_level: explicit
+            source_refs: ["Table 5 (Scenario 1 vs 2)", "§4.2.1"]
+            title: "Single- vs multi-objective (Scenario 1 -> 2)"
+            description: "Revenue loss 1133 yuan buys 10.7% flexibility gain — economy-flexibility trade-off."
+            evidence: ["C01"]
+          - id: N09
+            type: experiment
+            support_level: explicit
+            source_refs: ["Table 5 (Scenario 2 vs 3)", "§4.2.1", "Figure 8", "Figures 13-14"]
+            title: "Add EVs as flexibility resource (Scenario 2 -> 3)"
+            description: "+296 yuan cost yields +356 yuan profit and +16.7% electrical flexibility, time-localized to connection windows."
+            evidence: ["C03"]
+          - id: N10
+            type: experiment
+            support_level: explicit
+            source_refs: ["Table 5 (Scenario 3->4->5)", "§4.2.1", "Figure 6"]
+            title: "Add carbon then green-certificate trading (Scenario 3 -> 4 -> 5)"
+            description: >
+              Carbon trading: emissions -989 kg (5.19%) but profit -5587 yuan (trade-off).
+              Green certificate: further -1109 kg (6.19%) and carbon cost -302 yuan (complementary).
+            evidence: ["C04", "C05"]
+          - id: N11
+            type: experiment
+            support_level: explicit
+            source_refs: ["Table 5 (User Aggregator rows)", "§4.2.2", "Figures 9-12"]
+            title: "User-aggregator cost stability across scenarios"
+            description: "Total cost varies only 74 yuan across all 5 scenarios; DR reallocation absorbs operator-side shocks."
+            evidence: ["C02"]
+      - id: N12
+        type: experiment
+        support_level: explicit
+        source_refs: ["§4.2.4", "Table 6"]
+        title: "Carbon-price sensitivity sweep (1.0x/1.05x/1.1x)"
+        description: "Higher carbon price -> monotonically lower emissions and lower operator revenue."
+        evidence: ["C08"]
+      - id: N13
+        type: experiment
+        support_level: explicit
+        source_refs: ["§4.2.4", "Figure 15", "Table 4"]
+        title: "EV fleet-composition sensitivity for time-targeted flexibility"
+        description: "Reweighting EV proportions raises 12:00 flexibility 0.2 -> 0.22 (10%)."
+        evidence: ["C07"]
+  - id: N14
+    type: decision
+    support_level: inferred
+    title: "Scope limited to deterministic park-level IES; uncertainty and regional scale deferred"
+    description: >
+      Inferred from the model setup and the §5 future-work statement: the study fixes a
+      deterministic typical-day park-level case and defers probabilistic flexibility/EV
+      indicators and regional-level IES to future work. Not a recorded session event.

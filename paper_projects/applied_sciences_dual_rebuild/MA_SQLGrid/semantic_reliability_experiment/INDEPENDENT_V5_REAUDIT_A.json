@@ -1,0 +1,149 @@
+{
+  "schema_version": "ma-sqlgrid-independent-v3-reaudit-v1",
+  "decision": "PASS_AUTHORIZE_FORMAL_SCORE",
+  "freeze_content_sha256": "eb29201bd078e6903bea158d0dba6a974c0e1647dbf3e43972b38499b52a0818",
+  "freeze_file_sha256": "cccd903bd7f3309f50fae4a5d7084b1f272b094ef0afd42467287a51b376e898",
+  "freeze_file_bytes": 22556,
+  "audit_scope": "pre-score only",
+  "formal_stage_b_scoring_executed": false,
+  "formal_outcomes_accessed": false,
+  "frozen_v5_files_modified": false,
+  "required_gates_all_pass": true,
+  "authorizes_formal_score": true,
+  "summary": {
+    "required_gates_passed": 10,
+    "frozen_files_verified": 35,
+    "tests": "22/22 PASS; 1 v4-parent skip reviewed and not v5-masking",
+    "zero_sql_preflight": "PASS ledgers=1440 sql_executions=0 output_written=0",
+    "canonical_snapshot_preflight": "PASS ledgers=1440 gold=180 sql_executions=1620 canonical_mismatches=0 output_written=0",
+    "sql_safety": "scalar REPLACE allowed; REPLACE INTO and CTE write rejected",
+    "all_v4_gates_continue_to_pass": true
+  },
+  "gates": [
+    {
+      "id": "G1_INPUT_IDENTITY",
+      "status": "PASS",
+      "evidence": {
+        "prediction_bindings_present_and_live": true,
+        "unique_prediction_keys": "1440/1440",
+        "canonical_v2_physical_identity_checked": true,
+        "all_35_frozen_files_match_sha256_and_bytes": true
+      }
+    },
+    {
+      "id": "G2_STAGE_A_BLINDNESS",
+      "status": "PASS",
+      "evidence": {
+        "stage_a_prediction_and_benchmark_blind": true,
+        "base_database_read_only": true,
+        "blindness_and_read_only_tests": "PASS"
+      }
+    },
+    {
+      "id": "G3_STATE_REPRODUCIBILITY",
+      "status": "PASS",
+      "evidence": {
+        "states_total": 18,
+        "semantic_states": 15,
+        "physical_diagnostic_states": 3,
+        "matching_state_hash_pairs": 18,
+        "matching_trace_hash_pairs": 18,
+        "zero_sql_preflight_live_states": 18
+      }
+    },
+    {
+      "id": "G4_DATABASE_AND_GOLD_VALIDITY",
+      "status": "PASS",
+      "evidence": {
+        "gold_queries_pre_score": 3240,
+        "gold_execution_errors": 0,
+        "database_integrity_and_foreign_keys": "18/18 PASS",
+        "canonical_snapshot_gold_queries": 180,
+        "canonical_snapshot_prediction_queries": 1440,
+        "canonical_snapshot_sql_executions": 1620,
+        "canonical_snapshot_mismatches": 0
+      }
+    },
+    {
+      "id": "G5_GOLD_STATE_COVERAGE",
+      "status": "PASS",
+      "evidence": {
+        "changed_denotation_union": "180/180",
+        "snapshot_empty_nonempty_in_at_least_two_states": true,
+        "t0_canonical_snapshot_preflight": "PASS"
+      }
+    },
+    {
+      "id": "G6_ORDER_REVIEW_AND_ADJUDICATION",
+      "status": "PASS",
+      "evidence": {
+        "order_sensitive": 114,
+        "order_holds": 114,
+        "automatic_primary_order_insensitive": 66,
+        "reviewer_a_reviewer_b_adjudication_and_checklist_bound": true,
+        "zero_sql_preflight_live_order_items": 114
+      }
+    },
+    {
+      "id": "G7_COMPARISON_CONTRACT",
+      "status": "PASS",
+      "evidence": {
+        "scalar_replace_function_allowed": true,
+        "replace_into_rejected": true,
+        "cte_replace_into_rejected": true,
+        "pairwise_tolerance_duplicate_order_null_affinity_headers_tested": true,
+        "test_discovery": "22 PASS, 1 reviewed skip"
+      }
+    },
+    {
+      "id": "G8_STAGE_B_FAIL_CLOSED_LOADING",
+      "status": "PASS",
+      "evidence": {
+        "frozen_stage_b_sha256": "dc5ddcba6b62b50c85888c410e9cae728a7194f54749ed1501d05c47d81eb57b",
+        "valid_zero_sql_preflight": "authorization=1 canonical=1 ledgers=1440 states=18 order=114 sql_executions=0 output_written=0",
+        "valid_t0_preflight": "ledgers=1440 gold=180 sql_executions=1620 canonical_mismatches=0 output_written=0",
+        "t0_other_states_opened": 0,
+        "invalid_authorization_fail_closed_without_output": true,
+        "replace_into_and_cte_write_fail_closed": true
+      }
+    },
+    {
+      "id": "G9_STATISTICS_AND_DENOMINATORS",
+      "status": "PASS",
+      "evidence": {
+        "atomic_rows": 25920,
+        "primary_semantic_state_rows": 7920,
+        "order_hold_diagnostic_rows": 16416,
+        "suite_rows": 1440,
+        "primary_predictions": 528,
+        "order_hold_predictions": 912,
+        "semantic_and_states": 15,
+        "physical_states_excluded": 3,
+        "seed_base": 20260805,
+        "sign_flips": 100000,
+        "bootstraps": 20000,
+        "holm_family_size": 9,
+        "denominator_tests": "PASS"
+      }
+    },
+    {
+      "id": "G10_RELEASE_AUDIT_SPECIFICATION",
+      "status": "PASS",
+      "evidence": {
+        "frozen_analysis_sha256": "17e07a973f02fefa8ae103eb3feb1a38fa8712f7dcd3ec61b2fd169b61b4c85e",
+        "frozen_release_builder_sha256": "a9b6b605125cb82f54f483d351c4747cb1e827394f7cd6db12594739acb95871",
+        "frozen_release_verifier_sha256": "aed2e163c69c7cb2a604d7fd5e452fb0aadab81b3eb37a1960f8b57385f538fe",
+        "atomic_suite_statistics_table_figure_lineage_hashed": true,
+        "synthetic_denominator_and_release_chain": "PASS"
+      }
+    }
+  ],
+  "skip_review": {
+    "count": 1,
+    "test": "test_valid_synthetic_authorization_preflight_writes_no_output",
+    "reason": "v4 parent freeze is immutable and binds the versioned v4 runner while the current runner is v5",
+    "does_not_mask_v5": true,
+    "replacement_evidence": "The v5 zero-SQL preflight was run directly and passed; the v5-specific canonical snapshot test also passed."
+  },
+  "launch_condition": "A separate valid launch companion must bind this finalized audit JSON name, SHA-256, byte count, and exact v5 freeze content SHA-256 before formal scoring."
+}

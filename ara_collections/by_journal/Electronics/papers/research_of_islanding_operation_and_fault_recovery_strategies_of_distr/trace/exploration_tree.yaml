@@ -1,0 +1,193 @@
+# Exploration tree — Yang et al., Electronics 2023, 12, 4230
+# Reconstructed from the published paper only (no lab notes/repo available).
+# support_level: explicit = directly grounded in the paper; inferred = reconstruction of its logic.
+
+tree:
+  - id: N01
+    type: question
+    support_level: explicit
+    source_refs: ["Abstract", "§1"]
+    title: "How should a DG-rich distribution network handle faults across BOTH the islanding and recovery stages under new-energy uncertainty?"
+    description: >
+      Fault handling splits into island division/operation (superior grid unavailable) and fault
+      recovery (superior grid restored). Existing work treats them separately and relies on fixed
+      24-h pre-fault prediction windows, while wind/PV output and troubleshooting time are
+      uncertain.
+    children:
+      - id: N02
+        type: decision
+        support_level: explicit
+        source_refs: ["§1 pp.3", "§2.1"]
+        title: "Reject fixed-horizon (e.g. 24 h) planning; adopt rolling optimization with feedback correction"
+        description: >
+          Troubleshooting time is variable and short-term DG prediction beats long-term accuracy,
+          so plans are re-solved each ΔT = 15 min window, committing only the next step.
+        evidence: [C03]
+        children:
+          - id: N03
+            type: decision
+            support_level: explicit
+            source_refs: ["§2.2 Eq.(2)"]
+            title: "Re-partition islands only when load/wind/PV changes exceed thresholds (Eq. 2)"
+            description: >
+              Continuous re-partitioning would cause frequent switching, shortening switch life and
+              hurting user satisfaction; below the σ thresholds the previous partition persists and
+              only DG dispatch is re-optimized (Eqs. 3-12 dropped).
+            evidence: [C01, C03]
+      - id: N04
+        type: decision
+        support_level: explicit
+        source_refs: ["§2.2 Eqs.(16)-(20)", "§4.2 Eqs.(43)-(45)"]
+        title: "Convexify via second-order cone relaxation of the branch-flow model"
+        description: >
+          The nonconvex islanding/recovery models are cast as (mixed-integer) SOCP — Eq. 16 cone
+          relaxation with big-M voltage-drop constraints — stated accurate for radial networks;
+          enables solving with CPLEX 12.10.
+        evidence: [C04]
+      - id: N05
+        type: decision
+        support_level: explicit
+        source_refs: ["§4.1", "§4.2", "§5.1"]
+        title: "Handle wind/PV uncertainty by scenario generation + reduction + extreme scenarios"
+        description: >
+          Weibull wind / normal PV-error models; Latin hypercube sampling (N=500) on a measured
+          Hubei typical day; K-means reduction to K=5 weighted scenarios; append max-wind/min-PV
+          and min-wind/max-PV extremes (Ψcom, Eq. 47); scenario-weighted SOCP (Eq. 48).
+        evidence: [C02]
+        children:
+          - id: N06
+            type: experiment
+            support_level: explicit
+            source_refs: ["Figures 2-5", "§5.1"]
+            title: "E02 — generate and reduce wind/PV scenario sets"
+            description: >
+              500 generated curves vs 5 reduced representatives for wind and PV; reduced set tracks
+              the base profile while spanning the ensemble spread.
+            evidence: [C02]
+      - id: N07
+        type: decision
+        support_level: explicit
+        source_refs: ["§3.1 Eq.(36)", "§1 pp.3"]
+        title: "Couple the two stages through a history-aware recovery load weight β (Eq. 36)"
+        description: >
+          Key insight: add to the static weight α penalties for island-membership changes and
+          no-supply periods experienced during islanding, so island-stage history raises recovery
+          priority and protects user electricity satisfaction.
+        evidence: [C05]
+        children:
+          - id: N08
+            type: dead_end
+            support_level: explicit
+            source_refs: ["§5.3.4", "Figure 20"]
+            title: "Baseline β = α (stage-decoupled weight) leaves churned node 28 unpowered"
+            description: >
+              The comparison method — β reduced to the island-stage weight α — assigns excessive
+              weight to switch actions and neglects intermittent-supply history; its reconstruction
+              (Figure 20) does not re-energize node 28, which had experienced outage->supply->outage
+              during 20 h of islanding. Kept as the paper's explicit negative contrast.
+            evidence: [C05]
+      - id: N09
+        type: experiment
+        support_level: explicit
+        source_refs: ["Figure 6", "§5.2"]
+        title: "E01 — island division under extreme fault (breaker trip + S28)"
+        description: >
+          Partition yields two islands: Island 1 (2 DGs, 12 loads), Island 2 (2 DGs, 11 loads);
+          all DGs and important loads inside islands.
+        evidence: [C01]
+        children:
+          - id: N10
+            type: experiment
+            support_level: explicit
+            source_refs: ["Figures 7-8", "§5.2"]
+            title: "E03 — Island 2 rolling operation, wind at node 6"
+            description: >
+              Five periods: voltages within [1.0884, 1.1] pu; wind share up to 34.09%; diesel
+              complements wind; losses 3-4.9 kW per period.
+            evidence: [C03]
+          - id: N11
+            type: experiment
+            support_level: explicit
+            source_refs: ["Figures 9-10", "§5.2"]
+            title: "E04 — Island 2 rolling operation, PV at node 6"
+            description: >
+              Five periods: voltages within [1.0811, 1.1] pu despite larger PV fluctuation; PV
+              share up to 48.65%.
+            evidence: [C03]
+          - id: N12
+            type: experiment
+            support_level: explicit
+            source_refs: ["Figure 11", "§5.2"]
+            title: "E05 — 20 random wind scenarios, voltage statistics"
+            description: >
+              Box plots per node: all voltages within [1.08, 1.1] pu across the 20 scenarios;
+              narrow dispersion.
+            evidence: [C03]
+          - id: N13
+            type: experiment
+            support_level: explicit
+            source_refs: ["Figures 12-13", "§5.2"]
+            title: "E06 — Island 1 operation at 50% and 80% initial storage energy"
+            description: >
+              No violation at either state of charge (max voltage 1.093 / 1.094 pu); losses remain
+              a small share of island load (≈0.22-0.26%).
+            evidence: [C03]
+      - id: N14
+        type: experiment
+        support_level: explicit
+        source_refs: ["Figures 14-15", "Table 3", "§5.3.1"]
+        title: "E07 — recovery with reconstruction, fault S28 + DG3"
+        description: >
+          Reconstruction: S29 opens (DG4 islands), S22 recloses, node 28 via tie S37. Loss
+          49.3339 -> 43.4675 kW; min voltage +0.0046 pu.
+        evidence: [C04, C06]
+        also_depends_on: [N04, N05]
+        children:
+          - id: N15
+            type: experiment
+            support_level: explicit
+            source_refs: ["Figures 16-17", "Table 4", "§5.3.2"]
+            title: "E08 — recovery with reconstruction, fault S28 only"
+            description: >
+              With DG3 healthy: loss 22.2987 -> 19.2725 kW; min voltage +0.0088 pu. Contrast with
+              N14 shows DG availability conditions recovery gains.
+            evidence: [C04, C06]
+          - id: N16
+            type: experiment
+            support_level: explicit
+            source_refs: ["Figures 18-19", "Table 5", "§5.3.3"]
+            title: "E09 — recovery with reconstruction, faults S9 + S22"
+            description: >
+              Two islands form (DG2 -> nodes 10-16; DG3 -> nodes 22-24); loss 39.5470 -> 33.9117 kW;
+              min voltage +0.0046 pu.
+            evidence: [C04]
+          - id: N17
+            type: experiment
+            support_level: explicit
+            source_refs: ["Figure 20 vs Figure 16", "§5.3.4"]
+            title: "E10 — ablation: proposed β vs β = α after 20 h islanding"
+            description: >
+              Proposed weight restores the intermittently supplied node; static weight does not
+              (see dead-end N08).
+            evidence: [C05]
+            also_depends_on: [N07]
+      - id: N18
+        type: experiment
+        support_level: explicit
+        source_refs: ["Figures 21-24", "§6"]
+        title: "E11 — semi-physical validation (OPAL-RT + DSP)"
+        description: >
+          DSP detects the S28 fault (PV at node 6), issues switch signals reproducing the Figure 6
+          partition; three periods of stable islanded waveforms (voltages ≈1.082-1.099 pu, phase
+          −10.09° to 0°, frequency near 50 Hz).
+        evidence: [C07]
+        also_depends_on: [N09]
+      - id: N19
+        type: question
+        support_level: explicit
+        source_refs: ["§7 Conclusions"]
+        title: "Open: algorithm refinement and other renewable types"
+        description: >
+          Future research declared by the authors: refine the optimization algorithm for system
+          efficiency; study how renewable sources beyond wind/PV influence islanding and fault
+          recovery.

@@ -1,0 +1,61 @@
+{
+  "schema_version": "ma-sqlgrid-semantic-design-audit-gates-v1",
+  "decision": "NO_GO_CLAIM_PROMOTING",
+  "diagnostic_only": true,
+  "gates": [
+    {
+      "id": "G1_INPUT_IDENTITY",
+      "status": "PASS",
+      "requirement": "Each backbone has exactly 720 unique expected question-condition keys; row hashes match run manifests; physical prediction and manifest hashes match the canonical-v2 freeze.",
+      "evidence": "diagnostic_inventory.json#/prediction_ledger_integrity"
+    },
+    {
+      "id": "G2_GENERATOR_BLINDNESS",
+      "status": "BLOCK",
+      "requirement": "A separately frozen Stage-A generator has no access to questions, gold SQL, predictions, scores, or correctness."
+    },
+    {
+      "id": "G3_STATE_REPRODUCIBILITY",
+      "status": "BLOCK",
+      "requirement": "State hashes, mutation traces, pinned SQLite version/compile options, and clean deterministic rerun are present."
+    },
+    {
+      "id": "G4_DATABASE_VALIDITY",
+      "status": "BLOCK",
+      "diagnostic_status": "PASS",
+      "requirement": "Formal states use foreign_keys=ON, pass integrity/FK checks, and execute all 180 gold SQL statements."
+    },
+    {
+      "id": "G5_SEMANTIC_COVERAGE",
+      "status": "BLOCK",
+      "diagnostic_changed_union": 160,
+      "diagnostic_unchanged_union": 20,
+      "requirement": "All 180 questions have predeclared relevance coverage, all five snapshot-empty queries become nonempty, and changed/unchanged gold counts are reported per state."
+    },
+    {
+      "id": "G6_ORDER_AND_TIES",
+      "status": "BLOCK",
+      "requirement": "All 114 order-sensitive and 18 top-k questions have independently adjudicated total-order/tie policy."
+    },
+    {
+      "id": "G7_COMPARATOR",
+      "status": "BLOCK",
+      "requirement": "Sequence/multiset/NULL behavior is retained, float comparison is pairwise and boundary-tested, and output-column policy is frozen."
+    },
+    {
+      "id": "G8_NO_ADAPTATION",
+      "status": "BLOCK",
+      "requirement": "No states or candidates are selected/removed after scores are viewed; all refreezes are versioned and retain unfavorable states."
+    },
+    {
+      "id": "G9_STATISTICS",
+      "status": "BLOCK",
+      "requirement": "Finite-corpus estimands, paired clustered contrasts, a predeclared multiplicity family, state coverage, and adjudication holds are reported."
+    },
+    {
+      "id": "G10_RELEASE_AUDIT",
+      "status": "BLOCK",
+      "requirement": "An independent atomic-row rerun reproduces scores, statistics, tables, figures, and their manifest hashes."
+    }
+  ]
+}

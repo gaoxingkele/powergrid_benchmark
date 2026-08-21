@@ -1,0 +1,91 @@
+# Exploration Tree — Two-Stage Energy and Service Market Framework
+# Research DAG: nested tree with cross-edges (also_depends_on) forming a DAG.
+
+tree:
+  - id: N01
+    type: question
+    support_level: explicit
+    source_refs: ["§1"]
+    title: "How can zonal DAM and nodal ASM be coordinated in the European framework with full UC re-evaluation in ASM?"
+    description: "Existing models either fix unit commitment from DAM or co-optimize in a single stage. The European zonal-then-nodal structure requires a sequential approach where DAM clears without UC and ASM re-evaluates commitment."
+    children:
+
+      - id: N02
+        type: decision
+        support_level: explicit
+        source_refs: ["§2"]
+        title: "Design four-stage sequential framework: DAM → bid adjustment → DCLF/sensitivity → ASM NCUCER"
+        choice: "DAM as zonal LP (no UC), then bid adjustment mapping DAM to ASM bids across five operational cases, then DCLF for overload detection and PTDF computation, then NCUCER MILP for ASM redispatch."
+        alternatives:
+          - "Single co-optimized DAM-ASM model (American framework, not compatible with European structure)"
+          - "Fixed-commitment redispatch (loses flexibility of SU/SD in ASM)"
+          - "One-stage zonal DAM with UC (benchmark model)"
+        children:
+
+          - id: N03
+            type: experiment
+            support_level: explicit
+            source_refs: ["§2.1", "§2.3", "§4.1", "§4.2"]
+            title: "E01: Year-long DAM-ASM sequential simulation on NREL-118"
+            result: "All 11 overloaded branches resolved; SRR met year-round; zero RES curtailment/load shedding; yearly TSO disbursement $170.2M."
+            evidence: [C01, "Figures 6–11", "Tables 1–5"]
+
+          - id: N04
+            type: experiment
+            support_level: explicit
+            source_refs: ["§2.2", "Figure 3", "§4.2"]
+            title: "E02: Bid adjustment case validation per technology"
+            result: "Constraint (31) activated ~1/4 of yearly horizon. CC NG SU cleared for ~3/4 of those activations. ST NG shows more SD than SU due to higher costs."
+            evidence: [C02, "Table 5"]
+
+          - id: N05
+            type: experiment
+            support_level: explicit
+            source_refs: ["§4.1", "Figure 10"]
+            title: "E03: USM insufficiency analysis"
+            result: "DSM sufficient year-round; USM deficient for 741 hours. ASM resolves all via SU and DR clearance."
+            evidence: [C05, "Figure 10"]
+
+          - id: N06
+            type: experiment
+            support_level: explicit
+            source_refs: ["§4.2", "Figure 8", "Figure 9"]
+            title: "E04: Technology contribution analysis"
+            result: "CC NG most exploited for all services; DH provides UR/DR; CT NG provides SRU; ST NG mainly SU/SD."
+            evidence: [C04, "Figure 9", "Table 5"]
+
+          - id: N07
+            type: experiment
+            support_level: explicit
+            source_refs: ["§4.4"]
+            title: "E05: Sensitivity analysis on bid factors and DH strategy"
+            result: "UR price-inelastic (±0.5–0.6%). DR/SU/SD elastic. DH strategy change (85%→90% DAM) increases cost by $1.72M."
+            evidence: [C06, C07, "Tables 6–7", "Figures 15–16"]
+
+          - id: N08
+            type: experiment
+            support_level: explicit
+            source_refs: ["§4.5", "Appendix A"]
+            title: "E06: Benchmark comparison with DAM-UC-Reserve"
+            result: "Proposed approach: $3.49B total cost. Benchmark: $19.50B (5.6× higher). Benchmark zonal prices 2–6× higher."
+            evidence: [C03, "Table 8", "Figures 17–19"]
+            also_depends_on: [N03]
+
+  - id: N09
+    type: decision
+    support_level: explicit
+    source_refs: ["§2.2"]
+    title: "Define bid adjustment cases based on DAM schedule vs technical minimum"
+    choice: "Five cases (Figure 3) encoding whether DAM schedule is null, below P^min, at P^min, between limits, or at P^max."
+    alternatives:
+      - "Uniform bid adjustment (ignoring unit state — would violate constraints)"
+      - "Single SU/SD rule for all cases (too restrictive)"
+    children:
+      - id: N10
+        type: dead_end
+        support_level: explicit
+        source_refs: ["§2.2", "Figure 3b"]
+        title: "Unit cleared below technical minimum forces mandatory SU or SD"
+        hypothesis: "Units below P^min can simply adjust generation in ASM."
+        failure_mode: "DT unit below P^min cannot operate at that level; must either start up further (SU to P^min) or shut down (SD to 0)."
+        lesson: "Bid adjustment must handle P^D < P^min as a separate case with mandatory SU-or-SD constraint (31)."

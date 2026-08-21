@@ -1,0 +1,1329 @@
+{
+  "stage": "ma_stage3_negative_controls",
+  "seed": 20260807,
+  "generated_at": "2026-08-07T08:41:19.392882+00:00",
+  "protocol_sha256": "FC422FEF02B278D60B6E3850604EAB2E02F0683F7AF02115B6153FB36DC32A4E",
+  "sampling_rule": "same rules as stage 2: Random(20260807).sample(45 sealed RTS, 15) then .sample(40 sealed SimBench, 15); least-used family first; fallback from unselected pool in file order",
+  "n_controls": 30,
+  "family_distribution": {
+    "drop_filter": 10,
+    "wrong_filter_value": 3,
+    "wrong_column": 8,
+    "drop_order": 2,
+    "wrong_aggregation": 7
+  },
+  "controls": [
+    {
+      "control_id": "NEG_RTS_SEALED_003__drop_filter",
+      "source_question_id": "RTS_SEALED_003",
+      "dataset_id": "RTS_GMLC_AUTO_PILOT",
+      "template_family": "RS09_renewable_availability_daily_mean",
+      "family": "drop_filter",
+      "question": "What was the average available power in MW of PV resources on 2020-06-20?",
+      "original_sql": "SELECT resource_type, ROUND(AVG(available_mw), 3) AS avg_available_mw FROM renewable_availability_da WHERE resource_type = 'PV' AND timestamp >= '2020-06-20 00:00:00' AND timestamp < datetime('2020-06-20 00:00:00', '+1 day') GROUP BY resource_type;",
+      "perturbed_sql": "SELECT resource_type, ROUND(AVG(available_mw), 3) AS avg_available_mw FROM renewable_availability_da WHERE resource_type = 'PV' AND timestamp >= '2020-06-20 00:00:00' GROUP BY resource_type;",
+      "expected": {
+        "semantically_correct": false
+      },
+      "sandbox_check": {
+        "executable": true,
+        "row_count_orig": 1,
+        "row_count_neg": 1,
+        "result_sets_differ": true
+      }
+    },
+    {
+      "control_id": "NEG_RTS_SEALED_022__drop_filter",
+      "source_question_id": "RTS_SEALED_022",
+      "dataset_id": "RTS_GMLC_AUTO_PILOT",
+      "template_family": "RS04_committed_unit_hours_by_fuel",
+      "family": "drop_filter",
+      "question": "How many committed unit-hours did Hydro-fueled units have in the day-ahead dispatch on 2020-07-12?",
+      "original_sql": "SELECT COUNT(*) AS committed_unit_hours FROM dispatch_da d JOIN generators g ON d.generator_uid = g.generator_uid WHERE d.committed = 1 AND g.fuel = 'Hydro' AND d.timestamp >= '2020-07-12 00:00:00' AND timestamp < datetime('2020-07-12 00:00:00', '+1 day');",
+      "perturbed_sql": "SELECT COUNT(*) AS committed_unit_hours FROM dispatch_da d JOIN generators g ON d.generator_uid = g.generator_uid WHERE d.committed = 1 AND g.fuel = 'Hydro' AND d.timestamp >= '2020-07-12 00:00:00';",
+      "expected": {
+        "semantically_correct": false
+      },
+      "sandbox_check": {
+        "executable": true,
+        "row_count_orig": 1,
+        "row_count_neg": 1,
+        "result_sets_differ": true
+      }
+    },
+    {
+      "control_id": "NEG_RTS_SEALED_024__wrong_column",
+      "source_question_id": "RTS_SEALED_024",
+      "dataset_id": "RTS_GMLC_AUTO_PILOT",
+      "template_family": "RS07_startup_cost_topk_by_fuel",
+      "family": "wrong_column",
+      "question": "Which 3 Solar-fueled generators have the highest non-fuel start-up costs, and what are those costs?",
+      "original_sql": "SELECT c.generator_uid, c.nonfuel_start_cost_usd FROM generator_costs c JOIN generators g ON c.generator_uid = g.generator_uid WHERE g.fuel = 'Solar' ORDER BY c.nonfuel_start_cost_usd DESC LIMIT 3;",
+      "perturbed_sql": "SELECT c.fuel_price_usd_per_mmbtu, c.nonfuel_start_cost_usd FROM generator_costs c JOIN generators g ON c.generator_uid = g.generator_uid WHERE g.fuel = 'Solar' ORDER BY c.nonfuel_start_cost_usd DESC LIMIT 3;",
+      "expected": {
+        "semantically_correct": false
+      },
+      "sandbox_check": {
+        "executable": true,
+        "row_count_orig": 3,
+        "row_count_neg": 3,
+        "result_sets_differ": true
+      }
+    },
+    {
+      "control_id": "NEG_RTS_SEALED_029__wrong_aggregation",
+      "source_question_id": "RTS_SEALED_029",
+      "dataset_id": "RTS_GMLC_AUTO_PILOT",
+      "template_family": "RS03_dispatch_fuel_daily_total",
+      "family": "wrong_aggregation",
+      "question": "What was the total day-ahead dispatched generation in MW for NG-fueled units on 2020-07-06?",
+      "original_sql": "SELECT g.fuel, ROUND(SUM(d.generation_mw), 2) AS total_generation_mw FROM dispatch_da d JOIN generators g ON d.generator_uid = g.generator_uid WHERE g.fuel = 'NG' AND d.timestamp >= '2020-07-06 00:00:00' AND timestamp < datetime('2020-07-06 00:00:00', '+1 day') GROUP BY g.fuel;",
+      "perturbed_sql": "SELECT g.fuel, ROUND(AVG(d.generation_mw), 2) AS total_generation_mw FROM dispatch_da d JOIN generators g ON d.generator_uid = g.generator_uid WHERE g.fuel = 'NG' AND d.timestamp >= '2020-07-06 00:00:00' AND timestamp < datetime('2020-07-06 00:00:00', '+1 day') GROUP BY g.fuel;",
+      "expected": {
+        "semantically_correct": false
+      },
+      "sandbox_check": {
+        "executable": true,
+        "row_count_orig": 1,
+        "row_count_neg": 1,
+        "result_sets_differ": true
+      }
+    },
+    {
+      "control_id": "NEG_RTS_SEALED_004__drop_filter",
+      "source_question_id": "RTS_SEALED_004",
+      "dataset_id": "RTS_GMLC_AUTO_PILOT",
+      "template_family": "RS04_committed_unit_hours_by_fuel",
+      "family": "drop_filter",
+      "question": "How many committed unit-hours did NG-fueled units have in the day-ahead dispatch on 2020-07-08?",
+      "original_sql": "SELECT COUNT(*) AS committed_unit_hours FROM dispatch_da d JOIN generators g ON d.generator_uid = g.generator_uid WHERE d.committed = 1 AND g.fuel = 'NG' AND d.timestamp >= '2020-07-08 00:00:00' AND timestamp < datetime('2020-07-08 00:00:00', '+1 day');",
+      "perturbed_sql": "SELECT COUNT(*) AS committed_unit_hours FROM dispatch_da d JOIN generators g ON d.generator_uid = g.generator_uid WHERE d.committed = 1 AND g.fuel = 'NG' AND d.timestamp >= '2020-07-08 00:00:00';",
+      "expected": {
+        "semantically_correct": false
+      },
+      "sandbox_check": {
+        "executable": true,
+        "row_count_orig": 1,
+        "row_count_neg": 1,
+        "result_sets_differ": true
+      }
+    },
+    {
+      "control_id": "NEG_RTS_SEALED_021__wrong_column",
+      "source_question_id": "RTS_SEALED_021",
+      "dataset_id": "RTS_GMLC_AUTO_PILOT",
+      "template_family": "RS06_branch_rating_list",
+      "family": "wrong_column",
+      "question": "List the branch identifiers and continuous ratings of branches rated above 550 MVA, ordered by rating descending.",
+      "original_sql": "SELECT branch_uid, continuous_rating_mva FROM branches WHERE continuous_rating_mva > 550 ORDER BY continuous_rating_mva DESC;",
+      "perturbed_sql": "SELECT from_bus_id, continuous_rating_mva FROM branches WHERE continuous_rating_mva > 550 ORDER BY continuous_rating_mva DESC;",
+      "expected": {
+        "semantically_correct": false
+      },
+      "sandbox_check": {
+        "executable": true,
+        "row_count_orig": 1,
+        "row_count_neg": 1,
+        "result_sets_differ": true
+      }
+    },
+    {
+      "control_id": "NEG_RTS_SEALED_028__wrong_filter_value",
+      "source_question_id": "RTS_SEALED_028",
+      "dataset_id": "RTS_GMLC_AUTO_PILOT",
+      "template_family": "RS01_reserve_product_daily_peak",
+      "family": "wrong_filter_value",
+      "question": "What was the peak day-ahead requirement in MW for the Spin_Up_R3 reserve product on 2020-03-15?",
+      "original_sql": "SELECT reserve_product, ROUND(MAX(requirement_mw), 3) AS peak_requirement_mw FROM reserve_requirements_da WHERE reserve_product = 'Spin_Up_R3' AND timestamp >= '2020-03-15 00:00:00' AND timestamp < datetime('2020-03-15 00:00:00', '+1 day') GROUP BY reserve_product;",
+      "perturbed_sql": "SELECT reserve_product, ROUND(MAX(requirement_mw), 3) AS peak_requirement_mw FROM reserve_requirements_da WHERE reserve_product = 'Spin_Up_R1' AND timestamp >= '2020-03-15 00:00:00' AND timestamp < datetime('2020-03-15 00:00:00', '+1 day')  AND timestamp >= '2020-03-15 00:00:00' AND timestamp < datetime('2020-03-15 00:00:00', '+1 day') GROUP BY reserve_product;",
+      "expected": {
+        "semantically_correct": false
+      },
+      "sandbox_check": {
+        "executable": true,
+        "row_count_orig": 1,
+        "row_count_neg": 1,
+        "result_sets_differ": true
+      }
+    },
+    {
+      "control_id": "NEG_RTS_SEALED_031__wrong_filter_value",
+      "source_question_id": "RTS_SEALED_031",
+      "dataset_id": "RTS_GMLC_AUTO_PILOT",
+      "template_family": "RS01_reserve_product_daily_peak",
+      "family": "wrong_filter_value",
+      "question": "What was the peak day-ahead requirement in MW for the Spin_Up_R1 reserve product on 2020-03-15?",
+      "original_sql": "SELECT reserve_product, ROUND(MAX(requirement_mw), 3) AS peak_requirement_mw FROM reserve_requirements_da WHERE reserve_product = 'Spin_Up_R1' AND timestamp >= '2020-03-15 00:00:00' AND timestamp < datetime('2020-03-15 00:00:00', '+1 day') GROUP BY reserve_product;",
+      "perturbed_sql": "SELECT reserve_product, ROUND(MAX(requirement_mw), 3) AS peak_requirement_mw FROM reserve_requirements_da WHERE reserve_product = 'Spin_Up_R2' AND timestamp >= '2020-03-15 00:00:00' AND timestamp < datetime('2020-03-15 00:00:00', '+1 day')  AND timestamp >= '2020-03-15 00:00:00' AND timestamp < datetime('2020-03-15 00:00:00', '+1 day') GROUP BY reserve_product;",
+      "expected": {
+        "semantically_correct": false
+      },
+      "sandbox_check": {
+        "executable": true,
+        "row_count_orig": 1,
+        "row_count_neg": 1,
+        "result_sets_differ": true
+      }
+    },
+    {
+      "control_id": "NEG_RTS_SEALED_019__drop_filter",
+      "source_question_id": "RTS_SEALED_019",
+      "dataset_id": "RTS_GMLC_AUTO_PILOT",
+      "template_family": "RS04_committed_unit_hours_by_fuel",
+      "family": "drop_filter",
+      "question": "How many committed unit-hours did Coal-fueled units have in the day-ahead dispatch on 2020-07-10?",
+      "original_sql": "SELECT COUNT(*) AS committed_unit_hours FROM dispatch_da d JOIN generators g ON d.generator_uid = g.generator_uid WHERE d.committed = 1 AND g.fuel = 'Coal' AND d.timestamp >= '2020-07-10 00:00:00' AND timestamp < datetime('2020-07-10 00:00:00', '+1 day');",
+      "perturbed_sql": "SELECT COUNT(*) AS committed_unit_hours FROM dispatch_da d JOIN generators g ON d.generator_uid = g.generator_uid WHERE d.committed = 1 AND g.fuel = 'Coal' AND d.timestamp >= '2020-07-10 00:00:00';",
+      "expected": {
+        "semantically_correct": false
+      },
+      "sandbox_check": {
+        "executable": true,
+        "row_count_orig": 1,
+        "row_count_neg": 1,
+        "result_sets_differ": true
+      }
+    },
+    {
+      "control_id": "NEG_RTS_SEALED_038__wrong_aggregation",
+      "source_question_id": "RTS_SEALED_038",
+      "dataset_id": "RTS_GMLC_AUTO_PILOT",
+      "template_family": "RS09_renewable_availability_daily_mean",
+      "family": "wrong_aggregation",
+      "question": "What was the average available power in MW of WIND resources on 2020-03-15?",
+      "original_sql": "SELECT resource_type, ROUND(AVG(available_mw), 3) AS avg_available_mw FROM renewable_availability_da WHERE resource_type = 'WIND' AND timestamp >= '2020-03-15 00:00:00' AND timestamp < datetime('2020-03-15 00:00:00', '+1 day') GROUP BY resource_type;",
+      "perturbed_sql": "SELECT resource_type, ROUND(MAX(available_mw), 3) AS avg_available_mw FROM renewable_availability_da WHERE resource_type = 'WIND' AND timestamp >= '2020-03-15 00:00:00' AND timestamp < datetime('2020-03-15 00:00:00', '+1 day') GROUP BY resource_type;",
+      "expected": {
+        "semantically_correct": false
+      },
+      "sandbox_check": {
+        "executable": true,
+        "row_count_orig": 1,
+        "row_count_neg": 1,
+        "result_sets_differ": true
+      }
+    },
+    {
+      "control_id": "NEG_RTS_SEALED_043__wrong_column",
+      "source_question_id": "RTS_SEALED_043",
+      "dataset_id": "RTS_GMLC_AUTO_PILOT",
+      "template_family": "RS02_reserve_daily_avg_by_product",
+      "family": "wrong_column",
+      "question": "What was the average day-ahead requirement for each spinning reserve product on 2020-09-10?",
+      "original_sql": "SELECT reserve_product, ROUND(AVG(requirement_mw), 3) AS avg_requirement_mw FROM reserve_requirements_da WHERE timestamp >= '2020-09-10 00:00:00' AND timestamp < datetime('2020-09-10 00:00:00', '+1 day') GROUP BY reserve_product ORDER BY reserve_product;",
+      "perturbed_sql": "SELECT timestamp, ROUND(AVG(requirement_mw), 3) AS avg_requirement_mw FROM reserve_requirements_da WHERE timestamp >= '2020-09-10 00:00:00' AND timestamp < datetime('2020-09-10 00:00:00', '+1 day') GROUP BY reserve_product ORDER BY reserve_product;",
+      "expected": {
+        "semantically_correct": false
+      },
+      "sandbox_check": {
+        "executable": true,
+        "row_count_orig": 3,
+        "row_count_neg": 3,
+        "result_sets_differ": true
+      }
+    },
+    {
+      "control_id": "NEG_RTS_SEALED_005__wrong_aggregation",
+      "source_question_id": "RTS_SEALED_005",
+      "dataset_id": "RTS_GMLC_AUTO_PILOT",
+      "template_family": "RS08_regional_load_daily_peak",
+      "family": "wrong_aggregation",
+      "question": "What was the peak day-ahead load in MW in region 3 on 2020-03-15?",
+      "original_sql": "SELECT region, ROUND(MAX(load_mw), 3) AS peak_load_mw FROM load_timeseries_da WHERE region = 3 AND timestamp >= '2020-03-15 00:00:00' AND timestamp < datetime('2020-03-15 00:00:00', '+1 day') GROUP BY region;",
+      "perturbed_sql": "SELECT region, ROUND(MIN(load_mw), 3) AS peak_load_mw FROM load_timeseries_da WHERE region = 3 AND timestamp >= '2020-03-15 00:00:00' AND timestamp < datetime('2020-03-15 00:00:00', '+1 day') GROUP BY region;",
+      "expected": {
+        "semantically_correct": false
+      },
+      "sandbox_check": {
+        "executable": true,
+        "row_count_orig": 1,
+        "row_count_neg": 1,
+        "result_sets_differ": true
+      }
+    },
+    {
+      "control_id": "NEG_RTS_SEALED_006__wrong_column",
+      "source_question_id": "RTS_SEALED_006",
+      "dataset_id": "RTS_GMLC_AUTO_PILOT",
+      "template_family": "RS07_startup_cost_topk_by_fuel",
+      "family": "wrong_column",
+      "question": "Which 5 Hydro-fueled generators have the highest non-fuel start-up costs, and what are those costs?",
+      "original_sql": "SELECT c.generator_uid, c.nonfuel_start_cost_usd FROM generator_costs c JOIN generators g ON c.generator_uid = g.generator_uid WHERE g.fuel = 'Hydro' ORDER BY c.nonfuel_start_cost_usd DESC LIMIT 5;",
+      "perturbed_sql": "SELECT c.fuel_price_usd_per_mmbtu, c.nonfuel_start_cost_usd FROM generator_costs c JOIN generators g ON c.generator_uid = g.generator_uid WHERE g.fuel = 'Hydro' ORDER BY c.nonfuel_start_cost_usd DESC LIMIT 5;",
+      "expected": {
+        "semantically_correct": false
+      },
+      "sandbox_check": {
+        "executable": true,
+        "row_count_orig": 5,
+        "row_count_neg": 5,
+        "result_sets_differ": true
+      }
+    },
+    {
+      "control_id": "NEG_RTS_SEALED_041__wrong_aggregation",
+      "source_question_id": "RTS_SEALED_041",
+      "dataset_id": "RTS_GMLC_AUTO_PILOT",
+      "template_family": "RS03_dispatch_fuel_daily_total",
+      "family": "wrong_aggregation",
+      "question": "What was the total day-ahead dispatched generation in MW for Oil-fueled units on 2020-07-14?",
+      "original_sql": "SELECT g.fuel, ROUND(SUM(d.generation_mw), 2) AS total_generation_mw FROM dispatch_da d JOIN generators g ON d.generator_uid = g.generator_uid WHERE g.fuel = 'Oil' AND d.timestamp >= '2020-07-14 00:00:00' AND timestamp < datetime('2020-07-14 00:00:00', '+1 day') GROUP BY g.fuel;",
+      "perturbed_sql": "SELECT g.fuel, ROUND(AVG(d.generation_mw), 2) AS total_generation_mw FROM dispatch_da d JOIN generators g ON d.generator_uid = g.generator_uid WHERE g.fuel = 'Oil' AND d.timestamp >= '2020-07-14 00:00:00' AND timestamp < datetime('2020-07-14 00:00:00', '+1 day') GROUP BY g.fuel;",
+      "expected": {
+        "semantically_correct": false
+      },
+      "sandbox_check": {
+        "executable": true,
+        "row_count_orig": 1,
+        "row_count_neg": 1,
+        "result_sets_differ": true
+      }
+    },
+    {
+      "control_id": "NEG_RTS_SEALED_018__drop_filter",
+      "source_question_id": "RTS_SEALED_018",
+      "dataset_id": "RTS_GMLC_AUTO_PILOT",
+      "template_family": "RS02_reserve_daily_avg_by_product",
+      "family": "drop_filter",
+      "question": "What was the average day-ahead requirement for each spinning reserve product on 2020-01-20?",
+      "original_sql": "SELECT reserve_product, ROUND(AVG(requirement_mw), 3) AS avg_requirement_mw FROM reserve_requirements_da WHERE timestamp >= '2020-01-20 00:00:00' AND timestamp < datetime('2020-01-20 00:00:00', '+1 day') GROUP BY reserve_product ORDER BY reserve_product;",
+      "perturbed_sql": "SELECT reserve_product, ROUND(AVG(requirement_mw), 3) AS avg_requirement_mw FROM reserve_requirements_da WHERE timestamp >= '2020-01-20 00:00:00' GROUP BY reserve_product ORDER BY reserve_product;",
+      "expected": {
+        "semantically_correct": false
+      },
+      "sandbox_check": {
+        "executable": true,
+        "row_count_orig": 3,
+        "row_count_neg": 3,
+        "result_sets_differ": true
+      }
+    },
+    {
+      "control_id": "NEG_SB_SEALED_015__drop_order",
+      "source_question_id": "SB_SEALED_015",
+      "dataset_id": "SIMBENCH_AUTO_PILOT",
+      "template_family": "SS02_line_current_capacity_list",
+      "family": "drop_order",
+      "question": "List the names and maximum current capacities of lines rated below 0.45 kA, ordered by capacity ascending.",
+      "original_sql": "SELECT name, max_current_ka FROM lines WHERE max_current_ka < 0.45 ORDER BY max_current_ka;",
+      "perturbed_sql": "SELECT name, max_current_ka FROM lines WHERE max_current_ka < 0.45;",
+      "expected": {
+        "semantically_correct": false
+      },
+      "sandbox_check": {
+        "executable": true,
+        "row_count_orig": 81,
+        "row_count_neg": 81,
+        "result_sets_differ": true
+      }
+    },
+    {
+      "control_id": "NEG_SB_SEALED_035__wrong_filter_value",
+      "source_question_id": "SB_SEALED_035",
+      "dataset_id": "SIMBENCH_AUTO_PILOT",
+      "template_family": "SS05_switch_state_count",
+      "family": "wrong_filter_value",
+      "question": "How many load-break switches (LBS) are recorded?",
+      "original_sql": "SELECT COUNT(*) AS lbs_count FROM switches WHERE switch_type = 'LBS';",
+      "perturbed_sql": "SELECT COUNT(*) AS lbs_count FROM switches WHERE switch_type = 'CB';",
+      "expected": {
+        "semantically_correct": false
+      },
+      "sandbox_check": {
+        "executable": true,
+        "row_count_orig": 1,
+        "row_count_neg": 1,
+        "result_sets_differ": true
+      }
+    },
+    {
+      "control_id": "NEG_SB_SEALED_010__wrong_aggregation",
+      "source_question_id": "SB_SEALED_010",
+      "dataset_id": "SIMBENCH_AUTO_PILOT",
+      "template_family": "SS06_bus_voltage_count",
+      "family": "wrong_aggregation",
+      "question": "What is the highest nominal bus voltage in kV in this network?",
+      "original_sql": "SELECT MAX(nominal_kv) AS max_nominal_kv FROM buses;",
+      "perturbed_sql": "SELECT MIN(nominal_kv) AS max_nominal_kv FROM buses;",
+      "expected": {
+        "semantically_correct": false
+      },
+      "sandbox_check": {
+        "executable": true,
+        "row_count_orig": 1,
+        "row_count_neg": 1,
+        "result_sets_differ": true
+      }
+    },
+    {
+      "control_id": "NEG_SB_SEALED_006__wrong_column",
+      "source_question_id": "SB_SEALED_006",
+      "dataset_id": "SIMBENCH_AUTO_PILOT",
+      "template_family": "SS03_transformer_capacity",
+      "family": "wrong_column",
+      "question": "List the transformer names and rated powers ordered by rated power descending.",
+      "original_sql": "SELECT name, rated_power_mva FROM transformers ORDER BY rated_power_mva DESC;",
+      "perturbed_sql": "SELECT transformer_id, rated_power_mva FROM transformers ORDER BY rated_power_mva DESC;",
+      "expected": {
+        "semantically_correct": false
+      },
+      "sandbox_check": {
+        "executable": true,
+        "row_count_orig": 2,
+        "row_count_neg": 2,
+        "result_sets_differ": true
+      }
+    },
+    {
+      "control_id": "NEG_SB_SEALED_033__drop_filter",
+      "source_question_id": "SB_SEALED_033",
+      "dataset_id": "SIMBENCH_AUTO_PILOT",
+      "template_family": "SS06_bus_voltage_count",
+      "family": "drop_filter",
+      "question": "How many buses are of bus type 'db' (double busbar)?",
+      "original_sql": "SELECT COUNT(*) AS db_bus_count FROM buses WHERE bus_type = 'db';",
+      "perturbed_sql": "SELECT COUNT(*) AS db_bus_count FROM buses;",
+      "expected": {
+        "semantically_correct": false
+      },
+      "sandbox_check": {
+        "executable": true,
+        "row_count_orig": 1,
+        "row_count_neg": 1,
+        "result_sets_differ": true
+      }
+    },
+    {
+      "control_id": "NEG_SB_SEALED_004__drop_filter",
+      "source_question_id": "SB_SEALED_004",
+      "dataset_id": "SIMBENCH_AUTO_PILOT",
+      "template_family": "SS01_line_length_threshold_count",
+      "family": "drop_filter",
+      "question": "How many lines are longer than 0.3 km?",
+      "original_sql": "SELECT COUNT(*) AS line_count FROM lines WHERE length_km > 0.3;",
+      "perturbed_sql": "SELECT COUNT(*) AS line_count FROM lines;",
+      "expected": {
+        "semantically_correct": false
+      },
+      "sandbox_check": {
+        "executable": true,
+        "row_count_orig": 1,
+        "row_count_neg": 1,
+        "result_sets_differ": true
+      }
+    },
+    {
+      "control_id": "NEG_SB_SEALED_039__wrong_column",
+      "source_question_id": "SB_SEALED_039",
+      "dataset_id": "SIMBENCH_AUTO_PILOT",
+      "template_family": "SS07_line_loading_rank",
+      "family": "wrong_column",
+      "question": "List the 10 lines with the highest maximum loading percent.",
+      "original_sql": "SELECT name, max_loading_percent FROM lines ORDER BY max_loading_percent DESC LIMIT 10;",
+      "perturbed_sql": "SELECT line_id, max_loading_percent FROM lines ORDER BY max_loading_percent DESC LIMIT 10;",
+      "expected": {
+        "semantically_correct": false
+      },
+      "sandbox_check": {
+        "executable": true,
+        "row_count_orig": 10,
+        "row_count_neg": 10,
+        "result_sets_differ": true
+      }
+    },
+    {
+      "control_id": "NEG_SB_SEALED_030__wrong_column",
+      "source_question_id": "SB_SEALED_030",
+      "dataset_id": "SIMBENCH_AUTO_PILOT",
+      "template_family": "SS06_bus_voltage_count",
+      "family": "wrong_column",
+      "question": "How many buses are there at each voltage level?",
+      "original_sql": "SELECT voltage_level_code, COUNT(*) AS bus_count FROM buses GROUP BY voltage_level_code ORDER BY voltage_level_code;",
+      "perturbed_sql": "SELECT bus_id, COUNT(*) AS bus_count FROM buses GROUP BY voltage_level_code ORDER BY voltage_level_code;",
+      "expected": {
+        "semantically_correct": false
+      },
+      "sandbox_check": {
+        "executable": true,
+        "row_count_orig": 2,
+        "row_count_neg": 2,
+        "result_sets_differ": true
+      }
+    },
+    {
+      "control_id": "NEG_SB_SEALED_019__wrong_column",
+      "source_question_id": "SB_SEALED_019",
+      "dataset_id": "SIMBENCH_AUTO_PILOT",
+      "template_family": "SS03_transformer_capacity",
+      "family": "wrong_column",
+      "question": "What are the high-voltage and low-voltage nominal ratings of the transformers?",
+      "original_sql": "SELECT name, hv_nominal_kv, lv_nominal_kv FROM transformers ORDER BY name;",
+      "perturbed_sql": "SELECT transformer_id, hv_nominal_kv, lv_nominal_kv FROM transformers ORDER BY name;",
+      "expected": {
+        "semantically_correct": false
+      },
+      "sandbox_check": {
+        "executable": true,
+        "row_count_orig": 2,
+        "row_count_neg": 2,
+        "result_sets_differ": true
+      }
+    },
+    {
+      "control_id": "NEG_SB_SEALED_018__wrong_aggregation",
+      "source_question_id": "SB_SEALED_018",
+      "dataset_id": "SIMBENCH_AUTO_PILOT",
+      "template_family": "SS04_load_by_voltage_level",
+      "family": "wrong_aggregation",
+      "question": "What is the average per-load active power in MW at voltage level 5?",
+      "original_sql": "SELECT ROUND(AVG(active_power_mw), 6) AS avg_load_mw FROM loads WHERE voltage_level_code = 5;",
+      "perturbed_sql": "SELECT ROUND(MAX(active_power_mw), 6) AS avg_load_mw FROM loads WHERE voltage_level_code = 5;",
+      "expected": {
+        "semantically_correct": false
+      },
+      "sandbox_check": {
+        "executable": true,
+        "row_count_orig": 1,
+        "row_count_neg": 1,
+        "result_sets_differ": true
+      }
+    },
+    {
+      "control_id": "NEG_SB_SEALED_025__drop_filter",
+      "source_question_id": "SB_SEALED_025",
+      "dataset_id": "SIMBENCH_AUTO_PILOT",
+      "template_family": "SS08_load_power_threshold_count",
+      "family": "drop_filter",
+      "question": "How many loads draw more than 0.4 MW of active power?",
+      "original_sql": "SELECT COUNT(*) AS load_count FROM loads WHERE active_power_mw > 0.4;",
+      "perturbed_sql": "SELECT COUNT(*) AS load_count FROM loads;",
+      "expected": {
+        "semantically_correct": false
+      },
+      "sandbox_check": {
+        "executable": true,
+        "row_count_orig": 1,
+        "row_count_neg": 1,
+        "result_sets_differ": true
+      }
+    },
+    {
+      "control_id": "NEG_SB_SEALED_029__drop_order",
+      "source_question_id": "SB_SEALED_029",
+      "dataset_id": "SIMBENCH_AUTO_PILOT",
+      "template_family": "SS02_line_current_capacity_list",
+      "family": "drop_order",
+      "question": "List the names and maximum current capacities of lines rated below 0.4 kA, ordered by capacity ascending.",
+      "original_sql": "SELECT name, max_current_ka FROM lines WHERE max_current_ka < 0.4 ORDER BY max_current_ka;",
+      "perturbed_sql": "SELECT name, max_current_ka FROM lines WHERE max_current_ka < 0.4;",
+      "expected": {
+        "semantically_correct": false
+      },
+      "sandbox_check": {
+        "executable": true,
+        "row_count_orig": 30,
+        "row_count_neg": 30,
+        "result_sets_differ": true
+      }
+    },
+    {
+      "control_id": "NEG_SB_SEALED_027__drop_filter",
+      "source_question_id": "SB_SEALED_027",
+      "dataset_id": "SIMBENCH_AUTO_PILOT",
+      "template_family": "SS05_switch_state_count",
+      "family": "drop_filter",
+      "question": "How many switches are currently open?",
+      "original_sql": "SELECT COUNT(*) AS open_switch_count FROM switches WHERE closed = 0;",
+      "perturbed_sql": "SELECT COUNT(*) AS open_switch_count FROM switches;",
+      "expected": {
+        "semantically_correct": false
+      },
+      "sandbox_check": {
+        "executable": true,
+        "row_count_orig": 1,
+        "row_count_neg": 1,
+        "result_sets_differ": true
+      }
+    },
+    {
+      "control_id": "NEG_SB_SEALED_001__drop_filter",
+      "source_question_id": "SB_SEALED_001",
+      "dataset_id": "SIMBENCH_AUTO_PILOT",
+      "template_family": "SS01_line_length_threshold_count",
+      "family": "drop_filter",
+      "question": "How many lines are longer than 0.5 km?",
+      "original_sql": "SELECT COUNT(*) AS line_count FROM lines WHERE length_km > 0.5;",
+      "perturbed_sql": "SELECT COUNT(*) AS line_count FROM lines;",
+      "expected": {
+        "semantically_correct": false
+      },
+      "sandbox_check": {
+        "executable": true,
+        "row_count_orig": 1,
+        "row_count_neg": 1,
+        "result_sets_differ": true
+      }
+    },
+    {
+      "control_id": "NEG_SB_SEALED_005__wrong_aggregation",
+      "source_question_id": "SB_SEALED_005",
+      "dataset_id": "SIMBENCH_AUTO_PILOT",
+      "template_family": "SS03_transformer_capacity",
+      "family": "wrong_aggregation",
+      "question": "What is the combined rated power in MVA of all in-service transformers?",
+      "original_sql": "SELECT ROUND(SUM(rated_power_mva), 3) AS total_rated_power_mva FROM transformers WHERE in_service = 1;",
+      "perturbed_sql": "SELECT ROUND(AVG(rated_power_mva), 3) AS total_rated_power_mva FROM transformers WHERE in_service = 1;",
+      "expected": {
+        "semantically_correct": false
+      },
+      "sandbox_check": {
+        "executable": true,
+        "row_count_orig": 1,
+        "row_count_neg": 1,
+        "result_sets_differ": true
+      }
+    }
+  ],
+  "generation_log": [
+    {
+      "source": "RTS_SEALED_003",
+      "accepted": true,
+      "attempts": [
+        {
+          "family": "drop_filter",
+          "verdict": "accepted",
+          "row_count_orig": 1,
+          "row_count_neg": 1
+        }
+      ]
+    },
+    {
+      "source": "RTS_SEALED_022",
+      "accepted": true,
+      "attempts": [
+        {
+          "family": "wrong_filter_value",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_column",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "drop_order",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_aggregation",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "drop_filter",
+          "verdict": "accepted",
+          "row_count_orig": 1,
+          "row_count_neg": 1
+        }
+      ]
+    },
+    {
+      "source": "RTS_SEALED_024",
+      "accepted": true,
+      "attempts": [
+        {
+          "family": "wrong_filter_value",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_column",
+          "verdict": "accepted",
+          "row_count_orig": 3,
+          "row_count_neg": 3
+        }
+      ]
+    },
+    {
+      "source": "RTS_SEALED_029",
+      "accepted": true,
+      "attempts": [
+        {
+          "family": "wrong_filter_value",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "drop_order",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_aggregation",
+          "verdict": "accepted",
+          "row_count_orig": 1,
+          "row_count_neg": 1
+        }
+      ]
+    },
+    {
+      "source": "RTS_SEALED_004",
+      "accepted": true,
+      "attempts": [
+        {
+          "family": "wrong_filter_value",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "drop_order",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_column",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_aggregation",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "drop_filter",
+          "verdict": "accepted",
+          "row_count_orig": 1,
+          "row_count_neg": 1
+        }
+      ]
+    },
+    {
+      "source": "RTS_SEALED_021",
+      "accepted": true,
+      "attempts": [
+        {
+          "family": "wrong_filter_value",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "drop_order",
+          "verdict": "equivalent_result_rejected"
+        },
+        {
+          "family": "wrong_column",
+          "verdict": "accepted",
+          "row_count_orig": 1,
+          "row_count_neg": 1
+        }
+      ]
+    },
+    {
+      "source": "RTS_SEALED_028",
+      "accepted": true,
+      "attempts": [
+        {
+          "family": "wrong_filter_value",
+          "verdict": "accepted",
+          "row_count_orig": 1,
+          "row_count_neg": 1
+        }
+      ]
+    },
+    {
+      "source": "RTS_SEALED_031",
+      "accepted": true,
+      "attempts": [
+        {
+          "family": "drop_order",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_filter_value",
+          "verdict": "accepted",
+          "row_count_orig": 1,
+          "row_count_neg": 1
+        }
+      ]
+    },
+    {
+      "source": "RTS_SEALED_019",
+      "accepted": true,
+      "attempts": [
+        {
+          "family": "drop_order",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_aggregation",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_filter_value",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_column",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "drop_filter",
+          "verdict": "accepted",
+          "row_count_orig": 1,
+          "row_count_neg": 1
+        }
+      ]
+    },
+    {
+      "source": "RTS_SEALED_038",
+      "accepted": true,
+      "attempts": [
+        {
+          "family": "drop_order",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_aggregation",
+          "verdict": "accepted",
+          "row_count_orig": 1,
+          "row_count_neg": 1
+        }
+      ]
+    },
+    {
+      "source": "RTS_SEALED_043",
+      "accepted": true,
+      "attempts": [
+        {
+          "family": "drop_order",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_filter_value",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_column",
+          "verdict": "accepted",
+          "row_count_orig": 3,
+          "row_count_neg": 3
+        }
+      ]
+    },
+    {
+      "source": "RTS_SEALED_005",
+      "accepted": true,
+      "attempts": [
+        {
+          "family": "drop_order",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_filter_value",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_aggregation",
+          "verdict": "accepted",
+          "row_count_orig": 1,
+          "row_count_neg": 1
+        }
+      ]
+    },
+    {
+      "source": "RTS_SEALED_006",
+      "accepted": true,
+      "attempts": [
+        {
+          "family": "drop_order",
+          "verdict": "equivalent_result_rejected"
+        },
+        {
+          "family": "wrong_filter_value",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_column",
+          "verdict": "accepted",
+          "row_count_orig": 5,
+          "row_count_neg": 5
+        }
+      ]
+    },
+    {
+      "source": "RTS_SEALED_041",
+      "accepted": true,
+      "attempts": [
+        {
+          "family": "drop_order",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_filter_value",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_aggregation",
+          "verdict": "accepted",
+          "row_count_orig": 1,
+          "row_count_neg": 1
+        }
+      ]
+    },
+    {
+      "source": "RTS_SEALED_018",
+      "accepted": true,
+      "attempts": [
+        {
+          "family": "drop_order",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_filter_value",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "drop_filter",
+          "verdict": "accepted",
+          "row_count_orig": 3,
+          "row_count_neg": 3
+        }
+      ]
+    },
+    {
+      "source": "SB_SEALED_015",
+      "accepted": true,
+      "attempts": [
+        {
+          "family": "drop_order",
+          "verdict": "accepted",
+          "row_count_orig": 81,
+          "row_count_neg": 81
+        }
+      ]
+    },
+    {
+      "source": "SB_SEALED_035",
+      "accepted": true,
+      "attempts": [
+        {
+          "family": "drop_order",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_filter_value",
+          "verdict": "accepted",
+          "row_count_orig": 1,
+          "row_count_neg": 1
+        }
+      ]
+    },
+    {
+      "source": "SB_SEALED_010",
+      "accepted": true,
+      "attempts": [
+        {
+          "family": "drop_order",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_filter_value",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_column",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_aggregation",
+          "verdict": "accepted",
+          "row_count_orig": 1,
+          "row_count_neg": 1
+        }
+      ]
+    },
+    {
+      "source": "SB_SEALED_006",
+      "accepted": true,
+      "attempts": [
+        {
+          "family": "drop_order",
+          "verdict": "equivalent_result_rejected"
+        },
+        {
+          "family": "wrong_filter_value",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_column",
+          "verdict": "accepted",
+          "row_count_orig": 2,
+          "row_count_neg": 2
+        }
+      ]
+    },
+    {
+      "source": "SB_SEALED_033",
+      "accepted": true,
+      "attempts": [
+        {
+          "family": "drop_order",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_filter_value",
+          "verdict": "equivalent_result_rejected"
+        },
+        {
+          "family": "drop_filter",
+          "verdict": "accepted",
+          "row_count_orig": 1,
+          "row_count_neg": 1
+        }
+      ]
+    },
+    {
+      "source": "SB_SEALED_028",
+      "accepted": false,
+      "attempts": [
+        {
+          "family": "drop_order",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_filter_value",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_column",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_aggregation",
+          "verdict": "equivalent_result_rejected"
+        },
+        {
+          "family": "drop_filter",
+          "verdict": "inapplicable"
+        }
+      ]
+    },
+    {
+      "source": "SB_SEALED_028",
+      "accepted": false,
+      "note": "all families failed; replaced by SB_SEALED_001"
+    },
+    {
+      "source": "SB_SEALED_034",
+      "accepted": false,
+      "attempts": [
+        {
+          "family": "drop_order",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_filter_value",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_column",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_aggregation",
+          "verdict": "equivalent_result_rejected"
+        },
+        {
+          "family": "drop_filter",
+          "verdict": "inapplicable"
+        }
+      ]
+    },
+    {
+      "source": "SB_SEALED_034",
+      "accepted": false,
+      "note": "all families failed; replaced by SB_SEALED_002"
+    },
+    {
+      "source": "SB_SEALED_004",
+      "accepted": true,
+      "attempts": [
+        {
+          "family": "drop_order",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_filter_value",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_column",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_aggregation",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "drop_filter",
+          "verdict": "accepted",
+          "row_count_orig": 1,
+          "row_count_neg": 1
+        }
+      ]
+    },
+    {
+      "source": "SB_SEALED_039",
+      "accepted": true,
+      "attempts": [
+        {
+          "family": "drop_order",
+          "verdict": "equivalent_result_rejected"
+        },
+        {
+          "family": "wrong_filter_value",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_column",
+          "verdict": "accepted",
+          "row_count_orig": 10,
+          "row_count_neg": 10
+        }
+      ]
+    },
+    {
+      "source": "SB_SEALED_030",
+      "accepted": true,
+      "attempts": [
+        {
+          "family": "drop_order",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_filter_value",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_aggregation",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_column",
+          "verdict": "accepted",
+          "row_count_orig": 2,
+          "row_count_neg": 2
+        }
+      ]
+    },
+    {
+      "source": "SB_SEALED_019",
+      "accepted": true,
+      "attempts": [
+        {
+          "family": "drop_order",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_filter_value",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_aggregation",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "drop_filter",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_column",
+          "verdict": "accepted",
+          "row_count_orig": 2,
+          "row_count_neg": 2
+        }
+      ]
+    },
+    {
+      "source": "SB_SEALED_018",
+      "accepted": true,
+      "attempts": [
+        {
+          "family": "drop_order",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_filter_value",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_aggregation",
+          "verdict": "accepted",
+          "row_count_orig": 1,
+          "row_count_neg": 1
+        }
+      ]
+    },
+    {
+      "source": "SB_SEALED_025",
+      "accepted": true,
+      "attempts": [
+        {
+          "family": "drop_order",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_filter_value",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_aggregation",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "drop_filter",
+          "verdict": "accepted",
+          "row_count_orig": 1,
+          "row_count_neg": 1
+        }
+      ]
+    },
+    {
+      "source": "SB_SEALED_029",
+      "accepted": true,
+      "attempts": [
+        {
+          "family": "drop_order",
+          "verdict": "accepted",
+          "row_count_orig": 30,
+          "row_count_neg": 30
+        }
+      ]
+    },
+    {
+      "source": "SB_SEALED_027",
+      "accepted": true,
+      "attempts": [
+        {
+          "family": "drop_order",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_filter_value",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_aggregation",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "drop_filter",
+          "verdict": "accepted",
+          "row_count_orig": 1,
+          "row_count_neg": 1
+        }
+      ]
+    },
+    {
+      "source": "SB_SEALED_001",
+      "accepted": true,
+      "attempts": [
+        {
+          "family": "drop_order",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_filter_value",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_aggregation",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_column",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "drop_filter",
+          "verdict": "accepted",
+          "row_count_orig": 1,
+          "row_count_neg": 1
+        }
+      ]
+    },
+    {
+      "source": "SB_SEALED_002",
+      "accepted": false,
+      "attempts": [
+        {
+          "family": "drop_order",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_filter_value",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_aggregation",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_column",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "drop_filter",
+          "verdict": "inapplicable"
+        }
+      ]
+    },
+    {
+      "source": "SB_SEALED_002",
+      "accepted": false,
+      "note": "all families failed; replaced by SB_SEALED_003"
+    },
+    {
+      "source": "SB_SEALED_003",
+      "accepted": false,
+      "attempts": [
+        {
+          "family": "drop_order",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_filter_value",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_aggregation",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_column",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "drop_filter",
+          "verdict": "equivalent_result_rejected"
+        }
+      ]
+    },
+    {
+      "source": "SB_SEALED_003",
+      "accepted": false,
+      "note": "all families failed; replaced by SB_SEALED_005"
+    },
+    {
+      "source": "SB_SEALED_005",
+      "accepted": true,
+      "attempts": [
+        {
+          "family": "drop_order",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_filter_value",
+          "verdict": "inapplicable"
+        },
+        {
+          "family": "wrong_aggregation",
+          "verdict": "accepted",
+          "row_count_orig": 1,
+          "row_count_neg": 1
+        }
+      ]
+    }
+  ]
+}

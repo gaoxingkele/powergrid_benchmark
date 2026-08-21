@@ -1,0 +1,207 @@
+tree:
+  nodes:
+    - id: root_question
+      type: question
+      support_level: explicit
+      source_refs: ["Section 1"]
+      title: "How to optimize power-grid investment portfolios by collaboratively considering both risk and benefit factors?"
+      description: >
+        Power-grid enterprises need a systematic method to select investment projects that
+        jointly optimize risk exposure and benefit realization under budget, demand, and
+        environmental constraints. Existing approaches focus on single dimensions.
+
+    - id: stage1_mcdm
+      type: decision
+      support_level: explicit
+      source_refs: ["Section 2", "Section 3.1"]
+      title: "Use MCDM to compute comprehensive risk and benefit scores"
+      choice: "Two-stage architecture: Stage 1 evaluates each project via MCDM; Stage 2 optimizes selection"
+      alternatives: "Direct multi-objective optimization combining all risk and benefit indicators simultaneously"
+      description: >
+        Decision to decompose the problem into evaluation (MCDM) and optimization stages rather than
+        solving a single large multi-objective problem.
+
+    - id: indicator_systems
+      type: experiment
+      support_level: explicit
+      source_refs: ["Section 2.1", "Section 2.2", "Figures 2-3"]
+      title: "Construct risk and benefit indicator systems"
+      result: "4 risk dimensions (policy, management, technical, environmental) with 9 indicators; 4 benefit dimensions (operational, financial, cleanliness, social) with 9 indicators"
+      description: >
+        Build hierarchical indicator systems covering all relevant PGI evaluation dimensions.
+
+    - id: weight_method_decision
+      type: decision
+      support_level: explicit
+      source_refs: ["Section 3.1.1"]
+      title: "Select Bayesian BWM for indicator weighting"
+      choice: "Bayesian BWM over traditional BWM"
+      alternatives: "AHP, entropy method, principal component analysis, CRITIC, traditional BWM"
+      description: >
+        Bayesian BWM handles group decision-making via probability distributions, avoiding extreme
+        weight phenomena from mechanized averaging.
+
+    - id: eval_method_decision
+      type: decision
+      support_level: explicit
+      source_refs: ["Section 3.1.2"]
+      title: "Select TOPSIS for comprehensive evaluation"
+      choice: "TOPSIS ranking method"
+      alternatives: "MARCOS, VIKOR, matter-element extension model"
+      description: >
+        TOPSIS ranks alternatives by distance to ideal and anti-ideal solutions. Suitable for
+        multi-scheme comparison (10 projects).
+
+    - id: objective_formulation
+      type: decision
+      support_level: explicit
+      source_refs: ["Section 3.2.1"]
+      title: "Formulate benefit-per-unit-risk objective"
+      choice: "Single-objective ratio: max f = sum(Bi)/sum(Ri)"
+      alternatives: "True multi-objective optimization with separate risk and benefit objectives"
+      description: >
+        Convert multi-objective (min risk, max benefit) into a single ratio objective to avoid
+        multi-objective complexity and Pareto front computation.
+
+    - id: constraint_definition
+      type: experiment
+      support_level: explicit
+      source_refs: ["Section 3.2.2"]
+      title: "Define investment, demand, and low-carbon constraints"
+      result: "Three constraints: sum(AMOi) <= 1500, sum(TPi) >= 600, sum(CERi) >= 5000"
+      description: >
+        Three binding constraints identified: total investment amount cap, minimum power demand,
+        and minimum CO2 emission reduction target.
+
+    - id: solver_selection
+      type: decision
+      support_level: explicit
+      source_refs: ["Section 3.2.3"]
+      title: "Select ILA as the optimization solver"
+      choice: "Incomprehensible but Intelligible-in-time Logic Algorithm (ILA)"
+      alternatives: "Genetic Algorithm (GA), quantum genetic algorithm, Benders decomposition"
+      description: >
+        ILA claims higher accuracy and efficiency for constrained problems. Three stages: groupwork
+        (intra-group), integration (inter-group), logic search (overall).
+
+    - id: empirical_study
+      type: experiment
+      support_level: explicit
+      source_refs: ["Section 4", "Table 10"]
+      title: "Empirical analysis with 10 projects from a power-grid company"
+      result: "Optimal portfolio = {P2, P5, P7, P8, P9}, objective value = 1.0031"
+      description: >
+        Apply the two-stage model to 10 real projects from a power-grid company's investment
+        project database. Stage 1 produces risk/benefit scores. Stage 2 finds optimal portfolio.
+
+    - id: scenario_weight_comparison
+      type: experiment
+      support_level: explicit
+      source_refs: ["Section 5.1.2", "Tables 12-13"]
+      title: "Compare Bayesian BWM vs traditional BWM weights"
+      result: "BWM weight range 48.15% (risk) and 40.42% (benefit) wider than Bayesian BWM"
+      description: >
+        Traditional BWM produces extreme weight phenomena. Bayesian BWM mitigates this via
+        probabilistic group decision-making.
+
+    - id: scenario_objective_comparison
+      type: experiment
+      support_level: explicit
+      source_refs: ["Section 5.1.1", "Table 11"]
+      title: "Compare benefit-per-unit-risk vs single-objective optimization"
+      result: "Risk-only: benefit drops 37.27%. Benefit-only: risk increases 89.86%."
+      description: >
+        The ratio objective balances risk and benefit. Single-objective approaches severely
+        degrade the other dimension.
+
+    - id: scenario_algorithm_comparison
+      type: experiment
+      support_level: explicit
+      source_refs: ["Section 5.1.3", "Table 14"]
+      title: "Compare ILA vs GA solver performance"
+      result: "ILA: 1.0031 value, 7.25s. GA: 0.9135 value, 18.87s"
+      description: >
+        ILA achieves 9.8% higher objective value with 61.57% computation time reduction
+        compared to MATLAB GA toolbox.
+
+    - id: sensitivity_investment
+      type: experiment
+      support_level: explicit
+      source_refs: ["Section 5.2.1", "Figure 7"]
+      title: "Sensitivity analysis of investment amount constraint"
+      result: "Below 900 infeasible. At 1200: P7, P9 preferred. Above 1500: stable."
+      description: >
+        Vary AMO0 from 300 to 1800. P7, P9 emerge when budget is limited. P8 requires
+        higher budget despite high benefit-risk ratio.
+
+    - id: sensitivity_demand
+      type: experiment
+      support_level: explicit
+      source_refs: ["Section 5.2.2", "Figure 8"]
+      title: "Sensitivity analysis of power demand constraint"
+      result: "Below 900: P7, P8, P9 essential. Above 1200: infeasible under budget."
+      description: >
+        Vary D from 300 to 1800. P7, P8, P9 consistently included at feasible demand levels.
+        Budget constraint binds at high demand.
+
+    - id: sensitivity_carbon
+      type: experiment
+      support_level: explicit
+      source_refs: ["Section 5.2.3", "Figure 9"]
+      title: "Sensitivity analysis of CO2 emission reduction constraint"
+      result: "Slack: P7, P8, P9 stable. Tight (6000): P7 dropped. At 7000: infeasible."
+      description: >
+        Vary CER0 from 2000 to 7000. P7 dropped under tight environmental targets.
+        Investment budget binds at aggressive targets.
+
+    - id: small_sample_limitation
+      type: dead_end
+      support_level: explicit
+      source_refs: ["Section 6.2"]
+      title: "Small sample size limits generalizability"
+      hypothesis: "Larger project libraries yield more complex portfolios requiring direction-based analysis"
+      failure_mode: "Only 10 projects from one company; national grid investment ~CNY 3 trillion"
+      lesson: "Future work must expand scope and consider investment direction (reinforcement vs supply vs channel)"
+      description: >
+        Single-company, 10-project sample limits statistical and practical generalizability.
+        Larger scales require consideration of investment direction factors.
+
+  edges:
+    - from: root_question
+      to: stage1_mcdm
+    - from: stage1_mcdm
+      to: indicator_systems
+    - from: indicator_systems
+      to: weight_method_decision
+    - from: indicator_systems
+      to: eval_method_decision
+    - from: weight_method_decision
+      to: empirical_study
+    - from: eval_method_decision
+      to: empirical_study
+    - from: stage1_mcdm
+      to: objective_formulation
+    - from: objective_formulation
+      to: constraint_definition
+    - from: constraint_definition
+      to: solver_selection
+    - from: solver_selection
+      to: empirical_study
+    - from: empirical_study
+      to: scenario_weight_comparison
+    - from: empirical_study
+      to: scenario_objective_comparison
+    - from: empirical_study
+      to: scenario_algorithm_comparison
+    - from: empirical_study
+      to: sensitivity_investment
+    - from: empirical_study
+      to: sensitivity_demand
+    - from: empirical_study
+      to: sensitivity_carbon
+    - from: sensitivity_investment
+      to: small_sample_limitation
+    - from: sensitivity_demand
+      to: small_sample_limitation
+    - from: sensitivity_carbon
+      to: small_sample_limitation

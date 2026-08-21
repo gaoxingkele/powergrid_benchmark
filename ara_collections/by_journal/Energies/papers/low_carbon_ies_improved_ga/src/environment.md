@@ -1,0 +1,22 @@
+# Environment
+
+- **Language/runtime**: MATLAB or similar numerical computing environment (assumed from the algorithm description; no specific runtime stated in paper)
+- **Framework**: Custom implementation of the IGA (no external optimization library cited). NSGA-II framework [23] used for fast non-dominated sorting and crowding distance concepts.
+- **Hardware**: Not specified in paper
+- **Data sources**:
+  - IES operational parameters adapted from Ref. [24] (Zhang and Yao, 2024)
+  - Key optimization-sensitive parameters (CHP and GB output boundaries) modified from Ref. [24] to suit the case study
+  - Electricity pricing: locational marginal price (LMP) data, tiered pricing per Hong Kong Electric Company [21]
+  - Natural gas pricing: based on tiered pricing principles from Ref. [8]
+  - Carbon emission pricing: three-tier structure based on concept from Ref. [7]
+  - Renewable generation profiles: PV and wind power generation data (source not specified)
+  - Load profiles: electrical and thermal load curves (source not specified, modified for Scenario 2)
+- **Key dependencies**:
+  - No external optimization libraries are cited
+  - The IGA is implemented as described algorithmically in Section 3
+  - NSGA-II fast non-dominated sorting and crowding distance from Deb et al. (2002) [23]
+  - Comparative algorithms: MGA (based on NSGA-II), MPSO [25], SGA [22], MABC [26]
+- **Protocols**: Day-ahead scheduling over 24 hourly time slots. Three scenarios tested with identical algorithm parameters.
+- **Random seeds**: Not specified in paper
+- **Code availability**: Not specified in paper. The Data Availability Statement states "Dataset available on request from the authors."
+- **Population parameters**: Population size and maximum generation count not specified in paper.

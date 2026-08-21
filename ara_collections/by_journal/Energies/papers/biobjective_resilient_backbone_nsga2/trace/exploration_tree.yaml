@@ -1,0 +1,104 @@
+version: "1.0"
+paper_id: 34
+title: "Bi-Objective Resilient Backbone-Grid Planning via a Three-Stage TER-NSGA-II Approach Considering Pumped-Storage Hub Effects"
+
+exploration_tree:
+  root:
+    question: "How to integrate pumped-storage hub effects into bi-objective resilient backbone-grid planning with rigorous N-1 connectivity constraints?"
+
+    branches:
+      - branch_id: b1
+        focus: "Resilience Quantification"
+        questions:
+          - "How to quantify the resilience value of pumped storage in backbone-grid planning?"
+          - "What metrics can capture both recovery distance and hub support capability?"
+        findings:
+          - "Recovery-distance contribution based on weighted shortest-path electrical distance"
+          - "Capacity-weighted betweenness centrality integrating topological centrality and power capacity"
+          - "Multiplicative coupling provides better discrimination than additive alternatives"
+        confidence: high
+        evidence:
+          - "Section 3.1-3.4: Quantitative index system"
+          - "Section 6.4: Validation of weighting schemes"
+          - "Appendix A: Surrogate form comparison and sensitivity analysis"
+        sub_branches:
+          - branch_id: b1a
+            focus: "Weighting Scheme Selection"
+            questions:
+              - "Arithmetic mean vs geometric mean vs unweighted average for hub effect?"
+            findings:
+              - "Arithmetic mean (proposed) achieves best IGD+, HV, and F2 mean"
+              - "Avoids over-compression of geometric mean and insensitivity of unweighted average"
+            confidence: high
+            evidence: "Table 4"
+
+      - branch_id: b2
+        focus: "Constraint Handling"
+        questions:
+          - "How to strictly enforce N-1 connectivity (edge connectivity >= 2) without combinatorial explosion?"
+          - "How to handle hierarchical constraints of increasing restrictiveness?"
+        findings:
+          - "Three-stage framework activates constraints in layers: connectivity -> N-1 -> safety"
+          - "Max-flow min-cut theorem enables precise edge-connectivity validation in polynomial time"
+          - "Continuous risk indices for power flow provide search gradient avoiding cliff effect"
+        confidence: high
+        evidence:
+          - "Section 5.1-5.2: Three-stage framework and hierarchical constraint screening"
+          - "Section 5.5: Complexity analysis"
+
+      - branch_id: b3
+        focus: "Algorithm Design"
+        questions:
+          - "How to adapt NSGA-II for heavily constrained discrete optimization?"
+          - "How to maintain population diversity and avoid premature convergence?"
+        findings:
+          - "Three-stage elite selection with stage-dependent constraint priorities"
+          - "Periodic reverse learning generates structurally diverse solutions"
+          - "Greedy post-processing removes redundant lines"
+          - "irace-based parameter tuning for stage transition points"
+        confidence: high
+        evidence:
+          - "Section 5: Complete TER-NSGA-II description"
+          - "Section 6.2: Parameter tuning via irace"
+
+      - branch_id: b4
+        focus: "Experimental Validation"
+        questions:
+          - "Does TER-NSGA-II outperform standard algorithms on benchmark systems?"
+          - "How does the approach scale to larger networks?"
+        findings:
+          - "100% feasible-run rate vs 48.11% (NSGA-II) on IEEE 118-bus"
+          - "25.7% mean F1 reduction vs NSGA-II; 20.0% vs NSGA-III/NG"
+          - "Competitive IGD+, HV, Spread on both IEEE 118-bus and 300-bus systems"
+          - "Higher computational cost but reliably better feasible-domain search"
+        confidence: high
+        evidence:
+          - "Tables 2, 3, 6, 7: Core-objective and multi-objective metrics"
+          - "Table 8: Computational performance comparison"
+          - "Figures 3, 4, 5, 6: Convergence curves, Pareto fronts, topologies"
+
+      - branch_id: b5
+        focus: "Engineering Applicability"
+        questions:
+          - "What do the resulting backbone-grid configurations look like?"
+          - "Can the method provide differentiated planning schemes?"
+        findings:
+          - "Economic-oriented (54 lines), Transitional (67 lines), Resilience-oriented (70 lines)"
+          - "Different redundancy levels provide differentiated planning options"
+          - "Pump-storage hub effect explicitly quantified in resilience assessment"
+        confidence: high
+        evidence:
+          - "Section 6.5, Table 5"
+          - "Figure 5a-c: Topological configurations"
+
+      - branch_id: b6
+        focus: "Limitations and Future Work"
+        questions:
+          - "What are the limitations of the current approach?"
+        findings:
+          - "Deterministic modeling framework (no uncertainty considerations)"
+          - "DC power flow approximation (no voltage, reactive power, losses)"
+          - "Results more suitable for planning-stage screening than detailed validation"
+          - "Future: uncertainty modeling, more detailed operational constraints, coordination with other flexible resources"
+        confidence: high
+        evidence: "Section 7: Conclusions and future work"

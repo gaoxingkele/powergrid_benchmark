@@ -1,0 +1,193 @@
+{
+  "protocol": "predicted-label",
+  "protocol_definition": {
+    "role_source": "external_predictions",
+    "is_end_to_end": true,
+    "reporting_constraint": "Include the upstream label predictor and its errors when reporting end-to-end performance."
+  },
+  "end_to_end": true,
+  "design": "five-seed training robustness with Wikipedia-document-disjoint FEVER splits",
+  "seeds": [
+    2026
+  ],
+  "encoder": "sentence-transformers/all-MiniLM-L6-v2",
+  "k_sensitivity": {
+    "1": {
+      "full": {
+        "mean_f1": 0.8,
+        "sample_std_f1": 0.0,
+        "min_f1": 0.8,
+        "max_f1": 0.8,
+        "per_seed_f1": [
+          0.8
+        ]
+      },
+      "no_role": {
+        "mean_f1": 0.8,
+        "sample_std_f1": 0.0,
+        "min_f1": 0.8,
+        "max_f1": 0.8,
+        "per_seed_f1": [
+          0.8
+        ]
+      },
+      "no_graph": {
+        "mean_f1": 0.7,
+        "sample_std_f1": 0.0,
+        "min_f1": 0.7,
+        "max_f1": 0.7,
+        "per_seed_f1": [
+          0.7
+        ]
+      },
+      "query_only": {
+        "mean_f1": 0.7,
+        "sample_std_f1": 0.0,
+        "min_f1": 0.7,
+        "max_f1": 0.7,
+        "per_seed_f1": [
+          0.7
+        ]
+      },
+      "tfidf": {
+        "mean_f1": 0.8,
+        "sample_std_f1": 0.0,
+        "min_f1": 0.8,
+        "max_f1": 0.8,
+        "per_seed_f1": [
+          0.8
+        ]
+      },
+      "bm25": {
+        "mean_f1": 0.9,
+        "sample_std_f1": 0.0,
+        "min_f1": 0.9,
+        "max_f1": 0.9,
+        "per_seed_f1": [
+          0.9
+        ]
+      },
+      "sbert": {
+        "mean_f1": 0.8,
+        "sample_std_f1": 0.0,
+        "min_f1": 0.8,
+        "max_f1": 0.8,
+        "per_seed_f1": [
+          0.8
+        ]
+      },
+      "lexcue": {
+        "mean_f1": 0.5,
+        "sample_std_f1": 0.0,
+        "min_f1": 0.5,
+        "max_f1": 0.5,
+        "per_seed_f1": [
+          0.5
+        ]
+      }
+    },
+    "3": {
+      "full": {
+        "mean_f1": 0.45,
+        "sample_std_f1": 0.0,
+        "min_f1": 0.45,
+        "max_f1": 0.45,
+        "per_seed_f1": [
+          0.45
+        ]
+      },
+      "no_role": {
+        "mean_f1": 0.45,
+        "sample_std_f1": 0.0,
+        "min_f1": 0.45,
+        "max_f1": 0.45,
+        "per_seed_f1": [
+          0.45
+        ]
+      },
+      "no_graph": {
+        "mean_f1": 0.45,
+        "sample_std_f1": 0.0,
+        "min_f1": 0.45,
+        "max_f1": 0.45,
+        "per_seed_f1": [
+          0.45
+        ]
+      },
+      "query_only": {
+        "mean_f1": 0.45,
+        "sample_std_f1": 0.0,
+        "min_f1": 0.45,
+        "max_f1": 0.45,
+        "per_seed_f1": [
+          0.45
+        ]
+      },
+      "tfidf": {
+        "mean_f1": 0.45,
+        "sample_std_f1": 0.0,
+        "min_f1": 0.45,
+        "max_f1": 0.45,
+        "per_seed_f1": [
+          0.45
+        ]
+      },
+      "bm25": {
+        "mean_f1": 0.5,
+        "sample_std_f1": 0.0,
+        "min_f1": 0.5,
+        "max_f1": 0.5,
+        "per_seed_f1": [
+          0.5
+        ]
+      },
+      "sbert": {
+        "mean_f1": 0.4,
+        "sample_std_f1": 0.0,
+        "min_f1": 0.4,
+        "max_f1": 0.4,
+        "per_seed_f1": [
+          0.4
+        ]
+      },
+      "lexcue": {
+        "mean_f1": 0.35,
+        "sample_std_f1": 0.0,
+        "min_f1": 0.35,
+        "max_f1": 0.35,
+        "per_seed_f1": [
+          0.35
+        ]
+      }
+    }
+  },
+  "bootstrap_cluster_unit": "underlying_wikipedia_document",
+  "document_leakage_audits": [
+    {
+      "grouping_key": "underlying_document_id",
+      "unique_documents": {
+        "train": 19,
+        "dev": 10,
+        "test": 9
+      },
+      "pairwise_overlap": {
+        "train_vs_dev": {
+          "count": 0,
+          "document_ids": []
+        },
+        "train_vs_test": {
+          "count": 0,
+          "document_ids": []
+        },
+        "dev_vs_test": {
+          "count": 0,
+          "document_ids": []
+        }
+      },
+      "overlap_document_count": 0,
+      "passed": true
+    }
+  ],
+  "upstream_predicted_labels": "D:\\aicoding\\powergrid_benchmark\\paper_projects\\2026_c2ges_engineeringletters\\workspace\\w2_seed_sweep_smoke\\upstream_label_predictor\\predicted_labels.json",
+  "upstream_predicted_labels_sha256": "1883a4ca5436b534118c861c5501cedb44e87c054fe1d403cccbe889a5fde87d"
+}

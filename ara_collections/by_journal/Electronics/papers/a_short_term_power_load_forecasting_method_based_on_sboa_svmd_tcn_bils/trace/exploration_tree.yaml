@@ -1,0 +1,106 @@
+tree:
+  - id: N01
+    type: question
+    support_level: explicit
+    source_refs: ["§1 Introduction", "§3 opening", "§6 Discussion"]
+    title: "How to capture weakened temporal continuity in short-term load forecasting?"
+    description: >
+      Central question: load is non-stationary with multiple periodicities and random
+      fluctuations, and existing deep models under-utilize temporal information. Goal:
+      integrate deeply-mined temporal features into a day-ahead forecasting model.
+    children:
+      - id: N02
+        type: decision
+        support_level: explicit
+        source_refs: ["§1 contributions", "§2.1", "§4"]
+        title: "Adopt a decompose–predict–reconstruct framework with SVMD front-end"
+        description: >
+          Decompose the load into IMFs before forecasting; use SVMD (successive VMD) so
+          the mode count K need not be preset and mode mixing is reduced vs EMD/VMD.
+        children:
+          - id: N03
+            type: decision
+            support_level: explicit
+            source_refs: ["§2.2", "Table 1", "Figure 2"]
+            title: "Optimize SVMD's dominant parameter (maxAlpha) with SBOA"
+            description: >
+              Mode-compactness coefficient dominates decomposition quality; optimize it with
+              the Secretary Bird Optimization Algorithm, minimizing component permutation entropy.
+            children:
+              - id: N04
+                type: experiment
+                support_level: explicit
+                source_refs: ["Table 2", "Figure 9"]
+                title: "Compactness sweep + optimization → minimum permutation entropy"
+                description: >
+                  Permutation entropy falls with optimized compactness (0.3462 → 0.2857 → 0.1245);
+                  decomposition yields four clean IMFs.
+                evidence: ["C01"]
+              - id: N05
+                type: experiment
+                support_level: explicit
+                source_refs: ["Figure 10", "§5.4"]
+                title: "Optimizer comparison SBOA vs SSA vs GWO"
+                description: >
+                  Under equal budget (pop 30, 60 iters), SBOA converges lowest and stays stable;
+                  SSA fluctuates; GWO stagnates above.
+                evidence: ["C07"]
+      - id: N06
+        type: decision
+        support_level: explicit
+        source_refs: ["§3.3", "Figure 7", "§5.2"]
+        title: "Forecast each IMF with a TCN→BiLSTM hybrid"
+        description: >
+          TCN dilated causal convolutions extract multi-scale local features; BiLSTM captures
+          bidirectional temporal dependencies; dense layer outputs the component's value.
+        children:
+          - id: N07
+            type: experiment
+            support_level: explicit
+            source_refs: ["Table 6", "Figure 13"]
+            title: "Forecaster comparison on same IMFs (LSTM/ELM/BiLSTM/TCN-BiLSTM)"
+            description: >
+              TCN-BiLSTM lowest MAE/RMSE, highest R²; smallest margin over BiLSTM, largest over LSTM.
+            evidence: ["C04"]
+      - id: N08
+        type: experiment
+        support_level: explicit
+        source_refs: ["Table 4", "Figure 11", "Table 3"]
+        title: "Decomposition-method comparison (SVMD vs CEEMDAN vs ICEEMDAN)"
+        description: >
+          With the forecaster fixed, SVMD front-end gives lowest error; EMD-family baselines
+          suffer mode mixing.
+        evidence: ["C02"]
+      - id: N09
+        type: experiment
+        support_level: explicit
+        source_refs: ["Table 5", "Figure 12"]
+        title: "Ablation: with vs without SBOA-SVMD decomposition"
+        description: >
+          Proposed model vs plain TCN-BiLSTM on raw input; decomposition lowers MAE/RMSE, raises R².
+        evidence: ["C03"]
+      - id: N10
+        type: experiment
+        support_level: explicit
+        source_refs: ["Table 8", "Table 9", "Figure 14"]
+        title: "Seasonal + peak-period robustness analysis"
+        description: >
+          Hybrid lowest error every season; all models worse in summer/winter; afternoon-peak and
+          winter errors highest; proposed model's errors concentrate at low magnitudes.
+        evidence: ["C05"]
+      - id: N11
+        type: experiment
+        support_level: explicit
+        source_refs: ["Table 7", "§5.6"]
+        title: "Timing: per-IMF training/testing (offline-train/online-predict)"
+        description: >
+          Per-component training dominates cost (~355 s total) while total testing time is ~0.89 s.
+        evidence: ["C06"]
+      - id: N12
+        type: decision
+        support_level: explicit
+        source_refs: ["§6 Discussion (future work)"]
+        title: "Future directions (not executed)"
+        description: >
+          Explore other intelligent optimizers to refine SVMD, and integrate further deep models
+          with TCN-BiLSTM. Stated as future work, not tested here.

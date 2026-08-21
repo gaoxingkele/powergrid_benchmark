@@ -1,0 +1,38 @@
+{
+  "protocol_id": "C2GES-NERC-ANNOTATION-STAGE2-v1.1",
+  "frozen_at": "2026-08-07",
+  "supersedes": "C2GES-NERC-ANNOTATION-PILOT-v1.0 (SHA-256 030AE44ABE53975CB3838FBC898723523C4BEC7BE11A433EDB8654AEA2DC706D); pilot outputs remain archived under runs/c2ges_pilot/ and are NOT reused",
+  "status": "FROZEN_FOR_STAGE2",
+  "governance": "Machine-adjudicated SILVER labels only; never human/expert gold. No human review gate in this stage.",
+  "reason_for_revision": "Pilot (25 items) showed 76% adjudication rate driven by (1) annotator B including background/context sentences while A selected minimal sets, and (2) inconsistent answerable thresholds (inference vs explicit statement). v1.1 adds explicit evidence-sufficiency and answerability rules.",
+  "task": {
+    "unit": "one role-conditioned question over one NERC event-analysis document",
+    "source_data": "paper_projects/2026_c2ges_engineeringletters/workspace/simulated_expert_reannotation_2026-07-24/blind_packet.jsonl (15 public NERC documents, 75 questions, dev-visible)",
+    "scope": "ALL 75 questions (full dev-visible set)",
+    "input_to_annotators": "document sentences with stable sids + question + question role; NO prior labels, NO other annotator output",
+    "annotator_output_schema": "unchanged from v1.0"
+  },
+  "evidence_sufficiency_rules_v1_1": [
+    "R1: Select ONLY sentences that directly state the fact the question asks for. A sentence is IN only if removing it makes the answer incomplete.",
+    "R2: Exclude scene-setting, background, or restating sentences even if topically related.",
+    "R3: Exception to R2: if the question explicitly asks about time/place/quantity and that detail appears only in a separate sentence, include that sentence too.",
+    "R4: If several sentences each partially state the fact (e.g. event in one, date in another), include exactly the minimal covering set.",
+    "R5: Tie-break: when uncertain whether a borderline sentence is required, EXCLUDE it.",
+    "R6 (answerability): answerable=true only if the document EXPLICITLY states the queried fact. If answering requires inference, combining weak scattered mentions, or outside knowledge, set answerable=false and evidence_role=insufficient with empty evidence set.",
+    "R7: A document section that merely says a topic is discussed elsewhere does not make the question answerable."
+  ],
+  "models": "unchanged from v1.0 (A=DeepSeek deepseek-chat direct; B=Gemini gemini-2.5-flash direct; C=gpt-5.4 via Cloubic, disagreements only)",
+  "generation_params": {"temperature": 0, "max_tokens": 1024},
+  "prompt_template": "You are annotating evidence for a question about a public NERC power-system event report.\n\n[DOCUMENT {doc_id}: {title}]\n{numbered sentences as [sid] text}\n\n[QUESTION id={qid}] ({role}) {question}\n\nEvidence rules:\n- Select ONLY sentences that directly state the asked fact; a sentence is in only if removing it makes the answer incomplete.\n- Exclude background/scene-setting/restating sentences. Exception: if the question asks time/place/quantity stated only in a separate sentence, include it.\n- If several sentences each carry part of the fact, include exactly the minimal covering set.\n- When unsure about a borderline sentence, EXCLUDE it.\n- answerable=true only if the document EXPLICITLY states the fact; inference or scattered weak mentions => answerable=false, evidence_role=insufficient, empty evidence.\n- A section merely saying a topic is discussed elsewhere is not an answer.\nEcho the question id in field qid. Return ONLY one JSON object matching this schema: {schema}",
+  "deterministic_checks": "unchanged from v1.0",
+  "adjudication_rule": "unchanged from v1.0 (C on disagreements/abstains only, anonymized annotator_1/annotator_2)",
+  "validation_gate_before_full_run": "Re-annotate 12 pilot items that required adjudication under v1.0, using v1.1 prompts. Proceed to the full 75-question run only if the adjudication rate on these 12 drops to <= 50%; otherwise report back instead of running the full set.",
+  "agreement_metrics": "unchanged from v1.0",
+  "stop_conditions": [
+    "5 consecutive auth or format failures for one model -> halt and report",
+    "served model id differs from frozen id (DeepSeek rolling alias deepseek-v4-flash excepted) -> halt and report",
+    "total stage-2 calls exceed the budget in STAGE2_AUTHORIZATION_20260807.json -> halt"
+  ],
+  "ledger_requirements": "unchanged from v1.0; stage-2 outputs go to runs/c2ges_stage2/ and must not overwrite runs/c2ges_pilot/",
+  "prohibited": "unchanged from v1.0"
+}

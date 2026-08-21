@@ -1,0 +1,160 @@
+tree:
+  - id: N01
+    type: question
+    support_level: explicit
+    source_refs: ["Abstract", "§1.1", "§1.2"]
+    title: "How to dispatch a volatile renewable-plus-thermal microgrid economically and cleanly?"
+    description: >
+      Root question: minimize total daily operating-plus-environmental cost of a PV/WT/DG/ESS
+      microgrid under renewable volatility while ensuring reliable, stable operation.
+    children:
+      - id: N02
+        type: question
+        support_level: explicit
+        source_refs: ["§1.2", "G1"]
+        title: "Is the dispatch model comprehensive enough?"
+        description: >
+          Gap G1 — prior models capture only subsets of devices/costs/objectives; build a more
+          comprehensive model with additional influencing factors.
+        children:
+          - id: N03
+            type: decision
+            support_level: explicit
+            source_refs: ["§2", "§3.1", "Contribution (1)"]
+            title: "Model PV+WT+DG+ESS with O&M+fuel+depreciation+grid+environmental costs"
+            description: >
+              Decision: include four device types and a five-component cost objective
+              (Min C_sun = C1 + C2), rather than a single-cost / single-device model.
+            evidence: ["C03"]
+            children:
+              - id: N04
+                type: decision
+                support_level: explicit
+                source_refs: ["§3.2"]
+                title: "Impose power-balance, output, emission, and ramp constraints"
+                description: >
+                  Constraint set (Eqs. 13-22): supply=demand, device limits, ESS SOC/power caps,
+                  pollutant cap, DG ramp rate.
+                evidence: ["C03"]
+              - id: N05
+                type: decision
+                support_level: explicit
+                source_refs: ["§3.3", "Figure 1"]
+                title: "Adopt merit-order scheduling strategy"
+                description: >
+                  Renewables first, storage buffer, thermal slack, grid as final balance.
+                evidence: ["C03"]
+      - id: N06
+        type: question
+        support_level: explicit
+        source_refs: ["§1.2", "§4.1", "G2"]
+        title: "Can the PSO solver be made to avoid local optima and converge faster?"
+        description: >
+          Gap G2 — traditional PSO suffers premature convergence, local optima, uneven particle
+          distribution. Seek algorithmic improvements.
+        children:
+          - id: N07
+            type: decision
+            support_level: explicit
+            source_refs: ["§4.2.1", "Eq. 25"]
+            title: "Add Henon chaotic-mapping initialization"
+            description: "Spread initial particles diversely to improve early global search."
+            evidence: ["C01"]
+          - id: N08
+            type: decision
+            support_level: explicit
+            source_refs: ["§4.2.2", "Eqs. 26-27"]
+            title: "Add adaptive nonlinear inertia weight (wmax=0.9, wmin=0.4)"
+            description: "Schedule w large->small to balance global vs local search."
+            evidence: ["C01"]
+          - id: N09
+            type: decision
+            support_level: explicit
+            source_refs: ["§4.2.3", "Eqs. 28-29", "Figure 2"]
+            title: "Add complementary dynamic learning factors (c1 down, c2 up)"
+            description: "Cognitive emphasis early, social emphasis late; crossover at Tmax/2."
+            evidence: ["C01"]
+          - id: N10
+            type: decision
+            support_level: explicit
+            source_refs: ["§4.2.4", "Eq. 30"]
+            title: "Add second-order oscillation velocity term"
+            description: >
+              Use current + previous global best to inject controllable perturbation near optimum.
+            evidence: ["C02"]
+            children:
+              - id: N11
+                type: decision
+                support_level: explicit
+                source_refs: ["§4.2.4", "Eqs. 33-34", "Figure 3", "Figure 4"]
+                title: "Gate oscillation vs progressive regime at t = Tmax/2"
+                description: >
+                  t<=Tmax/2 -> oscillation convergence (two-sided); t>Tmax/2 -> progressive
+                  convergence (one-sided damped).
+                evidence: ["C02"]
+      - id: N12
+        type: experiment
+        support_level: explicit
+        source_refs: ["§4.2.5", "Table 3", "Figure 5"]
+        title: "Benchmark-function convergence test (5 functions, dim 50)"
+        description: >
+          Test SCMPSO on Sum of Different Powers, Schwefel, Rastrigin, Rosenbrock, Levy;
+          acceptance 0.01, optimum 0.
+        evidence: ["C01", "C02"]
+        also_depends_on: ["N07", "N08", "N09", "N10"]
+      - id: N13
+        type: experiment
+        support_level: explicit
+        source_refs: ["§4.2.5", "Figure 6"]
+        title: "Comparative convergence: SCMPSO vs PSO/CPSO/QPSO"
+        description: "Overlay convergence curves under identical settings (pop 100, dim 50, 2000 iters)."
+        evidence: ["C01", "C05"]
+        also_depends_on: ["N12"]
+      - id: N14
+        type: decision
+        support_level: explicit
+        source_refs: ["§4.2.5", "Figure 6"]
+        title: "Set iteration budget to 2000 (floor 500)"
+        description: >
+          Variants approach 0 by ~500 iterations; keep budget >=500 and use 2000 for margin.
+        evidence: ["C05"]
+        also_depends_on: ["N13"]
+      - id: N15
+        type: experiment
+        support_level: explicit
+        source_refs: ["§5", "Table 5", "Figure 13", "Figure 14"]
+        title: "24-h summer dispatch case study (Jiangsu microgrid)"
+        description: >
+          Apply SCMPSO to the dispatch model; extract hourly source outputs and grid exchange;
+          classify purchase/no-interaction/sale regimes.
+        evidence: ["C03"]
+        also_depends_on: ["N03", "N05", "N11"]
+      - id: N16
+        type: experiment
+        support_level: explicit
+        source_refs: ["§5.2", "Table 6", "Table 7"]
+        title: "Cross-algorithm cost and emissions comparison"
+        description: >
+          Compare SCMPSO/CPSO/QPSO/PSO on O&M/fuel/depreciation/grid/environmental cost and
+          CO2/SO2/NOX emissions for the same case.
+        evidence: ["C04", "C06"]
+        also_depends_on: ["N15", "N13"]
+      - id: N17
+        type: dead_end
+        support_level: inferred
+        title: "Per-mechanism ablation not performed"
+        description: >
+          The four modifications (chaotic init, adaptive weight, dynamic factors, oscillation term)
+          are always applied jointly; the paper reports no leave-one-out isolating each mechanism's
+          individual contribution. Marked inferred: this is an absence noted from the paper, not a
+          recorded rejected experiment.
+        evidence: ["C01"]
+      - id: N18
+        type: dead_end
+        support_level: inferred
+        title: "Uncertainty / multi-season robustness not modeled"
+        description: >
+          Despite motivating on renewable uncertainty, only a single deterministic summer day is
+          simulated; no stochastic/robust formulation or other-season validation. Inferred from the
+          scope of §5, not an explicit rejected branch.
+        evidence: ["C03"]

@@ -1,0 +1,45 @@
+{
+  "protocol_id": "C2GES-NERC-ANNOTATION-STAGE2-v1.2",
+  "frozen_at": "2026-08-07",
+  "supersedes": "C2GES-NERC-ANNOTATION-STAGE2-v1.1 (SHA-256 41053D9BC589CCF0411407072E7B2525847F02C39E514CCE6E0C0053C73B994F)",
+  "status": "FROZEN_FOR_STAGE2",
+  "governance": "Machine-adjudicated SILVER labels only; never human/expert gold.",
+  "reason_for_revision": "v1.1 validation gate failed: 9/12 re-annotated items still required adjudicator C (0.75 > 0.50 gate). Divergence analysis showed the dominant pattern is evidence-set granularity (one annotator's sid-set is a superset adding background sentences), NOT substantive conflict over the answer. v1.2 therefore replaces the exact-set-equality disagreement trigger with a two-tier rule: deterministic resolution for granularity differences, C adjudication reserved for substantive conflicts. The v1.1 prompt (R1-R7) is unchanged.",
+  "task": "unchanged from v1.1 (all 75 questions, blind_packet.jsonl, v1.1 prompt_template with R1-R7 and qid echo)",
+  "disagreement_and_adjudication_rule_v1_2": {
+    "tier1_deterministic_resolution": [
+      "Applies only when A and B AGREE on answerable AND on evidence_role AND neither abstains.",
+      "If both answerable=false: final = answerable false, empty evidence (no C call).",
+      "If one sid-set is a subset of the other: final evidence = the SMALLER set (minimal-sufficiency principle R1/R5); record resolution='subset_minimal'.",
+      "If neither is a subset but intersection is non-empty AND Jaccard >= 0.5: final evidence = intersection; record resolution='intersection_consensus'.",
+      "Tier-1 resolutions are NOT called agreement; they are reported separately as deterministically-resolved granularity divergences."
+    ],
+    "tier2_adjudicator_C": [
+      "answerable differs, OR",
+      "evidence_role differs, OR",
+      "either annotator abstains, OR",
+      "both answerable=true and (intersection empty OR Jaccard < 0.5)",
+      "C sees document, question, anonymized labels, check results; C outputs final label or ABSTAIN."
+    ],
+    "rationale": "Exact sid-set equality conflates granularity preference with substantive disagreement. The literature-standard practice is to report set-level agreement (Jaccard/F1) alongside adjudication of substantive conflicts; granularity differences are resolved by the frozen minimal-sufficiency rule, not by spending adjudicator calls."
+  },
+  "metrics_v1_2": [
+    "raw agreement on answerable (and Cohen's kappa)",
+    "raw agreement on evidence_role",
+    "evidence-set exact-match rate and mean Jaccard (descriptive, unchanged)",
+    "tier1 deterministic resolution count/rate (subset_minimal vs intersection_consensus)",
+    "tier2 C-adjudication count/rate (the cost metric)",
+    "abstain rates, format failure rate, API failure rate"
+  ],
+  "validation_gate_v1_2": "Re-annotate the SAME 12 validation items under v1.2 rules (v1.1 labels may be reused from runs/c2ges_stage2/validation_gate/ — only the resolution/adjudication logic changes, not the annotation prompts). Also retry the 4 items left unresolved by C read-timeouts (technical retry at a different time is permitted). Proceed to the full 75-question run only if the tier2 C-adjudication rate on the 12 items is <= 50%; otherwise stop and report.",
+  "models": "unchanged from v1.0",
+  "generation_params": {"temperature": 0, "max_tokens": 1024},
+  "deterministic_checks": "unchanged from v1.0",
+  "stop_conditions": [
+    "5 consecutive auth or format failures for one model -> halt and report",
+    "served model id differs from frozen id (deepseek-v4-flash rolling alias excepted) -> halt and report",
+    "total stage-2 calls exceed the budget in STAGE2_AUTHORIZATION_20260807.json -> halt"
+  ],
+  "ledger_requirements": "unchanged from v1.1; outputs to runs/c2ges_stage2/; never overwrite pilot or validation_gate directories",
+  "prohibited": "unchanged from v1.0"
+}

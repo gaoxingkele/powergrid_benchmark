@@ -1,0 +1,130 @@
+{
+  "freeze_id": "C2GES-NERC-FORMAL-v0.3-PRETEST-20260808",
+  "created_date": "2026-08-08",
+  "status": "PRETEST_FROZEN_AWAITING_INDEPENDENT_AUDIT_AND_EXPLICIT_AUTHORIZATION",
+  "evaluation_status": "post_audit_corrective_evaluation_not_fresh_confirmatory_one_shot",
+  "test_execution_authorized": false,
+  "datasets": {
+    "builder_sha256": "817518DF71F16DA05F54E18A5505BD0639201082E5E846142EF74F64F1A1BA38",
+    "build_manifest_sha256": "27CF2AD3C9114E92D967EBF524D94504B6E9BB13F9D643B6C486363C21611F51",
+    "combined_sha256": "87F7F7545CE8116E161A88919483B4EEB0ACF7A9C8854981894947C326EDAA15",
+    "dev_sha256": "27CE41D37D8BA7B0BBA9D80072B3A3FAC742CEB4997E30DF0BE40CC5B2DF7F79",
+    "test_sha256": "A9342BD75BB5E20B61C9B06FE21B1FBA260347BFDB77B0AEBBA89A423DFCD127",
+    "included_reports": 27,
+    "development_reports": 12,
+    "test_reports": 15,
+    "candidate_sentences": 12924,
+    "candidate_truncation": "none",
+    "test_path": "D:/aicoding/powergrid_benchmark/paper_projects/applied_sciences_dual_rebuild/C2GES/original_title_rebuild/R2_v0_3/diagnostic_build_08/nerc_full_pdf_test_v0_3.jsonl"
+  },
+  "development": {
+    "registered_grid_records": 144,
+    "grid_correction": "The coordinating oral value 192 was erroneous; candidates(), run01/run02 records, and corrective history consistently establish 144. No grid point was added or removed.",
+    "run": "dev_selection_run04",
+    "decision_path": "D:/aicoding/powergrid_benchmark/paper_projects/applied_sciences_dual_rebuild/C2GES/original_title_rebuild/R2_v0_3/dev_selection_run04/DEV_SELECTION_DECISION.json",
+    "decision_sha256": "EEBD0D0A88C3448A7C312984263207AF776B9FFF09B5ADBBC61E58A3817BAFE3",
+    "ledger_sha256": "19A3D17CB2E501B12EDD966727200C473DB7C5C222AB8FC109877C51C736E14B",
+    "run_state_sha256": "335E559CCABFD3B295E930FA11B19ACFA719EBBEEDBB46F519276DB0365335F3",
+    "test_input_accessed": false,
+    "selection_rule": [
+      "maximize mean ROUGE-L F1 at K=5 on 12 development reports",
+      "tie: maximize mean ROUGE-1 F1",
+      "tie: minimize mean redundancy",
+      "tie: earliest lexicographic grid record"
+    ],
+    "selected_grid_index": 60,
+    "selected_config": {
+      "weights": {"relevance": 0.4, "role": 0.2, "graph": 0.15, "counterfactual": 0.15, "position": 0.1},
+      "redundancy_penalty": 0.5,
+      "max_distance": 12,
+      "path_min_edges": 2,
+      "path_max_edges": 4
+    },
+    "selected_dev_mean_rougeL_k5": 0.11951259817416543,
+    "selected_dev_full_minus_no_cf_rougeL_k5": -0.005665215823945863,
+    "interpretation_boundary": "The negative development contrast is retained verbatim and is not evidence of CF benefit or test performance."
+  },
+  "method": {
+    "graph_builder": "build_graph_v03: lexical proxy roles; every positive top-score tie abstains and creates no directed edge",
+    "silver_role_evidence": "not consumed",
+    "counterfactual_estimand": "For each sentence, the marginal loss in summed strength of simple stage-monotone typed paths of 2-4 edges after node deletion; path strength is geometric mean edge weight times stage coverage.",
+    "counterfactual_limits": {"max_paths": 250000, "max_expansions": 2000000, "failure_policy": "raise PathEnumerationLimitError; retain failed run"},
+    "strict_no_cf": "Set only the counterfactual coefficient from 0.15 to 0.0; retain all other coefficients and redundancy penalty exactly; do not renormalize.",
+    "conditions": ["lead", "centroid", "textrank", "semantic_centroid", "role", "graph_no_cf_strict", "c2ges_full"],
+    "budgets": [5, 10]
+  },
+  "statistics": {
+    "primary_metric": "ROUGE-L F1",
+    "unit": "report",
+    "primary_contrasts": [
+      "c2ges_full_minus_graph_no_cf_strict",
+      "c2ges_full_minus_semantic_centroid",
+      "c2ges_full_minus_textrank"
+    ],
+    "budgets": [5, 10],
+    "primary_family_size": 6,
+    "paired_bootstrap_samples": 10000,
+    "bootstrap_seed_base": 20260808,
+    "interval": "95% percentile paired bootstrap",
+    "multiplicity": "Holm step-down adjustment across all six primary ROUGE-L tests",
+    "secondary_descriptive_metrics": ["ROUGE-1 F1", "ROUGE-2 F1", "redundancy"],
+    "secondary_inference": "none"
+  },
+  "semantic_model_snapshot": {
+    "name": "sentence-transformers/all-MiniLM-L6-v2",
+    "revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+    "path": "C:/Users/10175/.cache/huggingface/hub/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+    "sha256": "62FFD0D66684928CE0B0F68FD2A411078405B80B7FAF915195ADBDD63454DDF7",
+    "file_count": 11,
+    "bytes": 91578415,
+    "network_access": "forbidden"
+  },
+  "artifacts": {
+    "config_sha256": "5E96EC591FDFD05728AF5486FAAB3E9F544540ED413387F05461A7EC8C7C95D4",
+    "stage1_independent_reaudit_sha256": "C5E8B61B2710B0C09BED0F523F95738BBF991F6815C8C94C9FDE784DBC7AD974",
+    "corrective_history_sha256": "F5BF2FB469FE5622CA98EE8565F65424F640B770C541D31201EEE593CCB4E665",
+    "tests": {"command": "python -m unittest discover -s R2_v0_3 -p test_*.py -q", "result": "22 passed, 0 failed, 0 errors"}
+  },
+  "bound_files": [
+    {"path": "paper_projects/applied_sciences_dual_rebuild/C2GES/original_title_rebuild/R2_v0_3/diagnostic_build_08/build_manifest.json", "sha256": "27CF2AD3C9114E92D967EBF524D94504B6E9BB13F9D643B6C486363C21611F51"},
+    {"path": "paper_projects/applied_sciences_dual_rebuild/C2GES/original_title_rebuild/R2_v0_3/diagnostic_build_08/nerc_full_pdf_benchmark_v0_3.jsonl", "sha256": "87F7F7545CE8116E161A88919483B4EEB0ACF7A9C8854981894947C326EDAA15"},
+    {"path": "paper_projects/applied_sciences_dual_rebuild/C2GES/original_title_rebuild/R2_v0_3/diagnostic_build_08/nerc_full_pdf_dev_v0_3.jsonl", "sha256": "27CE41D37D8BA7B0BBA9D80072B3A3FAC742CEB4997E30DF0BE40CC5B2DF7F79"},
+    {"path": "paper_projects/applied_sciences_dual_rebuild/C2GES/original_title_rebuild/R2_v0_3/dev_selection_run04/dev_search_ledger.jsonl", "sha256": "19A3D17CB2E501B12EDD966727200C473DB7C5C222AB8FC109877C51C736E14B"},
+    {"path": "paper_projects/applied_sciences_dual_rebuild/C2GES/original_title_rebuild/R2_v0_3/dev_selection_run04/run_state.json", "sha256": "335E559CCABFD3B295E930FA11B19ACFA719EBBEEDBB46F519276DB0365335F3"},
+    {"path": "paper_projects/applied_sciences_dual_rebuild/C2GES/original_title_rebuild/R2_v0_3/INDEPENDENT_STAGE1_REAUDIT_08.md", "sha256": "C5E8B61B2710B0C09BED0F523F95738BBF991F6815C8C94C9FDE784DBC7AD974"},
+    {"path": "paper_projects/applied_sciences_dual_rebuild/C2GES/original_title_rebuild/R2_v0_3/CORRECTIVE_HISTORY.md", "sha256": "F5BF2FB469FE5622CA98EE8565F65424F640B770C541D31201EEE593CCB4E665"}
+  ],
+  "code_files": [
+    {"path": "paper_projects/applied_sciences_dual_rebuild/C2GES/original_title_rebuild/R2_v0_3/run_test_v0_3.py", "sha256": "32CBB6B8FFF02EAFD616F295578815CA9156FF1051DBBC24940EABC7B0DCA6D5"},
+    {"path": "paper_projects/applied_sciences_dual_rebuild/C2GES/original_title_rebuild/R2_v0_3/build_full_pdf_dataset.py", "sha256": "817518DF71F16DA05F54E18A5505BD0639201082E5E846142EF74F64F1A1BA38"},
+    {"path": "paper_projects/applied_sciences_dual_rebuild/C2GES/original_title_rebuild/R2_v0_3/v03_methods.py", "sha256": "6A7884C540690D052D6359481C511AA1170FF1C819627D67DA612897F0BA6216"},
+    {"path": "paper_projects/applied_sciences_dual_rebuild/C2GES/original_title_rebuild/R2_v0_3/counterfactual_paths.py", "sha256": "73DD8BB7D6B362558E7DD9EA40F3A2FF8D4AB6CC5EDA493DD8A21701AD504E3C"},
+    {"path": "paper_projects/applied_sciences_dual_rebuild/C2GES/original_title_rebuild/R2_v0_3/select_dev_config.py", "sha256": "5AF4930A76C10DCB3C6FEB4860343758EBE191CABBD200EBCE074872D3BEF700"},
+    {"path": "paper_projects/applied_sciences_dual_rebuild/C2GES/original_title_rebuild/run_formal_experiment.py", "sha256": "B6E8A373E766F3430EAA87DC498F2813523C451AC7F7ED672C2409C4ACB59C8D"},
+    {"path": "paper_projects/applied_sciences_dual_rebuild/C2GES/original_title_rebuild/c2ges_offline.py", "sha256": "77D89DBEB187A6EA89C5786584D5C1F55BCED5B88A949743F95546D39F5FC6DE"}
+  ],
+  "test_files": [
+    {"path": "test_full_pdf_builder.py", "sha256": "1A03CCDB1C6308EB7A9E1CF26F80C2DFA6882E534A445103CF9B023B99BB8FEE"},
+    {"path": "test_v03_methods.py", "sha256": "DBE3FBDCB6580F39EC76C54F950D45AD2398215857556C0CC6F56917D9964DE5"},
+    {"path": "test_counterfactual_paths.py", "sha256": "D85FFD2C951DCFDB204BB8CC6349D9262819E7554BFBB2981D5927216A4AC9F5"},
+    {"path": "test_formal_runner_v0_3.py", "sha256": "9B0AA3A928B1B35B405F19F3FBD77E5B5004EF079E902AECE9ACD7E434A651A8"}
+  ],
+  "runtime": {
+    "python": "3.12.10",
+    "packages": {"networkx": "3.6.1", "numpy": "2.4.6", "rouge-score": "0.1.2", "sentence-transformers": "5.6.0", "torch": "2.13.0+cpu"},
+    "offline_only": true
+  },
+  "one_shot_policy": {
+    "permitted_input": "physically test-only build08 JSONL with 15 rows",
+    "permitted_runs": 1,
+    "rerun_after_success": "forbidden",
+    "failure_policy": "retain the entire failed directory and stop for new authorization; never resume, overwrite, delete, or silently retry",
+    "precondition": "fresh independent pretest audit PASS plus explicit coordinating authorization"
+  },
+  "incident_exclusions": [
+    "All v0.1/v0.2 results are historical post-audit corrective context and are not v0.3 results.",
+    "dev_selection_run01 and dev_selection_run02 are excluded historical development incidents tied to superseded build06.",
+    "dev_selection_run03 is permanently excluded as orphan_process_detected_and_terminated_by_root; it reached a final retained state of 120/144 with test_input_accessed=false and emitted no ledger or decision.",
+    "Only dev_selection_run04 decision and ledger are bound to this freeze; directory separation and distinct creation times are required in pretest audit."
+  ]
+}

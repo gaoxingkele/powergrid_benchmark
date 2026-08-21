@@ -1,0 +1,104 @@
+# Exploration Tree — Classification-Based Global Optimization for Integrated DG, CB, and EVCS Planning
+# Research DAG: nested tree with cross-edges forming a DAG.
+# Node types: question | experiment | dead_end | decision | pivot
+
+tree:
+  - id: N01
+    type: question
+    support_level: explicit
+    source_refs: ["Section 1.5"]
+    title: "How to achieve coordinated optimal placement and sizing of DGs, CBs, and EVCSs in radial distribution networks under high EV penetration?"
+    description: "The combined optimization challenge of identifying optimal placement and sizing of EVCS, DGs, and CBs to reduce power losses, improve voltage stability, uphold operating restrictions, and reduce CO2 emissions under 30-50% EV penetration."
+    children:
+
+      - id: N02
+        type: experiment
+        support_level: explicit
+        source_refs: ["Table 2", "Figure 7", "Section 5.1.1"]
+        title: "33-bus DG+EVCS integration analysis"
+        result: "Active power losses reduced from 210.99 kW to 87.33 kW (58.6% reduction) at 30% HF, but substation PF dropped sharply from 0.849 to 0.609, revealing reactive power deficit from EV inductive loading. Minimum voltage improved from 0.9038 to 0.969 p.u."
+        evidence: [C02, C04]
+        children:
+
+          - id: N07
+            type: decision
+            support_level: explicit
+            source_refs: ["Section 5.1.2", "Table 3"]
+            title: "Addition of capacitor banks for reactive compensation"
+            choice: "Include capacitor banks (CBs) in the planning framework to provide reactive power support"
+            alternatives:
+              - "Operate DGs at non-unity power factor to supply reactive power"
+              - "Accept the low substation PF and focus only on active power losses"
+              - "Use STATCOM or other flexible FACTS devices for reactive compensation"
+            evidence: "Tables 3 and 5 show that adding CBs restores PF to above 0.90 (33-bus) and above 0.81 (69-bus), reducing losses further by 66-89% compared to DG+EVCS only"
+            children:
+
+              - id: N05
+                type: experiment
+                support_level: explicit
+                source_refs: ["Table 3", "Table 6", "Figure 8", "Section 5.1.2"]
+                title: "33-bus combined DG, CB, and EVCS integration"
+                result: "Active power loss reduced to 28.67 kW (86.4% reduction from base) at 30% HF. VDI reduced to 1.49e-3 (vs 16.98e-3 without CBs). Min voltage improved to 0.981 p.u. PF recovered to 0.904. Payback period: 11.94 years."
+                evidence: [C02, C04]
+
+              - id: N06
+                type: experiment
+                support_level: explicit
+                source_refs: ["Table 5", "Table 7", "Figure 11", "Section 5.2.2"]
+                title: "69-bus combined DG, CB, and EVCS integration"
+                result: "Active power loss reduced to 7.65 kW (96.6% reduction from base) at 30% HF. VDI maintained below 0.1e-3. Min voltage 0.994 p.u. PF 0.812. Payback period: 11.6 years. Near-flat voltage profile across all buses."
+                evidence: [C02, C04]
+
+      - id: N03
+        type: experiment
+        support_level: explicit
+        source_refs: ["Table 4", "Figure 10", "Section 5.2.1"]
+        title: "69-bus DG+EVCS integration analysis"
+        result: "Active power losses reduced from 225.00 kW to 72.13 kW (68% reduction) at 30% HF. PF dropped severely from 0.8214 to 0.502. Minimum voltage improved from 0.9092 to 0.979 p.u. Consistent pattern with 33-bus: DG-only cannot compensate reactive demand."
+        evidence: [C02, C04]
+
+      - id: N04
+        type: experiment
+        support_level: explicit
+        source_refs: ["Tables 8-11", "Section 5.4"]
+        title: "Comparative benchmark against PSO and GWO"
+        result: "CGO achieved lower PLoss (28.67 kW vs PSO 35.7 kW, GWO 32.10 kW) for 33-bus and lower PLoss (7.65 kW vs PSO 10.59 kW, GWO 8.463 kW) for 69-bus at 30% HF. CGO required only 18/22 iterations vs 100 for both competitors, with 25/28.5 s run time vs 32.5-39.8 s."
+        evidence: [C01, C03]
+
+      - id: N08
+        type: experiment
+        support_level: explicit
+        source_refs: ["Figures 9, 12", "Sections 5.1.3, 5.2.3"]
+        title: "Thermal capacity limit validation"
+        result: "All branches in both 33-bus and 69-bus systems carry power flow below their thermal capacity limits at all hosting factors, confirming that the CGO solution respects branch loading constraints under high EV penetration."
+        evidence: [C04]
+
+      - id: N09
+        type: dead_end
+        support_level: inferred
+        source_refs: ["Section 2"]
+        title: "Equal EV load splitting between stations"
+        hypothesis: "Starting with equal EV load split between two stations should give a good initial solution"
+        failure_mode: "Equal split is suboptimal; the optimization must redistribute loads at different levels between the two stations to achieve minimum Ft"
+        lesson: "The initial equal split is only a starting point; the final optimal solution requires unequal distribution of EV load between stations based on branch capacity and demand profiles"
+
+      - id: N10
+        type: dead_end
+        support_level: inferred
+        source_refs: ["Section 1.3, Table 1"]
+        title: "Metaheuristic methods for integrated planning"
+        hypothesis: "Existing metaheuristics (PSO, GA, Firefly, GWO) can effectively solve the three-component optimization problem"
+        failure_mode: "Existing methods suffer from: (1) excessive computational load and parameter sensitivity; (2) black-box interpretability; (3) variation in network topology performance; (4) limited application of engineering concepts; (5) no single deterministic framework for all three components under different hosting factors; (6) thermal capacity limits not synchronized"
+        lesson: "A deterministic, classification-driven approach is needed to overcome the limitations of stochastic metaheuristics"
+
+  - id: N11
+    type: decision
+    support_level: explicit
+    source_refs: ["Section 2.2"]
+    title: "Weight selection for multi-objective function"
+    choice: "W1 = 0.4, W2 = 0.25, W3 = 0.1, W4 = 0.25 for loss, VDI, economic savings, and CO2 respectively"
+    alternatives:
+      - "Equal weights for all objectives"
+      - "Higher weight on economic savings (W3 > 0.1)"
+      - "Higher weight on CO2 reduction (W4 > 0.25)"
+    evidence: "Preliminary simulations tested several weight combinations; selected values provided best overall trade-off among the objectives. Higher W1 emphasizes loss minimization as primary goal."

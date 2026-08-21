@@ -1,0 +1,133 @@
+{
+  "candidate_order": [
+    "qwen:F00_Full_NoShape",
+    "qwen:F01_Full_WithShape",
+    "qwen:F10_Compact_NoShape",
+    "qwen:F11_Compact_WithShape",
+    "granite:F00_Full_NoShape",
+    "granite:F01_Full_WithShape",
+    "granite:F10_Compact_NoShape",
+    "granite:F11_Compact_WithShape"
+  ],
+  "candidate_slots_per_question": 8,
+  "equal_operation_budget": {
+    "candidate_slots_per_method": 8,
+    "candidate_state_attempts_per_question": 32,
+    "fixed_order_policy": "collect all evidence, then ignore ranking and choose frozen slot 0",
+    "full_policy": "collect all evidence and require complete 3/3 metamorphic invariance",
+    "states_executed_per_candidate_before_any_method_selects": 4,
+    "validation_policy": "collect all evidence, pass an empty counterfactual mapping to adjudicator, and rank validation only"
+  },
+  "evaluation_after_seal": {
+    "externally_fixed_sha256": "a08f302afb47bc2e7c352d20ca69efa0068b74d9ad296c988bc7b27160593a82",
+    "freeze_behavior": "record path and externally fixed hash without opening or parsing the gold-bearing file",
+    "gold_path": "paper_projects/2026_ma_sqlgrid_cmc/source/data/griddb_maintenance_v2_v0_1/questions.jsonl",
+    "selection_or_rule_tuning_from_gold": false
+  },
+  "executor": {
+    "extensions_disabled": true,
+    "immutable": true,
+    "max_opcodes": 2000000,
+    "max_rows": 10000,
+    "metadata_authorization": false,
+    "progress_step": 1000,
+    "query_only": true,
+    "timeout_seconds": 2.0,
+    "uri_mode": "ro"
+  },
+  "interpretation": "Historical frozen candidate-pool offline prospective selection with equal evidence-collection operations; no new model generation, no five-role end-to-end gain estimate, and no autonomous-agent claim.",
+  "metamorphic_invariants": {
+    "M1_irrelevant_relation_rows": "Original-schema queries retain denotation after an irrelevant relation with probe rows is added.",
+    "M2_harmless_indexes_rebuild": "Indexes and physical rebuild preserve ordered results and unordered result multisets.",
+    "M3_nullable_schema_extension": "Explicit-column queries retain denotation after nullable probe columns are added; wildcard projection is allowed to fail invariance."
+  },
+  "prespecified_sensitivity": {
+    "complete_coverage_required_for_all_thresholds": true,
+    "minimum_invariant_passes": [
+      1,
+      2,
+      3
+    ],
+    "tie_rules": [
+      "original_candidate_order",
+      "reverse_candidate_order"
+    ],
+    "weight_policies": {
+      "default": {
+        "executable": 40,
+        "order": 5,
+        "safe": 40,
+        "shape": 10,
+        "value_hit_cap": 5,
+        "value_hit_each": 1
+      },
+      "intent_emphasis": {
+        "executable": 40,
+        "order": 10,
+        "safe": 40,
+        "shape": 15,
+        "value_hit_cap": 5,
+        "value_hit_each": 1
+      },
+      "validation_equal": {
+        "executable": 40,
+        "order": 5,
+        "safe": 40,
+        "shape": 5,
+        "value_hit_cap": 0,
+        "value_hit_each": 0
+      }
+    }
+  },
+  "primary_full_condition": {
+    "abstain_if_no_eligible_candidate": true,
+    "minimum_invariant_passes": 3,
+    "require_complete_state_coverage": true
+  },
+  "question_count": 180,
+  "reference_free_states": [
+    "M1_irrelevant_relation_rows",
+    "M2_harmless_indexes_rebuild",
+    "M3_nullable_schema_extension"
+  ],
+  "reference_state": "T0_snapshot",
+  "retention": {
+    "all_180_questions": true,
+    "all_4_state_attempts_per_slot": true,
+    "all_8_source_slots": true,
+    "all_failures": true,
+    "no_overwrite": true,
+    "no_retry": true
+  },
+  "runtime": {
+    "network_access": false,
+    "no_llm_calls": true,
+    "python_version_recorded_at_execution": true,
+    "reproductions": 2,
+    "sqlite_reported_at_execution": true
+  },
+  "schema_version": "ma-sqlgrid-offline-coordination-selection-v3",
+  "selection_methods": [
+    "fixed_order_equal_budget",
+    "validation_rank_equal_budget_no_cf",
+    "full_coordination_complete_metamorphic"
+  ],
+  "selector_inputs": {
+    "granite_predictions": "paper_projects/applied_sciences_dual_rebuild/MA_SQLGrid/granite_formal/granite33_8b_q4km_seed20260805_clean1/predictions.jsonl",
+    "qwen_predictions": "paper_projects/applied_sciences_dual_rebuild/MA_SQLGrid/formal_run/qwen25coder7b_q4km_seed20260805_clean_rerun1/predictions.jsonl",
+    "qwen_prompts": "paper_projects/applied_sciences_dual_rebuild/MA_SQLGrid/formal_run/qwen25coder7b_q4km_seed20260805_clean_rerun1/prompts.jsonl",
+    "reference_database": "paper_projects/applied_sciences_dual_rebuild/MA_SQLGrid/semantic_reliability_experiment/states_v2b/T0_snapshot.sqlite",
+    "schema_sql": "paper_projects/2026_ma_sqlgrid_cmc/source/data/griddb_maintenance_v2_v0_1/schema.sql",
+    "witness_directory": "paper_projects/applied_sciences_dual_rebuild/MA_SQLGrid/original_title_rebuild/metamorphic_witnesses_v3",
+    "witness_manifest": "paper_projects/applied_sciences_dual_rebuild/MA_SQLGrid/original_title_rebuild/metamorphic_witnesses_v3/WITNESS_MANIFEST.json"
+  },
+  "study_label": "release-v3 prospective-from-freeze offline coordination selection study",
+  "validation_weights": {
+    "executable": 40,
+    "order": 5,
+    "safe": 40,
+    "shape": 10,
+    "value_hit_cap": 5,
+    "value_hit_each": 1
+  }
+}

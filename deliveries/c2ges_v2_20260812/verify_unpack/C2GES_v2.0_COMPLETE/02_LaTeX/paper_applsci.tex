@@ -1,0 +1,445 @@
+% C2GES original-title reconstruction, P60 revision after a 20-paper Applied Sciences benchmark.
+% Scientific evidence remains the independently audited v0.3.1 post-audit corrective run only.
+\documentclass[applsci,article,submit,moreauthors]{Definitions/mdpi}
+\firstpage{1}
+\makeatletter\setcounter{page}{\@firstpage}\makeatother
+\pubvolume{1}\issuenum{1}\articlenumber{0}\pubyear{2026}\copyrightyear{2026}
+\datereceived{}\daterevised{}\dateaccepted{}\datepublished{}
+\newcommand{\cges}{C\textsuperscript{2}GES}
+\setlength{\headheight}{20pt}
+\AtBeginDocument{\pdfstringdefDisableCommands{\def\cges{C2GES}}}
+
+\Title{C\texorpdfstring{\textsuperscript{2}}{2}GES: Structure-Aware Extractive Summarization of Long Power-System Technical Reports with Typed-Path Graphs}
+\Author{Liu Bijing $^{1,2}$ and Yang Yong $^{1,2,}$*}
+\AuthorNames{Liu Bijing and Yang Yong}
+\address{$^{1}$ \quad NARI Group Corporation (State Grid Electric Power Research Institute), Nanjing 211106, Jiangsu Province, China;\\
+$^{2}$ \quad Beijing Kedong Electric Power Control System Co., Ltd., Beijing 100080, China}
+\corres{Correspondence: Yang Yong; liubijing@outlook.com}
+
+\abstract{Long power-system reports often distribute related evidence across distant sections, which makes a relevance-only extract difficult to use as a coherent engineering reading aid. This study presents \cges{}, a deterministic extractive framework that combines centroid relevance, lexical text roles, a typed sentence graph, node-deletion path participation, and source-page traceability. The method was evaluated on a selected public NERC technical-report corpus comprising 12 development reports and 15 test reports. Seven conditions were compared at five- and ten-sentence budgets. Full \cges{} obtained the highest observed ROUGE-L among the evaluated non-ablation systems at both budgets, reaching 0.1060 and 0.1276, respectively. Its extracts were 54--63\% longer than those of Semantic-MMR and TextRank, so these differences are not length-controlled performance advantages. The strict no-path-deletion variant exceeded Full \cges{} by approximately 0.0033 ROUGE-L at both budgets, with report-composition intervals crossing zero. The path-deletion term was nevertheless active: it changed 9774 of 19,008 sentence scores and 28 of 30 report--budget selections. Development-only calibration selected zero path-deletion weight in all 12 leave-one-report-out folds. \cges{} therefore provides a structure-aware, source-linked framework for technical-report navigation, while the current path-deletion integration requires redesign and evaluation under matched output lengths and expert-reviewed data.}
+\keyword{extractive summarization; typed textual proxy graph; structural perturbation; power-grid reports; NERC; reproducible evaluation}
+\featuredapplication{\cges{} is designed to support source-linked navigation of long power-system technical reports by organizing selected passages around condition, event, impact, and mitigation roles. It is intended as analyst support: extracted passages remain linked to their original pages, and operational use requires validation on maintenance records and expert review.}
+
+\begin{document}
+
+\section{Introduction}
+
+Power-system reliability and event-analysis reports often extend across hundreds of pages. Evidence about an initiating condition, a trigger, system propagation, consequences, and corrective action may appear in different sections and coexist with tables, standards language, recommendations, and appendices. Engineers reviewing such material need more than a list of individually prominent sentences. They need a compact route through structurally complementary passages and a reliable way to return to the source.
+
+Extractive summarization is attractive in this setting because it preserves the wording and location of selected passages. Position, centroid relevance, graph centrality, and semantic diversity offer useful ranking signals \cite{zhong2020extractive,bi2021aredsum,liu2021unsupervised,mihalcea2004textrank,reimers2019sentencebert}. These signals, however, do not necessarily distinguish the roles that passages play in an engineering account. A highly central sentence may repeat background information, while a less central sentence may contain the only mitigation or consequence needed to interpret an event.
+
+Graph-based summarizers address relationships among sentences through learned graphs, hypergraphs, or structural filtering \cite{siragusa2022sentencegraph,onan2024mches,hark2025mis}. Power-domain language studies likewise use entity--relation extraction and knowledge graphs to organize fault, alarm, and inspection evidence \cite{liu2022powerfault,ma2025alarm,zgg2026bridge}. \cges{} connects these lines of work through an engineering-oriented formulation: sentences receive transparent textual roles, compatible roles form typed paths, and path participation is combined with relevance, graph salience, position, and redundancy control. The resulting extract remains linked to the original report pages.
+
+The study uses complete public NERC reliability, disturbance, event-analysis, recommendation, and assessment reports \cite{nercEventAnalysis,nerc2015qualityreport}. These reports contain event narratives and corrective lessons but are not utility work orders, inspection records, or field-maintenance narratives. They are therefore treated as a maintenance-oriented technical-report proxy. Twelve reports support development and 15 reports form the retained test set. All candidates are drawn from report pages outside the official Executive Summary, which is used only as the reference for automatic evaluation.
+
+Three questions organize the evaluation. \textit{RQ1} asks how Full \cges{} compares with representative extractive baselines on the selected NERC corpus at fixed sentence budgets and how output length affects that comparison. \textit{RQ2} asks whether the typed path-deletion term improves ROUGE-L or redundancy relative to the otherwise fixed strict no-path-deletion variant. \textit{Exploratory RQ3} asks how consistently the term changes sentence scores and selected sequences across reports and budgets, and whether development-only coefficient calibration supports a nonzero path-deletion weight.
+
+This work makes three contributions. First, it presents a deterministic, role-conditioned typed-path framework for selecting structurally complementary and source-linked evidence from long power-system reports. Second, it evaluates seven conditions at two sentence budgets using complete-PDF candidates, report-level pairing, and explicit output-length diagnostics. Third, it separates system-level performance from component behavior: Full \cges{} produced the highest observed ROUGE-L among the evaluated non-ablation systems, whereas the strict no-path-deletion variant was slightly higher and development calibration did not support a nonzero path weight. This negative component result provides a concrete mechanism diagnosis rather than being used to qualify away the overall framework. The empirical conclusions remain limited to the selected technical-report proxy and do not establish performance on operational maintenance records.
+
+\section{Related Work}
+
+\subsection{Extractive Technical-Document Summarization}
+
+Extractive methods rank source sentences using position, document-centroid similarity, graph centrality, learned salience, or redundancy-aware relevance \cite{zhong2020extractive,bi2021aredsum,liu2021unsupervised}. Lead and centroid methods remain useful controls, while TextRank provides a widely used graph-ranking reference \cite{mihalcea2004textrank}. Dense sentence representations extend lexical matching and support semantic relevance--diversity selection \cite{reimers2019sentencebert}. Holding candidates, references, preprocessing, and sentence budgets constant allows these ranking principles to be compared within one report corpus, although representation and tuning opportunities still differ.
+
+Long technical documents add layout and discourse problems that are less prominent in short news articles. Bug-report summarization, for example, must distinguish problem statements, observed behavior, diagnostic discussion, and resolution-oriented passages \cite{koh2022bugreport}. Multi-document methods must likewise balance common content against source-specific evidence \cite{zhang2024tomds}. NERC reports combine long narrative sections with tables, standards language, recommendations, and appendices. This motivates a selector that considers both sentence relevance and the role of a passage in the report's engineering account.
+
+\subsection{Graphs, Semantic Ranking, and Causal Language}
+
+Graph summarizers model relations among sentences, entities, topics, or discourse units \cite{wang2020heterogeneous,cui2020enhancing,jing2021multiplex}. Learned sentence graphs, contextual hypergraphs, independent-set filtering, and heterogeneous long-document graphs all extend isolated relevance scoring \cite{siragusa2022sentencegraph,onan2024mches,hark2025mis,bugueno2025graphlss}. \cges{} takes a complementary approach. It uses fixed lexical roles and deterministic typed-path enumeration so that the contribution of each score channel and selected sentence can be inspected.
+
+The graph is rebuilt for each report and does not store a persistent asset ontology. Its node-deletion term measures how much qualified textual-path utility is lost when one sentence node is removed. This is a structural sensitivity feature, not an alternative physical event. Causal NLP distinguishes language association from intervention and counterfactual identification \cite{feder2022causal,du2022ecare}; accordingly, the present method is described as causal-chain-inspired only in the sense of its condition--event--impact--mitigation role progression. The remainder of the paper uses the more precise term \emph{path-deletion term}.
+
+\subsection{Power-Grid Text Analytics}
+
+Grid language technologies cover infrastructure analysis, digital twins, supervised entity--relation extraction, and persistent knowledge graphs \cite{xie2022massively,hamann2024foundation,madabhushi2023survey,srinivasan2023artificial,ranawaka2024leveraging,meng2023gridfield}. Power-fault, line-loss, and alarm-tracing graphs organize entities or events \cite{liu2022powerfault,li2024lineloss,ma2025alarm}. Maintenance-oriented retrieval and knowledge-graph studies use equipment or inspection records and sometimes include annotation or practitioner evaluation \cite{cao2024coalmaintenance,zgg2026bridge,dimaggio2025predictivemaintenance}. Relation-extraction methods similarly predict supervised entity--relation labels \cite{li2025moere,she2025clear}.
+
+\cges{} addresses a different level of analysis: it ranks passages from a complete report while preserving source locations and encouraging complementary textual roles. Table~\ref{tab:related-comparison} positions this formulation against adjacent Applied Sciences studies. The methodological contribution is the integration of deterministic role evidence, typed-path participation, source-linked extraction, and a strict component ablation. The study does not depend on an absolute priority claim.
+
+\begin{table}[H]
+\caption{Positioning against selected Applied Sciences studies with related structural or power-domain objectives.}
+\label{tab:related-comparison}\centering\scriptsize
+\begin{tabularx}{\textwidth}{p{2.5cm}p{2.4cm}p{2.5cm}p{2.5cm}X}
+\toprule
+Study family & Primary object & Structural mechanism & Evaluation emphasis & Difference from this study\\
+\midrule
+Sentence Graph Attention / MCHES \cite{siragusa2022sentencegraph,onan2024mches} & General-domain documents & Learned sentence graph or contextual hypergraph & Summary metrics on benchmark corpora & Learned semantic representations; no power-report proxy or registered node-deletion ablation\\
+Graph MIS + LLM \cite{hark2025mis} & DUC and CNN/DailyMail documents & Independent-set filtering and graph metrics & ROUGE and computational efficiency & Different graph objective, corpora, and generation components\\
+Bug-report summarization \cite{koh2022bugreport} & Software issue reports & Learned sentence significance & Technical-artifact summary quality & Similar long technical discourse, but different roles, references, and domain\\
+Power fault/alarm graphs \cite{liu2022powerfault,ma2025alarm} & Power-domain entities and events & Ontology/KG extraction and graph tracing & Entity, relation, or tracing performance & Structured knowledge construction rather than report-level extractive summarization\\
+Maintenance KG and retrieval \cite{cao2024coalmaintenance,zgg2026bridge} & Equipment or inspection records & LLM retrieval or ontology-constrained extraction & Retrieval, annotation, manual audit, or practitioner utility & Title-concordant data and human assessment; no comparable extractive ablation\\
+\cges{} & Selected NERC technical reports & Deterministic role graph and typed-path deletion & Executive-Summary overlap, paired contrasts, and length diagnostics & Report-level extractive selection with source-linked outputs and a strict component ablation\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Materials and Methods}
+
+\subsection{Task Formulation and System Overview}
+
+Let report $D=\{s_1,\ldots,s_n\}$ contain non-summary candidate sentences. For budget $K\in\{5,10\}$, method $m$ returns $\hat{Y}_{m,K}\subseteq D$, with $|\hat{Y}_{m,K}|=\min(K,n)$. The selected sentences are restored to source order. The official Executive Summary is the reference only and is never candidate input.
+
+ROUGE-1, ROUGE-2, and ROUGE-L F1 quantify lexical overlap between the extract and that Executive Summary \cite{lin2004rouge}. ROUGE-L is the predefined primary endpoint; redundancy is a descriptive secondary outcome. These measures characterize reference overlap and lexical repetition, respectively, rather than expert-assessed completeness or operational usefulness.
+
+Figure~\ref{fig:algorithm} summarizes the deterministic pipeline. Complete reports first pass candidate and reference-separation gates. Each retained candidate receives five lexical role scores and contributes, when a unique role is assigned, to a typed sentence graph. Relevance, role, graph, path-deletion, and position channels form a base score. The selector reserves available evidence from three role groups before filling the remaining budget with a redundancy-aware greedy rule. Selected passages are restored to source order and retain identifiers that resolve to the original pages.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/fig01_algorithm_dual_panel.pdf}
+\caption{Deterministic \cges{} pipeline and path-deletion mechanism. \textbf{(a)} Complete reports pass candidate and reference-separation gates; retained passages receive lexical roles and form a typed textual graph. The five score channels feed an ordered role-group reservation followed by redundancy-aware greedy filling. The strict no-path-deletion variant sets $C$ to zero without renormalizing the remaining coefficients. \textbf{(b)} For candidate node $i$, path-deletion loss removes $i$, recomputes qualified-path utility, and takes $C_i=U(G)-U(G\setminus i)$.}
+\label{fig:algorithm}
+\end{figure}
+
+The unit of analysis is the report. Sentences within a report share topic, vocabulary, layout, and reference-summary content and are not treated as independent observations. Candidate-level quantities drive selection, whereas paired differences and composition intervals use the 15 report-level observations.
+
+\subsection{Corpus Construction and Reference Separation}
+
+The corpus builder inspected 40 complete public PDFs covering 3200 declared pages. It retained 27 reports and excluded 13 before outcome computation; 12 retained reports were assigned to development and 15 to test. Figure~\ref{fig:data-flow} summarizes this construction, and Supplementary Table~S1 provides the non-verbatim sampling frame and exclusion reasons.
+
+Inclusion required a complete readable PDF, a detectable summary reference, a non-empty post-summary candidate region, and passage of the registered extraction-quality gates. Exclusion was decided before outcome computation and remained visible in the inventory. This procedure reduces discretionary removal after seeing ROUGE values, but it also changes the estimand: the results concern reports that satisfy the builder's document and reference requirements, not every NERC publication. A report without a conventional Executive Summary may be operationally important yet unavailable to the present automatic evaluation.
+
+Development and test assignment was performed at report level so that sentences from one source could not cross partitions. Reference-summary text was used only for development scoring or final evaluation, never as a candidate. The builder preserved report ID, page interval, source order, and candidate ID so that every downstream score could be joined directly to its extraction record.
+
+\begin{figure}[H]
+\includegraphics[width=\textwidth]{figures/fig02_dataset_flow.pdf}
+\caption{Corpus construction and partitioning. Boundary and extraction-quality gates retained 27 of 40 complete PDFs. Twelve reports supported configuration selection, and 15 formed the retained test set.}
+\label{fig:data-flow}
+\end{figure}
+
+Candidates begin after a conservatively detected Executive Summary boundary, and no fixed sentence cap is applied. The builder produced 12,924 candidates, with 51--1898 per report. Rebuilding the corpus found no reference/body page overlap, normalized exact candidate/reference match, or normalized common substring of at least 50 characters. These checks prevent direct reference leakage caused by page or extraction errors; legitimate paraphrase and facts repeated in the report body remain part of the task.
+
+\subsection{Sentence Roles and Typed Textual Proxy Graph}
+
+Each candidate receives lexical evidence for root cause, trigger event, propagation or response, impact, and mitigation. Positive top-score ties abstain rather than using fixed role order; 111 development ties all received no dominant role and no incident directed edge. No silver role label is supplied to the v0.3 selector.
+
+For each role, the implementation counts registered cue classes and divides all non-negative scores for that role by the largest score in the report. The role channel $R_i$ is the maximum of these five unit-scaled values. A dominant role is assigned only when one positive role score is uniquely maximal. An all-zero vector or equal positive maximum yields abstention. An abstaining sentence remains eligible for selection through the non-role channels but contributes no typed path edge.
+
+Table~\ref{tab:taxonomy} gives the executable taxonomy. The cues are substring-based lexical indicators, normalized within a report. A unique positive maximum assigns a dominant role; an all-zero vector or equal positive maximum yields abstention. The system does not detect grammatical scope, factual status, or document-level coreference.
+
+\begin{table}[H]
+\caption{Executable role and transition taxonomy. These are lexical text proxies, not expert labels or physical relations.}
+\label{tab:taxonomy}\centering\small
+\begin{tabularx}{\textwidth}{p{2.2cm}XX}
+\toprule
+Role & Representative registered cue classes & Permitted outgoing transitions\\
+\midrule
+Root cause & cause, due-to, failure, and protection-setting terms & trigger; propagation or response; mitigation\\
+Trigger event & fault, outage, initiation, trip, and fire terms & propagation or response; impact\\
+Propagation or response & trip, voltage, frequency, islanding, load-shed, reserve, and flow terms & impact\\
+Impact & quantities with grid units, customer, load, loss, and unavailability terms & mitigation\\
+Mitigation & recommendation, corrective, preventive, and standard terms & none\\
+Abstention & no positive cue, or more than one equal positive maximum & none\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+A directed edge is allowed only for registered stage-monotone role transitions whose sentence positions differ by at most 12. The implementation maps root cause, trigger event, propagation or response, impact, and mitigation to stages 0, 1, 2, 3, and 4, respectively. Let $d_{ij}=|\operatorname{pos}(i)-\operatorname{pos}(j)|$, let $J_{ij}$ be token-set Jaccard overlap, and let $r_i,r_j\in[0,1]$ be the unit-scaled dominant-role scores. The edge weight is
+\[
+w_{ij}=\operatorname{round}_{12}\!\left[0.45\exp(-d_{ij}/5)+0.30J_{ij}+0.25\min(r_i,r_j)\right].
+\]
+Thus $w_{ij}\in[0,1]$. Min--max scaled weighted degree within the report forms graph salience $G_i$.
+
+The edge gate has two semantic/positional parts. The source and target roles must appear in the stage-monotone transition registry in Table~\ref{tab:taxonomy}, and their sentence indices must lie within the 12-position horizon. The implementation uses absolute positional distance and therefore does \emph{not} require the source-role sentence to occur earlier in document order; edge direction comes from the role transition, not chronology. The weight rewards proximity, lexical continuity, and confident role assignments. A high weight therefore means ``nearby, lexically connected, and compatible with the registered role progression''; it does not mean that a domain expert verified the relation or its temporal order.
+
+These choices make the graph sparse and document specific. Sparse construction limits path enumeration and improves inspectability, while document-specific normalization avoids comparing raw node degrees across reports of very different size. The design also creates known blind spots. A causal statement whose evidence and consequence are separated by more than 12 candidates cannot form an edge; a relation expressed through coreference may have low token overlap; a role-compatible edge may point against document chronology; and a valid sentence with two equally strong role cues abstains. These are algorithmic consequences rather than post hoc explanations of individual outcomes.
+
+\subsection{Typed Path-Deletion Structural Perturbation}
+
+Let $\mathcal{P}(G)$ be the set of simple, stage-monotone paths with two to four edges beginning at a root-cause or trigger node and ending at an impact or mitigation node. For path $p$,
+\begin{equation}
+\operatorname{strength}(p)=\left(\prod_{e\in p}w_e\right)^{1/|p|}\frac{\max\operatorname{stage}(p)-\min\operatorname{stage}(p)}{4}.
+\end{equation}
+The graph utility and raw deletion score are
+\begin{equation}
+U(G)=\sum_{p\in\mathcal{P}(G)}\operatorname{strength}(p),\qquad
+C_i=U(G)-U(G_{-i})=\sum_{p\ni i}\operatorname{strength}(p).
+\end{equation}
+Unlike weighted degree, $C_i$ depends on qualified multi-edge path membership, role order, and the geometric mean of edge weights. A registered counterexample gives two nodes equal weighted degree but unequal qualified-path membership. Unit tests verify deletion-loss equality, deterministic scaling, cache equivalence, and fail-closed work limits. These checks establish software and mathematical non-identity, not physical causality or effectiveness.
+
+The functional has three design properties under a fixed qualified-path set: non-negativity when edge weights are non-negative; nullity for a node that belongs to no qualified path; and additivity over the qualified paths that contain the deleted node. More precisely, if deleting node $i$ removes exactly those paths containing $i$ and does not change the weights of paths that remain, then $C_i=\sum_{p\ni i}\operatorname{strength}(p)$. This proposition is an accounting identity for a fixed textual graph, not a causal-identification theorem. It can fail as a model of semantic influence when deletion would change role assignments, coreference, discourse interpretation, or the weights of surviving relations; the implemented perturbation intentionally holds those quantities fixed.
+
+Table~\ref{tab:toy-path} provides a synthetic walk-through that is independent of the experimental corpus. Consider five source-ordered nodes with roles root cause, trigger, propagation, impact, and mitigation and four compatible edge weights. The four qualified paths that begin at the root-cause or trigger node and end at impact or mitigation have strengths 0.566964, 0.741559, 0.367423, and 0.542282 under Equation~(1), giving $U(G)=2.218228\approx2.218$. Deleting the propagation node removes all four paths, so $C_{q}\approx2.218$; deleting the root-cause node removes only the two paths that start there, so $C_{r}=1.308523\approx1.309$. The example shows why path participation and stage span matter beyond local edge totals.
+
+\begin{table}[H]
+\caption{Synthetic typed-path example used only to explain the registered computation; it is not an experimental observation.}
+\label{tab:toy-path}\centering\small
+\begin{tabular}{llll}
+\toprule
+Nodes on path & Edge weights & Stage-span factor & Path strength\\
+\midrule
+$r\rightarrow t\rightarrow q\rightarrow i$ & 0.8, 0.6, 0.9 & $3/4$ & 0.567\\
+$r\rightarrow t\rightarrow q\rightarrow i\rightarrow m$ & 0.8, 0.6, 0.9, 0.7 & $4/4$ & 0.741\\
+$t\rightarrow q\rightarrow i$ & 0.6, 0.9 & $2/4$ & 0.367\\
+$t\rightarrow q\rightarrow i\rightarrow m$ & 0.6, 0.9, 0.7 & $3/4$ & 0.542\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The equality $C_i=\sum_{p\ni i}\operatorname{strength}(p)$ follows because node deletion removes exactly the qualified paths containing $i$ and leaves the remaining path strengths unchanged. The implementation recomputes or cache-checks the deleted graph, and direct deletion loss, membership-sum loss, and cached loss must agree within the numeric tolerance. The raw $C_i$ values are then min--max scaled within the report.
+
+\subsection{Scoring and Selection}
+
+The Full base score is
+\begin{equation}
+S_i=0.40Q_i+0.20R_i+0.15G_i+0.15C_i+0.10P_i,
+\end{equation}
+where $Q_i$ is min--max scaled lexical centroid relevance, $R_i$ is the maximum unit-scaled role evidence, $G_i$ is min--max scaled weighted-degree salience, $C_i$ is min--max scaled path-deletion loss, and $P_i=1/(1+\operatorname{pos}(i))$ is the unrescaled positional prior for zero-based source position. Path and expansion caps are 250,000 and 2,000,000; reaching either cap terminates the computation rather than returning a partial path score.
+
+The strict no-path-deletion variant changes only the coefficient of $C_i$ from 0.15 to zero. It does not renormalize any remaining coefficient or alter candidates, graph construction, role-group reservation, redundancy penalty, tie rules, or budgets. Consequently, the positive-channel weight decreases from 1.00 to 0.85 while the redundancy coefficient remains 0.50; relative to the remaining positive scale, that penalty is $0.50/0.85=0.5882$, 17.6\% larger than 0.50. The contrast therefore estimates coefficient removal under this unrenormalized scoring rule, including relative-scale coupling, rather than a pure information-only contribution of $C_i$.
+
+Each score channel has a distinct interpretation. $Q_i$ rewards similarity to the report centroid and can favor generic report language. $R_i$ rewards registered condition, event, impact, and mitigation cues but is vulnerable to cue ambiguity. $G_i$ rewards local connectivity under the typed edge rules, whereas $C_i$ rewards membership in qualified paths and can differ from degree. $P_i$ favors earlier source positions. The scaling rules bound all channels to $[0,1]$ within a report but do not make their meanings interchangeable.
+
+Selection has two phases. When $K\geq3$, the selector first considers three role groups in the fixed order (i) root cause or trigger event, (ii) propagation or response or impact, and (iii) mitigation. If a group has eligible candidates, it reserves the candidate with the largest base score. Ties use earlier source position and then sentence identifier. A group with no eligible candidate is skipped; the method never manufactures a role assignment to satisfy the reservation.
+
+After reservation, the selector fills the remaining positions by maximizing
+\begin{equation}
+S_i^{\prime}=S_i-0.50\max_{j\in A}J(i,j),
+\end{equation}
+where $A$ is the selected set and an empty maximum is zero. Exact ties again use earlier source position and then sentence identifier. The selected set is finally reordered by source position for presentation. The role-group phase uses the base score without a redundancy penalty, so its contribution to structural coverage is separate from the path-deletion channel. No stochastic decoding or model sampling occurs in this selector.
+
+The dominant computational cost arises from candidate-pair edge checks and bounded path enumeration. The implementation screens every ordered source--target pair, so edge construction is $O(n^2)$. The absolute 12-position gate limits admitted local ordered pairs to at most approximately $24n$ apart from boundary effects, but it is applied after the quadratic scan. Path enumeration can still grow combinatorially in a dense compatible region, which motivates the 250,000-path and 2,000,000-expansion limits.
+
+The output is designed for source navigation. Each selected item preserves report and sentence identifiers, and a deterministic non-verbatim locator joins them to page, source order, report metadata, and source URL. All 1575 selected references resolved uniquely to an integer page within the declared PDF range. A reader can therefore reopen the source page and inspect the surrounding context.
+
+\subsection{Method Assumptions and Failure Modes}
+
+The lexical roles are executable features rather than expert labels. Ambiguous positive ties abstain, but an unambiguous cue can still assign an incorrect role. Negation scope, hypothetical or quoted events, and document-level coreference are not modeled. A transition can also join locally compatible roles without a supported discourse relation. These assumptions make the method deterministic and inspectable while limiting semantic coverage.
+
+Errors can enter through segmentation, role assignment, edge construction, or final selection. For example, a PDF table may remain fused with prose; a sentence may receive the wrong dominant role; compatible role cues may form an unsupported edge; or a relevant extract may omit necessary context. ROUGE cannot distinguish these layers. Future expert annotation should therefore score extraction-unit validity, role or abstention, relation support, source faithfulness, and omission separately.
+
+\subsection{Development Selection and Comparators}
+
+The 12-report development search evaluated 144 predefined configurations. Its ordered objective maximized mean ROUGE-L F1 at $K=5$, followed by mean ROUGE-1 F1, lower redundancy, and earliest configuration order. Grid index 60 was selected, with mean development ROUGE-L F1 of 0.1195126 and ROUGE-1 F1 of 0.2713870. Full minus the strict no-path-deletion variant was $-0.0056652$ on development.
+
+Seven conditions share the same candidate space: Lead, lexical Centroid, TextRank, Semantic-MMR, Role, the strict graph variant without path deletion, and Full \cges{}. Semantic-MMR uses a local all-MiniLM-L6-v2 snapshot and greedily maximizes $0.5\cos(e_i,\bar e_D)-0.5\max_{j\in A}\cos(e_i,e_j)$ \cite{reimers2019sentencebert}. Its symmetric coefficient was not optimized on development or test outcomes.
+
+The comparators expose distinct ranking signals. Lead tests position; Centroid tests lexical representativeness; TextRank tests an untyped similarity graph; Semantic-MMR combines dense relevance and diversity; and Role tests lexical discourse evidence without graph structure. The strict variant retains the typed graph while setting the deletion coefficient to zero without renormalization. This comparison includes the scale coupling described in Section~3.5 rather than isolating path information alone.
+
+Hyperparameter opportunity is not balanced across systems (Table~\ref{tab:tuning-opportunity}). Full \cges{} inherited a 144-configuration development search, whereas the Semantic-MMR relevance/diversity coefficient was fixed at 0.5 and TextRank used its implementation defaults. This asymmetry is relevant to system-level ranks. The strict variant is the closer comparison for RQ2 because it shares the selected absolute weights, graph, candidates, and selector.
+
+\begin{table}[H]
+\caption{Tuning opportunity and inferential role. The reported intervals condition on the selected Full configuration and do not include model-selection uncertainty.}
+\label{tab:tuning-opportunity}\centering\small
+\begin{tabular}{p{0.25\textwidth}p{0.22\textwidth}p{0.40\textwidth}}
+\toprule
+Comparison object & Development opportunity & Analytical role\\
+\midrule
+Full \cges{} & 144 predefined configurations & Selected deterministic system; selection uncertainty omitted\\
+Strict no-path-deletion & Same absolute weights, $C=0$ only & Component comparator; redundancy is relatively stronger\\
+Semantic-MMR & Coefficient fixed at 0.5 & Semantic relevance--diversity comparator\\
+TextRank & Implementation defaults & Untyped graph-ranking comparator\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Sentence-count budgets allow every method to return five or ten complete source units. They do not guarantee equal information because extraction units vary in length. Output length was therefore analyzed after selection as a diagnostic; no outputs were truncated or reselected.
+
+\subsection{Statistical Analysis}
+
+The primary estimand is the unweighted mean report-level ROUGE-L difference on the retained 15-report test set. Three Full-minus-baseline contrasts were defined at each budget: strict no-path-deletion, Semantic-MMR, and TextRank. Paired percentile composition intervals use 10,000 report-level resamples. For paired deltas $d_1,\ldots,d_{15}$, each resample draws 15 reports with replacement and yields mean $\bar d_b$. The archived analysis also records
+\begin{equation}
+t_{\mathrm{boot}}=2\min\left\{B^{-1}\sum_{b=1}^{B}\mathbb{1}(\bar d_b\leq0),\;B^{-1}\sum_{b=1}^{B}\mathbb{1}(\bar d_b\geq0)\right\},\quad B=10{,}000.
+\end{equation}
+Because resamples are centered on the observed deltas rather than generated under a null, $t_{\mathrm{boot}}$ is a descriptive sign-tail quantity and not a calibrated hypothesis-test $p$ value. The composition intervals characterize sensitivity to the retained report set; they are not population confidence intervals. ROUGE-1, ROUGE-2, redundancy, and other pairings are descriptive \cite{cameron2008bootstrap}.
+
+An exact paired sign-flip sensitivity enumerates all $2^{15}=32{,}768$ sign assignments for each contrast and applies Holm adjustment across the six values \cite{holm1979simple}. This post-result analysis assumes report-level independence and sign exchangeability and is reported in the Supplementary Materials. The interpretation in the main text relies primarily on effect sizes, paired distributions, and composition intervals.
+
+The run contains all $15\times7\times2=210$ report--condition--budget records. Packaged checks rebuild aggregate values, contrast records, candidate boundaries, and selected source identifiers. Detailed file identities and check results are provided in Supplementary Table~S3.
+
+\subsection{Exploratory Development-Only Calibration}
+
+After the test result was known, a separate exploratory program evaluated 147 semantically deduplicated configurations using only the 12 development reports. It varied path-deletion weight, weight-allocation rule, path horizon, and gating rule. Twelve leave-one-report-out folds selected a zero-weight configuration in 12/12 folds. The best nonzero candidate used weight 0.025, won no fold, and remained below strict zero at both budgets. This analysis diagnoses integration behavior and was not applied to the retained test reports.
+
+\subsection{Generative-AI Assistance and Verification Boundary}
+
+The OpenAI Codex agent interface was used to assist with prose drafting and editing, experiment and audit planning suggestions, Python and \LaTeX{} development and review, provenance-record preparation, and manuscript build and visual-quality checks. All numerical results reported in this article were obtained from the frozen experiment ledgers or from documented local code execution; Codex output was not used as a source of experimental measurements. No generative-AI system was treated as a qualified power-grid expert, human annotator, or adjudicator. All figures are code-native outputs generated locally from the packaged scripts and stated data sources. The authors reviewed the assisted work and retain responsibility for the study and manuscript.
+
+\section{Results}
+
+\subsection{Overview of Empirical Findings}
+
+Three findings organize the results. First, Full \cges{} achieved the highest observed ROUGE-L among the evaluated non-ablation systems at both sentence budgets, whereas the strict no-path-deletion variant produced the highest overall mean. Second, Full extracts were substantially longer than those of Semantic-MMR and TextRank, which limits the system-level comparison. Third, the path-deletion term changed scores and selected sequences but did not improve the predefined ROUGE-L endpoint; development-only calibration also favored zero weight. Detailed corpus and execution checks are reported in Supplementary Table~S3.
+
+\subsection{Main Comparison (RQ1)}
+
+Table~\ref{tab:all-results} contains all seven conditions and four recorded metrics at both budgets. Full \cges{} exceeded Semantic-MMR and TextRank on mean ROUGE-L at each equal-sentence budget but was below the strict no-path-deletion variant. Because extraction-unit lengths differ materially, these comparisons are not word- or token-budget controlled. Figure~\ref{fig:aggregate} visualizes the same ROUGE-L means.
+
+\begin{table}[H]
+\caption{Macro-mean results over $n=15$ test reports at equal sentence counts, not equal word counts. Bold marks only the observed maximum ROUGE-L within a budget; underlining marks the minimum redundancy. Neither convention is an inferential conclusion.}
+\label{tab:all-results}\centering\small
+\begin{tabular}{llrrrr}
+\toprule
+$K$ & Condition & R-1 F1 & R-2 F1 & R-L F1 & Redundancy\\
+\midrule
+5 & Lead & 0.1633 & 0.0545 & 0.0878 & 0.0668\\
+5 & Centroid & 0.1955 & 0.0457 & 0.0939 & 0.2333\\
+5 & TextRank & 0.1508 & 0.0356 & 0.0806 & 0.2560\\
+5 & Semantic-MMR & 0.1783 & 0.0433 & 0.0853 & \underline{0.0237}\\
+5 & Role & 0.1889 & 0.0557 & 0.0934 & 0.0862\\
+5 & Strict variant & 0.2497 & 0.0648 & \textbf{0.1094} & 0.0798\\
+5 & Full \cges{} & 0.2359 & 0.0611 & 0.1060 & 0.0745\\
+\midrule
+10 & Lead & 0.2617 & 0.0811 & 0.1158 & 0.0554\\
+10 & Centroid & 0.2809 & 0.0683 & 0.1196 & 0.2011\\
+10 & TextRank & 0.2470 & 0.0615 & 0.1156 & 0.2149\\
+10 & Semantic-MMR & 0.2840 & 0.0728 & 0.1133 & \underline{0.0269}\\
+10 & Role & 0.3132 & 0.0848 & 0.1257 & 0.0550\\
+10 & Strict variant & 0.3471 & 0.0930 & \textbf{0.1310} & 0.0746\\
+10 & Full \cges{} & 0.3366 & 0.0874 & 0.1276 & 0.0667\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\includegraphics[width=\textwidth]{figures/fig03_aggregate_rougel.pdf}
+\caption{Mean Executive-Summary ROUGE-L F1 for the seven conditions ($n=15$ reports) at equal sentence counts but unequal word counts. Bars are descriptive macro-means; paired distributions appear in Figure~\ref{fig:paired}.}
+\label{fig:aggregate}
+\end{figure}
+
+Increasing the budget from five to ten sentences raised mean ROUGE-L for every condition, as expected when more source content is admitted. The ordering was not identical across methods: Role moved from 0.0934 to 0.1257 and became the strongest non-graph comparator at $K=10$, whereas Centroid was the strongest non-graph comparator at $K=5$. A result at only one extract length would therefore incompletely characterize these systems. This pattern does not imply that the larger budget is operationally preferable; a reviewer may value brevity, coverage, and omission risk differently.
+
+The strict variant had the largest observed ROUGE-1, ROUGE-2, and ROUGE-L mean at both budgets. Semantic-MMR had the lowest redundancy, consistent with its explicit diversity objective and shorter outputs. Full \cges{} reduced redundancy relative to the strict variant at both budgets while also reducing all three ROUGE means. The configuration therefore expresses a measurable overlap--redundancy trade-off rather than a uniformly better operating point.
+
+\subsection{Output-Length Diagnostic (RQ1)}
+
+A post-selection script counted Unicode whitespace-delimited words and characters in every selected unit. Supplementary Table~S2 contains all 14 condition--budget groups and per-report records. Table~\ref{tab:length-audit} shows the four conditions used in the main interpretation. The long-unit and Table-marker counts are selection instances, so an item selected by more than one condition or budget is counted in each output.
+
+\begin{table}[H]
+\caption{Descriptive output-length diagnostics. ``$>100$'' counts selected-unit instances longer than 100 words; ``Table'' counts units containing the exact case-sensitive string.}
+\label{tab:length-audit}\centering\small
+\begin{tabular}{llrrrrr}
+\toprule
+$K$ & Condition & Mean words & Mean characters & $>100$ & Table & Maximum words\\
+\midrule
+5 & Full \cges{} & 287.7 & 1843.6 & 12 & 14 & 140\\
+5 & Strict variant & 329.0 & 2099.9 & 15 & 16 & 270\\
+5 & Semantic-MMR & 184.7 & 1242.1 & 5 & 9 & 138\\
+5 & TextRank & 177.0 & 1125.1 & 1 & 7 & 124\\
+10 & Full \cges{} & 568.9 & 3619.5 & 25 & 26 & 270\\
+10 & Strict variant & 596.9 & 3822.5 & 28 & 26 & 270\\
+10 & Semantic-MMR & 354.5 & 2361.2 & 7 & 16 & 138\\
+10 & TextRank & 369.0 & 2329.7 & 4 & 18 & 130\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Figure~\ref{fig:length} makes the output-length mismatch visible. At $K=5$, Full used 56\% more words than Semantic-MMR and 63\% more than TextRank on average; at $K=10$, the corresponding increases were 61\% and 54\%.
+
+\begin{figure}[H]
+\includegraphics[width=0.90\textwidth]{figures/fig05_output_length.pdf}
+\caption{Mean selected words per test report for the four principal conditions. Values reproduce Table~\ref{tab:length-audit}; no word-budget reselection was performed.}
+\label{fig:length}
+\end{figure}
+
+Full averaged 103.0 and 214.5 more words than Semantic-MMR at $K=5$ and $K=10$, and 110.7 and 199.9 more than TextRank. Among its 225 selected-unit instances, 37 exceeded 100 words, 40 contained ``Table'', and the maximum was 270 words. These diagnostics reveal fused table, heading, footnote, or line-break blocks in the sentence-level extraction units. Consequently, the observed ROUGE advantages over Semantic-MMR and TextRank are equal-sentence but unequal-word comparisons and do not establish fair length-matched superiority. Constructing newly selected word-budget systems on the revealed test would be a new post hoc experiment and was not done.
+
+A fair word-budget study would have to specify the budget before ranking, define how partially fitting units are handled, and apply an equivalent constraint to every comparator. Truncating the present outputs would answer a different question because it could cut a technical statement mid-clause and would preserve any advantage obtained while ranking long fused units.
+
+The long-unit counts locate a concrete extraction risk. Units exceeding 100 words and units containing ``Table'' show that PDF layout sometimes survives the sentence splitter as one selectable block. Such blocks can contain many reference-summary tokens and thereby increase ROUGE without providing a concise sentence. They may remain useful source locators, but they weaken sentence-budget comparisons and motivate layout-aware segmentation before external validation.
+
+\subsection{Endpoint Contribution of the Path-Deletion Term (RQ2)}
+
+Table~\ref{tab:contrasts} gives the six predefined contrasts. Full minus the strict no-path-deletion variant was $-0.003332$ at $K=5$ and $-0.003360$ at $K=10$; both report-composition intervals crossed zero. Full had slightly lower redundancy than the strict variant (0.0745 versus 0.0798 at $K=5$ and 0.0667 versus 0.0746 at $K=10$), but redundancy was a descriptive secondary outcome. Under the current integration, the path-deletion term therefore did not improve the predefined lexical-overlap endpoint.
+
+Full also exceeded Semantic-MMR and TextRank at both equal-sentence budgets on this split. These paired differences describe the selected reports but retain the output-length mismatch documented in Section~4.3. No minimum important difference or qualified-reader outcome was specified, so the automatic contrasts do not establish practical benefit for maintenance review.
+
+\begin{table}[H]
+\caption{Predefined Full-minus-baseline Executive-Summary ROUGE-L contrasts paired by test report ($n=15$). Intervals describe sensitivity of the mean paired difference to the composition of the retained reports. The final column is a descriptive bootstrap sign-tail quantity rather than a calibrated hypothesis-test $p$ value.}
+\label{tab:contrasts}\centering\small
+\begin{tabular}{llrrr}
+\toprule
+$K$ & Baseline & Mean difference & 95\% comp. interval & Unadjusted $t_{boot}$\\
+\midrule
+5 & Strict variant & -0.003332 & [-0.010889, 0.002826] & 0.3544\\
+5 & Semantic-MMR & 0.020737 & [0.012765, 0.028354] & 0/10,000 tail draws\\
+5 & TextRank & 0.025438 & [0.017542, 0.033722] & 0/10,000 tail draws\\
+10 & Strict variant & -0.003360 & [-0.008306, 0.001040] & 0.1444\\
+10 & Semantic-MMR & 0.014360 & [0.006082, 0.022215] & 0.0008\\
+10 & TextRank & 0.012029 & [0.004397, 0.019241] & 0.0022\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Figure~\ref{fig:paired} exposes every report-level difference. Full and the strict variant selected different sentence sequences in 28 of 30 report--budget cells, and their base scores differed in all 30, confirming an active coefficient rule but not a benefit.
+
+\begin{figure}[H]
+\includegraphics[width=\textwidth]{figures/fig04_paired_differences.pdf}
+\caption{Per-report paired Executive-Summary ROUGE-L differences for the six predefined contrasts ($n=15$). Horizontal colored segments denote means; black lines denote zero; panel titles give positive/negative/zero sign counts. Rights-safe report indices map to non-verbatim metadata in Supplementary Table~S1.}
+\label{fig:paired}
+\end{figure}
+
+The signs clarify heterogeneity hidden by macro-means. Against the strict variant, Full was positive and negative on equally many non-tied reports at $K=5$ and negative on more reports at $K=10$. Against Semantic-MMR and TextRank, positive signs predominated, although the length mismatch remains.
+
+The report-level signs reveal heterogeneity hidden by the means. Against the strict variant, Full was positive and negative on equally many non-tied reports at $K=5$ and negative on more reports at $K=10$. Against Semantic-MMR and TextRank, positive differences predominated, although the length mismatch remains. The exact paired sign-flip analysis led to the same qualitative directions under a sign-exchangeability assumption; full values and Holm adjustments are reported in Supplementary Table~S4.
+
+\subsection{Component Behavior and Coefficient Support (Exploratory RQ3)}
+
+Across 19,008 Full/strict-variant sentence-score comparisons, 9774 were nonzero, and selected sequences changed in 28 of 30 report--budget cells. The term was therefore active rather than a silent no-op. Its report-level effect was heterogeneous, and the endpoint comparison in Section~4.4 did not show an average ROUGE-L gain.
+
+The post-result development-only calibration evaluated 147 semantically deduplicated configurations. A zero path-deletion weight won all 12 leave-one-report-out folds. The best nonzero candidate used weight 0.025, won no fold, and remained below its strict-zero comparison at both budgets. This exploratory analysis cannot replace the retained test results, but it makes a simple coefficient adjustment an unpromising explanation for the negative ablation. A revised component will likely require different path semantics, role evidence, or score integration.
+
+Maximum path expansions were 19,638 of the 2,000,000 cap, and qualifying paths were 16,182 of 250,000. The selected reports were therefore processed without approaching the work limits. These observed margins describe the present corpus rather than asymptotic scalability.
+
+\subsection{Implementation Reliability}
+
+All reported selections and aggregate values were reproduced from the archived run artifacts. Candidate boundaries, condition--budget completeness, source identifiers, path-work limits, and aggregate recalculation passed the packaged checks. These tests support the integrity of the reported experiment; the complete matrix, file identities, and corrective history are provided in the Supplementary Materials.
+
+\section{Discussion}
+
+\subsection{Main Findings and System-Level Comparison}
+
+Full \cges{} recovered more Executive-Summary wording than Semantic-MMR and TextRank on the selected test set at equal sentence counts. The result is consistent with the intended benefit of combining relevance with explicit role coverage and graph structure. It is also partly entangled with extraction-unit length: Full outputs contained 54--63\% more words than the two main baselines. Sentence budgets standardize the number of source units, but they do not standardize the opportunity to match reference wording. The system comparison should therefore be read as evidence that the integrated selector is competitive on this corpus, followed by a clear requirement for a matched-length study.
+
+\subsection{Why the Path-Deletion Term Did Not Improve ROUGE-L}
+
+Several properties of the implementation may explain the negative component result. Role-group reservation already requires available evidence from condition/trigger, propagation/impact, and mitigation groups before ordinary greedy filling. It may therefore capture much of the structural coverage that the path-deletion term was intended to add. The path channel also competes with relevance and graph salience after report-level scaling, while strict coefficient removal reduces the positive-score total without reducing the fixed redundancy penalty. The observed contrast consequently reflects both path information and this relative-scale coupling.
+
+Lexical roles create a second limitation. Negation, hypothetical language, quotations, and cross-sentence coreference are not resolved, and an edge is permitted by role compatibility and local distance rather than by expert-validated discourse relations. A sentence can therefore participate in a strong typed path without adding useful Executive-Summary wording. Conversely, a semantically important passage can receive low path participation when its related evidence lies beyond the 12-position horizon. These explanations are consistent with the active but heterogeneous score changes; they require targeted evaluation rather than being treated as established causal mechanisms.
+
+\begin{figure}[H]
+\includegraphics[width=\textwidth]{figures/fig06_component_diagnostic.pdf}
+\caption{Component diagnosis for the path-deletion term. The term altered 9774 of 19,008 sentence scores and 28 of 30 report--budget selections, but Full-minus-strict-variant ROUGE-L was slightly negative at both budgets and zero weight was selected in all 12 development leave-one-report-out folds. Error bars in panel (c) are report-composition intervals.}
+\label{fig:component-diagnostic}
+\end{figure}
+
+\subsection{Engineering Use and Source-Linked Navigation}
+
+The practical value of \cges{} lies in providing a structured, source-linked entry point into long reports. A reader can begin with passages distributed across condition, event, impact, and mitigation roles and then return to their original pages. Deterministic selection also makes changes attributable to explicit feature channels rather than generation variability. This combination is useful for method development and analyst-facing prototypes even though automatic reference overlap is not a substitute for engineering judgment.
+
+NERC reliability and disturbance reports can support lessons-learned review, but work orders and inspection records differ in vocabulary, length, asset granularity, narrative structure, and available reference summaries. An operational study would also need asset-specific terminology, access controls, abstention rules for extraction failures, and explicit evaluation of missed hazards. The current experiment establishes a technical-report workflow, not maintenance effectiveness.
+
+\subsection{Limitations}
+
+The test set contains 15 selected public reports from one organization, and the reports were inspected during corrective reconstruction. Revised editions, recurring institutional language, and near-duplicate passages were not modeled as cross-report dependence. The estimates therefore describe the retained reports; report-level resampling measures sensitivity to their composition rather than population-wide uncertainty.
+
+Equal sentence counts produced unequal word counts, and some extraction units retained table, heading, footnote, or line-break material. Semantic-MMR used a fixed coefficient of 0.5, whereas \cges{} inherited a 144-configuration development search, so tuning opportunities were also asymmetric. A fairer system comparison requires layout-aware segmentation, equal word or token budgets, and comparable development resources.
+
+The method lacks expert role labels and expert assessment of source faithfulness, structural coverage, unsafe omission, and reading utility. ROUGE and redundancy cannot provide these judgments. The 147-configuration calibration occurred after the test result was known and is therefore exploratory. Third-party licensing also prevents public redistribution of the source PDFs and verbatim derived text; non-verbatim metadata, configurations, aggregate results, code, and page locators can still be provided for review.
+
+\subsection{Future Validation}
+
+The next protocol should begin with layout-aware extraction and compare both fixed-sentence and fixed-word budgets under balanced tuning. The path component should be redesigned before it is applied to unseen evaluation units, with a normalized coefficient-removal comparison that separates path information from score-scale coupling. A hierarchical analysis can then distinguish report, site, and organization variation.
+
+A license-cleared corpus of maintenance narratives or work orders would provide the appropriate application test. Qualified power-grid personnel should independently assess source faithfulness, condition--event--impact--mitigation coverage, engineering usefulness, and unsafe omissions. Agreement should be reported before adjudication, and unresolved cases should remain visible. This expert-reviewed evaluation should use an untouched external holdout and retain source locators wherever document licenses permit.
+
+\section{Conclusions}
+
+\cges{} is a deterministic, structure-aware framework for extracting source-linked passages from long power-system technical reports. On the selected 15-report NERC test set, Full \cges{} achieved ROUGE-L F1 of 0.1060 and 0.1276 at five and ten sentences and produced the highest observed values among the evaluated non-ablation systems. Its extracts were longer than those of Semantic-MMR and TextRank, so the comparison establishes an equal-sentence observation rather than a length-controlled advantage.
+
+The path-deletion term changed sentence scores and selected sequences but did not improve the predefined ROUGE-L endpoint. The strict variant was higher by approximately 0.0033 at both budgets, and development-only calibration selected zero path weight in all 12 folds. This negative result identifies the next design problem: path semantics and score integration must add information beyond explicit role reservation without relying on longer extraction units. The overall framework provides a reproducible basis for structured report navigation; the next evaluation should use layout-aware units, matched lengths, unseen maintenance-oriented data, and independent assessment by qualified power-grid personnel.
+
+\supplementary{The supplementary PDF contains Table~S1 (the non-verbatim 40-report sampling frame), Table~S2 (output-length records), Table~S3 (corpus and implementation checks), and Table~S4 (exact paired sign-flip sensitivity), together with the exploratory development-only calibration summary. Machine-readable aggregate metrics, paired differences, report-level length records, and selected-ID-to-page locators are included in the accompanying reproducibility files. Source PDFs and verbatim derived text are excluded because third-party redistribution permission has not been established.}
+\authorcontributions{Conceptualization, B.L. and Y.Y.; methodology, B.L.; software, B.L.; validation, B.L.; formal analysis, B.L.; investigation, B.L.; resources, Y.Y.; data curation, B.L.; writing---original draft preparation, B.L.; writing---review and editing, B.L. and Y.Y.; visualization, B.L.; supervision, Y.Y.; project administration, Y.Y.; funding acquisition, Y.Y. All authors have read and agreed to the published version of the manuscript.}
+\funding{This research was funded by the Science and Technology Research Project of State Grid Fujian Electric Power Co., Ltd., grant number 521300250006. The funder had no role in the design of the study; in the collection, analyses, or interpretation of data; in the writing of the manuscript; or in the decision to publish the results.}
+\institutionalreview{Not applicable. This computational study uses published technical reports and does not involve human participants or animals.}
+\informedconsent{Not applicable.}
+\dataavailability{The implementation repository is available at \url{https://github.com/gaoxingkele/c2ges}. The rights-safe reproducibility package used for editorial verification, including metadata, hashes, configurations, the non-verbatim selected-ID-to-page locator, descriptive diagnostic records, and audit records, is available from the corresponding author upon reasonable request. Owing to third-party licensing restrictions, source PDFs and verbatim derived text are not publicly redistributed. Access to restricted materials is subject to the applicable third-party permissions and licenses.}
+\acknowledgments{The OpenAI Codex agent interface was used for the generative-AI-assisted activities described in Materials and Methods. The exact backend model identifier and version were not retained in the project records. The authors reviewed the outputs and retain responsibility for the manuscript; Codex was not treated as an author, qualified power-grid expert, human annotator, or adjudicator.}
+\conflictsofinterest{The authors declare no conflicts of interest.}
+
+\begin{adjustwidth}{-\extralength}{0cm}
+\reftitle{References}
+\bibliography{references_cited_verified}
+\PublishersNote{}
+\end{adjustwidth}
+\end{document}

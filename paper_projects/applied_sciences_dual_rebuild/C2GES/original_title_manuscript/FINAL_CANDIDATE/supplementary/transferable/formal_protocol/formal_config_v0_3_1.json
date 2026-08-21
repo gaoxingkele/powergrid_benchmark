@@ -1,0 +1,61 @@
+{
+  "protocol": "C2GES-NERC-FORMAL-v0.3.1-post-audit-corrective",
+  "conditions": [
+    "lead",
+    "centroid",
+    "textrank",
+    "semantic_mmr",
+    "role",
+    "graph_no_cf_strict",
+    "c2ges_full"
+  ],
+  "selection_budgets": [5, 10],
+  "bootstrap_samples": 10000,
+  "bootstrap_seed": 20260808,
+  "rouge_use_stemmer": true,
+  "max_distance": 12,
+  "path_min_edges": 2,
+  "path_max_edges": 4,
+  "path_max_paths": 250000,
+  "path_max_expansions": 2000000,
+  "textrank": {
+    "alpha": 0.85,
+    "max_iter": 100,
+    "tolerance": 1e-08,
+    "fallback": "weighted_degree"
+  },
+  "semantic_mmr": {
+    "lambda": 0.5,
+    "relevance_weight": 0.5,
+    "redundancy_penalty": 0.5,
+    "formula": "lambda * cosine(sentence, normalized_document_centroid) - (1-lambda) * max_cosine(sentence, selected)",
+    "lambda_selection": "fixed before test at symmetric conventional balance; no test inspection and no development optimization",
+    "tie_breaking": "higher adjusted score, then earlier document position, then lexicographically larger sentence id"
+  },
+  "semantic_model": {
+    "name": "sentence-transformers/all-MiniLM-L6-v2",
+    "revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+    "snapshot_path": "C:/Users/10175/.cache/huggingface/hub/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+    "local_files_only": true,
+    "device": "cpu",
+    "normalize_embeddings": true
+  },
+  "c2ges_full_weights": {
+    "relevance": 0.4,
+    "role": 0.2,
+    "graph": 0.15,
+    "counterfactual": 0.15,
+    "position": 0.1
+  },
+  "redundancy_penalty": 0.5,
+  "primary_metric": "rougeL_f1",
+  "primary_contrasts": [
+    "graph_no_cf_strict",
+    "semantic_mmr",
+    "textrank"
+  ],
+  "multiplicity_family": "six primary ROUGE-L tests: three contrasts at K=5 and K=10",
+  "multiplicity_adjustment": "Holm step-down",
+  "unit_of_analysis": "report",
+  "test_execution_policy": "one physical attempt only after fresh independent pretest PASS and hash-bound explicit authorization"
+}

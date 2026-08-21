@@ -1,0 +1,176 @@
+{
+  "schema_version": "ma-sqlgrid-independent-v2-reaudit-v1",
+  "decision": "BLOCK",
+  "freeze_content_sha256": "7ea872fe554f72547664d3c160577bc26501d8e2e09aab298d354a57966f5052",
+  "freeze_file_sha256": "8f47cc5d91c952f94c9b752107cde1b22444f999ff298a7704d6a2c8d5f020a4",
+  "audit_scope": "pre-score only",
+  "formal_stage_b_scoring_executed": false,
+  "formal_outcomes_accessed": false,
+  "frozen_v2_files_modified": false,
+  "authorizes_formal_score": false,
+  "summary": {
+    "passed_pre_score_evidence": [
+      "freeze content and 17 frozen-file hashes",
+      "query-blind Stage-A import and four-argument CLI boundary",
+      "18 state and 18 trace hash pairs across two clean generations",
+      "SQLite 3.49.1 compile options, integrity, foreign keys, and row counts",
+      "independent 3240 gold executions with zero errors",
+      "180/180 changed-denotation union and five empty snapshots nonempty in at least two states",
+      "two 114-item order reviews and current all-114-hold adjudication",
+      "pairwise isclose, duplicate-preserving bipartite multiset, NULL, ordering, and header diagnostics",
+      "two 720-key prediction ledgers and canonical-v2 physical and row-level hash bindings",
+      "current old NO-GO audit fails the Stage-B audit condition"
+    ],
+    "blocking_findings": 5
+  },
+  "gates": [
+    {
+      "id": "G1_INPUT_IDENTITY",
+      "status": "PASS",
+      "evidence": {
+        "qwen_rows_unique_expected_keys": "720/720",
+        "granite_rows_unique_expected_keys": "720/720",
+        "duplicate_missing_unexpected_keys_each": "0/0/0",
+        "all_status_success": true,
+        "row_data_code_configuration_hash_singletons_match_run_manifests": true,
+        "prediction_and_manifest_physical_hashes_match_canonical_v2": true
+      }
+    },
+    {
+      "id": "G2_STAGE_A_BLINDNESS",
+      "status": "PASS",
+      "evidence": {
+        "cli_inputs": ["--base-db", "--policy", "--out", "--trace-dir"],
+        "benchmark_or_ledger_cli_or_literal_paths": false,
+        "scorer_or_comparator_imported": false,
+        "operator_policy_contains_question_ids": false,
+        "base_database_opened_read_only": true
+      }
+    },
+    {
+      "id": "G3_STATE_REPRODUCIBILITY",
+      "status": "PASS",
+      "evidence": {
+        "states_each_generation": 18,
+        "matching_state_hash_pairs": 18,
+        "matching_trace_hash_pairs": 18,
+        "first_manifest_sha256": "ee94cb32d3cb1d0389af6fde6ae2f9e0772fd843bea45001b1c9ae955667607d",
+        "rerun_manifest_sha256": "fe5e8495d105a2fdca926bfc1486f500f01483a69a62188f826158129176adcd",
+        "manifest_content_hashes_recomputed": true,
+        "sqlite_version": "3.49.1",
+        "runtime_compile_options_exact_match": true
+      }
+    },
+    {
+      "id": "G4_DATABASE_AND_GOLD_VALIDITY",
+      "status": "PASS",
+      "evidence": {
+        "states_integrity_ok": "18/18",
+        "states_zero_foreign_key_violations": "18/18",
+        "gold_executions": 3240,
+        "gold_execution_errors": 0,
+        "frozen_atomic_rows_unique": "3240/3240"
+      }
+    },
+    {
+      "id": "G5_GOLD_STATE_COVERAGE",
+      "status": "PASS",
+      "evidence": {
+        "changed_denotation_union": "180/180",
+        "snapshot_empty_question_ids": ["Q073", "Q104", "Q107", "Q110", "Q140"],
+        "nonempty_state_counts": {
+          "Q073": 2,
+          "Q104": 6,
+          "Q107": 6,
+          "Q110": 5,
+          "Q140": 2
+        }
+      }
+    },
+    {
+      "id": "G6_ORDER_REVIEW_AND_ADJUDICATION",
+      "status": "BLOCK",
+      "safe_runtime_policy_present": true,
+      "evidence": {
+        "reviewer_a_reviewed": 114,
+        "reviewer_b_reviewed": 114,
+        "top_k_each": 18,
+        "total_order_valid_each": 0,
+        "current_adjudication_holds": 114,
+        "automatic_primary_order_insensitive": 66,
+        "reviewer_a_sha256_frozen": "47244d5e144a5b4173994399774fb2e27e04f4b95e1ce65879f38d6d9287dd1d",
+        "reviewer_b_sha256_frozen": "1efbe567213cf2f1a29e6ca8d20e2224d82a4576473f4ecd2397b90c50bf3c4e",
+        "adjudication_sha256": "afa677f152136e9fb8a9d3ce9f8bd63b1b08a2f27abcb402a72dc21c0f3909b7",
+        "adjudication_bound_by_exact_freeze": false
+      },
+      "block_reason": "The exact freeze relies on adjudication language but does not bind the adjudication artifact."
+    },
+    {
+      "id": "G7_COMPARISON_CONTRACT",
+      "status": "PASS",
+      "evidence": {
+        "frozen_comparator_sha256": "790695b74b32810bfe36fc12d24db2412260173477ca64cb6070ebc41a27027f",
+        "unit_tests": "11/11 PASS",
+        "independent_exhaustive_small_multiset_cases": 47989,
+        "finite_pairwise_isclose": true,
+        "unordered_duplicate_preserving_bipartite_matching": true,
+        "ordered_sequence": true,
+        "null_distinct": true,
+        "header_policy": "diagnostic only, explicitly frozen and tested"
+      }
+    },
+    {
+      "id": "G8_STAGE_B_FAIL_CLOSED_LOADING",
+      "status": "BLOCK",
+      "evidence": {
+        "current_ledgers_pass_all_loading_checks": true,
+        "current_old_audit_decision": "NO_GO_CLAIM_PROMOTING",
+        "current_old_audit_would_authorize": false,
+        "frozen_stage_b_sha256": "2f37fdc3c2d5d879b9adccf7a4a12ffee9a06599ac9584f4077405196c73152a"
+      },
+      "block_reasons": [
+        "Stage B accepts only audit.decision == 'PASS', while the exact authorization contract requires PASS_AUTHORIZE_FORMAL_SCORE; the requested valid authorization token would be rejected.",
+        "Stage B loads the current canonical-v2 FREEZE_AND_METHOD.json but does not assert its physical SHA-256 and byte count against freeze.canonical_v2_binding before trusting accepted_inputs.",
+        "The audit gate checks only two fields and does not require the independent re-audit schema, all-gates-pass assertion, or audit artifact identity."
+      ]
+    },
+    {
+      "id": "G9_STATISTICS_AND_DENOMINATORS",
+      "status": "BLOCK",
+      "evidence": {
+        "finite_66_question_estimand_declared": true,
+        "semantic_suite_states_declared": 15,
+        "physical_order_diagnostic_states_declared": 3,
+        "full_expected_atomic_rows": 25920,
+        "primary_semantic_eligible_rows_before_suite_and": 7920,
+        "order_hold_diagnostic_rows": 16416,
+        "frozen_aggregation_or_statistical_implementation_present": false
+      },
+      "block_reason": "The freeze names clustered 2x2 contrasts and Holm correction but freezes no atomic-to-suite aggregation/statistics implementation, exact resampling parameters, cluster-map binding, or invariant that excludes the three T1 states from the 15-state primary AND."
+    },
+    {
+      "id": "G10_RELEASE_AUDIT_SPECIFICATION",
+      "status": "BLOCK",
+      "evidence": {
+        "release_builder_frozen": false,
+        "independent_release_verifier_frozen": false,
+        "table_figure_traceability_contract_frozen": false
+      },
+      "block_reason": "No frozen release-stage manifest/verifier proves atomic rows, denominators, suite aggregation, statistics, tables, and figures."
+    }
+  ],
+  "additional_freeze_blocker": {
+    "id": "FROZEN_PROTOCOL_STATE_COUNT_CONTRADICTION",
+    "status": "BLOCK",
+    "finding": "Frozen PROTOCOL_V2.md states 'Sixteen states' and then describes three insertion permutations, while the policy, manifests, and freeze contain 18 total states: 15 semantic-suite plus 3 physical-order diagnostics.",
+    "risk": "A reader cannot determine the intended denominator and state partition from the frozen protocol alone."
+  },
+  "minimum_verified_repairs_requiring_new_freeze": [
+    "Correct PROTOCOL_V2.md to exactly 18 total states, explicitly 15 semantic-suite plus 3 physical-order diagnostic states.",
+    "Add adjudication.json with SHA-256 and byte count to the freeze and test the 114-held/66-eligible policy from that bound artifact.",
+    "Make Stage B accept only the exact PASS_AUTHORIZE_FORMAL_SCORE enum for the exact freeze SHA and require the re-audit schema plus all pre-score gates passing.",
+    "Before loading canonical accepted_inputs, assert the physical SHA-256 and bytes of canonical-v2 FREEZE_AND_METHOD.json against canonical_v2_binding.",
+    "Freeze an aggregation/statistics implementation and cluster-map/resampling specification that enforces 25920 atomic rows, 15-state AND over 66 items, 114 held items, all prediction errors in denominators, paired contrasts, one Holm family, and composition-sensitivity labels.",
+    "Freeze a release manifest builder and an independent verifier covering atomic scores, suite rows, statistics, tables, figures, and provenance hashes."
+  ]
+}

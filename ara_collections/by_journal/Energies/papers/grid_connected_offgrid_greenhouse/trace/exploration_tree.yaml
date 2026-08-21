@@ -1,0 +1,91 @@
+# Exploration Tree for Paper #27
+# Optimization of Grid-Connected and Off-Grid Hybrid Energy Systems for a Greenhouse Facility
+
+nodes:
+  - id: q1
+    type: question
+    label: What hybrid energy system configuration is most cost-effective for the greenhouse facility?
+    description: "Core research question: identify optimal architecture minimizing NPC and LCOE while meeting load demand."
+    source: "Section 1.3 (Objectives)"
+
+  - id: q2
+    type: question
+    label: How do grid-connected vs. off-grid configurations compare in economic and environmental terms?
+    description: "Dual analysis: evaluate systems with and without utility grid access under consistent assumptions."
+    source: "Section 1.3"
+
+  - id: e1
+    type: experiment
+    label: "E1: Grid-connected system optimization (6 architectures)"
+    description: "Simulate G/PV, G/PV/WT, G/WT, G/PV/B, G/PV/WT/B, G/WT/B in HOMER Pro."
+    source: "Section 3.1"
+    outcome: "G/PV is optimal: NPC $282,492, LCOE $0.0401/kWh, 54.94% CO2 reduction."
+
+  - id: d1
+    type: decision
+    label: "Select optimal grid-connected architecture"
+    description: "Choose between PV-only, WT-only, or hybrid PV+WT configurations, with/without battery."
+    basis: "Table 2 results: G/PV lowest NPC and LCOE; G/PV/WT highest RF but higher cost."
+    outcome: "G/PV selected as optimal grid-connected configuration."
+
+  - id: e2
+    type: experiment
+    label: "E2: Off-grid system optimization (10 architectures)"
+    description: "Simulate Gen, Gen/PV, Gen/PV/B, Gen/PV/WT, Gen/PV/WT/B, Gen/WT, Gen/WT/B, PV/WT/B, PV/B, WT/B."
+    source: "Section 3.2"
+    outcome: "Gen/PV/B is optimal: NPC $1.19M, LCOE $0.342/kWh, 64.58% CO2 reduction."
+
+  - id: d2
+    type: decision
+    label: "Select optimal off-grid architecture"
+    description: "Choose between pure diesel, PV-diesel hybrids, wind-diesel hybrids, or fully renewable."
+    basis: "Table 7 results: Gen/PV/B lowest NPC and LCOE among economically viable options; fully renewable systems too expensive."
+    outcome: "Gen/PV/B selected as optimal standalone configuration."
+
+  - id: q3
+    type: question
+    label: How sensitive are the optimal configurations to macroeconomic uncertainty?
+    description: "Test robustness of G/PV and Gen/PV/B under varying inflation, fuel prices, and renewable resource availability."
+    source: "Sections 3.1-3.2 (Sensitivity Analysis)"
+
+  - id: e3
+    type: experiment
+    label: "E3: Sensitivity analysis for G/PV"
+    description: "Vary solar irradiance (2.0-7.0), temperature (1-25C), inflation (5-30%), power price ($0.12-0.16), sellback ($0.10-0.18)."
+    source: "Tables 5-6, Figure 12"
+    outcome: "Payback ranges from 2.1 years (5% inflation, high sellback) to >25 years (30% inflation)."
+
+  - id: e4
+    type: experiment
+    label: "E4: Sensitivity analysis for Gen/PV/B"
+    description: "Vary solar irradiance (2.0-7.0), fuel price ($1.2-1.8/L), inflation (5-30%)."
+    source: "Tables 9-10, Figure 16"
+    outcome: "Payback 1.7-8 years; IRR 12-60% depending on conditions."
+
+  - id: pivot1
+    type: pivot
+    label: "Economic vs. environmental trade-off recognition"
+    description: "Finding that optimal economic solutions are suboptimal for emissions and vice versa leads to two-tier evaluation."
+    source: "Section 4 (Discussion)"
+    outcome: "Study recommends cost-optimal configurations while acknowledging zero-emission pathways exist at higher cost."
+
+  - id: dead_end1
+    type: dead_end
+    label: "Fully renewable off-grid systems economically inviable at current costs"
+    description: "PV/WT/B, PV/B, WT/B achieve zero emissions but NPC $2.54M-$4.52M, LCOE $0.759-$1.370/kWh."
+    source: "Table 7, Section 3.2"
+    outcome: "Not recommended under current economic conditions."
+
+  - id: dead_end2
+    type: dead_end
+    label: "Generator-only and generator-wind-only systems environmentally inadequate"
+    description: "Gen and Gen/WT achieve only 0-7.12% CO2 reduction with high fuel consumption."
+    source: "Table 7"
+    outcome: "Discouraged for meeting sustainability goals."
+
+  - id: decision3
+    type: decision
+    label: "Battery storage not justified for grid-connected systems"
+    description: "Adding battery to G/PV increases NPC 79% with identical CO2 reduction."
+    source: "Table 2"
+    outcome: "Batteries recommended only for off-grid or high-reliability applications."

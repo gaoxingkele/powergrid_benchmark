@@ -1,0 +1,263 @@
+% C2GES original-title reconstruction, Round 2.
+% Scientific evidence: independently audited v0.3.1 post-audit corrective run only.
+\documentclass[applsci,article,submit,moreauthors]{Definitions/mdpi}
+\firstpage{1}
+\makeatletter\setcounter{page}{\@firstpage}\makeatother
+\pubvolume{1}\issuenum{1}\articlenumber{0}\pubyear{2026}\copyrightyear{2026}
+\datereceived{}\daterevised{}\dateaccepted{}\datepublished{}
+\newcommand{\cges}{C\textsuperscript{2}GES}
+\setlength{\headheight}{20pt}
+\AtBeginDocument{\pdfstringdefDisableCommands{\def\cges{C2GES}}}
+
+\Title{Causal and Counterfactual Graph-Enhanced Extractive Summarization (C\texorpdfstring{\textsuperscript{2}}{2}GES) for Power Grid Maintenance Reports}
+\Author{Liu Bijing $^{1,2}$ and Yang Yong $^{1,2,}$*}
+\AuthorNames{Liu Bijing and Yang Yong}
+\address{$^{1}$ \quad NARI Group Corporation (State Grid Electric Power Research Institute), Nanjing 211106, Jiangsu Province, China;\\
+$^{2}$ \quad Beijing Kedong Electric Power Control System Co., Ltd., Beijing 100080, China}
+\corres{Correspondence: Yang Yong; email address to be provided before submission}
+
+\abstract{Power-grid engineering reports distribute initiating conditions, event sequences, impacts, and corrective actions across long documents. We present \cges{}, a deterministic extractive framework combining centroid relevance, lexical sentence-role evidence, a typed textual proxy graph, and a node-deletion path-utility score. The measured population is 27 public North American Electric Reliability Corporation (NERC) reliability, disturbance, event-analysis, recommendation, and assessment reports rather than utility maintenance work orders; maintenance-domain transfer remains untested, and the graph does not identify physical causal effects. From 40 complete PDFs (3200 declared pages), conservative summary-boundary and quality gates retained 12 development and 15 test reports and 12,924 non-summary candidate sentences. A 144-configuration development search selected one frozen specification. In the single authorized post-audit corrective test run, Full \cges{} achieved mean ROUGE-L F1 of 0.1060 at five sentences and 0.1276 at ten. It exceeded Semantic-MMR by 0.0207 (95\% paired bootstrap interval [0.0128, 0.0284]) and 0.0144 ([0.0061, 0.0222]), and TextRank by 0.0254 ([0.0175, 0.0337]) and 0.0120 ([0.0044, 0.0192]), respectively, after Holm correction. However, Full was below a strict no-counterfactual graph ablation by 0.0033 at both budgets; both intervals crossed zero. Thus, the typed path-deletion mechanism is mathematically distinct and auditable but has no demonstrated ROUGE gain. Results are descriptive evidence from a corrective benchmark, not fresh confirmation.}
+\keyword{extractive summarization; typed textual proxy graph; structural perturbation; power-grid reports; NERC; reproducible evaluation}
+\featuredapplication{The framework produces a source-traceable extract for engineering report navigation. It is not autonomous root-cause analysis; source-linked review and qualified human judgment remain required.}
+
+\begin{document}
+
+\section{Introduction}
+
+Power-grid reliability and maintenance review requires more than retrieving isolated high-frequency terms. Engineers may need the sequence linking a condition or root cause to an initiating event, propagation or response, impact, and mitigation. Extractive summarization is attractive because each selected sentence can retain a stable source identifier and page link. It also exposes a difficult trade-off: sentences that are individually relevant may not preserve a coherent technical chain.
+
+Evidence selection, query-focused summarization, and graph ranking provide foundations for sentence-level selection \cite{thorne2018fever,zhong2021qmsum,vig2022exploring,wang2020heterogeneous}. Dense sentence encoders offer strong semantic ranking comparators \cite{reimers2019sentencebert}, whereas causal NLP emphasizes that association and text-derived direction should not be confused with identified causal effects \cite{feder2022causal,du2022ecare}. These distinctions matter in critical-infrastructure text.
+
+The exact title retains continuity with the original research objective. It does not describe the evaluation population precisely. The present corpus comprises public NERC reliability, disturbance, event-analysis, recommendation, and assessment reports \cite{nercEventAnalysis,nerc2015qualityreport}; it contains maintenance-relevant lessons and corrective actions but not utility work orders or inspection logs. Consequently, effectiveness on title-concordant maintenance records is an untested transfer claim.
+
+An earlier implementation used fixed excerpts, allowed Executive Summary leakage, and defined a deletion quantity algebraically equivalent to weighted degree. Those v0.1/v0.2 results are withdrawn from the scientific claims of this article. R2 rebuilds the benchmark from complete PDFs and defines ``counterfactual'' narrowly as a computational graph perturbation: remove one sentence node and recompute registered typed-path utility. This operation neither generates alternative events nor estimates what the grid would have done under an intervention.
+
+The contributions are fourfold. First, we construct a full-PDF benchmark with explicit inclusion, extraction, leakage, split, and rights ledgers. Second, we define a typed textual proxy graph and a path-deletion score that is not reducible to weighted degree. Third, we compare seven conditions at two budgets with report-level paired inference and a strict single-channel ablation. Fourth, we report the unfavorable counterfactual ablation and the maintenance-transfer boundary instead of converting either into a favorable claim.
+
+\section{Related Work}
+
+\subsection{Extractive Technical-Document Summarization}
+
+Extractive methods retain source text and are therefore naturally auditable. Lead, centroid, and graph-ranking methods remain useful comparators because they reveal whether complex selectors add value over position or centrality \cite{zhong2020extractive,bi2021aredsum,liu2021unsupervised}. Long reports also require diversity control; relevance-only selection can repeat a local event while omitting consequences or mitigation. The present task is global report summarization: each method receives identical candidates from one report and returns five or ten sentences in source order.
+
+\subsection{Graphs, Semantic Ranking, and Causal Language}
+
+Graph summarizers model relations among sentences, entities, topics, or discourse units \cite{wang2020heterogeneous,cui2020enhancing,jing2021multiplex}. \cges{} instead uses an interpretable typed sentence graph, trading learned capacity for deterministic construction and auditability. Semantic-MMR supplies a stronger non-graph baseline by combining dense centroid relevance with pairwise diversity.
+
+Causal language requires an explicit boundary. A text-derived directed edge can reflect rhetorical order, lexical overlap, or a heuristic role transition. It is not a validated structural equation or a physical power-system mechanism \cite{feder2022causal}. We therefore use ``causal'' for the intended role vocabulary and ``counterfactual'' for node-deletion structural sensitivity, while repeatedly identifying both as proxies.
+
+\subsection{Power-Grid Text Analytics}
+
+Language technologies have been considered for grid models, operational records, and infrastructure analysis \cite{xie2022massively,hamann2024foundation,madabhushi2023survey,srinivasan2023artificial}. Supervised entity--relation extraction from a grid-field corpus is related but does not solve report-level summarization \cite{meng2023gridfield}. Our study evaluates authentic public technical reports but does not claim validated maintenance-workflow utility.
+
+\section{Materials and Methods}
+
+\subsection{Task, Scope, and Evidence Class}
+
+Let report $D=\{s_1,\ldots,s_n\}$ contain non-summary candidate sentences. For budget $K\in\{5,10\}$, method $m$ returns $\hat{Y}_{m,K}\subseteq D$, with $|\hat{Y}_{m,K}|=\min(K,n)$. The selected sentences are restored to source order. The official Executive Summary is the reference only and is never candidate input.
+
+This is a post-audit corrective evaluation. Earlier versions of the test population were inspected while diagnosing R1, so the v0.3.1 freeze cannot recover outcome-unseen confirmatory status. The formal output is therefore descriptive evidence for a fixed corrective benchmark. A new sealed holdout would be required for confirmation.
+
+\subsection{Source PDFs, Inclusion, and Leakage Gates}
+
+The manifest binds 40 complete local PDFs with distinct SHA-256 values and 3200 declared pages. A deterministic full-PDF builder retained 27 reports and excluded 13 before outcome computation. The retained data comprise 12 development and 15 test reports. Their complete, development, and test SHA-256 values are \texttt{87F7F754...AA15}, \texttt{27CE41D...7F79}, and \texttt{A9342BD...D127}. Figure~\ref{fig:data-flow} summarizes the construction.
+
+\begin{figure}[H]
+\includegraphics[width=\textwidth]{figures/fig02_dataset_flow.pdf}
+\caption{Dataset construction and partitioning. Conservative boundary and quality gates retained 27 of 40 full PDFs. The 12-report development split was used for configuration selection; one authorized run evaluated the 15-report test split.}
+\label{fig:data-flow}
+\end{figure}
+
+Candidates begin after a conservatively detected Executive Summary boundary, and no fixed sentence cap is applied. The builder emits 12,924 candidates, with 51--1898 per report; 25 reports have more than 80. An independent rebuild found zero reference/body page-interval overlap, zero normalized exact candidate/reference match, zero normalized common substring of at least 50 characters, and zero occurrences of eight registered extraction-pollution patterns. These checks address registered leakage and pollution modes but do not establish semantic cleanliness of every sentence.
+
+\subsection{Sentence Roles and Typed Textual Proxy Graph}
+
+Each candidate receives lexical evidence for root cause, trigger event, propagation or response, impact, and mitigation. Positive top-score ties abstain rather than using fixed role order; 111 development ties all received no dominant role and no incident directed edge. No silver role label is supplied to the v0.3 selector.
+
+A directed edge is allowed only for registered stage-monotone role transitions within 12 sentence positions. Its weight combines positional distance, token-set Jaccard overlap, and role confidence. Normalized weighted degree forms graph salience $G_i$. Figure~\ref{fig:algorithm} displays the executable flow and its claim boundary.
+
+\begin{figure}[H]
+\includegraphics[width=\textwidth]{figures/fig01_algorithm.pdf}
+\caption{Implemented \cges{} pipeline. The roles, directed edges, and node deletions are deterministic textual proxies. They do not constitute a learned graph neural network, a physical simulator, or causal identification.}
+\label{fig:algorithm}
+\end{figure}
+
+\subsection{Typed Path-Deletion Structural Perturbation}
+
+Let $\mathcal{P}(G)$ be the set of simple, stage-monotone paths with two to four edges beginning at a root-cause or trigger node and ending at an impact or mitigation node. For path $p$,
+\begin{equation}
+\operatorname{strength}(p)=\left(\prod_{e\in p}w_e\right)^{1/|p|}\frac{\max\operatorname{stage}(p)-\min\operatorname{stage}(p)}{4}.
+\end{equation}
+The graph utility and raw deletion score are
+\begin{equation}
+U(G)=\sum_{p\in\mathcal{P}(G)}\operatorname{strength}(p),\qquad
+C_i=U(G)-U(G_{-i})=\sum_{p\ni i}\operatorname{strength}(p).
+\end{equation}
+Unlike weighted degree, $C_i$ depends on qualified multi-edge path membership, role order, and the geometric mean of edge weights. A registered counterexample gives two nodes equal weighted degree but unequal qualified-path membership. Unit tests verify deletion-loss equality, deterministic scaling, cache equivalence, and fail-closed work limits. These checks establish software and mathematical non-identity, not physical causality or effectiveness.
+
+\subsection{Scoring and Selection}
+
+The development-selected Full score is
+\begin{equation}
+S_i=0.40Q_i+0.20R_i+0.15G_i+0.15C_i+0.10P_i,
+\end{equation}
+where $Q_i$ is lexical centroid relevance, $R_i$ role evidence, $G_i$ weighted-degree salience, $C_i$ normalized path-deletion loss, and $P_i$ a positional prior. Greedy selection subtracts $0.50$ times the maximum token-set Jaccard overlap with an already selected sentence. Path and expansion caps are 250,000 and 2,000,000 and fail closed on exhaustion.
+
+The strict no-CF ablation changes only the coefficient of $C_i$ from 0.15 to zero. It does not renormalize any remaining coefficient or alter candidates, graph construction, redundancy penalty, tie rules, or budgets. This single-factor contrast isolates the implemented perturbation channel.
+
+\subsection{Development Selection and Comparators}
+
+The 12-report development search evaluated 144 registered configurations. Its ordered objective maximized mean ROUGE-L F1 at $K=5$, then mean ROUGE-1 F1, lower redundancy, and earliest ledger position. Grid index 60 was selected, with mean development ROUGE-L F1 0.1195126 and ROUGE-1 F1 0.2713870. Full minus strict no-CF development ROUGE-L was $-0.0056652$; this negative result was retained before the formal test.
+
+Seven frozen conditions share the same candidate space: Lead, lexical Centroid, TextRank, Semantic-MMR, Role, graph without CF (strict), and Full \cges{}. Semantic-MMR uses a frozen local all-MiniLM-L6-v2 snapshot and greedily maximizes $0.5\cos(e_i,\bar e_D)-0.5\max_{j\in A}\cos(e_i,e_j)$ \cite{reimers2019sentencebert}. Its symmetric coefficient was not optimized on development or test outcomes.
+
+\subsection{Frozen Evaluation and Statistics}
+
+The v0.3.1 freeze registers ROUGE-L F1 as primary and three Full-minus-baseline contrasts (strict no-CF, Semantic-MMR, TextRank) at each budget. The six tests form one Holm step-down family. Paired report-level percentile bootstrap intervals use 10,000 resamples; ROUGE-1, ROUGE-2, redundancy, and other pairings are descriptive \cite{cameron2008bootstrap}. The freeze binds data, code, configuration, model tree, dependency lock, tests, and corrective history.
+
+One authorized physical run produced 210 rows ($15\times7\times2$). Independent post-run audit rehashed 31 frozen files, recalculated all 28 aggregate values and all six contrast records with maximum absolute discrepancy zero, and returned PASS. The evidence class remains post-audit corrective descriptive.
+
+\section{Results}
+
+\subsection{Dataset and Execution Integrity}
+
+Table~\ref{tab:audit} reports the principal audit quantities. Candidate page boundaries remained strictly after reference-summary pages for all 15 test reports, and every selected sentence ID/text pair matched its frozen source candidate.
+
+\begin{table}[H]
+\caption{Dataset and execution audit.}
+\label{tab:audit}\centering
+\begin{tabular}{lr}
+\toprule
+Item & Audited value\\
+\midrule
+Source PDFs / declared pages & 40 / 3200\\
+Included / excluded reports & 27 / 13\\
+Development / test reports & 12 / 15\\
+Candidate sentences & 12,924\\
+Reference/body page overlaps & 0\\
+Exact normalized reference/candidate matches & 0\\
+Common substrings $\geq50$ characters & 0\\
+Prediction rows / expected rows & 210 / 210\\
+Frozen-file hash checks at execution & 77 / 77 passed\\
+Independent current rehashes & 31 / 31 passed\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Aggregate Test Results}
+
+Table~\ref{tab:all-results} contains all seven conditions and four recorded metrics at both budgets. Full \cges{} exceeded Semantic-MMR and TextRank on mean ROUGE-L at each budget but was below strict no-CF. Figure~\ref{fig:aggregate} visualizes the same ROUGE-L means and does not add a statistical test.
+
+\begin{table}[H]
+\caption{Macro-mean results over 15 test reports. Bold marks the observed maximum within a budget and metric, not a statistical conclusion.}
+\label{tab:all-results}\centering\small
+\begin{tabular}{llrrrr}
+\toprule
+$K$ & Condition & R-1 F1 & R-2 F1 & R-L F1 & Redundancy\\
+\midrule
+5 & Lead & 0.1633 & 0.0545 & 0.0878 & \textbf{0.0668}\\
+5 & Centroid & 0.1955 & 0.0457 & 0.0939 & 0.2333\\
+5 & TextRank & 0.1508 & 0.0356 & 0.0806 & 0.2560\\
+5 & Semantic-MMR & 0.1783 & 0.0433 & 0.0853 & \textbf{0.0237}\\
+5 & Role & 0.1889 & 0.0557 & 0.0934 & 0.0862\\
+5 & Graph no-CF & \textbf{0.2497} & \textbf{0.0648} & \textbf{0.1094} & 0.0798\\
+5 & Full \cges{} & 0.2359 & 0.0611 & 0.1060 & 0.0745\\
+\midrule
+10 & Lead & 0.2617 & 0.0811 & 0.1158 & 0.0554\\
+10 & Centroid & 0.2809 & 0.0683 & 0.1196 & 0.2011\\
+10 & TextRank & 0.2470 & 0.0615 & 0.1156 & 0.2149\\
+10 & Semantic-MMR & 0.2840 & 0.0728 & 0.1133 & \textbf{0.0269}\\
+10 & Role & 0.3132 & 0.0848 & 0.1257 & 0.0550\\
+10 & Graph no-CF & \textbf{0.3471} & \textbf{0.0930} & \textbf{0.1310} & 0.0746\\
+10 & Full \cges{} & 0.3366 & 0.0874 & 0.1276 & 0.0667\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\includegraphics[width=\textwidth]{figures/fig03_aggregate_rougel.pdf}
+\caption{Mean ROUGE-L F1 for the seven frozen conditions. Bars are descriptive macro-means; paired uncertainty and multiplicity-adjusted tests are reported in Table~\ref{tab:contrasts}.}
+\label{fig:aggregate}
+\end{figure}
+
+\subsection{Registered Contrasts}
+
+Table~\ref{tab:contrasts} gives the six registered tests. Full minus strict no-CF was $-0.003332$ at $K=5$ and $-0.003360$ at $K=10$; both intervals crossed zero and Holm-adjusted $p$ values were 0.3544 and 0.2888. Thus, neither development nor test evidence supports an accuracy benefit from the counterfactual channel.
+
+Full exceeded Semantic-MMR and TextRank at both budgets on this split. The two raw machine estimator values recorded as 0.0 had zero smaller-tail draws among 10,000 resamples; following the audit boundary, they are reported as $p_{boot}<0.0002$, never as a probability of zero. The machine-readable artifact retains 0.0 exactly.
+
+\begin{table}[H]
+\caption{Registered Full-minus-baseline ROUGE-L contrasts, paired by test report. All six tests are in one Holm family.}
+\label{tab:contrasts}\centering\small
+\begin{tabular}{llrrr}
+\toprule
+$K$ & Baseline & Mean difference & 95\% bootstrap CI & Holm $p$\\
+\midrule
+5 & Graph no-CF strict & -0.003332 & [-0.010889, 0.002826] & 0.3544\\
+5 & Semantic-MMR & 0.020737 & [0.012765, 0.028354] & $<0.0002$\textsuperscript{a}\\
+5 & TextRank & 0.025438 & [0.017542, 0.033722] & $<0.0002$\textsuperscript{a}\\
+10 & Graph no-CF strict & -0.003360 & [-0.008306, 0.001040] & 0.2888\\
+10 & Semantic-MMR & 0.014360 & [0.006082, 0.022215] & 0.0032\\
+10 & TextRank & 0.012029 & [0.004397, 0.019241] & 0.0066\\
+\bottomrule
+\end{tabular}\\
+\textsuperscript{a}Zero smaller-tail draws in 10,000 registered resamples; the bound reflects estimator resolution.
+\end{table}
+
+Figure~\ref{fig:paired} exposes every report-level difference. Full and strict no-CF selected different sentence sequences in 28 of 30 report--budget cells, and their base scores differed in all 30, confirming an active but not beneficial channel.
+
+\begin{figure}[H]
+\includegraphics[width=\textwidth]{figures/fig04_paired_differences.pdf}
+\caption{Per-report paired ROUGE-L differences for the six registered contrasts. Horizontal colored segments denote mean differences; the black line denotes zero. The no-CF distributions straddle zero at both budgets.}
+\label{fig:paired}
+\end{figure}
+
+\subsection{Computational Diagnostics}
+
+Across 19,008 Full/no-CF sentence-score comparisons, 9774 were nonzero and the maximum absolute difference was 0.15. Maximum observed path expansions were 19,638 of the 2,000,000 cap, and maximum qualifying paths were 16,182 of 250,000; no fail-closed path limit was approached. These diagnostics confirm that the mechanism executed as specified, but do not convert it into a useful accuracy component.
+
+\section{Discussion}
+
+\subsection{Supported Interpretation}
+
+The rebuild establishes a cleaner experimental object than R1: complete-PDF candidates, multi-level summary-leakage checks, a recorded development search, a path-based score distinct from degree, a strong Semantic-MMR baseline, and report-level paired inference. Full \cges{} descriptively outperformed Semantic-MMR and TextRank on this retained split after Holm correction.
+
+System-level baseline gains should not be attributed to the named counterfactual mechanism. Strict no-CF produced the highest observed ROUGE-1, ROUGE-2, and ROUGE-L at both budgets, while the Full-minus-no-CF intervals crossed zero. The proper conclusion is that path deletion is an identifiable structural feature whose incremental accuracy value was not demonstrated.
+
+\subsection{Causal and Counterfactual Boundaries}
+
+The graph organizes text into role-conditioned paths. Direction and path score are reproducible hypotheses, not validated relations in grid physics. Node deletion measures the dependence of graph utility on one sentence; it is not a potential-outcome estimand, a do-intervention on grid state, or evidence that an event would change if a sentence were absent. The title must therefore be read together with these boundaries.
+
+\subsection{Maintenance-Workflow Transfer}
+
+NERC reliability and disturbance reports can inform maintenance-oriented lessons-learned review, but work orders and inspection records differ in vocabulary, length, asset granularity, narrative structure, and reference-summary availability. Current evidence supports NERC technical-report summarization and a proposed maintenance-review use case. It does not establish effectiveness for operational maintenance reports.
+
+\subsection{Limitations}
+
+The test set contains only 15 selected public reports and derives from a population inspected during corrective reconstruction. Official Executive Summaries are long references, and ROUGE/redundancy do not measure factual sufficiency, engineering usefulness, unsafe omission, or causal-chain correctness. Role and edge construction lack blinded qualified-expert validation. Third-party rights restrict redistribution of PDFs and verbatim extracted text. The public repository has not yet been asserted to match the exact R2 submission package.
+
+Post hoc tuning after seeing these results cannot rehabilitate the current test as confirmatory. Development-only calibration may be explored, including lower or confidence-gated CF weights, but any resulting method requires a new, genuinely unseen holdout. If the best development setting assigns zero weight to $C_i$, that outcome should be retained.
+
+\subsection{Future Validation}
+
+Future work should freeze a license-cleared corpus of work orders or maintenance narratives at report or site level and create an untouched external holdout. Qualified power-grid personnel should independently score source faithfulness, coverage of cause/event/impact/mitigation, engineering usefulness, and unsafe omissions; disagreement and adjudication should be retained, and inter-rater agreement reported. LLM judgments may support annotation workflow experiments but must not be labeled expert validation.
+
+\section{Conclusions}
+
+\cges{} is rebuilt as a deterministic, auditable extractive method operating on full NERC reports. The typed path-deletion score is mathematically distinct from weighted degree, the benchmark has explicit leakage and extraction audits, and the comparison includes Semantic-MMR and a strict single-channel ablation. Full achieved ROUGE-L F1 of 0.1060 and 0.1276 at five and ten sentences and exceeded Semantic-MMR and TextRank on the retained split. It was nevertheless lower than strict no-CF by approximately 0.0033 at both budgets, with intervals crossing zero. Therefore, the study supports a reproducible structural mechanism and selected system-level descriptive comparisons, but not a counterfactual-component gain, real-world causal identification, or maintenance-work-order effectiveness. Confirmation requires a new sealed, title-concordant holdout and qualified human validation.
+
+\supplementary{The manuscript-bound verification package contains the source and exclusion manifests, extraction and rights ledgers, development-search ledger, freeze and authorization records, dependency lock, regression-test report, 210-row prediction ledger, aggregate metrics, six paired-statistics records, independent audit reports, and figure-lineage files. Source PDFs and verbatim extracted text are excluded from public redistribution unless third-party permission is confirmed.}
+\authorcontributions{Conceptualization, B.L. and Y.Y.; methodology, B.L.; software, B.L.; validation, B.L.; formal analysis, B.L.; investigation, B.L.; resources, Y.Y.; data curation, B.L.; writing---original draft preparation, B.L.; writing---review and editing, B.L. and Y.Y.; visualization, B.L.; supervision, Y.Y.; project administration, Y.Y.; funding acquisition, Y.Y. All authors have read and agreed to the published version of the manuscript.}
+\funding{This research was funded by the Science and Technology Project of NARI Group Corporation (State Grid Electric Power Research Institute), grant number 521300250006.}
+\institutionalreview{Not applicable. This computational study uses published technical reports and does not involve human participants or animals.}
+\informedconsent{Not applicable.}
+\dataavailability{Code is intended for release at \url{https://github.com/gaoxingkele/c2ges}. The repository must be synchronized, tagged, and verified from a fresh clone before submission; this R2 manuscript does not assert that its current public contents reproduce the reported artifacts. Owing to third-party licensing restrictions, source PDFs and verbatim derived text are not publicly redistributed. Subject to applicable permissions, materials needed for editorial and peer-review verification may be requested from the corresponding author. Hashes, configuration, non-verbatim audit metadata, and reproducibility records accompany the manuscript-bound package.}
+\acknowledgments{AI-assisted tools were used in drafting, editing, code review, figure generation, and reproducibility checks. The authors reviewed the outputs and retain responsibility for the manuscript. No AI system was treated as a qualified power-grid expert, human annotator, adjudicator, or author. Tool-by-tool provider/model/version/date details must be completed from the project provenance ledger before submission.}
+\conflictsofinterest{The authors declare no conflicts of interest. The authors must confirm this statement and the funder-role statement before submission.}
+
+\begin{adjustwidth}{-\extralength}{0cm}
+\reftitle{References}
+\bibliography{references_cited_verified}
+\PublishersNote{}
+\end{adjustwidth}
+\end{document}

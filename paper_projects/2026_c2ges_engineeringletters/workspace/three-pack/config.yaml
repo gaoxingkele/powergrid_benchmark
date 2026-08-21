@@ -1,0 +1,150 @@
+project:
+  name: "c2ges-causal-mechanism-ieeeaccess"
+  mode: "full-auto"
+
+runtime:
+  timezone: "Asia/Shanghai"
+
+research:
+  topic: >-
+    Paper title is fixed as "Causal and Counterfactual Graph-Enhanced Extractive
+    Summarization (C²GES) for Power Grid Maintenance Reports". The paper must
+    use the validated restart route: QMSum-style causal-role evidence sentence
+    selection over public NERC power-grid reports. The primary task is
+    `NERC report sentences + causal role/question -> evidence_sentence_ids`.
+    The model output is selected evidence sentence IDs; any causal summary is a
+    downstream packaging of selected evidence, not the primary target.
+
+    The dataset is the local 40-document agent-verified candidate benchmark at
+    `verification_pilot/agent_audit_40doc/`, containing 40 NERC reports or
+    report excerpts, 200 causal questions, 608 evidence sentence IDs, and five
+    causal roles per document: trigger_event, root_cause,
+    propagation_or_response, impact, and mitigation. Schema/evidence validation
+    has 0 errors. The labels are agent-rewritten and agent-verified candidate
+    labels, not human gold or expert gold. Some documents are event-focused
+    excerpts inside broader reliability or lessons reports, so claims must be
+    limited to evidence-supported causal/mechanism findings.
+
+    The proposed method is C²GES, a causal-role graph-enhanced evidence
+    sentence ranker implemented in `verification_pilot/scripts/run_c2ges.py`.
+    It ranks candidate sentences by combining query relevance, causal-role
+    compatibility, and lightweight causal-chain/graph consistency. The method
+    must be described as a lightweight causal-chain consistency reranker, not as
+    full structural causal inference, a full GNN, or a true counterfactual power
+    system simulator.
+
+    Experiments must compare at most eight main conditions: lead_k, tfidf_query,
+    tfidf_centroid, textrank_networkx, lexrank, causal_trigger_rank,
+    sbert_query, and c2ges_full. Ablations must use the existing C²GES variants:
+    c2ges_query_only, c2ges_no_role, c2ges_no_graph, and c2ges_full. Primary
+    metric is evidence_f1, maximized. Secondary metrics are precision, recall,
+    ROUGE-L over selected evidence text, role coverage, ablation deltas, and
+    qualitative case studies. The 40-document preflight results show c2ges_full
+    F1 0.2580, tfidf_query F1 0.2122, sbert_query F1 0.1972, and lead_k F1
+    0.0545. These numbers may be cited only as verified preflight artifacts;
+    final paper claims must use results actually produced by the Executor.
+
+    Target venue is IEEE Access. The contribution should be framed as an
+    evidence-grounded extractive causal summarization benchmark and a scoped
+    causal-role-aware reranking method for power grid maintenance reports. The
+    paper must not claim human-gold labels, broad state of the art summarization,
+    full GNN inference, or true counterfactual causal discovery.
+  domains:
+    - "power_systems"
+    - "natural_language_processing"
+  daily_paper_count: 10
+  quality_threshold: 4.0
+
+notifications:
+  channel: "console"
+  target: ""
+  on_stage_start: true
+  on_stage_fail: true
+  on_gate_required: true
+
+knowledge_base:
+  backend: "markdown"
+  root: "docs/kb/c2ges-causal-mechanism-ieeeaccess"
+
+openclaw_bridge:
+  use_cron: false
+  use_message: false
+  use_memory: false
+  use_sessions_spawn: false
+  use_web_fetch: false
+  use_browser: false
+
+llm:
+  provider: "openai-compatible"
+  base_url: "https://api.krill-ai.com/codex/v1"
+  api_key_env: "KRILL_API_KEY"
+  wire_api: "responses"
+  primary_model: "gpt-5.5"
+  fallback_models:
+    - "gpt-5.4"
+    - "gpt-5.4-mini"
+    - "gpt-5.3-codex-spark"
+
+security:
+  hitl_required_stages: [5, 9, 20]
+  allow_publish_without_approval: false
+  redact_sensitive_logs: true
+
+experiment:
+  mode: "sandbox"
+  time_budget_sec: 5400
+  max_iterations: 10
+  metric_key: "evidence_f1"
+  metric_direction: "maximize"
+  sandbox:
+    python_path: ".venv/bin/python3"
+    network_policy: "full"
+    pip_install: false
+    datasets_dir: "./datasets"
+  cli_agent:
+    provider: "codex"
+    model: "gpt-5.5"
+    timeout_sec: 600
+  repair:
+    skip_metric_diversity_repair: true
+  benchmark_agent:
+    enabled: false
+  figure_agent:
+    enabled: true
+    min_figures: 3
+    max_figures: 8
+    max_iterations: 3
+    render_timeout_sec: 30
+    use_docker: false
+    nano_banana_enabled: true
+    nano_banana_backend: "openai-compatible"
+    nano_banana_api_base: "https://new.apipudding.com/v1"
+    nano_banana_api_url: "https://new.apipudding.com/v1/chat/completions"
+    nano_banana_api_key_env: "GEMINI_API_KEY"
+    gemini_model: "[官逆C]Nano banana pro(大香蕉)"
+    strict_mode: false
+    dpi: 300
+    output_format: "python"
+
+export:
+  target_conference: "ieee_access"
+  authors: "Anonymous"
+  keywords:
+    - "extractive summarization"
+    - "causal evidence selection"
+    - "power grid maintenance reports"
+    - "NERC reliability reports"
+    - "causal-role reranking"
+  affiliations:
+    - index: "1"
+      text: "Dispatching and Control Center, State Grid Corporation, China"
+  corresponding_author: "Corresponding Author (email@example.com)"
+
+prompts:
+  custom_file: "paper_workspace/workspaces/c2ges-causal-mechanism-ieeeaccess/three-pack/prompts.yaml"
+
+research_policy:
+  policy_file: "paper_workspace/workspaces/c2ges-causal-mechanism-ieeeaccess/three-pack/research_policy.yaml"
+
+metaclaw_bridge:
+  enabled: false

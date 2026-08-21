@@ -1,0 +1,83 @@
+table,column,sqlite_type,not_null,primary_key,foreign_key,source_table,description
+networks,network_code,TEXT,0,1,,derived,Stable SimBench network identifier.
+networks,source_dataset,TEXT,1,0,,derived,Source dataset for networks.
+networks,scenario,INTEGER,1,0,,derived,Scenario for networks.
+networks,voltage_scope,TEXT,1,0,,derived,Voltage scope for networks.
+networks,settlement_type,TEXT,1,0,,derived,Settlement type for networks.
+networks,switch_representation,TEXT,1,0,,derived,Switch representation for networks.
+networks,base_power_mva,REAL,1,0,,derived,Base power mva for networks.
+voltage_levels,network_code,TEXT,1,1,networks.network_code,derived from bus,Stable SimBench network identifier.
+voltage_levels,voltage_level_code,INTEGER,1,2,,derived from bus,SimBench categorical voltage-level code.
+voltage_levels,nominal_kv,REAL,1,3,,derived from bus,Nominal bus voltage in kilovolts.
+voltage_levels,bus_count,INTEGER,1,0,,derived from bus,Bus count for voltage_levels.
+buses,bus_id,INTEGER,0,1,,bus,Connected bus identifier/foreign key.
+buses,network_code,TEXT,1,0,networks.network_code,bus,Stable SimBench network identifier.
+buses,name,TEXT,1,0,,bus,Name for buses.
+buses,nominal_kv,REAL,1,0,,bus,Nominal bus voltage in kilovolts.
+buses,bus_type,TEXT,0,0,,bus,Bus type for buses.
+buses,subnet,TEXT,0,0,,bus,Subnet for buses.
+buses,substation,TEXT,0,0,,bus,Substation for buses.
+buses,voltage_level_code,INTEGER,0,0,,bus,SimBench categorical voltage-level code.
+buses,in_service,INTEGER,1,0,,bus,Boolean service-state flag encoded as 0/1.
+buses,min_voltage_pu,REAL,0,0,,bus,Min voltage pu for buses.
+buses,max_voltage_pu,REAL,0,0,,bus,Max voltage pu for buses.
+lines,line_id,INTEGER,0,1,,line,Line id for lines.
+lines,network_code,TEXT,1,0,networks.network_code,line,Stable SimBench network identifier.
+lines,name,TEXT,1,0,,line,Name for lines.
+lines,from_bus_id,INTEGER,1,0,buses.bus_id,line,Origin bus foreign key.
+lines,to_bus_id,INTEGER,1,0,buses.bus_id,line,Destination bus foreign key.
+lines,standard_type,TEXT,0,0,,line,Standard type for lines.
+lines,length_km,REAL,1,0,,line,Length km for lines.
+lines,resistance_ohm_per_km,REAL,0,0,,line,Resistance ohm per km for lines.
+lines,reactance_ohm_per_km,REAL,0,0,,line,Reactance ohm per km for lines.
+lines,max_current_ka,REAL,0,0,,line,Max current ka for lines.
+lines,max_loading_percent,REAL,0,0,,line,Max loading percent for lines.
+lines,voltage_level_code,INTEGER,0,0,,line,SimBench categorical voltage-level code.
+lines,in_service,INTEGER,1,0,,line,Boolean service-state flag encoded as 0/1.
+transformers,transformer_id,INTEGER,0,1,,trafo,Transformer id for transformers.
+transformers,network_code,TEXT,1,0,networks.network_code,trafo,Stable SimBench network identifier.
+transformers,name,TEXT,1,0,,trafo,Name for transformers.
+transformers,hv_bus_id,INTEGER,1,0,buses.bus_id,trafo,Hv bus id for transformers.
+transformers,lv_bus_id,INTEGER,1,0,buses.bus_id,trafo,Lv bus id for transformers.
+transformers,rated_power_mva,REAL,1,0,,trafo,Rated power mva for transformers.
+transformers,hv_nominal_kv,REAL,1,0,,trafo,Hv nominal kv for transformers.
+transformers,lv_nominal_kv,REAL,1,0,,trafo,Lv nominal kv for transformers.
+transformers,vector_group,TEXT,0,0,,trafo,Vector group for transformers.
+transformers,tap_position,INTEGER,0,0,,trafo,Tap position for transformers.
+transformers,on_load_tap_changer,INTEGER,0,0,,trafo,On load tap changer for transformers.
+transformers,in_service,INTEGER,1,0,,trafo,Boolean service-state flag encoded as 0/1.
+loads,load_id,INTEGER,0,1,,load,Load id for loads.
+loads,network_code,TEXT,1,0,networks.network_code,load,Stable SimBench network identifier.
+loads,name,TEXT,1,0,,load,Name for loads.
+loads,bus_id,INTEGER,1,0,buses.bus_id,load,Connected bus identifier/foreign key.
+loads,active_power_mw,REAL,1,0,,load,Active power mw for loads.
+loads,reactive_power_mvar,REAL,1,0,,load,Reactive power mvar for loads.
+loads,maximum_active_power_mw,REAL,0,0,,load,Maximum active power mw for loads.
+loads,minimum_active_power_mw,REAL,0,0,,load,Minimum active power mw for loads.
+loads,profile,TEXT,0,0,,load,Profile for loads.
+loads,voltage_level_code,INTEGER,0,0,,load,SimBench categorical voltage-level code.
+loads,in_service,INTEGER,1,0,,load,Boolean service-state flag encoded as 0/1.
+generators,generator_id,INTEGER,0,1,,sgen,Generator id for generators.
+generators,network_code,TEXT,1,0,networks.network_code,sgen,Stable SimBench network identifier.
+generators,name,TEXT,1,0,,sgen,Name for generators.
+generators,bus_id,INTEGER,1,0,buses.bus_id,sgen,Connected bus identifier/foreign key.
+generators,active_power_mw,REAL,1,0,,sgen,Active power mw for generators.
+generators,reactive_power_mvar,REAL,1,0,,sgen,Reactive power mvar for generators.
+generators,rated_power_mva,REAL,0,0,,sgen,Rated power mva for generators.
+generators,maximum_active_power_mw,REAL,0,0,,sgen,Maximum active power mw for generators.
+generators,minimum_active_power_mw,REAL,0,0,,sgen,Minimum active power mw for generators.
+generators,generator_type,TEXT,0,0,,sgen,Generator type for generators.
+generators,physical_type,TEXT,0,0,,sgen,Physical type for generators.
+generators,profile,TEXT,0,0,,sgen,Profile for generators.
+generators,controllable,INTEGER,0,0,,sgen,Boolean generator controllability flag encoded as 0/1.
+generators,voltage_level_code,INTEGER,0,0,,sgen,SimBench categorical voltage-level code.
+generators,in_service,INTEGER,1,0,,sgen,Boolean service-state flag encoded as 0/1.
+switches,switch_id,INTEGER,0,1,,switch,Switch id for switches.
+switches,network_code,TEXT,1,0,networks.network_code,switch,Stable SimBench network identifier.
+switches,name,TEXT,0,0,,switch,Name for switches.
+switches,bus_id,INTEGER,1,0,buses.bus_id,switch,Connected bus identifier/foreign key.
+switches,element_id,INTEGER,1,0,,switch,Identifier of the element referenced by the polymorphic switch element_type.
+switches,element_type,TEXT,1,0,,switch,"SimBench switch target code: l=line, b=bus, t=transformer."
+switches,switch_type,TEXT,0,0,,switch,Switch type for switches.
+switches,closed,INTEGER,1,0,,switch,Boolean switch state encoded as 0/1.
+switches,voltage_level_code,INTEGER,0,0,,switch,SimBench categorical voltage-level code.

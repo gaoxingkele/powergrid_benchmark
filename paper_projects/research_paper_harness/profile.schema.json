@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "research-paper-harness-profile-v1",
+  "title": "Research Paper Harness profile",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "portfolio_id",
+    "workspace_root",
+    "authority",
+    "papers",
+    "stages",
+    "hard_rules",
+    "manual_gates"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "portfolio_id": {"type": "string", "minLength": 1},
+    "workspace_root": {"type": "string", "minLength": 1},
+    "authority": {
+      "type": "object",
+      "required": ["canonical_roots", "legacy_roots", "incident_roots", "required_paths", "expected_hashes"],
+      "properties": {
+        "canonical_roots": {"type": "array", "items": {"type": "string"}},
+        "legacy_roots": {"type": "array", "items": {"type": "string"}},
+        "incident_roots": {"type": "array", "items": {"type": "string"}},
+        "required_paths": {"type": "array", "items": {"type": "string"}},
+        "expected_hashes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["path", "sha256"],
+            "properties": {
+              "path": {"type": "string"},
+              "sha256": {"type": "string", "pattern": "^[A-Fa-f0-9]{64}$"},
+              "role": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "papers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "target", "manuscript", "pdf", "evidence_root"],
+        "properties": {
+          "id": {"type": "string"},
+          "title": {"type": "string"},
+          "target": {"type": "string"},
+          "manuscript": {"type": "string"},
+          "pdf": {"type": "string"},
+          "evidence_root": {"type": "string"}
+        }
+      }
+    },
+    "stages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "depends_on", "status", "gate", "artifacts", "commands", "auto_safe"],
+        "properties": {
+          "id": {"type": "string"},
+          "title": {"type": "string"},
+          "depends_on": {"type": "array", "items": {"type": "string"}},
+          "status": {"enum": ["complete", "pending", "blocked", "optional", "superseded"]},
+          "gate": {"type": "string"},
+          "artifacts": {"type": "array", "items": {"type": "string"}},
+          "commands": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["argv"],
+              "properties": {
+                "argv": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+                "cwd": {"type": "string"},
+                "note": {"type": "string"}
+              }
+            }
+          },
+          "auto_safe": {"type": "boolean"}
+        }
+      }
+    },
+    "manifest_paths": {"type": "array", "items": {"type": "string"}},
+    "hard_rules": {"type": "array", "items": {"type": "string"}},
+    "manual_gates": {"type": "array", "items": {"type": "string"}}
+  }
+}
+

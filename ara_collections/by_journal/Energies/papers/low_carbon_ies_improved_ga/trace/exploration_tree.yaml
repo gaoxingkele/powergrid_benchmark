@@ -1,0 +1,116 @@
+# Exploration Tree — Multi-Objective Optimization for Low-Carbon IES Operation Using IGA
+# Research DAG: nested tree with cross-edges (also_depends_on) forming a DAG.
+# Node types: question | experiment | dead_end | decision | pivot
+
+tree:
+  - id: N01
+    type: question
+    support_level: explicit
+    source_refs: ["§1"]
+    title: "Can an improved genetic algorithm with specialized crossover and mutation operators outperform standard MOEAs for low-carbon IES multi-objective optimization?"
+    description: "The paper investigates whether combining cyclic crossover, polynomial mutation, and constraint-prioritizing selection within a GA framework can simultaneously achieve low constraint violations and superior Pareto-optimal solutions for IES scheduling."
+    children:
+
+      - id: N02
+        type: question
+        support_level: explicit
+        source_refs: ["§1"]
+        title: "How should IES operational constraints — especially equality constraints (power and heat balance) — be handled in a multi-objective GA framework?"
+        description: "Existing heuristic approaches use penalty functions that treat equality constraints as soft constraints, leading to violations. The paper explores a constraint-prioritizing selection mechanism."
+        children:
+
+          - id: N03
+            type: decision
+            support_level: explicit
+            source_refs: ["§3.2", "§3.5"]
+            title: "Constraint-prioritizing parent selection with infeasible-solution elimination"
+            choice: "Use a three-tier selection principle: (1) feasible individuals ranked by non-dominated sorting; (2) feasible always beats infeasible; (3) among infeasible, smaller violation wins. Eliminate constraint-violating offspring."
+            alternatives:
+              - "Penalty function methods (used by MPSO and MABC) that add penalty terms to the objective function"
+              - "Feasibility relaxation (epsilon-constrained approach)"
+              - "Repair operators that fix infeasible solutions"
+            evidence: "Section 3.2 and 3.5 describe the three-tier principle; Table 1 compares constraint violations across methods"
+            children:
+
+              - id: N04
+                type: experiment
+                support_level: explicit
+                source_refs: ["Table 1"]
+                title: "Constraint handling comparison across all algorithms"
+                result: "GA variants with the proposed selection (IGA, MGA, SGA) achieve max violations <0.33 kW across all scenarios, while penalty-based MPSO shows 10.91-17.6 kW and MABC shows 2.5-4.8 kW."
+                evidence: [C03, C05, "Table 1"]
+                children: []
+
+      - id: N05
+        type: question
+        support_level: explicit
+        source_refs: ["§3.3"]
+        title: "Which crossover operator best preserves beneficial genetic structure for IES optimization?"
+        description: "The paper investigates alternatives to standard GA crossover that could better preserve advantageous parental gene combinations."
+        children:
+
+          - id: N06
+            type: decision
+            support_level: explicit
+            source_refs: ["§3.3"]
+            title: "Cyclic crossover for preserving genetic structure"
+            choice: "Use cyclic crossover, which creates offspring by exchanging genes along closed cycles between parents, preserving parental gene order while preventing duplicate combinations."
+            alternatives:
+              - "Standard single-point crossover"
+              - "Standard uniform crossover"
+              - "Simulated binary crossover (SBX)"
+            evidence: "Section 3.3 describes cyclic crossover; Figure 3 illustrates the mechanism; Figure 17 shows IGA (with cyclic crossover) Pareto-dominates MGA (without)"
+
+
+      - id: N07
+        type: question
+        support_level: explicit
+        source_refs: ["§3.4"]
+        title: "How should mutation rate be controlled to balance exploration and exploitation?"
+        description: "Fixed mutation rates can be either too aggressive (disrupting good solutions) or too conservative (insufficient exploration). The paper explores adaptive mutation."
+        children:
+
+          - id: N08
+            type: decision
+            support_level: explicit
+            source_refs: ["§3.4"]
+            title: "Adaptive polynomial mutation with dynamic distribution index"
+            choice: "Use polynomial mutation where the mutation amplitude follows a polynomial distribution with index βm starting at 1 and increasing linearly with iterations (βm = βmin_m + n)."
+            alternatives:
+              - "Uniform random mutation with fixed probability"
+              - "Gaussian mutation with fixed standard deviation"
+              - "Non-uniform mutation with generation-dependent range"
+            evidence: "Section 3.4 defines polynomial mutation via Eq. (32)-(36); βm = βmin_m + n in Eq. (36)"
+            children: []
+
+      - id: N09
+        type: experiment
+        support_level: explicit
+        source_refs: ["§4.2"]
+        title: "Scenario 1 — Normal operation (PV + wind available)"
+        result: "IGA achieves max violation of 0.20 kW, o1=3202.13 CNY, o2=4216.66 m3. IGA Pareto-dominates MGA. Reduced electricity purchases during peak hours."
+        evidence: [C01, C03, C04, "Figure 5", "Figure 6", "Figure 7", "Figure 8", "Table 1"]
+        children:
+          - id: N10
+            type: experiment
+            support_level: explicit
+            source_refs: ["§4.5", "Figure 17"]
+            title: "Pareto front comparison — IGA vs MGA (Scenario 1)"
+            result: "IGA's Pareto front lies to the lower-left of MGA's front, demonstrating superior solutions in both cost and emissions. IGA achieves o1=3202.13 vs MGA o1=3290.70, and o2=4216.66 vs MGA o2=4330.03."
+            evidence: [C01, C04, "Figure 17"]
+
+      - id: N11
+        type: experiment
+        support_level: explicit
+        source_refs: ["§4.3"]
+        title: "Scenario 2 — PV outage with high electricity prices"
+        result: "IGA maintains max violation of 0.29 kW, o1=8094.54 CNY, o2=5246.46 m3. Avoids peak-price electricity purchases. Efficiently utilizes wind energy."
+        evidence: [C03, "Figure 9", "Figure 10", "Figure 11", "Figure 12", "Table 1"]
+
+      - id: N12
+        type: experiment
+        support_level: explicit
+        source_refs: ["§4.4"]
+        title: "Scenario 3 — PV outage with normal prices"
+        result: "IGA maintains max violation of 0.30 kW, o1=3381.65 CNY, o2=4948.82 m3. Reduces electricity purchases during 15:00-17:00 peak; increases CHP output to compensate."
+        evidence: [C03, "Figure 13", "Figure 14", "Figure 15", "Figure 16", "Table 1"]

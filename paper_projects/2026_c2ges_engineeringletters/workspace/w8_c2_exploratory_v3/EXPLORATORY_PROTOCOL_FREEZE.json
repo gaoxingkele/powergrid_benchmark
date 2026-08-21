@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-08-05T07:39:47.5163818Z",
+  "status": "frozen_before_outcome_inspection_or_aggregation_by_round2_revision_agent",
+  "scope_note": "This is a prospectively specified exploratory analysis of pre-existing frozen source ledgers plus one newly executed cached-model baseline. It is not prospective data collection and does not modify W6 canonical-v2 primary gates.",
+  "outcome_blind_inventory": {
+    "inspected_before_freeze": [
+      "prediction JSON field names",
+      "mode names and row counts",
+      "source file presence",
+      "executable mode definitions",
+      "local model-cache presence, snapshot references, sizes, and hashes"
+    ],
+    "not_inspected_before_freeze": [
+      "per-row precision, recall, or F1",
+      "mode aggregate performance",
+      "mode contrasts or confidence intervals"
+    ],
+    "source_schema": ["qid", "doc_id", "underlying_document_id", "wikipedia_title", "gold_role", "selector_role", "mode", "k", "predicted_sentence_ids", "gold_sentence_ids", "candidate_scores", "precision", "recall", "f1"],
+    "source_modes_each_run": {
+      "full": 6000,
+      "query_only": 6000,
+      "no_role": 6000,
+      "no_graph": 6000,
+      "tfidf": 6000,
+      "bm25": 6000,
+      "sbert": 6000,
+      "lead_k": 6000,
+      "lexcue": 6000
+    }
+  },
+  "unchanged_evaluation_contract": {
+    "test_instances": 1500,
+    "test_documents": 145,
+    "test_sha256": "fff475583c9603673134614b06d17229f6711f3e55e80ac5412462845bdc63b8",
+    "candidate_pool": "identical supplied-document sentence candidates",
+    "metric": "macro exact sentence-ID evidence F1",
+    "cutoffs": [1, 3, 5, 10],
+    "primary_cutoff": 3,
+    "source_protocol": "predicted-label",
+    "source_downstream_seeds": [2026, 2027, 2028, 2029, 2030]
+  },
+  "planned_arms_in_display_order": [
+    {"id": "bm25", "source": "frozen_mode:bm25", "role": "reference"},
+    {"id": "query_only", "source": "frozen_mode:query_only", "definition": "equal lexical-plus-dense query channel only"},
+    {"id": "dense_only", "source": "frozen_mode:sbert", "definition": "frozen MiniLM cosine only"},
+    {"id": "no_local", "source": "frozen_mode:no_graph", "definition": "full trained head and mixture with local channel removed at inference"},
+    {"id": "no_role_no_floor", "source": "frozen_mode:no_role", "definition": "role score and its floor removed at inference; retained query/local weights are used and result min-max normalized"},
+    {"id": "full", "source": "frozen_mode:full", "definition": "predicted-label full C2GES"},
+    {"id": "cross_encoder", "source": "new_cached_baseline", "definition": "zero-shot cross-encoder/ms-marco-MiniLM-L-6-v2 claim-sentence reranker"}
+  ],
+  "modern_baseline": {
+    "selected_model": "cross-encoder/ms-marco-MiniLM-L-6-v2",
+    "snapshot_ref": "c5ee24cb16019beea0893ab7796b1df96625c6b8",
+    "snapshot_tree_sha256": "2c58efb06d3dac978b77bdb9b075b1b302176dca53b5fa7a30f32a85fb4f879b",
+    "snapshot_files": 6,
+    "snapshot_bytes": 91815758,
+    "device": "cpu",
+    "batch_size": 64,
+    "max_length": 512,
+    "training": "none",
+    "query_input": "claim text only",
+    "tie_rule": "stable descending score then original sentence order",
+    "runtime_boundary": "model load plus scoring and top-K extraction over the complete test partition; report wall time and peak RSS"
+  },
+  "planned_single_multiplicity_family": {
+    "cutoff": 3,
+    "contrasts": [
+      "query_only_minus_bm25", "dense_only_minus_bm25", "no_local_minus_bm25",
+      "no_role_no_floor_minus_bm25", "full_minus_bm25", "cross_encoder_minus_bm25",
+      "full_minus_query_only", "full_minus_dense_only", "full_minus_no_local",
+      "full_minus_no_role_no_floor", "cross_encoder_minus_full"
+    ],
+    "point_estimate": "mean claim-level paired F1 difference; average the five source-seed values per claim before deterministic contrasts",
+    "uncertainty": "10000-draw paired document-cluster percentile bootstrap with replacement, all claims retained in each sampled document, RNG seed 20260805 plus contrast index",
+    "raw_p": "two-sided bootstrap sign probability, twice the smaller tail proportion, capped at one",
+    "multiplicity": "Holm adjustment across all 11 frozen contrasts",
+    "exploratory_positive_flag": "mean > 0, percentile CI lower bound > 0, and Holm-adjusted p < 0.05",
+    "secondary_cutoffs": "K=1,5,10 are descriptive only and cannot create or rescue an exploratory positive flag"
+  },
+  "reporting_contract": [
+    "Report every planned arm at every planned cutoff regardless of result.",
+    "Report all 11 planned K=3 contrasts with raw and Holm-adjusted p-values and bootstrap intervals.",
+    "Label source-mode comparisons as prospectively specified extraction from pre-existing ledgers, not prospectively collected experiments.",
+    "Do not alter, merge with, or reinterpret W6 canonical-v2 role/BM25 gates.",
+    "Report modern-baseline runtime under its exact boundary; do not call non-comparable historical full-script times a Pareto frontier."
+  ],
+  "frozen_source_hashes": {
+    "c2ges_learnable.py": "1dc73962d7e0c9b77fc59533de1484205f94e12376e7bee215336b464ea275f6",
+    "prepared_baselines/run_crossencoder_baseline.py": "1a2da6ce2cf71a60ac2f226d83b8d11ee645e34b3ff08ff0d1126fb8671bfc3f",
+    "prepared_baselines/common.py": "b3965a0fdd69b0df82149408b97dc067d2e951dc16b8f39bf760eb1d6cb1826a"
+  }
+}

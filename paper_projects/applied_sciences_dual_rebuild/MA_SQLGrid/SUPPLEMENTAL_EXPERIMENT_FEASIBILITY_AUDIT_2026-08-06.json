@@ -1,0 +1,271 @@
+{
+  "schema_version": "ma-sqlgrid-supplemental-experiment-feasibility-audit-v1",
+  "date": "2026-08-06",
+  "scope": "read_only_inventory_and_execution_plan",
+  "execution_performed": false,
+  "bird_calls_made": 0,
+  "manuscript_modified": false,
+  "overall_assessment": "TECHNICALLY_EXECUTABLE_HUMAN_GATES_DOMINATE",
+  "targeted_gaps": [
+    "cross-database validity",
+    "independent baselines",
+    "sealed external validation",
+    "repeated generation"
+  ],
+  "available_compute": {
+    "gpu": "NVIDIA GeForce RTX 3090",
+    "vram_total_mib": 24576,
+    "vram_free_at_audit_mib": 23200,
+    "gpu_utilization_at_audit_percent": 4,
+    "driver": "610.62",
+    "formal_policy": "one llama-server/model slot at a time; sequential Qwen then Granite"
+  },
+  "available_models": [
+    {
+      "id": "qwen2.5-coder-7b-instruct-q4_k_m@13fb94bf",
+      "bytes": 4683073536,
+      "sha256": "509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c",
+      "license": "Apache-2.0",
+      "status": "LOCAL_HASH_PINNED"
+    },
+    {
+      "id": "granite-3.3-8b-instruct-q4_k_m@e40e9dd",
+      "bytes": 4942873344,
+      "sha256": "77bcee066a76dcdd10d0d123c87e32c8ec2c74e31b6ffd87ebee49c9ac215dca",
+      "license": "Apache-2.0",
+      "status": "LOCAL_HASH_PINNED"
+    }
+  ],
+  "available_datasets": {
+    "GridDB": {
+      "questions": 180,
+      "tables": 8,
+      "rows": 98,
+      "role": "development-visible controlled factorial benchmark"
+    },
+    "BIRD_Mini_Dev": {
+      "questions": 500,
+      "databases": 11,
+      "gold_preflight": "500/500 PASS under Python 3.10.11 and SQLite 3.40.1",
+      "role": "development-visible public cross-database comparator; not sealed"
+    },
+    "RTS_GMLC": {
+      "tables": 10,
+      "rows": 360530,
+      "current_candidates": 55,
+      "template_families": 11,
+      "role": "power-grid external candidate database"
+    },
+    "SimBench": {
+      "tables": 8,
+      "current_candidates": 36,
+      "template_families": 6,
+      "role": "power-grid external candidate database"
+    }
+  },
+  "bird_freeze": {
+    "protocol_id": "MA-PUBLIC-BIRD-MINIDEV-v1.0",
+    "freeze_sha256": "29C780C63A2DC2BAAE221CFCE52252C716D8720DBEECDC2F7A2FDD5756B42AF5",
+    "status": "FROZEN_NOT_RUN",
+    "technical_audit": "PASS 39/39",
+    "formal_outputs": 0,
+    "expected_generation_calls": 5000,
+    "expected_final_predictions": 4000,
+    "methods": [
+      "B0_DIRECT: full schema and evidence, one call",
+      "B1_DECOMP: schema links plus clause plan, one call",
+      "B2_SCHEMA_SELECT: deterministic BM25 schema selection, one call",
+      "B3_EXEC_REPAIR: initial plus mandatory feedback-bound second call"
+    ],
+    "human_gate": "A real human must create an approval JSON binding the exact freeze SHA and acknowledging 5000 calls.",
+    "claim_boundary": "Independent transparent public baselines; not DKASQL reproduction and not sealed validation."
+  },
+  "external_current_state": {
+    "questions": 91,
+    "rts_questions": 55,
+    "simbench_questions": 36,
+    "factorial_cells_per_model": 364,
+    "human_reviews_complete": 0,
+    "sealed_items": 0,
+    "existing_qwen_diagnostic_calls": 364,
+    "existing_qwen_executable": 321,
+    "existing_qwen_auto_reference_matches": 15,
+    "canonical_eligible": false,
+    "review_packet": "READY for two independent real reviewers plus third-person adjudication",
+    "important_boundary": "The existing 91 are development-visible and cannot be made sealed retroactively."
+  },
+  "observed_runtime_calibration": [
+    {
+      "run": "GridDB Qwen factorial",
+      "calls": 720,
+      "summed_latency_hours": 0.08,
+      "mean_seconds_per_call": 0.40
+    },
+    {
+      "run": "GridDB Granite factorial",
+      "calls": 720,
+      "summed_latency_hours": 0.15,
+      "mean_seconds_per_call": 0.77
+    },
+    {
+      "run": "RTS/SimBench Qwen diagnostic",
+      "calls": 364,
+      "summed_latency_hours": 0.04,
+      "mean_seconds_per_call": 0.35
+    }
+  ],
+  "priority_matrix": [
+    {
+      "priority": "P0",
+      "experiment": "BIRD frozen public comparator",
+      "gap_addressed": ["cross-database validity", "independent baselines"],
+      "questions": 500,
+      "databases": 11,
+      "models": 2,
+      "generation_calls": 5000,
+      "estimated_gpu_hours": "3-6; reserve one uninterrupted 8-hour window",
+      "estimated_cpu_audit_hours": "2-4",
+      "statistics": "Per-database rates and failures; predeclared B2-vs-B0, B3-vs-B0, B3-vs-B2 paired contrasts within each backbone plus cross-backbone modifiers; exact database-cluster sign enumeration over 2^11=2048 assignments; database-cluster composition-sensitivity bootstrap; Holm family of nine.",
+      "deliverables": [
+        "5000 immutable call rows and 4000 final prediction/score rows",
+        "model/prompt/data/runtime hash manifests and incident ledger",
+        "independent re-execution audit of all 4000 final predictions",
+        "per-database CSV/TeX tables, paired-effect plot, error taxonomy",
+        "bounded manuscript comparison that explicitly excludes DKASQL reproduction"
+      ],
+      "human_dependencies": [
+        "explicit launch approval bound to freeze SHA 29C780...B42AF5",
+        "author decision to spend the 5000-call compute budget"
+      ],
+      "readiness": "READY_AFTER_HUMAN_APPROVAL"
+    },
+    {
+      "priority": "P1A",
+      "experiment": "Qualified review and unsealed external evaluation on the existing 91 RTS-GMLC/SimBench candidates",
+      "gap_addressed": ["expert-checked external validity", "domain error analysis"],
+      "questions": 91,
+      "models": 2,
+      "conditions": 4,
+      "generation_calls_after_adjudication": 728,
+      "estimated_gpu_hours": "0.5-1",
+      "estimated_human_hours": "35-55 total: two complete reviews plus adjudication/re-review",
+      "statistics": "Field coverage, raw agreement, Cohen kappa and Gwet AC1; 17-family-cluster paired randomization and bootstrap; dataset-stratified exact denominators; no use of the two datasets themselves as inferential clusters.",
+      "deliverables": [
+        "two locked completed review forms",
+        "agreement report and conflict ledger",
+        "third-person adjudication and re-executed revised SQL hashes",
+        "new two-backbone 91x4 run; prior Qwen diagnostic retained only as development history",
+        "dataset/family error table and external-effect forest plot"
+      ],
+      "human_dependencies": [
+        "two independent qualified power/data reviewers",
+        "one real adjudicator",
+        "source-license/redistribution review"
+      ],
+      "readiness": "PACKET_READY_HUMAN_REVIEW_REQUIRED",
+      "claim_boundary": "Human-reviewed but unsealed; cannot by itself establish untouched test performance."
+    },
+    {
+      "priority": "P1B",
+      "experiment": "New genuinely sealed RTS-GMLC/SimBench confirmatory set",
+      "gap_addressed": ["sealed external validation"],
+      "recommended_questions": 60,
+      "allocation": "30 RTS-GMLC and 30 SimBench; at least 12 family/SQL-structure strata",
+      "models": 2,
+      "conditions": 4,
+      "generation_calls": 480,
+      "estimated_gpu_hours": "0.5-1",
+      "estimated_human_hours": "40-70 for independent authoring/deep rewriting, dual review, leakage audit and adjudication",
+      "statistics": "All-attempt execution accuracy/agreement with Wilson descriptive intervals; paired family-cluster exact randomization where cluster count permits; family-stratified bootstrap; dataset-specific denominators; no post-unsealing exclusions.",
+      "deliverables": [
+        "access-controlled hidden question/gold package",
+        "authoring and qualification attestations",
+        "duplicate, normalized-SQL, template-family and semantic leakage audit against GridDB and the existing 91",
+        "pre-unsealing method/configuration freeze",
+        "single no-drop 480-call sealed batch and independent re-execution audit",
+        "sealed results table, failure appendix and audit trail"
+      ],
+      "human_dependencies": [
+        "independent real domain authors who are outside the model/prompt development loop",
+        "two qualified reviewers and a third adjudicator",
+        "custodian who controls access until the entire registered batch is complete",
+        "license clearance"
+      ],
+      "readiness": "DESIGN_READY_CONTENT_NOT_AUTHORED",
+      "nonnegotiable": "The current 91 development-visible items must not be relabeled sealed."
+    },
+    {
+      "priority": "P2",
+      "experiment": "Five-seed repeated GridDB factorial",
+      "gap_addressed": ["generation repeatability", "seed sensitivity"],
+      "questions": 180,
+      "conditions": 4,
+      "models": 2,
+      "seeds": 5,
+      "generation_calls": 7200,
+      "estimated_gpu_hours": "2-4",
+      "statistics": "Freeze one nonzero sampling configuration before generation; all five seeds use identical prompts and full denominators. Report execution mean, range and within-question variance; SQL-string and denotation stability; hierarchical logistic model or GEE with question/structural-cluster dependence and seed effect; paired cluster bootstrap and Holm-adjusted planned contrasts.",
+      "deliverables": [
+        "five-seed protocol freeze and deterministic call order",
+        "7200 prediction/score rows with no cherry-picking or dropped failures",
+        "seed-by-cell stability table and heatmap",
+        "question-level disagreement/error-transition ledger",
+        "independent aggregate recomputation"
+      ],
+      "human_dependencies": [
+        "author approval of the added stochastic protocol and compute scope"
+      ],
+      "readiness": "CODE_REUSE_HIGH_NEW_PROTOCOL_FREEZE_REQUIRED",
+      "warning": "Changing seeds at temperature 0 is not a meaningful stochastic replication; a common nonzero sampling configuration must be frozen and all five runs regenerated."
+    },
+    {
+      "priority": "P3",
+      "experiment": "Cross-evidence synthesis and failure robustness",
+      "gap_addressed": ["practical interpretation", "failure-mode robustness"],
+      "generation_calls": 0,
+      "estimated_cpu_hours": "2-4 after P0-P2",
+      "statistics": "Predefined error taxonomy, database/family/difficulty strata, no pooling that hides failed calls, sensitivity excluding empty-reference cases only as labeled diagnostics, and concordance of effect directions across GridDB, BIRD and the two power-grid datasets.",
+      "deliverables": [
+        "cross-dataset evidence-tier table",
+        "effect-direction matrix",
+        "failure and empty-result sensitivity appendix",
+        "claim-to-artifact ledger and updated review-response matrix"
+      ],
+      "human_dependencies": [
+        "domain interpretation and author approval of revised claims"
+      ],
+      "readiness": "BLOCKED_ON_UPSTREAM_RESULTS"
+    }
+  ],
+  "full_program_budget": {
+    "new_generation_calls": 13408,
+    "breakdown": {
+      "BIRD": 5000,
+      "reviewed_unsealed_external": 728,
+      "sealed_external": 480,
+      "five_seed_GridDB": 7200
+    },
+    "estimated_gpu_hours": "6-12 with one RTX 3090; reserve 14 hours including server transitions and validation",
+    "estimated_cpu_postprocessing_hours": "6-10",
+    "estimated_human_hours": "75-125, dominated by external authoring/review/adjudication and declarations",
+    "paid_api_calls": 0
+  },
+  "recommended_sequence": [
+    "Obtain BIRD launch decision and recruit external reviewers/authors in parallel.",
+    "Freeze the five-seed GridDB and new sealed-set protocols before any new generation.",
+    "Run BIRD sequentially Qwen then Granite, preserve incidents, then independently audit before analysis.",
+    "Complete review/adjudication of the existing 91 and separately create/leakage-audit the new hidden set.",
+    "Run the reviewed-unsealed and sealed external batches only after their respective gates pass.",
+    "Run the five-seed GridDB factorial under one frozen stochastic configuration.",
+    "Perform independent statistical recomputation and integrate only evidence whose gate is closed."
+  ],
+  "hard_prohibitions": [
+    "Do not run BIRD without the exact human approval companion.",
+    "Do not describe BIRD as sealed or as DKASQL reproduction.",
+    "Do not relabel the current 91 external candidates as sealed.",
+    "Do not use agent review as qualified human domain review.",
+    "Do not use the existing Qwen external diagnostic as post-adjudication canonical evidence.",
+    "Do not vary one factor at a time after observing results or drop failed generations.",
+    "Do not run Qwen and Granite servers concurrently on the single formal GPU slot."
+  ]
+}

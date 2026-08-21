@@ -1,0 +1,2241 @@
+Article
+
+TRACE-MOEA: Traceable Multi-Objective Portfolio
+Optimization for Power-Grid Investment Review
+Yubin Lin, Jiyu Li, Xiaofei Ruan, Xiaoyu Huang, Dishan Yang
+
+
+                                          Economic and Technological Research Institute of State Grid Fujian Electric Power Co., Ltd., Fuzhou 350000,
+                                             Fujian, China
+                                          * Correspondence: 18606932711@163.com (Y. Lin)
+
+
+                                          Abstract                                                                                                       1
+
+
+                                          Utilities reviewing large grid-project queues need portfolio-aware optimization together                       2
+
+                                          with a record of the interventions that shape each recommendation. TRACE-MOEA com-                             3
+
+                                          bines preference-guided ranking, deterministic budget repair, and a quarantined decision                       4
+
+                                          trace that records repair drops and preference-elite injections without entering the evalu-                    5
+
+                                          ation metric. On a reproducible five-objective benchmark of 120 candidate projects, the                        6
+
+                                          method reaches pooled mean hypervolume 0.17425 across seven review scenarios and 30                            7
+
+                                          seeds per stochastic method, 0.89% above NSGA-II (0.17270). Among 28 comparisons with                          8
+
+                                          four stochastic baselines, TRACE-MOEA has 27 positive mean differences and 24 Holm-                            9
+
+                                          significant wins, with no significant loss; 21 gaps against three deterministic ranking rules                 10
+
+                                          are descriptive and all favor TRACE-MOEA. A separate 270-run budget scan yields higher                        11
+
+                                          hypervolume than R-NSGA-II and NSGA-II at all three tested budgets. Component attribu-                        12
+
+                                          tion is narrower: removing preference adaptation changes pooled hypervolume by 0.17%,                         13
+
+                                          and the direct contrast is unresolved after cross-scenario correction. The decision trace                     14
+
+                                          covers 98.6% of projects in returned fronts, but its effect on human review remains untested.                 15
+
+                                          Public reliability and project-outcome checks provide descriptive external consistency                        16
+
+                                          rather than validated review performance.                                                                     17
+
+
+
+                                          Keywords: power grid investment review; project portfolio selection; multi-objective                          18
+
+                                          evolutionary algorithm; preference adaptation; decision traceability; hypervolume; external                   19
+
+                                          validity backtest                                                                                             20
+
+
+
+
+                                          0.1. Introduction                                                                                             21
+
+
+                                               Grid operators face more candidate investments than available capital can support.                       22
+
+                                          The queue includes line reinforcement, protection and automation retrofits, storage, and                      23
+
+                                          renewable-support installations. Expansion-planning research offers mature tools for sizing                   24
+
+                                          and routing assets under uncertainty [1,2]. A review board faces a different task: select                     25
+
+                                          from predefined projects under a budget, balance reliability, renewable accommodation,                        26
+
+                                          and schedule risk, and justify each inclusion to regulators and stakeholders.                                 27
+
+
+Received:                                      The instruments that boards actually use come from multi-criteria decision analysis                      28
+
+Accepted:                                 (MCDA). The AHP and TOPSIS families dominate energy investment appraisal [3,4] and                            29
+
+Published:                                continue to be refined for grid asset prioritization at this journal [5]. Their strength is                   30
+
+Copyright: © 2026 by the authors.         procedural transparency: weights, pairwise judgments, and closeness scores can all be                         31
+Submitted to Energies for possible open   minuted. Their structural weakness is independent project scoring, which overlooks                            32
+access publication under the terms and
+                                          budget crowding-out and portfolio-level trade-offs. Exact portfolio methods such as Robust                    33
+conditions of the Creative Commons
+Attribution (CC BY) license.
+                                          Portfolio Modeling address this issue for small pools [6,7], but richer dependencies and                      34
+
+
+
+
+Version August 13, 2026 submitted to Energies                                                                       https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                   2 of 23
+
+
+
+                                    larger combinatorial pools can make them computationally difficult. MOEAs offer scalable              35
+
+                                    approximate search [8,9], although a converged front alone does not explain why a project             36
+
+                                    appears in a recommendation.                                                                          37
+
+                                          TRACE-MOEA is designed to produce both portfolios and review evidence. A                        38
+
+                                    preference-adaptive layer maintains objective-weight vectors and injects their best-response          39
+
+                                    portfolios as elites. Every five generations, the vectors are perturbed and retained according        40
+
+                                    to the dispersion of their induced responses. Deterministic repair removes low-benefit                41
+
+                                    selections until the budget is met. A quarantined archive timestamps repair drops and                 42
+
+                                    preference-elite injections; no trace statistic enters an objective, constraint, or selection         43
+
+                                    decision.                                                                                             44
+
+                                          Because genuine utility review records with feasibility labels are confidential, evalua-        45
+
+                                    tion is conducted on a reproducible proxy benchmark. The pool of 120 projects is generated            46
+
+                                    by published deterministic rules from RTS-GMLC zones, SimBench networks, and meta-                    47
+
+                                    data from 40 cached public NERC reliability reports. Seven scenarios cover portfolio                  48
+
+                                    optimization, distribution-only review, reliability and renewable preferences, budget tight-          49
+
+                                    ening, preference-aware support, and traceability. A five-objective formulation encodes               50
+
+                                    the investment-effectiveness lens. A two-rung external-consistency ladder then checks                 51
+
+                                    the selected portfolios against a NERC-derived rule and against historical MISO MTEP16                52
+
+                                    project outcomes.                                                                                     53
+
+                                          The paper makes three contributions:                                                            54
+
+
+                                    1.    An inspectable portfolio-search architecture. TRACE-MOEA combines a constrained                 55
+
+                                          non-dominated sorting kernel with preference-vector updates and deterministic bud-              56
+
+                                          get repair. A quarantined output channel records preference-elite injections and repair         57
+
+                                          drops without feeding trace variables back into the objectives, constraints, or selection       58
+
+                                          rule.                                                                                           59
+
+                                    2.    A reproducible evaluation for large grid-project queues. The five-objective bench-              60
+
+                                          mark contains 120 candidates in six archetypes derived from RTS-GMLC, SimBench,                 61
+
+                                          and public NERC metadata. Seven review scenarios, 30 seeded runs, general-purpose               62
+
+                                          and preference-based optimizers, component controls, and a matched three-budget                 63
+
+                                          scan evaluate front quality, preference distance, computation, and trace production.            64
+
+                                    3.    A separation of optimization quality, component effects, and external consistency.              65
+
+                                          The complete framework improves pooled proxy hypervolume over NSGA-II and the                   66
+
+                                          implemented R-NSGA-II control, whereas the preference-layer removal is unresolved.              67
+
+                                          The trace covers 98.6% of projects in returned fronts. NERC and MTEP16 diagnostics              68
+
+                                          then test whether selected portfolios conflict with public risk and outcome records             69
+
+                                          without treating those checks as expert-validated review performance.                           70
+
+
+                                         The contribution is an inspectable portfolio-search workflow. The optimizer produces             71
+
+                                    competitive proxy fronts under the tested review scenarios, and the trace supplies a                  72
+
+                                    machine-readable history of preference protection and repair drops. These properties                  73
+
+                                    are measured separately: the 0.17% preference-ablation difference does not establish an               74
+
+                                    optimization benefit from adaptation, and trace coverage does not measure its value in                75
+
+                                    contested human decisions.                                                                            76
+
+                                         Section 2 situates the work in three literatures. Section 3 defines the problem and the          77
+
+                                    public benchmark. Section 4 details the algorithm. Section 5 describes the experimental               78
+
+                                    protocol, Section 6 the results, Section 7 the discussion, Section 8 the limitations, and Section     79
+
+                                    9 concludes.                                                                                          80
+
+
+
+                                                                                                                                          81
+
+
+
+
+                                                                                                     https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                  3 of 23
+
+
+
+                                    0.2. Related Work                                                                                    82
+
+
+                                         Three research threads intersect in this work: investment portfolio decision methods            83
+
+                                    for power grids, preference-guided evolutionary multi-objective optimization, and the                84
+
+                                    traceability of algorithmic decisions.                                                               85
+
+
+
+                                    0.2.1. Grid Investment Decisions: Optimization and Review Scoring                                    86
+
+
+                                          Transmission expansion planning treats the network topology itself as the decision             87
+
+                                    variable and has been surveyed comprehensively from both the modeling [1] and the                    88
+
+                                    practice side [2]; stochastic engineering-economic formulations bring market and regulatory          89
+
+                                    uncertainty into the objective [10]. The present work addresses a different sub-problem:             90
+
+                                    selecting from a pre-specified list of candidate projects under a hard budget, which is the          91
+
+                                    institutional form of most utility investment cycles.                                                92
+
+                                          For this sub-problem, the energy-domain literature relies heavily on MCDA. The                 93
+
+                                    surveys of Wang et al. [3] and Kumar et al. [4] document the use of AHP and TOPSIS across            94
+
+                                    energy investment appraisal tasks, and this tradition remains active: recent studies combine         95
+
+                                    fuzzy-AHP with distribution-transformer maintenance priorities [5] and explainable multi-            96
+
+                                    criteria scoring with strategic energy-investment ranking [33]. Portfolio-explicit alternatives      97
+
+                                    exist in operational research. Robust Portfolio Modeling (RPM) computes non-dominated                98
+
+                                    project portfolios under incomplete preference information [6] and has been applied to               99
+
+                                    infrastructure maintenance programming [7].                                                          100
+
+                                          Recent power-system planning studies have strengthened the application layer                   101
+
+                                    through coordinated transmission-storage planning [29], interruption-cost estimation for             102
+
+                                    reliability investment [30], grid-side storage investment-return analysis [31], and hybrid           103
+
+                                    exact-heuristic treatment of non-analytical investment costs [32]. These studies provide in-         104
+
+                                    creasingly detailed engineering or economic validation, but they optimize system expansion           105
+
+                                    or asset configuration rather than a reviewable selection process for a large, pre-specified         106
+
+                                    project queue. Hybrid grid-investment models also couple risk and benefit dimensions                 107
+
+                                    using MCDA fronts [11]. The remaining gap is therefore not portfolio optimization alone. It          108
+
+                                    is the combination of portfolio-level search over more than one hundred candidates, online           109
+
+                                    preference adaptation, active budget repair, and an exported decision record that can be             110
+
+                                    inspected independently of the optimization metric.                                                  111
+
+
+
+                                    0.2.2. Preference-Guided Evolutionary Multi-Objective Optimization                                   112
+
+
+                                         Dominance-based MOEAs [8] and decomposition-based ones [9,12] treat all trade-off               113
+
+                                    directions as equally interesting, which motivated two decades of research on preference             114
+
+                                    injection into evolutionary multi-objective optimization. Representative approaches include          115
+
+                                    reference-point guidance [13], achievement-scalarizing function methods [14], preference-            116
+
+                                    modified dominance relations [15], and comprehensive taxonomies of a priori, interactive,            117
+
+                                    and a posteriori preference articulation [16,17].                                                    118
+
+                                         Two developments in this thread are particularly relevant to the present design. RVEA           119
+
+                                    demonstrated that reference vectors can be adapted during the run to the geometry of the             120
+
+                                    objective space [18], establishing run-time preference adaptation as a legitimate mechanism–         121
+
+                                    though on continuous benchmarks with no constraint repair and no decision recording.                 122
+
+                                    The second is the field’s empirical evaluation of preference guidance. Li et al. [19] showed         123
+
+                                    that measuring preference-based EMO fairly is itself a hard problem, and a subsequent                124
+
+                                    holistic study found that reference-point guidance can degrade search performance on                 125
+
+                                    some problem classes [20]. The present results extend that caution to a constrained binary           126
+
+                                    portfolio problem: the preference-adaptive layer contributes only weakly on top of a                 127
+
+                                    well-repaired constrained kernel. What no existing work in this thread provides is the               128
+
+                                    specific combination required here: adaptive preference structure on a budget-repaired               129
+
+
+
+
+                                                                                                    https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                          4 of 23
+
+
+
+                                    combinatorial problem, with the preference decisions retained for downstream review                          130
+
+                                    rather than discarded after optimization.                                                                    131
+
+
+
+                                    0.2.3. Traceability and Explainability of Algorithmic Decisions                                              132
+
+
+                                         The explainable AI (XAI) literature has matured a vocabulary of transparency and                        133
+
+                                    post-hoc explanation [21] and an account of what human decision-makers accept as ex-                         134
+
+                                    planations [22], but the object of study is typically the learned predictor rather than the                  135
+
+                                    optimization pipeline. The energy-domain XAI survey of Machlev et al. [23] finds ap-                         136
+
+                                    plications concentrated in forecasting and security assessment, not in optimization. For                     137
+
+                                    metaheuristics specifically, explainability has been identified as an open research direction                138
+
+                                    rather than an available toolbox [24].                                                                       139
+
+                                         Provenance research supplies taxonomies of why, how, and where records are gen-                         140
+
+                                    erated [25], while the W3C PROV recommendation standardizes derivation records [26].                         141
+
+                                    The algorithmic-accountability literature further distinguishes process artifacts generated                  142
+
+                                    during computation from post-hoc reconstructions [27]. TRACE-MOEA applies these                              143
+
+                                    ideas inside an MOEA: the decision trace records search interventions as they occur and is                   144
+
+                                    quarantined from the evaluation objective.                                                                   145
+
+
+
+                                    0.2.4. Differentiation from the Companion Study                                                              146
+
+
+                                          BiLo-NSGA [28] uses the same public candidate generator but a different mechanism.                     147
+
+                                    It modifies variation through insertion, substitution, and dependency-aware local moves                      148
+
+                                    under a hard budget. TRACE-MOEA acts at selection and recording through preference                           149
+
+                                    elitism, repair, and a decision trace. It also adds a compliance-and-evidence objective                      150
+
+                                    and uses review-preference scenarios. Both papers apply independently executed NERC                          151
+
+                                    and MTEP16 checks to paper-specific selected portfolios. They share source corpora and                       152
+
+                                    public backtest records, but not method operators, optimization runs, selected portfolios,                   153
+
+                                    or inferential claims.                                                                                       154
+
+                                          The study targets the intersection of four requirements: search over more than 100                     155
+
+                                    grid candidates, adaptive preference coverage, explicit budget repair, and a decision trace                  156
+
+                                    quarantined from evaluation. It also tests whether selected portfolios align with public                     157
+
+                                    project outcomes rather than only with the benchmark objectives. Its empirical scope is                      158
+
+                                    the public proxy and the two external-consistency checks; expert validation of real utility                  159
+
+                                    review remains future work.                                                                                  160
+
+
+
+                                                                                                                                                 161
+
+
+
+                                    0.3. Problem Formulation and Public Benchmark                                                                162
+
+                                    0.3.1. Investment-Effectiveness Review as Constrained Five-Objective Selection                               163
+
+
+                                           Let there be n candidate projects. Candidate i carries a cost k i , a reliability benefit             164
+
+                                    ri , a renewable-accommodation benefit gi , a compliance score ci (reflecting alignment                      165
+
+                                    with regulatory standards), and an evidence score ei (quantifying how well the project is                    166
+
+                                    supported by documented reliability records). Its aggregate schedule-and-implementation                      167
+
+                                    risk and review quality are                                                                                  168
+
+
+
+                                                                                                 impl
+                                                                     ρi = 0.58ρsched
+                                                                               i     + 0.42ρi           ,                                        169
+
+
+                                          and                                                                                                    170
+
+
+
+
+                                                                          qi = 0.5ci + 0.5ei ,                                                   171
+
+
+                                         respectively. A review decision is a binary vector x ∈ {0, 1}n , with selected-set                      172
+
+                                    cardinality N ( x ) = ∑i xi .                                                                                173
+
+
+
+
+                                                                                                            https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                         5 of 23
+
+
+
+                                          The selected-project mean risk and mean quality are                                                   174
+
+
+
+                                                                                      ∑in=1 ρi xi
+                                                                        ρ̄( x ) =                   ,                                           175
+                                                                                    max{1, N ( x )}
+                                          and                                                                                                   176
+
+
+
+                                                                                      ∑in=1 qi xi
+                                                                        q̄( x ) =                   .                                           177
+                                                                                    max{1, N ( x )}
+                                          The investment-effectiveness review problem is formalized as minimization of                          178
+
+                                                                                                                  !
+                                                         F(x) =    ∑ ki xi , − ∑ ri xi , − ∑ gi xi , ρ̄(x), −q̄(x) ,                            179
+
+                                                                    i           i            i
+
+                                          subject to                                                                                            180
+
+
+                                                                                n
+                                                                               ∑ ki xi ≤ B.                                                     181
+
+                                                                               i =1
+
+                                          The normalized budget violation used by constraint domination is                                      182
+
+
+
+                                                                                       ∑i k i xi − B
+                                                                                                    
+                                                                    v B ( x ) = max 0,                 .                                        183
+                                                                                              B
+                                         The minus signs convert maximization objectives to minimization for the hypervolume                    184
+
+                                    computation.                                                                                                185
+
+                                         The fifth objective — mean quality — distinguishes investment-effectiveness review                     186
+
+                                    from a generic knapsack. It rewards portfolios containing well-evidenced, compliance-                       187
+
+                                    strong projects, a property that review boards must assess. Two standard notions are used                   188
+
+                                    throughout. A portfolio is non-dominated if no other portfolio is at least as good on all                   189
+
+                                    five objectives and strictly better on one. Hypervolume is the normalized objective-space                   190
+
+                                    volume dominated by a front relative to a fixed reference point and is the sole optimization-               191
+
+                                    performance metric used here.                                                                               192
+
+
+
+                                    0.3.2. Candidate Pool from Public Data                                                                      193
+
+
+                                         Real review dossiers are not published, so the pool is generated by deterministic,                     194
+
+                                    released rules from three public sources. Table 1 summarizes the derivation; the full source                195
+
+                                    profile is available at evidence/source/real_project_review_source_profile.csv.                             196
+
+                                         RTS-GMLC zone aggregates (load, branch ratings and outage rates, generator ca-                         197
+
+                                    pacities and renewable shares) produce three archetypes per zone — transmission rein-                       198
+
+                                    forcement, reliability automation, and renewable support — with costs and benefits as                       199
+
+                                    analytic functions of the aggregates. The sixteen highest-stress SimBench subnets each                      200
+
+                                    yield a feeder-reinforcement, a storage-flexibility, and a protection-automation candidate                  201
+
+                                    driven by subnet load, line statistics, and the distributed-resource gap. The metadata of                   202
+
+                                    40 cached public NERC reliability documents (28 event reports) then adjusts attributes at                   203
+
+                                    the archetype level: event-report counts raise reliability values uniformly, inverter-based-                204
+
+                                    resource and storage mentions raise the renewable attribute for the two renewable-facing                    205
+
+                                    archetypes, and document counts feed the evidence score. The result is 120 candidates in                    206
+
+                                    six archetypes with zone- and feeder-level dependency-group structure.                                      207
+
+                                         The epistemic status of this pool must be stated explicitly: it is an engineering-plausible,           208
+
+                                    fully reproducible proxy whose every attribute traces to public data through published                      209
+
+                                    rules. It contains no expert-labeled review outcomes, and its cost coefficients are synthetic               210
+
+                                    units calibrated to grid-case branch and generation statistics rather than to actual utility                211
+
+                                    expenditure records (see Section 8).                                                                        212
+
+
+
+
+                                                                                                           https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                            6 of 23
+
+
+
+                                    Table 1. Candidate pool derivation (source: evidence/source/real_project_review_source_profile.csv).
+
+                                    Public Source             Used Artifact                Candidates               Archetypes
+                                                                                                                    Transmission
+                                                              Zone aggregates of bus,
+                                                                                                                    reinforcement; reliability
+                                    RTS-GMLC                  branch, and generator        72
+                                                                                                                    automation; renewable
+                                                              source data
+                                                                                                                    support
+                                                                                                                    Feeder reinforcement;
+                                                              Complete mixed network,
+                                    SimBench                                            48                          storage flexibility;
+                                                              16 highest-stress subnets
+                                                                                                                    protection automation
+                                                              Metadata of 40 public
+                                    NERC / C2GES cache                                     Attribute adjustment     —
+                                                              reliability documents
+                                    Total                                                  120                      6 archetypes
+
+
+                                    Table 2. The seven review scenarios (source: real_project_review_config.json, lines 7–15). Stake-
+                                    holder weights parameterize scalarizing baselines and seed one preference vector of TRACE-MOEA;
+                                    they never enter the evaluation metric.
+
+                                    Experiment ID             Pool                         Budget                   Weight Emphasis
+                                    benchmark_portfolio_optimization
+                                                                Full (120)                 1.00 x B                 Balanced
+                                    distribution_project_review SimBench candidates only   1.00 x B                 Balanced
+                                                                Reliability-related
+                                    reliability_driven_review                              1.00 x B                 Reliability +0.22
+                                                                archetypes
+                                                                Renewable/storage
+                                    renewable_accommodation_review                         1.00 x B                 Renewable +0.24
+                                                                archetypes
+                                    budget_ranking_stability Full                          0.88 x B                 Balanced
+                                    preference_aware_support Full                          1.00 x B                 Compliance +0.16
+                                                                                                                    Evidence +0.28,
+                                    traceability_evaluation   Full                         1.00 x B
+                                                                                                                    compliance +0.12
+
+
+
+                                    0.3.3. Review Scenarios                                                                                        213
+
+
+                                        Seven experiments vary the candidate pool composition and the assumed stakeholder                          214
+
+                                    weighting while the evaluation protocol — objectives, hypervolume bounds, and reference                        215
+
+                                    point — never changes (Table 2). The nominal budget is B = 1160 cost units across all                          216
+
+                                    scenarios except the budget-stability scenario, where it is tightened to 0.88 x B.                             217
+
+
+
+                                    0.3.4. Shared-Pipeline Declaration                                                                             218
+
+
+                                         The candidate-generation code of Section 3.2 is a single versioned artifact used by this                  219
+
+                                    paper and by the companion BiLo-NSGA study [28]. Everything above the pool — the                               220
+
+                                    five-objective formulation (the companion uses four objectives), the scenario definitions, the                 221
+
+                                    method implementations, the statistical protocol, and the external backtests — is specific to                  222
+
+                                    this paper. The Data Availability statement records the pipeline location and version.                         223
+
+
+
+                                                                                                                                                   224
+
+
+
+                                    0.4. TRACE-MOEA                                                                                                225
+
+
+                                         Figure 1 separates optimization state from trace state. Preference-guided responses                       226
+
+                                    and deterministic budget repair operate around a constrained NSGA-II kernel, while their                       227
+
+                                    review-specific events are copied through one-way links to an append-only decision trace.                      228
+
+                                    The trace has no return edge: no event count, coverage statistic, or event attribute enters an                 229
+
+                                    objective, constraint, fitness, or selection rule.                                                             230
+
+                                         The algorithm augments a constrained non-dominated sorting kernel with three                              231
+
+                                    switchable components: the preference-adaptive ranking layer, the budget repair operator,                      232
+
+                                    and the decision trace. Each design choice is exercised by a dedicated ablation in Section                     233
+
+                                    6.2.                                                                                                           234
+
+                                         Formal definitions. A portfolio is x ∈ {0, 1}n , with minimized five-objective vector                     235
+
+                                    and budget violation                                                                                           236
+
+
+
+
+                                                                                                            https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                                          7 of 23
+
+
+
+
+                                    Figure 1. TRACE-MOEA architecture and quarantine invariant. Dashed one-way arrows write
+                                    preference-elite and repair-drop events to the trace archive. The external checks assess returned
+                                    portfolios but do not train or tune the optimizer.
+
+
+                                                                                                                                             !
+                                                                                                                                  n
+                                                                                           ⊤
+                                                    F ( x ) = [ f 1 ( x ), . . . , f 5 ( x )] ,      v B ( x ) = max 0, ∑ c j x j − B .                          237
+
+                                                                                                                              j =1
+
+                                          Constraint dominance is                                                                                                238
+
+
+
+
+                                    x ≺c y ⇐⇒ [v B ( x ) = 0 < v B (y)] ∨ [v B ( x ) = v B (y) = 0 ∧ x ≺ P y] ∨ [v B ( x ), v B (y) > 0 ∧ v B ( x )239< v B
+
+                                          For preference vector wk on the simplex, the response score on combined pool Rt is                                     240
+
+
+                                                                        5
+                                                        ψk ( x ) = ∑ wkq f˜q ( x ) + λv B ( x ),                 xk⋆ = arg min ψk ( x ).                         241
+
+                                                                      q =1                                                 x ∈ Rt
+
+                                        Every fifth generation, candidate weights are perturbed and projected back to the                                        242
+
+                                    simplex,                                                                                                                     243
+
+
+
+
+                                                                    w̃k = Π∆4 (wk + ε k ),                ε k ∼ N (0, 0.12 I ).                                  244
+
+
+                                        The retained K weights maximize spread of their best responses by greedy max-min                                         245
+
+                                    dispersion,                                                                                                                  246
+
+
+
+
+                                                                   w+ = arg max                   min           ⋆
+                                                                                                          F̃ ( xw ) − F̃ ( xu⋆ ) 2 .                             247
+                                                                             w∈W \Wkeep        u∈Wkeep
+
+
+                                          Budget repair ranks selected project j by                                                                              248
+
+
+
+                                                                 b j,rel + b j,ren + b j,comp + b j,evid
+                                                        rj =                                             ,            j− = arg min r j ,                         249
+                                                                                    cj                                            j:x j =1
+
+                                         and repeats x j− ← 0 until v B ( x ) = 0. If At is the trace state and et a repair-drop or                              250
+
+                                    preference-elite event, quarantine is the one-way transition                                                                 251
+
+
+
+
+                                                      A t +1 = A t ∥ e t ,            F ( x ), v B ( x ), ψk ( x ), Select( Rt ) ⊥ At+1 .                        252
+
+
+                                        The independence symbol states an implementation invariant: archive contents are                                         253
+
+                                    absent from every optimization input, not a probabilistic claim. Standard hypervolume is                                     254
+
+                                                                                                                             !
+                                                                                                          5
+                                                                                                         ∏ [ f q ( x ), r q ] ,
+                                                                                                             ˜
+                                                                                                   [
+                                                                         HV (P ; r ) = λ5                                                                        255
+
+                                                                                                   x ∈P q=1
+
+
+
+                                                                                                                            https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                  8 of 23
+
+
+
+                                          with method-independent bounds and reference point fixed before comparisons.                   256
+
+
+
+                                    0.4.1. Constrained Non-Dominated Sorting Kernel                                                      257
+
+
+                                          Portfolios are binary vectors evolved by uniform crossover (crossover probability              258
+
+                                    0.9) and bit-flip mutation at rate 1/n, with constraint-dominated non-dominated sorting              259
+
+                                    (feasible solutions dominate infeasible ones; infeasible solutions are ordered by the mag-           260
+
+                                    nitude of budget violation) and crowding-distance truncation. The population size is 40              261
+
+                                    and the generation limit is 40. Initialization uses a low-density strategy (3–15% selection          262
+
+                                    probability per candidate) so that early portfolios begin near the fundable region. The              263
+
+                                    kernel is intentionally unremarkable: the paper’s claims rest on the three review-specific           264
+
+                                    components described below, not on exotic selection machinery.                                       265
+
+
+
+                                    0.4.2. Preference-Adaptive Ranking Layer                                                             266
+
+
+                                         The layer maintains K = 8 objective-weight vectors w_1, . . . , w_K on the five-                267
+
+                                    dimensional simplex. One vector is initialized from the scenario’s stakeholder weighting             268
+
+                                    (Table 2); the remaining seven are sampled from a symmetric Dirichlet(1) distribution. The           269
+
+                                    layer acts twice per generation cycle:                                                               270
+
+
+                                    •     Preference elitism. For each weight vector w_k, the union of parents and offspring is          271
+
+                                          scored by the weighted sum of min-max-normalized objectives plus a violation penalty           272
+
+                                          for infeasible portfolios. The best-response portfolio (the one with lowest scalarized         273
+
+                                          score) is injected into the next population if it was dropped during non-dominated             274
+
+                                          sorting and crowding-distance truncation. Each injection is logged as an archive event         275
+
+                                          carrying the weight-vector index and the portfolio’s project identifiers.                      276
+
+                                    •     Adaptive re-selection. Every five generations, the current vector set is perturbed             277
+
+                                          with independent Gaussian noise (sigma = 0.1, followed by renormalization to the               278
+
+                                          simplex). The best responses of all K original and K perturbed vectors are computed            279
+
+                                          on the current generation’s combined parent-offspring pool, and the K vectors whose            280
+
+                                          responses are maximally spread in the normalized objective space (determined by                281
+
+                                          greedy max-min dispersion selection) survive into the next five-generation window.             282
+
+
+                                          The layer is designed for review settings in which a decision maker cannot specify exact       283
+
+                                    reference points in advance, an assumption common in preference-guided EMO (Section                  284
+
+                                    2.2). It identifies weighting directions that yield distinct feasible portfolios and preserves       285
+
+                                    representatives from those directions. Whether this mechanism improves hypervolume is                286
+
+                                    evaluated separately; Section 6.2 shows that its isolated pooled effect is small.                    287
+
+
+
+                                    0.4.3. Budget Repair                                                                                 288
+
+
+                                          Any initial or offspring portfolio that exceeds the budget is repaired by iteratively          289
+
+                                    dropping the selected project with the lowest equal-weight benefit-to-cost ratio (summed             290
+
+                                    reliability, renewable, compliance, and evidence benefits divided by cost) until the portfolio       291
+
+                                    becomes affordable. Each drop event is recorded in the archive with the generation number            292
+
+                                    and the project identifier. The repair operator is deterministic: given the same portfolio, the      293
+
+                                    drop sequence is identical across seeds.                                                             294
+
+                                          The purpose of explicit repair is to keep the population inside the fundable region            295
+
+                                    where the review question is actually posed, rather than leaving constraint pressure to              296
+
+                                    selection alone. The ablation Ablation-NoFeasibilityRepair disables this operator and                297
+
+                                    relies entirely on constraint-dominated sorting for budget feasibility.                              298
+
+
+
+                                    0.4.4. Decision Trace Archive                                                                        299
+
+
+                                        The archive is an append-only log of two event types: repair_drop (from Section 4.3)             300
+
+                                    and preference_elite (from Section 4.2). Each event carries the generation number, the               301
+
+
+
+
+                                                                                                    https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                 9 of 23
+
+
+
+                                    affected project identifiers, and for preference-elite events the responsible weight-vector         302
+
+                                    index. Three properties define the archive’s role:                                                  303
+
+
+                                    •     Completeness for the mechanisms that alter portfolios outside standard variation.             304
+
+                                          Every repair drop and every preference injection is recorded. Standard crossover              305
+
+                                          and mutation operations are not logged because they are the domain-general search             306
+
+                                          operators; the archive captures the review-specific interventions.                            307
+
+                                    •     Quarantine. No archive statistic — not count, not coverage, not entropy — appears             308
+
+                                          in any objective function, constraint inequality, or selection criterion. The archive is      309
+
+                                          purely descriptive, reported separately in Section 6.3.                                       310
+
+                                    •     Descriptive reporting. Across all 210 proposed-method runs (7 scenarios x 30 seeds),          311
+
+                                          the archive averages 1126 events per run, and 98.6% of the projects present in the            312
+
+                                          final feasible non-dominated front appear in at least one recorded event (evidence:           313
+
+                                          real_project_review_leaderboard.csv, row 2, trace columns). This means that for               314
+
+                                          nearly any project that a reviewer sees recommended, the archive can answer when              315
+
+                                          it was protected by which preference direction and which competing projects were              316
+
+                                          dropped during budget repair.                                                                 317
+
+
+
+                                    0.4.5. Algorithm Outline                                                                            318
+
+
+                                          The complete algorithm is summarized as:                                                      319
+
+
+
+                                    TRACE-MOEA(pool, budget, seed):                                               320
+
+                                      initialize 40 low-density binary portfolios                                 321
+
+                                      repair each to budget (log each repair_drop event)            // Section 4.3322
+                                      preferences = 1 scenario-seeded + 7 Dirichlet(1) weight vectors // Section 3234.2
+                                      for generation = 1 to 40:                                                   324
+
+                                        offspring = uniform crossover + bit-flip mutation (rate 1/n)              325
+
+                                        repair offspring portfolios to budget (log repair_drop)     // Section 4.1,
+                                                                                                                  326 4.3
+
+                                        survivors = constraint-dominated NDS + crowding truncation                327
+
+                                                    over (parents union offspring)                  // Section 4.1328
+                                        for each weight vector w in preferences:                                  329
+
+                                          inject w's best-response portfolio into survivors         // Section 4.2330
+                                          log preference_elite event with w index and project IDs                 331
+
+                                        end for                                                                   332
+
+                                        every 5 generations:                                                      333
+
+                                          perturb preferences (Gaussian, sigma = 0.1, renormalize)                334
+
+                                          keep K vectors with max-min dispersion of best responses // Section 4.2335
+                                      return feasible non-dominated front + decision archive         // Section 4.4
+                                                                                                                  336
+
+
+
+                                                                                                                                        337
+
+
+
+                                    0.5. Experimental Setup                                                                             338
+
+                                    0.5.1. Methods                                                                                      339
+
+
+                                         Table 3 lists the sixteen methods: the proposed algorithm, seven baselines covering            340
+
+                                    evolutionary, preference-based, and MCDM families relevant to grid review, and eight                341
+
+                                    ablations designed to isolate individual components and objective-visibility effects.               342
+
+                                         Evolutionary baselines (NSGA-II, R-NSGA-II, and MOEA/D) are pymoo reference                    343
+
+                                    implementations on the identical constrained binary problem, with population 40, 40 gen-            344
+
+                                    erations, and the same low-density initialization used by TRACE-MOEA. R-NSGA-II uses                345
+
+                                    the normalized scenario preference point and the same objective bounds as the evaluation            346
+
+                                    protocol; its preference distance never enters TRACE-MOEA’s hypervolume. pymoo’s                    347
+
+                                    MOEA/D has no native constraint-handling mechanism, so it receives a documented                     348
+
+
+
+
+                                                                                                   https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                        10 of 23
+
+
+
+                                    Table 3. Method matrix (source: real_project_review_config.json, lines 33–49).
+
+                                    Method                           Role                          One-line Description
+                                                                                                   Constrained kernel + preference-adaptive
+                                    TRACE-MOEA                       Proposed
+                                                                                                   layer + budget repair + trace archive
+                                    NSGA-II                          Baseline                      pymoo, constrained, binary encoding
+                                                                                                   reference-point NSGA-II using the
+                                    R-NSGA-II                        Baseline
+                                                                                                   declared scenario preference point
+                                                                                                   pymoo, Tchebycheff decomposition,
+                                    MOEA/D                           Baseline
+                                                                                                   budget violation as penalty
+                                                                                                   Consistent AHP matrix, TOPSIS closeness
+                                    AHP-TOPSIS                       Baseline
+                                                                                                   ranking, greedy budget fill
+                                    Weighted Sum                     Baseline                      Weighted-score ranking, greedy budget fill
+                                    Greedy BCR                       Baseline                      Benefit-cost ratio greedy fill under budget
+                                    Random Feasible                  Baseline                      Random-permutation greedy fill
+                                                                                                   Repair disabled; constraint domination
+                                    Ablation-NoFeasibilityRepair     Ablation
+                                                                                                   only
+                                    Ablation-NoPreferenceRanking     Ablation                      Preference-adaptive layer disabled
+                                                                                                   Reliability objective hidden from search
+                                    Ablation-NoReliabilityFeatures   Ablation
+                                                                                                   (evaluation unchanged)
+                                    Ablation-NoRenewableFeatures     Ablation                      Renewable objective hidden from search
+                                    Ablation-NoScheduleRisk          Ablation                      Risk objective hidden from search
+                                    Ablation-SingleObjective         Ablation                      Search on scalarized weighted sum
+                                                                                                   Bare kernel: no repair, no preference layer,
+                                    Ablation-NSGA2Only               Ablation
+                                                                                                   no trace
+                                                                                                   Candidate pool reduced to one third (~40
+                                    Ablation-SmallProjectPool        Ablation
+                                                                                                   candidates)
+
+
+
+                                    penalty formulation. Scalarizing baselines consume the scenario stakeholder weights of                        349
+
+                                    Table 2. No baseline receives a pool restriction or cardinality cap.                                          350
+
+                                         Three ablations (NoReliabilityFeatures, NoRenewableFeatures, NoScheduleRisk) hide                        351
+
+                                    one objective from the search while the evaluation remains the full five-objective hyper-                     352
+
+                                    volume; they measure how critical each review dimension is for the optimizer. Three                           353
+
+                                    ablations remove algorithmic components (NoFeasibilityRepair, NoPreferenceRanking,                            354
+
+                                    NSGA2Only), and two stress the problem structure (SingleObjective, SmallProjectPool).                         355
+
+
+
+                                    0.5.2. Protocol, Metric, and Statistics                                                                       356
+
+
+                                          The archive contains 16 methods x 7 scenarios x 30 invocations, or 3360 rows. Twelve                    357
+
+                                    opponents are stochastic: four baselines (NSGA-II, R-NSGA-II, MOEA/D, and Random                              358
+
+                                    Feasible) and eight ablations. AHP-TOPSIS, Weighted Sum, and Greedy BCR are determin-                         359
+
+                                    istic rules. Their 30 identical invocations are retained for a rectangular provenance table                   360
+
+                                    but provide an effective sample size of one per scenario. The candidate pool, budget, and                     361
+
+                                    scenario weights are fixed within each scenario.                                                              362
+
+                                          The metric is the standard hypervolume of the feasible non-dominated front. Objective                   363
+
+                                    values are normalized by fixed per-scenario bounds computed once from a seeded, method-                       364
+
+                                    independent reference set consisting of the empty portfolio, all singleton portfolios, and                    365
+
+                                    2048 random feasible portfolios. The reference point is 1.1 in each normalized dimension.                     366
+
+                                    An experiment that returns no feasible portfolio scores zero. The three deterministic ranking                 367
+
+                                    rules produce one portfolio per scenario and appear as single markers in Figure 2. Random                     368
+
+                                    Feasible is stochastic and is analyzed by seed.                                                               369
+
+                                          Seed-level inference uses two-sided Mann–Whitney U tests comparing TRACE-MOEA                           370
+
+                                    with each of the twelve stochastic opponents per scenario (n = 30 per group). P-                              371
+
+                                    values are Holm-corrected within that stochastic family, with significance at α = 0.05.                       372
+
+                                    We report rank-biserial effect sizes and 5000-resample bootstrap confidence intervals                         373
+
+                                    for mean differences. Comparisons with the three deterministic rules are descriptive                          374
+
+                                    point gaps and are not assigned inferential p-values. The corrected table is available                        375
+
+                                    at evidence/tables/real_project_review_inference_v2.csv; the original rectangular                             376
+
+                                    significance table is retained only as computational provenance.                                              377
+
+                                          To remove implementation ambiguity, objective j is normalized with method-                              378
+
+                                    independent bounds (l j , u j ) as                                                                            379
+
+
+
+
+                                                                                                   https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                              11 of 23
+
+
+
+                                                                                 (       "                   #)
+                                                                                           f j (x) − lj
+                                                                 f˜j ( x ) = min 1, max 0,                          .                                 380
+                                                                                              uj − lj
+
+                                        For a feasible non-dominated front P and reference point zref = (1.1, . . . , 1.1), the                       381
+
+                                    reported quality score is                                                                                         382
+
+                                                                                                             !
+                                                                                                       ref
+                                                                                        [
+                                                                    HV (P ) = λ5              [ F̃ ( x ), z ] .                                       383
+
+                                                                                       x ∈P
+
+                                          For two seed samples with ranks Ri , the first-sample statistic is                                          384
+
+
+                                                                                                      n1
+                                                                                     n1 ( n1 + 1)
+                                                                  U1 = n1 n2 +                    − ∑ Ri ,                                            385
+                                                                                           2        i =1
+
+                                          and ordered raw p-values are adjusted monotonically by                                                      386
+
+
+                                                                              n                       o
+                                                               pHolm
+                                                                (i ) = max min  1, ( M − k + 1 ) p (k) .                                              387
+                                                                          k ≤i
+
+                                         The evaluation depends only on candidate attributes and fixed normalization bounds;                          388
+
+                                    preference vectors, trace variables, and method-owned parameters do not enter the hyper-                          389
+
+                                    volume metric. This separation is necessary because the trace is an output to be inspected,                       390
+
+                                    not a reward to be optimized.                                                                                     391
+
+
+
+                                                                                                                                                      392
+
+
+
+                                    0.6. Results                                                                                                      393
+
+                                    0.6.1. Main Comparison                                                                                            394
+
+
+                                         Table 4 reports the pooled leaderboard across all seven scenarios. TRACE-MOEA 395
+                                    leads the table with mean hypervolume 0.17425 (standard deviation 0.00635), +0.89% over 396
+                                    NSGA-II (0.17270) and +29.4% over AHP-TOPSIS (0.13468). Across four stochastic baselines 397
+                                    and seven scenarios, TRACE-MOEA has 27 positive mean differences in 28 comparisons; 398
+                                    24 are Holm-significant wins and none is a significant loss. All 21 descriptive gaps against 399
+                                    the three deterministic ranking rules favor TRACE-MOEA. R-NSGA-II provides the direct 400
+                                    preference-based control and is retained despite its lower pooled hypervolume.                401
+
+                                         The four non-significant baseline comparisons all involve NSGA-II: benchmark_portfolio_optim
+                                                                                                                                  402
+
+                                    (Holm p = 0.064), budget_ranking_stability (p = 0.053), distribution_project_review (p = 1.0, 403
+                                    with a nominally negative difference of -0.13%), and reliability_driven_review (p = 0.242). 404
+                                    Every comparison with R-NSGA-II is significant. Figure 2 shows the original distribution 405
+                                    view; the direct preference control is isolated in Figure 5 so that its lower scale does not 406
+                                    compress the close TRACE-MOEA–NSGA-II differences.                                            407
+
+                                         Table 5 breaks down the TRACE-MOEA vs. NSGA-II comparison by scenario. The 408
+                                    three Holm-significant wins occur exactly in the scenarios whose stakeholder weighting de- 409
+                                    parts most from uniform (preference_aware_support, renewable_accommodation_review, 410
+                                    traceability_evaluation). In the balanced full-pool scenarios (benchmark, budget stability) 411
+                                    the margins remain positive (+1.1–1.3%) but do not survive Holm correction at n = 30, and 412
+                                    on the SimBench-only pool (distribution) the two methods are statistically identical.         413
+
+                                         The pattern is consistent with, but does not prove, the design hypothesis. Gains 414
+                                    appear in scenarios with explicit preference emphasis; in balanced scenarios, differences 415
+                                    are smaller and do not separate statistically.                                                416
+
+
+
+
+                                                                                                                  https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                                          12 of 23
+
+
+
+                                    Table 4. Pooled leaderboard over seven scenarios. Stochastic methods have 210 runs; deterministic-
+                                    rule rows summarize seven unique outputs retained as 210 repeated provenance rows. Trace and
+                                    decision-coverage columns are descriptive only.
+
+                                                                                                         Mean Runtime          Trace           Decision
+                                    Method             Role            Mean HV        Std HV
+                                                                                                         (s)                   Events/Run      Coverage
+                                    TRACE-MOEA Proposed                0.17425        0.00635            0.113                 1126            0.986
+                                    Ablation-
+                                                      Ablation         0.17403        0.00702            0.107                 1125            0.986
+                                    NoScheduleRisk
+                                    Ablation-
+                                                      Ablation         0.17396        0.00564            0.109                 803             0.966
+                                    NoPreferenceRanking
+                                    Ablation-
+                                                      Ablation         0.17300        0.00652            0.106                 320             0.865
+                                    NoFeasibilityRepair
+                                    NSGA-II           Baseline         0.17270        0.00642            0.146                 —               —
+                                    Ablation-
+                                                      Ablation         0.17249        0.00652            0.102                 —               —
+                                    NSGA2Only
+                                    Ablation-
+                                                      Ablation         0.16930        0.00375            0.106                 919             0.964
+                                    NoRenewableFeatures
+                                    AHP-TOPSIS        Baseline         0.13468        0.00269            0.065                 —               —
+                                    R-NSGA-II         Baseline         0.11980        0.02671            0.192                 —               —
+                                    Ablation-
+                                                      Ablation         0.11617        0.02637            0.112                 1611            0.984
+                                    SingleObjective
+                                    Ablation-
+                                                      Ablation         0.09081        0.02124            0.106                 915             0.977
+                                    NoReliabilityFeatures
+                                    Random
+                                                      Baseline         0.08064        0.02261            0.065                 —               —
+                                    Feasible
+                                    Ablation-
+                                                      Ablation         0.06920        0.01280            0.079                 654             0.970
+                                    SmallProjectPool
+                                    Greedy BCR        Baseline         0.05576        0.03248            0.065                 —               —
+                                    Weighted Sum      Baseline         0.04105        0.01991            0.065                 —               —
+                                    MOEA/D            Baseline         0.01954        0.01379            0.375                 —               —
+
+
+                                    Table 5. TRACE-MOEA versus NSGA-II per scenario (30 seeds). Confidence intervals are pointwise,
+                                    multiplicity-unadjusted 5000-resample bootstrap intervals for the mean difference; rrb is the rank-
+                                    biserial effect. Holm-adjusted rank-test p-values determine significance across twelve stochastic
+                                    opponents within each scenario (real_project_review_inference_v2.csv).
+
+                                                                                                Mean difference
+                                    Scenario              TRACE-MOEA        NSGA-II                                   rrb                   Holm p
+                                                                                                (95% CI)
+                                                                                                0.00218 [0.00047,
+                                    benchmark_portfolio_optimization
+                                                        0.17441             0.17224                                   0.376                 0.0637
+                                                                                                0.00425]
+                                    budget_ranking_stability                                    0.00184 [0.00026,
+                                                        0.17139             0.16955                                   0.358                 0.0529
+                                    (0.88 x B)                                                  0.00353]
+                                                                                                -0.00022 [-0.00115,
+                                    distribution_project_review
+                                                          0.16490           0.16512                                   -0.020                1.000
+                                                                                                0.00066]
+                                                                                                0.00283 [0.00138,
+                                    preference_aware_support
+                                                        0.17512             0.17229                                   0.593                 0.000407
+                                                                                                0.00477]
+                                                                                                0.00080 [0.00010,
+                                    reliability_driven_review
+                                                          0.17223           0.17144                                   0.298                 0.242
+                                                                                                0.00153]
+                                                                                                0.00141 [0.00051,
+                                    renewable_accommodation_review
+                                                      0.18646               0.18505                                   0.504                 0.00325
+                                                                                                0.00229]
+                                                                                                0.00196 [0.00102,
+                                    traceability_evaluation0.17521          0.17325                                   0.560                 0.00100
+                                                                                                0.00292]
+
+
+
+                                    0.6.2. Ablations: Where the Gain Does and Does Not Come From                                                                  417
+
+
+                                         Figure 3 orders the attribution. The dominant effects are related to objective visibility:                               418
+
+                                    hiding the reliability objective from search costs 47.9% of the pooled hypervolume (0.09081                                   419
+
+                                    vs. 0.17425); scalarizing all objectives into a single weighted sum costs 33.3% (0.11617);                                    420
+
+                                    hiding the renewable objective costs 2.8% (0.16930); and cutting the candidate pool to one                                    421
+
+                                    third costs 60.3% (0.06920). The five-dimensional review structure itself — not any single                                    422
+
+                                    algorithmic trick — carries most of the task difficulty.                                                                      423
+
+                                         Among the component-level ablations, disabling budget repair (NoFeasibilityRepair)                                       424
+
+                                    costs 0.72% of pooled hypervolume and drops decision-trace coverage from 0.986 to 0.865,                                      425
+
+                                    confirming that repair events are a material part of the recorded intervention history.                                       426
+
+                                    Disabling all review-specific components at once (NSGA2Only, the bare kernel) costs 1.01%                                     427
+
+                                    (0.17249 vs. 0.17425).                                                                                                        428
+
+                                         The component results constrain the algorithmic claim. Removing preference adap-                                         429
+
+                                    tation (NoPreferenceRanking) changes pooled hypervolume by only 0.17%. The full                                               430
+
+
+
+
+                                                                                                                      https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                  13 of 23
+
+
+
+
+                                    Figure 2. Hypervolume across the seven review scenarios (30 seeds per box for stochastic methods).
+                                    AHP-TOPSIS, Weighted Sum, and Greedy BCR produce one portfolio per scenario and appear as
+                                    diamonds. Random Feasible is stochastic. TRACE-MOEA and NSGA-II contend at the top of every
+                                    scenario; the remaining baselines operate in a different performance regime.
+
+
+
+
+                                    Figure 3. Pooled mean hypervolume of the full method and the eight ablations (error bars =
+                                    one standard deviation). Two annotations identify the results that most constrain architectural
+                                    interpretation.
+
+
+                                    method wins the renewable scenario under the within-scenario family (p Holm = 0.0206),                431
+
+                                    but no preference-ablation contrast remains significant after a second Holm correction                432
+
+                                    across the seven scenarios (p = 0.0722 for that cell). Removing schedule risk changes                 433
+
+                                    pooled hypervolume by 0.13%. The risk-blind variant is higher in traceability_evaluation              434
+
+                                    (p Holm = 0.0219 within scenario), but that contrast also falls just outside the cross-scenario       435
+
+                                    threshold (p = 0.0510). These are exploratory mechanism patterns rather than resolved                 436
+
+                                    component effects.                                                                                    437
+
+                                          Two readings follow. The schedule-risk objective enters as a portfolio mean, producing          438
+
+                                    a weak search gradient and, in one scenario, an adverse difference. Preference-injected               439
+
+                                    portfolios also overlap substantially with those already preserved by constraint-dominated            440
+
+                                    crowding, consistent with evidence that preference guidance is not automatically beneficial           441
+
+                                    [20]. The complete TRACE-MOEA has the highest pooled hypervolume among the tested                     442
+
+                                    external baselines and no significant per-scenario loss, but its margin over its leanest viable       443
+
+                                    variant is small. A hypervolume-only user could disable preference adaptation with little             444
+
+                                    measured loss. The trade-off is reduced trace coverage (0.966 versus 0.986) and removal of            445
+
+                                    records identifying which weighting directions shaped the returned front.                             446
+
+
+
+
+                                                                                                      https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                     14 of 23
+
+
+
+
+                                    Figure 4. Decision-trace diagnostics pooled across seven scenarios and 30 seeds (210 runs per
+                                    configuration). (a) Fraction of projects in the final feasible front covered by at least one recorded
+                                    event; (b) number of logged events per run. Boxes are descriptive. Trace statistics are quarantined
+                                    from all objectives, constraints, and selection decisions.
+
+
+                                    0.6.3. Decision-Trace Production and Coverage                                                            447
+
+
+                                          Because no trace statistic enters any ranking, trace production is reported descriptively.         448
+
+                                    Across the 210 proposed-method runs, the trace averages 1126 events per run (standard                    449
+
+                                    deviation 210 events), and 98.6% of the projects appearing in the returned feasible non-                 450
+
+                                    dominated front are covered by at least one event that names them.                                       451
+
+                                          The two trace-bearing ablations bracket the sources. Without the preference-adaptive               452
+
+                                    layer (NoPreferenceRanking), the archive records only repair-drop events and achieves a                  453
+
+                                    mean coverage of 96.6%. Without the repair operator (NoFeasibilityRepair), the archive                   454
+
+                                    records only preference-elite events and achieves coverage of 86.5%. The complete method’s               455
+
+                                    98.6% coverage thus arises from the combination of the two mechanisms, each filling                      456
+
+                                    coverage gaps left by the other.                                                                         457
+
+                                          We do not claim that the archive improves review outcomes or that 98.6% coverage is                458
+
+                                    the correct target. Validating whether the archive helps review boards make faster or more               459
+
+                                    consistent decisions would require a human-subjects study that has not been performed                    460
+
+                                    (Section 8). The descriptive claim is limited to a near-complete, per-project record of review-          461
+
+                                    specific interventions. Archive variables are quarantined from the evaluation function; this             462
+
+                                    does not imply zero computational or human-review cost.                                                  463
+
+                                          Figure 4 makes the trace mechanism measurable without turning it into an optimiza-                 464
+
+                                    tion objective. Removing preference ranking reduces both the number of recorded events                   465
+
+                                    and project coverage moderately. Removing repair sharply reduces both quantities because                 466
+
+                                    repair-drop events disappear. The bare kernel has neither trace channel. These are diagnos-              467
+
+                                    tic differences in trace production; they do not imply that a larger record improves portfolio           468
+
+                                    quality or human review.                                                                                 469
+
+
+
+                                    0.6.4. Matched-Budget Preference Controls                                                                470
+
+
+                                          The direct-control scan freezes the 120-candidate pool and balanced preference point,              471
+
+                                    varies the budget multiplier over {0.75, 1.00, 1.25}, and runs TRACE-MOEA, R-NSGA-II,                    472
+
+                                    and NSGA-II for 30 independent seeds at each level. It therefore adds 270 runs without                   473
+
+                                    reusing the heterogeneous scenario rows of the main experiment. Alongside hypervolume,                   474
+
+                                    it reports the Euclidean distance from the normalized compromise vector to the declared                  475
+
+                                    preference point,                                                                                        476
+
+
+
+
+                                                                                                        https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                           15 of 23
+
+
+
+                                    Table 6. Budget and direct preference-control scan (30 seeds per cell; lower preference distance is
+                                    better).
+
+                                                                                                   Mean preference          HV verdict versus
+                                    Budget              Method              Mean HV
+                                                                                                   distance                 TRACE
+                                    0.75 x B            TRACE-MOEA          0.16650                0.52985                  –
+                                                                                                                            TRACE win, Holm
+                                    0.75 x B            NSGA-II             0.16439                0.53252
+                                                                                                                            p = 0.0327
+                                                                                                                            TRACE win, Holm
+                                    0.75 x B            R-NSGA-II           0.11007                0.55375
+                                                                                                                            p < 10−9
+                                    1.00 x B            TRACE-MOEA          0.17509                0.52597                  –
+                                                                                                                            TRACE win, Holm
+                                    1.00 x B            NSGA-II             0.17304                0.53007
+                                                                                                                            p = 0.00177
+                                                                                                                            TRACE win, Holm
+                                    1.00 x B            R-NSGA-II           0.12862                0.53431
+                                                                                                                            p < 10−9
+                                    1.25 x B            TRACE-MOEA          0.17849                0.52323                  –
+                                                                                                                            TRACE win, Holm
+                                    1.25 x B            NSGA-II             0.17675                0.52764
+                                                                                                                            p = 0.00144
+                                                                                                                            TRACE win, Holm
+                                    1.25 x B            R-NSGA-II           0.13563                0.52898
+                                                                                                                            p < 10−9
+
+
+
+
+                                    Figure 5. Hypervolume and preference-achievement distance for TRACE-MOEA, NSGA-II, and
+                                    R-NSGA-II at 0.75, 1.00, and 1.25 times the nominal budget. Error bars show one standard deviation
+                                    over 30 seeds. The two panels keep global front coverage and distance to the declared preference
+                                    point conceptually separate.
+
+
+
+                                                                      dpref ( x ) = F̃ ( x ) − zpref       ,                                       477
+                                                                                                       2
+
+                                          where lower values indicate closer preference achievement. This second metric pre-                       478
+
+                                    vents a preference method from being judged only by global front coverage.                                     479
+
+                                          Hypervolume rises with budget for all three methods. TRACE-MOEA significantly                            480
+
+                                    exceeds both controls at every budget level, and its mean preference distance is also lowest                   481
+
+                                    at every level. The inferential tests in Table 6 apply to hypervolume; the distance ordering                   482
+
+                                    is descriptive because a second multiplicity family was not preregistered. R-NSGA-II’s                         483
+
+                                    adverse result is retained as an implementation-specific direct control, not generalized to                    484
+
+                                    all reference-point algorithms.                                                                                485
+
+
+
+                                    0.6.5. Public-Record Consistency Checks                                                                        486
+
+
+                                         Hypervolume measures optimization quality on the proxy objectives; it does not                            487
+
+                                    establish that selected portfolios identify real grid risk or predict project outcomes. We                     488
+
+                                    therefore add two external-consistency checks. Both are descriptive because the NERC rule                      489
+
+                                    overlaps the construction corpus and the MTEP project-level tests do not preserve portfolio                    490
+
+                                    dependence or a confirmatory comparison family.                                                                491
+
+                                         Rung 1 — NERC rule consistency. Each candidate receives a priority score equal to                         492
+
+                                    a NERC-report-topic weight for its archetype multiplied by a stress percentile from raw                        493
+
+                                    RTS-GMLC and SimBench statistics. The score is computed before the pool’s NERC-based                           494
+
+
+
+
+                                                                                                               https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                     16 of 23
+
+
+
+
+                                    Figure 6. External-consistency ladder. (a) NERC rule backtest: priority-capture ratio against a rule
+                                    combining NERC-topic archetype weights with NERC-independent physical stress percentiles (10
+                                    seeded compromise portfolios per method). (b) MISO MTEP16 outcome backtest: broad outcome-
+                                    capture ratio against real built/withdrawn/unresolved project statuses. The vertical line marks parity
+                                    with uniform random selection.
+
+
+                                    attribute adjustment, preventing a direct mirror of that adjustment. Alignment is the mean               495
+
+                                    priority of selected projects divided by the mean priority of the full pool; values above 1.0            496
+
+                                    indicate oversampling of documented-risk candidates.                                                     497
+
+                                          TRACE-MOEA achieves priority capture of 1.55 in the benchmark scenario and 1.34                    498
+
+                                    in the reliability-driven scenario (evidence: real_nerc_rule_backtest.csv). Its Kendall                  499
+
+                                    tau values are 0.01 and 0.15. AHP-TOPSIS posts the highest alignment (capture 2.29 and                   500
+
+                                    1.63; tau 0.45 and 0.52). These are raw, unadjusted associations in a descriptive check.                 501
+
+                                    AHP-TOPSIS directly weights reliability-type attributes adjacent to the rule, so its high                502
+
+                                    alignment partly reflects construct overlap. Greedy BCR provides an adverse descriptive                  503
+
+                                    control, with capture 0.23–0.53 and negative raw tau values.                                             504
+
+                                          Rung 2 — MISO MTEP16 outcomes. The second rung replaces a constructed rule                         505
+
+                                    with observable real-world outcomes. From the MTEP16 Appendix A and B project table                      506
+
+                                    (1218 projects), those with positive 2016 cost estimates form backtest pools of 1097 and 1062            507
+
+                                    projects for the two review scenarios. Features use only 2016-vintage fields (cost estimate,             508
+
+                                    project type, voltage, mileage, appendix status, record date). Labels come from quarterly                509
+
+                                    status snapshots (2016-12 through 2018-01) and the 2026 MISO in-service and active-project               510
+
+                                    lists, yielding 924 built, 19 explicitly withdrawn, 39 deferred, and 236 unresolved projects             511
+
+                                    across the full table. No outcome field enters any feature, and no constant was fitted to                512
+
+                                    outcomes.                                                                                                513
+
+                                          TRACE-MOEA’s broad capture is 1.079 in the benchmark scenario and 1.070 in the                     514
+
+                                    reliability-driven scenario. Raw project-level diagnostics are point-biserial r = 0.169                  515
+
+                                    (p < 10−7 ) and r = 0.151 (p = 10−6 ), respectively; the corresponding unadjusted Mann–                  516
+
+                                    Whitney readouts point in the same direction (evidence: real_mtep_backtest.csv). These                   517
+
+                                    p-values are descriptive diagnostics, not confirmatory tests: projects co-occur within se-               518
+
+                                    lected portfolios, and no portfolio-preserving permutation family was preregistered. The                 519
+
+                                    capture ratios exceed those of the tested evolutionary baselines, but AHP-TOPSIS reaches                 520
+
+                                    1.100 in the benchmark scenario and Weighted Sum reaches 1.132 in the reliability-driven                 521
+
+                                    scenario. Strict-label results use only 19 explicit withdrawals and are underpowered.                    522
+
+                                          Five boundary conditions restrict the interpretation of Rung 2. First, the MTEP16                  523
+
+                                    approved pool is approximately 98% built within the strictly labeled subset, so the backtest             524
+
+                                    measures alignment within an already board-approved plan. Second, the unresolved class                   525
+
+                                    may contain projects re-scoped under new identifiers. Third, the pool contains almost no                 526
+
+                                    renewable or storage projects, so this rung provides no evidence for renewable-related                   527
+
+                                    objectives. Fourth, appendix status is decision-time information correlated with broad                   528
+
+                                    outcomes. Fifth, the raw project-level association tests do not preserve dependence induced              529
+
+
+
+
+                                                                                                        https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                    17 of 23
+
+
+
+
+                                    Figure 7. Pooled search-and-trace profile over seven scenarios and 30 seeds per method. Hypervol-
+                                    ume, runtime, accepted moves, trace events, and coverage retain their native units; the panels should
+                                    not be read as a scalar composite score.
+
+
+                                    by portfolio selection. Within these limits, the backtest shows descriptive contact with real           530
+
+                                    outcomes; it does not establish above-chance portfolio performance, best alignment, or                  531
+
+                                    engineering-economic effectiveness.                                                                     532
+
+
+
+                                    0.6.6. Search-Effort and Outcome-Sensitivity Diagnostics                                                533
+
+
+                                         Figure 7 relates optimization quality to the computation and trace production re-                  534
+
+                                    quired to obtain it. TRACE-MOEA averages 0.17425 hypervolume, 0.1130 s, 806 accepted                    535
+
+                                    preference-guided moves, 1126 trace events, and 0.986 project coverage per run. Removing                536
+
+                                    preference ranking leaves 0.17396 hypervolume while reducing the trace to about 803                     537
+
+                                    events; disabling repair removes accepted repair moves and lowers coverage to 0.865.                    538
+
+                                    NSGA-II attains 0.17270 at 0.1456 s without a project-level decision trace. Event count                 539
+
+                                    remains descriptive and is not an optimization objective.                                               540
+
+                                         The diagnostic clarifies the practical trade-off. TRACE-MOEA is faster than the tested             541
+
+                                    NSGA-II implementation at this small problem size, but deterministic baselines remain                   542
+
+                                    orders of magnitude cheaper. The method’s additional product is the trace archive: 98.6%                543
+
+                                    coverage means that almost every project represented in the returned fronts has at least one            544
+
+                                    recorded decision event. Coverage is a software-level completeness measure, not evidence                545
+
+                                    that human reviewers find the explanations sufficient.                                                  546
+
+                                         Figure 8 re-expresses the MTEP16 result without collapsing broad and strict labels.                547
+
+                                    Broad capture is 1.079 and 1.070 in the benchmark and reliability-driven scenarios, respec-             548
+
+                                    tively, whereas strict capture is 1.014 and 1.000. The broad view supplies statistical power            549
+
+                                    by treating unresolved projects as non-built; the strict view avoids that uncertain label but           550
+
+                                    contains only 19 withdrawals in the full inventory. Their divergence is not a robustness                551
+
+                                    success: it quantifies the outcome-definition sensitivity that bounds the external-validity             552
+
+                                    claim.                                                                                                  553
+
+                                         The two diagnostics answer different questions. Figure 7 shows the computation and                 554
+
+                                    trace volume associated with the proxy-objective result, whereas Figure 8 shows how the                 555
+
+                                    external-consistency result depends on the definition of the negative class. Their aggregate            556
+
+                                    tables are retained under manuscript/derived_tables/ for independent recomputation.                     557
+
+
+
+                                                                                                                                            558
+
+
+
+
+                                                                                                        https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                    18 of 23
+
+
+
+
+                                    Figure 8. MTEP16 outcome-capture ratios for the two review scenarios. The dashed line denotes
+                                    parity with uniform selection. Broad labels include unresolved projects among negatives; strict
+                                    labels compare built projects only with explicit withdrawals. Proposed-method highlighting is visual
+                                    identification and does not override the reported significance tests.
+
+
+                                    0.7. Discussion                                                                                         559
+
+
+                                          Preference guidance and the constrained kernel. The three significant comparisons                 560
+
+                                    with NSGA-II occur in preference-emphasized scenarios (Table 5), but the direct NoPrefer-               561
+
+                                    enceRanking ablation is unresolved after correction across its seven scenarios. Preference-             562
+
+                                    injected portfolios appear to overlap those already preserved by crowding, which may                    563
+
+                                    explain the small marginal effect of the adaptive layer. The traceability scenario also favors          564
+
+                                    the risk-blind variant within its scenario family, but the contrast falls just outside the second       565
+
+                                    cross-scenario correction. These patterns motivate targeted tests of preference-vector count            566
+
+                                    and update cadence rather than attribution to a single component.                                       567
+
+                                          Public-record consistency. AHP-TOPSIS is favored on the NERC view partly because                  568
+
+                                    its reliability attributes overlap the priority rule. The MTEP view measures capture within             569
+
+                                    an already-approved plan and is constrained by its high build rate. The two diagnostics                 570
+
+                                    show that optimized portfolios retain some alignment with public records, but they do not               571
+
+                                    establish review accuracy.                                                                              572
+
+                                          Relation to the companion study. BiLo-NSGA [28] asks how variation-stage, project-                573
+
+                                    vocabulary local moves behave under hard budgets. TRACE-MOEA studies selection-stage                    574
+
+                                    preference adaptation and a quarantined decision trace. The problem formulations differ in              575
+
+                                    dimensionality (five objectives versus four), operators, scenarios, and optimization records.           576
+
+                                    Both papers use separately executed NERC and MTEP16 consistency checks on their own                     577
+
+                                    selected portfolios. Sharing the candidate generator and public source records makes data               578
+
+                                    derivation comparable; it does not make the algorithmic evidence interchangeable.                       579
+
+                                          Use in a planning workflow. Against NSGA-II, the pooled hypervolume gain is below                 580
+
+                                    1%. TRACE-MOEA additionally supplies per-project intervention records unavailable from                  581
+
+                                    the baselines in Table 3. These records allow an analyst to inspect which projects were                 582
+
+                                    inserted through preference protection or removed during budget repair. Whether that                    583
+
+                                    inspection improves review time, consistency, or contestability requires human evaluation.              584
+
+                                          The direct R-NSGA-II comparison changes what can be claimed about preference                      585
+
+                                    guidance. TRACE-MOEA performs better on this benchmark in both front coverage and                       586
+
+                                    mean preference distance, including across the three frozen budgets, but the result is not              587
+
+                                    evidence that adaptive weights are universally better than reference points. R-NSGA-II                  588
+
+                                    uses one declared point and one matched configuration; different points, normalization,                 589
+
+
+
+
+                                                                                                       https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                19 of 23
+
+
+
+                                    or niching parameters could change its behavior. The defensible advance is that a direct            590
+
+                                    preference-family control now exists and the proposed method survives it under the                  591
+
+                                    disclosed setup.                                                                                    592
+
+                                          Against AHP-TOPSIS, the portfolio-level hypervolume gain is 29.4%, and both back-             593
+
+                                    tests show that the optimized portfolios do not lose all alignment with documented risk.            594
+
+                                    This comparison remains a proxy-objective result, not proof of superior utility decisions.          595
+
+                                    Mean runtime is 0.113 s per run, so seed ensembles and budget what-if analyses are inex-            596
+
+                                    pensive at the tested scale. Deterministic repair also ensures that each returned portfolio         597
+
+                                    satisfies the benchmark budget.                                                                     598
+
+
+
+                                                                                                                                        599
+
+
+
+                                    0.8. Limitations                                                                                    600
+
+
+                                          Seven limitations constrain the scope of the claims in this paper.                            601
+
+
+                                    1.    Proxy task without expert ground truth. All main-benchmark claims address algo-               602
+
+                                          rithmic performance on a reproducible public proxy whose objectives are engineering           603
+
+                                          proxies. No expert-labeled review outcomes exist. An annotated subset with inter-             604
+
+                                          rater agreement and rank correlation against the proxy objectives remains undone.             605
+
+                                          The NERC and MTEP checks assess descriptive alignment but do not validate review              606
+
+                                          correctness.                                                                                  607
+
+                                    2.    External consistency is assessed descriptively only. Neither rung establishes exter-          608
+
+                                          nal validity because portfolio-preserving confirmatory inference and expert ground            609
+
+                                          truth are absent. AHP-TOPSIS and Weighted Sum also attain the highest capture on              610
+
+                                          individual views. The MTEP check operates within an already-approved plan, with               611
+
+                                          an approximately 98% strict-label build rate and only 19 explicit negatives.                  612
+
+                                    3.    Uncalibrated economics. Candidate costs are synthetic units derived from network              613
+
+                                          aggregates (branch ratings, generator capacities, line lengths); benefits are engineering     614
+
+                                          proxies derived from the same aggregates. No engineering-economic conclusion —                615
+
+                                          in currencies, rates of return, tariffs, or cost-effectiveness thresholds — can be drawn      616
+
+                                          from this paper, and none is offered.                                                         617
+
+                                    4.    Traceability is measured, not validated. The decision archive’s coverage (98.6%)              618
+
+                                          shows that the record is nearly complete, and its quarantine prevents trace statistics        619
+
+                                          from entering objectives, selection, or the reported metric. Whether the archive actu-        620
+
+                                          ally improves board decisions, review speed, stakeholder contestability, or regulatory        621
+
+                                          compliance requires a human-subjects study that has not been performed.                       622
+
+                                    5.    Single benchmark family with no electrical verification. All seven scenarios in-              623
+
+                                          stantiate one 120-candidate pool derived from one combination of public sources.              624
+
+                                          Portfolio feasibility is budgetary (the repair operator enforces the cost constraint) but     625
+
+                                          not electrical: no candidate portfolio has been checked for AC power-flow feasibility         626
+
+                                          using the cached SimBench or RTS-GMLC network models. A second, independently                 627
+
+                                          constructed pool and an OPF-based feasibility check of recommended portfolios are             628
+
+                                          natural extensions.                                                                           629
+
+                                    6.    Preference-layer hyperparameters remain fixed. The adaptive layer was tested with             630
+
+                                          K = 8 weight vectors and one update cadence (every five generations). The three-level         631
+
+                                          budget scan tests constraint tightness and includes a direct preference-based control,        632
+
+                                          but it does not vary K, update cadence, objective weights, or pool size. The design has       633
+
+                                          been evaluated at the tested budgets; the direct optimization benefit of the preference       634
+
+                                          layer remains unresolved.                                                                     635
+
+                                    7.    One direct preference-based comparator is not a family survey. R-NSGA-II closes               636
+
+                                          the absence of a reference-point control and is evaluated under the same population,          637
+
+                                          generations, constraints, and three budget levels. However, the study does not                638
+
+
+
+
+                                                                                                    https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                               20 of 23
+
+
+
+                                           include RVEA, NSGA-III with preference articulation, or interactive decision-maker          639
+
+                                           feedback. The result supports TRACE-MOEA against the implemented R-NSGA-II                  640
+
+                                           configuration, not superiority over the broader preference-based EMO family.                641
+
+
+
+                                                                                                                                       642
+
+
+
+                                    0.9. Conclusions                                                                                   643
+
+
+                                          TRACE-MOEA combines a preference-adaptive weight-vector population, determin-                644
+
+                                    istic budget repair, and a quarantined decision trace archive. The archive records review-         645
+
+                                    specific interventions without entering the evaluation, while repair maintains budget              646
+
+                                    feasibility throughout search.                                                                     647
+
+                                          On the five-objective, 120-project proxy benchmark, TRACE-MOEA attains pooled                648
+
+                                    mean hypervolume 0.17425, 0.89% above NSGA-II (0.17270). Across four stochastic base-              649
+
+                                    lines and seven scenarios, it has 27 positive mean differences in 28 comparisons, 24 Holm-         650
+
+                                    significant wins, and no significant loss. Twenty-one deterministic-rule gaps are descriptive      651
+
+                                    and all favor TRACE-MOEA. In the separate 270-run scan, TRACE-MOEA significantly                   652
+
+                                    exceeds R-NSGA-II and NSGA-II at all three budgets while retaining the lowest descrip-             653
+
+                                    tive preference distance. The archive covers 98.6% of recommended projects and remains             654
+
+                                    quarantined from the metric.                                                                       655
+
+                                          The NERC consistency backtest yields priority-capture ratios of 1.34–1.55. The MISO          656
+
+                                    MTEP16 backtest yields broad capture of 1.070–1.079 and a raw point-biserial correlation           657
+
+                                    up to 0.169. Because the public-record tests do not preserve portfolio dependence or               658
+
+                                    a comparison family, these values support descriptive external consistency rather than             659
+
+                                    confirmatory above-chance alignment.                                                               660
+
+                                          The preference-adaptive layer changes pooled hypervolume by 0.17%, but its di-               661
+
+                                    rect effect is unresolved after cross-scenario correction. Its observable function is to add       662
+
+                                    preference-labeled interventions to the decision trace. The schedule-risk contrast is likewise     663
+
+                                    unresolved after the second correction, and the external checks remain descriptive. The            664
+
+                                    method is therefore supported as a traceable portfolio-optimization framework on the pub-          665
+
+                                    lic proxy; expert-labeled utility data and human evaluation of the trace remain necessary          666
+
+                                    before drawing conclusions about review effectiveness.                                             667
+
+
+
+                                                                                                                                       668
+
+
+
+                                    Author Contributions                                                                               669
+
+
+                                        [AUTHOR INPUT REQUIRED: assign the CRediT roles to Yubin Lin, Jiyu Li, Xiaofei                 670
+
+                                    Ruan, Xiaoyu Huang, and Dishan Yang, and obtain approval from every author.] All                   671
+
+                                    authors have read and agreed to the published version of the manuscript.                           672
+
+
+
+                                    Funding                                                                                            673
+
+
+                                        [AUTHOR INPUT REQUIRED: insert the verified funder, grant number, and APC                      674
+
+                                    funder, or state “This research received no external funding.”]                                    675
+
+
+
+                                    Institutional Review Board Statement                                                               676
+
+
+                                          Not applicable.                                                                              677
+
+
+
+                                    Informed Consent Statement                                                                         678
+
+
+                                          Not applicable.                                                                              679
+
+
+
+
+                                                                                                   https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                         21 of 23
+
+
+
+                                    Data Availability Statement                                                                                  680
+
+
+                                          All data sources used in this study are publicly accessible. RTS-GMLC source                           681
+
+                                    data is available at https://github.com/GridMod/RTS-GMLC. The SimBench complete                              682
+
+                                    mixed dataset is available at https://simbench.de. NERC reliability reports are available                    683
+
+                                    at https://www.nerc.com; only report metadata is used in this study, and a manifest                          684
+
+                                    with official URLs and SHA-256 checksums is released in place of redistributed PDF                           685
+
+                                    files. MISO MTEP16 Appendix A and B project records, subsequent quarterly status                             686
+
+                                    snapshots, and the 2026 MISO in-service and active-project portal lists are available at                     687
+
+                                    https://www.misoenergy.org.                                                                                  688
+
+                                          The candidate-derivation pipeline, TRACE-MOEA implementation, baseline and                             689
+
+                                    ablation configurations, 3360 main per-run records, the 270-run three-budget control scan,                   690
+
+                                    inference tables, backtest analyses, and figure scripts are included in the supplementary                    691
+
+                                    package and are available from the corresponding author. A persistent public archive can                     692
+
+                                    be supplied before publication, subject to third-party redistribution terms. The companion                   693
+
+                                    BiLo-NSGA study [28] shares the candidate generator, NERC source corpus, and public                          694
+
+                                    MTEP16 records. Algorithm implementations, problem objectives, scenario definitions, run                     695
+
+                                    records, selected portfolios, and reported comparisons are paper-specific.                                   696
+
+
+
+                                    Acknowledgments                                                                                              697
+
+
+                                         During the preparation of this manuscript, the authors used generative AI tools                         698
+
+                                    (Claude, Anthropic) for language refinement, literature summary, and formatting assistance,                  699
+
+                                    under the authors’ full intellectual oversight. The authors have reviewed and edited all                     700
+
+                                    AI-assisted content and take full responsibility for the final manuscript.                                   701
+
+
+
+                                    Conflicts of Interest                                                                                        702
+
+
+                                          The authors declare no conflicts of interest.                                                          703
+
+
+
+                                                                                                                                                 704
+
+
+
+                                                                                                                                                 705
+
+                                    1.   Hemmati, R.; Hooshmand, R.-A.; Khodabakhshian, A. State-of-the-art of transmission expansion            706
+
+                                         planning: Comprehensive review. Renewable and Sustainable Energy Reviews 2013, 23, 312–319.             707
+
+                                         https://doi.org/10.1016/j.rser.2013.03.015                                                              708
+
+                                    2.   Lumbreras, S.; Ramos, A. The new challenges to transmission expansion planning. Survey of               709
+
+                                         recent practice and literature review. Electric Power Systems Research 2016, 134, 19–29. https:         710
+
+                                         //doi.org/10.1016/j.epsr.2015.10.013                                                                    711
+
+                                    3.   Wang, J.-J.; Jing, Y.-Y.; Zhang, C.-F.; Zhao, J.-H. Review on multi-criteria decision analysis aid      712
+
+                                         in sustainable energy decision-making. Renewable and Sustainable Energy Reviews 2009, 13(9),            713
+
+                                         2263–2278. https://doi.org/10.1016/j.rser.2009.06.021                                                   714
+
+                                    4.   Kumar, A.; Sah, B.; Singh, A.R.; Deng, Y.; He, X.; Kumar, P.; Bansal, R.C. A review of multi criteria   715
+
+                                         decision making (MCDM) towards sustainable renewable energy development. Renewable and                  716
+
+                                         Sustainable Energy Reviews 2017, 69, 596–609. https://doi.org/10.1016/j.rser.2016.11.191                717
+
+                                    5.   Rodkumnerd, P.; Pothinun, T.; Phumpho, S.; Watson, N.; Siritaratiwat, A.; Srirattanawichaikul,          718
+
+                                         W.; Khunkitti, S. Fuzzy Analytical Hierarchy Process-Based Multi-Criteria Decision Framework            719
+
+                                         for Risk-Informed Maintenance Prioritization of Distribution Transformers. Energies 2026, 19(2),        720
+
+                                         460. https://doi.org/10.3390/en19020460                                                                 721
+
+                                    6.   Liesio, J.; Mild, P.; Salo, A. Preference programming for robust portfolio modeling and project         722
+
+                                         selection. European Journal of Operational Research 2007, 181(3), 1488–1505. https://doi.org/10.101     723
+
+                                         6/j.ejor.2005.12.041                                                                                    724
+
+                                    7.   Mild, P.; Liesio, J.; Salo, A. Selecting infrastructure maintenance projects with Robust Portfolio      725
+
+                                         Modeling. Decision Support Systems 2015, 77, 21–30. https://doi.org/10.1016/j.dss.2015.05.001           726
+
+
+
+
+                                                                                                           https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                            22 of 23
+
+
+
+                                    8.   Deb, K.; Pratap, A.; Agarwal, S.; Meyarivan, T. A fast and elitist multiobjective genetic algorithm:       727
+
+                                         NSGA-II. IEEE Transactions on Evolutionary Computation 2002, 6(2), 182–197. https://doi.org/10.1           728
+
+                                         109/4235.996017                                                                                            729
+
+                                    9. Zhang, Q.; Li, H. MOEA/D: A Multiobjective Evolutionary Algorithm Based on Decomposition.                    730
+
+                                         IEEE Transactions on Evolutionary Computation 2007, 11(6), 712–731. https://doi.org/10.1109/               731
+
+                                         TEVC.2007.892759                                                                                           732
+
+                                    10. Munoz, F.D.; Hobbs, B.F.; Ho, J.L.; Kasina, S. An Engineering-Economic Approach to Transmis-                733
+
+                                         sion Planning Under Market and Regulatory Uncertainties: WECC Case Study. IEEE Transactions                734
+
+                                         on Power Systems 2014, 29(1), 307–317. https://doi.org/10.1109/TPWRS.2013.2279654                          735
+
+                                    11. Gao, C.; Wang, X.; Li, D.; Han, C.; You, W.; Zhao, Y. A Novel Hybrid Power-Grid Investment                  736
+
+                                         Optimization Model with Collaborative Consideration of Risk and Benefit. Energies 2023, 16(20),            737
+
+                                         7215. https://doi.org/10.3390/en16207215                                                                   738
+
+                                    12. Deb, K.; Jain, H. An Evolutionary Many-Objective Optimization Algorithm Using Reference-                    739
+
+                                         Point-Based Nondominated Sorting Approach, Part I: Solving Problems With Box Constraints.                  740
+
+                                         IEEE Transactions on Evolutionary Computation 2014, 18(4), 577–601. https://doi.org/10.1109/               741
+
+                                         TEVC.2013.2281535                                                                                          742
+
+                                    13. Deb, K.; Sundar, J. Reference point based multi-objective optimization using evolutionary algo-             743
+
+                                         rithms. In Proceedings of the 8th Annual Conference on Genetic and Evolutionary Computation (GECCO         744
+
+                                        ’06), Seattle, WA, USA, 8–12 July 2006; pp. 635–642. https://doi.org/10.1145/1143997.1144112                745
+
+                                    14. Thiele, L.; Miettinen, K.; Korhonen, P.J.; Molina, J. A Preference-Based Evolutionary Algorithm             746
+
+                                         for Multi-Objective Optimization. Evolutionary Computation 2009, 17(3), 411–436. https://doi.              747
+
+                                         org/10.1162/evco.2009.17.3.411                                                                             748
+
+                                    15. Ben Said, L.; Bechikh, S.; Ghedira, K. The r-Dominance: A New Dominance Relation for Interac-               749
+
+                                         tive Evolutionary Multicriteria Decision Making. IEEE Transactions on Evolutionary Computation             750
+
+                                         2010, 14(5), 801–818. https://doi.org/10.1109/TEVC.2010.2041060                                            751
+
+                                    16. Bechikh, S.; Kessentini, M.; Ben Said, L.; Ghedira, K. Preference Incorporation in Evolutionary             752
+
+                                         Multiobjective Optimization: A Survey of the State-of-the-Art. Advances in Computers 2015, 98,             753
+
+                                         141–207. https://doi.org/10.1016/bs.adcom.2015.03.001                                                      754
+
+                                    17. Wang, H.; Olhofer, M.; Jin, Y. A mini-review on preference modeling and articulation in multi-              755
+
+                                         objective optimization: current status and challenges. Complex & Intelligent Systems 2017, 3(4),           756
+
+                                         233–245. https://doi.org/10.1007/s40747-017-0053-9                                                         757
+
+                                    18. Cheng, R.; Jin, Y.; Olhofer, M.; Sendhoff, B. A Reference Vector Guided Evolutionary Algorithm              758
+
+                                         for Many-Objective Optimization. IEEE Transactions on Evolutionary Computation 2016, 20(5),                759
+
+                                         773–791. https://doi.org/10.1109/TEVC.2016.2519378                                                         760
+
+                                    19. Li, K.; Deb, K.; Yao, X. R-Metric: Evaluating the Performance of Preference-Based Evolutionary              761
+
+                                         Multiobjective Optimization Using Reference Points. IEEE Transactions on Evolutionary Computa-             762
+
+                                         tion 2018, 22(6), 821–835. https://doi.org/10.1109/TEVC.2017.2737781                                       763
+
+                                    20. Li, K.; Liao, M.; Deb, K.; Min, G.; Yao, X. Does Preference Always Help? A Holistic Study                   764
+
+                                         on Preference-Based Evolutionary Multiobjective Optimization Using Reference Points. IEEE                  765
+
+                                        Transactions on Evolutionary Computation 2020, 24(6), 1078–1096. https://doi.org/10.1109/TEVC.              766
+
+                                         2020.2987559                                                                                               767
+
+                                    21. Barredo Arrieta, A.; Diaz-Rodriguez, N.; Del Ser, J.; Bennetot, A.; Tabik, S.; Barbado, A.; Garcia, S.;     768
+
+                                         Gil-Lopez, S.; Molina, D.; Benjamins, R.; Chatila, R.; Herrera, F. Explainable Artificial Intelligence     769
+
+                                         (XAI): Concepts, taxonomies, opportunities and challenges toward responsible AI. Information               770
+
+                                         Fusion 2020, 58, 82–115. https://doi.org/10.1016/j.inffus.2019.12.012                                      771
+
+                                    22. Miller, T. Explanation in artificial intelligence: Insights from the social sciences. Artificial Intelli-   772
+
+                                         gence 2019, 267, 1–38. https://doi.org/10.1016/j.artint.2018.07.007                                        773
+
+                                    23. Machlev, R.; Heistrene, L.; Perl, M.; Levy, K.Y.; Belikov, J.; Mannor, S.; Levron, Y. Explainable           774
+
+                                         Artificial Intelligence (XAI) techniques for energy and power systems: Review, challenges and              775
+
+                                         opportunities. Energy and AI 2022, 9, 100169. https://doi.org/10.1016/j.egyai.2022.100169                  776
+
+                                    24. Bacardit, J.; Brownlee, A.E.I.; Cagnoni, S.; Iacca, G.; McCall, J.; Walker, D. The intersection             777
+
+                                         of evolutionary computation and explainable AI. In Proceedings of the Genetic and Evolutionary             778
+
+                                         Computation Conference Companion (GECCO ’22 Companion), Boston, MA, USA, 9–13 July 2022; pp.               779
+
+                                         1757–1762. https://doi.org/10.1145/3520304.3533974                                                         780
+
+
+
+
+                                                                                                             https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                         23 of 23
+
+
+
+                                    25. Herschel, M.; Diestelkamper, R.; Ben Lahmar, H. A survey on provenance: What for? What form?             781
+
+                                        What from? The VLDB Journal 2017, 26(6), 881–906. https://doi.org/10.1007/s00778-017-0486-1              782
+
+                                    26. Moreau, L.; Groth, P.; Cheney, J.; Lebo, T.; Miles, S. The rationale of PROV. Journal of Web Semantics   783
+
+                                        2015, 35, 235–257. https://doi.org/10.1016/j.websem.2015.04.001                                          784
+
+                                    27. Raji, I.D.; Smart, A.; White, R.N.; Mitchell, M.; Gebru, T.; Hutchinson, B.; Smith-Loud, J.;             785
+
+                                        Theron, D.; Barnes, P. Closing the AI accountability gap: defining an end-to-end framework for           786
+
+                                        internal algorithmic auditing. In Proceedings of the 2020 Conference on Fairness, Accountability, and    787
+
+                                        Transparency (FAT ’20)*, Barcelona, Spain, 27–30 January 2020; pp. 33–44. https://doi.org/10.114         788
+
+                                        5/3351095.3372873                                                                                        789
+
+                                    28. Lin, Y.; Zhang, J.; Huang, X.; Yang, D.; Li, J. BiLo-NSGA: Project-Level Local Search for Budget-        790
+
+                                        Constrained Power-Grid Portfolio Optimization. Unpublished manuscript, 2026; available to                791
+
+                                        editors and reviewers on request.                                                                        792
+
+                                    29. Liang, Y.; Liu, H.; Zhou, H.; Meng, Z.; Liu, J.; Zhou, M. Multi-Stage Coordinated Planning               793
+
+                                        for Transmission and Energy Storage Considering Large-Scale Renewable Energy Integration.                794
+
+                                        Applied Sciences 2024, 14(15), 6486. https://doi.org/10.3390/app14156486                                 795
+
+                                    30. Bhattarai, S.; Karki, R. Interruption Cost Estimation for Value-Based Reliability Investment in          796
+
+                                        Emerging Smart Grid Resources. Applied Sciences 2024, 14(19), 8651. https://doi.org/10.3390/             797
+
+                                        app14198651                                                                                              798
+
+                                    31. Zhang, T.; Wu, J.; Hong, J.; Zhou, H.; Zheng, J.; Zheng, Z.; Niu, C.; Gao, Z.; Peng, L.; Lin,            799
+
+                                        Z. Optimal Planning and Investment Return Analysis of Grid-Side Energy Storage System                    800
+
+                                        Addressing Multi-Dimensional Grid Security Requirements. Applied Sciences 2025, 15(22), 11944.           801
+
+                                        https://doi.org/10.3390/app152211944                                                                     802
+
+                                    32. Xiong, H.; Feng, B.; Yan, F.; Kang, Y.; Hu, Y.; Li, Q.; Tan, Q. A Hybrid Heuristic–Benders Method        803
+
+                                        for Wind–Hydrogen Investment Planning with Non-Analytical Cost Functions. Energies 2026,                 804
+
+                                        19(9), 2172. https://doi.org/10.3390/en19092172                                                          805
+
+                                    33. Mizrak, F.; Yasar, O. A Secondary-Data-Driven Decision Support Framework for Strategic Energy            806
+
+                                        Investment Prioritization: An Explainable Multi-Criteria Application Across Countries. Energies          807
+
+                                        2026, 19(14), 3243. https://doi.org/10.3390/en19143243                                                   808
+
+
+
+
+                                                                                                           https://doi.org/10.3390/en1010000
+

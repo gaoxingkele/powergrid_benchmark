@@ -1,0 +1,20 @@
+{
+  "status": "transcribed_and_hash_bound_to_executable_sources",
+  "sources": {
+    "c2ges_learnable.py": "1dc73962d7e0c9b77fc59533de1484205f94e12376e7bee215336b464ea275f6",
+    "predict_fever_labels.py": "532e846e6601457e7494a146628c911830577673d4bff83bceaa407b295380ce",
+    "prepare_fever_benchmark.py": "8f66d987d0ac04df80bd1d2727f89536b8f56a8854d7b8c4b4a80c333b317a71"
+  },
+  "rows": [
+    ["Encoder", "all-MiniLM-L6-v2; frozen; batch 64", "snapshot 1110a243...; tree SHA-256 091de8e3..."],
+    ["Role head", "role embedding = encoder dimension; hidden 256", "ReLU; dropout 0.1; sigmoid output; 3 role IDs"],
+    ["Query channel", "0.5 normalized embedding cosine + 0.5 normalized TF--IDF cosine", "per-document word (1,2)-grams; min\\_df=1"],
+    ["Local channel", "all other sentences; exp(-|i-j|/3)", "query-salience proxy; no finite window"],
+    ["Mixture", "floors (0.35, 0.25, 0.05); raw init (0.8, 0.7, 0.2)", "softplus + 1e-3; normalize, add floors, renormalize"],
+    ["Loss", "pairwise softplus on total score + 0.5 pairwise softplus on role score", "all positive--negative pairs within an instance"],
+    ["Optimization", "Adam; lr 0.001; weight decay 0; 4 epochs", "PyTorch defaults; one optimizer step per document-instance"],
+    ["Selection", "development F1 at K=3; strict improvement", "earliest epoch retained on a tie; descending argsort at inference"],
+    ["Randomness", "Python, NumPy, and PyTorch seeded", "training-instance shuffle each epoch; CPU execution"],
+    ["Normalization", "within-document min--max", "range below 1e-12 maps to all zeros"]
+  ]
+}

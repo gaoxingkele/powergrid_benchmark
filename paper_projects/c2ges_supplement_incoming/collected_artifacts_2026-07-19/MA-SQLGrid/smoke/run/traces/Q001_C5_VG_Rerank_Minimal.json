@@ -1,0 +1,71 @@
+{
+  "prompt": "You are generating candidate SQL for a value-grounded Text-to-SQL smoke test.\n\nReturn 3 distinct read-only SQLite SELECT queries as a numbered list. Do not include explanation.\nEach candidate must use only the schema and domain values below.\nPrefer exact domain literals from the question/metadata and preserve expected answer shape.\n\nSQLite schema:\nDROP TABLE IF EXISTS grid_topology;\nDROP TABLE IF EXISTS sensor_readings;\nDROP TABLE IF EXISTS maintenance_logs;\nDROP TABLE IF EXISTS work_orders;\nDROP TABLE IF EXISTS technicians;\nDROP TABLE IF EXISTS assets;\nDROP TABLE IF EXISTS locations;\nDROP TABLE IF EXISTS asset_types;\n\nCREATE TABLE asset_types (\n    asset_type_id INTEGER PRIMARY KEY,\n    type_name TEXT NOT NULL,\n    voltage_class TEXT NOT NULL,\n    manufacturer TEXT NOT NULL,\n    expected_lifetime_years INTEGER NOT NULL\n);\n\nCREATE TABLE locations (\n    location_id INTEGER PRIMARY KEY,\n    location_name TEXT NOT NULL,\n    region TEXT NOT NULL,\n    latitude REAL NOT NULL,\n    longitude REAL NOT NULL,\n    criticality TEXT NOT NULL\n);\n\nCREATE TABLE assets (\n    asset_id INTEGER PRIMARY KEY,\n    asset_name TEXT NOT NULL,\n    asset_type_id INTEGER NOT NULL REFERENCES asset_types(asset_type_id),\n    location_id INTEGER NOT NULL REFERENCES locations(location_id),\n    install_date TEXT NOT NULL,\n    status TEXT NOT NULL,\n    capacity_mw REAL NOT NULL\n);\n\nCREATE TABLE technicians (\n    technician_id INTEGER PRIMARY KEY,\n    technician_name TEXT NOT NULL,\n    specialty TEXT NOT NULL,\n    home_region TEXT NOT NULL,\n    active INTEGER NOT NULL\n);\n\nCREATE TABLE work_orders (\n    work_order_id INTEGER PRIMARY KEY,\n    asset_id INTEGER NOT NULL REFERENCES assets(asset_id),\n    assigned_technician_id INTEGER NOT NULL REFERENCES technicians(technician_id),\n    priority TEXT NOT NULL,\n    status TEXT NOT NULL,\n    scheduled_date TEXT NOT NULL,\n    completed_date TEXT,\n    fault_code TEXT NOT NULL\n);\n\nCREATE TABLE maintenance_logs (\n    log_id INTEGER PRIMARY KEY,\n    work_order_id INTEGER NOT NULL REFERENCES work_orders(work_order_id),\n    technician_id INTEGER NOT NULL REFERENCES technicians(technician_id),\n    action_type TEXT NOT NULL,\n    started_at TEXT NOT NULL,\n    ended_at TEXT NOT NULL,\n    notes TEXT NOT NULL,\n    parts_cost REAL NOT NULL\n);\n\nCREATE TABLE sensor_readings (\n    reading_id INTEGER PRIMARY KEY,\n    asset_id INTEGER NOT NULL REFERENCES assets(asset_id),\n    reading_time TEXT NOT NULL,\n    sensor_type TEXT NOT NULL,\n    reading_value REAL NOT NULL,\n    unit TEXT NOT NULL,\n    alarm_flag INTEGER NOT NULL\n);\n\nCREATE TABLE grid_topology (\n    edge_id INTEGER PRIMARY KEY,\n    upstream_asset_id INTEGER NOT NULL REFERENCES assets(asset_id),\n    downstream_asset_id INTEGER NOT NULL REFERENCES assets(asset_id),\n    connection_type TEXT NOT NULL,\n    switch_status TEXT NOT NULL\n);\n\nCompact domain value dictionary:\n- asset_types.type_name: Breaker, Capacitor, Line, Relay, Substation, Transformer\n- asset_types.voltage_class: 115kV, 230kV, 33kV\n- asset_types.manufacturer: GridMakers, LineWorks, SafeGrid, SwitchCorp, VoltCare\n- assets.asset_name: BR-001, BR-002, BR-003, BR-004, BR-005, CAP-001, LN-001, LN-002, LN-003, REL-001, REL-002, REL-003, SUB-001, SUB-002, TX-001, TX-002, TX-003, TX-004\n- assets.status: in_service, maintenance, offline\n- grid_topology.connection_type: control, feeder, tie\n- grid_topology.switch_status: closed, open\n- locations.location_name: Central Node, East Yard, Harbor Tap, Mesa Switch, North Ridge, Remote Spur, South Hub, West Yard\n- locations.region: Central, East, North, South, West\n- locations.criticality: critical, low, standard\n- maintenance_logs.action_type: calibration, inspection, repair, replacement\n- maintenance_logs.notes: breaker replacement, cooling fan replacement, line repair, relay trip review, substation calibration, substation check, temperature inspection\n- sensor_readings.sensor_type: load, power_factor, temperature, voltage\n- sensor_readings.unit: C, MW, kV, pu\n- sensor_readings.alarm_flag: 0, 1\n- technicians.technician_name: Ava Chen, Ben Ortiz, Cara Singh, Drew Miller, Eli Novak, Fran Wu, Gina Patel, Hao Lin\n- technicians.specialty: breaker, capacitor, line, relay, sensor, substation, transformer\n- technicians.home_region: Central, East, North, South, West\n- work_orders.priority: high, low, medium\n- work_orders.status: completed, open, scheduled\n- work_orders.fault_code: BREAKER, CAP, INSPECT, LINE, LOAD, RELAY, SUB, TEMP, VOLT\n\nQuestion ID: Q001\nQuestion: How many assets are currently in service?\nExpected answer shape: {\"column_count\": 1, \"columns\": [\"asset_count\"], \"row_granularity\": \"scalar\"}\nOrder-sensitive answer: False\nRequired domain literals mentioned by metadata: [\"in_service\"]\n",
+  "raw_response": "1. ```sql\nSELECT COUNT(*) AS asset_count\nFROM assets\nWHERE status = 'in_service';\n```\n\n2. ```sql\nSELECT COUNT(asset_id) AS asset_count\nFROM assets\nWHERE status IN ('in_service');\n```\n\n3. ```sql\nSELECT SUM(CASE WHEN status = 'in_service' THEN 1 ELSE 0 END) AS asset_count\nFROM assets;\n```",
+  "rank_trace": [
+    {
+      "candidate_index": 0,
+      "sql": "SELECT COUNT(*) AS asset_count FROM assets WHERE status = 'in_service';",
+      "safe": true,
+      "safety_error": "",
+      "exec_ok": true,
+      "exec_error": "",
+      "column_count": 1,
+      "expected_column_count": 1,
+      "shape_ok": true,
+      "required_value_hits": 1,
+      "ranker_score": 16
+    },
+    {
+      "candidate_index": 1,
+      "sql": "SELECT COUNT(asset_id) AS asset_count FROM assets WHERE status IN ('in_service');",
+      "safe": true,
+      "safety_error": "",
+      "exec_ok": true,
+      "exec_error": "",
+      "column_count": 1,
+      "expected_column_count": 1,
+      "shape_ok": true,
+      "required_value_hits": 1,
+      "ranker_score": 15
+    },
+    {
+      "candidate_index": 2,
+      "sql": "SELECT SUM(CASE WHEN status = 'in_service' THEN 1 ELSE 0 END) AS asset_count FROM assets;",
+      "safe": true,
+      "safety_error": "",
+      "exec_ok": true,
+      "exec_error": "",
+      "column_count": 1,
+      "expected_column_count": 1,
+      "shape_ok": true,
+      "required_value_hits": 1,
+      "ranker_score": 14
+    },
+    {
+      "candidate_index": 3,
+      "sql": "SELECT COUNT(*) AS asset_count;",
+      "safe": true,
+      "safety_error": "",
+      "exec_ok": true,
+      "exec_error": "",
+      "column_count": 1,
+      "expected_column_count": 1,
+      "shape_ok": true,
+      "required_value_hits": 0,
+      "ranker_score": 12
+    },
+    {
+      "candidate_index": 4,
+      "sql": "SELECT COUNT(asset_id) AS asset_count;",
+      "safe": true,
+      "safety_error": "",
+      "exec_ok": false,
+      "exec_error": "no such column: asset_id",
+      "column_count": 0,
+      "expected_column_count": 1,
+      "shape_ok": false,
+      "required_value_hits": 0,
+      "ranker_score": -6
+    }
+  ]
+}

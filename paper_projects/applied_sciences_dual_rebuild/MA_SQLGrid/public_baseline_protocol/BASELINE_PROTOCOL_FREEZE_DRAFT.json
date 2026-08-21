@@ -1,0 +1,137 @@
+{
+  "schema_version": "ma-public-baseline-freeze-draft-v1",
+  "protocol_id": "MA-PUBLIC-BIRD-MINIDEV-v0.1-draft",
+  "created_local_date": "2026-08-05",
+  "status": "DRAFT_NOT_FROZEN",
+  "formal_model_execution_authorized": false,
+  "manuscript_modified": false,
+  "purpose": "Address MA-SQLGrid Round-1 competitive public baseline gap without claiming DKASQL reproduction.",
+  "dataset": {
+    "name": "BIRD Mini-Dev SQLite",
+    "official_repo": "https://github.com/bird-bench/mini_dev",
+    "official_dataset": "https://huggingface.co/datasets/birdsql/bird_mini_dev",
+    "revision": "f65faf4ae3b638c1fa6df1d3370c8d92c8366301",
+    "metadata_file": "data/mini_dev_sqlite-00000-of-00001.json",
+    "metadata_bytes": 278513,
+    "metadata_sha256": "88ceb0710163cae46a256ecea8f0a8c98286599530b60587fda5c3cfe57d45d2",
+    "license": "CC-BY-SA-4.0",
+    "dialect": "SQLite",
+    "population_rule": "all_official_rows_no_author_selection",
+    "items": 500,
+    "unique_question_ids": 500,
+    "databases": 11,
+    "difficulty_counts": {
+      "simple": 148,
+      "moderate": 250,
+      "challenging": 102
+    },
+    "oracle_evidence_included_for_all_methods": true,
+    "gold_visible_to_model_or_selector": false,
+    "development_visible_not_sealed": true,
+    "database_archive": {
+      "url": "https://bird-bench.oss-cn-beijing.aliyuncs.com/dev.zip",
+      "expected_bytes_from_head": 346207293,
+      "etag_non_sha256": "04B4AF221C9186361F09B16ABFD917EC",
+      "sha256": "cdd6d19faeb45a23970b98d3ef6c40a87987c95459c2cf12076897a60cf5a630",
+      "downloaded": true
+    }
+  },
+  "methods": [
+    {
+      "id": "B0_DIRECT",
+      "class": "direct",
+      "calls_per_item": 1,
+      "description": "Question, oracle evidence, full schema, SQL-only response."
+    },
+    {
+      "id": "B1_DECOMP",
+      "class": "cot_or_decomposition",
+      "calls_per_item": 1,
+      "description": "Explicit schema-links and clause-plan object plus final SQL in one response."
+    },
+    {
+      "id": "B2_SCHEMA_SELECT",
+      "class": "schema_selection",
+      "calls_per_item": 1,
+      "description": "Deterministic BM25 schema selection plus foreign-key closure, then generation."
+    },
+    {
+      "id": "B3_EXEC_REPAIR",
+      "class": "candidate_verification_and_repair",
+      "calls_per_item": 2,
+      "always_second_call": true,
+      "description": "Initial candidate, deterministic safe execution, bounded feedback, final repair call."
+    }
+  ],
+  "models": [
+    {
+      "id": "qwen2.5-coder-7b-instruct-q4_k_m@13fb94bf",
+      "repo": "Qwen/Qwen2.5-Coder-7B-Instruct-GGUF",
+      "revision": "13fb94bfda8c8cf22497dc57b78f391a9acb426a",
+      "bytes": 4683073536,
+      "sha256": "509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c",
+      "locally_available": true
+    },
+    {
+      "id": "granite-3.3-8b-instruct-q4_k_m@e40e9dd",
+      "repo": "ibm-granite/granite-3.3-8b-instruct-GGUF",
+      "revision": "e40e9dd739c7be00fa965c16ce167088190ce114",
+      "bytes": 4942873344,
+      "sha256": "77bcee066a76dcdd10d0d123c87e32c8ec2c74e31b6ffd87ebee49c9ac215dca",
+      "locally_available": true
+    }
+  ],
+  "runtime": {
+    "backend": "llama.cpp",
+    "release": "b9637",
+    "commit": "aedb2a5e9ca3d4064148bbb919e0ddc0c1b70ab3",
+    "cuda": "13.3",
+    "gpu": "NVIDIA RTX 3090 24576 MiB",
+    "parallel_slots": 1,
+    "context_tokens": 16384,
+    "aggregate_input_token_cap_per_item_method": 12000,
+    "aggregate_output_token_cap_per_item_method": 800,
+    "temperature": 0.0,
+    "seed": 20260805,
+    "retries": 0
+  },
+  "expected_work": {
+    "items": 500,
+    "models": 2,
+    "method_calls_per_item_sum": 5,
+    "total_generation_calls": 5000,
+    "calls_by_model": 2500,
+    "worst_case_generated_tokens": 4000000,
+    "estimated_gpu_hours_low": 3,
+    "estimated_gpu_hours_high": 8,
+    "additional_disk_gb_low": 2,
+    "additional_disk_gb_high": 7
+  },
+  "primary_outcome": "official_BIRD_execution_accuracy_all_attempts",
+  "primary_contrasts_per_backbone": [
+    "B1_DECOMP_minus_B0_DIRECT",
+    "B2_SCHEMA_SELECT_minus_B0_DIRECT",
+    "B3_EXEC_REPAIR_minus_B0_DIRECT"
+  ],
+  "dkasql": {
+    "official_article_doi": "10.3390/app152011121",
+    "official_implementation_found": false,
+    "reproduction_claim_permitted": false,
+    "allowed_label_for_independent_comparator": "DKASQL-style independent implementation",
+    "published_point_estimates_directly_comparable": false
+  },
+  "freeze_gates": {
+    "database_downloaded_and_sha256_bound": true,
+    "all_11_databases_present": true,
+    "gold_execution_500_of_500": true,
+    "official_evaluator_pinned": false,
+    "prompts_materialized_and_hashed": false,
+    "token_budget_passed_both_chat_templates": false,
+    "gold_leakage_audit_passed": false,
+    "selector_and_repair_tests_passed": false,
+    "independent_reviewer_signed": false,
+    "clean_process_gpu_port_preflight": false
+  },
+  "formal_outputs": 0,
+  "canonical_claims_changed": false
+}

@@ -1,0 +1,66 @@
+{
+  "schema_version": "ma-public-bird-formal-incident-v1",
+  "incident_id": "MA-BIRD-QWEN-REPLACEMENT1-SQLITE-WARNING-20260807",
+  "protocol_id": "MA-PUBLIC-BIRD-MINIDEV-v1.0",
+  "freeze_sha256": "29c780c63a2dc2baae221cfce52252c716d8720dbeecdc2f7a2fdd5756b42af5",
+  "recovery_approval": "MA_PUBLIC_BIRD_MINIDEV_v1_replacement_run_approval.json",
+  "model": "qwen",
+  "output_directory": "MA_PUBLIC_BIRD_v1_qwen_replacement1",
+  "runtime": {
+    "python": "3.10.11",
+    "sqlite": "3.40.1"
+  },
+  "status": "FAILED_RETAINED_NOT_RESUMABLE",
+  "formal_calls_completed": 2135,
+  "final_score_rows_completed": 1707,
+  "run_manifest_present": false,
+  "last_call": {
+    "call_index": 2134,
+    "formal_call_number": 2135,
+    "question_id": 98,
+    "db_id": "financial",
+    "method": "B1_DECOMP",
+    "call": 1
+  },
+  "failure": {
+    "exception": "sqlite3.Warning",
+    "message": "You can only execute one statement at a time.",
+    "trigger": "The extracted model output contained two semicolon-separated SELECT statements.",
+    "gate_behavior": "The runner stopped before writing a final-score row for the failing call."
+  },
+  "root_cause": {
+    "classification": "FROZEN_RUNNER_EXCEPTION_COVERAGE_DEFECT",
+    "detail": "Under Python 3.10.11, sqlite3.Warning is not a subclass of sqlite3.Error. The frozen safe_execute function catches sqlite3.Error only, so a multi-statement prediction escapes the intended classification path and terminates the run.",
+    "required_protocol_correction": "A new frozen revision must deterministically classify multi-statement predictions as PARSE_ERROR or catch sqlite3.Warning, with regression tests, before another full run."
+  },
+  "immutable_ledger_hashes": {
+    "call_ledger_sha256": "946a483035911574b94dc55fa89eb2bc7364295e116ea427947b5402e4e50503",
+    "final_scores_sha256": "6b9638a72814d43cb1c0d49fa7fbe671155c2e78e858d19b73a6a6bb9e957d35"
+  },
+  "physical_call_accounting": {
+    "attempt1_runtime_incident": 341,
+    "replacement1_sqlite_warning_incident": 2135,
+    "total_completed_so_far": 2476,
+    "previously_authorized_maximum": 5341,
+    "remaining_under_previous_authorization": 2865,
+    "calls_required_for_a_new_complete_two-model_run": 5000,
+    "maximum_if_new_complete_run_is_authorized": 7476
+  },
+  "integrity_actions": [
+    "The failed replacement directory was retained and was not resumed, overwritten, or deleted.",
+    "The Qwen llama-server was stopped after failure.",
+    "Granite was not started.",
+    "No incident scores were promoted to the manuscript."
+  ],
+  "recovery_gate": {
+    "status": "NEW_PROTOCOL_FREEZE_AND_HUMAN_AUTHORIZATION_REQUIRED",
+    "prohibited": [
+      "resume replacement1",
+      "overwrite replacement1",
+      "delete failed records",
+      "patch protocol v1.0 in place",
+      "start Granite before a clean Qwen completion",
+      "promote partial results"
+    ]
+  }
+}

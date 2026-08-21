@@ -1,0 +1,209 @@
+{
+  "schema_version": "1.0",
+  "review_round": 1,
+  "scope": ["methods", "statistics", "reproducibility"],
+  "decision": "major_revision",
+  "reviewed_snapshot": {
+    "tex": {
+      "path": "paper_projects/applied_sciences_dual_rebuild/C2GES/manuscript_applsci/paper_applsci.tex",
+      "sha256": "82ff97765be219ea3f2400bfba2fecdfb75a0b5d8c6558921e797a7d982ba988"
+    },
+    "pdf": {
+      "path": "paper_projects/applied_sciences_dual_rebuild/C2GES/manuscript_applsci/build/paper_applsci.pdf",
+      "sha256": "e1668847ea3a9ee8df2c9399373b283534e79c9c2add8b4aca0b2e241b4d5a51",
+      "physical_pages": 19
+    },
+    "canonical_manifest": {
+      "path": "paper_projects/2026_c2ges_engineeringletters/workspace/w6_c2_canonical_v2/canonical_manifest.json",
+      "sha256": "989e91c60eb48220e92a8eac32047973fa0f7b5d407cc66af0489f6a51ca4783"
+    }
+  },
+  "summary": {
+    "major": 7,
+    "minor": 5,
+    "open": 12,
+    "passes": 6
+  },
+  "issues": [
+    {
+      "id": "R1-M01",
+      "severity": "major",
+      "category": "prospective_status",
+      "status": "open",
+      "title": "Complete five-seed experiment was not prospectively frozen",
+      "manuscript_evidence": ["paper_applsci.tex:135-144"],
+      "artifact_evidence": [
+        "workspace/w4_c2_five_seed/W4_FREEZE_MANIFEST.json:2-5",
+        "workspace/w3_c2_pilot/W3_C2_PILOT_REPORT.md:6,28-37,49-58",
+        "source/code/aggregate_c2_w4_five_seed.py:35-38,114-115,268,275,303-311"
+      ],
+      "finding": "Seed 2026 test results were observed as a W3 pilot before the W4 freeze manifest was created; only seeds 2027-2030 were new after freeze.",
+      "required_action": "Disclose the reused observed pilot and replace full-study confirmatory/prespecified language unless a pre-W3 timestamped protocol exists.",
+      "verification": "Text states exact seed provenance and timing; no unsupported confirmatory/preregistered wording remains."
+    },
+    {
+      "id": "R1-M02",
+      "severity": "major",
+      "category": "multiplicity",
+      "status": "open",
+      "title": "Holm correction is asserted but absent",
+      "manuscript_evidence": ["paper_applsci.tex:144"],
+      "artifact_evidence": ["source/code/aggregate_c2_w4_five_seed.py:41-75,220-226,237-255", "workspace/w6_c2_canonical_v2/**: no Holm or adjusted-p result"],
+      "finding": "The frozen analysis reports raw paired t/sign-flip p-values and CI gates; it does not define or apply Holm families.",
+      "required_action": "Remove the claim or add traceable family definitions and adjusted results, labeled retrospective unless prospectively documented.",
+      "verification": "Every multiplicity statement maps to code and a canonical adjusted-results table, or Holm is absent from the paper."
+    },
+    {
+      "id": "R1-M03",
+      "severity": "major",
+      "category": "upstream_model",
+      "status": "open",
+      "title": "Upstream classifier is under-specified and fixed across downstream seeds",
+      "manuscript_evidence": ["paper_applsci.tex:79-97", "paper_applsci.tex:136-142"],
+      "artifact_evidence": ["workspace/w3_c2_pilot/full_8000_1500_1500/upstream_labels/provenance.json:2-19,63-89", "workspace/w4_c2_five_seed/W4_FREEZE_MANIFEST.json:33", "source/code/aggregate_c2_w4_five_seed.py:156-162"],
+      "finding": "One TF-IDF/logistic-regression role ledger is reused for all five downstream seeds, but configuration and uncertainty scope are not reported.",
+      "required_action": "Report the complete upstream configuration and state that uncertainty excludes upstream refits; add a separately labeled sensitivity if feasible.",
+      "verification": "A reader can reproduce the ledger and correctly interpret the seed/bootstrap variance."
+    },
+    {
+      "id": "R1-M04",
+      "severity": "major",
+      "category": "downstream_model",
+      "status": "open",
+      "title": "Registered downstream architecture and optimization are incompletely specified",
+      "manuscript_evidence": ["paper_applsci.tex:104-133"],
+      "artifact_evidence": ["source/code/c2ges_learnable.py:185-221,275-300,318-355"],
+      "finding": "Architecture size, dropout, exact floors/init, auxiliary coefficient, TF-IDF setup, batching, optimizer defaults, and local-channel details are omitted.",
+      "required_action": "Add a complete implementation table and total-loss equation; deposit executable code and an environment lock.",
+      "verification": "Independent reproduction requires no undocumented hyperparameter choices."
+    },
+    {
+      "id": "R1-M05",
+      "severity": "major",
+      "category": "dataset_construction",
+      "status": "open",
+      "title": "FEVER conversion and deterministic split are not fully documented",
+      "manuscript_evidence": ["paper_applsci.tex:62-75"],
+      "artifact_evidence": ["source/code/prepare_fever_benchmark.py:84-133,151-203,251-310"],
+      "finding": "Source revision, exclusions, evidence mapping, hash assignment, deduplication, pooling, and document-boundary limiting are omitted.",
+      "required_action": "Document the full conversion algorithm, counts by exclusion reason, source snapshot, hashes, and split parameters; deposit conversion code.",
+      "verification": "A clean regeneration produces the frozen manifest hashes and split counts."
+    },
+    {
+      "id": "R1-M06",
+      "severity": "major",
+      "category": "artifact_availability",
+      "status": "open",
+      "title": "No permanent submission-ready reproducibility package",
+      "manuscript_evidence": ["paper_applsci.tex:274", "paper_applsci.tex:279"],
+      "artifact_evidence": ["Local canonical v2 artifacts exist but no public DOI/URL is supplied"],
+      "finding": "The supplement is conditional and the data-availability statement contains a repository placeholder.",
+      "required_action": "Deposit permitted artifacts with DOI/URL, licenses, hashes, code, environment, ledgers, checkpoints/configs, and verification instructions.",
+      "verification": "All cited artifacts resolve from a permanent public record or have exact restriction-aware regeneration instructions."
+    },
+    {
+      "id": "R1-M07",
+      "severity": "major",
+      "category": "component_validation",
+      "status": "open",
+      "title": "Component attribution is discussed while available frozen ablations are omitted",
+      "manuscript_evidence": ["paper_applsci.tex:104-131", "paper_applsci.tex:173", "paper_applsci.tex:249-254"],
+      "artifact_evidence": ["source/code/aggregate_c2_w4_five_seed.py:166-175", "workspace/w6_c2_canonical_v2/canonical_manifest.json: source run prediction_rows=54000 and canonical_rows=12000"],
+      "finding": "Canonical v2 retains full/BM25 only although source runs contain additional modes; the shared-component interpretation is not directly shown.",
+      "required_action": "Report frozen modes as exploratory ablations or soften attribution and justify their exclusion.",
+      "verification": "Every component-performance interpretation is supported by a presented frozen contrast or clearly labeled as hypothesis."
+    },
+    {
+      "id": "R1-m01",
+      "severity": "minor",
+      "category": "gate_definition",
+      "status": "open",
+      "title": "Gate wording and captions omit one required interval",
+      "manuscript_evidence": ["paper_applsci.tex:138,142,146,165"],
+      "artifact_evidence": ["source/code/aggregate_c2_w4_five_seed.py:237-255"],
+      "finding": "Some text says hierarchical CI alone determines the gate, while code and the correct methods sentence require seed-level and hierarchical CIs.",
+      "required_action": "Use the exact two-interval gate definition everywhere and expose both intervals.",
+      "verification": "Methods, captions, tables, and Results describe identical gate logic."
+    },
+    {
+      "id": "R1-m02",
+      "severity": "minor",
+      "category": "oracle_labeling",
+      "status": "open",
+      "title": "Oracle-label is not a guaranteed upper bound",
+      "manuscript_evidence": ["paper_applsci.tex:89"],
+      "artifact_evidence": ["workspace/w6_c2_canonical_v2/tables/table_main_results.csv"],
+      "finding": "Privileged role access is a conditional sensitivity, not a mathematical upper bound, and observed ordering is not uniform.",
+      "required_action": "Replace upper-bound with privileged-label conditional sensitivity diagnostic.",
+      "verification": "No upper-bound wording remains unless formally defined and demonstrated."
+    },
+    {
+      "id": "R1-m03",
+      "severity": "minor",
+      "category": "ledger_scope",
+      "status": "open",
+      "title": "The 180,000-row canonical ledger scope is ambiguous",
+      "manuscript_evidence": ["paper_applsci.tex:149", "paper_applsci.tex:162"],
+      "artifact_evidence": ["source/code/aggregate_c2_w4_five_seed.py:166-175", "workspace/w6_c2_canonical_v2/canonical_manifest.json"],
+      "finding": "Source runs total 810,000 rows, whereas canonical v2 retains 180,000 full/BM25 rows.",
+      "required_action": "Distinguish full source-ledger audit coverage from reduced canonical release scope.",
+      "verification": "All row counts name modes, seeds, cutoffs, and inclusion scope."
+    },
+    {
+      "id": "R1-m04",
+      "severity": "minor",
+      "category": "bootstrap_reporting",
+      "status": "open",
+      "title": "Bootstrap estimand and Monte Carlo details need clarification",
+      "manuscript_evidence": ["paper_applsci.tex:138-146"],
+      "artifact_evidence": ["source/code/aggregate_c2_w4_five_seed.py:79-104"],
+      "finding": "The implementation is an instance-weighted percentile hierarchical cluster bootstrap with replacement, but weighting and RNG details are not stated.",
+      "required_action": "State weighting, replacement, percentile CI, RNG strategy, and 2,000-replicate limitation; optionally add a stability sensitivity.",
+      "verification": "The written algorithm reproduces canonical interval endpoints."
+    },
+    {
+      "id": "R1-m05",
+      "severity": "minor",
+      "category": "build_artifact",
+      "status": "open",
+      "title": "Readable PDF retains warnings and placeholder metadata",
+      "manuscript_evidence": ["paper_applsci.tex:274-284"],
+      "artifact_evidence": ["manuscript_applsci/build/paper_applsci.log", "manuscript_applsci/build/paper_applsci.pdf metadata"],
+      "finding": "No undefined references were found, but fancyhdr/hyperref warnings remain and author metadata is a placeholder.",
+      "required_action": "Clear warnings/placeholders and verify deterministic pagination/metadata before submission.",
+      "verification": "Clean compile, consistent page count, final metadata, no undefined references/citations."
+    }
+  ],
+  "passes": [
+    {
+      "id": "R1-P01",
+      "title": "Superseded 4000/800/800 split claim absent",
+      "evidence": "Boundary/context scan of TeX and extracted PDF; new split is 8000/1500/1500."
+    },
+    {
+      "id": "R1-P02",
+      "title": "Superseded single-seed/one-seed manuscript framing absent",
+      "evidence": "No match in new TeX/PDF; manuscript reports five downstream seeds."
+    },
+    {
+      "id": "R1-P03",
+      "title": "Superseded legacy metrics absent",
+      "evidence": "No 0.5066, 0.5030, 0.4967, 0.4937, 0.4837, 0.4818, 0.4414, or +0.0099 match in new TeX/PDF."
+    },
+    {
+      "id": "R1-P04",
+      "title": "Unsupported positive-role conclusion absent",
+      "evidence": "Abstract, Results, Discussion, and Conclusion retain role NO-GO and interval-crossing-zero language."
+    },
+    {
+      "id": "R1-P05",
+      "title": "Canonical numerical and artifact chain passes",
+      "evidence": "Canonical v2 validation passed with 180000 rows, 15 runs, 176 audit checks, and zero failures; generated claims map to hashed sources."
+    },
+    {
+      "id": "R1-P06",
+      "title": "Cited-only bibliography is internally closed",
+      "evidence": "references_cited_verified.bib contains exactly the 28 keys present in the latest AUX: zero missing and zero uncited entries."
+    }
+  ]
+}

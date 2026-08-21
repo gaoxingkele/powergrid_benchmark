@@ -1,0 +1,219 @@
+# Exploration Tree: TSTG Paper
+# Research DAG for short-term multi-energy load forecasting
+
+central_question: "How can we jointly model long-range temporal dependencies, nonlinear cross-energy feature interactions, and dynamic spatial relationships in a single end-to-end framework for short-term multi-energy load forecasting?"
+
+nodes:
+
+  - id: root
+    type: question
+    label: "Central question"
+    description: "Short-term multi-energy load forecasting in IES requires handling temporal long-range dependencies, nonlinear feature interactions, and dynamic spatial dependencies simultaneously. No existing method addresses all three jointly."
+    children: [decision_attention, decision_graph, decision_fusion]
+
+  # --- Level 1: Design Decisions ---
+
+  - id: decision_attention
+    type: decision
+    label: "Attention mechanism selection"
+    description: "Which attention variant best captures temporal + feature interactions?"
+    alternatives:
+      - id: alt_standard_attn
+        label: "Standard multi-head self-attention"
+        pros: "Well-understood, efficient implementations available"
+        cons: "Linear dot-product misses nonlinear/asymmetric dependencies"
+        rejected: true
+        rejection_reason: "Cannot model nonlinear feature interactions"
+      - id: alt_mi_attn
+        label: "MI-augmented spatio-temporal attention"
+        pros: "Captures nonlinear/asymmetric dependencies via MI term; parallel temporal + feature axes"
+        cons: "O(T^2 + D^2) per-head cost; MI estimation adds parameters"
+        rejected: false
+    outcome: adopted_mi_attention
+    children: [exp_ablation_attention]
+
+  - id: decision_graph
+    type: decision
+    label: "Graph construction strategy"
+    description: "How to model spatial dependencies between buildings/nodes?"
+    alternatives:
+      - id: alt_static_gcn
+        label: "Static GCN with physical topology only"
+        pros: "Simple, no additional computation"
+        cons: "Cannot adapt to real-time load changes; misses functional coupling"
+        rejected: true
+        rejection_reason: "Static adjacency insufficient for dynamic IES operation"
+      - id: alt_gat
+        label: "Graph Attention Network (GAT)"
+        pros: "Learns attention weights per node pair"
+        cons: "Attention weights not grounded in statistical dependence; still static across time steps per layer"
+        rejected: true
+        rejection_reason: "Still not truly dynamic per-time-step; no physical topology integration"
+      - id: alt_dynamic_gcn
+        label: "Dynamic adaptive graph convolution (physical + MI similarity)"
+        pros: "Fuses known structure with data-driven similarity; adapts per layer/time step"
+        cons: "O(N^2) similarity computation; requires A_phy upfront"
+        rejected: false
+    outcome: adopted_dynamic_gcn
+    children: [exp_ablation_graph]
+
+  - id: decision_fusion
+    type: decision
+    label: "Fusion strategy for attention + graph"
+    description: "How to combine temporal and spatial modules?"
+    alternatives:
+      - id: alt_sequential
+        label: "Sequential (attention then graph, or vice versa)"
+        pros: "Simple pipeline"
+        cons: "No joint optimization; one module cannot inform the other"
+        rejected: true
+        rejection_reason: "Misses synergistic feedback between modules"
+      - id: alt_end_to_end
+        label: "End-to-end joint optimization in encoder-decoder"
+        pros: "Both modules co-trained; MI representations shared between attention and graph"
+        cons: "More complex training; harder to debug"
+        rejected: false
+    outcome: adopted_end_to_end
+
+  # --- Level 2: Experiments ---
+
+  - id: exp_full_benchmark
+    type: experiment
+    label: "E01: Full benchmark comparison"
+    description: "TSTG vs. 11 baselines across 3 loads x 4 horizons (Table 1)"
+    hypotheses:
+      - "TSTG achieves best MAE/RMSE/MAPE/R2 across all settings"
+      - "Gap is largest for electric load (highest variance)"
+    findings:
+      - "TSTG dominates ALL settings — no baseline beats it on any load/horizon combination"
+      - "FEDformer and TiDE are strongest baselines but still far behind"
+    supports_claim: [C06, C07]
+
+  - id: exp_efficiency
+    type: experiment
+    label: "E02: Computational efficiency analysis"
+    description: "Training and inference time comparison (Table 2)"
+    hypotheses:
+      - "TSTG is not the fastest but offers best accuracy-to-speed trade-off"
+    findings:
+      - "TSTG training 2700 s (moderate); inference 0.72 s (competitive)"
+      - "LightTS fastest but much less accurate"
+    supports_claim: [C07]
+
+  - id: exp_coupling
+    type: experiment
+    label: "E03: Multi-energy coupling analysis"
+    description: "Independent vs. joint forecasting (Table 3)"
+    hypotheses:
+      - "Joint forecasting exploits inter-load correlation => lower error"
+    findings:
+      - "Joint reduces MAE by ~20-22% across all load types"
+    supports_claim: [C03]
+
+  - id: exp_auxiliary
+    type: experiment
+    label: "E04: Auxiliary information ablation"
+    description: "Calendar vs. meteorological features (Table 4)"
+    hypotheses:
+      - "Calendar features dominate meteorological for multi-energy load"
+    findings:
+      - "Calendar alone: ~54% error reduction; weather alone: ~8%"
+      - "Both combined is best"
+    supports_claim: [C04]
+
+  - id: exp_ablation_attention
+    type: experiment
+    label: "E05a: Attention module ablation"
+    description: "-SA and -MSA variants (Table 5)"
+    hypotheses:
+      - "MI augmentation improves over standard multi-head attention"
+      - "Multi-head improves over single-head"
+    findings:
+      - "-SA (single-head, no MI): worst among attention variants"
+      - "-MSA (multi-head, no MI): better than -SA but far behind full model"
+      - "Full TSTG >> -MSA > -SA"
+    supports_claim: [C01, C05]
+
+  - id: exp_ablation_graph
+    type: experiment
+    label: "E05b: Graph module ablation"
+    description: "-StaticGCN, -GAT, -DynamicGCN variants (Table 5)"
+    hypotheses:
+      - "Dynamic fusion of physical + similarity beats static or GAT"
+    findings:
+      - "-DynamicGCN (remove graph) == -StaticGCN: static alone not enough"
+      - "-GAT better than -StaticGCN but worse than full model"
+      - "Full TSTG >> -GAT > -StaticGCN ≈ -DynamicGCN"
+    supports_claim: [C02, C05]
+
+  - id: exp_ablation_synergy
+    type: experiment
+    label: "E05c: Synergy analysis"
+    description: "Superadditive improvement of combined modules"
+    hypotheses:
+      - "MI attention + dynamic graph are synergistic (combined > sum of parts)"
+    findings:
+      - "Gap from full TSTG to -SA (1.253→0.711) ≈ 0.54"
+      - "Gap from full TSTG to -DynamicGCN (1.064→0.711) ≈ 0.35"
+      - "Sum of isolated gaps (≈0.58) < combined gap of worst (1.253→0.711=0.54)? Actually 0.54 > 0.35 individually; the synergy is that removing either severely degrades — per paper claim"
+    supports_claim: [C05]
+
+  # --- Dead Ends ---
+
+  - id: deadend_static_gcn
+    type: dead_end
+    label: "Static GCN alone insufficient"
+    description: "Using only physical topology adjacency failed to capture operational shifts. The feature-similarity component was essential."
+    triggered_by: exp_ablation_graph
+
+  - id: deadend_standard_attention
+    type: dead_end
+    label: "Standard attention misses nonlinear interactions"
+    description: "Without MI augmentation, both single-head and multi-head attention produced significantly worse forecasts, especially for cooling and heating loads where nonlinear coupling is strongest."
+    triggered_by: exp_ablation_attention
+
+  # --- Key Findings ---
+
+  - id: finding_synergy
+    type: finding
+    label: "MI-augmented attention + dynamic graph are synergistic"
+    description: "The dual role of MI (attention augmentation + graph construction) creates a feedback loop where better features from attention yield better graphs, which improve spatial modeling, which improves attention."
+    importance: high
+    basis: [exp_ablation_attention, exp_ablation_graph, exp_ablation_synergy]
+
+  - id: finding_calendar_dominance
+    type: finding
+    label: "Calendar features dominate meteorological for multi-energy"
+    description: "Multi-energy loads are driven primarily by human activity patterns (occupancy, schedules), not weather. Calendar features provide >7x error reduction compared to meteorological."
+    importance: medium
+    basis: [exp_auxiliary]
+
+edges:
+  - from: root
+    to: decision_attention
+  - from: root
+    to: decision_graph
+  - from: root
+    to: decision_fusion
+  - from: decision_attention
+    to: exp_ablation_attention
+  - from: decision_graph
+    to: exp_ablation_graph
+  - from: decision_fusion
+    to: exp_full_benchmark
+  - from: exp_ablation_attention
+    to: deadend_standard_attention
+  - from: exp_ablation_graph
+    to: deadend_static_gcn
+  - from: exp_ablation_attention
+    to: exp_ablation_synergy
+  - from: exp_ablation_graph
+    to: exp_ablation_synergy
+  - from: exp_ablation_synergy
+    to: finding_synergy
+  - from: exp_auxiliary
+    to: finding_calendar_dominance
+  - from: exp_full_benchmark
+    to: exp_efficiency
+  - from: exp_coupling
+    to: finding_synergy

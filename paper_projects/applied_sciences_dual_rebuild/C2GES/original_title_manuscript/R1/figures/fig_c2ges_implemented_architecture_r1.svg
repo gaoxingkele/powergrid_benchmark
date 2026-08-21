@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img">
+<defs>
+<marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L10,4 L0,8 Z" fill="#24445c"/></marker>
+<filter id="shadow" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#19354a" flood-opacity="0.16"/></filter>
+</defs>
+<rect x="0" y="0" width="1600" height="900" fill="#ffffff"/>
+<title>C²GES: implemented offline summarization pipeline</title><desc>Deterministic sentence-level proxy graph; no GNN, model API, or claim of ground-truth causality</desc>
+<text x="800" y="43" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" text-anchor="middle" fill="#153247">C²GES: implemented offline summarization pipeline</text>
+<text x="800" y="75" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" text-anchor="middle" fill="#536978">Deterministic sentence-level proxy graph; no GNN, model API, or claim of ground-truth causality</text>
+<g data-box="Report inputs"><rect x="45" y="150" width="225" height="235" rx="16" fill="#e9f3f8" stroke="#24445c" stroke-width="2" filter="url(#shadow)"/><line x1="45" y1="201" x2="270" y2="201" stroke="#24445c" stroke-width="1" opacity="0.55"/></g>
+<text x="157.5" y="184" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" text-anchor="middle" fill="#153247">Report inputs</text>
+<text x="63" y="228" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" text-anchor="start" fill="#183240">
+<tspan x="63" dy="0">• sentence ID + text</tspan>
+<tspan x="63" dy="25">• report position</tspan>
+<tspan x="63" dy="25">• optional query</tspan>
+<tspan x="63" dy="25">• optional silver</tspan>
+<tspan x="63" dy="25">  role evidence</tspan>
+</text>
+<text x="157.5" y="370" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#5d6870">Silver evidence is not human gold</text>
+<g data-box="Typed causal event graph"><rect x="335" y="105" width="430" height="325" rx="16" fill="#e8f5ef" stroke="#24445c" stroke-width="2" filter="url(#shadow)"/><line x1="335" y1="156" x2="765" y2="156" stroke="#24445c" stroke-width="1" opacity="0.55"/></g>
+<text x="550.0" y="139" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" text-anchor="middle" fill="#153247">Typed causal event graph</text>
+<text x="353" y="183" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" text-anchor="start" fill="#183240">
+<tspan x="353" dy="0">Sentence nodes retain five lexical role scores:</tspan>
+<tspan x="353" dy="25">trigger • root cause • propagation/response</tspan>
+<tspan x="353" dy="25">impact • mitigation</tspan>
+<tspan x="353" dy="25">Dominant role → allowed typed transition</tspan>
+<tspan x="353" dy="25">Edge weight = proximity + token overlap</tspan>
+<tspan x="353" dy="25">+ role confidence (fixed coefficients)</tspan>
+</text>
+<text x="550.0" y="415" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#5d6870">Auditable proxy graph; rule-based, not a learned GNN</text>
+<g data-box="Deterministic interventions"><rect x="830" y="105" width="310" height="325" rx="16" fill="#fff4df" stroke="#24445c" stroke-width="2" filter="url(#shadow)"/><line x1="830" y1="156" x2="1140" y2="156" stroke="#24445c" stroke-width="1" opacity="0.55"/></g>
+<text x="985.0" y="139" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" text-anchor="middle" fill="#153247">Deterministic interventions</text>
+<text x="848" y="183" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" text-anchor="start" fill="#183240">
+<tspan x="848" dy="0">Baseline causal flow = Σ edge weight</tspan>
+<tspan x="848" dy="25">For each sentence node:</tspan>
+<tspan x="848" dy="25">1. delete node + incident edges</tspan>
+<tspan x="848" dy="25">2. recompute causal flow</tspan>
+<tspan x="848" dy="25">3. measure non-negative flow loss</tspan>
+<tspan x="848" dy="25">4. min–max scale across nodes</tspan>
+</text>
+<text x="985.0" y="415" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#5d6870">Node deletion only; no synthetic counterfactual text</text>
+<g data-box="Multi-channel scoring"><rect x="1205" y="105" width="350" height="325" rx="16" fill="#f2edfa" stroke="#24445c" stroke-width="2" filter="url(#shadow)"/><line x1="1205" y1="156" x2="1555" y2="156" stroke="#24445c" stroke-width="1" opacity="0.55"/></g>
+<text x="1380.0" y="139" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" text-anchor="middle" fill="#153247">Multi-channel scoring</text>
+<text x="1223" y="183" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" text-anchor="start" fill="#183240">
+<tspan x="1223" dy="0">0.30 relevance (query/document focus)</tspan>
+<tspan x="1223" dy="25">0.20 lexical/silver role evidence</tspan>
+<tspan x="1223" dy="25">0.20 weighted-degree graph signal</tspan>
+<tspan x="1223" dy="25">0.25 node-deletion sensitivity</tspan>
+<tspan x="1223" dy="25">0.05 report-position prior</tspan>
+<tspan x="1223" dy="25">→ fixed weighted sum per sentence</tspan>
+</text>
+<text x="1380.0" y="415" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#5d6870">Weights are configured constants in the current core</text>
+<g data-box="Constrained extractive selection"><rect x="440" y="555" width="650" height="235" rx="16" fill="#eaf1fb" stroke="#24445c" stroke-width="2" filter="url(#shadow)"/><line x1="440" y1="606" x2="1090" y2="606" stroke="#24445c" stroke-width="1" opacity="0.55"/></g>
+<text x="765.0" y="589" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" text-anchor="middle" fill="#153247">Constrained extractive selection</text>
+<text x="458" y="633" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" text-anchor="start" fill="#183240">
+<tspan x="458" dy="0">Reserve available causal-function groups when budget ≥ 3:</tspan>
+<tspan x="458" dy="25">cause/trigger • propagation/impact • mitigation</tspan>
+<tspan x="458" dy="25">Fill remaining budget by adjusted score</tspan>
+<tspan x="458" dy="25">Adjusted score = base score − 0.35 × max Jaccard redundancy</tspan>
+<tspan x="458" dy="25">Return selected sentences in original report order</tspan>
+</text>
+<text x="765.0" y="775" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#5d6870">Deterministic tie-break: score, earlier position, sentence ID</text>
+<g data-box="Output"><rect x="1240" y="585" width="290" height="170" rx="16" fill="#e8f5ef" stroke="#24445c" stroke-width="2" filter="url(#shadow)"/><line x1="1240" y1="636" x2="1530" y2="636" stroke="#24445c" stroke-width="1" opacity="0.55"/></g>
+<text x="1385.0" y="619" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" text-anchor="middle" fill="#153247">Output</text>
+<text x="1258" y="663" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" text-anchor="start" fill="#183240">
+<tspan x="1258" dy="0">Extractive summary</tspan>
+<tspan x="1258" dy="25">selection order</tspan>
+<tspan x="1258" dy="25">covered role groups</tspan>
+<tspan x="1258" dy="25">per-sentence reason + score</tspan>
+</text>
+<polyline points="270,267 335,267" fill="none" stroke="#24445c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="765,267 830,267" fill="none" stroke="#24445c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1140,267 1205,267" fill="none" stroke="#24445c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="550,430 550,505 630,505 630,555" fill="none" stroke="#24445c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="577.5" y="497.0" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#425b6c">roles + graph signal</text>
+<polyline points="1380,430 1380,510 1000,510 1000,555" fill="none" stroke="#24445c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="1207.5" y="502.0" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#425b6c">base scores</text>
+<polyline points="1090,672 1160,672 1160,620 1240,620" fill="none" stroke="#24445c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="55" y="855" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start" fill="#536978">Solid arrows denote actual data dependencies in c2ges_offline.py.</text>
+</svg>

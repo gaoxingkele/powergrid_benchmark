@@ -1,0 +1,82 @@
+{
+  "prompt": "You are generating candidate SQLite SQL for CHESS-style MA-SQLGrid.\n\nReturn 3 distinct read-only SQLite SELECT queries as a numbered list. Do not include explanation.\nDo not use INSERT, UPDATE, DELETE, DROP, PRAGMA, or multiple statements.\nUse only the selected context, normalization hints, and inferred output-form hints below. Candidate queries should differ in plausible joins/projections while respecting the inferred projection count and relevant literal predicates.\n\nCondition: C5_MASQLGrid_DomainContext_Validated\n\nSQLite selected context:\nTables and selected columns:\n- asset_types(asset_type_id) -- equipment type catalog such as Transformer, Breaker, Line, Relay, Substation, Capacitor\n- assets(asset_id, asset_name, asset_type_id, location_id) -- individual grid assets with names, type, location, install date, status, and MW capacity\n- grid_topology(edge_id, upstream_asset_id, downstream_asset_id, connection_type, switch_status) -- directed upstream/downstream asset connections and switch status\n- locations(location_id) -- grid yards, substations, regions, coordinates, and location criticality\n- sensor_readings(reading_id, asset_id, alarm_flag) -- time-series sensor readings for assets with sensor type, value, unit, and alarm flag\n- technicians(technician_id, active) -- maintenance technicians, specialties, home regions, and active flag\nJoin paths:\n- assets.asset_type_id = asset_types.asset_type_id\n- assets.location_id = locations.location_id\n- sensor_readings.asset_id = assets.asset_id\n- grid_topology.upstream_asset_id = assets.asset_id\n- grid_topology.downstream_asset_id = assets.asset_id\nPower-grid domain normalization hints inferred from the question:\n- GROUP BY the upstream asset and use HAVING COUNT(*) > 1\nAnswer-shape hints inferred from the question text:\n- expected column count: 2\n- row granularity: multi-row\n- deterministic ordering needed: True\n- Use GROUP BY with HAVING COUNT(*) > 1.\n\nQuestion ID: Q079\nQuestion: Which upstream assets have more than one topology edge?\n",
+  "rank_trace": [
+    {
+      "candidate_index": 0,
+      "column_count": 2,
+      "empty_result": false,
+      "exec_error": "",
+      "exec_ok": true,
+      "expected_column_count": 2,
+      "missing_value_hints": [],
+      "order_ok": true,
+      "order_required": true,
+      "ranker_score": 33,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": true,
+      "sql": "SELECT a.asset_id, a.asset_name FROM grid_topology AS gt JOIN assets AS a ON a.asset_id = gt.upstream_asset_id GROUP BY a.asset_id, a.asset_name HAVING COUNT(*) > 1 ORDER BY a.asset_id ASC, a.asset_name ASC;",
+      "value_hint_count": 1,
+      "value_hits": 1
+    },
+    {
+      "candidate_index": 1,
+      "column_count": 2,
+      "empty_result": false,
+      "exec_error": "",
+      "exec_ok": true,
+      "expected_column_count": 2,
+      "missing_value_hints": [],
+      "order_ok": true,
+      "order_required": true,
+      "ranker_score": 32,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": true,
+      "sql": "SELECT gt.upstream_asset_id, COUNT(*) AS edge_count FROM grid_topology AS gt GROUP BY gt.upstream_asset_id HAVING COUNT(*) > 1 ORDER BY gt.upstream_asset_id ASC;",
+      "value_hint_count": 1,
+      "value_hits": 1
+    },
+    {
+      "candidate_index": 2,
+      "column_count": 2,
+      "empty_result": false,
+      "exec_error": "",
+      "exec_ok": true,
+      "expected_column_count": 2,
+      "missing_value_hints": [],
+      "order_ok": true,
+      "order_required": true,
+      "ranker_score": 31,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": true,
+      "sql": "SELECT a.asset_name, COUNT(gt.edge_id) AS edge_count FROM grid_topology AS gt JOIN assets AS a ON a.asset_id = gt.upstream_asset_id GROUP BY a.asset_name HAVING COUNT(gt.edge_id) > 1 ORDER BY a.asset_name ASC;",
+      "value_hint_count": 1,
+      "value_hits": 1
+    },
+    {
+      "candidate_index": 3,
+      "column_count": 0,
+      "empty_result": false,
+      "exec_error": "incomplete input",
+      "exec_ok": false,
+      "expected_column_count": 2,
+      "missing_value_hints": [
+        "GROUP BY the upstream asset and use HAVING COUNT(*) > 1"
+      ],
+      "order_ok": false,
+      "order_required": true,
+      "ranker_score": -18,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": false,
+      "sql": "SELECT;",
+      "value_hint_count": 1,
+      "value_hits": 0
+    }
+  ],
+  "raw_response": "1. ```sql\nSELECT\n  a.asset_id,\n  a.asset_name\nFROM grid_topology AS gt\nJOIN assets AS a\n  ON a.asset_id = gt.upstream_asset_id\nGROUP BY\n  a.asset_id,\n  a.asset_name\nHAVING COUNT(*) > 1\nORDER BY\n  a.asset_id ASC,\n  a.asset_name ASC;\n```\n\n2. ```sql\nSELECT\n  gt.upstream_asset_id,\n  COUNT(*) AS edge_count\nFROM grid_topology AS gt\nGROUP BY gt.upstream_asset_id\nHAVING COUNT(*) > 1\nORDER BY\n  gt.upstream_asset_id ASC;\n```\n\n3. ```sql\nSELECT\n  a.asset_name,\n  COUNT(gt.edge_id) AS edge_count\nFROM grid_topology AS gt\nJOIN assets AS a\n  ON a.asset_id = gt.upstream_asset_id\nGROUP BY\n  a.asset_name\nHAVING COUNT(gt.edge_id) > 1\nORDER BY\n  a.asset_name ASC;\n```",
+  "repair_raw_response": "",
+  "repaired_sql": ""
+}

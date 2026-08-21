@@ -1,0 +1,148 @@
+tree:
+  nodes:
+    - id: "RQ1"
+      type: question
+      support_level: explicit
+      source_refs: ["Section 1.2, lines 262-264"]
+      title: "Forecasting incorporation into EVCS-RES planning"
+      description: "How can forecasting methodologies be systematically incorporated into EVCS and RES planning to improve system reliability, optimization, and resilience under uncertainty?"
+
+    - id: "RQ2"
+      type: question
+      support_level: explicit
+      source_refs: ["Section 1.2, lines 265-267"]
+      title: "Technical, economic, and environmental challenges of EVCS-RES integration"
+      description: "What are the key technical, economic, and environmental challenges in integrating EVCSs and RESs into distribution networks, and how can robust system optimization strategies effectively address them?"
+
+    - id: "RQ3"
+      type: question
+      support_level: explicit
+      source_refs: ["Section 1.2, lines 268-271"]
+      title: "Planning algorithms for long-term sustainability"
+      description: "In what ways can innovative planning algorithms enhance the long-term sustainability, reliability cost-effectiveness, and operational efficiency of EVCS-RES-integrated distribution systems?"
+
+    - id: "DEC_FORECAST_CLASS"
+      type: decision
+      support_level: explicit
+      source_refs: ["Section 2.1, Figure 2"]
+      title: "Forecasting method classification scheme"
+      description: "Bifurcate forecasting methods into learning-based and non-learning-based categories for structured literature analysis."
+      choice: "Bifurcate into learning-based vs non-learning-based with hierarchical subcategories"
+      alternatives:
+        - "Single continuous spectrum from simple to complex methods"
+        - "Categorize by forecasting horizon (short-term vs long-term)"
+        - "Categorize by input data types (historical data, behavioral data, contextual data)"
+
+    - id: "DEC_NON_LEARN"
+      type: decision
+      support_level: explicit
+      source_refs: ["Section 2.1.1"]
+      title: "Non-learning-based sub-classification"
+      description: "Sub-classify non-learning-based methods into non-probabilistic and probabilistic approaches."
+      choice: "Split into non-probabilistic (ARIMA, SARIMA, ARMA) and probabilistic (MCS, Markov Chain, parametric, non-parametric)"
+      alternatives:
+        - "Single category without probabilistic distinction"
+        - "Only statistical time-series methods"
+
+    - id: "DEC_LEARN"
+      type: decision
+      support_level: explicit
+      source_refs: ["Section 2.1.2"]
+      title: "Learning-based sub-classification"
+      description: "Sub-classify learning-based methods into non-NN ML, NN ML, Generative AI, and RL branches."
+      choice: "Four-way split: non-NN ML, NN ML, Generative AI, Reinforcement Learning"
+      alternatives:
+        - "Single machine-learning category"
+        - "Split only by supervised/unsupervised/reinforcement learning paradigm"
+
+    - id: "DEC_PLANNING_CLASS"
+      type: decision
+      support_level: explicit
+      source_refs: ["Section 2.2.1, Figure 3"]
+      title: "Planning algorithm classification scheme"
+      description: "Bifurcate EVCS planning algorithms into deterministic and stochastic/metaheuristic methods."
+      choice: "Bifurcate into deterministic (LP, NLP, MILP, ADMM, SQP, DP) and stochastic/metaheuristic (PSO, GA, GWO, TLBO, ACO, SOA)"
+      alternatives:
+        - "Categorize by optimization paradigm (single-objective vs multi-objective)"
+        - "Categorize by problem type (siting vs sizing vs combined)"
+
+    - id: "DEC_OBJ_FUNC"
+      type: decision
+      support_level: explicit
+      source_refs: ["Section 2.2.2, Table 4"]
+      title: "Objective function classification scheme"
+      description: "Classify planning objectives into technical, economic, environmental, and reliability criteria."
+      choice: "Four-dimensional classification: technical, economic, environmental, reliability"
+      alternatives:
+        - "Binary classification (technical vs non-technical)"
+        - "Single weighted objective approach"
+
+    - id: "NODE_IMPACT_ANALYSIS"
+      type: experiment
+      support_level: explicit
+      source_refs: ["Section 3", "Section 4"]
+      title: "Impact assessment of EVCS-RES integration"
+      description: "Systematic assessment of voltage regulation, power loss, power quality, reliability, and environmental impacts of combined EVCS-RES deployment."
+      result: "EVCS-RES integration creates significant technical challenges (voltage drops, power losses, harmonic distortion) that can be mitigated through optimal siting, BESS coordination, and smart charging strategies. Environmental benefits (CO2 reduction) are confirmed but reliability impacts are understudied."
+
+    - id: "NODE_GAP_INTEGRATION"
+      type: experiment
+      support_level: explicit
+      source_refs: ["Section 4", "Table 1"]
+      title: "Gap analysis: integrated forecasting-driven planning"
+      description: "Identification that most existing work separates forecasting from planning optimization and neglects environmental/reliability objectives."
+      result: "No existing framework jointly addresses AI-based forecasting, uncertainty propagation, multi-objective synthesis, and planning optimization. Technical and economic objectives dominate (>99% and ~70% of studies), while environmental (35%) and reliability (18%) are underrepresented."
+
+    - id: "NODE_BESS_ENABLING"
+      type: experiment
+      support_level: explicit
+      source_refs: ["Section 1.1, Ref. [22]", "Section 4"]
+      title: "BESS as enabling technology assessment"
+      description: "Assessment of coordinated BESS dispatch with active-reactive power control for uncertainty mitigation in EVCS-RES planning."
+      result: "Coordinated BESS dispatch with bio-inspired optimization reduces operational costs, network losses, and emissions under stochastic conditions. BESS with active-reactive power control can mitigate voltage deviations and enhance reliability, but is insufficiently embedded in current planning models."
+
+    - id: "NODE_POLICY_MARKET"
+      type: experiment
+      support_level: explicit
+      source_refs: ["Section 3.1", "Section 4"]
+      title: "Policy and market factor assessment"
+      description: "Analysis of how regulatory policies, market mechanisms, and socioeconomic factors impact EVCS-RES planning outcomes."
+      result: "Regulatory policies (demand-response, dynamic pricing, V2G market participation, carbon trading) significantly impact EVCS planning outcomes but are rarely integrated into techno-economic optimization models. Future research should include regulatory compliance limitations, incentive mechanisms, and market design factors."
+
+  edges:
+    - from: "RQ1"
+      to: "DEC_FORECAST_CLASS"
+      label: "drives"
+    - from: "DEC_FORECAST_CLASS"
+      to: "DEC_NON_LEARN"
+      label: "branches_to"
+    - from: "DEC_FORECAST_CLASS"
+      to: "DEC_LEARN"
+      label: "branches_to"
+    - from: "RQ3"
+      to: "DEC_PLANNING_CLASS"
+      label: "drives"
+    - from: "RQ2"
+      to: "DEC_OBJ_FUNC"
+      label: "drives"
+    - from: "DEC_OBJ_FUNC"
+      to: "NODE_IMPACT_ANALYSIS"
+      label: "informs"
+    - from: "DEC_FORECAST_CLASS"
+      to: "NODE_GAP_INTEGRATION"
+      label: "reveals"
+    - from: "DEC_PLANNING_CLASS"
+      to: "NODE_GAP_INTEGRATION"
+      label: "reveals"
+    - from: "DEC_OBJ_FUNC"
+      to: "NODE_GAP_INTEGRATION"
+      label: "reveals"
+    - from: "NODE_IMPACT_ANALYSIS"
+      to: "NODE_BESS_ENABLING"
+      label: "identifies"
+    - from: "NODE_IMPACT_ANALYSIS"
+      to: "NODE_POLICY_MARKET"
+      label: "identifies"
+    - from: "NODE_GAP_INTEGRATION"
+      to: "NODE_POLICY_MARKET"
+      label: "links"

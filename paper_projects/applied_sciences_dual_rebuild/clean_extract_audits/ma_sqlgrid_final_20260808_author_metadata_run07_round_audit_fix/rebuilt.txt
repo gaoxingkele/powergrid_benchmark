@@ -1,0 +1,2039 @@
+Article
+
+MA-SQLGrid: A Robust Multi-Agent Framework for
+Text-to-SQL in Power Grid Databases
+Liu Bijing 1,2 , Sun Chenglong 1,2 and Yang Yong 1,2, *
+
+                                       1   NARI Group Corporation (State Grid Electric Power Research Institute), Nanjing 211106, Jiangsu Province,
+                                           China;
+                                       2   Beijing Kedong Electric Power Control System Co., Ltd., Beijing 100080, China
+                                       *   Correspondence: Yang Yong; liubijing@outlook.com
+
+
+                                       Featured Application                                                                                            1
+
+
+                                       MA-SQLGrid is an experimental read-only decision-support framework for auditable                                2
+
+                                       natural-language access to structured power-grid records. Generated SQL and returned                            3
+
+                                       source rows require human inspection before consequential use; no operational control,                          4
+
+                                       protection, or maintenance decision has been validated.                                                         5
+
+
+
+                                       Abstract                                                                                                        6
+
+
+                                       Natural-language access to power-grid databases requires traceable schema grounding,                            7
+
+                                       database-enforced read-only execution, and explicit treatment of missing evidence. This                         8
+
+                                       paper presents MA-SQLGrid, a five-role software architecture coordinated through an                             9
+
+                                       append-only blackboard and deterministic adjudicator. The implemented boundary uses                            10
+
+                                       SQLite read-only mode, query_only, an authorizer, disabled extensions, resource limits,                        11
+
+                                       and fail-closed named-state coverage. Earlier GridDB and BIRD experiments evaluate                             12
+
+                                       frozen prompting workflows, not autonomous multi-agent generation. The only audited                            13
+
+                                       prospective experiment is a separate 700-call component study; it tests presented-value and                    14
+
+                                       reference-free selection components rather than the five-role system. A deterministic no-                      15
+
+                                       generation release-v3 re-execution applies three selectors to a shared 5760-attempt evidence                   16
+
+                                       collection for eight historical candidates on 180 GridDB questions. A supersession record                      17
+
+                                       classifies this release as descriptive because its frozen pre-run tests accessed same-item                     18
+
+                                       gold-derived v2 outcomes. Fixed order, validation-only ranking, and complete three-                            19
+
+                                       witness selection obtained 80/180, 100/180, and 101/180, respectively. The latter two                          20
+
+                                       selectors had top-score ties on 130/180 questions, with mean tie multiplicities 5.4000 and                     21
+
+                                       5.3889; reversing candidate order yielded 117–118/180. Their sole difference was Q039,                         22
+
+                                       where a constructed nullable-column witness rejected SELECT * and retained an explicit                         23
+
+                                       projection. This 1/180 trace is semantically ambiguous and is not evidence of a general                        24
+
+                                       counterfactual, robustness, coordination, or multi-agent gain. The evidence supports a                         25
+
+                                       reproducible architecture with tested safety and bounded-evidence mechanisms, but not                          26
+
+                                       end-to-end agent superiority, qualified power-grid semantic validity, deployment safety, or                    27
+
+                                       universal robustness.                                                                                          28
+
+Received:
+Accepted:                              Keywords: text-to-SQL; multi-agent systems; power-grid databases; schema grounding;                            29
+
+Published:                             execution validation; counterfactual testing; reproducibility                                                  30
+
+Copyright: © 2026 by the authors.
+Submitted to Appl. Sci. for possible
+open access publication under the
+terms and conditions of the Creative
+Commons Attribution (CC BY) license.
+
+
+
+
+Version August 8, 2026 submitted to Appl. Sci.                                                                 https://doi.org/10.3390/app1010000
+Version August 8, 2026 submitted to Appl. Sci.                                                                                2 of 20
+
+
+
+
+                                     1. Introduction                                                                                    31
+
+
+                                           Power-grid organizations maintain relational data about assets, locations, topology,         32
+
+                                     sensor readings, work orders, technicians, and maintenance activity. SQL provides precise          33
+
+                                     access to these records, but it requires knowledge of table names, join keys, identifiers,         34
+
+                                     units, aggregation conventions, and local coding rules. Text-to-SQL systems aim to reduce          35
+
+                                     this access barrier by translating a natural-language request into an executable query. In an      36
+
+                                     engineering workflow, however, a fluent query is not sufficient evidence of correctness. A         37
+
+                                     query can execute while selecting the wrong status field, omitting a required filter, using        38
+
+                                     an unintended join path, or returning the expected number of columns with the wrong                39
+
+                                     content.                                                                                           40
+
+                                           Cross-database benchmarks such as Spider and BIRD have made schema generaliza-               41
+
+                                     tion and realistic database content central evaluation concerns [1,2]. Schema-aware models,        42
+
+                                     constrained decoding, context selection, decomposition, and execution guidance address             43
+
+                                     different failure surfaces [3–7]. These methods also expose a design problem: generation           44
+
+                                     steps are frequently bundled together. A system may change schema serialization, value             45
+
+                                     presentation, domain normalization, structural hints, candidate count, and repair policy           46
+
+                                     simultaneously. An observed score difference then cannot be assigned cleanly to schema             47
+
+                                     linking, reasoning, or validation.                                                                 48
+
+                                           The original MA-SQLGrid concept addresses this problem through five specialized              49
+
+                                     roles. A Query Analyst interprets the request, a Schema Cartographer maps it to the                50
+
+                                     database, an SQL Synthesizer packages candidate queries, a Validation Engine checks safety         51
+
+                                     and execution, and a Counterfactual Critic records evidence from named database states. A          52
+
+                                     separate deterministic adjudicator resolves the resulting evidence. This separation makes          53
+
+                                     the trace inspectable: a reviewer can distinguish what the analyst inferred, which schema          54
+
+                                     elements were retained, which candidates were proposed, which candidates executed, and             55
+
+                                     why a final candidate was selected or rejected.                                                    56
+
+                                           The architecture must nevertheless be separated from the evidence used to evaluate           57
+
+                                     it. The inherited GridDB factorial study was not a multi-agent execution. It used one              58
+
+                                     model generation per question and prompt cell, followed by deterministic parsing, read-            59
+
+                                     only validation, execution, and offline scoring. The BIRD study likewise compared four             60
+
+                                     frozen prompting procedures rather than five interacting agents. These assets can motivate         61
+
+                                     modules, supply baselines, and test replay interfaces, but they cannot be renamed as results       62
+
+                                     of the new coordination core.                                                                      63
+
+                                           This distinction leads to three questions. First, can role-specific handoffs be imple-       64
+
+                                     mented with a database-enforced, gold-isolated, fail-closed boundary? Second, what do the          65
+
+                                     completed experiments establish about context packages, presented values, public-database          66
+
+                                     transfer, and constructed-state agreement? Third, when generation is held fixed at eight           67
+
+                                     already frozen candidates per question, how do fixed-order, validation-only, and complete          68
+
+                                     metamorphic selectors behave under the same evidence-collection operations? The third              69
+
+                                     question estimates historical-pool offline selection only; schema grounding is retained as         70
+
+                                     trace evidence and no five-role end-to-end, new-generation, dialogue, or deployment effect         71
+
+                                     is estimated.                                                                                      72
+
+                                           The paper makes four contributions. First, it defines a testable five-role coordination      73
+
+                                     core, a database-enforced SQLite executor, and a deterministic adjudicator whose required          74
+
+                                     counterfactual coverage fails closed. Second, it conservatively integrates a 1440-prediction       75
+
+                                     GridDB factorial experiment, an audited prospective 700-call component study, a 25,920-            76
+
+                                     row multi-state ledger, and a 5000-call BIRD comparison while retaining their original             77
+
+                                     identities and evidence classes. Third, it reports a deterministic descriptive re-execution        78
+
+                                     over the existing eight-slot pool using three query-blind metamorphic witnesses with dis-          79
+
+                                     tinct database hashes; all methods choose only after the same shared 32-attempt evidence           80
+
+
+
+
+                                                                                                  https://doi.org/10.3390/app1010000
+Version August 8, 2026 submitted to Appl. Sci.                                                                                 3 of 20
+
+
+
+
+                                     collection per question is complete. Fourth, it publishes complete counts and adverse diag-         81
+
+                                     nostics: 130/180 top-score ties for both adjudicating selectors, approximately 5.4 candidates       82
+
+                                     per top-tie set, all 18 order/weight/threshold cells, and the semantically ambiguous 1/180          83
+
+                                     Q039 trace.                                                                                         84
+
+                                          No Spider or WikiSQL experiment is reported, no unsupported large power-grid                   85
+
+                                     question–SQL corpus is asserted, and the offline result is not relabeled as autonomous              86
+
+                                     multi-agent generation. In the retained title, multi-agent names the typed five-role software       87
+
+                                     decomposition, not five concurrently hosted language models, and robust names only                  88
+
+                                     the explicitly tested mutation-denial, bounded-execution, complete-evidence, and three-             89
+
+                                     witness mechanisms. The title is therefore a framework identity rather than an empirical            90
+
+                                     superiority claim. Qualified domain review and a matched new-generation experiment                  91
+
+                                     remain mandatory gates before broader interpretation.                                               92
+
+
+
+                                     2. Related Work                                                                                     93
+
+
+                                     2.1. Text-to-SQL Evaluation and Schema Generalization                                               94
+
+
+                                          Text-to-SQL systems map a natural-language question and a database schema to                   95
+
+                                     a query. Spider established a cross-domain setting with previously unseen databases,                96
+
+                                     drawing attention to table selection, joins, grouping, nesting, and ordering [1]. BIRD              97
+
+                                     extends public evaluation toward larger and more content-rich databases [2]. A benchmark            98
+
+                                     result depends on the exact split, evaluator, database engine, execution boundary, and              99
+
+                                     model configuration. We therefore report only the completed BIRD Mini-Dev protocol and              100
+
+                                     make no claim about public datasets that were discussed but not run.                                101
+
+                                          Exact SQL match and execution evaluation answer different questions. String match              102
+
+                                     can penalize equivalent SQL, whereas result equality can reward nonequivalent queries               103
+
+                                     on an insufficiently discriminating database state. A robustness evaluation should retain           104
+
+                                     predicted SQL, record every failure, and specify the state on which equality was observed.          105
+
+                                     MA-SQLGrid uses strict result equality for inherited snapshot analyses and separately re-           106
+
+                                     ports constructed-state agreement and bounded metamorphic invariance. Neither auxiliary             107
+
+                                     endpoint is semantic certification.                                                                 108
+
+
+
+                                     2.2. Schema Linking, Context Packages, and Output Contracts                                         109
+
+
+                                          Schema linking connects question spans to tables, columns, values, and foreign-key             110
+
+                                     relations [3,8,9]. Full-schema context preserves recall but can increase token cost and             111
+
+                                     distraction. Compact context reduces the search space but risks dropping a required join            112
+
+                                     key or predicate. Value examples can disambiguate coded attributes, while question-                 113
+
+                                     derived instructions can identify aggregation, result shape, ordering, or a limit.                  114
+
+                                          The inherited GridDB factorial study isolates two implemented prompt factors: a full-          115
+
+                                     DDL/global-values package versus a compact/domain-grounded package, and absence                     116
+
+                                     versus presence of a composite structural/SQL-operation hint. The compact package is not            117
+
+                                     a pure schema-length manipulation because it also changes value presentation and adds               118
+
+                                     corpus-tailored normalization. The hint is not merely formatting because it can include             119
+
+                                     aggregation, grouping, projection, ordering, and limit guidance. We retain these precise            120
+
+                                     labels instead of assigning broader causal interpretations.                                         121
+
+                                          Constrained generation and execution guidance reduce invalid candidates. PICARD                122
+
+                                     constrains decoding so inadmissible SQL continuations can be rejected during generation             123
+
+                                     [4]. CHESS combines contextual grounding and SQL synthesis components [7]; other                    124
+
+                                     prompt-based methods investigate decomposition and representation choices [5,6,10]. MA-             125
+
+                                     SQLGrid differs at the coordination boundary: its new core accepts externally produced              126
+
+                                     candidates, checks them with deterministic contracts, and records evidence before selection.        127
+
+
+
+
+                                                                                                   https://doi.org/10.3390/app1010000
+Version August 8, 2026 submitted to Appl. Sci.                                                                                       4 of 20
+
+
+
+
+                                     It does not claim that the current lexical cartographer supersedes learned schema-linking                 128
+
+                                     systems.                                                                                                  129
+
+
+
+                                     2.3. Agentic Decomposition and Auditable Control                                                          130
+
+
+                                          Agentic decomposition can make intermediate decisions explicit, but naming pipeline                  131
+
+                                     stages as agents does not establish a multi-agent benefit. Such evidence requires a com-                  132
+
+                                     parison that holds the model, data, decoding configuration, candidate count, and physical                 133
+
+                                     generation budget constant. Otherwise, a multi-candidate system can improve simply                        134
+
+                                     because it receives more samples.                                                                         135
+
+                                          MA-SQLGrid treats an agent as a role with a typed contract rather than assuming                      136
+
+                                     that every role must be a separately hosted model. The Analyst and Cartographer can                       137
+
+                                     be deterministic or model-assisted; the Synthesizer can receive candidates from a frozen                  138
+
+                                     generator; the Validator uses a fixed read-only policy; the Critic consumes named-state                   139
+
+                                     evidence; and the Adjudicator is deterministic. This design allows components to be                       140
+
+                                     replaced without changing the blackboard schema and prevents gold-guided selection                        141
+
+                                     from being hidden behind an opaque debate label.                                                          142
+
+
+
+                                     2.4. Power-Grid Data and External Validity                                                                143
+
+
+                                           Power-system datasets combine topology, equipment attributes, measurements, time                    144
+
+                                     series, costs, and constraints. RTS-GMLC and SimBench provide reproducible engineering                    145
+
+                                     resources that can be transformed into relational structures [11,12]. Their availability does             146
+
+                                     not automatically create a text-to-SQL benchmark: intended projections, units, ordering,                  147
+
+                                     ties, and reference SQL require semantic review. The current RTS-GMLC, SimBench, and                      148
+
+                                     NERC-derived candidates are consequently machine-adjudicated silver resources, not                        149
+
+                                     expert gold.                                                                                              150
+
+                                           DKA-SQL is a direct power-grid text-to-SQL precedent [13]. Its published corpus,                    151
+
+                                     method, models, and evaluation boundary differ from ours. Because no official imple-                      152
+
+                                     mentation was used, the current BIRD protocol is neither a DKA-SQL reproduction nor a                     153
+
+                                     head-to-head comparison.                                                                                  154
+
+
+
+                                     3. Materials and Methods                                                                                  155
+
+
+                                     3.1. Task and Evidence Boundary                                                                           156
+
+
+                                         For question xi , read-only database Di , and introspected schema Si , a generator                    157
+
+                                     produces one or more candidates                                                                           158
+
+
+
+                                                                          Yi = {yei1 , . . . , yeik }.                                  (1)    159
+
+
+
+                                     Each candidate must satisfy a single-statement read-only contract. The accepted leading                   160
+
+                                     form is SELECT or WITH; comments, multiple statements, write operations, schema changes,                  161
+
+                                     attachments, and pragmas are rejected. A candidate is eligible for adjudication only when                 162
+
+                                     it is safe and executable.                                                                                163
+
+                                            The offline evaluator may later compare the selected query with a reference result.                164
+
+                                     Let Ei = 1 when the selected SQL executes and its result equals the frozen reference result               165
+
+                                     under the registered evaluator, and Ei = 0 otherwise. Reference SQL, reference results, Ei ,              166
+
+                                     and any derivative correctness field are forbidden from all five agents and the Adjudicator.              167
+
+                                     Evaluation occurs only after the blackboard is sealed.                                                    168
+
+
+
+                                     3.2. Data Resources and Provenance                                                                        169
+
+
+                                           GridDB-Maintenance-v2 v0.1 is a synthetic SQLite case study with eight tables and 98                170
+
+                                     rows: asset_types (6), assets (18), grid_topology (9), locations (8), maintenance_logs                    171
+
+                                     (8), sensor_readings (26), technicians (8), and work_orders (15). It contains 200 natural-                172
+
+
+
+
+                                                                                                         https://doi.org/10.3390/app1010000
+Version August 8, 2026 submitted to Appl. Sci.                                                                                                   5 of 20
+
+
+
+
+                                     language–SQL records: 20 development records and 180 factorial evaluation records. The                                173
+
+                                     evaluation records include 66 easy, 91 medium, and 23 hard items and map to 70 normalized                             174
+
+                                     gold-SQL structural clusters, of which 58 are singletons. The evaluation partition had been                           175
+
+                                     visible during project development; it is a controlled finite-set case study, not a sealed                            176
+
+                                     production benchmark.                                                                                                 177
+
+                                          BIRD Mini-Dev contributes 500 public items over 11 SQLite databases. The authorized                              178
+
+                                     protocol froze item and method order, prompts, two local model files, evaluator behavior,                             179
+
+                                     Python 3.10.11/SQLite 3.40.1, and zero retries. Each backbone made 2500 calls and pro-                                180
+
+                                     duced 2000 final predictions. An independent audit re-executed all 4000 predictions and                               181
+
+                                     500 gold queries with zero score mismatches. Two earlier failed attempts, totaling 2476                               182
+
+                                     physical calls, remain immutable incidents and are excluded from scores.                                              183
+
+                                          The GridDB reliability release contains 18 states: the canonical snapshot, three insertion                       184
+
+                                     permutations, and 14 additional schema-valid stress states. The scorer produced 25,920                                185
+
+                                     prediction-state rows (1440 × 18). A prediction-blinded automated protocol admitted a 66-                             186
+
+                                     question subset for the primary 15-state analysis and retained 114 order-sensitive questions                          187
+
+                                     as diagnostics. These constructed states are not operator-certified grid snapshots.                                   188
+
+                                          Artifacts are labeled Inherited, Recomputed, New, or Diagnostic. The coordination                                189
+
+                                     core is implementation evidence and its replay is Diagnostic. Neither is a New execution-                             190
+
+                                     accuracy result.                                                                                                      191
+
+                                          Table 1 separates resources by domain, evidence class, visibility, and semantic-review                           192
+
+                                     status. BIRD is explicitly non-grid. RTS-GMLC and SimBench provide authentic power-                                   193
+
+                                     system structures, but their question–SQL pairs remain machine-generated silver candi-                                194
+
+                                     dates with zero completed qualified-human reviews and zero sealed items.                                              195
+
+
+
+                                     Table 1. Data-resource scope and evidence status. Counts describe retained local artifacts; they are
+                                     not interchangeable benchmark denominators.
+
+                                      Resource             DBs           Tables              Rows NL–SQL Evidence class          Visibility and review
+                                                                                                                                 status
+                                      GridDB v0.1             1               8                 98       200 Synthetic grid; in- 20 dev + 180 evalu-
+                                                                                                             herited develop- ation; development-
+                                                                                                             ment case           visible;   no docu-
+                                                                                                                                 mented independent
+                                                                                                                                 dual-expert review
+                                      GridDB     state 18 states              8 state-dependent       0 new Constructed grid- Prediction-blinded
+                                      suite                                                                  state diagnostic state       construction;
+                                                                                                                                 not operator-certified
+                                      RTS-GMLC pi-            1              10            360,530        55 Authentic grid AUTO_CANDIDATE; 0
+                                      lot                                                                    structure;    ma- human-reviewed; 0
+                                                                                                             chine silver        sealed;    source-use
+                                                                                                                                 notice applies
+                                      SimBench pilot          1               8                874        36 Authentic grid Development-visible;
+                                                                                                             structure;    ma- 0 human-reviewed; 0
+                                                                                                             chine silver        sealed; ODbL/DbCL
+                                                                                                                                 review       required
+                                                                                                                                 before redistribution
+                                      BIRD Mini-Dev          11 dataset-specific   dataset-specific      500 Public non-grid Frozen public split;
+                                                                                                             portability bench- BIRD v1.1 protocol;
+                                                                                                             mark                not    evidence      of
+                                                                                                                                 power-grid validity
+
+
+
+                                     3.3. Five-Agent Coordination Framework                                                                                196
+
+
+                                         The evidence chronology is shown in Table 2. Release v3 is classified as a post-audit                             197
+
+                                     descriptive re-execution: its execution path sealed decisions before directly loading raw                             198
+
+                                     gold, but the frozen regression suite had already read v2 gold-derived outcomes for the                               199
+
+                                     same 180 items. Consequently, hashing and within-run sealing provide traceability, not                                200
+
+                                     prospective outcome blindness.                                                                                        201
+
+
+
+
+                                                                                                                https://doi.org/10.3390/app1010000
+Version August 8, 2026 submitted to Appl. Sci.                                                                                                        6 of 20
+
+
+
+
+                                     Table 2. Study chronology, visibility, and permitted interpretation.
+
+                                      Study                    Data/candidate         Rule or analysis      Outcome access        Permitted interpretation
+                                                               visibility             freeze
+                                      GridDB factorial         Evaluation parti-      Original protocol     After generation      Inherited finite-corpus
+                                                               tion visible during    before generation;                          prompt-package      evi-
+                                                               development            v3 hierarchy is                             dence
+                                                                                      post-review     re-
+                                                                                      analysis
+                                      Component study          Candidate              Component proto-      After       black-    Inherited component ev-
+                                                               prompts      frozen    col frozen before     board/selection       idence; not five-role co-
+                                                               before calls           calls                 seal                  ordination
+                                      Formal-v5 states         States         built   Scorer frozen be-     Gold-relative         Constructed-state diag-
+                                                               prediction-blind       fore formal scor-     scoring after state   nostic
+                                                                                      ing                   freeze
+                                      BIRD v1.1                Public Mini-Dev        Protocol/runtime      Formal evaluation     Non-grid       workflow
+                                                                                      frozen before 5000    after calls           portability; unequal calls
+                                                                                      calls                                       by method
+                                      Retrospective replay     All     predictions    Diagnostic logic      No gold accuracy      Candidate-pool cover-
+                                                               and T0 evidence        hash-locked           computed              age only
+                                                               already existed
+                                      Descriptive        re-   Eight     historical   Question-only se-     Raw gold directly     Reproducible descrip-
+                                      execution v3             candidates      and    lection view, three   loaded by the v3      tive selector behavior
+                                                               their prior eval-      distinct witnesses,   execution path af-    on previously evaluated
+                                                               uations     already    construction code,    ter all 180 boards    items; no prospective,
+                                                               existed                tests, and rules      were sealed           five-role, or generation-
+                                                                                      hash-bound in v3;                           effect claim
+                                                                                      frozen tests had
+                                                                                      read same-item v2
+                                                                                      outcomes
+
+
+
+                                          MA-SQLGrid comprises five specialist roles coordinated by a deterministic controller.                                 202
+
+                                     Figure 1 is derived from the implemented source rather than an aspirational free-form                                      203
+
+                                     agent diagram. The controller is not a sixth reasoning model: it orders calls, applies the                                 204
+
+                                     registered rule, and seals the trace. Messages receive consecutive sequence numbers, and                                   205
+
+                                     the complete trace is serialized canonically to a SHA-256 digest.                                                          206
+
+                                          The Query Analyst produces a structured question-only intent record containing                                        207
+
+                                     lexical tokens, detected aggregations, ordering requirements, and an explicit limit when                                   208
+
+                                     present. It does not select SQL or see correctness. The Schema Cartographer maps lexical                                   209
+
+                                     intent to tables, columns, and foreign-key edges. The current skeleton uses deterministic                                  210
+
+                                     overlap and records unmatched tokens; a richer GridDB adapter adds disclosed domain                                        211
+
+                                     rules and graph expansion.                                                                                                 212
+
+                                          The SQL Synthesizer packages externally produced SQL strings. It contains no model                                    213
+
+                                     client, performs no hidden API call, canonicalizes whitespace and semicolons, removes ex-                                  214
+
+                                     act duplicates without changing first occurrence, and assigns stable identifiers. The Valida-                              215
+
+                                     tion Engine separates lexical admissibility from the executor trust boundary. The executor                                 216
+
+                                     bound into release v3 opens a frozen database through a URI with mode=ro&immutable=1,                                      217
+
+                                     enables SQLite query_only, disables loadable extensions, and installs an authorizer that                                   218
+
+                                     admits selection, reads, selected functions, and recursive-query opcodes. Writes, DDL,                                     219
+
+                                     transactions, attachments, pragmas, metadata enumeration, dangerous file/extension func-                                   220
+
+                                     tions, and reads outside configured table/column allowlists are denied. A progress handler                                 221
+
+                                     enforces registered time and opcode limits, and result fetching enforces a row cap. Every                                  222
+
+                                     attempt records database and SQL hashes, authorization or resource failure, elapsed time,                                  223
+
+                                     row count, and result hash; no automatic retry removes a failure.                                                          224
+
+                                          After R3 review, a separate FINAL executor variant adds explicit function allowlisting,                               225
+
+                                     maximum projected width, a raw scalar-cell byte boundary, and a budget for the total                                       226
+
+                                     returned result. BLOBs and memory views are charged at their original payload length                                       227
+
+                                     before their public representation is replaced by a digest; the total budget charges the                                   228
+
+                                     original payload plus deterministic row, column, type-envelope, delimiter, and container                                   229
+
+
+
+
+                                                                                                                    https://doi.org/10.3390/app1010000
+Version August 8, 2026 submitted to Appl. Sci.                                                                                   7 of 20
+
+
+
+
+                                     Figure 1. Implemented MA-SQLGrid boundary (code-native SVG and deterministic raster derivative).
+                                     Candidate SQL is supplied externally. The database validator enforces read-only and registered
+                                     resource limits; counterfactual-required selection demands complete named-state coverage; gold SQL
+                                     remains outside the blackboard until sealing. User authorization and operational approval remain
+                                     outside this software boundary.
+
+
+                                     overhead. Fourteen additive tests pass, including 1, 5, and 50 MB zeroblob denial under a             230
+
+                                     1 KB cell limit, an independent total-result-budget denial, exact boundary behavior, trace            231
+
+                                     retention, oversized text/result denial, and wide-projection denial. These FINAL controls             232
+
+                                     were implemented after release v3 and were not used to obtain its 5760-attempt ledger or              233
+
+                                     80/100/101 counts. A SQL table/column allowlist is a query-scope mechanism supplied                   234
+
+                                     by the caller; it is not authentication, identity management, row-level access control, or            235
+
+                                     proof that a particular utility user is entitled to the data. Both historical and FINAL variants      236
+
+                                     therefore establish tested SQLite mutation denial and explicitly scoped execution bounds              237
+
+                                     only, not user authorization, data minimization, process isolation, or operational approval.          238
+
+                                           The Counterfactual Critic consumes named state results, rejects duplicate state iden-           239
+
+                                     tifiers, and records evaluated, passed, failed, and missing states. When counterfactual               240
+
+                                     evidence is optional, missing evidence remains diagnostic and does not break prior no-                241
+
+                                     counterfactual behavior. When the caller requires counterfactual evidence, coverage must              242
+
+                                     equal the complete registered state set and the pass threshold must be met; otherwise the             243
+
+                                     candidate is ineligible. Thus an incomplete 1/1 record cannot outrank a complete 10/11                244
+
+                                     record. Existing formal-v5 labels compare predictions with gold and remain forbidden                  245
+
+                                     during selection.                                                                                     246
+
+
+
+                                     3.4. Deterministic Adjudication and Abstention                                                        247
+
+
+                                          Eligibility always requires safety and successful execution. The default rule assigns            248
+
+                                     40 validation points for safety, 40 for execution, 10 for question-derived aggregate-shape            249
+
+                                     conformity, 5 for question-derived ordering conformity, and up to 5 for lexical value hits. In        250
+
+                                     no-counterfactual mode, ties preserve original candidate order. In required-counterfactual            251
+
+                                     mode, incomplete coverage fails closed before ranking and the registered pass threshold is            252
+
+                                     enforced. If no candidate remains eligible, the controller abstains. These are deterministic          253
+
+                                     recorded engineering rules, but v3 does not establish that their design preceded access to            254
+
+                                     derived outcomes for the 180 items. Weight, pass-threshold, and reversed-order results are            255
+
+                                     therefore descriptive sensitivity analyses.                                                           256
+
+
+
+
+                                                                                                     https://doi.org/10.3390/app1010000
+Version August 8, 2026 submitted to Appl. Sci.                                                                                               8 of 20
+
+
+
+
+                                          For this paper, robustness is a vector rather than a universal label (Table 3). Only                         257
+
+                                     tested components are reported as evidence.                                                                       258
+
+
+
+                                     Table 3. Operational robustness dimensions and their evidence boundaries.
+
+                                      Dimension           Registered   operation/end      Evidence in this paper          Not established
+                                                          point
+                                      Mutation safety     DB-enforced   denial    of      Adversarial executor tests;     User authorization or
+                                                          write/DDL/attach/pragma         unchanged database hash         whole-process sandbox-
+                                                          operations                                                      ing
+                                      Resource bound-     Timeout/opcode, row, raw-       Recursive-query,                Worst-case     process-
+                                      edness              cell-byte, budgeted-result-     row/width           overflow,   memory bounds for
+                                                          byte, and output-width          oversized text, and 1/5/50      every SQLite feature
+                                                          termination                     MB BLOB tests with re-
+                                                                                          tained failure traces; FINAL
+                                                                                          limits are not retroactive to
+                                                                                          v3
+                                      Evidence    com-    Complete named-state set re-    Fail-closed tests and com-      Missing-not-at-random
+                                      pleteness           quired before CF-aware eligi-   plete three-state ledgers       state correction
+                                                          bility
+                                      Metamorphic in-     Selected result equals T0 un-   180-question offline selector   Value drift, paraphrase,
+                                      variance            der irrelevant-relation, in-    result                          production-state, or se-
+                                                          dex/rebuild, and nullable-                                      mantic robustness
+                                                          extension witnesses
+                                      Semantic validity   Agreement with frozen           Finite historical-pool accu-    Qualified human gold
+                                                          GridDB reference after board    racy                            or field-operational cor-
+                                                          sealing                                                         rectness
+
+
+
+                                     Algorithm 1 Gold-isolated deterministic coordination
+                                     Require: question xi , schema Si , external candidates Yi , read-only executor, named state
+                                         evidence
+                                      1: post structured intent and schema grounding to the append-only blackboard
+                                      2: canonicalize and deduplicate externally produced candidates
+                                      3: for each candidate y ∈ Yi do
+                                      4:    apply single-statement read-only validation
+                                      5:    record execution and available reference-free state evidence
+                                      6: end for
+                                      7: if required named-state coverage is incomplete for a candidate then
+                                      8:    mark that candidate ineligible (fail closed)
+                                      9: end if
+                                     10: if no safe executable candidate meets all registered gates then
+                                     11:    abstain
+                                     12: else
+                                     13:    apply the fixed validation, state-evidence, coverage, and order rule
+                                     14: end if
+                                     15: post the decision and seal the blackboard
+                                     16: load reference results only for offline evaluation
+
+
+
+
+                                     3.5. Inherited GridDB Factorial Design                                                                            259
+
+
+                                          The paired design crosses context package c ∈ {0, 1} and composite hint h ∈ {0, 1}.                          260
+
+                                     F00 uses full DDL and global values without the hint; F01 adds the hint; F10 uses compact                         261
+
+                                     domain-grounded context without the hint; and F11 combines compact context and the                                262
+
+                                     hint. The same 180 questions appear in all four cells for each backbone, yielding 720 Qwen                        263
+
+                                     and 720 Granite predictions.                                                                                      264
+
+                                          Qwen2.5-Coder-7B Q4_K_M and Granite-3.3-8B Q4_K_M were run at temperature                                    265
+
+                                     zero with fixed snapshots. Each prompt produced exactly one response. The parser retained                         266
+
+                                     the first SQL candidate through the first semicolon; the validator then applied the read-                         267
+
+
+
+
+                                                                                                              https://doi.org/10.3390/app1010000
+Version August 8, 2026 submitted to Appl. Sci.                                                                                  9 of 20
+
+
+
+
+                                     only policy. There was no candidate ranking, multi-agent negotiation, or repair in this              268
+
+                                     experiment.                                                                                          269
+
+                                          Strict execution equality is primary. A common-target projected-column indicator is a           270
+
+                                     secondary manipulation check. Paired finite-set contrasts use normalized-SQL clusters as             271
+
+                                     dependence proxies, registered sign-flip tests, composition-sensitivity bootstrap intervals,         272
+
+                                     and Holm correction. The intervals describe sensitivity to the observed corpus composition,          273
+
+                                     not population confidence.                                                                           274
+
+
+
+                                     3.6. Component, Multi-State, and Public Protocols                                                    275
+
+
+                                           The separately frozen component study contains 700 scored calls. E1 compares can-              276
+
+                                     didate generation with and without presented value evidence. E2 requests up to three                 277
+
+                                     candidates and compares a deterministic reference-answer-independent selector with the               278
+
+                                     first candidate. Selection is sealed before gold loading. Rescue, harm, and oracle-at-three          279
+
+                                     are descriptive; oracle-at-three is a gold-only upper-bound diagnostic.                              280
+
+                                           The v5 reliability protocol reproduced all 1440 T0 labels and then executed every              281
+
+                                     prediction over 18 states. The primary 66-question analysis uses a logical-AND endpoint              282
+
+                                     over 15 semantic states. A prediction passes only when it agrees with the reference on               283
+
+                                     every included state. The nine registered contrasts form a separate Holm family; with only           284
+
+                                     12 structural clusters, all 212 = 4096 sign assignments are enumerated.                              285
+
+                                           The BIRD protocol compares direct prompting, decomposition, schema selection, and              286
+
+                                     bounded execution repair. Each method has a fixed call pattern and zero retries. Pairwise            287
+
+                                     differences use exact database-cluster sign randomization across 11 databases and Holm               288
+
+                                     correction.                                                                                          289
+
+
+
+                                     3.7. Retrospective Offline Coordination Diagnostic                                                   290
+
+
+                                           The replay verifies SHA-256 for two 720-row prediction ledgers and the 25,920-row              291
+
+                                     formal-v5 ledger before reading them. For each question it pools the eight existing outputs          292
+
+                                     from two backbones and four prompt cells, canonicalizes SQL, and removes duplicates.                 293
+
+                                     Frozen T0 fields provide execution and metadata-shape evidence. The Critic records                   294
+
+                                     counterfactual evidence as unavailable because existing state-agreement labels are gold-             295
+
+                                     relative.                                                                                            296
+
+                                           This is a coverage diagnostic. Candidates were generated under different models                297
+
+                                     and prompt packages; the pool is not a deployable, matched multi-agent run. No selected              298
+
+                                     output is compared with gold to produce an accuracy number.                                          299
+
+
+
+                                     3.8. Deterministic Descriptive Offline Re-Execution Study v3                                         300
+
+
+                                           The release-v3 study reuses exactly eight frozen source slots for each of the 180 GridDB       301
+
+                                     evaluation questions: four Qwen prompt cells followed by four Granite prompt cells. It               302
+
+                                     performs no LLM call and creates no new question or SQL label. Before any method selects,            303
+
+                                     the three methods share one precomputed eight-by-four execution ledger: T0 plus three                304
+
+                                     metamorphic witnesses for every slot. Thus 5760 is the shared physical evidence-collection           305
+
+                                     count, not a separate natural runtime cost assigned to each selector. The fixed-order control        306
+
+                                     then ignores the collected ranking evidence and chooses slot 0; validation-only passes               307
+
+                                     an empty counterfactual mapping and ranks validation evidence only; the full condition               308
+
+                                     requires complete 3/3 reference-free metamorphic invariance. Incomplete coverage or no               309
+
+                                     passing candidate causes abstention.                                                                 310
+
+                                           The three query-blind witnesses have distinct SHA-256 values and are built from T0             311
+
+                                     without reading questions, prompts, predictions, scores, or gold. M1 adds an irrelevant              312
+
+                                     relation and rows; M2 adds harmless indexes and rebuilds storage; M3 adds nullable probe             313
+
+                                     columns to three business tables. M1 and M2 preserve original-schema denotation. M3                  314
+
+                                     preserves explicitly projected original columns but deliberately allows wildcard projection          315
+
+
+
+
+                                                                                                    https://doi.org/10.3390/app1010000
+Version August 8, 2026 submitted to Appl. Sci.                                                                                10 of 20
+
+
+
+
+                                     to fail. Query order is preserved when candidate SQL contains ORDER BY; otherwise                   316
+
+                                     rows are compared as a multiset. The selector sees only question text extracted from                317
+
+                                     frozen prompt ledgers, the schema, eight SQL strings, executor traces, and T0-to-witness            318
+
+                                     equivalence. It does not see gold SQL, answer-shape metadata, correctness, difficulty,              319
+
+                                     feature tags, required literals, or gold-relative formal-v5 labels.                                 320
+
+                                          Before v3 execution, a content-bound UTC timestamp, configuration, question-only               321
+
+                                     prompt-derived selection view, two 720-row prediction ledgers, schema, T0, three wit-               322
+
+                                     ness databases, complete witness manifest, exact witness-builder bytes and SHA-256,                 323
+
+                                     executor, coordinator, core and release runners, all four regression-test files, and the            324
+
+                                     passing pre-run test record were bound into a 21-artifact manifest with content SHA-256             325
+
+                                     8b34bc370451173197ad07b460908537836409d6eb49f303caf46d13d53889e6. The number                        326
+
+                                     21 denotes manifest entries, not test cases. The restored frozen tree passes 30/30 tests across     327
+
+                                     four files: 10 agent, 9 release-v3, 4 replay, and 7 executor tests. The superseded R3 additive      328
+
+                                     suite passed its 10 registered tests but did not cover raw BLOB accounting; it is retained as       329
+
+                                     review provenance rather than counted as a validated FINAL boundary. A transient 33/33              330
+
+                                     count produced while the frozen executor path had been overwritten was invalid, was                 331
+
+                                     reverted, and is excluded from the evidence record. The witness manifest independently              332
+
+                                     binds its builder and three database hashes. Within each v3 run, all 180 blackboards and            333
+
+                                     their decisions were sealed and written before that execution path directly loaded raw gold.        334
+
+                                     Each run retains all 1440 source slots and all 180 × 8 × 4 = 5760 shared attempts, including        335
+
+                                     failures, without retry. Runs v3a and v3b produced byte-identical selection, evaluation,            336
+
+                                     sensitivity, and summary files. Independent release audit passed mechanical integrity               337
+
+                                     and descriptive traceability but failed the prior-outcome-independence evidence-class               338
+
+                                     gate: the frozen pre-run test suite had opened v2 gold-derived evaluation rows for these            339
+
+                                     same 180 items. The machine-readable SUPERSESSION_NOTICE.json controls interpretation               340
+
+                                     and invalidates conflicting prospective fields in the immutable historical configuration,           341
+
+                                     summaries, and internal 29/29 mechanical audit. V3 is therefore deterministic descriptive           342
+
+                                     re-execution, not a scientific release independent of prior same-item outcomes. V1 and v2           343
+
+                                     remain preserved diagnostic predecessors and are excluded from claims.                              344
+
+                                          Descriptive endpoints are strict execution accuracy over all 180 questions, coverage           345
+
+                                     and abstention, complete metamorphic invariance of the selected candidate, and res-                 346
+
+                                     cue/harm relative to fixed order. The retained sensitivity matrix crosses three weight              347
+
+                                     policies, invariant-pass thresholds of 1/3, 2/3, and 3/3 while always requiring complete            348
+
+                                     observation, and original versus reversed candidate-order tie breaking. Because same-item           349
+
+                                     outcomes were accessible before v3, this matrix is reported only as descriptive analysis.           350
+
+                                          The later FINAL executor is a post-review engineering correction and is not part of            351
+
+                                     the historical v3 test count. Its 14-test suite closes the raw-BLOB accounting defect found         352
+
+                                     during R3 review, while the immutable R3 implementation and reviews remain preserved                353
+
+                                     outside this FINAL candidate. No v3 result was rerun or reinterpreted with the corrected            354
+
+                                     boundary.                                                                                           355
+
+
+
+                                     3.9. Generative-AI Assistance and Author Responsibility                                             356
+
+
+                                          The local SQL-generation experiments used the explicitly identified Qwen2.5-Coder-             357
+
+                                     7B-Instruct Q4_K_M and Granite-3.3-8B-Instruct Q4_K_M snapshots under the frozen pro-               358
+
+                                     tocols described above. Separately, during reconstruction and revision of this manuscript,          359
+
+                                     the authors used the OpenAI Codex agent interface to propose and edit prose, suggest                360
+
+                                     experimental and audit checks, review and draft Python/LATEX code, assemble prove-                  361
+
+                                     nance and response matrices, and assist local build and visual-quality checks. The exact            362
+
+                                     backend model identifier and version for every Codex session were not retained in the               363
+
+
+
+
+                                                                                                   https://doi.org/10.3390/app1010000
+Version August 8, 2026 submitted to Appl. Sci.                                                                                                                                                                                         11 of 20
+
+
+
+
+                                     project records; this provenance boundary is reported explicitly, and no unrecorded model                                                                                                                    364
+
+                                     identifier is inferred.                                                                                                                                                                                      365
+
+                                          All executable suggestions were run locally against retained inputs, and reported                                                                                                                       366
+
+                                     numerical results were taken from frozen or independently recomputed ledgers rather                                                                                                                          367
+
+                                     than accepted from generated prose. The authors retained responsibility for protocol                                                                                                                         368
+
+                                     authorization, evidence-class decisions, interpretation, citations, declarations, and the final                                                                                                              369
+
+                                     manuscript. Codex output was not treated as qualified power-system expert annotation                                                                                                                         370
+
+                                     or adjudication. External machine-generated question–SQL candidates remain labeled                                                                                                                           371
+
+                                     machine silver and do not become human gold through model review. All four scientific                                                                                                                        372
+
+                                     figures are deterministic code-native graphics with file-level lineage; no generative-image                                                                                                                  373
+
+                                     model supplied quantitative evidence.                                                                                                                                                                        374
+
+
+
+                                     4. Results                                                                                                                                                                                                   375
+
+
+                                     4.1. Complete GridDB Cell Results                                                                                                                                                                            376
+
+
+                                          All 1440 scheduled predictions are present, and independent SQLite re-execution                                                                                                                         377
+
+                                     reproduced the stored execution verdicts. Table 4 reports strict execution equality.                                                                                                                         378
+
+
+
+                                     Table 4. Strict execution equality over 180 GridDB questions per cell.
+
+                                                                  Backbone F00 full/no hint                                       F01 full/hint               F10 compact/no hint F11 compact/hint
+                                                                  Qwen                         76/180 (0.4222)               129/180 (0.7167)                      78/180 (0.4333)                       108/180 (0.6000)
+                                                                  Granite                      77/180 (0.4278)               100/180 (0.5556)                      74/180 (0.4111)                       108/180 (0.6000)
+
+
+
+                                                                                                                     POINT ESTIMATES ONLY — no cell-level error bars
+
+
+
+                                                                               (a) Execution equality                                                           (b) Common-target projected-column conformity
+                                                                                                                                                                                   96.7                                   96.1
+                                                                         1.0
+                                                                                                                                                                                                                                       92.2
+                                                                                                                                                                                              87.8
+                                         Proportion (direct labels: %)
+
+
+
+
+                                                                         0.9
+
+                                                                         0.8
+                                                                                                   71.7
+                                                                         0.7
+                                                                                                                                         60.0         60.0                                            58.9
+                                                                                                              55.6                                                                                                56.7
+                                                                         0.6
+                                                                                                                                                               52.2         52.2
+
+                                                                         0.5                                         43.3
+                                                                               42.2         42.8                                  41.1
+                                                                         0.4                                                                                                                                                     Qwen
+                                                                                                                                                                                                                                 Granite
+                                                                         0.3
+                                                                                      F00                 F01               F10                 F11                   F00                 F01               F10                  F11
+                                                                                                           Factorial condition                                                             Factorial condition
+
+
+                                                                               v2 template-cluster composition-sensitivity intervals are intentionally omitted here; cluster-aware intervals are reported for registered contrasts.
+
+
+
+                                     Figure 2. Audited GridDB cell point estimates. Each cell contains all 180 attempts; the figure is
+                                     descriptive and does not replace registered factorial contrasts.
+
+                                          The common-target projected-column diagnostic is 0.5222 in F00 for both backbones.                                                                                                                      379
+
+                                     Qwen obtains 0.9667, 0.5889, and 0.9611 in F01, F10, and F11; Granite obtains 0.8778, 0.5667,                                                                                                                380
+
+                                     and 0.9222. Returning the requested number of columns is therefore easier than returning                                                                                                                     381
+
+                                     the intended rows. In Qwen F01, projected-column conformity is 0.9667 while execution                                                                                                                        382
+
+                                     equality is 0.7167.                                                                                                                                                                                          383
+
+
+
+                                     4.2. Factorial Effects and Multiplicity                                                                                                                                                                      384
+
+
+                                          For Qwen, the composite-hint execution effect is +0.2306, the package–hint interaction                                                                                                                  385
+
+                                     is −0.1278, and the compact-package main effect is −0.0528. Granite’s corresponding                                                                                                                          386
+
+                                     estimates are +0.1583, +0.0611, and +0.0139. Zero of nine primary execution tests survives                                                                                                                   387
+
+                                     Holm correction. Qwen’s hint effect has raw/adjusted p = 0.01372/0.09604, its interac-                                                                                                                       388
+
+                                     tion 0.00919/0.07352, and the cross-backbone hint modifier 0.00640/0.05760. No primary                                                                                                                       389
+
+                                     factorial execution effect or modifier is therefore described as statistically nonzero.                                                                                                                      390
+
+
+
+
+                                                                                                                                                                                     https://doi.org/10.3390/app1010000
+Version August 8, 2026 submitted to Appl. Sci.                                                                                           12 of 20
+
+
+
+
+                                         In the separately corrected secondary family, the common-target hint effects survive:                      391
+
+                                    +0.4083 for Qwen (adjusted p = 0.000090) and +0.3556 for Granite (adjusted p = 0.01944).                        392
+
+                                    Because the hint supplies structural information later scored by this endpoint, these are                       393
+
+                                    manipulation-check results, not independent semantic evidence.                                                  394
+
+
+
+                                     4.3. Component Results                                                                                         395
+
+
+                                           The component run completed all 700 scored calls. Presented value evidence in-                           396
+
+                                     creased Qwen first-candidate execution equality by +0.1059 over 170 eligible questions                         397
+
+                                     (95% composition-sensitivity interval [+0.0282, +0.2013], adjusted p = 0.0310). Granite’s                      398
+
+                                     estimate was zero with an interval spanning zero. The cross-backbone modifier did not                          399
+
+                                     meet the registered rule, so the Qwen result is not replicated across backbones.                               400
+
+                                           The deterministic selector changed 24 Qwen and 36 Granite choices. Relative to the                       401
+
+                                     first candidate, it rescued eight and harmed one Qwen question, and rescued ten while                          402
+
+                                     harming none for Granite. Execution effects were +0.0389 and +0.0556; neither survived its                     403
+
+                                     two-test Holm family. Oracle-at-three values of 0.6389 and 0.4667 are gold-only diagnostics                    404
+
+                                     and are not deployable selector results.                                                                       405
+
+
+
+                                     Table 5. Complete component endpoints from the 700-call audited prospective component protocol.
+                                     V0 contains the 170 value-intervention-eligible questions; V1 contains all 180. These are component,
+                                     not five-role, outcomes.
+
+                                      Backbone      Condition                      First correct     Selector correct   Oracle@3 diagnostic
+                                      Qwen          V0 no value evidence        83/170 (0.4882)     83/170 (0.4882)         100/170 (0.5882)
+                                      Qwen          V1 with value evidence     105/180 (0.5833)    112/180 (0.6222)         115/180 (0.6389)
+                                      Granite       V0 no value evidence        69/170 (0.4059)     69/170 (0.4059)          72/170 (0.4235)
+                                      Granite       V1 with value evidence      71/180 (0.3944)     81/180 (0.4500)          84/180 (0.4667)
+
+
+
+                                                                        Cluster-aware primary component effects
+                                             E1 Qwen
+
+
+
+                                           E1 Granite
+
+
+
+                                             E2 Qwen
+
+
+
+                                           E2 Granite
+                                                        −0.20   −0.15   −0.10 −0.05 0.00               0.05       0.10    0.15    0.20
+                                                                        Paired frozen-state execution-equality difference
+                                     Figure 3. Prospectively frozen component effects. Intervals describe composition sensitivity; the
+                                     registered decision also requires multiplicity-adjusted evidence.
+
+
+                                     4.4. Multi-State Reliability Results                                                                           406
+
+
+                                          The v5 scorer produced all 25,920 registered rows, and its T0 slice reproduced                            407
+
+                                     1440/1440 snapshot labels. Across the 66-question automatic subset, 15-state logical-AND                       408
+
+                                     rates range from 0.6212 (Granite F01) to 0.8182 (Granite F00). All nine Holm-adjusted values                   409
+
+                                     equal 1.0000 under exact cluster-sign enumeration. No context, hint, interaction, or cross-                    410
+
+                                     backbone multi-state effect meets the declared rule. These rates characterize agreement                        411
+
+                                     over constructed witness states, not population accuracy or human-certified equivalence.                       412
+
+
+
+
+                                                                                                           https://doi.org/10.3390/app1010000
+Version August 8, 2026 submitted to Appl. Sci.                                                                                                                           13 of 20
+
+
+
+
+                                     Table 6. Complete 15-state logical-AND counts for the prediction-blinded 66-question automatic
+                                     subset.
+
+                                                 Backbone                   F00                       F01                      F10                       F11
+                                                 Qwen             49/66 (0.7424)              48/66 (0.7273)           53/66 (0.8030)            43/66 (0.6515)
+                                                 Granite          54/66 (0.8182)              41/66 (0.6212)           51/66 (0.7727)            49/66 (0.7424)
+
+
+                                                                     Retrospective multi-state reliability effects (66 order-insensitive questions)
+                                                                                                                                     Exact enumeration: all Holm p = 1.000
+                                                           Qwen: hint
+                                                       Qwen: context
+                                                    Qwen: interaction
+                                                         Granite: hint
+                                                     Granite: context
+                                                  Granite: interaction
+                                                 Granite - Qwen: hint
+                                              Granite - Qwen: context
+                                           Granite - Qwen: interaction
+
+                                                                     −0.6           −0.4         −0.2        0.0         0.2        0.4      0.6                  0.8
+                                                                                             Effect on 15-state logical-AND execution agreement
+                                                                         Bars are 95% composition-sensitivity intervals, not population confidence intervals.
+
+                                     Figure 4. GridDB multi-state logical-AND agreement for the prediction-blinded automatic subset.
+                                     The endpoint is a constructed-state robustness diagnostic.
+
+
+                                     4.5. Public BIRD Results                                                                                                                       413
+
+
+                                          Table 7 reports all eight cells. BIRD Mini-Dev is a public non-grid portability bench-                                                    414
+
+                                     mark and does not validate power-grid semantics. B0–B2 use one physical generation call                                                        415
+
+                                     per item; B3 uses two, so the inherited comparison estimates frozen workflow efficacy un-                                                      416
+
+                                     der unequal call counts rather than a call-matched repair effect. Each backbone completed                                                      417
+
+                                     2500 calls, 2000 final predictions, zero retries, and zero final-ledger omissions; latency and                                                 418
+
+                                     token totals were not promoted into the retained summary and are therefore reported as                                                         419
+
+                                     unavailable rather than reconstructed.                                                                                                         420
+
+
+                                     Table 7. Inherited BIRD Mini-Dev v1.1 results (non-grid portability evidence; 11 database clusters).
+                                     Intervals are database-cluster composition-sensitivity intervals.
+
+                                       Backbone Method                               Correct/500 Accuracy                         Interval Calls/item Final-
+                                                                                                                                                      ledger
+                                                                                                                                                      omissions
+                                       Qwen          B0 direct                             189/500              0.378 [0.286, 0.470]                            1 0
+                                       Qwen          B1 decomposition                      151/500              0.302 [0.203, 0.401]                            1 0
+                                       Qwen          B2 schema selection                   197/500              0.394 [0.279, 0.511]                            1 0
+                                       Qwen          B3 execution repair                   174/500              0.348 [0.250, 0.452]                            2 0
+                                       Granite       B0 direct                             102/500              0.204 [0.125, 0.284]                            1 0
+                                       Granite       B1 decomposition                      105/500              0.210 [0.131, 0.294]                            1 0
+                                       Granite       B2 schema selection                   101/500              0.202 [0.137, 0.273]                            1 0
+                                       Granite       B3 execution repair                   118/500              0.236 [0.159, 0.318]                            2 0
+
+
+                                          After Holm adjustment, Qwen decomposition is 0.076 below direct prompting                                                                 421
+
+                                     (adjusted p = 0.0430), and schema selection is 0.092 above decomposition (adjusted                                                             422
+
+                                     p = 0.0117). No Granite contrast survives correction. Different method orders across                                                           423
+
+
+
+
+                                                                                                                                    https://doi.org/10.3390/app1010000
+Version August 8, 2026 submitted to Appl. Sci.                                                                                               14 of 20
+
+
+
+
+                                     the two model snapshots argue against a universal prompting recipe. The two failed                                 424
+
+                                     incident runs totaling 2476 physical calls remain excluded and immutable; they are not                             425
+
+                                     retries contributing to these denominators.                                                                        426
+
+
+
+                                     4.6. Retrospective Replay Coverage                                                                                 427
+
+
+                                         The replay audited all 180 GridDB questions without a generation call. At least                                428
+
+                                     two distinct frozen SQL candidates were present for 173 questions. After safety checks                             429
+
+                                     and binding to consistent T0 execution evidence, 172 questions had at least two eligible                           430
+
+                                     candidates and entered retrospective adjudication. Seven failed closed because only one                            431
+
+                                     unique SQL remained, and one failed because fewer than two candidates were eligible.                               432
+
+
+
+                                     Table 8. Retrospective offline coordination diagnostic coverage. Counts are not accuracy and do not
+                                     estimate multi-agent improvement.
+
+                                                      Coverage gate                                                    Questions
+                                                      Audited                                                                  180
+                                                      At least two unique frozen SQL candidates                                173
+                                                      At least two eligible candidates                                         172
+                                                      Retrospectively adjudicated                                              172
+                                                      Failed closed: one unique candidate                                        7
+                                                      Failed closed: fewer than two eligible candidates                          1
+                                                      Reference-free counterfactual evidence available                           0
+
+                                           Unique candidate counts ranged from one to eight: 1 (7 questions), 2 (19), 3 (15), 4                         433
+
+                                     (18), 5 (27), 6 (23), 7 (45), and 8 (26). These counts show that frozen assets can populate the                    434
+
+                                     coordination interfaces for most questions. They do not show that retrospectively selected                         435
+
+                                     SQL is correct. No retrospective accuracy, execution gain, rescue rate, or multi-agent                             436
+
+                                     superiority is reported.                                                                                           437
+
+
+
+                                     4.7. Descriptive Offline Coordination-Selection Results                                                            438
+
+
+                                           The deterministic descriptive re-execution retained 5760 candidate–state attempts;                           439
+
+                                     332 were non-executable or authorization/resource/SQL failures and remained in the                                 440
+
+                                     all-attempt ledger. Every question nevertheless had at least one eligible candidate, so both                       441
+
+                                     adjudicating selectors covered 180/180 questions and abstained on 0/180. Table 9 reports                           442
+
+                                     the recorded rules.                                                                                                443
+
+
+                                     Table 9. New v3 offline selection over one historical eight-slot pool per question. All methods
+                                     choose after the same shared precomputed 32-attempt evidence collection. Accuracy is finite-corpus
+                                     strict execution equality after all blackboards were sealed; this is not a new-generation or five-role
+                                     end-to-end experiment.
+
+                                      Selector                               Correct/180   Accuracy   Covered   Abstained   Invariant   Rescue/harm
+                                      Fixed order, equal budget                  80/180      0.4444       180           0    177/180            0/0
+                                      Validation rank, equal budget, no CF      100/180      0.5556       180           0    179/180           22/2
+                                      Complete metamorphic coordination         101/180      0.5611       180           0    180/180           23/2
+
+
+
+                                          The two adjudicating selectors each had more than one highest-scoring candidate on                            444
+
+                                     130/180 questions (Table 10). Their mean top-tie multiplicities were 5.4000 and 5.3889. All                        445
+
+                                     eight candidates tied on 79 validation-only questions and 78 complete-witness questions.                           446
+
+                                     With original-order tie breaking, 178/180 selections came from Qwen source slots; this                             447
+
+                                     reflects source order, not a learned preference or semantic advantage.                                             448
+
+                                          Validation-only ranking added 20 net correct items relative to fixed order through                            449
+
+                                     22 rescues and 2 harms. Complete-witness selection changed the chosen candidate on                                 450
+
+                                     only Q039, yielding one further frozen-reference match (101/180 versus 100/180), one                               451
+
+
+
+
+                                                                                                                https://doi.org/10.3390/app1010000
+Version August 8, 2026 submitted to Appl. Sci.                                                                                                                      15 of 20
+
+
+
+
+                                     Table 10. Complete top-score tie diagnostic for the two adjudicating selectors. Multiplicity distribu-
+                                     tions are reported as “tie size:number of questions”.
+
+                                      Selector               Tied questions   Mean size   Multiplicity distribution                   Selected source-slot counts
+                                      Validation only              130/180       5.4000   1:50; 2:5; 3:3; 4:4; 5:5; 6:8; 7:26; 8:79   Qwen             F00/F01/F10/F11:
+                                                                                                                                      115/49/12/2;     Granite F00/F10:
+                                                                                                                                      1/1
+                                      Complete witnesses           130/180       5.3889   1:50; 2:5; 3:3; 4:4; 5:5; 6:9; 7:26; 8:78   Qwen             F00/F01/F10/F11:
+                                                                                                                                      114/50/12/2;     Granite F00/F10:
+                                                                                                                                      1/1
+
+
+
+
+                                     additional rescue, no additional harm, and no coverage or abstention change. Table 11                                                     452
+
+                                     gives the complete constructed trace.                                                                                                     453
+
+
+
+                                     Table 11. Q039 is the sole validation-only versus complete-witness selection difference. Correctness
+                                     is agreement with the frozen synthetic reference, not an independently adjudicated engineering
+                                     judgment.
+
+                                      Field                   Validation-only                             Complete witnesses                            Interpretation
+                                      Natural-language re-    “Show the first scheduled work order after June 2024.”                                    Ambiguous: “af-
+                                      quest                                                                                                             ter June” can im-
+                                                                                                                                                        ply after 30 June,
+                                                                                                                                                        and “scheduled”
+                                                                                                                                                        can denote a sta-
+                                                                                                                                                        tus or merely a
+                                                                                                                                                        scheduled date.
+                                      Selected query          SELECT * FROM work_orders                  SELECT work_order_id,                          Both omit an ex-
+                                                              WHERE scheduled_date >                     scheduled_date FROM                            plicit scheduled-
+                                                              '2024-06-01' ORDER BY                      work_orders WHERE                              status predicate
+                                                              scheduled_date ASC LIMIT 1                 scheduled_date > '2024-06-01'                  and use a date
+                                                                                                         ORDER BY scheduled_date ASC                    boundary whose
+                                                                                                         LIMIT 1                                        intended mean-
+                                                                                                                                                        ing lacks expert
+                                                                                                                                                        adjudication.
+                                      M3 outcome              Fails when nullable columns extend         Preserves the explicit two-column              Constructed
+                                                              wildcard width                             projection                                     projection-
+                                                                                                                                                        stability behavior
+                                      Frozen-reference        Incorrect                                   Correct                                       Outcome-
+                                      match                                                                                                             exposed 1/180
+                                                                                                                                                        trace only
+
+
+                                           M3 added nullable columns to work_orders; consequently, complete-witness                                                            454
+
+                                     eligibility rejected the wildcard projection and retained the explicit work_order_id,                                                     455
+
+                                     scheduled_date projection. Because neither query resolves the request’s status and                                                        456
+
+                                     date-boundary ambiguity through qualified review, this observation is not called an                                                       457
+
+                                     engineering correctness rescue. It is a synthetic, outcome-exposed projection-stability                                                   458
+
+                                     trace, not evidence of general counterfactual reasoning, semantic validity, robustness,                                                   459
+
+                                     coordination, or five-role benefit.                                                                                                       460
+
+                                           Table 12 reports all 18 sensitivity cells. Every original-order cell produced 101/180;                                              461
+
+                                     reverse order produced 117/180 under default and intent-emphasis weights and 118/180                                                      462
+
+                                     under validation-equal weights. These more favorable values are outcome-exposed diag-                                                     463
+
+                                     nostics, not preferred alternatives. The 16–17-item shift and high tie multiplicity show that                                             464
+
+                                     the apparent selector behavior is materially order-dependent.                                                                             465
+
+                                           The full machine-generated numerical supplement binds all eight GridDB cells, 12                                                    466
+
+                                     component endpoints, eight 15-state cells, 18 sensitivity cells, the 360-row item-level                                                   467
+
+                                     tie ledger, selected-origin counts, Q039 trace, source paths, hashes, and byte counts in                                                  468
+
+                                     R3_EVIDENCE_TABLES.json and companion CSV files. Table 7’s final column records only                                                      469
+
+                                     omissions from the accepted final ledgers; it is not a taxonomy of parsing, authorization,                                                470
+
+                                     execution, provider, or incident failures. The two excluded BIRD incidents are reported                                                   471
+
+                                     separately above. This result supports auditability and exposes a design risk; it does not                                                472
+
+                                     establish a generally robust or superior selector.                                                                                        473
+
+
+
+
+                                                                                                                                https://doi.org/10.3390/app1010000
+Version August 8, 2026 submitted to Appl. Sci.                                                                                    16 of 20
+
+
+
+
+                                     Table 12. All 18 complete-witness selector sensitivity cells. Each row contains the original- and
+                                     reverse-order cells for one weight/threshold combination; coverage is 180/180 throughout.
+
+                                      Weight policy      Minimum witness passes   Original order correct/180   Reverse order correct/180
+                                      Default                               1/3                 101 (0.5611)                117 (0.6500)
+                                      Default                               2/3                 101 (0.5611)                117 (0.6500)
+                                      Default                               3/3                 101 (0.5611)                117 (0.6500)
+                                      Intent emphasis                       1/3                 101 (0.5611)                117 (0.6500)
+                                      Intent emphasis                       2/3                 101 (0.5611)                117 (0.6500)
+                                      Intent emphasis                       3/3                 101 (0.5611)                117 (0.6500)
+                                      Validation equal                      1/3                 101 (0.5611)                118 (0.6556)
+                                      Validation equal                      2/3                 101 (0.5611)                118 (0.6556)
+                                      Validation equal                      3/3                 101 (0.5611)                118 (0.6556)
+
+
+
+                                     5. Discussion                                                                                           474
+
+
+                                     5.1. What the Evidence Supports                                                                         475
+
+
+                                           The combined evidence supports four bounded findings. First, explicit structural                  476
+
+                                     and SQL-operation instructions strongly alter projected-column adherence, but surface                   477
+
+                                     conformity does not establish correct execution. Second, the audited prospective 700-                   478
+
+                                     call component experiment finds that presented value evidence matters for one frozen                    479
+
+                                     Qwen snapshot while showing no effect for Granite; this is component evidence, not a                    480
+
+                                     five-role outcome. Third, candidate selection and prompting are backbone-dependent: the                 481
+
+                                     component selector did not meet its registered efficacy rule, and the descriptively best                482
+
+                                     BIRD method differed between Qwen and Granite. Fourth, on the historical eight-slot                     483
+
+                                     pool, validation ranking changed the observed finite-set score relative to fixed order, but             484
+
+                                     complete witness evidence changed only Q039, and top-score ties on 130/180 items made                   485
+
+                                     results strongly dependent on arbitrary source order.                                                   486
+
+                                           These findings justify separating intent, schema grounding, synthesis, validation, and            487
+
+                                     state evidence. They do not establish that five roles are superior to one call or that newly            488
+
+                                     generated multi-agent candidates would reproduce the offline gain. The architecture’s                   489
+
+                                     demonstrated value is methodological and safety-bounded: typed contracts, database-                     490
+
+                                     enforced eligibility, complete-evidence gates, deterministic selection, abstention, incident            491
+
+                                     retention, and a sealed gold boundary make later comparisons reproducible and falsifiable.              492
+
+
+
+                                     5.2. Interpreting the Retrospective Replay                                                              493
+
+
+                                          The replay asks whether inherited ledgers contain enough distinct executable candi-                494
+
+                                     dates to exercise the coordination interfaces. For 172 of 180 questions, they do. This reduces          495
+
+                                     implementation risk and identifies eight fail-closed cases that require a registered fallback           496
+
+                                     or a new matched generation policy.                                                                     497
+
+                                          The replay cannot estimate a coordination effect. Its pool mixes two backbones                     498
+
+                                     and four prompt packages, so generation condition and diversity are confounded. It                      499
+
+                                     also lacks reference-free counterfactual equivalence evidence. Post hoc gold scoring of                 500
+
+                                     selected outputs would remain exploratory and cannot substitute for a prospective matched               501
+
+                                     comparison.                                                                                             502
+
+
+
+                                     5.3. Interpreting the Descriptive Re-Execution                                                          503
+
+
+                                           The release-v3 study hash-binds the selection view, rules, code, tests, and state inputs          504
+
+                                     and verifies the software fact that each execution path directly loaded raw gold only after             505
+
+                                     all blackboards were sealed. This does not establish outcome blindness: its frozen test suite           506
+
+                                     had accessed gold-derived v2 evaluation rows for the same items before v3. The additive                 507
+
+                                     supersession notice is the first authority for interpreting the immutable release package               508
+
+                                     and invalidates its historical prospective, prespecified, and outcome-unseen labels. The                509
+
+
+
+
+                                                                                                      https://doi.org/10.3390/app1010000
+Version August 8, 2026 submitted to Appl. Sci.                                                                               17 of 20
+
+
+
+
+                                     study is therefore a deterministic descriptive re-execution over a historical candidate pool.      510
+
+                                     Equal candidate budget means that each selector received the same eight pre-existing slots;        511
+
+                                     it does not mean equal historical model calls between source conditions, and it does not           512
+
+                                     turn those candidates into contemporaneous agent outputs.                                          513
+
+                                          The small contrast between validation-only and complete-witness selection is a mech-          514
+
+                                     anism trace, not a gain estimate. V3 uses three different query-blind database hashes              515
+
+                                     and exercises an irrelevant-relation witness, an index/storage witness, and a nullable             516
+
+                                     schema-extension witness. These are constructed operator families rather than indepen-             517
+
+                                     dent samples from a deployment population. The full gate changes only Q039 because                 518
+
+                                     M3 exposes wildcard-projection arity while preserving explicit-column projections. The             519
+
+                                     natural-language request itself admits unresolved status and date-boundary interpretations,        520
+
+                                     so the frozen-reference match cannot be promoted to power-grid semantic correctness. An            521
+
+                                     earlier v1 diagnostic used three same-hash insertion files and is retained as an excluded          522
+
+                                     incident; v2 is retained as a provenance-incomplete predecessor. The supersession notice           523
+
+                                     excludes their prospective interpretations and none of these predecessors supports the             524
+
+                                     current scientific claim.                                                                          525
+
+                                          The tie audit quantifies a second limitation: 130/180 questions have multiple highest-        526
+
+                                     scoring candidates for each adjudicating selector, with approximately 5.4 candidates in the        527
+
+                                     average top-tie set. The original-order rule consequently chooses source slots without se-         528
+
+                                     mantic evidence and selects Qwen-origin candidates on 178/180 items. Reporting only the            529
+
+                                     0.5556 default or choosing the 0.6556 reverse-order sensitivity after outcome access would         530
+
+                                     be misleading. A later rule-development study requires development-only calibration,               531
+
+                                     richer reference-free evidence, and a genuinely untouched evaluation resource.                     532
+
+
+
+                                     5.4. Power-Grid Use and Reproducibility                                                            533
+
+
+                                           Database-enforced read-only execution, resource limits, syntactic validity, and result-      534
+
+                                     shape conformity are necessary safeguards, not operational certification. A safely executed        535
+
+                                     query can still return the wrong assets, omit time bounds, misinterpret codes, or mishandle        536
+
+                                     ties. Table/column/function allowlists constrain SQL operations inside this local evaluator;       537
+
+                                     user authorization requires a separately authenticated identity, institutional access policy,      538
+
+                                     and data-owner decision. The additive FINAL raw-cell-byte, budgeted-result-byte, and               539
+
+                                     output-width controls were not used in release v3 and cannot be invoked to reinterpret its         540
+
+                                     results. They bound returned values within one Python/SQLite process, not SQLite’s entire          541
+
+                                     temporary-memory or process-memory footprint. Multi-state witnesses reduce accidental              542
+
+                                     snapshot equality but cannot cover all distributions or schema changes. Generated SQL              543
+
+                                     and returned source rows require authorized human inspection before any maintenance,               544
+
+                                     protection, dispatch, or asset-management decision.                                                545
+
+                                           Negative results are part of the contribution. Zero of nine primary factorial execution      546
+
+                                     tests survives correction. The deterministic component selector meets its efficacy rule for        547
+
+                                     neither snapshot. No registered multi-state effect survives correction. Granite and Qwen do        548
+
+                                     not share the same best BIRD method. Immutable ledgers, direct re-execution, registered            549
+
+                                     test families, portable manifests, and explicit incidents preserve these outcomes rather than      550
+
+                                     collapsing them into a success narrative.                                                          551
+
+
+
+                                     6. Limitations and Future Work                                                                     552
+
+
+                                          The primary domain corpus is one synthetic database with eight tables, 98 rows,               553
+
+                                     and 180 evaluation questions. Its evaluation partition was visible during development.             554
+
+                                     The 70 structural groups are dependence proxies, and 58 are singletons. Results cannot             555
+
+                                     be generalized to production schemas, permissions, missing-data patterns, units, access-           556
+
+                                     control policies, or workloads.                                                                    557
+
+
+
+
+                                                                                                  https://doi.org/10.3390/app1010000
+Version August 8, 2026 submitted to Appl. Sci.                                                                                18 of 20
+
+
+
+
+                                           Only two quantized local snapshots were evaluated. Model family, size, quantization,          558
+
+                                     serving software, and serialization may interact. The compact package bundles schema                559
+
+                                     reduction, values, normalization, and serialization; the hint bundles projection, aggregation,      560
+
+                                     grouping, ordering, and limit rules. The inherited factorial experiment identifies package          561
+
+                                     effects rather than contributions of individual internal rules.                                     562
+
+                                           The five-role core and frozen release-v3 executor pass 30 unit/adversarial/regression         563
+
+                                     tests; the separate FINAL executor passes 14 additive tests, including four new BLOB-               564
+
+                                     accounting and trace/boundary methods. The 21-entry freeze manifest is not a test count,            565
+
+                                     and the invalid transient 33/33 run is excluded. The system has not completed a new-                566
+
+                                     generation experiment on an evaluation resource whose outcomes were previously inac-                567
+
+                                     cessible to the study process. Its Analyst and Cartographer are deterministic skeletons,            568
+
+                                     its Synthesizer packages external candidates, and its adjudication weights have not been            569
+
+                                     independently optimized. Release v3 descriptively re-executes selection over historical             570
+
+                                     candidates and previously evaluated items; it does not estimate generation, communica-              571
+
+                                     tion, latency, token, or autonomous-agent effects. Existing formal-v5 agreement labels are          572
+
+                                     gold-relative and intentionally excluded from selection.                                            573
+
+                                           RTS-GMLC, SimBench, and NERC question–SQL assets remain machine-adjudicated                   574
+
+                                     silver data. Qualified review is required for intended projections, units, ordering, tie            575
+
+                                     handling, and result granularity before external accuracy is reported.                              576
+
+                                           Future work should execute a new hash-locked, call-matched comparison of four con-            577
+
+                                     temporaneous generation conditions: a single direct candidate; staged question/schema               578
+
+                                     handoffs with one candidate; a fixed multi-candidate budget with validation and adjudi-             579
+
+                                     cation but no counterfactual evidence; and the same candidate pool with a pre-registered            580
+
+                                     multi-family reference-free state suite. Model snapshot, question order, database state,            581
+
+                                     decoding, candidate count, physical calls, and evaluator must be held constant. The pro-            582
+
+                                     tocol must pre-register execution accuracy, valid SQL, abstention, tokens, latency, failure         583
+
+                                     taxonomy, clustered inference, multiplicity, and incident retention. The candidate-order            584
+
+                                     rule must be chosen on development-only evidence before the untouched evaluation set is             585
+
+                                     opened.                                                                                             586
+
+                                           Further work can replace lexical grounding with a trained schema linker, add a                587
+
+                                     low-confidence full-schema fallback, compare deterministic adjudication with budget-                588
+
+                                     matched voting, and evaluate risk–coverage calibration. Qualified power-system/database             589
+
+                                     reviewers must independently assess domain semantics; LLM or author-assisted triage                 590
+
+                                     cannot be relabeled as independent expert gold. Every change should receive a new                   591
+
+                                     protocol identity rather than modifying a completed run.                                            592
+
+
+
+                                     7. Conclusions                                                                                      593
+
+
+                                           MA-SQLGrid reframes power-grid text-to-SQL as an auditable coordination problem.              594
+
+                                     Five typed software roles separate question analysis, schema mapping, candidate packag-             595
+
+                                     ing, safety and execution validation, and named-state criticism. A deterministic controller         596
+
+                                     records their handoffs, selects only eligible candidates, and abstains when required evi-           597
+
+                                     dence is incomplete. Here, multi-agent denotes this inspectable role decomposition, not             598
+
+                                     demonstrated benefit from five autonomous language-model agents. The frozen executor                599
+
+                                     enforces read-only and resource limits at the SQLite boundary rather than relying on lexical        600
+
+                                     filtering alone; the separate FINAL variant adds tested raw-cell-byte, budgeted-result-             601
+
+                                     byte, width, and function controls that are not retroactive to v3 and are not whole-process         602
+
+                                     memory isolation.                                                                                   603
+
+                                           The inherited experiments provide a substantial but bounded evidence base. The                604
+
+                                     1440-prediction GridDB study shows strong projected-column instruction uptake but                   605
+
+                                     no primary execution effect surviving Holm correction. The 700-call component study                 606
+
+
+
+
+                                                                                                   https://doi.org/10.3390/app1010000
+Version August 8, 2026 submitted to Appl. Sci.                                                                                           19 of 20
+
+
+
+
+                                     supports presented values for one Qwen snapshot, not Granite, and does not validate its                        607
+
+                                     selector under the registered rule. The 25,920-row state study finds no corrected factorial                    608
+
+                                     agreement effect. The 5000-call BIRD protocol supplies a non-grid public comparison                            609
+
+                                     whose best method depends on the backbone and whose methods use unequal call counts.                           610
+
+                                     The retrospective replay confirms candidate coverage for 172 of 180 questions without                          611
+
+                                     accuracy claims.                                                                                               612
+
+                                          The descriptive offline re-execution records 80/180 for fixed order, 100/180 for                          613
+
+                                     validation-only, and 101/180 for complete witnesses. Both adjudicating selectors have                          614
+
+                                     highest-score ties on 130/180 questions, average tie multiplicity is approximately 5.4, and                    615
+
+                                     reverse order changes the complete-witness sensitivity result to 117–118/180. The sole                         616
+
+                                     Q039 difference is a constructed, outcome-exposed, semantically ambiguous projection                           617
+
+                                     trace. These facts, the historical mixed-source pool, development-visible GridDB, and                          618
+
+                                     absent qualified semantic review prevent a general multi-agent superiority or power-grid                       619
+
+                                     deployment claim. The original title is retained as the framework identity; robust refers                      620
+
+                                     only to explicitly tested mutation-denial, bounded-execution, complete-evidence, and                           621
+
+                                     three-witness mechanisms, not universal or operational robustness.                                             622
+
+
+                                     Supplementary Materials: The FINAL editor/reviewer package is generated from an explicit al-                   623
+
+                                     lowlist and clean-extraction checked. It contains the exact manuscript source and PDF, bibliography,           624
+
+                                     all four figure artifacts and lineage sources, complete numerical tables, 360-row tie ledger, Q039             625
+
+                                     trace, supersession notice, corrected FINAL executor and tests, three R3 reviews, the itemized FI-             626
+
+                                     NAL response matrix, rights inventory, audit reports, and hashes. It excludes old-title manuscripts,           627
+
+                                     old PDFs, ROUND1_SECTION_DRAFT, credentials, caches, and excluded incident outputs presented                   628
+
+                                     as evidence. This local package does not close repository synchronization, third-party permission,             629
+
+                                     qualified expert review, or untouched end-to-end experimental gates. The public repository at                  630
+
+                                     https://github.com/gaoxingkele/ma-sqlgrid must still be synchronized and tagged before submis-                 631
+
+                                     sion.                                                                                                          632
+
+
+                                     Author Contributions: Conceptualization, B.L. and Y.Y.; methodology, B.L.; software, B.L.; validation,         633
+
+                                     B.L. and C.S.; formal analysis, B.L. and C.S.; investigation, B.L. and C.S.; resources, Y.Y.; data curation,   634
+
+                                     B.L. and C.S.; writing—original draft preparation, B.L.; writing—review and editing, C.S. and Y.Y.;            635
+
+                                     visualization, B.L.; supervision, Y.Y.; project administration, Y.Y.; funding acquisition, Y.Y. All authors    636
+
+                                     have read and agreed to the published version of the manuscript.                                               637
+
+
+                                     Funding: This research was funded by the Science and Technology Research Project of State Grid                 638
+
+                                     Fujian Electric Power Co., Ltd., grant number 521300250006. The funder had no role in the study                639
+
+                                     design; in the collection, analysis, or interpretation of data; in the writing of the manuscript; or in the    640
+
+                                     decision to publish the results.                                                                               641
+
+
+                                     Institutional Review Board Statement: Not applicable. This study did not involve human partici-                642
+
+                                     pants or animals.                                                                                              643
+
+
+                                     Informed Consent Statement: Not applicable.                                                                    644
+
+
+                                     Data Availability Statement: The public repository at https://github.com/gaoxingkele/ma-sqlgrid                645
+
+                                     must be synchronized and tagged before submission; this statement does not assert that its current             646
+
+                                     contents match the FINAL candidate. BIRD Mini-Dev remains available from its public provider.                  647
+
+                                     Owing to third-party licensing restrictions, restricted source records and source-dependent RTS-               648
+
+                                     GMLC or SimBench artifacts may be requested from the corresponding author for editorial and                    649
+
+                                     peer-review verification, subject to third-party permission and applicable licenses; reviewer access is        650
+
+                                     not a redistribution license. The local allowlist package intentionally excludes source assets whose           651
+
+                                     redistribution or reviewer-sharing permission is unresolved. Its rights inventory distinguishes                652
+
+                                     public, restricted, derived, machine-silver, historical, and excluded-incident materials and binds the         653
+
+                                     supersession notice, numerical supplement, code, tests, and independent audits.                                654
+
+
+
+
+                                                                                                            https://doi.org/10.3390/app1010000
+Version August 8, 2026 submitted to Appl. Sci.                                                                                         20 of 20
+
+
+
+
+                                     Acknowledgments: During reconstruction and revision of this manuscript, the authors used the                 655
+
+                                     OpenAI Codex agent interface for prose drafting and editing, experimental and audit suggestions,             656
+
+                                     Python/LATEX code review and drafting, provenance assembly, reproducibility checks, and local                657
+
+                                     build/visual-quality assistance. The exact backend model identifier/version was not retained in              658
+
+                                     the project records; no unrecorded identifier is inferred. All reported values were obtained from            659
+
+                                     retained executable ledgers and local analyses; Codex output was not treated as qualified expert             660
+
+                                     annotation or independent scientific adjudication. All four scientific figures are code-native and           661
+
+                                     no generative-image output is used as quantitative evidence. The authors reviewed and edited the             662
+
+                                     outputs and take full responsibility for the publication.                                                    663
+
+
+                                     Conflicts of Interest: The authors declare no conflicts of interest.                                         664
+
+
+
+References                                                                                                                                        665
+
+1.    Yu, T.; Zhang, R.; Yang, K.; Yasunaga, M.; Wang, D.; Li, Z.; Ma, J.; Li, I.; Yao, Q.; Roman, S.; et al. Spider: A Large-Scale               666
+
+      Human-Labeled Dataset for Complex and Cross-Domain Semantic Parsing and Text-to-SQL Task. In Proceedings of the                             667
+
+      2018 Conference on Empirical Methods in Natural Language Processing. Association for Computational Linguistics, 2018, pp.                   668
+
+      3911–3921. https://doi.org/10.18653/v1/D18-1425.                                                                                            669
+
+2.    Li, J.; Hui, B.; Qu, G.; Yang, J.; Li, B.; Li, B.; Wang, B.; Qin, B.; Geng, R.; Huo, N.; et al. Can LLM Already Serve as a Database         670
+
+      Interface? A Big Bench for Large-Scale Database Grounded Text-to-SQLs. In Proceedings of the Advances in Neural Information                 671
+
+      Processing Systems 36, 2023.                                                                                                                672
+
+3.    Wang, B.; Shin, R.; Liu, X.; Polozov, O.; Richardson, M. RAT-SQL: Relation-Aware Schema Encoding and Linking for Text-to-                   673
+
+      SQL Parsers. In Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics. Association for                    674
+
+      Computational Linguistics, 2020, pp. 7567–7578. https://doi.org/10.18653/v1/2020.acl-main.677.                                              675
+
+4.    Scholak, T.; Schucher, N.; Bahdanau, D. PICARD: Parsing Incrementally for Constrained Auto-Regressive Decoding from                         676
+
+      Language Models. In Proceedings of the 2021 Conference on Empirical Methods in Natural Language Processing. Association for                 677
+
+      Computational Linguistics, 2021, pp. 9895–9901. https://doi.org/10.18653/v1/2021.emnlp-main.779.                                            678
+
+5.    Nan, L.; Zhao, Y.; Zou, W.; Ri, N.; Tae, J.; Zhang, E.; Cohan, A.; Radev, D. Enhancing Text-to-SQL Capabilities of Large Language           679
+
+      Models: A Study on Prompt Design Strategies. In Proceedings of the Findings of the Association for Computational Linguistics:               680
+
+      EMNLP 2023. Association for Computational Linguistics, 2023, pp. 14935–14956. https://doi.org/10.18653/v1/2023.findings-                    681
+
+      emnlp.996.                                                                                                                                  682
+
+6.    Pourreza, M.; Rafiei, D. DIN-SQL: Decomposed In-Context Learning of Text-to-SQL with Self-Correction. In Proceedings of the                 683
+
+      Advances in Neural Information Processing Systems 36, 2023.                                                                                 684
+
+7.    Talaei, S.; Pourreza, M.; Chang, Y.C.; Mirhoseini, A.; Saberi, A. CHESS: Contextual Harnessing for Efficient SQL Synthesis. arXiv           685
+
+      preprint arXiv:2405.16755 2024, [2405.16755]. https://doi.org/10.48550/arXiv.2405.16755.                                                    686
+
+8.    Lei, W.; Wang, W.; Ma, Z.; Gan, T.; Lu, W.; Kan, M.Y.; Chua, T.S. Re-examining the Role of Schema Linking in Text-to-SQL. In                687
+
+      Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing. Association for Computational                       688
+
+      Linguistics, 2020, pp. 6943–6954. https://doi.org/10.18653/v1/2020.emnlp-main.564.                                                          689
+
+9.    Liu, A.; Hu, X.; Li, L.; Wen, L. Semantic Enhanced Text-to-SQL Parsing via Iteratively Learning Schema Linking Graph. In                    690
+
+      Proceedings of the 28th ACM SIGKDD Conference on Knowledge Discovery and Data Mining. Association for Computing                             691
+
+      Machinery, 2022, pp. 1021–1030. https://doi.org/10.1145/3534678.3539294.                                                                    692
+
+10.   Sun, R.; Arik, S.O.; Sinha, R.; Nakhost, H.; Dai, H.; Yin, P.; Pfister, T. SQLPrompt: In-Context Text-to-SQL with Minimal                   693
+
+      Labeled Data. In Proceedings of the Findings of the Association for Computational Linguistics: EMNLP 2023. Association for                  694
+
+      Computational Linguistics, 2023, pp. 542–550. https://doi.org/10.18653/v1/2023.findings-emnlp.39.                                           695
+
+11.   Barrows, C.; Bloom, A.; Ehlen, A.; Ikäheimo, J.; Jorgenson, J.; Krishnamurthy, D.; Lau, J.; McBennett, B.; O’Connell, M.; Preston,          696
+
+      E.; et al. The IEEE Reliability Test System: A Proposed 2019 Update. IEEE Transactions on Power Systems 2020, 35, 119–127.                  697
+
+      https://doi.org/10.1109/TPWRS.2019.2925557.                                                                                                 698
+
+12.   Meinecke, S.; Sarajlić, D.; Drauz, S.R.; Klettke, A.; Lauven, L.P.; Rehtanz, C.; Moser, A.; Braun, M. SimBench—A Benchmark                 699
+
+      Dataset of Electric Power Systems to Compare Innovative Solutions Based on Power Flow Analysis. Energies 2020, 13, 3290.                    700
+
+      https://doi.org/10.3390/en13123290.                                                                                                         701
+
+13.   Bian, H.; Li, G.; Wang, Y.; Fu, Q.; Shen, J.; Yao, X.; Wu, Z. DKASQL: Dynamic Knowledge Adaptation for Domain-Specific                      702
+
+      Text-to-SQL. Applied Sciences 2025, 15, 11121. https://doi.org/10.3390/app152011121.                                                        703
+
+
+
+
+Disclaimer/Publisher’s Note: The statements, opinions and data contained in all publications are solely those of the individual                   704
+
+author(s) and contributor(s) and not of MDPI and/or the editor(s). MDPI and/or the editor(s) disclaim responsibility for any injury to            705
+
+people or property resulting from any ideas, methods, instructions or products referred to in the content.                                        706
+
+
+
+
+                                                                                                            https://doi.org/10.3390/app1010000
+

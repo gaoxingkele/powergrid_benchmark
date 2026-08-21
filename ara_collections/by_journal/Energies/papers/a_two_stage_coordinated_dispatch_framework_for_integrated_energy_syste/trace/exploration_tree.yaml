@@ -1,0 +1,77 @@
+# Exploration Tree — Two-Stage Coordinated Dispatch Framework for IES
+# Research DAG: nested tree with cross-edges (also_depends_on).
+
+tree:
+  - id: N01
+    type: question
+    support_level: explicit
+    source_refs: ["§1"]
+    title: "How can PDR, V2G, P2G, and LCOE degradation be jointly optimized in a coupled electricity–gas IES?"
+    description: "Existing studies treat each mechanism in isolation or pairs. No framework combines all four with security-constrained power–gas network constraints and market-stability limits."
+    children:
+
+      - id: N02
+        type: decision
+        support_level: explicit
+        source_refs: ["§2", "§3"]
+        title: "Design two-stage framework: TOU pricing/demand shaping → security-constrained dispatch, solved as single MILP"
+        choice: "First stage determines TOU prices and resulting load via cross-price elasticity. Second stage dispatches generation, storage, V2G, P2G. Single MILP preserves global optimality."
+        alternatives:
+          - "Iterative master–subproblem decomposition (loses global optimality)"
+          - "Sequential solve without coupling (ignores price-response loop)"
+          - "Single-stage co-optimization without explicit TOU pricing"
+        children:
+
+          - id: N03
+            type: experiment
+            support_level: explicit
+            source_refs: ["§4.2"]
+            title: "E01: Three-case comparison on coupled IEEE 33-bus + 20-node gas system"
+            result: "Case 3 (PDR+V2G) lowest cost $4,644,496 and flattest peak-valley (163.1 MW); Case 2 intermediate; Case 1 worst."
+            evidence: [C01, C05, C06, "Figures 5–12", "Tables 1–4"]
+
+          - id: N04
+            type: decision
+            support_level: explicit
+            source_refs: ["§2.3", "§3.2.1"]
+            title: "Include explicit market-stability constraints on TOU pricing"
+            choice: "Constrain the TOU vector with tariff ordering (valley < flat < peak) and peak-to-valley ratio γ ∈ [2, 5], plus per-block min/max bounds."
+            alternatives:
+              - "Leave TOU prices bounded but otherwise free (most prior work — can distort markets)"
+              - "Single price level (no demand response)"
+            children:
+
+              - id: N05
+                type: experiment
+                support_level: explicit
+                source_refs: ["§4.2.3", "Figure 11", "Figure 12"]
+                title: "Analyze load shapes and prices across three cases"
+                result: "PDR alone flattens load but peak price still spikes. V2G addition damps peak anomalies and lifts valley price."
+                evidence: [C06, "Figures 11–12"]
+
+          - id: N06
+            type: decision
+            support_level: explicit
+            source_refs: ["§3.2.3", "§3.2.4"]
+            title: "Couple P2G intake to curtailed wind only (rather than general grid power)"
+            choice: "P2G draws electricity only from wind that would otherwise be curtailed (Eq. 38). This aligns P2G with its economic and environmental rationale."
+            alternatives:
+              - "P2G can draw from any grid power (may exploit P2G as artificial load on conventional generation)"
+              - "No P2G (all surplus wind curtailed)"
+
+          - id: N07
+            type: experiment
+            support_level: explicit
+            source_refs: ["§4.2.4"]
+            title: "E02/E03: Computational benchmarking and ablation study"
+            result: "Model solves within seconds to <0.01% gap. P2G removal causes 14.5% wind curtailment; 30% wind reduction increases cost by 9.17%; LCOE removal affects accounting only."
+            evidence: [C02, C03, C04, C07, "Table 4"]
+
+          - id: N08
+            type: dead_end
+            support_level: explicit
+            source_refs: ["§4.2.4"]
+            title: "LCOE degradation does not change dispatch when storage at cycle limit"
+            hypothesis: "Adding LCOE degradation cost will reduce aggressive storage cycling."
+            failure_mode: "Storage already operates at its cycle-count limit in every configuration; the penalty affects reporting (cost decreases 0.42% when removed) but not dispatch."
+            lesson: "When a hard cycle limit binds, adding a soft cost on the same quantity is redundant for dispatch but necessary for accurate cost accounting."

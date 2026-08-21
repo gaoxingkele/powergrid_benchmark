@@ -1,0 +1,137 @@
+tree:
+  - id: N01
+    type: question
+    support_level: explicit
+    source_refs: ["§1 Introduction", "§2 title", "Abstract"]
+    title: "How to efficiently and reliably solve multi-objective economic dispatch for a microgrid cluster?"
+    description: >
+      Central research question: achieve optimal scheduling for an MGC while guaranteeing safe,
+      stable grid operation and maximizing economic benefit. Spawns two sub-problems: what to
+      optimize (objective/constraints) and how to optimize it (solver).
+    children:
+      - id: N02
+        type: question
+        support_level: explicit
+        source_refs: ["§1 objective-function paragraph", "§2.3"]
+        title: "What objective function best captures MGC economics + power quality + equipment life?"
+        description: >
+          Prior MGC objectives focus on operational + environmental cost only. Gap: they omit ESS
+          degradation cost and give no incentive for power quality or ESS cycle balance.
+        children:
+          - id: N03
+            type: decision
+            support_level: explicit
+            source_refs: ["§2.3 Eq. 8", "§2.3.3 Eq. 12", "§2.3.4-2.3.5 Eqs. 13-15", "Contribution 2"]
+            title: "Add ESS loss cost + two penalty terms to the objective"
+            description: >
+              Objective = operational + pollution + ESS loss cost + penalty(main-grid/MGC exchange
+              excursion) + penalty(ESS start/end energy discrepancy). Penalties decouple fitness from
+              real cost but encode power-quality and lifespan goals.
+            evidence: ["C01", "C07"]
+      - id: N04
+        type: question
+        support_level: explicit
+        source_refs: ["§1 metaheuristics paragraph", "§3.1"]
+        title: "Which optimization algorithm to use for the dispatch model?"
+        description: >
+          Classical LP/NLP judged unsuitable for modern power-system complexity; DL methods need
+          heavy training data/compute; metaheuristics (GA/PSO/FA/WOA) each have failure modes. GWO
+          chosen as the base for its simplicity + strong global search.
+        children:
+          - id: N05
+            type: decision
+            support_level: explicit
+            source_refs: ["§3.1", "§3.2 opening", "Contribution 1"]
+            title: "Enhance GWO rather than adopt another metaheuristic"
+            description: >
+              GWO is simple with strong global search but prone to local optima and slow late
+              convergence; enhance it with chaos + dynamic opposition-based learning.
+            evidence: ["C02"]
+            children:
+              - id: N06
+                type: experiment
+                support_level: explicit
+                source_refs: ["§4.2", "Table 4", "Figure 6"]
+                title: "Chaotic-map selection study (Tent/Sine/Chebyshev/Logistic vs GWO)"
+                description: >
+                  Integrate four chaotic maps into GWO initialization; compare convergence, fitness,
+                  and runtime against traditional GWO on the MGC dispatch instance.
+                evidence: ["C03"]
+                children:
+                  - id: N07
+                    type: dead_end
+                    support_level: explicit
+                    source_refs: ["§4.2", "Figure 6"]
+                    title: "Sine mapping — poorest performer"
+                    description: "CGWO with Sine mapping had the poorest performance and slowest early convergence."
+                  - id: N08
+                    type: dead_end
+                    support_level: explicit
+                    source_refs: ["§4.2", "Figure 6"]
+                    title: "Tent mapping — suboptimal speed and precision"
+                    description: "Tent mapping showed suboptimal results on both convergence speed and precision."
+                  - id: N09
+                    type: dead_end
+                    support_level: explicit
+                    source_refs: ["§4.2", "Table 4"]
+                    title: "Chebyshev mapping — best fitness but rejected on runtime"
+                    description: >
+                      Chebyshev reached the value closest to the true optimum (best fitness 1.6895e3)
+                      but required the most compute (11.616561 s); the accuracy gain over Logistic was
+                      judged negligible, so Chebyshev was rejected on the efficiency-precision tradeoff.
+                  - id: N10
+                    type: decision
+                    support_level: explicit
+                    source_refs: ["§4.2 conclusion", "Table 4"]
+                    title: "Select Logistic mapping"
+                    description: >
+                      Logistic gave the fastest runtime (7.9097413 s) with near-best fitness — chosen
+                      to balance efficiency and precision.
+                    evidence: ["C03"]
+              - id: N11
+                type: decision
+                support_level: explicit
+                source_refs: ["§3.2.2", "§4.3.1 opening", "Eq. 20"]
+                title: "Add dynamic opposition-based learning (DOBL) on top of chaotic init"
+                description: >
+                  Chaos accelerates early convergence but decays later; add DOBL (dynamic factor
+                  r=sin(t/T)) to keep injecting adaptive reverse solutions throughout, fixing the
+                  late-stage stagnation. Yields CDGWO.
+                evidence: ["C04"]
+                children:
+                  - id: N12
+                    type: experiment
+                    support_level: explicit
+                    source_refs: ["§4.3.1", "Table 5", "Figure 7"]
+                    title: "CDGWO vs FA/PSO/WOA/GWO/GA/SA"
+                    description: >
+                      Compare CDGWO against six metaheuristics on fitness, runtime, iterations-to-
+                      converge, and convergence variance. CDGWO best on fitness, runtime, and variance.
+                    evidence: ["C04", "C05"]
+                  - id: N13
+                    type: experiment
+                    support_level: explicit
+                    source_refs: ["§4.3.1", "Table A1"]
+                    title: "Actual daily cost per algorithm"
+                    description: >
+                      Confirm that lower penalized fitness maps to lower real daily cost; CDGWO lowest
+                      cost (780.46 CNY). Establishes fitness-cost order preservation.
+                    evidence: ["C01", "C06"]
+      - id: N14
+        type: experiment
+        support_level: explicit
+        source_refs: ["§4.3.2", "Figures 8-10 (a)", "Tables A2, A4", "Figure 5"]
+        title: "Nominal economic dispatch with CDGWO"
+        description: >
+          Apply CDGWO under nominal forecast; inspect per-MG hourly power balance, purchase/sale and
+          exchange totals, and cost breakdown; relate storage/exchange timing to the TOU price signal.
+        evidence: ["C07", "C08"]
+      - id: N15
+        type: experiment
+        support_level: explicit
+        source_refs: ["§4.3.2 robustness point", "Figures 8-10 (b)", "Tables A3, A5"]
+        title: "Robustness under ±10% random disturbance"
+        description: >
+          Add ±10% random disturbance to MG1 wind, MG2 PV, MG3 load and re-solve. Power balance held
+          at every hour; total cost rose only 7.80% (780.46 -> 841.35 CNY), showing graceful degradation.
+        evidence: ["C09"]

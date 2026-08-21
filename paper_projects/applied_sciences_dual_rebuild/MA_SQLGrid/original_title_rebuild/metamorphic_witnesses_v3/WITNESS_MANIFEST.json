@@ -1,0 +1,66 @@
+{
+  "base": {
+    "bytes": 36864,
+    "path": "D:\\aicoding\\powergrid_benchmark\\paper_projects\\applied_sciences_dual_rebuild\\MA_SQLGrid\\semantic_reliability_experiment\\states_v2b\\T0_snapshot.sqlite",
+    "sha256": "ba74e84f30c15ecf04bf2b1ffb5d1ccbb978a9e210b69f4676b9bde64e5bbc46"
+  },
+  "builder": {
+    "bytes": 4686,
+    "path": "build_metamorphic_witnesses_v3.py",
+    "schema_version": "ma-sqlgrid-witness-builder-v3",
+    "sha256": "0d9b5b694037e0483e842a1befe3e63c9b35669e6615df42f1312d77ba959654"
+  },
+  "comparison_policy": "Candidate SQL determines ordered versus multiset comparison; M3 wildcard arity changes are predeclared non-invariance and are not normalized away.",
+  "created_at_utc": "2026-08-08T08:15:32+00:00",
+  "forbidden_inputs_accessed": {
+    "gold_sql": false,
+    "predictions": false,
+    "prompts": false,
+    "questions": false,
+    "scores": false
+  },
+  "manifest_content_sha256": "1d42a193cecd671a9eeb8a5ff6be482523a61ea7c3e9650faf874e3c1ec706d9",
+  "schema_version": "ma-sqlgrid-query-blind-metamorphic-witnesses-v3",
+  "states": [
+    {
+      "bytes": 40960,
+      "integrity_check": "ok",
+      "invariant": "All original tables, named columns, and rows are unchanged; queries restricted to the original schema retain their denotation.",
+      "operator_sql": [
+        "CREATE TABLE __ma_probe_irrelevant(probe_id INTEGER PRIMARY KEY, note TEXT NOT NULL)",
+        "INSERT INTO __ma_probe_irrelevant VALUES (1,'alpha'),(2,'beta'),(3,'gamma')"
+      ],
+      "path": "M1_irrelevant_relation_rows.sqlite",
+      "sha256": "bffe088c7e727e4e2283e87a2161686a364c42afbb94f9ef435af89f37bb34fd",
+      "state_id": "M1_irrelevant_relation_rows"
+    },
+    {
+      "bytes": 49152,
+      "integrity_check": "ok",
+      "invariant": "Only indexes and physical storage are changed; ordered results preserve order and unordered results are compared as multisets.",
+      "operator_sql": [
+        "CREATE INDEX __ma_probe_assets_status ON assets(status)",
+        "CREATE INDEX __ma_probe_work_orders_status ON work_orders(status, priority)",
+        "CREATE INDEX __ma_probe_sensor_type ON sensor_readings(sensor_type, reading_time)",
+        "VACUUM"
+      ],
+      "path": "M2_harmless_indexes_rebuild.sqlite",
+      "sha256": "ede3f914e33eb5b7868d9d144004ffdb96ba1e6467d642774b4625ea6fd2c28c",
+      "state_id": "M2_harmless_indexes_rebuild"
+    },
+    {
+      "bytes": 36864,
+      "integrity_check": "ok",
+      "invariant": "Existing named columns and rows are unchanged; explicit-column queries retain denotation, while wildcard projections may fail invariance by design.",
+      "operator_sql": [
+        "ALTER TABLE assets ADD COLUMN __ma_probe_nullable TEXT",
+        "ALTER TABLE work_orders ADD COLUMN __ma_probe_nullable TEXT",
+        "ALTER TABLE sensor_readings ADD COLUMN __ma_probe_nullable TEXT"
+      ],
+      "path": "M3_nullable_schema_extension.sqlite",
+      "sha256": "db1b042b0a24d0530fc323d8003bb9d4f8f25bfb9b1cd562cdee3c04ae4ea935",
+      "state_id": "M3_nullable_schema_extension"
+    }
+  ],
+  "status": "BUILT_BEFORE_V3_FREEZE_AND_SELECTION"
+}

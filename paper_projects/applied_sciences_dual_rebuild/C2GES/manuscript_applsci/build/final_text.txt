@@ -1,0 +1,2305 @@
+Article
+
+Learnable Role-Conditioned Evidence Sentence Selection with
+Interpretable Mixture Reranking
+Bijing Liu 1,2 and Yong Yang 1,2, *
+
+                                       1   NARI Group Corporation (State Grid Electric Power Research Institute), Nanjing 211106, Jiangsu Province,
+                                           China;
+                                       2   Beijing Kedong Electric Power Control System Co., Ltd., Beijing 100080, China
+                                       *   Correspondence: Yong Yang; yangyong1@sgepri.sgcc.com.cn
+
+
+                                       Featured Application                                                                                            1
+
+
+                                       The workflow defines a prospective path toward auditable technical-incident-report review                       2
+
+                                       by returning inspectable sentence identifiers; power-grid performance remains unvalidated                       3
+
+                                       until independently annotated and adjudicated report evidence is available.                                    4
+
+
+
+                                       Abstract                                                                                                        5
+
+
+                                       Selecting exact supporting sentences is useful only when evaluation prevents document                           6
+
+                                       and label leakage. We evaluate C2 GES, an additive reranker combining query relevance,                          7
+
+                                       role compatibility, and local positional smoothing, on a document-grouped FEVER con-                            8
+
+                                       version with 8000 training, 1500 development, and 1500 test instances. Across one pilot                         9
+
+                                       seed and four prospectively specified continuation seeds, predicted-label F1 was 0.4920                        10
+
+                                       at the primary evidence budget, compared with 0.4864 for BM25. Neither the predefined                          11
+
+                                       role-effect criterion nor the criterion for superiority across budgets was met. Additional                     12
+
+                                       comparisons included nine existing scoring modes, two retrained structural ablations, and                      13
+
+                                       two frozen zero-shot cross-encoders. At label-blind K = 3, the MiniLM cross-encoder                            14
+
+                                       difference was +0.0102, with Holm-adjusted p = 0.1877. In a separate three-comparison                          15
+
+                                       family, BGE differed from full C2 GES by −0.0021 and no contrast survived Holm ad-                             16
+
+                                       justment. A crossed 5 × 5 upstream–downstream seed analysis yielded mean F1 0.4906;                            17
+
+                                       upstream marginal means varied less than downstream marginal means. The study con-                             18
+
+                                       tributes a leakage-controlled evaluation design, a traceable evidence-selection protocol,                      19
+
+                                       and a bounded resource analysis for future power-grid reliability-report review. Public                        20
+
+                                       power-grid reports define only the application setting because their candidate annotations                     21
+
+                                       have not been independently adjudicated by domain experts.                                                     22
+
+
+
+                                       Keywords: evidence sentence selection; fact verification; document-grouped evaluation;                         23
+
+                                       role-conditioned reranking; reproducibility; technical reports                                                 24
+
+
+
+
+                                       1. Introduction                                                                                                25
+Received:
+Accepted:                                   Evidence retrieval is a critical intermediate step in fact verification, query-focused                    26
+
+Published:                             summarization, and technical-report review because a ranked sentence list can be inspected                     27
+
+Copyright: © 2026 by the authors.      independently of a generated answer. FEVER made this separation explicit by pairing                            28
+
+Submitted to Appl. Sci. for possible   claims with annotated Wikipedia evidence sentences [1]. Query-focused summarization                            29
+open access publication under the
+                                       similarly asks which parts of a document answer a particular information need rather than                      30
+terms and conditions of the Creative
+                                       which sentences are globally salient [2–4]. In power-system operations, analysts face an                       31
+Commons Attribution (CC BY) license.
+
+
+
+
+Version August 5, 2026 submitted to Appl. Sci.                                                                 https://doi.org/10.3390/app1010000
+Version August 5, 2026 submitted to Appl. Sci.                                                                                    2 of 24
+
+
+
+
+                                     analogous task when locating trigger, propagation, impact, and mitigation evidence in                  32
+
+                                     disturbance reports [5,6].                                                                             33
+
+                                            Evidence-selection claims are nevertheless vulnerable to two design errors. First,              34
+
+                                     splitting claims while allowing the same underlying document in multiple partitions makes              35
+
+                                     sentence patterns transferable across train and test. Second, giving a selector the human              36
+
+                                     veracity label creates a conditional oracle result that cannot be interpreted as end-to-end            37
+
+                                     performance. These risks motivate evaluation in which the source document is the atomic                38
+
+                                     split and role provenance is explicit.                                                                 39
+
+                                            This article studies C2 GES, an interpretable mixture of query relevance, learned role          40
+
+                                     compatibility, and local positional consistency. The role channel is scientifically useful only        41
+
+                                     if it improves over an otherwise identical label-blind system. The five-seed test does not             42
+
+                                     establish that effect. The resulting contribution is therefore methodological and empirical:           43
+
+                                     (i) a document-grouped benchmark conversion and three-protocol contract, (ii) a complete               44
+
+                                     artifact and inference audit, and (iii) a cutoff-specific analysis against BM25 without a              45
+
+                                     blanket superiority statement.                                                                         46
+
+                                            The distinction between architectural intent and demonstrated effect is central to this         47
+
+                                     evaluation. A component may have an intuitive semantic interpretation and still contribute             48
+
+                                     no measurable improvement once the surrounding system and uncertainty are controlled.                  49
+
+                                     Conversely, a complete system may compare favorably with a baseline at one evidence                    50
+
+                                     budget without the named component causing that difference. We therefore separate the                  51
+
+                                     system-level comparison from the role-source contrast and retain the predefined decision               52
+
+                                     criteria even when they are not met. For an applied study, usable operating conditions and             53
+
+                                     evidence provenance matter at least as much as a headline score.                                       54
+
+                                            The title states the intended power-grid reliability-report application, but it does not im-    55
+
+                                     ply that FEVER is a power-grid corpus. Public NERC reports supply authentic technical lan-             56
+
+                                     guage and document structures for workflow design [7,8]. The current question–evidence                 57
+
+                                     records were constructed automatically and have not been independently adjudicated by                  58
+
+                                     domain experts. Quantitative evaluation is therefore restricted to FEVER human evidence,               59
+
+                                     whereas the NERC material motivates the application and defines the next validation stage.             60
+
+                                     This separation prevents source authenticity from being confused with annotation validity.             61
+
+                                            The article makes four scoped contributions. First, it describes an inspectable within-         62
+
+                                     document reranker whose sentence scores can be decomposed into query, role, and local                  63
+
+                                     channels. Second, it establishes a document-disjoint FEVER conversion and an explicit                  64
+
+                                     contract for oracle, predicted, and absent role information. Third, it reports a five-seed             65
+
+                                     analysis with paired document-clustered uncertainty, structural ablations, and a zero-shot             66
+
+                                     cross-encoder comparison. Fourth, it specifies how power-grid report evaluation must                   67
+
+                                     progress from automatically constructed development cases to independently adjudicated                 68
+
+                                     expert evidence before domain performance can be claimed.                                              69
+
+                                            The remainder of the article reviews fact-verification retrieval, extractive ranking, and       70
+
+                                     technical-report applications; defines the dataset and role-provenance protocols; presents             71
+
+                                     the scoring model, training objective, and audit controls; analyzes five-seed performance              72
+
+                                     and resource use; and closes with limitations and a concrete domain-validation path.                   73
+
+
+
+                                     2. Related Work                                                                                        74
+
+
+                                     2.1. Evidence Retrieval and Query-Focused Ranking                                                      75
+
+
+                                          FEVER evaluates both claim verification and retrieval of supporting evidence [1].                 76
+
+                                     Evidence retrieval and query-focused summarization share a ranking structure, although                 77
+
+                                     the present study supplies the candidate document and does not evaluate open-corpus page               78
+
+                                     retrieval. Matching-based extractive models, iterative ranking, and distance-augmented                 79
+
+
+
+
+                                                                                                      https://doi.org/10.3390/app1010000
+Version August 5, 2026 submitted to Appl. Sci.                                                                                3 of 24
+
+
+
+
+                                     sentence graphs motivate transparent sentence scoring [4,9,10]. These studies also show            80
+
+                                     why ranking quality should be reported at multiple output budgets.                                 81
+
+                                           Multi-stage retrieval work emphasizes that evidence recovery can fail even when a            82
+
+                                     downstream verifier is capable, because later reasoning cannot recover a sentence that was         83
+
+                                     never selected [11,12]. The present task is deliberately narrower: the source document             84
+
+                                     is supplied and the output is a set of sentence identifiers. This boundary allows close            85
+
+                                     inspection of reranking behavior but excludes page retrieval, multi-document aggregation,          86
+
+                                     claim-veracity accuracy, and answer generation. Accordingly, “end-to-end” in this arti-            87
+
+                                     cle refers only to the predicted-role-plus-sentence-selection workflow within a supplied           88
+
+                                     document.                                                                                          89
+
+                                           Query-focused benchmarks show that the same document may require different                   90
+
+                                     extracts under different information needs [2,3]. That observation motivates conditioning          91
+
+                                     signals but does not determine how they should be encoded or whether a coarse binary               92
+
+                                     label adds information beyond the query text. The comparison between predicted-label               93
+
+                                     and label-blind protocols is therefore the appropriate empirical test of the role hypothesis,      94
+
+                                     while the oracle is only a diagnostic of what could happen if veracity were known.                 95
+
+
+
+                                     2.2. Semantic and Lexical Ranking                                                                  96
+
+
+                                          BM25 remains a strong lexical baseline grounded in probabilistic relevance modeling           97
+
+                                     [13]. Dense sentence embeddings provide a complementary semantic signal; Sentence-                 98
+
+                                     BERT supports efficient cosine-based sentence comparison [14]. C2 GES combines semantic            99
+
+                                     and lexical query relevance but keeps the role and local channels separately inspectable.          100
+
+                                     This differs from claiming that each channel supplies a statistically supported gain.              101
+
+                                          Graph-based extractive systems model sentence relations, topics, discourse, or mul-           102
+
+                                     tiplex connections [15–17]. Those models motivate relational information but are not               103
+
+                                     equivalent to the positional smoothing used here. The C2 GES local channel does not infer          104
+
+                                     event direction, a physical propagation graph, or causal intervention. Calling it a local          105
+
+                                     chain identifies a proximity prior over document order, and its output must be interpreted         106
+
+                                     at that level.                                                                                     107
+
+                                          Recent neural and language-model rerankers explore pairwise, setwise, and listwise            108
+
+                                     candidate comparison [18–20]. They expand the potential accuracy–cost frontier, but often          109
+
+                                     add model, endpoint, and prompt dependencies. Our focus is a lightweight decomposable              110
+
+                                     score and an evaluation contract that can later host stronger rerankers without changing           111
+
+                                     candidates, splits, metrics, or audit rules. A fair future comparison must record model            112
+
+                                     snapshots and compute and must not silently replace the present document-conditioned               113
+
+                                     task with open retrieval.                                                                          114
+
+                                          The closest verified power-grid NLP precedent in this venue combines semantic-                115
+
+                                     dependency and lexical embeddings with RoBERTa for supervised entity–relation extrac-              116
+
+                                     tion on a purpose-built grid-field corpus [21]. Its output, supervision, and candidate scope       117
+
+                                     differ from ours: it predicts entity relations in domain text, whereas C2 GES ranks supplied-      118
+
+                                     document sentence identifiers and is evaluated quantitatively on human-annotated FEVER             119
+
+                                     evidence. The demonstrated novelty here is therefore the leakage-controlled, hash-bound            120
+
+                                     protocol and decomposable evidence ledger, not superior relation extraction, a supported           121
+
+                                     role-conditioning gain, or validated power-grid performance.                                       122
+
+
+
+                                     2.3. Technical-Report Application Boundary                                                         123
+
+
+                                          Computational analysis of power-grid reports motivates tools that preserve traceable          124
+
+                                     evidence rather than returning unsupported summaries [5,6,22]. The local NERC collection           125
+
+                                     contains public reports and automatically constructed candidate annotations. Because               126
+
+                                     those annotations have not undergone independent domain-expert adjudication, they are              127
+
+
+
+
+                                                                                                  https://doi.org/10.3390/app1010000
+Version August 5, 2026 submitted to Appl. Sci.                                                                                   4 of 24
+
+
+
+
+                                     used only to define an application scenario and future annotation protocol; quantitative              128
+
+                                     results in this article come exclusively from human-annotated FEVER evidence.                         129
+
+                                           Power-grid digitalization has created broad opportunities for AI-assisted forecasting,          130
+
+                                     anomaly detection, control, and decision support [5,23,24]. Evidence selection addresses              131
+
+                                     a different layer: it organizes the documentary basis for an engineering review. A useful             132
+
+                                     system should return stable sentence identifiers, preserve the originating report, expose             133
+
+                                     ranking provenance, and avoid presenting model-produced causal labels as expert findings.             134
+
+                                     These requirements favor transparent ledgers and conservative evidence boundaries.                    135
+
+                                           Role information is attractive because trigger, impact, propagation, and mitigation             136
+
+                                     questions can share vocabulary while seeking different passages. Work on causal language              137
+
+                                     and explanation datasets likewise distinguishes causes, consequences, and rationales                  138
+
+                                     [25,26]. Yet a role label can duplicate query cues or leak a target. The three-protocol design        139
+
+                                     addresses this ambiguity directly. A nonzero learned weight is not proof of incremental               140
+
+                                     utility; only the paired predicted-versus-blind contrast can support the deployed role claim.         141
+
+
+
+                                     3. Materials and Methods                                                                              142
+
+
+                                     3.1. Task and Data Boundary                                                                           143
+
+                                                                                          n
+                                           For claim qi and candidate document Di = {sij } j=i 1 , the selector returns the top-K sen-     144
+
+                                     tence identifiers. The annotated evidence set Ei is used for learning and offline evaluation,         145
+
+                                     not as an inference feature. The task is therefore document-conditioned evidence selection            146
+
+                                     rather than complete fact verification.                                                               147
+
+                                           The conversion loads the Hugging Face dataset lukasellinger/filtered_fever-                     148
+
+                                     evidence_selection, pools its original train, development, and test rows, and retains                 149
+
+                                     FEVER SUPPORTS and REFUTES instances with candidate sentences from one underlying                     150
+
+                                     Wikipedia document. The original script did not pass or record a dataset revision; therefore          151
+
+                                     an immutable upstream commit cannot be reconstructed retrospectively. The frozen local                152
+
+                                     cache is instead identified by configuration default, cache key 401c2800...ddc28f, and                153
+
+                                     split fingerprints 997ccf2c..., 954c703b..., and c096f049.... The converted corpus and                154
+
+                                     each output partition have full SHA-256 hashes in the supplement.                                     155
+
+                                           Each retained instance contains the claim text, its binary veracity label, an ordered           156
+
+                                     candidate-sentence list, and one or more annotated evidence identifiers. Sentence order is            157
+
+                                     preserved so that an output can be traced to the supplied document and the local channel              158
+
+                                     has a stable positional reference. Evaluation does not reward paraphrase similarity: a                159
+
+                                     returned item is correct only when its identifier belongs to the annotated set. This exact-ID         160
+
+                                     rule is reproducible, although it can penalize plausible supporting sentences omitted by              161
+
+                                     the original annotation.                                                                              162
+
+                                           The executable conversion is deterministic. Each nonempty tab-separated sentence                163
+
+                                     line must contain an integer line number and text; its stable identifier is sNNN. Evidence            164
+
+                                     line numbers are parsed, deduplicated, sorted, and mapped to available sentence identi-               165
+
+                                     fiers. Rows with an empty claim, missing document, unsupported label, fewer than two                  166
+
+                                     candidate sentences, no evidence line numbers, or no mapped evidence are excluded. The                167
+
+                                     deduplication key is the integer source row ID paired with the document ID. Documents                 168
+
+                                     are assigned by interpreting the first eight SHA-256 bytes of the unmodified document                 169
+
+                                     ID as a fraction in [0, 1): values below 0.8 map to train, below 0.9 to development, and              170
+
+                                     the remainder to test. Documents are sorted, and an entire document is skipped if adding              171
+
+                                     its rows would exceed the fixed partition capacity; no document is truncated across the               172
+
+                                     boundary. The conversion-script SHA-256 is 8f66d987...3b317a71.                                       173
+
+                                           The local replay began with 32900 pooled rows and found 32475 unique eligible                   174
+
+                                     rows. Exactly 425 rows were excluded for having fewer than two candidates; all other                  175
+
+                                     pre-assignment exclusion counters were zero. Table 2 separates original-source counts,                176
+
+
+
+
+                                                                                                     https://doi.org/10.3390/app1010000
+Version August 5, 2026 submitted to Appl. Sci.                                                                                    5 of 24
+
+
+
+
+                                     eligibility, whole-document capacity exclusions, and final retained counts. These counts               177
+
+                                     are reproducible from the retained cache but do not repair the missing upstream revision               178
+
+                                     record.                                                                                                179
+
+                                          The title-normalization audit standardizes encoding, Unicode, case, separators, punc-             180
+
+                                     tuation, leading articles, and a trailing disambiguator before screening potential aliases.            181
+
+                                     Even this audit cannot resolve every redirect or semantic relation. We therefore characterize          182
+
+                                     the split as exact-document-disjoint under recorded rules, not as proof that every test topic          183
+
+                                     is unrelated to every training topic.                                                                  184
+
+
+
+                                     Table 1. Document-grouped FEVER conversion. Values are generated from the frozen dataset
+                                     manifest.
+
+                                                    Partition         Instances    Documents       Cross-split overlap
+                                                    Train                  8000             745                        0
+                                                    Development            1500             141                        0
+                                                    Test                   1500             145                        0
+
+
+                                     Table 2. Deterministic FEVER conversion audit. The 425 eligibility exclusions all originated in the
+                                     pooled source train partition; capacity exclusions are assigned after document hashing.
+
+                                       Stage                                                      Train    Development          Test
+                                       Source rows pooled                                         29237                1978    1685
+                                       Excluded: < 2 candidate sentences                            425                   0       0
+                                       Eligible unique rows (pooled)                                           32475
+                                       Excluded by whole-document capacity rule                   18165                1830    1480
+                                       Final rows                                                  8000                1500    1500
+
+                                     3.2. Role-Provenance Protocols                                                                         185
+
+
+                                          The oracle-label protocol exposes FEVER veracity to the selector and is a conditional             186
+
+                                     diagnostic, not an end-to-end system. Predicted-label uses an upstream claim-text classifier:          187
+
+                                     training roles are out-of-fold predictions from document-grouped folds, whereas develop-               188
+
+                                     ment and test roles are produced by a classifier fitted only on training data. Label-blind             189
+
+                                     assigns the same unknown role to every item. Apart from role provenance, the proto-                    190
+
+                                     cols share candidates, split, encoder, objective, metric implementation, seeds, and cutoffs            191
+
+                                     (Figure 1).                                                                                            192
+
+                                          The contract isolates two estimands. The system comparison asks how a complete                    193
+
+                                     variant behaves relative to BM25 at a chosen reading budget. The role-effect comparison                194
+
+                                     asks whether changing only role provenance changes ranking quality. Conflating them                    195
+
+                                     would allow a positive system comparison to be attributed to a role head even when the                 196
+
+                                     blind model behaves similarly. Paired protocol rows and shared candidate pools prevent                 197
+
+                                     that attribution error.                                                                                198
+
+                                          For predicted-label training, the upstream classifier never predicts an item from a               199
+
+                                     model fitted on another claim from the same source document. It uses claim text only                   200
+
+                                     and a feature union of a lowercased word TF–IDF channel (1–2 grams) and a char_wb                      201
+
+                                     TF–IDF channel (3–5 grams); both use Unicode accent stripping, sublinear term frequency,               202
+
+                                     min_df=2, and at most 30,000 features. A class-balanced, L2-penalized logistic regression              203
+
+                                     uses liblinear, C = 1.0, an intercept, at most 1000 iterations, and otherwise scikit-learn             204
+
+                                     defaults. Five-fold StratifiedGroupKFold uses document IDs as groups, shuffling with                   205
+
+                                     seed 2026. Fold models use seeds 2026–2030 to create training OOF predictions; a seed-                 206
+
+                                     2026 model fitted to all training rows predicts development and test and is serialized as              207
+
+                                     full_train_model.joblib. OOF fold models were not serialized.                                          208
+
+
+
+
+                                                                                                      https://doi.org/10.3390/app1010000
+Version August 5, 2026 submitted to Appl. Sci.                                                                                                                                                                                        6 of 24
+
+
+
+
+                                          Grouped out-of-fold construction adapts the general cross-fitting principle to source-                                                                                                                209
+
+                                     document groups [27]. One complete prediction ledger, SHA-256 96c31a5f...3bcb625,                                                                                                                          210
+
+                                     was frozen and reused by every downstream seed. This preserves observed upstream                                                                                                                           211
+
+                                     errors without in-sample role prediction, but the reported five-seed SD and hierarchical                                                                                                                   212
+
+                                     bootstrap vary only the downstream selector: they do not include alternative upstream                                                                                                                      213
+
+                                     folds, seeds, refits, or ledgers. Upstream-model uncertainty is therefore a limitation, not                                                                                                                214
+
+                                     part of the interval estimand.                                                                                                                                                                             215
+
+                                          The label-blind control preserves the same role-head interface but supplies a constant                                                                                                                216
+
+                                     unknown role, minimizing code differences between the two deployed protocols. The                                                                                                                          217
+
+                                     oracle passes the human label through that interface, but every table and figure marks it as                                                                                                               218
+
+                                     conditional. It supports sensitivity analysis and debugging, not deployment claims.                                                                                                                        219
+
+
+
+
+                                                                        Oracle-label · conditional diagnostic
+
+
+
+                                                                                                                                                                                      Ranked evidence IDs
+                                                                                     Human veracity role                               C2GES · human role
+                                                                                                                                                                                          conditional
+
+
+
+
+                                                                        Predicted-label · end-to-end
+
+
+                                              Same claim                               OOF/train-only                                                                                 Ranked evidence IDs              Aligned metrics
+                                              candidates                                                                            C2GES · predicted role
+                                                                                       role predictor                                                                                     end-to-end                  cost · error audit
+                                               document
+
+
+
+
+                                                                        Label-blind · end-to-end
+
+
+
+                                                                                                                                                                                      Ranked evidence IDs
+                                                                                      No role exposed                                C2GES · role disabled
+                                                                                                                                                                                          end-to-end
+
+
+
+
+                                                                                                       Only role availability changes; instances, candidate pools and metrics remain paired.
+
+
+
+
+                                     Figure 1. Three-protocol contract. Oracle-label is a privileged-label conditional sensitivity diagnostic;
+                                     predicted-label and label-blind are end-to-end variants. Gold evidence enters training and evaluation
+                                     but never candidate scoring.
+
+
+
+
+                                            Atomic document-group split                                           Train-only OOF and final fit                                                          Predicted roles + audit
+
+
+
+
+                                                                                                                       Grouped folds                Fit K−1 folds
+                                                                                          Train docs                                                                           Train OOF roles
+                                                                                                                         F1 … FK                   predict held-out
+
+
+
+
+                                                                 Normalize title /
+                                           Claims keyed by
+                                                                 assign document                                                                                                                                 document_id
+                                        underlying document_id        group               Dev docs
+                                                                                                                                                                                                             coverage · hash audit
+                                                                                                                                                                                  Dev roles
+
+
+
+
+                                                                                                                                        Fit on all
+                                                                                                                                    train documents
+
+                                                                                          Test docs
+                                                                                                                                                                                  Test roles
+
+
+
+
+                                                                                                                          Development/test gold roles never enter the upstream predictor.
+
+
+
+
+                                     Figure 2. Document-grouped splitting and out-of-fold role construction. Each source document is
+                                     atomic, and each training role prediction comes from a model not fitted on that document.
+
+
+
+
+                                                                                                                                                                                 https://doi.org/10.3390/app1010000
+Version August 5, 2026 submitted to Appl. Sci.                                                                                     7 of 24
+
+
+
+
+                                          The upstream classifier is part of the predicted-label workflow, so its errors are not             220
+
+                                     replaced by oracle roles. Table 3 reports its frozen metrics. Test accuracy is 0.800 and                221
+
+                                     macro-F1 is 0.765.                                                                                      222
+
+
+
+                                     Table 3. Upstream role-prediction performance. All values are generated from the immutable metrics
+                                     artifact.
+
+                                      Partition         Prediction scheme             Accuracy     Balanced accuracy        Macro-F1
+                                      Train             Document-grouped OOF               0.774                   0.736         0.736
+                                      Development       Train-only model                   0.793                   0.759         0.761
+                                      Test              Train-only model                   0.800                   0.762         0.765
+
+
+                                     3.3. Interpretable Mixture Reranker                                                                     223
+
+                                                                                                      q
+                                           The frozen sentence encoder maps claims and candidates to hi and hij . The query                  224
+
+                                     channel Qij equally combines within-document normalized embedding cosine similarity                     225
+
+                                     and TF–IDF cosine similarity. The role channel concatenates the sentence, claim, and role               226
+
+                                     representations:                                                                                        227
+
+                                                                        h                           i    
+                                                                                     q
+                                                          Rij = σ W2 ReLU W1 (hij ⊕ hi ⊕ e(ri )) + b1 + b2 .                          (1)    228
+
+
+
+                                     The local channel Gij smooths query salience over sentence position. It is a positional                 229
+
+                                     consistency prior, not an inferred causal graph.                                                        230
+
+                                          All query-channel normalizations are computed within the candidate document.                       231
+
+                                     Scores therefore represent relative salience for one claim and should not be compared as                232
+
+                                     calibrated probabilities across documents. A constant channel maps to zero rather than                  233
+
+                                     being divided by a zero range. Semantic and lexical terms are combined before the final                 234
+
+                                     mixture, keeping query relevance as one identifiable source in the downstream trace.                    235
+
+                                          The role head receives frozen sentence and claim representations plus a learned                    236
+
+                                     embedding of the protocol-specific role. A shallow nonlinear transformation returns a                   237
+
+                                     bounded candidate score. Freezing the encoder reduces compute and makes across-seed                     238
+
+                                     changes easier to attribute to the head and mixture, but it also limits task adaptation. It is a        239
+
+                                     reproducibility choice for this study, not a claim of optimality.                                       240
+
+                                          The local channel averages nearby query salience with distance-decaying weights                    241
+
+                                     and then normalizes within the document. It can promote a sentence near other relevant                  242
+
+                                     sentences, reflecting the common writing pattern in which context and evidence occupy a                 243
+
+                                     short neighborhood. It cannot establish event direction or physical propagation. Candidate              244
+
+                                     traces therefore label the value as positional consistency rather than causal structure.                245
+
+                                          The final score is an additive positive mixture,                                                   246
+
+
+
+                                                       Sij = wQ Qij + w R Rij + wG Gij ,     wm ≥ 0,      ∑ wm = 1.                   (2)    247
+                                                                                                          m
+
+                                     Mixture parameters are transformed to positive values, combined with predefined com-                    248
+
+                                     ponent floors, and renormalized. These floors make channel presence auditable but also                  249
+
+                                     constrain the optimum; consequently, fitted weight magnitudes are not treated as causal                 250
+
+                                     importance estimates.                                                                                   251
+
+                                          Positivity makes a trace easier to interpret because every channel can only add support            252
+
+                                     to a candidate. The trade-off is reduced flexibility: the model cannot learn that a high                253
+
+                                     channel value should suppress a sentence, and a floor can keep an unhelpful component                   254
+
+                                     present. The role floor is especially relevant because the predefined role-effect criterion was         255
+
+                                     not met. A future no-floor experiment must be prospectively specified as a new comparison               256
+
+                                     rather than used retrospectively to replace the frozen outcome.                                         257
+
+
+
+
+                                                                                                       https://doi.org/10.3390/app1010000
+Version August 5, 2026 submitted to Appl. Sci.                                                                                            8 of 24
+
+
+
+
+                                          For positive evidence candidates Pi and remaining candidates Ni , training uses pair-                        258
+
+                                     wise softplus ranking loss,                                                                                       259
+
+
+
+                                                                              1
+                                                                        | Pi || Ni | p∑    ∑ log 1 + exp(Sin − Sip ) ,
+                                                                                                                    
+                                                           Lrank,i =                                                                             (3)   260
+
+                                                                                      ∈ P n∈ N
+                                                                                      i     i
+
+
+                                     The implemented total loss is                                                                                     261
+
+
+
+                                                                       Li = Lrank,i (S) + 0.5 Lrank,i ( R),                                      (4)   262
+
+
+
+                                     where R is the sigmoid-bounded role-head score and both terms enumerate every positive–                           263
+
+                                     negative pair within an instance. The encoder snapshot, configuration, code hashes,                               264
+
+                                     upstream-role ledger, predictions, component traces, and resource logs are retained for                           265
+
+                                     each run.                                                                                                         266
+
+                                          The pairwise objective compares annotated evidence sentences with non-evidence                               267
+
+                                     candidates from the same document, matching the relative ordering required by top-K                               268
+
+                                     inference. The auxiliary loss encourages the role head itself to distinguish positives from                       269
+
+                                     negatives. It does not guarantee that role identity supplies unique information: if claim                         270
+
+                                     and sentence representations already encode the useful distinction, predicted and blind                           271
+
+                                     protocols can remain empirically indistinguishable.                                                               272
+
+                                          At inference, all channels are computed, combined, sorted, and truncated at the                              273
+
+                                     requested budget. The ledger retains selected identifiers, evaluator-only gold identifiers,                       274
+
+                                     role provenance, candidate scores, seed, protocol, cutoff, and configuration. These fields                        275
+
+                                     allow an aggregate result to be recomputed and a disputed item to be inspected without                            276
+
+                                     retraining.                                                                                                       277
+
+
+
+                                     Table 4. Frozen downstream implementation choices, generated from a hash-bound implementation
+                                     contract checked against the executable source.
+
+                                        Element            Frozen choice                               Implementation detail
+                                        Encoder            all-MiniLM-L6-v2; frozen; batch 64          snapshot 1110a243...; tree SHA-256
+                                                                                                       091de8e3...
+                                        Role head          role embedding = encoder                    ReLU; dropout 0.1; sigmoid output; 3
+                                                           dimension; hidden 256                       role IDs
+                                        Query channel      0.5 normalized embedding cosine +           per-document word (1,2)-grams;
+                                                           0.5 normalized TF–IDF cosine                min_df=1
+                                        Local channel      all other sentences; exp(-|i-j|/3)          query-salience proxy; no finite
+                                                                                                       window
+                                        Mixture            floors (0.35, 0.25, 0.05); raw init (0.8,   softplus + 1e-3; normalize, add floors,
+                                                           0.7, 0.2)                                   renormalize
+                                        Loss               pairwise softplus on total score +          all positive–negative pairs within an
+                                                           0.5 pairwise softplus on role score         instance
+                                        Optimization       Adam; lr 0.001; weight decay 0; 4           PyTorch defaults; one optimizer step
+                                                           epochs                                      per document-instance
+                                        Selection          development F1 at K=3; strict               earliest epoch retained on a tie;
+                                                           improvement                                 descending argsort at inference
+                                        Randomness         Python, NumPy, and PyTorch                  training-instance shuffle each epoch;
+                                                           seeded                                      CPU execution
+                                        Normalization      within-document min–max                     range below 1e-12 maps to all zeros
+
+
+                                     3.4. Five-Seed Statistical Protocol                                                                               278
+
+
+                                          The first seed (2026) was completed and inspected during pipeline development.                               279
+
+                                     Before seeds 2027–2030 were run, the endpoint, protocols, evidence budgets, aggregation                           280
+
+                                     rule, and decision criteria were fixed in a dated manifest. The reported analysis includes                        281
+
+                                     the pilot seed rather than selecting only the four prospectively executed runs. This timing                       282
+
+
+
+
+                                                                                                              https://doi.org/10.3390/app1010000
+Version August 5, 2026 submitted to Appl. Sci.                                                                                 9 of 24
+
+
+
+
+                                     limits a fully prospective interpretation, but it preserves the complete run history and            283
+
+                                     prevents favorable seed selection.                                                                  284
+
+                                          The aggregation uses 5 downstream training seeds, cutoffs K ∈ {1, 3, 5, 10}, 4                 285
+
+                                     epochs, learning rate 0.001, and 2000 bootstrap replicates. The MiniLM encoder                      286
+
+                                     identifier is sentence-transformers/all-MiniLM-L6-v2; its exact snapshot reference is               287
+
+                                     1110a243...b4d41 with tree SHA-256 091de8e3...4f81. Learned protocols are fitted in-                288
+
+                                     dependently per downstream seed. BM25 is deterministic and evaluated on the identical               289
+
+                                     candidate pool.                                                                                     290
+
+                                          For predicted set Eb(K ) , per-instance precision, recall, and F1 are computed from            291
+                                                               i
+                                     sentence-ID overlap with Ei . Macro evidence F1 is the primary reported metric. Paired              292
+
+                                     uncertainty resamples the 145 test source documents and includes every item from each               293
+
+                                     sampled document. The hierarchical interval additionally samples training seeds. The                294
+
+                                     role-effect criterion requires a positive predicted-label minus label-blind mean and both           295
+
+                                     seed-level and hierarchical intervals to exclude zero. This rule was fixed before the remain-       296
+
+                                     ing four seeds were executed and before the five-seed aggregation.                                  297
+
+                                           Macro averaging gives every claim equal weight. Per-item precision is the share of            298
+
+                                     selected identifiers that are annotated, recall is the share of annotated identifiers returned,     299
+
+                                     and F1 is their harmonic mean with a defined zero for an empty denominator. Because                 300
+
+                                     changing the output budget alters the precision denominator and attainable recall, differ-          301
+
+                                     ent cutoffs are distinct operating points rather than repeated estimates of one invariant           302
+
+                                     performance value.                                                                                  303
+
+                                           Paired contrasts preserve item and document assignments between systems. The                  304
+
+                                     hierarchical procedure uses a deterministic NumPy RNG seed defined in the aggregator for            305
+
+                                     each contrast. It samples five downstream seeds with replacement; within each sampled               306
+
+                                     seed it samples that seed’s document clusters with replacement, repeats a duplicated cluster        307
+
+                                     with all of its claims, pools the resulting claim-level differences, and takes their mean. Thus     308
+
+                                     the estimand is instance-weighted rather than equally weighted by document. The reported            309
+
+                                     95% interval is the 2.5th–97.5th percentile interval over 2000 draws, whose finite Monte            310
+
+                                     Carlo count limits endpoint precision. The seed-level interval is a two-sided t interval over       311
+
+                                     the five paired seed means. Both interval lower bounds, as well as a positive mean, are             312
+
+                                     required by every positive-effect criterion. Resampling documents preserves within-page             313
+
+                                     dependence [28].                                                                                    314
+
+                                           The frozen aggregator reports raw paired t-test and exact sign-flip p-values, but the         315
+
+                                     decision criteria use neither value: they use the positive mean and the two unadjusted              316
+
+                                     interval lower bounds just defined. No Holm correction or other multiplicity adjustment             317
+
+                                     was implemented for this primary analysis, so none is claimed. Cutoff and protocol                  318
+
+                                     comparisons form a correlated descriptive matrix; a favorable secondary cell cannot reverse         319
+
+                                     the predefined primary role decision.                                                               320
+
+                                           BM25 supplies one deterministic result rather than artificial seed variation. Compari-        321
+
+                                     son uncertainty arises from paired documents and the learned systems’ downstream seeds.             322
+
+                                     A point estimate meets the positive-effect criterion only when its mean is positive and both        323
+
+                                     the seed-level t interval and hierarchical percentile interval are wholly above zero; meeting       324
+
+                                     it at one budget does not imply meeting it elsewhere.                                               325
+
+
+
+                                     3.5. Crossed Upstream–Downstream Seed Sensitivity                                                   326
+
+
+                                          The main five-seed analysis reuses one upstream role-prediction ledger, so its un-             327
+
+                                     certainty does not include variation from refitting the upstream classifier. A separately           328
+
+                                     hash-bound sensitivity experiment rebuilds document-grouped out-of-fold roles with up-              329
+
+                                     stream seeds 3101–3105. For each upstream ledger, the selector is trained with downstream           330
+
+                                     seeds 2026–2030, producing a crossed 5 × 5 matrix of 25 full pipelines. The data partitions,        331
+
+
+
+
+                                                                                                   https://doi.org/10.3390/app1010000
+Version August 5, 2026 submitted to Appl. Sci.                                                                                10 of 24
+
+
+
+
+                                     encoder snapshot, training limits, four-epoch schedule, learning rate, evidence budgets,            332
+
+                                     and exact sentence-ID metric remain unchanged. Completion requires five successful up-              333
+
+                                     stream builds, 25 successful downstream runs, and 25 prediction ledgers of exactly 54,000           334
+
+                                     rows each.                                                                                          335
+
+                                          The primary sensitivity estimand is claim-weighted macro F1 for the full predicted-role        336
+
+                                     model at K = 3, averaged over the 25 cells. A two-way method-of-moments decomposition               337
+
+                                     reports descriptive contributions from the five fixed upstream seeds, five fixed downstream         338
+
+                                     seeds, and their interaction/residual. It is not a population random-effects model. A               339
+
+                                     separate 10,000-draw procedure resamples the 145 test documents while preserving every              340
+
+                                     complete upstream–downstream cell; its percentile range measures document-composition               341
+
+                                     sensitivity rather than population confidence. The archived no_role mode remains an                 342
+
+                                     inference ablation and is not described as a separately retrained label-blind model.                343
+
+
+
+                                     3.6. Reproducibility and Failure Controls                                                           344
+
+
+                                          The registry freezes data and hashes, encoder identity and snapshot, training con-             345
+
+                                     figuration, seeds, cutoffs, resampling count, and overwrite policy. A completed run is              346
+
+                                     accepted only when its summary, configuration, provenance, predictions, resource log,               347
+
+                                     and standard streams are present and mutually consistent. Cartesian checks verify every             348
+
+                                     expected protocol–seed–item–cutoff record. Resume operations do not silently replace                349
+
+                                     completed evidence.                                                                                 350
+
+                                          Aggregation uses only indexed runs that satisfy the frozen configuration and integrity         351
+
+                                     checks. Tables are recomputed from complete prediction ledgers, source hashes are attached,         352
+
+                                     and figures are rendered from the resulting tabular release. The reproducibility manifest           353
+
+                                     covers code, environment information, converted data, the upstream role ledger and                  354
+
+                                     model, all 15 downstream configurations and checkpoints, the exploratory comparisons,               355
+
+                                     and the prospective structural-ablation package. The verification script also checks the            356
+
+                                     decompressed hash, byte count, and line count of the compressed prediction payload. These           357
+
+                                     controls establish numerical reproducibility for the reported results; long-term accessibility      358
+
+                                     additionally requires deposit in a permanent public archive.                                        359
+
+                                          Failure reporting is part of the result. A missing seed, incomplete ledger, hash mis-          360
+
+                                     match, or protocol inconsistency would block the primary table. Resource claims are                 361
+
+                                     bounded as well: wall time covers the full CPU script, while sampled resident memory is             362
+
+                                     not a precise measure of accelerator use or transient allocation peaks.                             363
+
+
+
+
+                                                                                                   https://doi.org/10.3390/app1010000
+Version August 5, 2026 submitted to Appl. Sci.                                                                                                                                                                          11 of 24
+
+
+
+
+                                           Immutable instance evidence                       Strict artifact gate                                                           Paired inference and E4 evidence
+
+
+
+
+                                                                                                                                                                                           Document bootstrap
+                                                                                              Required fields          Complete method                                                          95% CI
+                                            Evidence IDs                                        unique IDs               by item grid
+                                           method + seed
+
+
+
+
+                                                                                                                                                                             Complete                             E4 tables
+                                                              Document + item IDs                                                                     Audit
+                                                                                                                                                                                                                   figures
+                                                                config + hashes                                                                       PASS?                 paired items                        claim ledger
+
+
+
+
+                                            Item metrics                                                              Document coverage
+                                                                                                                                                                                               Paired test
+                                              + failures                                                                   + hash
+                                                                                                                                                                                                + Holm
+
+
+
+
+                                                                                    Audit failures remain explicit; they are not silently repaired inside the comparison.
+
+
+
+
+                                     Figure 3. Evidence-ledger audit and paired document-cluster analysis. Completeness, hashes, and
+                                     protocol provenance are checked before statistical contrasts are released.
+
+                                     4. Results                                                                                                                                                                                    364
+
+
+                                     4.1. Audit and Main Performance                                                                                                                                                               365
+
+
+                                           All 15 protocol–seed runs succeeded; the evidence audit passed 176 checks with 0                                                                                                        366
+
+                                     failures. The 15 source ledgers contain 810,000 rows across all recorded modes (54,000 per                                                                                                    367
+
+                                     run). The primary release retains 180000 full-model and BM25 rows (12,000 per run: 1,500                                                                                                      368
+
+                                     test instances at four cutoffs for each of the two modes). Table 5 reports this predefined                                                                                                    369
+
+                                     scope. Oracle-label values are marked as conditional and must not be interpreted as                                                                                                           370
+
+                                     deployed results.                                                                                                                                                                             371
+
+
+
+
+                                                                                                                                                                 https://doi.org/10.3390/app1010000
+Version August 5, 2026 submitted to Appl. Sci.                                                                                      12 of 24
+
+
+
+
+                                     Table 5. Five-seed evidence F1 by role-provenance protocol and budget. SD is the sample standard
+                                     deviation across downstream seeds. Every displayed decision criterion requires a positive mean and
+                                     positive lower bounds for both the seed-level t interval and hierarchical percentile interval; complete
+                                     intervals are retained in the effects artifact. † denotes a conditional, non-end-to-end protocol.
+
+                                       System                    K      Mean F1              SD       ∆ vs. BM25           Criterion
+                                       Oracle-label†             1         0.6705        0.0050            -0.0289         Not met
+                                       Oracle-label†             3         0.4926        0.0015            +0.0062             Met
+                                       Oracle-label†             5         0.4160        0.0009            +0.0051             Met
+                                       Oracle-label†             10        0.3563        0.0001            +0.0033             Met
+                                       Predicted-label           1         0.6688        0.0051            -0.0306         Not met
+                                       Predicted-label           3         0.4920        0.0021            +0.0056             Met
+                                       Predicted-label           5         0.4150        0.0007            +0.0041             Met
+                                       Predicted-label           10        0.3563        0.0002            +0.0033             Met
+                                       Label-blind               1         0.6677        0.0021            -0.0317         Not met
+                                       Label-blind               3         0.4910        0.0021            +0.0046         Not met
+                                       Label-blind               5         0.4154        0.0006            +0.0045             Met
+                                       Label-blind               10        0.3560        0.0003            +0.0031             Met
+                                       BM25                      1         0.6994        0.0000            +0.0000        Reference
+                                       BM25                      3         0.4864        0.0000            +0.0000        Reference
+                                       BM25                      5         0.4109        0.0000            +0.0000        Reference
+                                       BM25                      10        0.3530        0.0000            +0.0000        Reference
+
+                                           At the smallest budget, BM25 reaches 0.6994 and every learned protocol is lower.                    372
+
+                                     At the primary budget, predicted-label reaches 0.4920 ± 0.0021, compared with 0.4864                      373
+
+                                     for BM25. Its difference, +0.0056, has hierarchical interval [0.0008, 0.0107] and passes the              374
+
+                                     cutoff-specific positive gate. This local result does not justify blanket superiority because             375
+
+                                     the smallest-budget comparison is negative and not all systems pass at every cutoff.                      376
+
+                                           The cutoff trajectory is consistent across the three learned protocols: macro F1 decreases          377
+
+                                     as more sentences are returned because precision is divided over a larger packet, while                   378
+
+                                     recall opportunity increases. The scientific question is therefore not whether a larger cutoff            379
+
+                                     produces a larger F1, but which ranking is most useful at the reading budget an application               380
+
+                                     can afford. A one-sentence answer favors lexical concentration in this benchmark. At                      381
+
+                                     moderate budgets, selected protocol–BM25 differences are positive under the predefined                    382
+
+                                     cutoff-specific comparison; this observation does not identify a causal channel or establish              383
+
+                                     recovery beyond the exact sentence-ID endpoint.                                                           384
+
+                                           The similar trajectories of oracle, predicted, and blind variants are themselves infor-             385
+
+                                     mative. If role identity were a strong and unique selector signal, one would expect stable                386
+
+                                     separation between these curves, especially between oracle and blind. Instead, differences                387
+
+                                     are small relative to across-seed and across-document uncertainty. This contrast supports                 388
+
+                                     only the narrow conclusion that changing role provenance did not reliably change the                      389
+
+                                     full reranker here; it does not identify which remaining channel caused the system-level                  390
+
+                                     behavior.                                                                                                 391
+
+                                           Source ledgers also contain diagnostic modes that were not part of the primary full-                392
+
+                                     model–BM25 comparison. We therefore defined a finite post-primary analysis of all nine                    393
+
+                                     existing modes, all five seeds, three role protocols, and K ∈ {1, 3, 5, 10} before examining              394
+
+                                     the complete comparison family. Because these predictions already existed and some                        395
+
+                                     individual modes had been inspected, the analysis is exploratory rather than prospective                  396
+
+
+
+
+                                                                                                         https://doi.org/10.3390/app1010000
+Version August 5, 2026 submitted to Appl. Sci.                                                                                            13 of 24
+
+
+
+
+                                     and does not alter the predefined primary decisions. At label-blind K = 3, full-model                           397
+
+                                     F1 was 0.4910; mode-minus-full differences ranged from −0.0858 (LexCue) to −0.0006                              398
+
+                                     (no-local). Five-seed exact sign-flip tests have a minimum attainable two-sided p = 0.0625,                     399
+
+                                     and Holm adjustment across the eight frozen comparisons yielded no positive finding.                            400
+
+                                     The corrected intervals resample documents and pool every claim and complete seed                               401
+
+                                     bundle in each sampled cluster, matching the claim-weighted point estimand; independent                         402
+
+                                     recomputation exactly reproduced every stored interval. Figure 4 reports every primary                          403
+
+                                     contrast, and the hash-bound package retains all 108 cells and all multiplicity families. A                     404
+
+                                     cross-encoder and a true no-floor ablation were not part of this exploratory family and                         405
+
+                                     were evaluated separately.                                                                                      406
+
+
+
+
+                                                                        Label-blind K=3 exploratory contrasts vs full
+                                                    TF-IDF
+
+                                                    SBERT
+
+                                                 Query-only
+
+                                                    No-role
+
+                                                   No-local
+
+                                                   LexCue
+
+                                                    Lead-K
+
+                                                     BM25
+                                                               −0.10     −0.08         −0.06           −0.04      −0.02       0.00
+                                                                                     F1 difference from full
+
+                                     Figure 4. Post-primary exploratory label-blind comparisons at K = 3. Points are mode-minus-full
+                                     macro evidence-F1 differences; intervals are paired document-cluster bootstrap intervals. All eight
+                                     frozen comparisons are shown, and exact five-seed tests are Holm-adjusted as one family. This panel
+                                     does not modify the predefined role-effect or BM25 decisions.
+
+                                           The missing structural and neural comparisons were specified in a separate prospective                    407
+
+                                     protocol before execution. This experiment retains the same documents, candidates, exact-                       408
+
+                                     ID metric, and budgets, but restricts the primary estimand to deployment-valid label-blind                      409
+
+                                     K = 3. True no-floor and structurally role-free models were retrained independently for all                     410
+
+                                     five seeds; the latter has no role-head parameters and exactly zero role weight. A zero-shot                    411
+
+                                     cached cross-encoder was run from revision c5ee24cb...b1df96625c6b8. Table 6 reports                            412
+
+                                     all seven frozen arm-minus-full comparisons. Cross-encoder minus full was +0.0102 with a                        413
+
+                                     claim-weighted document-cluster interval of [+0.0007, +0.0200], but its Holm-adjusted p =                       414
+
+                                     0.1877 did not support a positive claim. True no-floor minus full was −0.0040 with interval                     415
+
+                                     [−0.0090, +0.0008]; true no-role minus full was −0.0080 with interval [−0.0162, −0.0008],                       416
+
+                                     also without a Holm-adjusted finding. These prospective results provide stronger method                         417
+
+                                     comparisons while leaving both primary decisions unchanged.                                                     418
+
+
+
+
+                                                                                                               https://doi.org/10.3390/app1010000
+Version August 5, 2026 submitted to Appl. Sci.                                                                                    14 of 24
+
+
+
+
+                                     Table 6. Prospectively specified comparisons at label-blind K = 3. Point estimates and intervals
+                                     use the same claim-weighted estimand; Holm adjustment covers all seven frozen arm-minus-full
+                                     contrasts.
+
+                                           Arm vs full               ∆ F1           95% cluster CI         raw p        Holm p
+                                           BM25                  -0.0046          [-0.0144, +0.0049]       0.3568        0.7135
+                                           Query–only            -0.0087           [-0.0168, -0.0013]      0.0313        0.1877
+                                           Dense/SBERT           -0.0221           [-0.0364, -0.0096]      0.0009        0.0062
+                                           No–local              -0.0006          [-0.0022, +0.0009]       0.4502        0.7135
+                                           True no–floor         -0.0040          [-0.0090, +0.0008]       0.1198        0.3593
+                                           True no–role          -0.0080           [-0.0162, -0.0008]      0.0450        0.1877
+                                           Cross–encoder         +0.0102         [+0.0007, +0.0200]        0.0374        0.1877
+
+                                     4.2. Independent BGE Strong-Baseline Comparison                                                         419
+
+
+                                          A separately specified evaluation compared the frozen zero-shot BAAI/bge-reranker-                 420
+
+                                     base snapshot (revision 2cfc18c...768a70) with full C2 GES, BM25, and the MiniLM cross-                 421
+
+                                     encoder on the same 1,500 FEVER test claims and 145 source-document clusters. BGE                       422
+
+                                     received only a claim–candidate-sentence pair, without a veracity label or gold evidence.               423
+
+                                     The candidate pool, exact sentence-ID metric, and K ∈ {1, 3, 5, 10} budgets were unchanged.             424
+
+                                     Full C2 GES was averaged over its complete five-seed bundle at claim level; the other three             425
+
+                                     methods were deterministic single runs.                                                                 426
+
+                                          The primary endpoint was claim-weighted evidence F1 at K = 3. For each BGE-minus-                  427
+
+                                     comparator contrast, a 10,000-draw document-cluster bootstrap quantified sensitivity to the             428
+
+                                     composition of the observed test documents, and a 100,000-sample two-sided document-                    429
+
+                                     cluster sign-flip test supplied the raw p-value. Holm adjustment covered exactly the three              430
+
+                                     contrasts in Table 7. These percentile ranges are composition-sensitivity intervals, not                431
+
+                                     population confidence intervals.                                                                        432
+
+
+
+                                     Table 7. Frozen zero-shot BGE comparisons on human-annotated FEVER evidence at K = 3. Differ-
+                                     ences are BGE minus comparator. Intervals describe sensitivity to resampling the observed document
+                                     composition; Holm adjustment covers the three displayed contrasts.
+
+                                             BGE minus comparator         ∆ F1    95% composition interval     raw p    Holm p
+                                             C2GES full               -0.0021            [-0.0137, +0.0090]    0.7214    1.0000
+                                             BM25                     +0.0026            [-0.0116, +0.0162]    0.7210    1.0000
+                                             MiniLM cross-encoder     -0.0123             [-0.0252, -0.0003]   0.0570    0.1710
+
+
+                                          BGE attained F1 values of 0.6112, 0.4890, 0.4169, and 0.3593 at K = 1, 3, 5, 10, re-               433
+
+                                     spectively. At the primary budget, its difference from full C2 GES was −0.0021 with                     434
+
+                                     composition-sensitivity interval [−0.0137, +0.0090]; the corresponding difference from                  435
+
+                                     BM25 was +0.0026 with interval [−0.0116, +0.0162]. Although the interval for BGE mi-                    436
+
+                                     nus MiniLM was wholly negative, its randomization result did not meet the prespecified                  437
+
+                                     family criterion after Holm adjustment (pHolm = 0.1710). Thus none of the three BGE                     438
+
+                                     comparisons supports a promoted difference. This finding concerns zero-shot ranking on                  439
+
+                                     human-annotated FEVER evidence only.                                                                    440
+
+                                          The BM25 comparison illustrates why a single operating point can mislead. Reporting                441
+
+                                     only the primary cutoff would omit the setting in which the deterministic lexical method                442
+
+                                     clearly leads. Reporting only the smallest cutoff would omit the settings in which selected             443
+
+                                     learned variants pass a positive paired gate. The complete cutoff table is thus part of the             444
+
+                                     claim boundary, and the figure uses distinct markers and line styles so the conditional                 445
+
+                                     oracle is not visually merged with deployable systems.                                                  446
+
+
+
+
+                                                                                                      https://doi.org/10.3390/app1010000
+Version August 5, 2026 submitted to Appl. Sci.                                                                                           15 of 24
+
+
+
+
+                                                         0.70                                          Oracle-label        Label-blind
+                                                                                                       Predicted-label     BM25
+
+                                                         0.65
+
+
+                                                         0.60
+
+
+
+
+                                           Evidence F1
+                                                         0.55
+
+
+                                                         0.50
+
+
+                                                         0.45
+
+
+                                                         0.40
+
+
+                                                         0.35
+
+                                                                1      3               5                                          10
+                                                                                   Evidence budget K
+
+
+                                     Figure 5. Five-seed results, comprising one pilot seed and four prospectively specified continuation
+                                     seeds. Error bars denote one sample SD. Oracle-label is conditional; neither the predefined role-effect
+                                     criterion nor the criterion for superiority across budgets was met.
+
+                                     4.3. Role-Effect Decision                                                                                      447
+
+
+                                           Table 8 and Figure 6 directly test whether the role source changes evidence ranking.                     448
+
+                                     At the primary budget, predicted-label minus label-blind is +0.0010. The seed-level interval                   449
+
+                                     is [-0.0016, 0.0036] and the hierarchical interval is [-0.0012, 0.0031]; both include zero. Every              450
+
+                                     predefined role contrast at the primary budget likewise crosses zero. Role conditioning is                     451
+
+                                     therefore a tested mechanism without a supported primary effect in this experiment.                            452
+
+                                           The conclusion is based on uncertainty as well as magnitude. The positive mean                           453
+
+                                     for predicted minus blind is too small to distinguish from zero under either seed-level or                     454
+
+                                     hierarchical inference. Oracle comparisons also fail the same primary gate. Because the                        455
+
+                                     oracle has access to strictly more privileged information, its failure to separate reliably from               456
+
+                                     blind strengthens the scoped interpretation that binary veracity is not a decisive ranking                     457
+
+                                     input in this document-conditioned setup.                                                                      458
+
+                                           Other cutoffs do not reverse the predefined conclusion. The direction changes for some                   459
+
+                                     contrasts and the hierarchical intervals include zero. Highlighting the most favorable ob-                     460
+
+                                     served cell would therefore be a post hoc selection over a family of correlated comparisons.                   461
+
+                                     We retain the full contrast matrix and report every role criterion explicitly. The negative                    462
+
+                                     finding also guards against reading the role mixture weight as proof: a constrained model                      463
+
+                                     can allocate weight to a channel even when replacing its input with a constant yields no                       464
+
+                                     stable loss in test F1.                                                                                        465
+
+                                           Upstream role prediction is adequate for evaluating a realistic two-stage path but                       466
+
+                                     is imperfect, as shown in Table 3. Prediction errors can attenuate a useful role signal,                       467
+
+                                     yet the oracle comparison does not show a reliable primary advantage either. It would                          468
+
+                                     therefore be premature to attribute the unsupported role effect solely to upstream error.                      469
+
+                                     More fine-grained application roles, stronger upstream modeling, and an unconstrained                          470
+
+                                     mixture are reasonable future hypotheses, each requiring a new prospectively specified                         471
+
+                                     test.                                                                                                          472
+
+
+
+
+                                                                                                          https://doi.org/10.3390/app1010000
+Version August 5, 2026 submitted to Appl. Sci.                                                                                                          16 of 24
+
+
+
+
+                                     Table 8. Paired role-source contrasts. Hierarchical intervals resample source documents within
+                                     training seeds. Oracle contrasts are conditional.
+
+                                       Contrast                                K      Mean ∆            Hierarchical 95% CI                   Criterion
+                                       Oracle† − predicted                     1      +0.0018                 [-0.0023, 0.0061]                    Not met
+                                       Oracle† − predicted                     3      +0.0006                 [-0.0012, 0.0023]                    Not met
+                                       Oracle† − predicted                     5      +0.0011                 [-0.0002, 0.0023]                    Not met
+                                       Oracle† − predicted                     10     -0.0000                 [-0.0005, 0.0004]                    Not met
+                                       Oracle† − blind                         1      +0.0028                 [-0.0031, 0.0099]                    Not met
+                                       Oracle† − blind                         3      +0.0016                 [-0.0009, 0.0044]                    Not met
+                                       Oracle† − blind                         5      +0.0006                 [-0.0005, 0.0017]                    Not met
+                                       Oracle† − blind                         10     +0.0002                 [-0.0002, 0.0007]                    Not met
+                                       Predicted − blind                       1      +0.0011                 [-0.0049, 0.0073]                    Not met
+                                       Predicted − blind                       3      +0.0010                 [-0.0012, 0.0031]                    Not met
+                                       Predicted − blind                       5      -0.0005                 [-0.0015, 0.0005]                    Not met
+                                       Predicted − blind                       10     +0.0003                 [-0.0001, 0.0008]                    Not met
+
+
+                                                  oracle - predicted; K=1
+
+                                                  oracle - predicted; K=3
+
+                                                  oracle - predicted; K=5
+
+                                                 oracle - predicted; K=10
+
+
+
+                                                 oracle - label-blind; K=1
+
+                                                 oracle - label-blind; K=3
+
+                                                 oracle - label-blind; K=5
+
+                                              oracle - label-blind; K=10
+
+
+
+                                            predicted - label-blind; K=1
+
+                                            predicted - label-blind; K=3
+
+                                            predicted - label-blind; K=5
+
+                                           predicted - label-blind; K=10
+
+                                                                             −0.004   −0.002    0.000     0.002     0.004      0.006       0.008     0.010
+                                                                                       Mean evidence-F1 difference (95% hierarchical CI)
+
+
+                                     Figure 6. Protocol differences with hierarchical seed/document intervals. Intervals crossing zero
+                                     show that the predefined role-effect criterion was not met; oracle-label comparisons are conditional.
+
+                                     4.4. Crossed Upstream–Downstream Seed Results                                                                                 473
+
+
+                                          The crossed sensitivity run completed all five upstream builds and all 25 downstream                                     474
+
+                                     pipelines without dropping a cell. At the primary endpoint, the 25-cell grand mean was                                        475
+
+                                     0.4906. Upstream-seed marginal means ranged from 0.4899–0.4913, whereas downstream-                                           476
+
+                                     seed marginal means ranged from 0.4879–0.4922. The document-composition sensitivity                                           477
+
+                                     interval was [0.4730, 0.5080]; by construction, this interval is not a population confidence                                  478
+
+                                     interval. Table 9 reports the descriptive variance decomposition together with these scale                                    479
+
+                                     checks.                                                                                                                       480
+
+
+
+
+                                                                                                                      https://doi.org/10.3390/app1010000
+Version August 5, 2026 submitted to Appl. Sci.                                                                                   17 of 24
+
+
+
+
+                                     Table 9. Crossed upstream–downstream seed sensitivity for the full predicted-role model at K = 3.
+                                     Variance components are descriptive method-of-moments quantities over the five fixed levels of each
+                                     seed factor.
+
+                                                    Quantity                                                 Estimate
+                                                    Crossed upstream–downstream cells                               25
+                                                    Grand mean exact-ID F1 at K = 3                             0.4906
+                                                    Upstream-seed mean range                            0.4899–0.4913
+                                                    Downstream-seed mean range                          0.4879–0.4922
+                                                    Upstream variance component                            0.00000000
+                                                    Downstream variance component                          0.00000216
+                                                    Interaction/residual variance                          0.00000286
+                                                    Document-composition sensitivity interval         [0.4730, 0.5080]
+
+
+                                          The upstream method-of-moments component was truncated at zero because its mean                   481
+
+                                     square was smaller than the interaction/residual mean square. The downstream and                       482
+
+                                     interaction/residual components were 2.16 × 10−6 and 2.86 × 10−6 , respectively. Together              483
+
+                                     with the narrower upstream marginal range, this indicates that upstream refitting was                  484
+
+                                     not the dominant source of variation among these chosen seeds. It does not imply that                  485
+
+                                     upstream-model uncertainty is universally absent. The experiment expands the origi-                    486
+
+                                     nal downstream-only seed analysis but does not turn five chosen upstream seeds into a                  487
+
+                                     population sample or alter the predefined role-effect and BM25 comparison families.                    488
+
+
+
+                                     4.5. Compute and Stability Diagnostics                                                                 489
+
+
+                                           The measured wall time covers the full CPU training-and-evaluation script, not online            490
+
+                                     per-query latency. Peak resident memory is sampled from the process tree and may miss                  491
+
+                                     short-lived peaks. Predicted-label has the additional upstream role stage, so small runtime            492
+
+                                     differences should not be interpreted as a general efficiency advantage.                               493
+
+                                           The resource table shows similar orders of magnitude across selector protocols, as               494
+
+                                     expected from their shared encoder and architecture. It does not compare BM25 indexing                 495
+
+                                     cost, model download cost, hardware energy, or interactive latency. The compute–accuracy               496
+
+                                     plot is therefore diagnostic rather than a definitive Pareto frontier. A deployment study              497
+
+                                     should separate offline encoding and training from per-query scoring, report warm and                  498
+
+                                     cold caches, and measure the complete document ingestion path.                                         499
+
+
+
+                                     Table 10. Full-script CPU wall time and sampled peak resident memory across seeds. Values are
+                                     generated from the frozen resource logs.
+
+                                                 Protocol          Wall time (s)    SD (s)    Peak RSS (GiB)      SD (GiB)
+                                                 Oracle-label†            200.40      7.15               1.280        0.018
+                                                 Predicted-label          204.99     11.41               1.270        0.033
+                                                 Label-blind              200.40      4.96               1.274        0.017
+
+
+
+
+                                                                                                      https://doi.org/10.3390/app1010000
+Version August 5, 2026 submitted to Appl. Sci.                                                                                                                                          18 of 24
+
+
+
+
+                                                                                                                                                               Oracle-label
+                                                                                            0.494
+                                                                                                                                                               Predicted-label
+                                                                                                                                                               Label-blind
+
+
+                                                                                            0.493
+
+
+
+
+                                                                          K=3 evidence F1
+                                                                                            0.492
+
+
+
+
+                                                                                            0.491
+
+
+
+
+                                                                                            0.490
+
+
+
+
+                                                                                            0.489
+
+                                                                                                      195          200          205             210                 215
+                                                                                                              Full training + evaluation wall time (s)
+
+
+                                     Figure 7. Measured full-script CPU time against primary-budget F1. Error bars are one seed SD; the
+                                     plot does not represent online latency.
+
+
+
+                                                                                                                         Oracle-label        Predicted-label              Label-blind
+
+                                                                         0.008
+                                           K=3 F1 difference from BM25
+
+
+
+
+                                                                         0.006
+
+
+
+
+                                                                         0.004
+
+
+
+
+                                                                         0.002
+
+
+
+
+                                                                         0.000
+
+                                                                                               2026         2027               2028                   2029                       2030
+                                                                                                                          Training seed
+
+
+                                     Figure 8. Per-seed primary-budget difference from fixed BM25, including the pilot seed. No test-
+                                     based seed selection is applied.
+
+
+
+
+                                                                                                                                                https://doi.org/10.3390/app1010000
+Version August 5, 2026 submitted to Appl. Sci.                                                                                             19 of 24
+
+
+
+
+                                                 C2GES win (5/5)        70
+
+
+
+
+                                                  BM25 win (5/5)        62
+
+
+
+
+                                                          Mixed          81
+
+
+
+
+                                                        Tie (5/5)                                                                   1287
+
+
+
+
+                                                                    0         200   400       600        800         1000    1200
+                                                                                      Number of K=3 test instances
+
+
+                                     Figure 9. Instance-level predicted-label outcomes against BM25 across seeds. Categories use sentence-
+                                     ID F1 outcomes and are not semantic error labels.
+
+                                           The seed-stability figure makes model variation visible instead of reporting only                          500
+
+                                     the best run. At the primary budget, learned-system differences from BM25 vary across                            501
+
+                                     seeds even though the aggregate predicted-label gate is positive. This variation motivates                       502
+
+                                     retaining checkpoints and seed-level rows and cautions against publishing a result selected                      503
+
+                                     after test inspection. The figure is paired to the same deterministic BM25 row for every seed,                   504
+
+                                     so its vertical movement reflects the learned reranker rather than baseline randomness.                          505
+
+                                           The case-stability analysis classifies all 1500 test instances solely by sentence-ID F1                    506
+
+                                     outcomes over the frozen seeds. Of these, 1287 are tied in every seed under the category                         507
+
+                                     definition. Remaining categories distinguish consistent wins, consistent losses, and seed-                       508
+
+                                     dependent outcomes. These categories identify where manual analysis may be useful, but                           509
+
+                                     they are not semantic labels such as “lexical failure” or “causal success.” Assigning such                       510
+
+                                     explanations requires reading source sentences and should be independently reviewed                              511
+
+                                     rather than inferred from score deltas.                                                                          512
+
+
+
+                                     4.6. Qualitative Power-Grid Workflow                                                                             513
+
+
+                                           The NERC material is used to specify how the method would enter a reliability-report                       514
+
+                                     workflow. A reviewer begins with a question scoped to a role such as initiating event, root                      515
+
+                                     cause, propagation or response, impact, or mitigation. The document parser produces stable                       516
+
+                                     sentence identifiers; the selector then returns a short packet with component scores and                         517
+
+                                     role provenance. A reviewer can accept, reject, or supplement the packet while retaining a                       518
+
+                                     link to the official source report.                                                                              519
+
+                                           This workflow differs from autonomous causal diagnosis. C2 GES does not infer grid                         520
+
+                                     topology, reconstruct a disturbance sequence from measurements, or establish that one                            521
+
+                                     event caused another. It ranks textual candidates. A high local-chain score indicates                            522
+
+                                     proximity to other relevant text, and a high role score indicates model compatibility with an                    523
+
+                                     input label. Neither is a substitute for engineering judgment or corroborating operational                       524
+
+                                     data.                                                                                                            525
+
+                                           The current candidate questions and evidence identifiers are valuable for refining                         526
+
+                                     instructions and interfaces, but they remain unadjudicated because they were generated                           527
+
+                                     and checked automatically. They can reveal parsing problems, broken identifiers, or unclear                      528
+
+                                     role definitions and can support illustrated traces. They cannot provide a defensible domain                     529
+
+                                     F1 value or establish improvement over a baseline. For this reason the manuscript does not                       530
+
+                                     include a NERC leaderboard, quantitative claim, or selected numerical case result.                               531
+
+
+
+
+                                                                                                               https://doi.org/10.3390/app1010000
+Version August 5, 2026 submitted to Appl. Sci.                                                                                20 of 24
+
+
+
+
+                                          A future validation should separate annotation development from sealed testing.                532
+
+                                     Domain experts should first refine role definitions and examples on development reports.            533
+
+                                     Independent annotators should then select evidence without seeing model outputs, dis-               534
+
+                                     agreements should be retained, and adjudication should follow a documented rule. Only               535
+
+                                     after the manual and model are frozen should a sealed report subset be scored. This se-             536
+
+                                     quence keeps model-assisted annotation from becoming circular evidence for the same                 537
+
+                                     model.                                                                                              538
+
+
+
+                                     5. Discussion                                                                                       539
+
+
+                                          Document-grouped splitting, out-of-fold role construction, and explicit oracle labeling        540
+
+                                     make the evaluation auditable. Under that protocol, predicted-label C2 GES shows a small            541
+
+                                     positive comparison with BM25 at moderate evidence budgets, while BM25 remains better               542
+
+                                     at the smallest budget. The result illustrates a budget-dependent benchmark trade-off               543
+
+                                     rather than a general advantage for either method.                                                  544
+
+
+
+                                     5.1. Supported Interpretation                                                                       545
+
+
+                                           The strongest supported contribution is methodological transparency. The study                546
+
+                                     exposes how documents are partitioned, how role labels are obtained, where gold data enter,         547
+
+                                     how uncertainty respects source clustering, and how every table connects to immutable               548
+
+                                     predictions. The resulting evidence does not support a role-driven gain; it supports an             549
+
+                                     auditable reranker whose relative behavior depends on the output budget.                            550
+
+                                           Evidence-selection systems are commonly evaluated under different output budgets              551
+
+                                     because a single returned sentence and a short evidence packet impose different precision–          552
+
+                                     recall trade-offs. In the present benchmark, BM25 is competitive at the smallest budget,            553
+
+                                     whereas the mixed reranker is a candidate for target-domain validation when a larger                554
+
+                                     packet is acceptable. The observed differences are modest and do not establish utility in           555
+
+                                     technical-report review.                                                                            556
+
+                                           Interpretability here has a precise, limited meaning: the final score is decomposable,        557
+
+                                     candidate identifiers are retained, and role provenance is visible. It does not mean that           558
+
+                                     individual components are causal explanations of model behavior, that the role head                 559
+
+                                     corresponds to human reasoning, or that a selected sentence is factually correct outside the        560
+
+                                     FEVER annotation. This distinction is especially important in reliability analysis, where           561
+
+                                     explanatory language can be mistaken for physical causation.                                        562
+
+                                           The role mechanism itself is not supported by the predefined primary contrast.                563
+
+                                     Predicted-label and label-blind results are practically close, and their uncertainty intervals      564
+
+                                     cross zero. This finding rules out statements that the role head is the source of the observed      565
+
+                                     moderate-budget advantage. Plausible explanations include limited information in binary             566
+
+                                     FEVER roles, upstream classification error, and mixture floors that constrain the label-blind       567
+
+                                     and role-aware solutions similarly. These are hypotheses for new experiments, not post hoc          568
+
+                                     conclusions.                                                                                        569
+
+                                           The crossed seed matrix narrows one of these explanations. Across the five upstream           570
+
+                                     fits tested, upstream marginal variation was smaller than downstream marginal variation             571
+
+                                     and the nonnegative method-of-moments estimate for the upstream component was zero.                 572
+
+                                     Interaction/residual variation remained, and the document-composition range was much                573
+
+                                     wider than either seed-marginal range. Thus the result does not rescue the role hypothesis          574
+
+                                     by attributing its failure to one fixed upstream ledger, although it remains conditional on         575
+
+                                     this classifier, corpus, and finite seed set.                                                       576
+
+                                           The oracle protocol provides a sensitivity analysis only. Its proximity to end-to-end         577
+
+                                     protocols suggests that access to the gold veracity label does not create a large measured          578
+
+                                     advantage here, but the result cannot be deployed because veracity is unavailable at                579
+
+
+
+
+                                                                                                   https://doi.org/10.3390/app1010000
+Version August 5, 2026 submitted to Appl. Sci.                                                                               21 of 24
+
+
+
+
+                                     selection time. The study also does not establish open-corpus retrieval quality: the correct       580
+
+                                     source document is supplied, and only sentences within it are ranked.                              581
+
+
+
+                                     5.2. Implications for Model Development                                                            582
+
+
+                                           The unsupported role effect indicates that simply increasing the seed count around           583
+
+                                     the same binary role and constrained mixture would not address the underlying ambiguity.           584
+
+                                     More informative tests include a query-only learned selector, a role-head removal that             585
+
+                                     also removes its floor, a no-floor mixture, and role labels aligned with domain information        586
+
+                                     needs rather than FEVER veracity. Each should preserve the document split and paired               587
+
+                                     evaluation so that improvements cannot be attributed to easier candidates.                         588
+
+                                           The two cross-encoder evaluations provide contemporary interaction-reranker ref-             589
+
+                                     erences on identical sentence pools under frozen snapshots, but they do not establish an           590
+
+                                     accuracy–cost frontier. Their runtime boundaries differ from learned-system training, and          591
+
+                                     neither comparison family produced a Holm-adjusted finding. BGE was statistically unre-            592
+
+                                     solved against full C2 GES and BM25 under the prespecified randomization criterion, while          593
+
+                                     its negative point contrast against MiniLM also failed that criterion after adjustment. Addi-      594
+
+                                     tional rerankers and neural listwise methods remain useful replication targets. Reporting          595
+
+                                     only accuracy would be insufficient for a technical-report tool: throughput, peak memory,          596
+
+                                     model size, offline encoding, and trace availability should accompany each comparison.             597
+
+                                           The result also illustrates the value of negative evidence in applied machine learning.      598
+
+                                     A failed component hypothesis prevents an organization from treating a semantically                599
+
+                                     appealing feature as validated. Preserving the negative result, source ledger, and decision        600
+
+                                     criterion makes subsequent changes comparable and reduces the temptation to rename a               601
+
+                                     post hoc pattern as the original contribution.                                                     602
+
+
+
+                                     5.3. Limitations and Planned Validation                                                            603
+
+
+                                          The seed sample is small; all five seeds are reported, including the pilot run that           604
+
+                                     preceded the four-seed prospective continuation. Hierarchical resampling captures seed             605
+
+                                     and document variation but does not cover distribution shift to new corpora. Exact                 606
+
+                                     document disjointness does not exclude redirect aliases or semantic near-duplicates. The           607
+
+                                     local channel is positional smoothing rather than causal structure, and the resource monitor       608
+
+                                     does not measure GPU memory or sub-sampling-interval peaks.                                        609
+
+                                          The power-grid application remains qualitative. The local NERC candidates were                610
+
+                                     generated and checked automatically and do not constitute an independently adjudicated             611
+
+                                     human-gold benchmark. A quantitative domain study requires a frozen manual, multiple               612
+
+                                     independent domain reviewers, recorded disagreements, adjudication, agreement statistics,          613
+
+                                     and a sealed test subset. Until that evidence is available, no NERC performance value can          614
+
+                                     be reported.                                                                                       615
+
+                                          Additional limitations follow from the metric and corpus. FEVER may provide                   616
+
+                                     incomplete evidence sets, and exact sentence-ID F1 does not grade semantic adequacy or             617
+
+                                     the usefulness of a packet to an engineer. The binary SUPPORTS/REFUTES role is much                618
+
+                                     coarser than the causal and operational categories implied by reliability-report review.           619
+
+                                     The benchmark supplies a source document, so page retrieval errors, OCR quality, report            620
+
+                                     segmentation, tables, figures, and multi-document evidence are outside scope.                      621
+
+                                          External validity is also limited by genre. Wikipedia prose is comparatively regular          622
+
+                                     and differs from incident narratives, recommendations, appendices, and tabular event               623
+
+                                     chronologies. A model that is auditable on FEVER may still fail on long reports, scanned           624
+
+                                     PDFs, or domain abbreviations. The title communicates the application goal, while the              625
+
+                                     abstract and data section explicitly identify the quantitative corpus to prevent that goal         626
+
+                                     from being mistaken for completed domain validation.                                               627
+
+
+
+
+                                                                                                  https://doi.org/10.3390/app1010000
+Version August 5, 2026 submitted to Appl. Sci.                                                                                        22 of 24
+
+
+
+
+                                          Finally, reproducibility artifacts do not eliminate governance obligations. FEVER                      628
+
+                                     licensing and attribution must accompany any redistributed conversion. Public availability                  629
+
+                                     of a NERC PDF does not automatically authorize redistribution of extracted text, and                        630
+
+                                     automatically constructed annotations must retain their machine provenance. The release                     631
+
+                                     package must therefore separate redistributable code and derived statistics from source                     632
+
+                                     text whose redistribution has not been confirmed.                                                           633
+
+
+
+                                     6. Conclusions                                                                                              634
+
+
+                                           This study evaluates C2 GES under a leakage-controlled three-protocol design. The                     635
+
+                                     five-seed results, comprising one pilot and four prospectively specified continuation seeds,                636
+
+                                     show budget-dependent behavior relative to BM25 but no reliable gain from predicted                         637
+
+                                     role conditioning over the label-blind system. A finite exploratory analysis reports all                    638
+
+                                     nine existing modes, while separately specified experiments retrain true no-floor and true                  639
+
+                                     no-role variants and evaluate frozen MiniLM and BGE cross-encoders. Neither cross-                          640
+
+                                     encoder comparison family produced a Holm-adjusted finding, and the floor-removal                           641
+
+                                     variants do not support a positive claim. A crossed 25-pipeline sensitivity study found                     642
+
+                                     less marginal variation across the five upstream fits than across the five downstream fits,                 643
+
+                                     without changing the role-effect conclusion. The supported contribution is a traceable                      644
+
+                                     evidence-selection method, an explicit role-provenance evaluation, and a bounded resource                   645
+
+                                     analysis for future power-grid reliability-report review. Open-corpus retrieval, additional                 646
+
+                                     modern rerankers, and independently adjudicated power-grid evidence remain prospective                      647
+
+                                     work.                                                                                                       648
+
+
+                                     Supplementary Materials: The reproducibility package contains executable source and hashes, the             649
+
+                                     frozen split manifest, conversion audit, upstream-role provenance, the serialized role model, all           650
+
+                                     15 main-study downstream configurations and checkpoints, complete prediction ledgers, tabular               651
+
+                                     results, figures, environment records, and verification scripts. It also includes the BGE protocol, exact   652
+
+                                     model-file inventory and revision, 6,000-row prediction ledger, resource and provenance records,            653
+
+                                     primary contrast table, and independent numerical validation report. The crossed seed-sensitivity           654
+
+                                     package adds five upstream artifacts, 25 downstream ledgers, 450,000 selected analysis rows, its            655
+
+                                     fixed analysis specification, cell summary, and validation record. Automatically constructed NERC           656
+
+                                     candidates are excluded from quantitative claims and retain explicit non-human provenance if shared.        657
+
+
+                                     Author Contributions: Conceptualization, L.B. and Y.Y.; methodology, L.B.; software, L.B.; validation,      658
+
+                                     L.B.; formal analysis, L.B.; investigation, L.B.; resources, Y.Y.; data curation, L.B.; writing—original    659
+
+                                     draft preparation, L.B.; writing—review and editing, L.B. and Y.Y.; visualization, L.B.; supervision,       660
+
+                                     Y.Y.; project administration, Y.Y.; funding acquisition, Y.Y. All authors have read and agreed to the       661
+
+                                     published version of the manuscript.                                                                        662
+
+
+                                     Funding: This research was funded by the Science and Technology Project of NARI Group Corpo-                663
+
+                                     ration (State Grid Electric Power Research Institute); the grant number must be confirmed before            664
+
+                                     submission.                                                                                                 665
+
+
+                                     Institutional Review Board Statement: Not applicable. This study did not involve humans or                  666
+
+                                     animals; it uses a public human-annotated benchmark and public technical reports.                           667
+
+
+                                     Informed Consent Statement: Not applicable.                                                                 668
+
+
+                                     Data Availability Statement: FEVER is available from its original providers [1]. The reproducibility        669
+
+                                     package contains the document-grouped split manifest, conversion and audit code, main and crossed-          670
+
+                                     seed upstream artifacts, downstream run configurations and predictions, statistical outputs, and            671
+
+                                     verification scripts. The original Hugging Face source revision was not recorded; the retained              672
+
+                                     cache fingerprints and converted-file hashes are reported instead. Public NERC reports are cited as         673
+
+                                     qualitative application material, and the automatically constructed candidate annotations are not a         674
+
+
+
+
+                                                                                                          https://doi.org/10.3390/app1010000
+Version August 5, 2026 submitted to Appl. Sci.                                                                                         23 of 24
+
+
+
+
+                                     human-gold test set. A permanent repository URL will be added after the redistribution and license           675
+
+                                     review is complete.                                                                                          676
+
+
+                                     Acknowledgments: During preparation of this manuscript, the authors used OpenAI Codex (GPT-                  677
+
+                                     5-based) for drafting, editing, code review, and reproducibility checks. The authors reviewed and            678
+
+                                     edited the outputs and take full responsibility for the content of the publication. Automatically            679
+
+                                     generated NERC candidates are not used as human or domain-expert ground truth in the quantitative            680
+
+                                     evaluation.                                                                                                  681
+
+
+                                     Conflicts of Interest: The authors declare no conflicts of interest. The funder had no role in the design    682
+
+                                     of the study; in the collection, analyses, or interpretation of data; in the writing of the manuscript; or   683
+
+                                     in the decision to publish the results.                                                                      684
+
+
+
+References                                                                                                                                        685
+
+1.    Thorne, J.; Vlachos, A.; Christodoulopoulos, C.; Mittal, A. FEVER: A Large-Scale Dataset for Fact Extraction and VERification. In           686
+
+      Proceedings of the NAACL-HLT 2018, Volume 1 (Long Papers). Association for Computational Linguistics, 2018, pp. 809–819.                    687
+
+      https://doi.org/10.18653/v1/N18-1074.                                                                                                       688
+
+2.    Zhong, M.; Yin, D.; Yu, T.; Zaidi, A.; Mutuma, M.; Jha, R.; Awadallah, A.H.; Celikyilmaz, A.; Liu, Y.; Qiu, X.; et al. QMSum: A             689
+
+      New Benchmark for Query-Based Multi-Domain Meeting Summarization. In Proceedings of the NAACL-HLT 2021. Association                         690
+
+      for Computational Linguistics, 2021, pp. 5905–5921. https://doi.org/10.18653/v1/2021.naacl-main.472.                                        691
+
+3.    Vig, J.; Fabbri, A.R.; Kryscinski, W.; Wu, C.S.; Liu, W. Exploring Neural Models for Query-Focused Summarization. In Proceedings            692
+
+      of the Findings of the Association for Computational Linguistics: NAACL 2022. Association for Computational Linguistics, 2022,              693
+
+      pp. 1455–1468. https://doi.org/10.18653/v1/2022.findings-naacl.109.                                                                         694
+
+4.    Zhong, M.; Liu, P.; Chen, Y.; Wang, D.; Qiu, X.; Huang, X. Extractive Summarization as Text Matching. In Proceedings of the                 695
+
+      58th Annual Meeting of the Association for Computational Linguistics. Association for Computational Linguistics, 2020, pp.                  696
+
+      6197–6208. https://doi.org/10.18653/v1/2020.acl-main.552.                                                                                   697
+
+5.    Xie, L.; Zheng, X.; Sun, Y.; Huang, T.; Bruton, T. Massively Digitized Power Grid: Opportunities and Challenges of Use-Inspired             698
+
+      AI. Proceedings of the IEEE 2023, 111, 762–787. https://doi.org/10.1109/JPROC.2022.3175070.                                                 699
+
+6.    Hamann, H.F.; Brunschwiler, T.; Gjorgiev, B.; Martins, L.S.A.; Puech, A.; Varbella, A.; Weiss, J.; Bernabe-Moreno, J.; Masse, A.B.;         700
+
+      Choi, S.; et al. Foundation Models for the Electric Power Grid, 2024, [arXiv:cs.LG/2407.09434].                                             701
+
+7.    North American Electric Reliability Corporation. Event Analysis, Reliability Assessment, and Performance Analysis. Official                 702
+
+      NERC program page; no publication date stated; accessed 5 August 2026.                                                                      703
+
+8.    North American Electric Reliability Corporation. Attributes of a Quality Event Analysis Report. Technical report, North                     704
+
+      American Electric Reliability Corporation, 2015.                                                                                            705
+
+9.    Bi, K.; Jha, R.; Croft, W.B.; Celikyilmaz, A. AREDSUM: Adaptive Redundancy-Aware Iterative Sentence Ranking for Extractive                  706
+
+      Document Summarization. In Proceedings of the 16th Conference of the European Chapter of the Association for Computational                  707
+
+      Linguistics: Main Volume. Association for Computational Linguistics, 2021, pp. 281–291. https://doi.org/10.18653/v1/2021.                   708
+
+      eacl-main.22.                                                                                                                               709
+
+10.   Liu, J.; Hughes, D.J.D.; Yang, Y. Unsupervised Extractive Text Summarization with Distance-Augmented Sentence Graphs. In                    710
+
+      Proceedings of the 44th International ACM SIGIR Conference on Research and Development in Information Retrieval. Association                711
+
+      for Computing Machinery, 2021, pp. 2313–2317. https://doi.org/10.1145/3404835.3463111.                                                      712
+
+11.   Liao, H.; Peng, J.; Huang, Z.; Zhang, W.; Li, G.; Shu, K.; Xie, X. MUSER: A Multi-Step Evidence Retrieval Enhancement Framework             713
+
+      for Fake News Detection. In Proceedings of the 29th ACM SIGKDD Conference on Knowledge Discovery and Data Mining.                           714
+
+      Association for Computing Machinery, 2023, pp. 4461–4472. https://doi.org/10.1145/3580305.3599873.                                          715
+
+12.   Liang, Z.; Zhao, Y.; Surdeanu, M. Using the Hammer Only on Nails: A Hybrid Method for Evidence Retrieval for Question                       716
+
+      Answering, 2020, [arXiv:cs.CL/2009.10791].                                                                                                  717
+
+13.   Robertson, S.; Zaragoza, H. The Probabilistic Relevance Framework: BM25 and Beyond. Foundations and Trends in Information                   718
+
+      Retrieval 2009, 3, 333–389. https://doi.org/10.1561/1500000019.                                                                             719
+
+14.   Reimers, N.; Gurevych, I. Sentence-BERT: Sentence Embeddings Using Siamese BERT-Networks. In Proceedings of the                             720
+
+      EMNLP-IJCNLP 2019. Association for Computational Linguistics, 2019, pp. 3982–3992. https://doi.org/10.18653/v1/D19-1410.                    721
+
+15.   Wang, D.; Liu, P.; Zheng, Y.; Qiu, X.; Huang, X. Heterogeneous Graph Neural Networks for Extractive Document Summarization.                 722
+
+      In Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics. Association for Computational                   723
+
+      Linguistics, 2020, pp. 6209–6219. https://doi.org/10.18653/v1/2020.acl-main.553.                                                            724
+
+
+
+
+                                                                                                           https://doi.org/10.3390/app1010000
+Version August 5, 2026 submitted to Appl. Sci.                                                                                      24 of 24
+
+
+
+
+16.   Cui, P.; Hu, L.; Liu, Y. Enhancing Extractive Text Summarization with Topic-Aware Graph Neural Networks. In Proceedings of               725
+
+      the 28th International Conference on Computational Linguistics. International Committee on Computational Linguistics, 2020,              726
+
+      pp. 5360–5371. https://doi.org/10.18653/v1/2020.coling-main.468.                                                                         727
+
+17.   Jing, B.; You, Z.; Yang, T.; Fan, W.; Tong, H. Multiplex Graph Neural Network for Extractive Text Summarization. In Proceedings          728
+
+      of the 2021 Conference on Empirical Methods in Natural Language Processing. Association for Computational Linguistics, 2021,             729
+
+      pp. 133–139. https://doi.org/10.18653/v1/2021.emnlp-main.11.                                                                             730
+
+18.   Qin, Z.; Jagerman, R.; Hui, K.; Zhuang, H.; Wu, J.; Yan, L.; Shen, J.; Liu, T.; Liu, J.; Metzler, D.; et al. Large Language Models Are   731
+
+      Effective Text Rankers with Pairwise Ranking Prompting. In Proceedings of the Findings of the Association for Computational              732
+
+      Linguistics: NAACL 2024. Association for Computational Linguistics, 2024, pp. 1504–1518. https://doi.org/10.18653/v1/2024.               733
+
+      findings-naacl.97.                                                                                                                       734
+
+19.   Zhuang, S.; Zhuang, H.; Koopman, B.; Zuccon, G. A Setwise Approach for Effective and Highly Efficient Zero-Shot Ranking with             735
+
+      Large Language Models. In Proceedings of the 47th International ACM SIGIR Conference on Research and Development in                      736
+
+      Information Retrieval. Association for Computing Machinery, 2024, pp. 38–47. https://doi.org/10.1145/3626772.3657813.                    737
+
+20.   Ren, R.; Wang, Y.; Zhou, K.; Zhao, W.X.; Wang, W.; Liu, J.; Wen, J.R.; Chua, T.S. Self-Calibrated Listwise Reranking with Large          738
+
+      Language Models. In Proceedings of the ACM Web Conference 2025. Association for Computing Machinery, 2025, pp. 3692–3701.                739
+
+      https://doi.org/10.1145/3696410.3714658.                                                                                                 740
+
+21.   Meng, Q.; Zhang, X.; Dong, Y.; Chen, Y.; Lin, D. A Combined Semantic Dependency and Lexical Embedding RoBERTa Model for                  741
+
+      Grid Field Relational Extraction. Applied Sciences 2023, 13, 11074. https://doi.org/10.3390/app131911074.                                742
+
+22.   Madabhushi, S.; Dewri, R. A Survey of Anomaly Detection Methods for Power Grids. International Journal of Information Security           743
+
+      2023, 22, 1799–1832. https://doi.org/10.1007/s10207-023-00720-z.                                                                         744
+
+23.   Srinivasan, S.; Kumarasamy, S.; Andreadakis, Z.; Lind, P.G. Artificial Intelligence and Mathematical Models of Power Grids               745
+
+      Driven by Renewable Energy Sources: A Survey. Energies 2023, 16, 5383. https://doi.org/10.3390/en16145383.                               746
+
+24.   Ranawaka, A.S.R.A.; Alahakoon, D.; Sun, Y.; Hewapathirana, K. Leveraging the Synergy of Digital Twins and Artificial                     747
+
+      Intelligence for Sustainable Power Grids: A Scoping Review. Energies 2024, 17, 5342. https://doi.org/10.3390/en17215342.                 748
+
+25.   Feder, A.; Keith, K.A.; Manzoor, E.; Pryzant, R.; Sridhar, D.; Wood-Doughty, Z.; Eisenstein, J.; Grimmer, J.; Reichart, R.; Roberts,     749
+
+      M.E.; et al. Causal Inference in Natural Language Processing: Estimation, Prediction, Interpretation and Beyond. Transactions of         750
+
+      the Association for Computational Linguistics 2022, 10, 1138–1158. https://doi.org/10.1162/tacl_a_00511.                                 751
+
+26.   Du, L.; Ding, X.; Xiong, K.; Liu, T.; Qin, B. e-CARE: A New Dataset for Exploring Explainable Causal Reasoning. In                       752
+
+      Proceedings of the 60th Annual Meeting of the Association for Computational Linguistics, Volume 1 (Long Papers). Association             753
+
+      for Computational Linguistics, 2022, pp. 432–446. https://doi.org/10.18653/v1/2022.acl-long.33.                                          754
+
+27.   Chernozhukov, V.; Chetverikov, D.; Demirer, M.; Duflo, E.; Hansen, C.; Newey, W.; Robins, J. Double/Debiased Machine Learning            755
+
+      for Treatment and Structural Parameters. The Econometrics Journal 2018, 21, C1–C68. https://doi.org/10.1111/ectj.12097.                  756
+
+28.   Cameron, A.C.; Gelbach, J.B.; Miller, D.L. Bootstrap-Based Improvements for Inference with Clustered Errors. The Review of               757
+
+      Economics and Statistics 2008, 90, 414–427. https://doi.org/10.1162/rest.90.3.414.                                                       758
+
+
+
+
+Disclaimer/Publisher’s Note: The statements, opinions and data contained in all publications are solely those of the individual                759
+
+author(s) and contributor(s) and not of MDPI and/or the editor(s). MDPI and/or the editor(s) disclaim responsibility for any injury to         760
+
+people or property resulting from any ideas, methods, instructions or products referred to in the content.                                     761
+
+
+
+
+                                                                                                        https://doi.org/10.3390/app1010000
+

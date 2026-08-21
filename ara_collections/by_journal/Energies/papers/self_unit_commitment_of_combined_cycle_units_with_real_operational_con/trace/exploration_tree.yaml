@@ -1,0 +1,117 @@
+version: 1
+paper_id: self_unit_commitment_of_combined_cycle_units_with_real_operational_con
+collection: by_journal/Energies
+tree:
+  - id: N01
+    type: question
+    support_level: explicit
+    source_refs: ["1.1"]
+    title: "How can a CCGT produce a physically followable dispatch that respects all real operational constraints?"
+    description: "Heuristic dispatch codes omit crucial operational constraints, leading to equipment damage and financial penalties. The question is how to model the CCGT at sufficient granularity to produce a plan the plant can actually follow."
+    children:
+      - id: N02
+        type: question
+        support_level: explicit
+        source_refs: ["1.1"]
+        title: "What is the gap between current heuristic dispatch and a feasible schedule?"
+        description: "Three observations: (O1) heuristic omits ramps, gas-hour gating, unit-count coupling, load distribution; (O2) equipment damage from ignoring thermal states; (O3) financial penalties under Colombian 5% deviation rule."
+        children:
+          - id: N03
+            type: dead_end
+            support_level: explicit
+            source_refs: ["1.1", "Figure 1"]
+            title: "Heuristic dispatch leads to unfollowable schedules"
+            hypothesis: "Existing heuristic codes produce acceptable dispatch schedules"
+            failure_mode: "Omitted constraints (ramps, thermal state, gas-hour gating) cause deviations exceeding the 5% penalty threshold and risk equipment damage"
+            lesson: "A model that captures per-unit operational constraints is needed; aggregate or heuristic approaches cannot produce a feasible schedule"
+
+      - id: N04
+        type: decision
+        support_level: explicit
+        source_refs: ["1.2", "2"]
+        title: "Choose hybrid component+mode representation"
+        choice: "Model gas and steam turbines as individual units (component representation) while embedding configuration-style coupling constraints"
+        alternatives:
+          - "Pure mode/configuration representation -- more efficient but cannot express per-unit coupling"
+          - "Pure component representation -- captures interdependence but not minimum gas-hours or load distribution"
+          - "Heuristic simulation -- current practice, omits constraints"
+        children:
+          - id: N05
+            type: decision
+            support_level: explicit
+            source_refs: ["2.6"]
+            title: "Novel constraint: minimum gas-turbine operating hours before steam turbine start"
+            choice: "Encode KGC=3h, KMH=6h gating via binary variables bt,c and constraints (33)-(37)"
+            alternatives:
+              - "Ignore gas-hours gating (existing models) -- allows physically invalid ST starts"
+            children:
+              - id: N06
+                type: decision
+                support_level: explicit
+                source_refs: ["2.7"]
+                title: "Novel constraint: load distribution penalty"
+                choice: "Penalise pairwise GT output differences (DSC) when both above minimum, via delta indicator (Eqs. 41-46)"
+                alternatives:
+                  - "No load distribution constraint (existing models) -- uneven loading, thermal stress risk"
+
+          - id: N07
+            type: decision
+            support_level: explicit
+            source_refs: ["2.5"]
+            title: "Implement hot/warm/cold startup ramp blocks"
+            choice: "Use Colombian grid code ramp blocks (Table 2) with state-dependent block counts (H4, W5, C6)"
+            alternatives:
+              - "Single startup ramp for all thermal states"
+            children:
+              - id: N08
+                type: decision
+                support_level: explicit
+                source_refs: ["2.3.2"]
+                title: "Include supplementary firing and steam waste"
+                choice: "Model supplementary fires (PAF=15MW) and steam waste variables for realistic HRSG behavior"
+                alternatives:
+                  - "No supplementary firing -- cannot decouple steam output from gas output at peak"
+
+      - id: N09
+        type: experiment
+        support_level: explicit
+        source_refs: ["3.1"]
+        title: "Case I -- Hot-start scenario (E01)"
+        result: "SEUC produces followable dispatch; heuristic deviates >5%; daily penalty USD 60,957"
+        evidence: [C01, C02, C03, "Figure 4", "Figure 5"]
+        children:
+          - id: N10
+            type: experiment
+            support_level: explicit
+            source_refs: ["3.2"]
+            title: "Case II -- Warm-start scenario (E02)"
+            result: "SEUC selects warm ramp; heuristic incorrectly assumes hot start; ST2 cold-start gated by KGC=3h; supplementary fire adds 4.75 MW; penalty USD 66,093"
+            evidence: [C02, C03, C04, "Figure 6", "Figure 7"]
+
+      - id: N11
+        type: experiment
+        support_level: explicit
+        source_refs: ["3.1", "3.2"]
+        title: "Economic penalty analysis (E03)"
+        result: "USD 60,957/day (Case I) and USD 66,093/day (Case II) under Colombian 5% deviation rule"
+        evidence: [C06, "Figure 4", "Figure 6"]
+
+      - id: N12
+        type: experiment
+        support_level: explicit
+        source_refs: ["2.7", "3.2"]
+        title: "Load distribution and supplementary fire verification (E04)"
+        result: "Gas-turbine outputs are nearly equal at full load (~100 MW each); supplementary fire contributes independently of GT output"
+        evidence: [C04, C05, "Figure 5", "Figure 7"]
+
+      - id: N13
+        type: decision
+        support_level: inferred
+        source_refs: ["4"]
+        title: "Future work extensions"
+        choice: "Extend from self-unit commitment to full system-wide UC"
+        alternatives:
+          - "Variable STF ratios"
+          - "Heterogeneous units"
+          - "Revenue recovery analysis"
+        children: []

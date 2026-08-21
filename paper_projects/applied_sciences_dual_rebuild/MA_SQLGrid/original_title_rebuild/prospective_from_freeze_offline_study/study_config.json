@@ -1,0 +1,91 @@
+{
+  "schema_version": "ma-sqlgrid-offline-coordination-selection-v1",
+  "study_label": "prospective-from-freeze offline coordination selection study",
+  "interpretation": "Historical frozen candidate-pool offline prospective selection; no new model generation and no estimate of autonomous multi-agent generation benefit.",
+  "question_count": 180,
+  "candidate_slots_per_question": 8,
+  "candidate_order": [
+    "qwen:F00_Full_NoShape",
+    "qwen:F01_Full_WithShape",
+    "qwen:F10_Compact_NoShape",
+    "qwen:F11_Compact_WithShape",
+    "granite:F00_Full_NoShape",
+    "granite:F01_Full_WithShape",
+    "granite:F10_Compact_NoShape",
+    "granite:F11_Compact_WithShape"
+  ],
+  "selection_methods": [
+    "first_candidate",
+    "validation_only_no_cf",
+    "full_coordination_complete_invariance"
+  ],
+  "reference_free_states": [
+    "T1_insertion_permutation_a",
+    "T1_insertion_permutation_b",
+    "T1_insertion_permutation_c"
+  ],
+  "reference_state": "T0_snapshot",
+  "primary_full_condition": {
+    "require_complete_state_coverage": true,
+    "minimum_invariant_passes": 3,
+    "abstain_if_no_eligible_candidate": true
+  },
+  "validation_weights": {
+    "safe": 40,
+    "executable": 40,
+    "shape": 10,
+    "order": 5,
+    "value_hit_each": 1,
+    "value_hit_cap": 5
+  },
+  "prespecified_sensitivity": {
+    "weight_policies": {
+      "default": {"safe": 40, "executable": 40, "shape": 10, "order": 5, "value_hit_each": 1, "value_hit_cap": 5},
+      "validation_equal": {"safe": 40, "executable": 40, "shape": 5, "order": 5, "value_hit_each": 0, "value_hit_cap": 0},
+      "intent_emphasis": {"safe": 40, "executable": 40, "shape": 15, "order": 10, "value_hit_each": 1, "value_hit_cap": 5}
+    },
+    "minimum_invariant_passes": [1, 2, 3],
+    "complete_coverage_required_for_all_thresholds": true,
+    "tie_rules": ["original_candidate_order", "reverse_candidate_order"]
+  },
+  "executor": {
+    "uri_mode": "ro",
+    "immutable": true,
+    "query_only": true,
+    "extensions_disabled": true,
+    "timeout_seconds": 2.0,
+    "max_opcodes": 2000000,
+    "progress_step": 1000,
+    "max_rows": 10000,
+    "metadata_authorization": false
+  },
+  "gold_boundary": {
+    "selection_view_excludes": ["gold_sql", "answer_shape", "order_sensitive", "required_value_literals", "difficulty", "sql_feature_tags", "tables", "columns"],
+    "gold_file_opened_only_after_all_blackboards_are_sealed": true,
+    "selection_or_rule_tuning_from_gold": false
+  },
+  "inputs": {
+    "questions_with_gold": "paper_projects/2026_ma_sqlgrid_cmc/source/data/griddb_maintenance_v2_v0_1/questions.jsonl",
+    "splits": "paper_projects/2026_ma_sqlgrid_cmc/source/data/griddb_maintenance_v2_v0_1/splits.json",
+    "schema_sql": "paper_projects/2026_ma_sqlgrid_cmc/source/data/griddb_maintenance_v2_v0_1/schema.sql",
+    "qwen_predictions": "paper_projects/applied_sciences_dual_rebuild/MA_SQLGrid/formal_run/qwen25coder7b_q4km_seed20260805_clean_rerun1/predictions.jsonl",
+    "granite_predictions": "paper_projects/applied_sciences_dual_rebuild/MA_SQLGrid/granite_formal/granite33_8b_q4km_seed20260805_clean1/predictions.jsonl",
+    "state_directory": "paper_projects/applied_sciences_dual_rebuild/MA_SQLGrid/semantic_reliability_experiment/states_v2b",
+    "state_manifest": "paper_projects/applied_sciences_dual_rebuild/MA_SQLGrid/semantic_reliability_experiment/states_v2b/STAGE_A_STATE_MANIFEST.json"
+  },
+  "runtime": {
+    "python_version_recorded_at_execution": true,
+    "sqlite_reported_at_execution": true,
+    "no_llm_calls": true,
+    "network_access": false,
+    "reproductions": 2
+  },
+  "retention": {
+    "all_180_questions": true,
+    "all_8_candidate_slots": true,
+    "all_state_attempts": true,
+    "all_failures": true,
+    "no_retry": true,
+    "no_overwrite": true
+  }
+}

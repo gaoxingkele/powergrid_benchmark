@@ -1,0 +1,160 @@
+tree:
+  - id: N01
+    type: question
+    support_level: explicit
+    source_refs: ["§I", "§III"]
+    title: "Can the Coati Optimization Algorithm be enhanced to solve Static and Dynamic TNEP competitively?"
+    description: >
+      COA is accurate but unstable and had not been applied to TNEP. The paper asks whether two
+      independent design operators (FDB selection, OBL seeding) can turn COA into a robust TNEP solver.
+    children:
+      - id: N02
+        type: question
+        support_level: explicit
+        source_refs: ["§III-B", "Table 1"]
+        title: "Where inside COA should FDB selection be injected?"
+        description: >
+          FDB can be applied at multiple position-update points; the best insertion for COA's
+          two-stage update was unknown.
+        children:
+          - id: N03
+            type: experiment
+            support_level: explicit
+            source_refs: ["Table 1", "Table 2", "Table 3", "Table 4", "Table 5", "Table 6", "Figure 1"]
+            title: "Benchmark FDBCOA1/2/3 vs COA on CEC2020 & CEC2022 (Friedman + Wilcoxon)"
+            description: >
+              Three FDB placements defined (FDBCOA1: Eq.17; FDBCOA2/3: Eq.19 branches). Evaluated on
+              CEC2020 (dims 5-100) and CEC2022 (dims 10,20), pop sizes 30/50/100, 51 runs.
+            evidence: ["C01", "C02"]
+            children:
+              - id: N04
+                type: decision
+                support_level: explicit
+                source_refs: ["Table 4", "§III-B"]
+                title: "Select FDBCOA1 (FDB in exploration Eq.17) as best FDB variant"
+                description: >
+                  FDBCOA1 attains best mean Friedman rank (1), FDBCOA2 rank 2, FDBCOA3 rank 3, COA rank 4.
+                evidence: ["C02"]
+              - id: N05
+                type: dead_end
+                support_level: explicit
+                source_refs: ["§III-B", "Table 7"]
+                title: "FDBCOA3 rejected — severe scalability problems"
+                description: >
+                  FDBCOA3 'faced severe scalability problems, especially on more complex problems';
+                  least effective FDB variant. FDB in the ground/exploitation update degrades scaling.
+              - id: N06
+                type: dead_end
+                support_level: explicit
+                source_refs: ["§III-B"]
+                title: "FDBCOA2 rejected — moderate but less consistent than FDBCOA1"
+                description: >
+                  FDBCOA2 'did not match the performance of FDBCOA1, with occasional ties and less sure wins.'
+          - id: N07
+            type: experiment
+            support_level: explicit
+            source_refs: ["Table 7"]
+            title: "Scalability of FDB variants D=20 -> D=50 (F1-F10, P=100)"
+            description: "Mean and std per function reveal COA accurate-but-unstable; FDBCOA1 most controlled std."
+            evidence: ["C02", "C07"]
+      - id: N08
+        type: question
+        support_level: explicit
+        source_refs: ["§III-C"]
+        title: "Which OBL scheme best seeds FDBCOA1's initial population?"
+        description: "Eight OBL schemes evaluated as initialization for the chosen FDBCOA1."
+        children:
+          - id: N09
+            type: experiment
+            support_level: explicit
+            source_refs: ["Table 8", "Table 9", "Table 10", "Table 11", "Table 12", "Figure 4"]
+            title: "Benchmark FDBCOA1-OBL1..OBL8 vs COA & FDBCOA1 (Friedman + Wilcoxon)"
+            description: >
+              Ten algorithms (COA, FDBCOA1, 8 OBL-seeded variants) on CEC2020/CEC2022, 51 runs.
+            evidence: ["C03", "C06"]
+            children:
+              - id: N10
+                type: decision
+                support_level: explicit
+                source_refs: ["Table 10", "§III-C"]
+                title: "Select Elite OBL (FDBCOA1-OBL5) as best; carry to TNEP"
+                description: >
+                  OBL5 (Elite OBL) attains best mean Friedman rank (1 of 10); FDBCOA1-without-OBL ranks 7.
+                evidence: ["C03"]
+              - id: N11
+                type: dead_end
+                support_level: explicit
+                source_refs: ["§III-B (OBL discussion, p.35085)"]
+                title: "OBL1 (Classical) and OBL2 (Quasi-Reflection) rejected — least scalable/balanced"
+                description: >
+                  'FDBCOA-OBL2 proved to have lower but stable performance due to eschewing scalability,
+                  whereas FDBCOA1-OBL1 lacked both factors.'
+          - id: N12
+            type: experiment
+            support_level: explicit
+            source_refs: ["Table 13"]
+            title: "Scalability of OBL variants (P=100, D=50, F1-F10)"
+            description: "FDBCOA1-OBL5 shows best scalability (average improves across most functions)."
+            evidence: ["C03"]
+      - id: N13
+        type: dead_end
+        support_level: explicit
+        source_refs: ["§III-B", "Figure 1", "Table 5", "Table 6"]
+        title: "No universal domination (No Free Lunch)"
+        description: >
+          FDBCOA1 loses 6/282 & ties 110; FDBCOA1-OBL5 loses 4/282 & ties 96. Losses concentrate at
+          low dimensions and P=100. Consistent with NFL [62].
+        evidence: ["C06"]
+      - id: N14
+        type: question
+        support_level: explicit
+        source_refs: ["§IV"]
+        title: "Does FDBCOA1-OBL5 solve Static and Dynamic TNEP competitively?"
+        description: "Apply the chosen configuration to Garver 6-bus, IEEE 25-bus (static), Colombian 93-bus (dynamic)."
+        children:
+          - id: N15
+            type: experiment
+            support_level: explicit
+            source_refs: ["Table 14", "Table 15", "Figure 8", "Figure 9", "Figure 10"]
+            title: "Static TNEP on Garver 6-bus (with/without generation resizing)"
+            description: >
+              Without resizing: optimal US$200,000 (n2-6:4, n3-5:1, n4-6:2) at 21st iteration.
+              With resizing: US$110,000 (n3-5:1, n4-6:3) at 14th iteration; G1=149, G3=312, G6=299 MW.
+            evidence: ["C04", "C08"]
+          - id: N16
+            type: experiment
+            support_level: explicit
+            source_refs: ["Table 16", "Table 17", "Figure 11", "Figure 12", "Figure 13"]
+            title: "Static TNEP on IEEE 25-bus (with/without generation resizing)"
+            description: >
+              Without resizing: US$111,466,000 at 19th iteration (reductions US$580k/580k/2,917k vs GBMO/MOX/DEA).
+              With resizing: US$9,780,000 (n5-25:3, n9-11:1) at 11th iteration.
+            evidence: ["C04", "C08"]
+          - id: N17
+            type: experiment
+            support_level: explicit
+            source_refs: ["Table 18", "Table 19", "Figure 14", "Figure 15"]
+            title: "Dynamic multistage TNEP on Colombian 93-bus (3 stages, 2002-2012)"
+            description: >
+              Discounted total US$497,157,143.3 (P1 338,744,000; P2 76,362,750; P3 82,050,398.3);
+              best solutions at iterations 31/21/26; 0.00 MW load shedding.
+            evidence: ["C04"]
+            children:
+              - id: N18
+                type: dead_end
+                support_level: explicit
+                source_refs: ["Table 19", "§IV"]
+                title: "Ranks second to HGA on Colombian investment cost"
+                description: >
+                  Proposed US$497,157,143.3 > HGA US$491,010,000 (rank 2), though proposed has 0.00 MW
+                  load shedding vs HGA 0.41 MW.
+                evidence: ["C06"]
+          - id: N19
+            type: experiment
+            support_level: explicit
+            source_refs: ["Table 20", "Table 21"]
+            title: "Stability analysis (SR%, MIT, MST) across 7 case studies vs COA/FDBCOA1/GA/PSO"
+            description: >
+              FDBCOA1-OBL5 mean SR% 74.2857 vs COA 4.2857, FDBCOA1 13.3333, GA 3.3333, PSO 21.9047;
+              feasible in 7/7 scenarios while FDBCOA1 and PSO feasible in only 3.
+            evidence: ["C05"]

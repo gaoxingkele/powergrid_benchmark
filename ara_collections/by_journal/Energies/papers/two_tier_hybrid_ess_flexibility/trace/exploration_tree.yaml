@@ -1,0 +1,120 @@
+# Exploration Tree for Paper #32
+# "A Two-Tier Planning Approach for Hybrid Energy Storage Systems Considering Grid Power Flexibility in New Energy High-Penetration Grids"
+
+research_question: "How to optimally plan hybrid energy storage systems (HESS) for regional power grids with high renewable penetration to achieve flexibility supply-demand balance?"
+
+exploration_tree:
+  - branch: "Problem Identification"
+    decisions:
+      - node: "Grid flexibility challenge in high-penetration renewable systems"
+        alternatives:
+          - "Single-type storage planning"
+          - "Generation-side flexibility only"
+          - "Demand-side management only"
+        chosen: "HESS bi-level planning integrating source-network-load-storage flexibility"
+        rationale: "Flexibility is the defining challenge as renewable penetration increases; single-type storage cannot address multi-timescale fluctuations; existing approaches lack synergy between planning and operation"
+
+  - branch: "Storage Technology Selection"
+    decisions:
+      - node: "Energy storage technology mix for HESS"
+        alternatives:
+          - "Li-ion + supercapacitor"
+          - "Flow battery + supercapacitor"
+          - "Li-ion + flow battery"
+          - "Li-ion + pumped hydro"
+        chosen: "Flow battery (long-duration) + Li-ion battery (short-duration)"
+        rationale: "Flow batteries offer long duration, scalable capacity; Li-ion offers rapid response; complementary for multi-timescale flexibility"
+
+  - branch: "Power Allocation Method"
+    decisions:
+      - node: "Signal decomposition approach for frequency-based power allocation"
+        alternatives:
+          - "Empirical Mode Decomposition (EMD)"
+          - "Wavelet Packet Decomposition"
+          - "Standard VMD with fixed parameters"
+          - "PSO-optimized VMD (proposed)"
+        chosen: "PSO-VMD adaptive decomposition"
+        rationale: "VMD overcomes EMD's mode mixing; PSO eliminates subjectivity in VMD parameter (K, alpha) selection; median frequency threshold provides systematic high/low split"
+
+      - node: "Frequency separation threshold"
+        alternatives:
+          - "Fixed frequency threshold"
+          - "Energy entropy threshold"
+          - "Median frequency threshold (proposed)"
+          - "Ratio-based threshold"
+        chosen: "Median frequency threshold"
+        rationale: "Simple, data-driven, eliminates manual tuning"
+
+  - branch: "Optimization Framework"
+    decisions:
+      - node: "Optimization model structure"
+        alternatives:
+          - "Single-level planning only"
+          - "Sequential planning then operation"
+          - "Bi-level with feedback (proposed)"
+        chosen: "Bi-level closed-loop optimization"
+        rationale: "Upper-level planning decisions impact lower-level operational feasibility; lower-level operational results inform planning refinement"
+
+      - node: "Solution algorithm"
+        alternatives:
+          - "KKT conditions (mathematical programming)"
+          - "Genetic Algorithm"
+          - "Particle Swarm Optimization (PSO)"
+          - "Weighted Average Algorithm (WAA)"
+          - "Improved WAA (proposed)"
+        chosen: "IWAA with refraction opposition-based learning and dynamic crowding distance"
+        rationale: "HESS planning is mixed-integer nonlinear and non-convex; heuristic algorithms needed; standard WAA converges to local optima in high-dimensional problems; refinements improve exploration and Pareto diversity"
+
+  - branch: "Multi-Objective Formulation"
+    decisions:
+      - node: "Lower-level objective components"
+        alternatives:
+          - "Single economic objective"
+          - "Economic + flexibility"
+          - "Economic + flexibility + voltage + losses (proposed)"
+        chosen: "Quadruple objective (O&M cost, flexibility penalty, voltage deviation, line losses)"
+        rationale: "Comprehensive evaluation of ESS performance across economic, stability, and flexibility dimensions"
+
+  - branch: "Validation Strategy"
+    decisions:
+      - node: "Test system"
+        alternatives:
+          - "IEEE 14-bus"
+          - "IEEE 30-bus"
+          - "IEEE 39-bus (chosen)"
+          - "Customer-owned network"
+        chosen: "Modified IEEE 39-bus with real data from Southwest China"
+        rationale: "Realistic-scale transmission network; actual operational data improves practical validity"
+
+      - node: "Comparative schemes for HESS evaluation"
+        alternatives:
+          - "No storage vs. HESS only"
+          - "No storage + single Li-ion + single FB + HESS (chosen)"
+          - "Different HESS control strategies"
+        chosen: "5 schemes: no storage, Li-ion only, FB only, single-node HESS, multi-node HESS"
+        rationale: "Comprehensive ablation study isolating benefits of hybrid vs. single-type and multi-node vs. co-located"
+
+      - node: "Algorithm comparison"
+        chosen: "COOT, PSO, DE, WAA, IWAA (30 trials each)"
+        rationale: "Established baselines with varied search mechanisms; 30 trials for statistical validity"
+
+      - node: "Sensitivity analysis"
+        chosen: "Penalty coefficient variation (0.1 to 0.5 * lambda_0)"
+        rationale: "Flexibility penalty tolerance is key practical parameter for grid operators"
+
+  - branch: "Modeling Assumptions"
+    decisions:
+      - node: "Battery degradation modeling"
+        alternatives:
+          - "Include detailed degradation model"
+          - "Ignore degradation (chosen, with note as limitation)"
+        rationale: "Planning-level studies commonly simplify to manage complexity; identified as future work"
+
+      - node: "Uncertainty representation"
+        alternatives:
+          - "Stochastic programming"
+          - "Robust optimization"
+          - "Scenario-based with clustering (chosen)"
+          - "Multi-stage stochastic (identified as future work)"
+        chosen: "Scenario clustering from historical data"
+        rationale: "Computationally tractable; captures key operational patterns"

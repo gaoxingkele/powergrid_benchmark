@@ -1,0 +1,44 @@
+{
+  "method_scope": "Wikipedia title strings only; does not prove absence of semantic, redirect, content, or entity aliases",
+  "normalization": "URL decode + Unicode NFKC + casefold + underscore/space and punctuation normalization",
+  "base_alias_rule": "remove one trailing parenthetical disambiguator and leading 'the'",
+  "near_duplicate_rule": {
+    "sequence_matcher_threshold": 0.92,
+    "character_trigram_jaccard_prefilter": 0.72
+  },
+  "unique_titles": {
+    "train": 745,
+    "dev": 141,
+    "test": 145
+  },
+  "cross_split_pairs_examined": 233515,
+  "hard_exact_alias_count": 0,
+  "review_candidate_count": 1,
+  "unreviewed_candidate_count": 0,
+  "confirmed_alias_count": 0,
+  "reviewed_distinct_entity_count": 1,
+  "automatic_exact_alias_gate_passed": true,
+  "canonical_freeze_ready": true,
+  "caveat": "A passing automatic gate must not be described as complete semantic deduplication.",
+  "candidates": [
+    {
+      "left_split": "dev",
+      "left_title": "A_Game_of_Thrones",
+      "left_normalized": "a game of thrones",
+      "right_split": "test",
+      "right_title": "Game_of_Thrones",
+      "right_normalized": "game of thrones",
+      "sequence_similarity": 0.9375,
+      "trigram_jaccard": 0.8,
+      "reasons": [
+        "high_title_string_similarity"
+      ],
+      "review_status": "reviewed_distinct_entities",
+      "review_rationale": "The first page is the novel; the second page is the television series. They are strongly related but are not aliases or duplicate Wikipedia documents.",
+      "review_evidence": [
+        "dev first sentence: A Game of Thrones is the first novel in A Song of Ice and Fire.",
+        "test first sentence: Game of Thrones is an American fantasy drama television series."
+      ]
+    }
+  ]
+}

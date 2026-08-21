@@ -1,0 +1,26 @@
+{
+  "protocol_id": "MA-SEALED-SET-FREEZE-v1.0",
+  "frozen_at": "2026-08-07",
+  "status": "FROZEN_FOR_STAGE3",
+  "governance": "Sealed-set discipline: question+SQL pairs are generated deterministically, sandbox-verified, hashed and frozen BEFORE any annotator call. Annotation labels remain machine-adjudicated SILVER, never human gold.",
+  "parent_protocols": ["MA-SQLGRID-EXTERNAL-ANNOTATION-STAGE2-v1.1 (926A08269217EF8337A8819FFD38DB2433EBE6065BE208240D1E40C938C7B75C)"],
+  "generation": {
+    "seed": 20260807,
+    "databases": {
+      "RTS_GMLC_AUTO_PILOT": "same pilot DB (data/rts_gmlc_pilot/artifacts/database.sqlite)",
+      "SIMBENCH_AUTO_PILOT": "same pilot DB (data/simbench_pilot/simbench_mv_urban.sqlite)"
+    },
+    "novelty_rule": "ALL template families must be NEW: no reuse of the 17 template_family ids used by the 91 dev-visible candidates; new families target tables/operations not covered by dev templates (e.g. reserve_requirements_da, dispatch_da window aggregation, branches ratings, generator_costs ranking, load_timeseries_da peaks, SimBench lines/transformers/loads/switches).",
+    "target_size": "~85 items (45 RTS + 40 SimBench), deterministic template instantiation",
+    "verification": "every gold SQL executes in the read-only sandbox; answer_shape (columns + column_count) registered from actual execution; items with errors are dropped and logged, never silently fixed",
+    "freeze_artifact": "runs/ma_stage3/sealed_questions.jsonl + sealed_manifest.json (per-item sha256 + set-level sha256, custodian='annotation-pipeline', no-leakage declaration)"
+  },
+  "annotation": {
+    "models_and_params": "unchanged from MA v1.1 (A=DeepSeek, B=Gemini, C=gpt-5.4 via Cloubic; temperature 0; max_tokens 1024)",
+    "negative_controls": "30 blinded negatives generated from the sealed items by generate_negative_controls.py rules (same 5 families, balanced, seed 20260807); annotators cannot distinguish them",
+    "adjudication_rule": "unchanged from MA v1.1",
+    "output_dir": "runs/ma_stage3/"
+  },
+  "metrics": "v1.1 metrics + negative detection rate; sealed-set results are reported separately from the dev-visible 91",
+  "prohibited": "unchanged from MA v1.1"
+}

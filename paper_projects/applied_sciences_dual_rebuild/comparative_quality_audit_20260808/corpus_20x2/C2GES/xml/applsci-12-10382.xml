@@ -1,0 +1,1759 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE article PUBLIC "-//NLM//DTD JATS (Z39.96) Journal Publishing DTD v1.3 20210610//EN" "JATS-journalpublishing1-3.dtd">
+<article xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" article-type="research-article" dtd-version="1.3" xml:lang="en">
+  <front>
+    <journal-meta>
+      <journal-id journal-id-type="publisher-id">applsci</journal-id>
+      <journal-title-group>
+        <journal-title>Applied Sciences</journal-title>
+        <abbrev-journal-title abbrev-type="publisher">Appl. Sci.</abbrev-journal-title>
+        <abbrev-journal-title abbrev-type="pubmed">Applied Sciences</abbrev-journal-title>
+      </journal-title-group>
+      <issn pub-type="epub">2076-3417</issn>
+      <publisher>
+        <publisher-name>MDPI</publisher-name>
+      </publisher>
+    </journal-meta>
+    <article-meta>
+      <article-id pub-id-type="doi">10.3390/app122010382</article-id>
+      <article-id pub-id-type="publisher-id">applsci-12-10382</article-id>
+      <article-categories>
+        <subj-group>
+          <subject>Article</subject>
+        </subj-group>
+      </article-categories>
+      <title-group>
+        <article-title>Sentence Graph Attention for Content-Aware Summarization</article-title>
+      </title-group>
+      <contrib-group>
+        <contrib contrib-type="author">
+          <contrib-id contrib-id-type="orcid" authenticated="true">https://orcid.org/0000-0002-1797-7956</contrib-id>
+          <name>
+            <surname>Siragusa</surname>
+            <given-names>Giovanni</given-names>
+          </name>
+          <xref rid="af1-applsci-12-10382" ref-type="aff">1</xref>
+          <xref rid="c1-applsci-12-10382" ref-type="corresp">*</xref>
+        </contrib>
+        <contrib contrib-type="author">
+          <name>
+            <surname>Robaldo</surname>
+            <given-names>Livio</given-names>
+          </name>
+          <xref rid="af2-applsci-12-10382" ref-type="aff">2</xref>
+          <xref rid="c1-applsci-12-10382" ref-type="corresp">*</xref>
+        </contrib>
+      </contrib-group>
+      <contrib-group>
+        <contrib contrib-type="editor">
+          <name>
+            <surname>Furferi</surname>
+            <given-names>Rocco</given-names>
+          </name>
+          <role>Academic Editor</role>
+        </contrib>
+      </contrib-group>
+      <aff id="af1-applsci-12-10382"><label>1</label>Dipartimento di Informatica, Universit&#xE1; degli Studi di Torino, Corso Svizzera 185, 10149 Torino, Italy</aff>
+      <aff id="af2-applsci-12-10382"><label>2</label>Legal Innovation Lab Wales, Swansea University, Singleton Park, Sketty, Swansea SA28PP, UK</aff>
+      <author-notes>
+        <corresp id="c1-applsci-12-10382"><label>*</label>Correspondence: <email>siragusa@di.unito.it</email> (G.S.); <email>livio.robaldo@swansea.ac.uk</email> (L.R.)</corresp>
+      </author-notes>
+      <pub-date pub-type="epub">
+        <day>14</day>
+        <month>10</month>
+        <year>2022</year>
+      </pub-date>
+      <pub-date pub-type="collection">
+        <month>10</month>
+        <year>2022</year>
+      </pub-date>
+      <volume>12</volume>
+      <issue>20</issue>
+      <elocation-id>10382</elocation-id>
+      <history>
+        <date date-type="received">
+          <day>05</day>
+          <month>09</month>
+          <year>2022</year>
+        </date>
+        <date date-type="accepted">
+          <day>10</day>
+          <month>10</month>
+          <year>2022</year>
+        </date>
+      </history>
+      <permissions>
+        <copyright-statement>&#xA9; 2022 by the authors.</copyright-statement>
+        <copyright-year>2022</copyright-year>
+        <license license-type="open-access">
+          <license-p>Licensee MDPI, Basel, Switzerland. This article is an open access article distributed under the terms and conditions of the Creative Commons Attribution (CC BY) license (<ext-link ext-link-type="uri" xlink:href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</ext-link>).</license-p>
+        </license>
+      </permissions>
+      <abstract>
+        <p>Neural network-based encoder&#x2013;decoder (ED) models are widely used for abstractive text summarization. While the encoder first reads the source document and embeds salient information, the decoder starts from such encoding to generate the summary word-by-word. However, the drawback of the ED model is that it treats words and sentences equally, without discerning the most relevant ones from the others. Many researchers have investigated this problem and provided different solutions. In this paper, we define a sentence-level attention mechanism based on the well-known PageRank algorithm to find the relevant sentences, then propagate the resulting scores into a second word-level attention layer. We tested the proposed model on the well-known CNN/Dailymail dataset, and found that it was able to generate summaries with a much higher abstractive power than state-of-the-art models, in spite of an unavoidable (but slight) decrease in terms of the Rouge scores.</p>
+      </abstract>
+      <kwd-group>
+        <kwd>summarization</kwd>
+        <kwd>knowledge graph</kwd>
+        <kwd>neural networks</kwd>
+        <kwd>pagerank</kwd>
+        <kwd>natural language processing</kwd>
+      </kwd-group>
+      <funding-group>
+        <funding-statement>This research received no external funding.</funding-statement>
+      </funding-group>
+    </article-meta>
+  </front>
+  <body>
+    <sec sec-type="intro" id="sec1-applsci-12-10382">
+      <title>1. Introduction</title>
+      <p>Textual Summarization (TS) is the task of compressing a text into a short form (the summary) that preserves all the relevant information, where the compression rate is chosen by a domain expert. There exist two approaches to TS: <italic>extractive</italic> TS where sentences are extracted from the input text and re-arranged to create the summary, and <italic>abstractive</italic> TS where the summary is generated word-by-word. With the ever-growing adoption of neural networks (NNs) by Natural Language Processing (NLP) techniques and tasks, researchers have found that NN-based encoder&#x2013;decoder (ED) models [<xref ref-type="bibr" rid="B1-applsci-12-10382">1</xref>,<xref ref-type="bibr" rid="B2-applsci-12-10382">2</xref>] are well-suited to generating abstractive summaries. In such models, the encoder is trained to select the salient information from the text, whereas the decoder is trained to condense such information into a fixed-length summary. To the best of our knowledge, Refs. [<xref ref-type="bibr" rid="B3-applsci-12-10382">3</xref>,<xref ref-type="bibr" rid="B4-applsci-12-10382">4</xref>,<xref ref-type="bibr" rid="B5-applsci-12-10382">5</xref>] represent the first research works that have successfully adopted NNs for abstractive TS.</p>
+      <p>The main drawback of using NN-based models for TS is their inability to capture the salience of each sentence. They are unable to discern the relevant and informative sentences (or words) in a summary from those that are secondary for the context, treating them equally. For instance, suppose that a document talks about both a big snow storm and a man who started to sell snow online; suppose that the correct summary is related to the online snow selling. The network may decide to focus on the snow storm, instead of the online snow selling, creating a summary of this topic and completely missing the content of the article. We think that this problem is generated by the attention mechanism [<xref ref-type="bibr" rid="B6-applsci-12-10382">6</xref>,<xref ref-type="bibr" rid="B7-applsci-12-10382">7</xref>] of the neural network, i.e., a score distribution over the document words that the network uses to focus on the relevant ones. Since such a mechanism has been defined for machine translation where the focus is limited to about three words at time, in our opinion, it is not able to capture the salient words present in longer texts (such as those of summarization).</p>
+      <p>To solve this drawback, we examined the recent works on neural network models based on knowledge bases (KBs) [<xref ref-type="bibr" rid="B8-applsci-12-10382">8</xref>,<xref ref-type="bibr" rid="B9-applsci-12-10382">9</xref>,<xref ref-type="bibr" rid="B10-applsci-12-10382">10</xref>,<xref ref-type="bibr" rid="B11-applsci-12-10382">11</xref>,<xref ref-type="bibr" rid="B12-applsci-12-10382">12</xref>,<xref ref-type="bibr" rid="B13-applsci-12-10382">13</xref>,<xref ref-type="bibr" rid="B14-applsci-12-10382">14</xref>]. In these research works, the knowledge graph created using an external KB was explored by the neural network to extract the relevant information (i.e., it selected one or more vertexes) via the attention mechanism, which focused on the relevant entities of the graph. These models have shown very high performance, taming the problems related to large graphs (e.g., millions of vertexes) and missing the connections between vertexes, for which the neural networks are able to exploit latent information.</p>
+      <p>However, adopting an external KB in the summarization task was a challenge. We could construct it using the entities that were present in the document to summarize, but the neural network could have the above-described problem, selecting external entities that were neither relevant nor correct for the summary; thus, we decided to create the graph using the sentences present in the input document. The graph selected the sentences that were fundamental to constructing the summary and from which the salient words (i.e., entities) could be copied into the output.</p>
+      <p>Our contribution is twofold:<list list-type="bullet"><list-item><p>a latent knowledge graph based on document sentences, which was changed according to the generated summary. In detail, the model calculated the sentence-level attention scores using the graph, which were used by the word-level attention to select the relevant entities from the sentences;</p></list-item><list-item><p>an inference-time score function that removed repetitions and attention errors, integrating two existing techniques: coverage vectors [<xref ref-type="bibr" rid="B6-applsci-12-10382">6</xref>,<xref ref-type="bibr" rid="B7-applsci-12-10382">7</xref>,<xref ref-type="bibr" rid="B15-applsci-12-10382">15</xref>] and reinforcement learning.</p></list-item></list></p>
+      <p>We tested our proposed model on the CNN/Dailymail dataset, obtaining interesting results both in the selection of the relevant sentences and the creation of summaries that contained all the salient information of the input document.</p>
+      <p>The remainder of the article is composed of the following: <xref ref-type="sec" rid="sec2-applsci-12-10382">Section 2</xref> describes the latest research works in neural-based knowledge bases and summarization; <xref ref-type="sec" rid="sec3-applsci-12-10382">Section 3</xref> describes the proposed model, the sentence-level attention, and the inference-time score function; <xref ref-type="sec" rid="sec4-applsci-12-10382">Section 4</xref> reports the results obtained using the proposed model. The article concludes with <xref ref-type="sec" rid="sec5-applsci-12-10382">Section 5</xref>.</p>
+    </sec>
+    <sec id="sec2-applsci-12-10382">
+      <title>2. Related&#xA0;Works</title>
+      <p>Our model belongs to the recent research field that exploits document contents to generate a better summary. In this context, to the best of our knowledge, there are two research directions: (1) retrieve, rank, and rewrite summarization models [<xref ref-type="bibr" rid="B16-applsci-12-10382">16</xref>,<xref ref-type="bibr" rid="B17-applsci-12-10382">17</xref>,<xref ref-type="bibr" rid="B18-applsci-12-10382">18</xref>] and (2) content selection methods [<xref ref-type="bibr" rid="B19-applsci-12-10382">19</xref>,<xref ref-type="bibr" rid="B20-applsci-12-10382">20</xref>,<xref ref-type="bibr" rid="B21-applsci-12-10382">21</xref>,<xref ref-type="bibr" rid="B22-applsci-12-10382">22</xref>,<xref ref-type="bibr" rid="B23-applsci-12-10382">23</xref>,<xref ref-type="bibr" rid="B24-applsci-12-10382">24</xref>]. In the former, models are trained to select sentences from the input document or from an external resource (retrieve and rank part) that are salient, i.e., that express the information in a very concise manner. The selected sentences are then rewritten (substituting, adding, and deleting words) to generate the summary. In the latter, researchers have defined layers, masks, and network structures to uncover salient sentences and words while removing redundant information. In this context, our proposed model fuses the sentence graph proposed in Tan et al. [<xref ref-type="bibr" rid="B20-applsci-12-10382">20</xref>] with the attention re-score method of Hsu et al. [<xref ref-type="bibr" rid="B22-applsci-12-10382">22</xref>]; our idea was to find the relevant sentences via the graph, which takes into account the shared information between sentences, and to select the salient words from them using Hsu et al.&#x2019;s method. Furthermore, instead of applying the softmax function in the PageRank method as Tan et al., we decided to use the sigmoid function, which could select more than one sentence.</p>
+      <p>Other interesting works integrated further information into sequence-to-sequence models. Refs.  [<xref ref-type="bibr" rid="B25-applsci-12-10382">25</xref>,<xref ref-type="bibr" rid="B26-applsci-12-10382">26</xref>,<xref ref-type="bibr" rid="B27-applsci-12-10382">27</xref>] used a pre-trained language model to improve the summary generation. Their idea was that the language model carries both fluency and domain style since it is able to deeply understand the meaning of each token. In detail, Liu and Lapata [<xref ref-type="bibr" rid="B26-applsci-12-10382">26</xref>] and Song et al. [<xref ref-type="bibr" rid="B27-applsci-12-10382">27</xref>] used BERT-based models [<xref ref-type="bibr" rid="B28-applsci-12-10382">28</xref>] to solve the summarization task. Kry&#x15B;ci&#x144;ski et al. [<xref ref-type="bibr" rid="B25-applsci-12-10382">25</xref>], instead, proposed to extend the sequence-to-sequence model proposed by Paulus et al. [<xref ref-type="bibr" rid="B6-applsci-12-10382">6</xref>] with a language model that integrates external knowledge. Other authors, such as Narayan et al. [<xref ref-type="bibr" rid="B29-applsci-12-10382">29</xref>], preferred to use the topic model to tie the model output to the document.</p>
+      <p>Currently, researchers are studying how to integrate neural networks with knowledge bases. Some research works focused on table-to-text [<xref ref-type="bibr" rid="B8-applsci-12-10382">8</xref>,<xref ref-type="bibr" rid="B9-applsci-12-10382">9</xref>,<xref ref-type="bibr" rid="B10-applsci-12-10382">10</xref>,<xref ref-type="bibr" rid="B30-applsci-12-10382">30</xref>], where a table that depicts a &#x201C;plain&#x201D; knowledge base is read by a sequence-to-sequence model and transformed into a text that reports (almost) all information occurring in the table. In Wang et al. [<xref ref-type="bibr" rid="B30-applsci-12-10382">30</xref>], the authors constructed both a latent graph over the entries of the table, looking to their position in the input, and an attention over them. This attention was refined in their successive work [<xref ref-type="bibr" rid="B8-applsci-12-10382">8</xref>], where they proposed a hybrid attention based on both the <italic>&lt;slot type, slot value&gt;</italic> attention and the <italic>link</italic> attention of the latent graph; the latter represented a sort of embedding and was learned via backpropagation rather than being computed by the model. Hayashi et al. [<xref ref-type="bibr" rid="B9-applsci-12-10382">9</xref>] and Liu et al. [<xref ref-type="bibr" rid="B10-applsci-12-10382">10</xref>] defined a language model based on a knowledge graph. In the former work, their model first selected from the knowledge base the entity that had to be copied in the output; then, a mechanism in the language model forced it to generate the words of the entity. In the case where a word of the entity was not present in the vocabulary, they used a character-based language model to generate it. In the latter work, however, their model first selected all the entities that could continue a phrase excerpt and encoded them using an LSTM [<xref ref-type="bibr" rid="B31-applsci-12-10382">31</xref>]; the resulting vector was then passed by the input to the language model, which copies the words of a chosen entity. Hu et al. [<xref ref-type="bibr" rid="B11-applsci-12-10382">11</xref>] used a neural network with a copying mechanism [<xref ref-type="bibr" rid="B6-applsci-12-10382">6</xref>,<xref ref-type="bibr" rid="B7-applsci-12-10382">7</xref>] over a knowledge graph to generate the text. Their model first encoded the RDF triplets using a stacked Gated Convolutional Neural Network (GCN) in order to obtain a more complex latent graph; then, the vertexes obtained by the GCN were fed by the input to the language model.</p>
+      <p>Other works, instead, used a knowledge graph in the Question Answering (QA) task [<xref ref-type="bibr" rid="B12-applsci-12-10382">12</xref>,<xref ref-type="bibr" rid="B13-applsci-12-10382">13</xref>,<xref ref-type="bibr" rid="B14-applsci-12-10382">14</xref>,<xref ref-type="bibr" rid="B32-applsci-12-10382">32</xref>]. Given a question, they retrieve from a knowledge base all those entities that are associated with the question; then, both the question and the retrieved entities are passed to a neural network, which selects the answer (i.e., the best retrieved entity). These research works reason on triplets <inline-formula><mml:math id="mm1"><mml:semantics><mml:mrow><mml:mo stretchy="false">(</mml:mo><mml:mi>h</mml:mi><mml:mo>,</mml:mo><mml:mi>r</mml:mi><mml:mo>,</mml:mo><mml:mi>t</mml:mi><mml:mo stretchy="false">)</mml:mo></mml:mrow></mml:semantics></mml:math></inline-formula>, where <italic>h</italic> and <italic>t</italic> are the entities and <italic>r</italic> is the relation that connects them. In [<xref ref-type="bibr" rid="B13-applsci-12-10382">13</xref>,<xref ref-type="bibr" rid="B32-applsci-12-10382">32</xref>], Saxena et al. calculated a score for each triplet multiplying together their elements (i.e., <italic>h</italic>, <italic>r</italic>, and <italic>t</italic>); the triplet with the highest score was then selected as the answer to the input question. Huang et al. [<xref ref-type="bibr" rid="B12-applsci-12-10382">12</xref>] defined a knowledge embedding based on QA, where their idea was to represent the relation and the entity as low-dimensional vectors. To accomplish their task, they trained their model on a simple QA dataset, where the question was easily answered if the correct entity and predicate (the relation) were identified. Finally, Bosselut and Leskovec [<xref ref-type="bibr" rid="B14-applsci-12-10382">14</xref>] proposed an interesting research work: they constructed a knowledge graph using the entities present in the question and the possible answers; then, they defined a model that used attention to focus on the relevant entities of the graph in order to create the context vector. The latter, the relevance of each vertex of the graph, and their relation type were used to predict the answer.</p>
+    </sec>
+    <sec id="sec3-applsci-12-10382">
+      <title>3. Our Approach: A Model with Graph Sentence-Level&#xA0;Attention</title>
+      <p>Our proposed model is similar to Nallapati et al. [<xref ref-type="bibr" rid="B4-applsci-12-10382">4</xref>]&#x2019;s model. It consists of a hierarchical bidirectional LSTM encoder and an attention-based LSTM decoder. In detail, unlike the classic encoder, the hierarchical one is composed of two encoders, each one formed by a bidirectional LSTM. In this paper, we call the first encoder the <italic>word encoder</italic> and the second one the <italic>sentence encoder</italic>.</p>
+      <p>The model works as follows: first, the word encoder generates sentence representations by reading all the <italic>M</italic> words in a sentence; then, the sentence representations are read by the sentence encoder to generate the document representation.</p>
+      <p>Let <inline-formula><mml:math id="mm2"><mml:semantics><mml:mrow><mml:msub><mml:mi mathvariant="bold">x</mml:mi><mml:mn mathvariant="bold">1</mml:mn></mml:msub><mml:mo>=</mml:mo><mml:mrow><mml:mo stretchy="false">[</mml:mo><mml:msubsup><mml:mi>x</mml:mi><mml:mrow><mml:mn>1</mml:mn></mml:mrow><mml:mn>1</mml:mn></mml:msubsup><mml:mo>,</mml:mo><mml:msubsup><mml:mi>x</mml:mi><mml:mrow><mml:mn>1</mml:mn></mml:mrow><mml:mn>2</mml:mn></mml:msubsup><mml:mo>,</mml:mo><mml:mo>&#x22EF;</mml:mo><mml:mo>,</mml:mo><mml:msubsup><mml:mi>x</mml:mi><mml:mrow><mml:mn>1</mml:mn></mml:mrow><mml:mi>M</mml:mi></mml:msubsup><mml:mo stretchy="false">]</mml:mo></mml:mrow></mml:mrow></mml:semantics></mml:math></inline-formula> be the tokens that compose the first sentence of the document and <inline-formula><mml:math id="mm3"><mml:semantics><mml:mrow><mml:mi mathvariant="bold">D</mml:mi><mml:mo>=</mml:mo><mml:mo stretchy="false">[</mml:mo><mml:msub><mml:mi mathvariant="bold">x</mml:mi><mml:mn>1</mml:mn></mml:msub><mml:mo>,</mml:mo><mml:mo>&#x22EF;</mml:mo><mml:mo>,</mml:mo><mml:msub><mml:mi mathvariant="bold">x</mml:mi><mml:mi>K</mml:mi></mml:msub><mml:mo stretchy="false">]</mml:mo></mml:mrow></mml:semantics></mml:math></inline-formula> the set of <italic>K</italic> sentences that compose the document. At each step <italic>i</italic>, the word encoder is fed with the input tokens <inline-formula><mml:math id="mm4"><mml:semantics><mml:msubsup><mml:mi>x</mml:mi><mml:mrow><mml:mn>1</mml:mn></mml:mrow><mml:mi>i</mml:mi></mml:msubsup></mml:semantics></mml:math></inline-formula> and produces two encoded states <inline-formula><mml:math id="mm5"><mml:semantics><mml:msubsup><mml:mover accent="true"><mml:mi mathvariant="bold">h</mml:mi><mml:mo>&#x2192;</mml:mo></mml:mover><mml:mrow><mml:mn>1</mml:mn></mml:mrow><mml:mi>i</mml:mi></mml:msubsup></mml:semantics></mml:math></inline-formula> and <inline-formula><mml:math id="mm6"><mml:semantics><mml:msubsup><mml:mover accent="true"><mml:mi mathvariant="bold">h</mml:mi><mml:mo>&#x2190;</mml:mo></mml:mover><mml:mrow><mml:mn>1</mml:mn></mml:mrow><mml:mi>i</mml:mi></mml:msubsup></mml:semantics></mml:math></inline-formula>, where the former is generated by reading the sentence&#x2019;s words from left to right and the latter by reading the sentence&#x2019;s words from right to left. Those two states are distinguished through the jargon terms <italic>forward state</italic> and <italic>backward state</italic>. Equation (<xref ref-type="disp-formula" rid="FD1-applsci-12-10382">1</xref>) represents the forward and backward states&#x2019; construction:<disp-formula id="FD1-applsci-12-10382"><label>(1)</label><mml:math id="mm7" display="block"><mml:semantics><mml:mtable displaystyle="true"><mml:mtr><mml:mtd columnalign="right"><mml:mspace width="1.em"/></mml:mtd><mml:mtd columnalign="left"><mml:mrow><mml:msubsup><mml:mover accent="true"><mml:mi mathvariant="bold">h</mml:mi><mml:mo>&#x2192;</mml:mo></mml:mover><mml:mrow><mml:mi>i</mml:mi></mml:mrow><mml:mi>j</mml:mi></mml:msubsup><mml:mo>=</mml:mo><mml:msub><mml:mover accent="true"><mml:mrow><mml:mi>L</mml:mi><mml:mi>S</mml:mi><mml:mi>T</mml:mi><mml:mi>M</mml:mi></mml:mrow><mml:mo>&#x2192;</mml:mo></mml:mover><mml:mi>W</mml:mi></mml:msub><mml:mrow><mml:mo stretchy="false">(</mml:mo><mml:mi>E</mml:mi><mml:mrow><mml:mo stretchy="false">(</mml:mo><mml:msubsup><mml:mi>x</mml:mi><mml:mrow><mml:mi>i</mml:mi></mml:mrow><mml:mi>j</mml:mi></mml:msubsup><mml:mo stretchy="false">)</mml:mo></mml:mrow><mml:mo>,</mml:mo><mml:msubsup><mml:mover accent="true"><mml:mi mathvariant="bold">h</mml:mi><mml:mo>&#x2192;</mml:mo></mml:mover><mml:mrow><mml:mi>i</mml:mi></mml:mrow><mml:mrow><mml:mi>j</mml:mi><mml:mo>&#x2212;</mml:mo><mml:mn>1</mml:mn></mml:mrow></mml:msubsup><mml:mo stretchy="false">)</mml:mo></mml:mrow></mml:mrow></mml:mtd></mml:mtr><mml:mtr><mml:mtd columnalign="right"><mml:mspace width="1.em"/></mml:mtd><mml:mtd columnalign="left"><mml:mrow><mml:msubsup><mml:mover accent="true"><mml:mi mathvariant="bold">h</mml:mi><mml:mo>&#x2190;</mml:mo></mml:mover><mml:mrow><mml:mi>i</mml:mi></mml:mrow><mml:mi>j</mml:mi></mml:msubsup><mml:mo>=</mml:mo><mml:msub><mml:mover accent="true"><mml:mrow><mml:mi>L</mml:mi><mml:mi>S</mml:mi><mml:mi>T</mml:mi><mml:mi>M</mml:mi></mml:mrow><mml:mo>&#x2192;</mml:mo></mml:mover><mml:mi>W</mml:mi></mml:msub><mml:mrow><mml:mo stretchy="false">(</mml:mo><mml:mi>E</mml:mi><mml:mrow><mml:mo stretchy="false">(</mml:mo><mml:msubsup><mml:mi>x</mml:mi><mml:mrow><mml:mi>i</mml:mi></mml:mrow><mml:mi>j</mml:mi></mml:msubsup><mml:mo stretchy="false">)</mml:mo></mml:mrow><mml:mo>,</mml:mo><mml:msubsup><mml:mover accent="true"><mml:mi mathvariant="bold">h</mml:mi><mml:mo>&#x2190;</mml:mo></mml:mover><mml:mrow><mml:mi>i</mml:mi></mml:mrow><mml:mrow><mml:mi>j</mml:mi><mml:mo>&#x2212;</mml:mo><mml:mn>1</mml:mn></mml:mrow></mml:msubsup><mml:mo stretchy="false">)</mml:mo></mml:mrow></mml:mrow></mml:mtd></mml:mtr></mml:mtable></mml:semantics></mml:math></disp-formula></p>
+      <p>In (<xref ref-type="disp-formula" rid="FD1-applsci-12-10382">1</xref>), <inline-formula><mml:math id="mm8"><mml:semantics><mml:msub><mml:mover accent="true"><mml:mrow><mml:mi>L</mml:mi><mml:mi>S</mml:mi><mml:mi>T</mml:mi><mml:mi>M</mml:mi></mml:mrow><mml:mo>&#x2192;</mml:mo></mml:mover><mml:mi>W</mml:mi></mml:msub></mml:semantics></mml:math></inline-formula> represents the word-level forward LSTM and <inline-formula><mml:math id="mm9"><mml:semantics><mml:msub><mml:mover accent="true"><mml:mrow><mml:mi>L</mml:mi><mml:mi>S</mml:mi><mml:mi>T</mml:mi><mml:mi>M</mml:mi></mml:mrow><mml:mo>&#x2190;</mml:mo></mml:mover><mml:mi>W</mml:mi></mml:msub></mml:semantics></mml:math></inline-formula> the backward one. In addition, <inline-formula><mml:math id="mm10"><mml:semantics><mml:mrow><mml:mi>E</mml:mi><mml:mo stretchy="false">(</mml:mo><mml:mo>&#xB7;</mml:mo><mml:mo stretchy="false">)</mml:mo></mml:mrow></mml:semantics></mml:math></inline-formula> is a function that returns the word-embed [<xref ref-type="bibr" rid="B33-applsci-12-10382">33</xref>,<xref ref-type="bibr" rid="B34-applsci-12-10382">34</xref>] of an input word.</p>
+      <p>Once the encoded states of a sentence are generated, the last forward state <inline-formula><mml:math id="mm11"><mml:semantics><mml:msubsup><mml:mover accent="true"><mml:mi mathvariant="bold">h</mml:mi><mml:mo>&#x2192;</mml:mo></mml:mover><mml:mrow><mml:mi>i</mml:mi></mml:mrow><mml:mi>M</mml:mi></mml:msubsup></mml:semantics></mml:math></inline-formula> and the last backward state <inline-formula><mml:math id="mm12"><mml:semantics><mml:msubsup><mml:mover accent="true"><mml:mi mathvariant="bold">h</mml:mi><mml:mo>&#x2190;</mml:mo></mml:mover><mml:mrow><mml:mi>i</mml:mi></mml:mrow><mml:mn>1</mml:mn></mml:msubsup></mml:semantics></mml:math></inline-formula> are concatenated together to generate the sentence representation <inline-formula><mml:math id="mm13"><mml:semantics><mml:msub><mml:mi mathvariant="bold">h</mml:mi><mml:mi>i</mml:mi></mml:msub></mml:semantics></mml:math></inline-formula>. Such an operation is represented in Equation (<xref ref-type="disp-formula" rid="FD2-applsci-12-10382">2</xref>), in which <inline-formula><mml:math id="mm14"><mml:semantics><mml:mrow><mml:mo stretchy="false">|</mml:mo><mml:mo stretchy="false">|</mml:mo></mml:mrow></mml:semantics></mml:math></inline-formula> is the concatenation operator.
+      <disp-formula id="FD2-applsci-12-10382"><label>(2)</label><mml:math id="mm15" display="block"><mml:semantics><mml:mrow><mml:msub><mml:mi mathvariant="bold">h</mml:mi><mml:mi>i</mml:mi></mml:msub><mml:mrow><mml:mo>=</mml:mo><mml:mo stretchy="false">[</mml:mo></mml:mrow><mml:msubsup><mml:mover accent="true"><mml:mi mathvariant="bold">h</mml:mi><mml:mo>&#x2192;</mml:mo></mml:mover><mml:mrow><mml:mi>i</mml:mi></mml:mrow><mml:mi>M</mml:mi></mml:msubsup><mml:mrow><mml:mo stretchy="false">|</mml:mo><mml:mo stretchy="false">|</mml:mo></mml:mrow><mml:msubsup><mml:mover accent="true"><mml:mi mathvariant="bold">h</mml:mi><mml:mo>&#x2190;</mml:mo></mml:mover><mml:mrow><mml:mi>i</mml:mi></mml:mrow><mml:mn>1</mml:mn></mml:msubsup><mml:mrow><mml:mo stretchy="false">]</mml:mo></mml:mrow></mml:mrow></mml:semantics></mml:math></disp-formula></p>
+      <p>Then, the sentence representations <inline-formula><mml:math id="mm16"><mml:semantics><mml:mrow><mml:mo stretchy="false">[</mml:mo><mml:msub><mml:mi mathvariant="bold">h</mml:mi><mml:mn>1</mml:mn></mml:msub><mml:mo>,</mml:mo><mml:mo>&#x22EF;</mml:mo><mml:mo>,</mml:mo><mml:msub><mml:mi mathvariant="bold">h</mml:mi><mml:mi>K</mml:mi></mml:msub><mml:mo stretchy="false">]</mml:mo></mml:mrow></mml:semantics></mml:math></inline-formula> are passed to the sentence encoder, which produces a forward state <inline-formula><mml:math id="mm17"><mml:semantics><mml:msub><mml:mover accent="true"><mml:mi mathvariant="bold">d</mml:mi><mml:mo>&#x2192;</mml:mo></mml:mover><mml:mi>i</mml:mi></mml:msub></mml:semantics></mml:math></inline-formula> and backward state <inline-formula><mml:math id="mm18"><mml:semantics><mml:msub><mml:mover accent="true"><mml:mi mathvariant="bold">d</mml:mi><mml:mo>&#x2190;</mml:mo></mml:mover><mml:mi>i</mml:mi></mml:msub></mml:semantics></mml:math></inline-formula>. The document representation <inline-formula><mml:math id="mm19"><mml:semantics><mml:mi mathvariant="bold">d</mml:mi></mml:semantics></mml:math></inline-formula> is constructed concatenating the last forward state with the last backward one:<disp-formula id="FD3-applsci-12-10382"><label>(3)</label><mml:math id="mm20" display="block"><mml:semantics><mml:mrow><mml:mi mathvariant="bold">d</mml:mi><mml:mo>=</mml:mo><mml:mo stretchy="false">[</mml:mo><mml:msub><mml:mover accent="true"><mml:mi mathvariant="bold">d</mml:mi><mml:mo>&#x2192;</mml:mo></mml:mover><mml:mi>K</mml:mi></mml:msub><mml:mo stretchy="false">|</mml:mo><mml:mo stretchy="false">|</mml:mo><mml:msub><mml:mover accent="true"><mml:mi mathvariant="bold">d</mml:mi><mml:mo>&#x2190;</mml:mo></mml:mover><mml:mn>1</mml:mn></mml:msub><mml:mo stretchy="false">]</mml:mo></mml:mrow></mml:semantics></mml:math></disp-formula></p>
+      <p>Similar to the encoder, at each step <italic>t</italic>, the decoder (a single unidirectional LSTM) receives as input the embedding of the previous word from the decoder state <inline-formula><mml:math id="mm21"><mml:semantics><mml:msub><mml:mi mathvariant="bold">s</mml:mi><mml:mi>t</mml:mi></mml:msub></mml:semantics></mml:math></inline-formula> and the context vector <inline-formula><mml:math id="mm22"><mml:semantics><mml:msub><mml:mi mathvariant="bold">c</mml:mi><mml:mi>t</mml:mi></mml:msub></mml:semantics></mml:math></inline-formula>, and uses them to emit a word in the output (the network emits a probability distribution over the vocabulary that is used to select the next word). During training, it is the embedding of the target word <inline-formula><mml:math id="mm23"><mml:semantics><mml:msub><mml:mi>w</mml:mi><mml:mrow><mml:mi>t</mml:mi><mml:mo>&#x2212;</mml:mo><mml:mn>1</mml:mn></mml:mrow></mml:msub></mml:semantics></mml:math></inline-formula>, whereas in testing it is the embedding of the previous word emitted by the decoder. In the model, the decoder state is initialized with the document representation. The context vector <inline-formula><mml:math id="mm24"><mml:semantics><mml:msub><mml:mi mathvariant="bold">c</mml:mi><mml:mi>t</mml:mi></mml:msub></mml:semantics></mml:math></inline-formula> is calculated as in Bahdanau et al. [<xref ref-type="bibr" rid="B35-applsci-12-10382">35</xref>]:<disp-formula id="FD4-applsci-12-10382"><label>(4)</label><mml:math id="mm25" display="block"><mml:semantics><mml:mrow><mml:msub><mml:mi mathvariant="bold">c</mml:mi><mml:mi>t</mml:mi></mml:msub><mml:mo>=</mml:mo><mml:munderover><mml:mo>&#x2211;</mml:mo><mml:mrow><mml:mi>k</mml:mi><mml:mo>=</mml:mo><mml:mn>1</mml:mn></mml:mrow><mml:mi>M</mml:mi></mml:munderover><mml:msubsup><mml:mover accent="true"><mml:mi>a</mml:mi><mml:mo stretchy="false">^</mml:mo></mml:mover><mml:mrow><mml:mi>k</mml:mi></mml:mrow><mml:mi>t</mml:mi></mml:msubsup><mml:mspace width="0.222222em"/><mml:msub><mml:mi mathvariant="bold">h</mml:mi><mml:mi>k</mml:mi></mml:msub></mml:mrow></mml:semantics></mml:math></disp-formula>
+      where <inline-formula><mml:math id="mm26"><mml:semantics><mml:msub><mml:mover accent="true"><mml:mi>a</mml:mi><mml:mo stretchy="false">^</mml:mo></mml:mover><mml:mi>k</mml:mi></mml:msub></mml:semantics></mml:math></inline-formula> represents an attention score calculated via the attention approach and <inline-formula><mml:math id="mm27"><mml:semantics><mml:msub><mml:mi mathvariant="bold">h</mml:mi><mml:mi>k</mml:mi></mml:msub></mml:semantics></mml:math></inline-formula> is the representation of the <italic>t</italic>-th word.</p>
+      <p>Inspired by the works of [<xref ref-type="bibr" rid="B4-applsci-12-10382">4</xref>,<xref ref-type="bibr" rid="B20-applsci-12-10382">20</xref>,<xref ref-type="bibr" rid="B22-applsci-12-10382">22</xref>], we decided to combine the word-level attention with the sentence-level scores to select only those words coming from sentences that were relevant for the summary. Given <inline-formula><mml:math id="mm28"><mml:semantics><mml:mi mathvariant="bold">b</mml:mi></mml:semantics></mml:math></inline-formula> was the sentence-level scores and <inline-formula><mml:math id="mm29"><mml:semantics><mml:mi mathvariant="bold">a</mml:mi></mml:semantics></mml:math></inline-formula> was the word-level ones, we computed the attention scores <inline-formula><mml:math id="mm30"><mml:semantics><mml:mover accent="true"><mml:mi mathvariant="bold">a</mml:mi><mml:mo stretchy="false">^</mml:mo></mml:mover></mml:semantics></mml:math></inline-formula> as follows:<disp-formula id="FD5-applsci-12-10382"><label>(5)</label><mml:math id="mm31" display="block"><mml:semantics><mml:mrow><mml:msub><mml:mover accent="true"><mml:mi>a</mml:mi><mml:mo stretchy="false">^</mml:mo></mml:mover><mml:mi>i</mml:mi></mml:msub><mml:mo>=</mml:mo><mml:mstyle scriptlevel="0" displaystyle="true"><mml:mfrac><mml:mrow><mml:msub><mml:mi>a</mml:mi><mml:mi>i</mml:mi></mml:msub><mml:mo>&#x2217;</mml:mo><mml:msub><mml:mi>b</mml:mi><mml:mrow><mml:mi>s</mml:mi><mml:mo stretchy="false">(</mml:mo><mml:mi>i</mml:mi><mml:mo stretchy="false">)</mml:mo></mml:mrow></mml:msub></mml:mrow><mml:mrow><mml:msubsup><mml:mo>&#x2211;</mml:mo><mml:mrow><mml:mi>k</mml:mi><mml:mo>=</mml:mo><mml:mn>1</mml:mn></mml:mrow><mml:mi>M</mml:mi></mml:msubsup><mml:msub><mml:mi>a</mml:mi><mml:mi>k</mml:mi></mml:msub><mml:mo>&#x2217;</mml:mo><mml:msub><mml:mi>b</mml:mi><mml:mrow><mml:mi>s</mml:mi><mml:mo stretchy="false">(</mml:mo><mml:mi>k</mml:mi><mml:mo stretchy="false">)</mml:mo></mml:mrow></mml:msub></mml:mrow></mml:mfrac></mml:mstyle></mml:mrow></mml:semantics></mml:math></disp-formula></p>
+      <p>In (<xref ref-type="disp-formula" rid="FD5-applsci-12-10382">5</xref>), the <inline-formula><mml:math id="mm32"><mml:semantics><mml:mi mathvariant="bold">a</mml:mi></mml:semantics></mml:math></inline-formula> scores were computed by Equation (<xref ref-type="disp-formula" rid="FD6-applsci-12-10382">6</xref>) (the symbol &#x22BA; in <inline-formula><mml:math id="mm33"><mml:semantics><mml:msup><mml:mi mathvariant="bold">v</mml:mi><mml:mo>&#x22BA;</mml:mo></mml:msup></mml:semantics></mml:math></inline-formula> is the transpose operator). On the other hand, the <inline-formula><mml:math id="mm34"><mml:semantics><mml:mi mathvariant="bold">b</mml:mi></mml:semantics></mml:math></inline-formula> scores were calculated using a graph-based neural network, which took into account both the current decoder state <inline-formula><mml:math id="mm35"><mml:semantics><mml:msub><mml:mi mathvariant="bold">s</mml:mi><mml:mi>t</mml:mi></mml:msub></mml:semantics></mml:math></inline-formula> and the sentence representations. The graph-based network is described in <xref ref-type="sec" rid="sec3dot1-applsci-12-10382">Section 3.1</xref>. The full model is depicted in <xref ref-type="fig" rid="applsci-12-10382-f001">Figure 1</xref>.
+      <disp-formula id="FD6-applsci-12-10382"><label>(6)</label><mml:math id="mm36" display="block"><mml:semantics><mml:mtable displaystyle="true"><mml:mtr><mml:mtd columnalign="right"><mml:mspace width="1.em"/></mml:mtd><mml:mtd columnalign="left"><mml:mrow><mml:msub><mml:mi>e</mml:mi><mml:mi>j</mml:mi></mml:msub><mml:mo>=</mml:mo><mml:msup><mml:mi mathvariant="bold">v</mml:mi><mml:mo>&#x22BA;</mml:mo></mml:msup><mml:mrow><mml:mspace width="0.222222em"/><mml:mo form="prefix">tanh</mml:mo><mml:mo stretchy="false">(</mml:mo></mml:mrow><mml:msub><mml:mi mathvariant="bold">W</mml:mi><mml:mi>e</mml:mi></mml:msub><mml:mrow><mml:mspace width="0.222222em"/><mml:mo stretchy="false">[</mml:mo></mml:mrow><mml:msub><mml:mi mathvariant="bold">s</mml:mi><mml:mi>t</mml:mi></mml:msub><mml:mrow><mml:mo stretchy="false">|</mml:mo><mml:mo stretchy="false">|</mml:mo></mml:mrow><mml:msub><mml:mi mathvariant="bold">h</mml:mi><mml:mi>j</mml:mi></mml:msub><mml:mrow><mml:mo stretchy="false">]</mml:mo><mml:mo>+</mml:mo><mml:msub><mml:mi>b</mml:mi><mml:mi>e</mml:mi></mml:msub><mml:mo stretchy="false">)</mml:mo></mml:mrow></mml:mrow></mml:mtd></mml:mtr><mml:mtr><mml:mtd columnalign="right"><mml:mspace width="1.em"/></mml:mtd><mml:mtd columnalign="left"><mml:mrow><mml:msubsup><mml:mi>a</mml:mi><mml:mi>i</mml:mi><mml:mi>t</mml:mi></mml:msubsup><mml:mo>=</mml:mo><mml:mstyle scriptlevel="0" displaystyle="true"><mml:mfrac><mml:mrow><mml:mo form="prefix">exp</mml:mo><mml:mo stretchy="false">(</mml:mo><mml:msubsup><mml:mi>e</mml:mi><mml:mi>j</mml:mi><mml:mi>t</mml:mi></mml:msubsup><mml:mo stretchy="false">)</mml:mo></mml:mrow><mml:mrow><mml:msubsup><mml:mo>&#x2211;</mml:mo><mml:mrow><mml:mi>k</mml:mi><mml:mo>=</mml:mo><mml:mn>1</mml:mn></mml:mrow><mml:mi>M</mml:mi></mml:msubsup><mml:mo form="prefix">exp</mml:mo><mml:mrow><mml:mo stretchy="false">(</mml:mo><mml:msubsup><mml:mi>e</mml:mi><mml:mi>j</mml:mi><mml:mi>t</mml:mi></mml:msubsup><mml:mo stretchy="false">)</mml:mo></mml:mrow></mml:mrow></mml:mfrac></mml:mstyle></mml:mrow></mml:mtd></mml:mtr></mml:mtable></mml:semantics></mml:math></disp-formula></p>
+      <p>For the output, we adopted the mixture model proposed by See et al. [<xref ref-type="bibr" rid="B7-applsci-12-10382">7</xref>], which combines the probability of a vocabulary word with its attention scores. Thus, the probability of emitting a word <inline-formula><mml:math id="mm37"><mml:semantics><mml:msub><mml:mi>y</mml:mi><mml:mi>i</mml:mi></mml:msub></mml:semantics></mml:math></inline-formula> at step <italic>t</italic> is defined as follows:<disp-formula id="FD7-applsci-12-10382"><label>(7)</label><mml:math id="mm38" display="block"><mml:semantics><mml:mrow><mml:mi>P</mml:mi><mml:mrow><mml:mo stretchy="false">(</mml:mo><mml:msubsup><mml:mi>y</mml:mi><mml:mi>i</mml:mi><mml:mi>t</mml:mi></mml:msubsup><mml:mo stretchy="false">)</mml:mo></mml:mrow><mml:mrow><mml:mo>=</mml:mo><mml:mi>&#x3B2;</mml:mi><mml:mspace width="0.222222em"/><mml:mi>s</mml:mi><mml:mi>o</mml:mi><mml:mi>f</mml:mi><mml:mi>t</mml:mi><mml:mi>m</mml:mi><mml:mi>a</mml:mi><mml:mi>x</mml:mi><mml:mo stretchy="false">(</mml:mo></mml:mrow><mml:msub><mml:mi mathvariant="bold">W</mml:mi><mml:mi>o</mml:mi></mml:msub><mml:mrow><mml:mspace width="0.222222em"/><mml:mo stretchy="false">(</mml:mo></mml:mrow><mml:msub><mml:mi mathvariant="bold">W</mml:mi><mml:mi>c</mml:mi></mml:msub><mml:mrow><mml:mspace width="0.222222em"/><mml:mo stretchy="false">[</mml:mo></mml:mrow><mml:msub><mml:mi mathvariant="bold">c</mml:mi><mml:mi>t</mml:mi></mml:msub><mml:mrow><mml:mo stretchy="false">|</mml:mo><mml:mo stretchy="false">|</mml:mo></mml:mrow><mml:msub><mml:mi mathvariant="bold">s</mml:mi><mml:mi>t</mml:mi></mml:msub><mml:mrow><mml:mo stretchy="false">]</mml:mo><mml:mo>+</mml:mo></mml:mrow><mml:msub><mml:mi>b</mml:mi><mml:mi>c</mml:mi></mml:msub><mml:mrow><mml:mo stretchy="false">)</mml:mo><mml:mo>+</mml:mo><mml:msub><mml:mi>b</mml:mi><mml:mi>o</mml:mi></mml:msub><mml:mo stretchy="false">)</mml:mo></mml:mrow><mml:mo>+</mml:mo><mml:mrow><mml:mo stretchy="false">(</mml:mo><mml:mn>1</mml:mn><mml:mo>&#x2212;</mml:mo><mml:mi>&#x3B2;</mml:mi><mml:mo stretchy="false">)</mml:mo></mml:mrow><mml:mspace width="0.222222em"/><mml:munder><mml:mo>&#x2211;</mml:mo><mml:mrow><mml:mi>w</mml:mi><mml:mo>=</mml:mo><mml:msub><mml:mi>y</mml:mi><mml:mi>t</mml:mi></mml:msub></mml:mrow></mml:munder><mml:mspace width="0.222222em"/><mml:msubsup><mml:mover accent="true"><mml:mi>a</mml:mi><mml:mo stretchy="false">^</mml:mo></mml:mover><mml:mrow><mml:mi>w</mml:mi></mml:mrow><mml:mi>t</mml:mi></mml:msubsup></mml:mrow></mml:semantics></mml:math></disp-formula>
+      where <inline-formula><mml:math id="mm39"><mml:semantics><mml:msub><mml:mi mathvariant="bold">W</mml:mi><mml:mi>o</mml:mi></mml:msub></mml:semantics></mml:math></inline-formula>, <inline-formula><mml:math id="mm40"><mml:semantics><mml:msub><mml:mi mathvariant="bold">W</mml:mi><mml:mi>c</mml:mi></mml:msub></mml:semantics></mml:math></inline-formula>, <inline-formula><mml:math id="mm41"><mml:semantics><mml:msub><mml:mi>b</mml:mi><mml:mi>o</mml:mi></mml:msub></mml:semantics></mml:math></inline-formula>, and <inline-formula><mml:math id="mm42"><mml:semantics><mml:msub><mml:mi>b</mml:mi><mml:mi>c</mml:mi></mml:msub></mml:semantics></mml:math></inline-formula> are learnable parameters. <inline-formula><mml:math id="mm43"><mml:semantics><mml:mi>&#x3B2;</mml:mi></mml:semantics></mml:math></inline-formula> is a value within the range <inline-formula><mml:math id="mm44"><mml:semantics><mml:mrow><mml:mo stretchy="false">[</mml:mo><mml:mn>0</mml:mn><mml:mo>,</mml:mo><mml:mn>1</mml:mn><mml:mo stretchy="false">]</mml:mo></mml:mrow></mml:semantics></mml:math></inline-formula> used to mix the two distributions and it is calculated using Equation (<xref ref-type="disp-formula" rid="FD8-applsci-12-10382">8</xref>), where <inline-formula><mml:math id="mm45"><mml:semantics><mml:msub><mml:mi mathvariant="bold">W</mml:mi><mml:mi>b</mml:mi></mml:msub></mml:semantics></mml:math></inline-formula> and <inline-formula><mml:math id="mm46"><mml:semantics><mml:msub><mml:mi>b</mml:mi><mml:mi>b</mml:mi></mml:msub></mml:semantics></mml:math></inline-formula> are learnable parameters and <inline-formula><mml:math id="mm47"><mml:semantics><mml:msub><mml:mi>y</mml:mi><mml:mrow><mml:mi>t</mml:mi><mml:mo>&#x2212;</mml:mo><mml:mn>1</mml:mn></mml:mrow></mml:msub></mml:semantics></mml:math></inline-formula> is the previously emitted word.
+      <disp-formula id="FD8-applsci-12-10382"><label>(8)</label><mml:math id="mm48" display="block"><mml:semantics><mml:mrow><mml:mrow><mml:mi>&#x3B2;</mml:mi><mml:mo>=</mml:mo><mml:mi>s</mml:mi><mml:mi>i</mml:mi><mml:mi>g</mml:mi><mml:mi>m</mml:mi><mml:mi>o</mml:mi><mml:mi>i</mml:mi><mml:mi>d</mml:mi><mml:mo stretchy="false">(</mml:mo></mml:mrow><mml:msub><mml:mi mathvariant="bold">W</mml:mi><mml:mi>b</mml:mi></mml:msub><mml:mrow><mml:mspace width="0.222222em"/><mml:mo stretchy="false">[</mml:mo><mml:mi>E</mml:mi></mml:mrow><mml:mrow><mml:mo stretchy="false">(</mml:mo><mml:msub><mml:mi>y</mml:mi><mml:mrow><mml:mi>t</mml:mi><mml:mo>&#x2212;</mml:mo><mml:mn>1</mml:mn></mml:mrow></mml:msub><mml:mo stretchy="false">)</mml:mo></mml:mrow><mml:mrow><mml:mo stretchy="false">|</mml:mo><mml:mo stretchy="false">|</mml:mo></mml:mrow><mml:msub><mml:mi mathvariant="bold">c</mml:mi><mml:mi>t</mml:mi></mml:msub><mml:mrow><mml:mo stretchy="false">|</mml:mo><mml:mo stretchy="false">|</mml:mo></mml:mrow><mml:msub><mml:mi mathvariant="bold">s</mml:mi><mml:mi>t</mml:mi></mml:msub><mml:mrow><mml:mo stretchy="false">]</mml:mo><mml:mo>+</mml:mo><mml:msub><mml:mi>b</mml:mi><mml:mi>b</mml:mi></mml:msub><mml:mo stretchy="false">)</mml:mo></mml:mrow></mml:mrow></mml:semantics></mml:math></disp-formula></p>
+      <p>In Equation (<xref ref-type="disp-formula" rid="FD7-applsci-12-10382">7</xref>), <inline-formula><mml:math id="mm49"><mml:semantics><mml:mi>&#x3B2;</mml:mi></mml:semantics></mml:math></inline-formula> was used to control how much information coming from the attention distribution will enter into the vocabulary distribution. If <inline-formula><mml:math id="mm50"><mml:semantics><mml:mi>&#x3B2;</mml:mi></mml:semantics></mml:math></inline-formula> is close to 1, the model generates the next word only using the vocabulary (i.e., selecting the word with the highest probability); if <inline-formula><mml:math id="mm51"><mml:semantics><mml:mi>&#x3B2;</mml:mi></mml:semantics></mml:math></inline-formula> is close to 0, then the model uses the attention distribution on the input document.</p>
+      <p>We trained the model to minimize the sum of the negative log likelihood of the sequence of target words <inline-formula><mml:math id="mm52"><mml:semantics><mml:msup><mml:mi>w</mml:mi><mml:mo>*</mml:mo></mml:msup></mml:semantics></mml:math></inline-formula>:<disp-formula id="FD9-applsci-12-10382"><label>(9)</label><mml:math id="mm53" display="block"><mml:semantics><mml:mrow><mml:mi>l</mml:mi><mml:mi>o</mml:mi><mml:mi>s</mml:mi><mml:mi>s</mml:mi><mml:mo>=</mml:mo><mml:mfrac><mml:mn>1</mml:mn><mml:mi>N</mml:mi></mml:mfrac><mml:munderover><mml:mo>&#x2211;</mml:mo><mml:mrow><mml:mi>t</mml:mi><mml:mo>=</mml:mo><mml:mn>1</mml:mn></mml:mrow><mml:mi>N</mml:mi></mml:munderover><mml:mo>&#x2212;</mml:mo><mml:mi>l</mml:mi><mml:mi>o</mml:mi><mml:mi>g</mml:mi><mml:mspace width="0.222222em"/><mml:mi>P</mml:mi><mml:mrow><mml:mo stretchy="false">(</mml:mo><mml:msubsup><mml:mi>w</mml:mi><mml:mi>t</mml:mi><mml:mo>*</mml:mo></mml:msubsup><mml:mo stretchy="false">)</mml:mo></mml:mrow></mml:mrow></mml:semantics></mml:math></disp-formula></p>
+      <p>We found that the model tended to generate summaries that had repeated words (or sentences). Thus, in order to minimize the repeated words (sentences), we decided to apply some heuristics both in the training and inference steps. In the training step, we applied the coverage method defined by See et al. [<xref ref-type="bibr" rid="B7-applsci-12-10382">7</xref>] (it is described in <xref ref-type="sec" rid="sec3dot2-applsci-12-10382">Section 3.2</xref>). At inference time, we adopted the scoring function of Gehrmann et al. [<xref ref-type="bibr" rid="B21-applsci-12-10382">21</xref>] for the beam search, which uses a hyperparameter <inline-formula><mml:math id="mm54"><mml:semantics><mml:mi>&#x3B1;</mml:mi></mml:semantics></mml:math></inline-formula> to control the length of the summary. We also set a minimum summary length based on the training data. Additionally, following Paulus et al. [<xref ref-type="bibr" rid="B6-applsci-12-10382">6</xref>], we restricted the beam search to never repeat the same trigram in the summary.</p>
+      <sec id="sec3dot1-applsci-12-10382">
+        <title>3.1. Sentence-Level&#xA0;Scores</title>
+        <p>Inspired by recent works on knowledge bases [<xref ref-type="bibr" rid="B9-applsci-12-10382">9</xref>,<xref ref-type="bibr" rid="B10-applsci-12-10382">10</xref>,<xref ref-type="bibr" rid="B13-applsci-12-10382">13</xref>,<xref ref-type="bibr" rid="B14-applsci-12-10382">14</xref>], our idea was to create a knowledge graph (KG) from which the neural network could select the relevant entities to insert in the summary. However, creating a KG for the summarization task was challenging: let us suppose we extracted all the entities present in the text and we created the KG from them, the model could select the entities that were not relevant for the summary, generating a text that was not related to the document&#x2019;s content.</p>
+        <p>As mentioned in the Introduction, we decided to create a latent graph looking at the informativeness of each sentence. The salient words could be copied into the summary via the pointer network [<xref ref-type="bibr" rid="B6-applsci-12-10382">6</xref>,<xref ref-type="bibr" rid="B7-applsci-12-10382">7</xref>]; the sentences were then seen as containers whose information must be unveiled.</p>
+        <p>The importance of a sentence to the summary was calculated by comparing it with <italic>both</italic> the current decoder state <italic>and</italic> the other sentences. The graph was, in particular, needed to compare the sentences to one another, specifically to understand whether some sentences were more informative than others.</p>
+        <p>For instance, let us suppose that we want to calculate the score for the sentence <inline-formula><mml:math id="mm55"><mml:semantics><mml:msub><mml:mi>d</mml:mi><mml:mn>1</mml:mn></mml:msub></mml:semantics></mml:math></inline-formula>. If we compare <inline-formula><mml:math id="mm56"><mml:semantics><mml:msub><mml:mi>d</mml:mi><mml:mn>1</mml:mn></mml:msub></mml:semantics></mml:math></inline-formula> with the decoder state <italic>d</italic>, we obtain a score that highlights the relevance of <inline-formula><mml:math id="mm57"><mml:semantics><mml:msub><mml:mi>d</mml:mi><mml:mn>1</mml:mn></mml:msub></mml:semantics></mml:math></inline-formula> with respect to the generated summary. Now, let us suppose that we want to calculate the score for the sentence <inline-formula><mml:math id="mm58"><mml:semantics><mml:msub><mml:mi>d</mml:mi><mml:mn>2</mml:mn></mml:msub></mml:semantics></mml:math></inline-formula>, which contains the same facts as <inline-formula><mml:math id="mm59"><mml:semantics><mml:msub><mml:mi>d</mml:mi><mml:mn>1</mml:mn></mml:msub></mml:semantics></mml:math></inline-formula> as well as some additional ones. If we compare <inline-formula><mml:math id="mm60"><mml:semantics><mml:msub><mml:mi>d</mml:mi><mml:mn>2</mml:mn></mml:msub></mml:semantics></mml:math></inline-formula> and <italic>d</italic>, we obtain its relevance with respect to the summary but not with respect to <inline-formula><mml:math id="mm61"><mml:semantics><mml:msub><mml:mi>d</mml:mi><mml:mn>1</mml:mn></mml:msub></mml:semantics></mml:math></inline-formula>. In other words, in this simpler setting, we cannot know whether a sentence is more informative than another one.</p>
+        <p>We thus constructed a graph where the vertexes were the sentences and the edge between two sentences was weighted by their cosine similarity. For simplicity, we treated the current decoder state, i.e., what the model summarized so far, as a sentence. Following the idea of Tan et al. [<xref ref-type="bibr" rid="B20-applsci-12-10382">20</xref>], we then applied the PageRank algorithm to the graph to calculate the score of each vertex, assigning high scores to informative and relevant sentences while pushing the scores of redundant sentences down; the pointer network of the model (defined in Equation (<xref ref-type="disp-formula" rid="FD7-applsci-12-10382">7</xref>)) then copied the salient words coming from the high-score sentences. <xref ref-type="fig" rid="applsci-12-10382-f002">Figure 2</xref> depicts an example of the graph score calculation:</p>
+        <p>We defined the adjacency matrix <italic>A</italic> of the graph via a bi-linear product of the sentences over which we applied the cosine similarity function, similar to the work proposed by Yao et al. [<xref ref-type="bibr" rid="B36-applsci-12-10382">36</xref>]. The cosine similarity ensured that the diagonal of <italic>A</italic> only contained values equal to 1 (because we were comparing a vector with itself), as required by graph-based models (they require that the identity matrix be added to the adjacency matrix in order to normalize the values). <xref ref-type="fig" rid="applsci-12-10382-f003">Figure 3</xref> shows an example of a graph and its adjacency matrix.</p>
+        <p>In detail, <italic>A</italic> is defined as follows, in which <inline-formula><mml:math id="mm62"><mml:semantics><mml:msub><mml:mi mathvariant="bold">d</mml:mi><mml:mi>i</mml:mi></mml:msub></mml:semantics></mml:math></inline-formula> and <inline-formula><mml:math id="mm63"><mml:semantics><mml:msub><mml:mi mathvariant="bold">d</mml:mi><mml:mi>j</mml:mi></mml:msub></mml:semantics></mml:math></inline-formula> are two sentence representations.
+        <disp-formula id="FD10-applsci-12-10382"><label>(10)</label><mml:math id="mm64" display="block"><mml:semantics><mml:mrow><mml:mi>A</mml:mi><mml:mrow><mml:mo stretchy="false">[</mml:mo><mml:mi>i</mml:mi><mml:mo>,</mml:mo><mml:mi>j</mml:mi><mml:mo stretchy="false">]</mml:mo></mml:mrow><mml:mo>=</mml:mo><mml:mi>c</mml:mi><mml:mi>o</mml:mi><mml:mi>s</mml:mi><mml:mi>i</mml:mi><mml:mi>n</mml:mi><mml:mi>e</mml:mi><mml:mrow><mml:mo stretchy="false">(</mml:mo><mml:msub><mml:mi mathvariant="bold">d</mml:mi><mml:mi>i</mml:mi></mml:msub><mml:mo>,</mml:mo><mml:msub><mml:mi mathvariant="bold">d</mml:mi><mml:mi>j</mml:mi></mml:msub><mml:mo stretchy="false">)</mml:mo></mml:mrow></mml:mrow></mml:semantics></mml:math></disp-formula></p>
+        <p>We also applied the ReLU function to the matrix <italic>A</italic> in order to remove all edges between dissimilar sentences (i.e., those with a negative cosine score). The mathematical calculation of the sentence scores is defined by Equation (<xref ref-type="disp-formula" rid="FD11-applsci-12-10382">11</xref>):<disp-formula id="FD11-applsci-12-10382"><label>(11)</label><mml:math id="mm65" display="block"><mml:semantics><mml:mrow><mml:mi mathvariant="bold">b</mml:mi><mml:mo>=</mml:mo><mml:mi>&#x3C3;</mml:mi><mml:mo stretchy="false">(</mml:mo><mml:mrow><mml:mo stretchy="false">(</mml:mo><mml:mn>1</mml:mn><mml:mo>&#x2212;</mml:mo><mml:mi>&#x3BB;</mml:mi><mml:mo stretchy="false">)</mml:mo></mml:mrow><mml:msup><mml:mrow><mml:mo stretchy="false">(</mml:mo><mml:mi>I</mml:mi><mml:mo>&#x2212;</mml:mo><mml:mi>&#x3BB;</mml:mi><mml:mspace width="0.222222em"/><mml:mi>R</mml:mi><mml:mi>e</mml:mi><mml:mi>L</mml:mi><mml:mi>U</mml:mi><mml:mrow><mml:mo stretchy="false">(</mml:mo><mml:mi>A</mml:mi><mml:mo stretchy="false">)</mml:mo></mml:mrow><mml:mspace width="0.222222em"/><mml:msup><mml:mi>D</mml:mi><mml:mrow><mml:mo>&#x2212;</mml:mo><mml:mn>1</mml:mn></mml:mrow></mml:msup><mml:mo stretchy="false">)</mml:mo></mml:mrow><mml:mrow><mml:mo>&#x2212;</mml:mo><mml:mn>1</mml:mn></mml:mrow></mml:msup><mml:mi mathvariant="bold">y</mml:mi><mml:mo stretchy="false">)</mml:mo></mml:mrow></mml:semantics></mml:math></disp-formula>
+        where <italic>I</italic> is the identity matrix, <italic>A</italic> is the adjacent matrix of the graph, <italic>D</italic> is the diagonal matrix where the <italic>i</italic>-th diagonal element is equal to the sum of the <italic>i</italic>-th column of the matrix <italic>A</italic>, and <italic>y</italic> is a one-hot vector of size <inline-formula><mml:math id="mm66"><mml:semantics><mml:mrow><mml:mi>K</mml:mi><mml:mo>+</mml:mo><mml:mn>1</mml:mn></mml:mrow></mml:semantics></mml:math></inline-formula>. It has all values equal to zero, except for the one that represents the decoder state. The scalar <inline-formula><mml:math id="mm67"><mml:semantics><mml:mi>&#x3BB;</mml:mi></mml:semantics></mml:math></inline-formula> is the dumping factor, whereas <inline-formula><mml:math id="mm68"><mml:semantics><mml:mrow><mml:mi>&#x3C3;</mml:mi><mml:mo stretchy="false">(</mml:mo><mml:mo>&#xB7;</mml:mo><mml:mo stretchy="false">)</mml:mo></mml:mrow></mml:semantics></mml:math></inline-formula> is the sigmoid function that assigns a score in the range <inline-formula><mml:math id="mm69"><mml:semantics><mml:mrow><mml:mo stretchy="false">[</mml:mo><mml:mn>0</mml:mn><mml:mo>,</mml:mo><mml:mn>1</mml:mn><mml:mo stretchy="false">]</mml:mo></mml:mrow></mml:semantics></mml:math></inline-formula> to each sentence. Unlike the softmax function that could assign the probability mass to a single sentence, the sigmoid function selects more than one sentence, allowing the model to use them either for the context vector or the pointer network.</p>
+      </sec>
+      <sec id="sec3dot2-applsci-12-10382">
+        <title>3.2. Coverage&#xA0;Method</title>
+        <p>In order to avoid word and sentence repetitions in our model, we adopted the coverage vector of See et al. [<xref ref-type="bibr" rid="B7-applsci-12-10382">7</xref>]. In other words, we modified Equation (<xref ref-type="disp-formula" rid="FD6-applsci-12-10382">6</xref>) to include it, thus obtaining:<disp-formula id="FD12-applsci-12-10382"><label>(12)</label><mml:math id="mm70" display="block"><mml:semantics><mml:mrow><mml:msubsup><mml:mi>e</mml:mi><mml:mrow><mml:mi>j</mml:mi></mml:mrow><mml:mi>t</mml:mi></mml:msubsup><mml:mo>=</mml:mo><mml:msup><mml:mi mathvariant="bold">v</mml:mi><mml:mi>T</mml:mi></mml:msup><mml:mrow><mml:mspace width="0.222222em"/><mml:mo form="prefix">tanh</mml:mo><mml:mo stretchy="false">(</mml:mo></mml:mrow><mml:msub><mml:mi mathvariant="bold">W</mml:mi><mml:mi>e</mml:mi></mml:msub><mml:mrow><mml:mspace width="0.222222em"/><mml:mo stretchy="false">[</mml:mo></mml:mrow><mml:msub><mml:mi mathvariant="bold">s</mml:mi><mml:mi>t</mml:mi></mml:msub><mml:mrow><mml:mo stretchy="false">|</mml:mo><mml:mo stretchy="false">|</mml:mo></mml:mrow><mml:msub><mml:mi mathvariant="bold">h</mml:mi><mml:mi>j</mml:mi></mml:msub><mml:mrow><mml:mo stretchy="false">|</mml:mo><mml:mo stretchy="false">|</mml:mo></mml:mrow><mml:msub><mml:mi mathvariant="bold">cov</mml:mi><mml:mi>t</mml:mi></mml:msub><mml:mrow><mml:mo stretchy="false">]</mml:mo><mml:mo>+</mml:mo><mml:msub><mml:mi>b</mml:mi><mml:mi>e</mml:mi></mml:msub><mml:mo stretchy="false">)</mml:mo></mml:mrow></mml:mrow></mml:semantics></mml:math></disp-formula></p>
+        <p>Finally, we used the auxiliary loss proposed by See et al. [<xref ref-type="bibr" rid="B7-applsci-12-10382">7</xref>] to penalize the overlapping between the attention distribution and the coverage vector:<disp-formula id="FD13-applsci-12-10382"><label>(13)</label><mml:math id="mm71" display="block"><mml:semantics><mml:mrow><mml:mi>c</mml:mi><mml:mi>o</mml:mi><mml:mi>v</mml:mi><mml:mi>l</mml:mi><mml:mi>o</mml:mi><mml:mi>s</mml:mi><mml:mi>s</mml:mi><mml:mo>=</mml:mo><mml:munderover><mml:mo>&#x2211;</mml:mo><mml:mrow><mml:mi>i</mml:mi><mml:mo>=</mml:mo><mml:mn>1</mml:mn></mml:mrow><mml:mi>N</mml:mi></mml:munderover><mml:munderover><mml:mo>&#x2211;</mml:mo><mml:mrow><mml:mi>j</mml:mi><mml:mo>=</mml:mo><mml:mn>1</mml:mn></mml:mrow><mml:mi>M</mml:mi></mml:munderover><mml:mrow><mml:mi>m</mml:mi><mml:mi>i</mml:mi><mml:mi>n</mml:mi><mml:mo stretchy="false">(</mml:mo><mml:msubsup><mml:mi>a</mml:mi><mml:mi>j</mml:mi><mml:mi>i</mml:mi></mml:msubsup><mml:mo>,</mml:mo><mml:mi>c</mml:mi><mml:mi>o</mml:mi><mml:msubsup><mml:mi>v</mml:mi><mml:mi>j</mml:mi><mml:mi>i</mml:mi></mml:msubsup><mml:mo stretchy="false">)</mml:mo></mml:mrow></mml:mrow></mml:semantics></mml:math></disp-formula></p>
+        <p>During the experiments with the coverage loss, we noticed that the model was producing semantically incorrect summaries. In our opinion, this was because the coverage loss had an impact on the attention and an indirect impact on the sentence-level scores and representations, invalidating part of the training.</p>
+        <p>We therefore decided to use such a loss in the inference time in order to guide the model in selecting the words that minimized the overlap between the attention and the coverage vector. We combined <italic>covloss</italic> with the reinforcement learning q-function since the latter was capable of adapting to the environment, selecting the best action (in this case, the best word to generate) at each time step. We had to specify that the resulting function was not a q-learning one, i.e., that it did not calculate a score for each state (time step) and action (generated word). We then defined the score function, called <italic>covscore</italic>, as in Equation (<xref ref-type="disp-formula" rid="FD14-applsci-12-10382">14</xref>). <italic>Covscore</italic> was added to the score function of the beam search; at <inline-formula><mml:math id="mm72"><mml:semantics><mml:mrow><mml:mi>t</mml:mi><mml:mo>=</mml:mo><mml:mn>0</mml:mn></mml:mrow></mml:semantics></mml:math></inline-formula>, <inline-formula><mml:math id="mm73"><mml:semantics><mml:mrow><mml:mi>c</mml:mi><mml:mi>o</mml:mi><mml:mi>v</mml:mi><mml:mi>s</mml:mi><mml:mi>c</mml:mi><mml:mi>o</mml:mi><mml:mi>r</mml:mi><mml:msub><mml:mi>e</mml:mi><mml:mi>t</mml:mi></mml:msub><mml:mo>=</mml:mo><mml:mn>0</mml:mn></mml:mrow></mml:semantics></mml:math></inline-formula>.
+        <disp-formula id="FD14-applsci-12-10382"><label>(14)</label><mml:math id="mm74" display="block"><mml:semantics><mml:mrow><mml:mi>c</mml:mi><mml:mi>o</mml:mi><mml:mi>v</mml:mi><mml:mi>s</mml:mi><mml:mi>c</mml:mi><mml:mi>o</mml:mi><mml:mi>r</mml:mi><mml:msub><mml:mi>e</mml:mi><mml:mi>t</mml:mi></mml:msub><mml:mo>=</mml:mo><mml:mi>c</mml:mi><mml:mi>o</mml:mi><mml:mi>v</mml:mi><mml:mi>s</mml:mi><mml:mi>c</mml:mi><mml:mi>o</mml:mi><mml:mi>r</mml:mi><mml:msub><mml:mi>e</mml:mi><mml:mrow><mml:mi>t</mml:mi><mml:mo>&#x2212;</mml:mo><mml:mn>1</mml:mn></mml:mrow></mml:msub><mml:mo>+</mml:mo><mml:mstyle scriptlevel="0" displaystyle="true"><mml:mfrac><mml:mn>1</mml:mn><mml:mi>t</mml:mi></mml:mfrac></mml:mstyle><mml:mrow><mml:mo stretchy="false">(</mml:mo><mml:mi>c</mml:mi><mml:mi>o</mml:mi><mml:mi>v</mml:mi><mml:mi>l</mml:mi><mml:mi>o</mml:mi><mml:mi>s</mml:mi><mml:msub><mml:mi>s</mml:mi><mml:mi>t</mml:mi></mml:msub><mml:mo>&#x2212;</mml:mo><mml:mi>c</mml:mi><mml:mi>o</mml:mi><mml:mi>v</mml:mi><mml:mi>s</mml:mi><mml:mi>c</mml:mi><mml:mi>o</mml:mi><mml:mi>r</mml:mi><mml:msub><mml:mi>e</mml:mi><mml:mrow><mml:mi>t</mml:mi><mml:mo>&#x2212;</mml:mo><mml:mn>1</mml:mn></mml:mrow></mml:msub><mml:mo stretchy="false">)</mml:mo></mml:mrow></mml:mrow></mml:semantics></mml:math></disp-formula></p>
+      </sec>
+    </sec>
+    <sec id="sec4-applsci-12-10382">
+      <title>4. Evaluation</title>
+      <p>We trained and tested the proposed model on the <italic>CNN/DailyMail</italic> dataset [<xref ref-type="bibr" rid="B37-applsci-12-10382">37</xref>], which contains online articles paired with multi-sentence summaries. We used the script supplied by Nallapati et al. [<xref ref-type="bibr" rid="B4-applsci-12-10382">4</xref>] to obtain the same version of their dataset that consists of 287,226 training pairs, 13,368 validation pairs and 11,490 test pairs. Each article has 781 tokens on average, whereas each summary has 3.75 sentences and 56 tokens on average. We used the <italic>non-anonymized</italic> version of the dataset (please see Chen et al. [<xref ref-type="bibr" rid="B38-applsci-12-10382">38</xref>] for problems regarding the anonymized version).</p>
+      <p>The model has 256 dimensional hidden layers and 128 dimensional embedding layers. Following See et al. [<xref ref-type="bibr" rid="B7-applsci-12-10382">7</xref>], we used a small vocabulary that included 50 k tokens for both the source and target. We set the dumping factor <inline-formula><mml:math id="mm75"><mml:semantics><mml:mi>&#x3BB;</mml:mi></mml:semantics></mml:math></inline-formula> to 0.9. All the weights were initialized with a normal distribution, with a mean of 0 and a standard deviation of 0.1. The model was trained using AdaGrad [<xref ref-type="bibr" rid="B39-applsci-12-10382">39</xref>], with a learning rate of 0.15. We also used gradient clipping with a gradient norm of 2.0 and dropout [<xref ref-type="bibr" rid="B40-applsci-12-10382">40</xref>] with a probability of 0.2 (keep probability of 0.8) to improve model generalization. We used the loss on the validation set for early stopping.</p>
+      <p>The training was performed on a single GPU RTX 2080Ti, with a batch size of 8. At testing time, we used a beam size of 5 and an <inline-formula><mml:math id="mm76"><mml:semantics><mml:mi>&#x3B1;</mml:mi></mml:semantics></mml:math></inline-formula> value of 1.4 for Gehrmann et al. [<xref ref-type="bibr" rid="B21-applsci-12-10382">21</xref>]&#x2019;s score function. We set the maximum number of encoder input sentences to 8. We truncated the length of each sentence to 50 tokens and the length of the summary to 100 tokens in order to speed up the convergence of the model. We trained the model for about 1,200,000 iterations. The training of the model took about 5 days of computation. <xref ref-type="table" rid="applsci-12-10382-t001">Table 1</xref> reports the hyperparameters and their setting.</p>
+      <p>We compared the proposed model with the following state-of-the-art works:<list list-type="bullet"><list-item><p>See et al. [<xref ref-type="bibr" rid="B7-applsci-12-10382">7</xref>]&#x2019;s pointer generation model, which used the pointer network and the coverage method as in our proposal;</p></list-item><list-item><p>Nallapati et al. [<xref ref-type="bibr" rid="B4-applsci-12-10382">4</xref>]&#x2019;s models, as it employed the hierarchical encoder with the two-level attention mechanism and a pointer network;</p></list-item><list-item><p>Hsu et al. [<xref ref-type="bibr" rid="B22-applsci-12-10382">22</xref>]&#x2019;s model, as it used the same equation to combine the two attention distributions;</p></list-item><list-item><p>Tan et al. [<xref ref-type="bibr" rid="B20-applsci-12-10382">20</xref>]&#x2019;s abstractive model, for its hierarchical structure, which was also extended to the decoder.</p></list-item></list></p>
+      <sec sec-type="results" id="sec4dot1-applsci-12-10382">
+        <title>4.1. Results</title>
+        <p><xref ref-type="table" rid="applsci-12-10382-t002">Table 2</xref> shows the Rouge scores (Rouge-1, Rouge-2, and Rouge-L) [<xref ref-type="bibr" rid="B41-applsci-12-10382">41</xref>] of the models. Our models &#x201C;<italic>our model + coverage</italic>&#x201D; and &#x201C;<italic>our model + coverage + covscore</italic>&#x201D; obtained higher R-1 and R-2 scores than Nallapati et al.&#x2019;s models. We suspect that our models had a low R-L due to their high abstraction power since the generated summaries contained tokens that were not present in the reference one; the longest common sub-sequence was short.</p>
+        <p>We noticed that the auxiliary loss did not improve the Rouge scores. Since the auxiliary loss modified the attention scores, it also impacted on the sentence-level scores and shook the sentence representations, invalidating part of the training. This was supported by the fact that the covloss incremented the loss in the validation set from <inline-formula><mml:math id="mm77"><mml:semantics><mml:mrow><mml:mn>3.5</mml:mn></mml:mrow></mml:semantics></mml:math></inline-formula> to <inline-formula><mml:math id="mm78"><mml:semantics><mml:mrow><mml:mn>3.8</mml:mn></mml:mrow></mml:semantics></mml:math></inline-formula> rather than decreasing it.</p>
+        <p>In light of these results, we can conclude that the proposed graph-based sentence-level attention generally performed better than the sentence-level attention proposed by Nallapati et al. [<xref ref-type="bibr" rid="B4-applsci-12-10382">4</xref>]. It allowed for the generation of more abstractive summaries, as reported in <xref ref-type="sec" rid="sec4dot3-applsci-12-10382">Section 4.3</xref>, at the cost of sacrificing recall. In more detail, since the Rouge score only evaluates the presence of tokens in the generated summary of the reference model, it indirectly penalizes models that use synonyms and periphrasis. Indeed, our best model had very high precision (<inline-formula><mml:math id="mm79"><mml:semantics><mml:mrow><mml:mn>41.76</mml:mn></mml:mrow></mml:semantics></mml:math></inline-formula> for R-1, <inline-formula><mml:math id="mm80"><mml:semantics><mml:mrow><mml:mn>16.27</mml:mn></mml:mrow></mml:semantics></mml:math></inline-formula> for R-2, and <inline-formula><mml:math id="mm81"><mml:semantics><mml:mrow><mml:mn>27.16</mml:mn></mml:mrow></mml:semantics></mml:math></inline-formula> for R-L) but very low recall (<inline-formula><mml:math id="mm82"><mml:semantics><mml:mrow><mml:mn>33.22</mml:mn></mml:mrow></mml:semantics></mml:math></inline-formula> for R-1, <inline-formula><mml:math id="mm83"><mml:semantics><mml:mrow><mml:mn>13.03</mml:mn></mml:mrow></mml:semantics></mml:math></inline-formula> for R-2, and <inline-formula><mml:math id="mm84"><mml:semantics><mml:mrow><mml:mn>21.50</mml:mn></mml:mrow></mml:semantics></mml:math></inline-formula> for R-L). This is also the reason why our models had lower Rouge scores than those of See et al. [<xref ref-type="bibr" rid="B7-applsci-12-10382">7</xref>], whose models were more oriented toward copying words from the input document than generating novel ones.</p>
+        <p>Finally, our models underperformed with respect to those in Hsu et al. [<xref ref-type="bibr" rid="B22-applsci-12-10382">22</xref>] and Tan et al. [<xref ref-type="bibr" rid="B20-applsci-12-10382">20</xref>]. This was expected since their models had a more complex architecture and used more complex features. The model of Hsu et al. [<xref ref-type="bibr" rid="B22-applsci-12-10382">22</xref>] is composed of two trained models: an extractive model to select the sentences that are useful for the summary and an abstractive one to digest them; our models, instead, were jointly trained to compute a score for each sentence and generate a summary. The model of Tan et al. [<xref ref-type="bibr" rid="B20-applsci-12-10382">20</xref>] first generates a sentence decoder state then generates the words of a sentence using the word-level attention and the pointer network. Compared to our models, which only combine both attentions and require fewer resources to be trained, theirs is resource-intensive because the hierarchical decoder adds a further million parameters, having a positive impact on the results.</p>
+        <p><xref ref-type="fig" rid="applsci-12-10382-f004">Figure 4</xref> shows an example of the generated summaries. From the table, it can be seen that our model produced a good summary. There was only an error caused by the phrase &#x201C;<italic>somalia&#x2019;s internationally recognized government that had been under pressure from al-shabaab</italic>&#x201D; because it was attached to the previous sentence, which was semantically distinct from the latter phrase. The adoption of the coverage vector corrected the error and the use of the coverage loss slightly improved the summary. The use of the <italic>covscore</italic> function modified part of the summary, including more details about the &#x201C;beliefs&#x201D; of the terrorist group.</p>
+        <p><xref ref-type="fig" rid="applsci-12-10382-f005">Figure 5</xref> shows the average percentage of duplicate n-grams. The measure gives an insight into both the reasons behind the low Rouge F1 scores and the impact of the coverage vector; in detail, a model with duplicate tokens in the summary could have low Rouge F1 scores because those repetitions prevented the generation of relevant terms while stretching the summary until it satisfied the minimum length. We computed the average percentage of duplicate n-grams as follows: for each method, we counted the number of repeated n-grams (from 1-grams to 4-grams) in the generated summaries, and we divided this by the length of the summary. From the figure, it is possible to observe that the coverage vector reduced the repetitions. Such a value was further reduced with the application of the coverage loss but it did not improve the Rouge scores as reported in <xref ref-type="table" rid="applsci-12-10382-t002">Table 2</xref>. Finally, the application of the <italic>covscore</italic> function produced summaries with an average n-gram repetition that was close to the reference ones.</p>
+        <p>Finally, we compared the summaries in terms of the <italic>readability</italic> and <italic>relevance</italic> scores; the former expresses the quality of the summary in terms of punctuation, syntax, and semantic coherency, whereas the latter expresses whether the summary captured all the salient information from the input document. Both metrics were in the range <inline-formula><mml:math id="mm85"><mml:semantics><mml:mrow><mml:mo stretchy="false">[</mml:mo><mml:mn>1</mml:mn></mml:mrow></mml:semantics></mml:math></inline-formula>, <inline-formula><mml:math id="mm86"><mml:semantics><mml:mrow><mml:mn>10</mml:mn><mml:mo stretchy="false">]</mml:mo></mml:mrow></mml:semantics></mml:math></inline-formula>. Following Paulus et al. [<xref ref-type="bibr" rid="B6-applsci-12-10382">6</xref>], we randomly selected 100 generated summaries by &#x201C;<italic>our model + coverage + covscore</italic>&#x201D; and we asked three annotators to evaluate them. For a better comparison, we also extracted the same summaries from Hsu et al. [<xref ref-type="bibr" rid="B22-applsci-12-10382">22</xref>]&#x2019;s model and Tan et al. [<xref ref-type="bibr" rid="B20-applsci-12-10382">20</xref>]&#x2019;s model.</p>
+        <p><xref ref-type="table" rid="applsci-12-10382-t003">Table 3</xref> shows the inter-annotator agreement for both <italic>readability</italic> and <italic>relevance</italic>. From the table, we can see that our model had, in general, very high agreement, i.e., the annotators agreed on the same scores, with a <italic>p</italic>-value of <inline-formula><mml:math id="mm87"><mml:semantics><mml:mrow><mml:mn>0.26</mml:mn></mml:mrow></mml:semantics></mml:math></inline-formula>. This was only surpassed by Hsu et al.&#x2019;s model for the <italic>relevance</italic> score; however, in this latter model, the annotators were discordant for the <italic>readability</italic> score. Indeed, it had a <italic>p</italic>-value of <inline-formula><mml:math id="mm88"><mml:semantics><mml:mrow><mml:mn>0.25</mml:mn></mml:mrow></mml:semantics></mml:math></inline-formula>. Finally, Tan et al.&#x2019;s model had very low agreement, meaning that the annotators did not agree on the scores, with a <italic>p</italic>-value lower than 1 <inline-formula><mml:math id="mm89"><mml:semantics><mml:mrow><mml:mo>&#xD7;</mml:mo><mml:msup><mml:mn>10</mml:mn><mml:mrow><mml:mo>&#x2212;</mml:mo><mml:mn>5</mml:mn></mml:mrow></mml:msup></mml:mrow></mml:semantics></mml:math></inline-formula>.</p>
+        <p><xref ref-type="table" rid="applsci-12-10382-t004">Table 4</xref> reports the results of the two metrics. The results show that Hsu et al. [<xref ref-type="bibr" rid="B22-applsci-12-10382">22</xref>]&#x2019;s model obtained very high scores because it selected the relevant sentences in an offline manner (the sentence extractor model). It is interesting to notice that the model of Tan et al. [<xref ref-type="bibr" rid="B20-applsci-12-10382">20</xref>] had very low readability and relevance scores, despite obtaining very high Rouge scores. This means that the model generated summaries that would not completely satisfy human readers. Our model instead had a very high relevance score since it copied portions of the input document into the summary. However, the readability was not so high, meaning that it mostly truncated the copied sentences without merging them into a coherent summary. Also, our model outperformed Tan et al. [<xref ref-type="bibr" rid="B20-applsci-12-10382">20</xref>]&#x2019;s model for both the <italic>readability</italic> and <italic>relevance</italic> scores, despite obtaining lower Rouge scores.</p>
+      </sec>
+      <sec id="sec4dot2-applsci-12-10382">
+        <title>4.2. Attention Scores&#xA0;Analysis</title>
+        <p>In this section, we evaluate the scores generated by the model both at the sentence level and word level. Plotting the scores helps to understand the model&#x2019;s behavior since neural networks are blackboxes. For our analysis, we selected a summary generated by &#x201C;<italic>our model + coverage + covscore</italic>&#x201D; from the testset.</p>
+        <p><xref ref-type="fig" rid="applsci-12-10382-f006">Figure 6</xref> shows the sentence-level scores generated by the network; it can be seen that the model mainly focused on the first sentence (dark colors) since it found it relevant for the summary. Thus, the model copied part of this sentence into the summary, as shown in <xref ref-type="fig" rid="applsci-12-10382-f007">Figure 7</xref>. These figures demonstrate the ability of the network to find the most informative sentence and to select the relevant words from it.</p>
+        <p>Nevertheless, the model copied a large portion of the sentence rather than just selecting the relevant words. This could lead to swiftly generated summaries that miss the salient information since the model arrived at the maximum permitted length for the summary (which was set to 100 tokens) without being able to incorporate all relevant text and entities.</p>
+      </sec>
+      <sec id="sec4dot3-applsci-12-10382">
+        <title>4.3. Abstractiveness of the&#xA0;Models</title>
+        <p>One important point to evaluate is the capability of the models to generate abstractive summaries. This requires the model to perform complex operations such as using synonyms and periphrasis, which could decrease the likelihood of matching the reference summaries. To evaluate the abstractiveness of the models, we calculated the average percentage of novel n-grams, which measures the capability of a neural network to generate n-grams that are not present in the reference summary. A low percentage of this measure means that the network is more conservative and tends to use words that appear in the document, whereas a high percentage means that the network is abstractive and tends to generate summaries that contain synonyms and periphrasis.</p>
+        <p><xref ref-type="fig" rid="applsci-12-10382-f008">Figure 8</xref> depicts the percentage of novel n-grams occurring in the generated summaries. We computed these percentages in the following way: for each n-gram (1-grams to 4-grams), we counted how many (unique) n-grams in the generated summary were not present in the reference summary. Then, we divided this by the total number of (unique) n-grams in the generated summary. The figure shows that our model had a high percentage of novel n-grams. These values remained stable with the adoption of the coverage vector, meaning that the model was using all the relevant words. Finally, the coverage loss increased the number of novel n-grams due to the generation errors of the model, i.e., the model tended to generate summaries that contained words not related to the topic of the document. The application of the <italic>covscore</italic> function slightly increased the number of novel n-grams.</p>
+        <p>We also computed the average <inline-formula><mml:math id="mm90"><mml:semantics><mml:mi>&#x3B2;</mml:mi></mml:semantics></mml:math></inline-formula> value of Equation (<xref ref-type="disp-formula" rid="FD7-applsci-12-10382">7</xref>) to check if the models were more oriented toward the vocabulary or the pointer network. <xref ref-type="table" rid="applsci-12-10382-t005">Table 5</xref> shows the average <inline-formula><mml:math id="mm91"><mml:semantics><mml:mi>&#x3B2;</mml:mi></mml:semantics></mml:math></inline-formula> value for each model, which was over <inline-formula><mml:math id="mm92"><mml:semantics><mml:mrow><mml:mn>0.90</mml:mn></mml:mrow></mml:semantics></mml:math></inline-formula>. This value shows that the models used the vocabulary to generate the summaries, rarely relying only on the pointer network.</p>
+      </sec>
+    </sec>
+    <sec sec-type="conclusions" id="sec5-applsci-12-10382">
+      <title>5. Conclusions</title>
+      <p>In this paper, we presented a novel NN-based model for TS. The model used a hierarchical encoder to obtain both word and sentence representations. Then, it computed a score for each sentence that expressed its importance with respect to the other sentences. These scores were then used to adjust the word-level attention scores, ensuring that the model focused only on the important words. Furthermore, since we used a pointer network model, the model only copied the words coming from the informative sentences into the summary.</p>
+      <p>The model that used the coverage vector performed better than the models of Nallapati et al. [<xref ref-type="bibr" rid="B4-applsci-12-10382">4</xref>]; however, our models had lower scores (about 2 Rouge points) than See et al. [<xref ref-type="bibr" rid="B7-applsci-12-10382">7</xref>]&#x2019;s models and did not surpass Hsu et al. [<xref ref-type="bibr" rid="B22-applsci-12-10382">22</xref>]&#x2019;s model and Tan et al. [<xref ref-type="bibr" rid="B20-applsci-12-10382">20</xref>]&#x2019;s model.</p>
+      <p>We found our model had high abstractive power, i.e., the ability to use synonyms and periphrases, as confirmed by both the novelty scores (see <xref ref-type="fig" rid="applsci-12-10382-f008">Figure 8</xref>) and the <inline-formula><mml:math id="mm93"><mml:semantics><mml:mi>&#x3B2;</mml:mi></mml:semantics></mml:math></inline-formula> values (see <xref ref-type="table" rid="applsci-12-10382-t005">Table 5</xref>). Finally, we outperformed Tan et al. [<xref ref-type="bibr" rid="B20-applsci-12-10382">20</xref>]&#x2019;s model in terms of the <italic>readability</italic> and <italic>relevance</italic> scores [<xref ref-type="bibr" rid="B6-applsci-12-10382">6</xref>].</p>
+      <p>In future works, we are interested in improving the recall of the model, which was its weakness. To increment the recall, we think that the use of topics generated by an LDA model [<xref ref-type="bibr" rid="B42-applsci-12-10382">42</xref>] could be useful since they capture the semantic content and the domain style of the document, tying the summary to it. We also plan to improve the graph-based sentence-level attention, which showed very good results. We intend to follow Hsu et al. [<xref ref-type="bibr" rid="B22-applsci-12-10382">22</xref>]&#x2019;s idea, training the sentence-level attention (via loss function) to recognize the best sentences for the summary. However, the method proposed by Hsu et al. [<xref ref-type="bibr" rid="B22-applsci-12-10382">22</xref>] cannot be directly adopted; we have to define a loss that can adapt to the generated summary, identifying the best sentences and penalizing the model in case it does not select them.</p>
+      <p>Another interesting research direction would be to integrate an external knowledge base (KB) with the model; in this case, we have to develop a classifier to discern the entities that are relevant to the summary from those that are not. This task would require the annotation of a dataset with the correct KB entities for the summary. We think that reasoning on the graph would reduce the copying behavior demonstrated by the pointer-network.</p>
+      <p>Finally, we plan to study how to improve the <italic>covscore</italic> function since it slightly increased the performance of the model while reducing the redundancy and attention errors.</p>
+    </sec>
+  </body>
+  <back>
+    <notes>
+      <title>Author Contributions</title>
+      <p>Conceptualization, G.S. and L.R.; methodology, G.S.; software, G.S.; validation, G.S. and L.R.; formal analysis, G.S. and L.R.; investigation, G.S.; writing&#x2014;review and editing, G.S. and L.R.; visualization, G.S.; supervision, L.R. All authors have read and agreed to the published version of the manuscript.</p>
+    </notes>
+    <notes>
+      <title>Data Availability Statement</title>
+      <p>Not applicable.</p>
+    </notes>
+    <ack>
+      <title>Acknowledgments</title>
+      <p>Livio Robaldo has been supported by the Legal Innovation Lab Wales operation within Swansea University&#x2019;s Hillary Rodham Clinton School of Law. The operation has been partly funded by the European Regional Development Fund through the Welsh Government.</p>
+    </ack>
+    <notes notes-type="COI-statement">
+      <title>Conflicts of Interest</title>
+      <p>The authors declare no conflict of interest. The funders had no role in the design of the study; in the collection, analyses, or interpretation of data; in the writing of the manuscript; or in the decision to publish the results.</p>
+    </notes>
+    <ref-list>
+      <title>References</title>
+      <ref id="B1-applsci-12-10382">
+        <label>1.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Sutskever</surname>
+              <given-names>I.</given-names>
+            </name>
+            <name>
+              <surname>Vinyals</surname>
+              <given-names>O.</given-names>
+            </name>
+            <name>
+              <surname>Le</surname>
+              <given-names>Q.V.</given-names>
+            </name>
+          </person-group>
+          <article-title>Sequence to sequence learning with neural networks</article-title>
+          <source>Adv. Neural Inf. Process. Syst.</source>
+          <year>2014</year>
+          <volume>27</volume>
+          <fpage>3104</fpage>
+          <lpage>3112</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B2-applsci-12-10382">
+        <label>2.</label>
+        <element-citation publication-type="confproc">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Cho</surname>
+              <given-names>K.</given-names>
+            </name>
+            <name>
+              <surname>Van Merri&#xEB;nboer</surname>
+              <given-names>B.</given-names>
+            </name>
+            <name>
+              <surname>Gulcehre</surname>
+              <given-names>C.</given-names>
+            </name>
+            <name>
+              <surname>Bahdanau</surname>
+              <given-names>D.</given-names>
+            </name>
+            <name>
+              <surname>Bougares</surname>
+              <given-names>F.</given-names>
+            </name>
+            <name>
+              <surname>Schwenk</surname>
+              <given-names>H.</given-names>
+            </name>
+            <name>
+              <surname>Bengio</surname>
+              <given-names>Y.</given-names>
+            </name>
+          </person-group>
+          <article-title>Learning phrase representations using RNN encoder-decoder for statistical machine translation</article-title>
+          <source>Proceedings of the 2014 Conference on Empirical Methods in Natural Language Processing (EMNLP)</source>
+          <conf-loc>Doha, Qatar</conf-loc>
+          <conf-date>25&#x2013;29 October 2014</conf-date>
+          <fpage>1724</fpage>
+          <lpage>1734</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B3-applsci-12-10382">
+        <label>3.</label>
+        <element-citation publication-type="confproc">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Rush</surname>
+              <given-names>A.M.</given-names>
+            </name>
+            <name>
+              <surname>Chopra</surname>
+              <given-names>S.</given-names>
+            </name>
+            <name>
+              <surname>Weston</surname>
+              <given-names>J.</given-names>
+            </name>
+          </person-group>
+          <article-title>A neural attention model for abstractive sentence summarization</article-title>
+          <source>Proceedings of the 2015 Conference on Empirical Methods in Natural Language Processing</source>
+          <conf-loc>Lisbon, Portugal</conf-loc>
+          <conf-date>17&#x2013;21 September 2015</conf-date>
+          <fpage>379</fpage>
+          <lpage>389</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B4-applsci-12-10382">
+        <label>4.</label>
+        <element-citation publication-type="confproc">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Nallapati</surname>
+              <given-names>R.</given-names>
+            </name>
+            <name>
+              <surname>Zhou</surname>
+              <given-names>B.</given-names>
+            </name>
+            <name>
+              <surname>Gulcehre</surname>
+              <given-names>C.</given-names>
+            </name>
+            <name>
+              <surname>Xiang</surname>
+              <given-names>B.</given-names>
+            </name>
+          </person-group>
+          <article-title>Abstractive text summarization using sequence-to-sequence rnns and beyond</article-title>
+          <source>Proceedings of the 20th SIGNLL Conference on Computational Natural Language Learning (CoNLL)</source>
+          <conf-loc>Berlin, Germany</conf-loc>
+          <conf-date>11&#x2013;12 August 2016</conf-date>
+          <fpage>280</fpage>
+          <lpage>290</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B5-applsci-12-10382">
+        <label>5.</label>
+        <element-citation publication-type="confproc">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Chopra</surname>
+              <given-names>S.</given-names>
+            </name>
+            <name>
+              <surname>Auli</surname>
+              <given-names>M.</given-names>
+            </name>
+            <name>
+              <surname>Rush</surname>
+              <given-names>A.M.</given-names>
+            </name>
+          </person-group>
+          <article-title>Abstractive sentence summarization with attentive recurrent neural networks</article-title>
+          <source>Proceedings of the 2016 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies</source>
+          <conf-loc>San Diego, CA, USA</conf-loc>
+          <conf-date>12&#x2013;17 June 2016</conf-date>
+          <fpage>93</fpage>
+          <lpage>98</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B6-applsci-12-10382">
+        <label>6.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Paulus</surname>
+              <given-names>R.</given-names>
+            </name>
+            <name>
+              <surname>Xiong</surname>
+              <given-names>C.</given-names>
+            </name>
+            <name>
+              <surname>Socher</surname>
+              <given-names>R.</given-names>
+            </name>
+          </person-group>
+          <article-title>A deep reinforced model for abstractive summarization</article-title>
+          <source>arXiv</source>
+          <year>2018</year>
+          <pub-id pub-id-type="arxiv">1705.04304</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B7-applsci-12-10382">
+        <label>7.</label>
+        <element-citation publication-type="confproc">
+          <person-group person-group-type="author">
+            <name>
+              <surname>See</surname>
+              <given-names>A.</given-names>
+            </name>
+            <name>
+              <surname>Liu</surname>
+              <given-names>P.J.</given-names>
+            </name>
+            <name>
+              <surname>Manning</surname>
+              <given-names>C.D.</given-names>
+            </name>
+          </person-group>
+          <article-title>Get to the point: Summarization with pointer-generator networks</article-title>
+          <source>Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics</source>
+          <conf-loc>Vancouver, CR, Canada</conf-loc>
+          <conf-date>30 July&#x2013;4 August 2017</conf-date>
+          <volume>Volume 1</volume>
+          <fpage>1073</fpage>
+          <lpage>1083</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B8-applsci-12-10382">
+        <label>8.</label>
+        <element-citation publication-type="book">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Wang</surname>
+              <given-names>Y.</given-names>
+            </name>
+            <name>
+              <surname>Zhang</surname>
+              <given-names>H.</given-names>
+            </name>
+            <name>
+              <surname>Liu</surname>
+              <given-names>Y.</given-names>
+            </name>
+            <name>
+              <surname>Xie</surname>
+              <given-names>H.</given-names>
+            </name>
+          </person-group>
+          <article-title>KG-to-text generation with slot-attention and link-attention</article-title>
+          <source>CCF International Conference on Natural Language Processing and Chinese Computing</source>
+          <publisher-name>Springer</publisher-name>
+          <publisher-loc>Berlin/Heidelberg, Germany</publisher-loc>
+          <year>2019</year>
+          <fpage>223</fpage>
+          <lpage>234</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B9-applsci-12-10382">
+        <label>9.</label>
+        <element-citation publication-type="confproc">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Hayashi</surname>
+              <given-names>H.</given-names>
+            </name>
+            <name>
+              <surname>Hu</surname>
+              <given-names>Z.</given-names>
+            </name>
+            <name>
+              <surname>Xiong</surname>
+              <given-names>C.</given-names>
+            </name>
+            <name>
+              <surname>Neubig</surname>
+              <given-names>G.</given-names>
+            </name>
+          </person-group>
+          <article-title>Latent relation language models</article-title>
+          <source>Proceedings of the AAAI Conference on Artificial Intelligence</source>
+          <conf-loc>New York, NY, USA</conf-loc>
+          <conf-date>7&#x2013;12 February 2020</conf-date>
+          <volume>Volume 34</volume>
+          <fpage>7911</fpage>
+          <lpage>7918</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B10-applsci-12-10382">
+        <label>10.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Liu</surname>
+              <given-names>Q.</given-names>
+            </name>
+            <name>
+              <surname>Yogatama</surname>
+              <given-names>D.</given-names>
+            </name>
+            <name>
+              <surname>Blunsom</surname>
+              <given-names>P.</given-names>
+            </name>
+          </person-group>
+          <article-title>Relational Memory-Augmented Language Models</article-title>
+          <source>Trans. Assoc. Comput. Linguist.</source>
+          <year>2022</year>
+          <volume>10</volume>
+          <fpage>555</fpage>
+          <lpage>572</lpage>
+          <pub-id pub-id-type="doi">10.1162/tacl_a_00476</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B11-applsci-12-10382">
+        <label>11.</label>
+        <element-citation publication-type="confproc">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Hu</surname>
+              <given-names>Z.</given-names>
+            </name>
+            <name>
+              <surname>Cheng</surname>
+              <given-names>L.</given-names>
+            </name>
+            <name>
+              <surname>Wang</surname>
+              <given-names>D.</given-names>
+            </name>
+            <name>
+              <surname>Niu</surname>
+              <given-names>W.</given-names>
+            </name>
+            <name>
+              <surname>Ma</surname>
+              <given-names>J.</given-names>
+            </name>
+            <name>
+              <surname>Mo</surname>
+              <given-names>F.</given-names>
+            </name>
+          </person-group>
+          <article-title>A Novel GCN Architecture for Text Generation from Knowledge Graphs: Full Node Embedded Strategy and Context Gate with Copy and Penalty Mechanism</article-title>
+          <source>Proceedings of the International Conference on Frontiers of Electronics, Information and Computation Technologies</source>
+          <conf-loc>Wuhan, China</conf-loc>
+          <conf-date>19&#x2013;21 August 2021</conf-date>
+          <fpage>1</fpage>
+          <lpage>5</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B12-applsci-12-10382">
+        <label>12.</label>
+        <element-citation publication-type="confproc">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Huang</surname>
+              <given-names>X.</given-names>
+            </name>
+            <name>
+              <surname>Zhang</surname>
+              <given-names>J.</given-names>
+            </name>
+            <name>
+              <surname>Li</surname>
+              <given-names>D.</given-names>
+            </name>
+            <name>
+              <surname>Li</surname>
+              <given-names>P.</given-names>
+            </name>
+          </person-group>
+          <article-title>Knowledge graph embedding based question answering</article-title>
+          <source>Proceedings of the Twelfth ACM International Conference on Web Search and Data MINING</source>
+          <conf-loc>Melbourne, VIC, Australia</conf-loc>
+          <conf-date>11&#x2013;15 February 2019</conf-date>
+          <fpage>105</fpage>
+          <lpage>113</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B13-applsci-12-10382">
+        <label>13.</label>
+        <element-citation publication-type="confproc">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Saxena</surname>
+              <given-names>A.</given-names>
+            </name>
+            <name>
+              <surname>Chakrabarti</surname>
+              <given-names>S.</given-names>
+            </name>
+            <name>
+              <surname>Talukdar</surname>
+              <given-names>P.</given-names>
+            </name>
+          </person-group>
+          <article-title>Question answering over temporal knowledge graphs</article-title>
+          <source>Proceedings of the 59th Annual Meeting of the Association for Computational Linguistics</source>
+          <conf-loc>Virtual Event</conf-loc>
+          <conf-date>1&#x2013;6 August 2021</conf-date>
+          <fpage>6663</fpage>
+          <lpage>6676</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B14-applsci-12-10382">
+        <label>14.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Bosselut</surname>
+              <given-names>M.Y.H.R.A.</given-names>
+            </name>
+            <name>
+              <surname>Leskovec</surname>
+              <given-names>P.L.J.</given-names>
+            </name>
+          </person-group>
+          <article-title>QA-GNN: Reasoning with Language Models and Knowledge Graphs for Question Answering</article-title>
+          <source>arXiv</source>
+          <year>2021</year>
+          <pub-id pub-id-type="arxiv">2104.06378</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B15-applsci-12-10382">
+        <label>15.</label>
+        <element-citation publication-type="book">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Koehn</surname>
+              <given-names>P.</given-names>
+            </name>
+          </person-group>
+          <source>Statistical Machine Translation</source>
+          <publisher-name>Cambridge University Press</publisher-name>
+          <publisher-loc>Cambridge, UK</publisher-loc>
+          <year>2009</year>
+        </element-citation>
+      </ref>
+      <ref id="B16-applsci-12-10382">
+        <label>16.</label>
+        <element-citation publication-type="confproc">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Chen</surname>
+              <given-names>Y.C.</given-names>
+            </name>
+            <name>
+              <surname>Bansal</surname>
+              <given-names>M.</given-names>
+            </name>
+          </person-group>
+          <article-title>Fast Abstractive Summarization with Reinforce-Selected Sentence Rewriting</article-title>
+          <source>Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics</source>
+          <conf-loc>Melbourne, Australia</conf-loc>
+          <conf-date>15&#x2013;20 July 2018</conf-date>
+          <fpage>675</fpage>
+          <lpage>686</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B17-applsci-12-10382">
+        <label>17.</label>
+        <element-citation publication-type="confproc">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Cao</surname>
+              <given-names>Z.</given-names>
+            </name>
+            <name>
+              <surname>Li</surname>
+              <given-names>W.</given-names>
+            </name>
+            <name>
+              <surname>Li</surname>
+              <given-names>S.</given-names>
+            </name>
+            <name>
+              <surname>Wei</surname>
+              <given-names>F.</given-names>
+            </name>
+          </person-group>
+          <article-title>Retrieve, rerank and rewrite: Soft template based neural summarization</article-title>
+          <source>Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics</source>
+          <conf-loc>Melbourne, Australia</conf-loc>
+          <conf-date>15&#x2013;20 July 2018</conf-date>
+          <fpage>152</fpage>
+          <lpage>161</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B18-applsci-12-10382">
+        <label>18.</label>
+        <element-citation publication-type="confproc">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Wang</surname>
+              <given-names>K.</given-names>
+            </name>
+            <name>
+              <surname>Quan</surname>
+              <given-names>X.</given-names>
+            </name>
+            <name>
+              <surname>Wang</surname>
+              <given-names>R.</given-names>
+            </name>
+          </person-group>
+          <article-title>BiSET: Bi-directional Selective Encoding with Template for Abstractive Summarization</article-title>
+          <source>Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics</source>
+          <conf-loc>Florence, Italy</conf-loc>
+          <conf-date>28 July&#x2013;2 August 2019</conf-date>
+          <fpage>2153</fpage>
+          <lpage>2162</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B19-applsci-12-10382">
+        <label>19.</label>
+        <element-citation publication-type="confproc">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Zhou</surname>
+              <given-names>Q.</given-names>
+            </name>
+            <name>
+              <surname>Yang</surname>
+              <given-names>N.</given-names>
+            </name>
+            <name>
+              <surname>Wei</surname>
+              <given-names>F.</given-names>
+            </name>
+            <name>
+              <surname>Zhou</surname>
+              <given-names>M.</given-names>
+            </name>
+          </person-group>
+          <article-title>Selective encoding for abstractive sentence summarization</article-title>
+          <source>Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics</source>
+          <conf-loc>Vancouver, MN, Canada</conf-loc>
+          <conf-date>30 July&#x2013;4 August 2017</conf-date>
+          <volume>Volume 1</volume>
+          <fpage>1095</fpage>
+          <lpage>1104</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B20-applsci-12-10382">
+        <label>20.</label>
+        <element-citation publication-type="confproc">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Tan</surname>
+              <given-names>J.</given-names>
+            </name>
+            <name>
+              <surname>Wan</surname>
+              <given-names>X.</given-names>
+            </name>
+            <name>
+              <surname>Xiao</surname>
+              <given-names>J.</given-names>
+            </name>
+          </person-group>
+          <article-title>Abstractive document summarization with a graph-based attentional neural model</article-title>
+          <source>Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)</source>
+          <conf-loc>Vancouver, MN, Canada</conf-loc>
+          <conf-date>30 July&#x2013;4 August 2017</conf-date>
+          <volume>Volume 1</volume>
+          <fpage>1171</fpage>
+          <lpage>1181</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B21-applsci-12-10382">
+        <label>21.</label>
+        <element-citation publication-type="confproc">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Gehrmann</surname>
+              <given-names>S.</given-names>
+            </name>
+            <name>
+              <surname>Deng</surname>
+              <given-names>Y.</given-names>
+            </name>
+            <name>
+              <surname>Rush</surname>
+              <given-names>A.M.</given-names>
+            </name>
+          </person-group>
+          <article-title>Bottom-up abstractive summarization</article-title>
+          <source>Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing</source>
+          <conf-loc>Brussels, Belgium</conf-loc>
+          <conf-date>31 October&#x2013;4 November 2018</conf-date>
+          <fpage>4098</fpage>
+          <lpage>4109</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B22-applsci-12-10382">
+        <label>22.</label>
+        <element-citation publication-type="confproc">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Hsu</surname>
+              <given-names>W.T.</given-names>
+            </name>
+            <name>
+              <surname>Lin</surname>
+              <given-names>C.K.</given-names>
+            </name>
+            <name>
+              <surname>Lee</surname>
+              <given-names>M.Y.</given-names>
+            </name>
+            <name>
+              <surname>Min</surname>
+              <given-names>K.</given-names>
+            </name>
+            <name>
+              <surname>Tang</surname>
+              <given-names>J.</given-names>
+            </name>
+            <name>
+              <surname>Sun</surname>
+              <given-names>M.</given-names>
+            </name>
+          </person-group>
+          <article-title>A Unified Model for Extractive and Abstractive Summarization using Inconsistency Loss</article-title>
+          <source>Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics</source>
+          <conf-loc>Melbourne, Australia</conf-loc>
+          <conf-date>15&#x2013;20 July 2018</conf-date>
+          <fpage>132</fpage>
+          <lpage>141</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B23-applsci-12-10382">
+        <label>23.</label>
+        <element-citation publication-type="confproc">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Li</surname>
+              <given-names>W.</given-names>
+            </name>
+            <name>
+              <surname>Xiao</surname>
+              <given-names>X.</given-names>
+            </name>
+            <name>
+              <surname>Lyu</surname>
+              <given-names>Y.</given-names>
+            </name>
+            <name>
+              <surname>Wang</surname>
+              <given-names>Y.</given-names>
+            </name>
+          </person-group>
+          <article-title>Improving Neural Abstractive Document Summarization with Structural Regularization</article-title>
+          <source>Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing</source>
+          <conf-loc>Brussels, Belgium</conf-loc>
+          <conf-date>31 October&#x2013;4 November 2018</conf-date>
+          <fpage>4078</fpage>
+          <lpage>4087</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B24-applsci-12-10382">
+        <label>24.</label>
+        <element-citation publication-type="confproc">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Li</surname>
+              <given-names>W.</given-names>
+            </name>
+            <name>
+              <surname>Xiao</surname>
+              <given-names>X.</given-names>
+            </name>
+            <name>
+              <surname>Lyu</surname>
+              <given-names>Y.</given-names>
+            </name>
+            <name>
+              <surname>Wang</surname>
+              <given-names>Y.</given-names>
+            </name>
+          </person-group>
+          <article-title>Improving Neural Abstractive Document Summarization with Explicit Information Selection Modeling</article-title>
+          <source>Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing</source>
+          <conf-loc>Brussels, Belgium</conf-loc>
+          <conf-date>31 October&#x2013;4 November 2018</conf-date>
+          <fpage>1787</fpage>
+          <lpage>1796</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B25-applsci-12-10382">
+        <label>25.</label>
+        <element-citation publication-type="confproc">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Kry&#x15B;ci&#x144;ski</surname>
+              <given-names>W.</given-names>
+            </name>
+            <name>
+              <surname>Paulus</surname>
+              <given-names>R.</given-names>
+            </name>
+            <name>
+              <surname>Xiong</surname>
+              <given-names>C.</given-names>
+            </name>
+            <name>
+              <surname>Socher</surname>
+              <given-names>R.</given-names>
+            </name>
+          </person-group>
+          <article-title>Improving Abstraction in Text Summarization</article-title>
+          <source>Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing</source>
+          <conf-loc>Brussels, Belgium</conf-loc>
+          <conf-date>31 October&#x2013;4 November 2018</conf-date>
+          <fpage>1808</fpage>
+          <lpage>1817</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B26-applsci-12-10382">
+        <label>26.</label>
+        <element-citation publication-type="confproc">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Liu</surname>
+              <given-names>Y.</given-names>
+            </name>
+            <name>
+              <surname>Lapata</surname>
+              <given-names>M.</given-names>
+            </name>
+          </person-group>
+          <article-title>Text summarization with pretrained encoders</article-title>
+          <source>Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing</source>
+          <conf-loc>Hong Kong, China</conf-loc>
+          <conf-date>3&#x2013;7 November 2019</conf-date>
+          <fpage>3730</fpage>
+          <lpage>3740</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B27-applsci-12-10382">
+        <label>27.</label>
+        <element-citation publication-type="confproc">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Song</surname>
+              <given-names>K.</given-names>
+            </name>
+            <name>
+              <surname>Tan</surname>
+              <given-names>X.</given-names>
+            </name>
+            <name>
+              <surname>Qin</surname>
+              <given-names>T.</given-names>
+            </name>
+            <name>
+              <surname>Lu</surname>
+              <given-names>J.</given-names>
+            </name>
+            <name>
+              <surname>Liu</surname>
+              <given-names>T.Y.</given-names>
+            </name>
+          </person-group>
+          <article-title>Mass: Masked sequence to sequence pre-training for language generation</article-title>
+          <source>Proceedings of the 36th International Conference on Machine Learning</source>
+          <conf-loc>Long Beach, CA, USA</conf-loc>
+          <conf-date>9&#x2013;15 June 2019</conf-date>
+        </element-citation>
+      </ref>
+      <ref id="B28-applsci-12-10382">
+        <label>28.</label>
+        <element-citation publication-type="confproc">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Devlin</surname>
+              <given-names>J.</given-names>
+            </name>
+            <name>
+              <surname>Chang</surname>
+              <given-names>M.W.</given-names>
+            </name>
+            <name>
+              <surname>Lee</surname>
+              <given-names>K.</given-names>
+            </name>
+            <name>
+              <surname>Toutanova</surname>
+              <given-names>K.</given-names>
+            </name>
+          </person-group>
+          <article-title>BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding</article-title>
+          <source>Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1 (Long and Short Papers)</source>
+          <conf-loc>Minneapolis, MN, USA</conf-loc>
+          <conf-date>2&#x2013;7 June 2019</conf-date>
+          <publisher-name>Association for Computational Linguistics</publisher-name>
+          <publisher-loc>Minneapolis, MN, USA</publisher-loc>
+          <year>2019</year>
+          <fpage>4171</fpage>
+          <lpage>4186</lpage>
+          <pub-id pub-id-type="doi">10.18653/v1/N19-1423</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B29-applsci-12-10382">
+        <label>29.</label>
+        <element-citation publication-type="confproc">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Narayan</surname>
+              <given-names>S.</given-names>
+            </name>
+            <name>
+              <surname>Cohen</surname>
+              <given-names>S.B.</given-names>
+            </name>
+            <name>
+              <surname>Lapata</surname>
+              <given-names>M.</given-names>
+            </name>
+          </person-group>
+          <article-title>Don&#x2019;t Give Me the Details, Just the Summary! Topic-Aware Convolutional Neural Networks for Extreme Summarization</article-title>
+          <source>Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing</source>
+          <conf-loc>Brussels, Belgium</conf-loc>
+          <conf-date>31 October&#x2013;4 November 2018</conf-date>
+          <fpage>1797</fpage>
+          <lpage>1807</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B30-applsci-12-10382">
+        <label>30.</label>
+        <element-citation publication-type="confproc">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Wang</surname>
+              <given-names>Q.</given-names>
+            </name>
+            <name>
+              <surname>Pan</surname>
+              <given-names>X.</given-names>
+            </name>
+            <name>
+              <surname>Huang</surname>
+              <given-names>L.</given-names>
+            </name>
+            <name>
+              <surname>Zhang</surname>
+              <given-names>B.</given-names>
+            </name>
+            <name>
+              <surname>Jiang</surname>
+              <given-names>Z.</given-names>
+            </name>
+            <name>
+              <surname>Ji</surname>
+              <given-names>H.</given-names>
+            </name>
+            <name>
+              <surname>Knight</surname>
+              <given-names>K.</given-names>
+            </name>
+          </person-group>
+          <article-title>Describing a Knowledge Base</article-title>
+          <source>Proceedings of the 11th International Conference on Natural Language Generation</source>
+          <conf-loc>Tilburg, The Netherlands</conf-loc>
+          <conf-date>5&#x2013;8 November 2018</conf-date>
+          <publisher-name>Association for Computational Linguistics, Tilburg University</publisher-name>
+          <publisher-loc>Tilburg, The Netherlands</publisher-loc>
+          <year>2018</year>
+          <fpage>10</fpage>
+          <lpage>21</lpage>
+          <pub-id pub-id-type="doi">10.18653/v1/W18-6502</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B31-applsci-12-10382">
+        <label>31.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Hochreiter</surname>
+              <given-names>S.</given-names>
+            </name>
+            <name>
+              <surname>Schmidhuber</surname>
+              <given-names>J.</given-names>
+            </name>
+          </person-group>
+          <article-title>Long short-term memory</article-title>
+          <source>Neural Comput.</source>
+          <year>1997</year>
+          <volume>9</volume>
+          <fpage>1735</fpage>
+          <lpage>1780</lpage>
+          <pub-id pub-id-type="doi">10.1162/neco.1997.9.8.1735</pub-id>
+          <pub-id pub-id-type="pmid">9377276</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B32-applsci-12-10382">
+        <label>32.</label>
+        <element-citation publication-type="confproc">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Saxena</surname>
+              <given-names>A.</given-names>
+            </name>
+            <name>
+              <surname>Tripathi</surname>
+              <given-names>A.</given-names>
+            </name>
+            <name>
+              <surname>Talukdar</surname>
+              <given-names>P.</given-names>
+            </name>
+          </person-group>
+          <article-title>Improving multi-hop question answering over knowledge graphs using knowledge base embeddings</article-title>
+          <source>Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics</source>
+          <conf-loc>Online</conf-loc>
+          <conf-date>5&#x2013;10 July 2020</conf-date>
+          <fpage>4498</fpage>
+          <lpage>4507</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B33-applsci-12-10382">
+        <label>33.</label>
+        <element-citation publication-type="confproc">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Mikolov</surname>
+              <given-names>T.</given-names>
+            </name>
+            <name>
+              <surname>Yih</surname>
+              <given-names>W.T.</given-names>
+            </name>
+            <name>
+              <surname>Zweig</surname>
+              <given-names>G.</given-names>
+            </name>
+          </person-group>
+          <article-title>Linguistic regularities in continuous space word representations</article-title>
+          <source>Proceedings of the 2013 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies</source>
+          <conf-loc>Minneapolis, MI, USA</conf-loc>
+          <conf-date>9&#x2013;14 June 2013</conf-date>
+          <fpage>746</fpage>
+          <lpage>751</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B34-applsci-12-10382">
+        <label>34.</label>
+        <element-citation publication-type="confproc">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Pennington</surname>
+              <given-names>J.</given-names>
+            </name>
+            <name>
+              <surname>Socher</surname>
+              <given-names>R.</given-names>
+            </name>
+            <name>
+              <surname>Manning</surname>
+              <given-names>C.</given-names>
+            </name>
+          </person-group>
+          <article-title>Glove: Global vectors for word representation</article-title>
+          <source>Proceedings of the 2014 Conference on Empirical Methods in Natural Language Processing (EMNLP)</source>
+          <conf-loc>Doha, Qatar</conf-loc>
+          <conf-date>26&#x2013;28 October 2014</conf-date>
+          <fpage>1532</fpage>
+          <lpage>1543</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B35-applsci-12-10382">
+        <label>35.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Bahdanau</surname>
+              <given-names>D.</given-names>
+            </name>
+            <name>
+              <surname>Cho</surname>
+              <given-names>K.</given-names>
+            </name>
+            <name>
+              <surname>Bengio</surname>
+              <given-names>Y.</given-names>
+            </name>
+          </person-group>
+          <article-title>Neural machine translation by jointly learning to align and translate</article-title>
+          <source>arXiv</source>
+          <year>2014</year>
+          <pub-id pub-id-type="arxiv">1409.0473</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B36-applsci-12-10382">
+        <label>36.</label>
+        <element-citation publication-type="confproc">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Yao</surname>
+              <given-names>L.</given-names>
+            </name>
+            <name>
+              <surname>Mao</surname>
+              <given-names>C.</given-names>
+            </name>
+            <name>
+              <surname>Luo</surname>
+              <given-names>Y.</given-names>
+            </name>
+          </person-group>
+          <article-title>Graph convolutional networks for text classification</article-title>
+          <source>Proceedings of the AAAI Conference on Artificial Intelligence</source>
+          <conf-loc>Atlanta, GA, USA</conf-loc>
+          <conf-date>8&#x2013;12 October 2019</conf-date>
+          <volume>Volume 33</volume>
+          <fpage>7370</fpage>
+          <lpage>7377</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B37-applsci-12-10382">
+        <label>37.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Hermann</surname>
+              <given-names>K.M.</given-names>
+            </name>
+            <name>
+              <surname>Kocisky</surname>
+              <given-names>T.</given-names>
+            </name>
+            <name>
+              <surname>Grefenstette</surname>
+              <given-names>E.</given-names>
+            </name>
+            <name>
+              <surname>Espeholt</surname>
+              <given-names>L.</given-names>
+            </name>
+            <name>
+              <surname>Kay</surname>
+              <given-names>W.</given-names>
+            </name>
+            <name>
+              <surname>Suleyman</surname>
+              <given-names>M.</given-names>
+            </name>
+            <name>
+              <surname>Blunsom</surname>
+              <given-names>P.</given-names>
+            </name>
+          </person-group>
+          <article-title>Teaching machines to read and comprehend</article-title>
+          <source>Adv. Neural Inf. Process. Syst.</source>
+          <year>2015</year>
+          <volume>28</volume>
+          <fpage>1693</fpage>
+          <lpage>1701</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B38-applsci-12-10382">
+        <label>38.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Chen</surname>
+              <given-names>D.</given-names>
+            </name>
+            <name>
+              <surname>Bolton</surname>
+              <given-names>J.</given-names>
+            </name>
+            <name>
+              <surname>Manning</surname>
+              <given-names>C.D.</given-names>
+            </name>
+          </person-group>
+          <article-title>A Thorough Examination of the CNN/Daily Mail Reading Comprehension Task</article-title>
+          <source>arXiv</source>
+          <year>2016</year>
+          <pub-id pub-id-type="arxiv">1606.02858</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B39-applsci-12-10382">
+        <label>39.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Duchi</surname>
+              <given-names>J.</given-names>
+            </name>
+            <name>
+              <surname>Hazan</surname>
+              <given-names>E.</given-names>
+            </name>
+            <name>
+              <surname>Singer</surname>
+              <given-names>Y.</given-names>
+            </name>
+          </person-group>
+          <article-title>Adaptive subgradient methods for online learning and stochastic optimization</article-title>
+          <source>J. Mach. Learn. Res.</source>
+          <year>2011</year>
+          <volume>12</volume>
+          <fpage>2121</fpage>
+          <lpage>2159</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B40-applsci-12-10382">
+        <label>40.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Srivastava</surname>
+              <given-names>N.</given-names>
+            </name>
+            <name>
+              <surname>Hinton</surname>
+              <given-names>G.</given-names>
+            </name>
+            <name>
+              <surname>Krizhevsky</surname>
+              <given-names>A.</given-names>
+            </name>
+            <name>
+              <surname>Sutskever</surname>
+              <given-names>I.</given-names>
+            </name>
+            <name>
+              <surname>Salakhutdinov</surname>
+              <given-names>R.</given-names>
+            </name>
+          </person-group>
+          <article-title>Dropout: A simple way to prevent neural networks from overfitting</article-title>
+          <source>J. Mach. Learn. Res.</source>
+          <year>2014</year>
+          <volume>15</volume>
+          <fpage>1929</fpage>
+          <lpage>1958</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B41-applsci-12-10382">
+        <label>41.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Lin</surname>
+              <given-names>C.Y.</given-names>
+            </name>
+          </person-group>
+          <article-title>Rouge: A package for automatic evaluation of summaries</article-title>
+          <source>Text Summ. Branches Out</source>
+          <year>2004</year>
+          <volume>2004</volume>
+          <fpage>74</fpage>
+          <lpage>81</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B42-applsci-12-10382">
+        <label>42.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Blei</surname>
+              <given-names>D.M.</given-names>
+            </name>
+            <name>
+              <surname>Ng</surname>
+              <given-names>A.Y.</given-names>
+            </name>
+            <name>
+              <surname>Jordan</surname>
+              <given-names>M.I.</given-names>
+            </name>
+          </person-group>
+          <article-title>Latent dirichlet allocation</article-title>
+          <source>J. Mach. Learn. Res.</source>
+          <year>2003</year>
+          <volume>3</volume>
+          <fpage>993</fpage>
+          <lpage>1022</lpage>
+        </element-citation>
+      </ref>
+    </ref-list>
+    <sec sec-type="display-objects">
+      <title>Figures and Tables</title>
+      <fig id="applsci-12-10382-f001" position="float">
+        <label>Figure 1</label>
+        <caption>
+          <p>Architecture of the model. The <italic>sentence-selection</italic> method is described in <xref ref-type="sec" rid="sec3dot1-applsci-12-10382">Section 3.1</xref>.</p>
+        </caption>
+        <graphic xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="applsci-12-10382-g001.tif"/>
+      </fig>
+      <fig id="applsci-12-10382-f002" position="float">
+        <label>Figure 2</label>
+        <caption>
+          <p>A graphical example of the score calculation of sentence <inline-formula><mml:math id="mm94"><mml:semantics><mml:msub><mml:mi mathvariant="bold">d</mml:mi><mml:mn>3</mml:mn></mml:msub></mml:semantics></mml:math></inline-formula>. Dotted arrows represent the relationship between the current sentence and the other representations.</p>
+        </caption>
+        <graphic xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="applsci-12-10382-g002.tif"/>
+      </fig>
+      <fig id="applsci-12-10382-f003" position="float">
+        <label>Figure 3</label>
+        <caption>
+          <p>The graph shows an example of a handmade graph with its adjacency matrix obtained by applying the ReLU function over it. Negative weights, i.e., negative cosine similarity scores, were set to zero thanks to the ReLU function, for example, between <inline-formula><mml:math id="mm95"><mml:semantics><mml:msub><mml:mi>d</mml:mi><mml:mn>1</mml:mn></mml:msub></mml:semantics></mml:math></inline-formula> and <inline-formula><mml:math id="mm96"><mml:semantics><mml:msub><mml:mi>d</mml:mi><mml:mn>2</mml:mn></mml:msub></mml:semantics></mml:math></inline-formula> (and between <inline-formula><mml:math id="mm97"><mml:semantics><mml:msub><mml:mi>d</mml:mi><mml:mn>2</mml:mn></mml:msub></mml:semantics></mml:math></inline-formula> and <inline-formula><mml:math id="mm98"><mml:semantics><mml:msub><mml:mi>d</mml:mi><mml:mn>4</mml:mn></mml:msub></mml:semantics></mml:math></inline-formula>).</p>
+        </caption>
+        <graphic xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="applsci-12-10382-g003.tif"/>
+      </fig>
+      <fig id="applsci-12-10382-f004" position="float">
+        <label>Figure 4</label>
+        <caption>
+          <p>Examples of the generated summaries including the reference summary and an excerpt of the document.</p>
+        </caption>
+        <graphic xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="applsci-12-10382-g004.tif"/>
+      </fig>
+      <fig id="applsci-12-10382-f005" position="float">
+        <label>Figure 5</label>
+        <caption>
+          <p>The average percentage of repeated n-grams (from 1-grams to 4-grams) for each sentence-level attention method and the reference summary. The term <italic>pg</italic> is the abbreviation of <italic>PageRank</italic>. The PageRank scores (or pg scores) refer to the base method, whereas <italic>pg coverage</italic> refers to the adoption of the coverage method in the base model.</p>
+        </caption>
+        <graphic xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="applsci-12-10382-g005.tif"/>
+      </fig>
+      <fig id="applsci-12-10382-f006" position="float">
+        <label>Figure 6</label>
+        <caption>
+          <p>The ability of the model to select the most informative sentence.</p>
+        </caption>
+        <graphic xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="applsci-12-10382-g006.tif"/>
+      </fig>
+      <fig id="applsci-12-10382-f007" position="float">
+        <label>Figure 7</label>
+        <caption>
+          <p>This shows that the model was able to copy part of the selected sentence into the summary.</p>
+        </caption>
+        <graphic xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="applsci-12-10382-g007.tif"/>
+      </fig>
+      <fig id="applsci-12-10382-f008" position="float">
+        <label>Figure 8</label>
+        <caption>
+          <p>The average percentage of novel n-grams (from 1-grams to 4-grams) for each sentence-level attention method. The term <italic>pg</italic> is an abbreviation for <italic>PageRank</italic>. The PageRank score (or pg scores) refers to the base method, whereas <italic>pg coverage</italic> refers to the adoption of the coverage method in the base model.</p>
+        </caption>
+        <graphic xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="applsci-12-10382-g008.tif"/>
+      </fig>
+      <table-wrap id="applsci-12-10382-t001" position="float">
+        <object-id pub-id-type="pii">applsci-12-10382-t001_Table 1</object-id>
+        <label>Table 1</label>
+        <caption>
+          <p>The hyperparameters (i.e., parameters set by the user) and their values.</p>
+        </caption>
+        <table>
+          <thead>
+            <tr>
+              <th align="center" valign="middle" style="border-bottom:solid thin;border-top:solid thin">Parameter</th>
+              <th align="center" valign="middle" style="border-bottom:solid thin;border-top:solid thin">Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">Embedding size</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">128</td>
+            </tr>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">Hidden size</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">256</td>
+            </tr>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">
+                <inline-formula>
+                  <mml:math id="mm99">
+                    <mml:semantics>
+                      <mml:mi>&#x3BB;</mml:mi>
+                    </mml:semantics>
+                  </mml:math>
+                </inline-formula>
+              </td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">0.9</td>
+            </tr>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">Gradient clipping</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">2.0</td>
+            </tr>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">Dropout</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">0.2</td>
+            </tr>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">Optimizer</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">Adagrad</td>
+            </tr>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">Learning rate</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">0.15</td>
+            </tr>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">Batch size</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">8</td>
+            </tr>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">Beam size</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">5</td>
+            </tr>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">Gehrmann et al. [<xref ref-type="bibr" rid="B21-applsci-12-10382">21</xref>]&#x2019;s <inline-formula><mml:math id="mm100"><mml:semantics><mml:mi>&#x3B1;</mml:mi></mml:semantics></mml:math></inline-formula></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">1.4</td>
+            </tr>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin"># words per sentence</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">50</td>
+            </tr>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin"># sentences</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">8</td>
+            </tr>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">Decoder output length</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">100</td>
+            </tr>
+          </tbody>
+        </table>
+      </table-wrap>
+      <table-wrap id="applsci-12-10382-t002" position="float">
+        <object-id pub-id-type="pii">applsci-12-10382-t002_Table 2</object-id>
+        <label>Table 2</label>
+        <caption>
+          <p>The Rouge-1 (R-1), Rouge-2 (R-2), and Rouge-L (R-L) F1 scores. &#x2020; indicates that the model could not be directly compared to ours because it was trained and tested on the anonymized version of the dataset.</p>
+        </caption>
+        <table>
+          <thead>
+            <tr>
+              <th align="left" valign="middle" style="border-bottom:solid thin;border-top:solid thin">Model</th>
+              <th align="center" valign="middle" style="border-bottom:solid thin;border-top:solid thin">R-1</th>
+              <th align="center" valign="middle" style="border-bottom:solid thin;border-top:solid thin">R-2</th>
+              <th align="center" valign="middle" style="border-bottom:solid thin;border-top:solid thin">R-L</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td align="left" valign="middle" style="border-bottom:solid thin">See&#xA0;et&#xA0;al.&#x2019;s pointer generation</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">29.7</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">9.21</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">23.24</td>
+            </tr>
+            <tr>
+              <td align="left" valign="middle" style="border-bottom:solid thin">See&#xA0;et&#xA0;al.&#x2019;s pointer generation with coverage</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">36.44</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">15.66</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">33.42</td>
+            </tr>
+            <tr>
+              <td align="left" valign="middle" style="border-bottom:solid thin">Nallapati&#xA0;et&#xA0;al.&#x2019;s pointer model&#xA0;<inline-formula><mml:math id="mm101"><mml:semantics><mml:msup><mml:mrow/><mml:mo>&#x2020;</mml:mo></mml:msup></mml:semantics></mml:math></inline-formula></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">32.1</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">11.7</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">29.2</td>
+            </tr>
+            <tr>
+              <td align="left" valign="middle" style="border-bottom:solid thin">Nallapati&#xA0;et&#xA0;al.&#x2019;s hierarchical model&#xA0;<inline-formula><mml:math id="mm102"><mml:semantics><mml:msup><mml:mrow/><mml:mo>&#x2020;</mml:mo></mml:msup></mml:semantics></mml:math></inline-formula></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">31.8</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">11.6</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">28.7</td>
+            </tr>
+            <tr>
+              <td align="left" valign="middle" style="border-bottom:solid thin">Hsu&#xA0;et&#xA0;al.&#x2019;s model</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">
+                <bold>40.68</bold>
+              </td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">
+                <bold>17.97</bold>
+              </td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">
+                <bold>37.13</bold>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="middle" style="border-bottom:solid thin">Tan&#xA0;et&#xA0;al.&#x2019;s model</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">38.1</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">13.9</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">34.0</td>
+            </tr>
+            <tr>
+              <td align="left" valign="middle" style="border-bottom:solid thin">Our model</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">26.77</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">9.67</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">19.04</td>
+            </tr>
+            <tr>
+              <td align="left" valign="middle" style="border-bottom:solid thin">Our model + coverage</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">34.50</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">13.47</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">22.26</td>
+            </tr>
+            <tr>
+              <td align="left" valign="middle" style="border-bottom:solid thin">Our model + coverage + covscore</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">
+                <bold>34.67</bold>
+              </td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">
+                <bold>13.61</bold>
+              </td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">
+                <bold>22.36</bold>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="middle" style="border-bottom:solid thin">Our model + coverage + covloss</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">25.14</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">7.56</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">16.78</td>
+            </tr>
+          </tbody>
+        </table>
+      </table-wrap>
+      <table-wrap id="applsci-12-10382-t003" position="float">
+        <object-id pub-id-type="pii">applsci-12-10382-t003_Table 3</object-id>
+        <label>Table 3</label>
+        <caption>
+          <p>The inter-annotator agreement on both the <italic>readability</italic> and <italic>relevance</italic> scores.</p>
+        </caption>
+        <table>
+          <thead>
+            <tr>
+              <th align="center" valign="middle" style="border-bottom:solid thin;border-top:solid thin">Model</th>
+              <th align="center" valign="middle" style="border-bottom:solid thin;border-top:solid thin">Readability</th>
+              <th align="center" valign="middle" style="border-bottom:solid thin;border-top:solid thin">Relevance</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">Our model + coverage + covscore</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">0.396</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">0.338</td>
+            </tr>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">Hsu&#xA0;et&#xA0;al.&#x2019;s model</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">0.064</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">0.471</td>
+            </tr>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">Tan&#xA0;et&#xA0;al.&#x2019;s model</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">0.148</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">0.017</td>
+            </tr>
+          </tbody>
+        </table>
+      </table-wrap>
+      <table-wrap id="applsci-12-10382-t004" position="float">
+        <object-id pub-id-type="pii">applsci-12-10382-t004_Table 4</object-id>
+        <label>Table 4</label>
+        <caption>
+          <p>The average scores for readability and relevance for the 100 randomly extracted summaries. A higher score is better.</p>
+        </caption>
+        <table>
+          <thead>
+            <tr>
+              <th align="center" valign="middle" style="border-bottom:solid thin;border-top:solid thin">Model</th>
+              <th align="center" valign="middle" style="border-bottom:solid thin;border-top:solid thin">Readability</th>
+              <th align="center" valign="middle" style="border-bottom:solid thin;border-top:solid thin">Relevance</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">Our model + coverage + covscore</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">5.78</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">6.73</td>
+            </tr>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">Hsu&#xA0;et&#xA0;al.&#x2019;s model</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">7.27</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">7.85</td>
+            </tr>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">Tan&#xA0;et&#xA0;al.&#x2019;s model</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">5.06</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">4.84</td>
+            </tr>
+          </tbody>
+        </table>
+      </table-wrap>
+      <table-wrap id="applsci-12-10382-t005" position="float">
+        <object-id pub-id-type="pii">applsci-12-10382-t005_Table 5</object-id>
+        <label>Table 5</label>
+        <caption>
+          <p>The average <inline-formula><mml:math id="mm103"><mml:semantics><mml:mi>&#x3B2;</mml:mi></mml:semantics></mml:math></inline-formula> value for each model. High <inline-formula><mml:math id="mm104"><mml:semantics><mml:mi>&#x3B2;</mml:mi></mml:semantics></mml:math></inline-formula> values denote that the model tended to use the vocabulary distribution in the generation of the next word, whereas low <inline-formula><mml:math id="mm105"><mml:semantics><mml:mi>&#x3B2;</mml:mi></mml:semantics></mml:math></inline-formula> values denote that the model tended to copy words from the input document through the pointer network.</p>
+        </caption>
+        <table>
+          <thead>
+            <tr>
+              <th align="left" valign="middle" style="border-bottom:solid thin;border-top:solid thin">Model</th>
+              <th align="center" valign="middle" style="border-bottom:solid thin;border-top:solid thin">Avg. <inline-formula><mml:math id="mm106"><mml:semantics><mml:mstyle mathvariant="bold"><mml:mi mathvariant="bold-italic">&#x3B2;</mml:mi></mml:mstyle></mml:semantics></mml:math></inline-formula> Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td align="left" valign="middle" style="border-bottom:solid thin">Our model</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">
+                <inline-formula>
+                  <mml:math id="mm107">
+                    <mml:semantics>
+                      <mml:mrow>
+                        <mml:mn>0.92</mml:mn>
+                        <mml:mo>&#xB1;</mml:mo>
+                        <mml:mn>0.04</mml:mn>
+                      </mml:mrow>
+                    </mml:semantics>
+                  </mml:math>
+                </inline-formula>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="middle" style="border-bottom:solid thin">Our model + coverage</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">
+                <inline-formula>
+                  <mml:math id="mm108">
+                    <mml:semantics>
+                      <mml:mrow>
+                        <mml:mn>0.93</mml:mn>
+                        <mml:mo>&#xB1;</mml:mo>
+                        <mml:mn>0.03</mml:mn>
+                      </mml:mrow>
+                    </mml:semantics>
+                  </mml:math>
+                </inline-formula>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="middle" style="border-bottom:solid thin">Our model + coverage + covscore</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">
+                <inline-formula>
+                  <mml:math id="mm109">
+                    <mml:semantics>
+                      <mml:mrow>
+                        <mml:mn>0.93</mml:mn>
+                        <mml:mo>&#xB1;</mml:mo>
+                        <mml:mn>0.03</mml:mn>
+                      </mml:mrow>
+                    </mml:semantics>
+                  </mml:math>
+                </inline-formula>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="middle" style="border-bottom:solid thin">Our model + coverage + coverage loss</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">
+                <inline-formula>
+                  <mml:math id="mm110">
+                    <mml:semantics>
+                      <mml:mrow>
+                        <mml:mn>0.95</mml:mn>
+                        <mml:mo>&#xB1;</mml:mo>
+                        <mml:mn>0.03</mml:mn>
+                      </mml:mrow>
+                    </mml:semantics>
+                  </mml:math>
+                </inline-formula>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </table-wrap>
+    </sec>
+    <fn-group>
+      <fn>
+        <p><bold>Publisher&#x2019;s Note:</bold> MDPI stays neutral with regard to jurisdictional claims in published maps and institutional affiliations.</p>
+      </fn>
+    </fn-group>
+  </back>
+</article>

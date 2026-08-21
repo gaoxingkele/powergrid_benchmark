@@ -1,0 +1,592 @@
+% C2GES original-title reconstruction, P60 revision after a 20-paper Applied Sciences benchmark.
+% Scientific evidence remains the independently audited v0.3.1 post-audit corrective run only.
+\documentclass[applsci,article,submit,moreauthors]{Definitions/mdpi}
+\firstpage{1}
+\makeatletter\setcounter{page}{\@firstpage}\makeatother
+\pubvolume{1}\issuenum{1}\articlenumber{0}\pubyear{2026}\copyrightyear{2026}
+\datereceived{}\daterevised{}\dateaccepted{}\datepublished{}
+\newcommand{\cges}{C\textsuperscript{2}GES}
+\setlength{\headheight}{20pt}
+\AtBeginDocument{\pdfstringdefDisableCommands{\def\cges{C2GES}}}
+
+\Title{Causal and Counterfactual Graph-Enhanced Extractive Summarization (C\texorpdfstring{\textsuperscript{2}}{2}GES) for Power Grid Maintenance Reports}
+\Author{Liu Bijing $^{1,2}$ and Yang Yong $^{1,2,}$*}
+\AuthorNames{Liu Bijing and Yang Yong}
+\address{$^{1}$ \quad NARI Group Corporation (State Grid Electric Power Research Institute), Nanjing 211106, Jiangsu Province, China;\\
+$^{2}$ \quad Beijing Kedong Electric Power Control System Co., Ltd., Beijing 100080, China}
+\corres{Correspondence: Yang Yong; liubijing@outlook.com}
+
+\abstract{The title states an aspirational application to power-grid maintenance reports; the evaluated population is a selected public NERC technical-report proxy corpus, so maintenance transfer remains untested. We present \cges{}, a deterministic extractive framework combining centroid relevance, lexical role evidence, a typed textual proxy graph, and node-deletion path utility; the graph does not identify physical causal effects. Conservative gates retained 27 of 40 complete PDFs: 12 development and 15 test reports, yielding 12,924 non-summary candidates. In one authorized corrective run, Full \cges{} achieved Executive-Summary ROUGE-L F1 of 0.1060 at five sentences and 0.1276 at ten. It exceeded Semantic-MMR and TextRank on this split, but under equal sentence counts Full averaged 103.0/214.5 and 110.7/199.9 more words, respectively; these are not length-controlled advantages. Full was below the registered unrenormalized no-counterfactual graph rule by about 0.0033 at both budgets, with intervals crossing zero. A post-unblinding development-only search of 147 configurations selected zero counterfactual weight in all 12 leave-one-report-out folds. The path mechanism is therefore an auditable structural diagnostic, not a demonstrated ROUGE-improving component. ROUGE measures lexical overlap, not quality, safety, or utility.}
+\keyword{extractive summarization; typed textual proxy graph; structural perturbation; power-grid reports; NERC; reproducible evaluation}
+\featuredapplication{Aspirationally, the framework could support source-linked navigation of maintenance reports. The present evidence is limited to a NERC technical-report proxy corpus. The output is not for operational decisions or autonomous root-cause analysis; engineers must inspect the source, and unsafe omissions remain unevaluated.}
+
+\begin{document}
+
+\section{Introduction}
+
+Power-grid reliability and maintenance review requires more than retrieving isolated high-frequency terms. Engineers may need the sequence linking a condition or root cause to an initiating event, propagation or response, impact, and mitigation. Extractive summarization is attractive because each selected sentence can retain a stable source identifier from which a page locator can be recovered. It also exposes a difficult trade-off: sentences that are individually relevant may not preserve a coherent technical chain.
+
+The underlying documents are difficult for both readers and algorithms. Reliability assessments and event reports combine narrative findings, tabular evidence, quotations from standards, recommendations, appendices, and retrospective interpretation. A single event can be described at different levels of granularity across dozens or hundreds of pages. The sentence that names an initiating condition may be separated from the sentence that quantifies customer impact, while mitigations can appear in a recommendation section rather than beside the event description. A selector that rewards only lexical centrality can therefore retrieve prominent sentences without preserving the progression that makes an engineering account useful.
+
+Maintenance-oriented review adds a second requirement: an extract should remain inspectable against its source. Abstractive generation can compress dispersed evidence, but it can also merge claims, suppress qualifications, or produce a fluent relation that the document does not state. Extractive output does not eliminate omission or contextual distortion, yet it preserves the selected wording and permits a stable sentence-to-page audit trail. We consequently formulate the present study as evidence selection rather than free-form report generation. The intended use is to help a reader navigate a technical source, not to replace the source or recommend an operational action.
+
+Evidence selection, query-focused summarization, and graph ranking provide foundations for sentence-level selection \cite{thorne2018fever,zhong2021qmsum,vig2022exploring,wang2020heterogeneous}. Dense sentence encoders offer strong semantic ranking comparators \cite{reimers2019sentencebert}, whereas causal NLP emphasizes that association and text-derived direction should not be confused with identified causal effects \cite{feder2022causal,du2022ecare}. These distinctions matter in critical-infrastructure text.
+
+Recent Applied Sciences studies illustrate three adjacent lines of work. Graph-based extractive summarizers use sentence graphs, hypergraphs, attention, or independent-set filtering to encode relations beyond isolated relevance \cite{siragusa2022sentencegraph,onan2024mches,hark2025mis}. Technical-document summarization has been evaluated on artifacts such as bug reports, where sentence importance and document structure differ from news benchmarks \cite{koh2022bugreport}. Power and maintenance text analytics increasingly uses entity--relation extraction and knowledge graphs to organize fault, alarm, and inspection evidence \cite{liu2022powerfault,ma2025alarm,zgg2026bridge}. These studies motivate structural modeling, but none by itself establishes that a node-deletion score improves extractive summarization of long reliability reports.
+
+This gap leads to three research questions. \textit{RQ1} asks how a deterministic role-conditioned graph selector compares descriptively with position, centroid, graph-ranking, semantic-diversity, and role-only comparators at equal sentence counts on the retained proxy corpus, including the induced word-count imbalance. \textit{RQ2} asks what happens to overlap when the registered node-deletion coefficient is set from 0.15 to zero under the otherwise fixed but unrenormalized scoring rule. \textit{RQ3} asks what the observed comparisons remain able to support after accounting for unequal extraction-unit lengths, report-level heterogeneity, corrective-study chronology, and the absence of qualified maintenance review. These questions deliberately separate finite-corpus system description from coefficient-removal behavior and transfer to the application named in the title.
+
+The exact title retains continuity with the original research objective, but ``for Power Grid Maintenance Reports'' denotes an aspirational intended downstream use rather than the population evaluated here. The empirical corpus comprises public NERC reliability, disturbance, event-analysis, recommendation, and assessment reports \cite{nercEventAnalysis,nerc2015qualityreport}; it contains maintenance-relevant lessons and corrective actions but not utility work orders, inspection records, or field-maintenance narratives. Every empirical statement below therefore concerns the selected NERC technical-report proxy corpus. Effectiveness, safety, and usefulness on title-concordant maintenance records remain untested.
+
+The proxy is nevertheless informative for method development. It contains complete public technical reports with explicit summary sections, heterogeneous report lengths, causal and corrective vocabulary, and source pages that can be audited. These properties permit a controlled study of candidate exclusion, summary leakage, graph construction, selection budgets, and reference overlap without claiming access to proprietary maintenance records. The proxy therefore supports evaluation of a reproducible selection mechanism, while the differences in institution, document genre, terminology, and decision context define an explicit external-validity boundary.
+
+An earlier implementation used fixed excerpts, allowed Executive Summary leakage, and defined a deletion quantity algebraically equivalent to weighted degree. Those v0.1/v0.2 results are withdrawn from the scientific claims of this article. The corrective rebuild uses complete PDFs and defines ``counterfactual'' narrowly as a computational graph perturbation: remove one sentence node and recompute registered typed-path utility. This operation neither generates alternative events nor estimates what the grid would have done under an intervention.
+
+The corrective design also changes how success is interpreted. A method can execute exactly as specified while its novel channel contributes no measurable gain. Conversely, a higher mean against an external baseline can reflect unequal output length rather than a better ranking rule. For this reason, the study reports the registered unrenormalized no-counterfactual coefficient-zero rule, paired report-level distributions, output-length diagnostics, and post-unblinding development calibration alongside the headline means. Negative and equivocal results are treated as information about the mechanism rather than hidden as implementation detail.
+
+The resulting evaluation is deliberately multi-criterion. Lexical overlap addresses correspondence with the official Executive Summary, redundancy addresses repetition, source locators address auditability, and component contrasts address mechanism attribution. No single quantity represents engineering summary quality, so the contribution is evaluated as a traceable evidence package rather than a leaderboard score.
+
+The contributions are fourfold. First, we construct a full-PDF corrective benchmark with explicit inclusion, extraction, leakage, split, and rights ledgers. Second, we instantiate and audit a typed qualified-path participation functional whose node-deletion score is not reducible to weighted degree; no physical causal identification or priority over all path-centrality measures is claimed. Third, we compare seven conditions at two budgets using report-level paired estimates, a registered unrenormalized coefficient-zero ablation, and a post-run exact sign-flip sensitivity. Fourth, we preserve the unfavorable counterfactual ablation, the completed zero-weight development calibration, and the maintenance-transfer boundary instead of converting them into favorable performance claims.
+
+The practical contribution is consequently narrower than an operational summarization system. The work supplies a source-linked experimental object, a deterministic mechanism that can be independently recomputed, and a set of falsifiable observations about that mechanism. It does not supply a validated maintenance corpus, expert quality labels, a safe autonomous summary, or evidence of physical causal discovery. Keeping these layers separate is necessary for the title to remain recognizable without allowing the title to overstate the experiment.
+
+\section{Related Work}
+
+\subsection{Extractive Technical-Document Summarization}
+
+Extractive methods retain source text and are therefore naturally auditable. Lead, centroid, and graph-ranking methods remain useful comparators because they reveal whether complex selectors add value over position or centrality \cite{zhong2020extractive,bi2021aredsum,liu2021unsupervised}. TextRank is a primary graph-ranking reference \cite{mihalcea2004textrank}. Long reports also require diversity control; relevance-only selection can repeat a local event while omitting consequences or mitigation. The present task is global report summarization: each method receives identical candidates from one report and returns five or ten sentences in source order.
+
+Extractive summarization methods can be organized by the evidence used to rank a sentence. Position-based methods assume that important content occurs in predictable locations. Centroid and topic methods reward similarity to a document representation. Graph centrality methods treat sentences as nodes and semantic or lexical similarity as edges. Neural extractors learn salience from labelled corpora, while redundancy-aware selectors jointly consider relevance and novelty. These families answer different questions, so a fair comparison must hold the candidate pool, reference, output budget, and preprocessing constant. Our seven conditions share those elements, but their internal representations and tuning budgets are not identical.
+
+Applied Sciences summarization studies further show that ``graph based'' is not one design choice. Sentence Graph Attention learns content-aware relations between sentences \cite{siragusa2022sentencegraph}; MCHES represents higher-order contextual groupings through a hypergraph \cite{onan2024mches}; and graph independent-set filtering removes mutually redundant or weakly connected content before LLM-supported selection \cite{hark2025mis}. These systems use learned representations or graph objectives evaluated on conventional summarization corpora. \cges{} instead uses fixed lexical roles, registered transitions, and deterministic path enumeration. Its advantage is auditability; its cost is limited semantic coverage and dependence on hand-specified cues.
+
+Technical reports differ from short news articles in layout and discourse. Bug-report summarization, for example, must distinguish problem statements, observed behavior, diagnostic discussion, and resolution-oriented sentences rather than rely on a news lead \cite{koh2022bugreport}. Multi-document methods similarly must balance shared content against source-specific information \cite{zhang2024tomds}. NERC reports present an analogous structural challenge but add tables, standards language, recommendations, and long extraction units. This motivates both role-conditioned selection and the post-run audit of units containing table or layout artifacts.
+
+\subsection{Graphs, Semantic Ranking, and Causal Language}
+
+Graph summarizers model relations among sentences, entities, topics, or discourse units \cite{wang2020heterogeneous,cui2020enhancing,jing2021multiplex}. \cges{} instead uses an interpretable typed sentence graph, trading learned capacity for deterministic construction and auditability. Semantic-MMR supplies a stronger non-graph baseline by combining dense centroid relevance with pairwise diversity.
+
+The typed graph should also be distinguished from a knowledge graph. A domain knowledge graph normally assigns entities and relations under an ontology and may support retrieval or reasoning over persistent triples. The \cges{} graph is rebuilt for each report, its nodes are candidate sentences, and its edge types are registered rhetorical transitions. It neither stores grid assets as entities nor performs ontology-based inference. This distinction prevents results from sentence ranking from being interpreted as knowledge-graph correctness.
+
+The structural perturbation is closest to a feature-sensitivity analysis. Removing node $i$ deletes every qualified path that contains $i$, and the lost path utility becomes one ranking channel. The operation can identify a sentence on many high-weight textual chains even when its local degree is ordinary. However, deletion occurs only in the computational representation; it does not construct an alternative document, re-estimate language-model predictions, or assert that the reported event would change. The method name records the design intent, whereas the mathematical definition controls the scientific claim.
+
+Causal language requires an explicit boundary. A text-derived directed edge can reflect rhetorical order, lexical overlap, or a heuristic role transition. It is not a validated structural equation or a physical power-system mechanism \cite{feder2022causal}. We therefore use ``causal'' for the intended role vocabulary and ``counterfactual'' for node-deletion structural sensitivity, while repeatedly identifying both as proxies.
+
+Causal NLP research distinguishes observational associations in language from assumptions that support intervention or counterfactual identification \cite{feder2022causal,du2022ecare}. The present study does not observe treatments, potential outcomes, exogenous variation, or a structural causal model. Its directed edges encode a monotone role-stage progression from cause-like cues toward impact- or mitigation-like cues, not necessarily the chronological order of sentences in the document. Accordingly, a large deletion score means that the sentence supports many registered textual paths, not that it has a large causal effect in the underlying power system.
+
+\subsection{Power-Grid Text Analytics}
+
+Language technologies have been considered for grid models, operational records, and infrastructure analysis \cite{xie2022massively,hamann2024foundation,madabhushi2023survey,srinivasan2023artificial}. Supervised entity--relation extraction from a grid-field corpus is related but does not solve report-level summarization \cite{meng2023gridfield}. Our study evaluates authentic public technical reports but does not claim validated maintenance-workflow utility.
+
+Power-domain knowledge-graph studies demonstrate why domain language and relation constraints matter. A power-fault knowledge graph can organize fault entities and relations extracted from specialised text \cite{liu2022powerfault}; line-loss management graphs integrate entities and management logic for structured evaluation \cite{li2024lineloss}; and alarm-tracing work combines knowledge graphs with graph neural computation to follow cybersecurity evidence \cite{ma2025alarm}. These systems target entity or event organization, whereas \cges{} selects source sentences against an Executive Summary. Their engineering contribution is therefore complementary rather than a baseline for ROUGE comparison.
+
+Maintenance-oriented studies provide a closer external-validity reference. Multi-source maintenance text has been used to ground large-language-model retrieval in coal-mine equipment records \cite{cao2024coalmaintenance}, and a recent bridge-maintenance knowledge-graph study built an ontology and extraction pipeline over inspection reports with human annotation and practitioner evaluation \cite{zgg2026bridge}. Such work has title-concordant records and human semantic assessment that the present study lacks. Conversely, it does not test the deterministic extractive ranking and strict node-deletion ablation studied here.
+
+Relation extraction is another adjacent but distinct task. Mixture-of-experts and dependency features can improve entity--relation extraction \cite{li2025moere}, while cross-document attention can aggregate evidence across documents \cite{she2025clear}. These approaches predict labelled entities or relations under supervised objectives. \cges{} deliberately avoids presenting its lexical roles as gold semantic labels; the roles are transparent ranking features whose validity must be tested separately from their software execution.
+
+The comparison also exposes a validation asymmetry across research traditions. General summarization work can rely on large benchmark corpora and automatic metrics, while maintenance-oriented knowledge systems often add ontology review, manual annotation, or practitioner assessment. A title-concordant evaluation of \cges{} needs both: controlled quantitative comparison and human review of source faithfulness, causal-chain coverage, unsafe omission, and practical navigability. The present proxy experiment supplies only the first, limited layer.
+
+Table~\ref{tab:related-comparison} summarizes the closest methodological and domain comparisons. The principal gap is not the absence of graph or power-domain NLP methods. It is the absence, in this selected literature, of a deterministic long-report extractor that combines source-linked candidates, a registered typed-path deletion channel, a strict channel ablation, and explicit reporting of an unfavorable component result.
+
+\begin{table}[H]
+\caption{Positioning against selected Applied Sciences studies. ``Human semantic evaluation'' means that people evaluated annotations or application outputs; it does not imply equivalent expertise or protocol across papers.}
+\label{tab:related-comparison}\centering\scriptsize
+\begin{tabularx}{\textwidth}{p{2.5cm}p{2.4cm}p{2.5cm}p{2.5cm}X}
+\toprule
+Study family & Primary object & Structural mechanism & Evaluation emphasis & Difference from this study\\
+\midrule
+Sentence Graph Attention / MCHES \cite{siragusa2022sentencegraph,onan2024mches} & General-domain documents & Learned sentence graph or contextual hypergraph & Summary metrics on benchmark corpora & Learned semantic representations; no power-report proxy or registered node-deletion ablation\\
+Graph MIS + LLM \cite{hark2025mis} & DUC and CNN/DailyMail documents & Independent-set filtering and graph metrics & ROUGE and computational efficiency & Different graph objective, corpora, and generation components\\
+Bug-report summarization \cite{koh2022bugreport} & Software issue reports & Learned sentence significance & Technical-artifact summary quality & Similar long technical discourse, but different roles, references, and domain\\
+Power fault/alarm graphs \cite{liu2022powerfault,ma2025alarm} & Power-domain entities and events & Ontology/KG extraction and graph tracing & Entity, relation, or tracing performance & Structured knowledge construction rather than report-level extractive summarization\\
+Maintenance KG and retrieval \cite{cao2024coalmaintenance,zgg2026bridge} & Equipment or inspection records & LLM retrieval or ontology-constrained extraction & Retrieval, annotation, manual audit, or practitioner utility & Title-concordant data and human assessment; no comparable extractive ablation\\
+\cges{} & Selected NERC technical reports & Deterministic role graph and typed-path deletion & Executive-Summary overlap, paired contrasts, leakage and length audits & Auditable structural diagnostic; maintenance transfer and semantic safety remain untested\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Materials and Methods}
+
+\subsection{Task, Scope, and Evidence Class}
+
+Let report $D=\{s_1,\ldots,s_n\}$ contain non-summary candidate sentences. For budget $K\in\{5,10\}$, method $m$ returns $\hat{Y}_{m,K}\subseteq D$, with $|\hat{Y}_{m,K}|=\min(K,n)$. The selected sentences are restored to source order. The official Executive Summary is the reference only and is never candidate input.
+
+ROUGE-1, ROUGE-2, and ROUGE-L F1 quantify lexical overlap between the extract and that Executive Summary \cite{lin2004rouge}. We use ROUGE-L as the registered primary endpoint. In this design, ``better ROUGE'' means greater Executive-Summary lexical overlap; it is not synonymous with accuracy, factual sufficiency, causal-chain correctness, maintenance quality, safety, or operator usefulness.
+
+This is a post-audit corrective evaluation. Earlier versions of the test population were inspected while diagnosing R1, so the v0.3.1 freeze cannot recover outcome-unseen confirmatory status. The formal output is therefore descriptive evidence for a fixed corrective benchmark. A new sealed holdout would be required for confirmation.
+
+The three research questions map to different evidence and must not be collapsed. RQ1 is addressed by the seven-condition comparison on the frozen test split, but its interpretation is qualified by unequal output lengths. RQ2 is addressed by Full minus the registered unrenormalized no-CF rule: the $C_i$ coefficient changes from 0.15 to zero while every other absolute coefficient and operation remains fixed. RQ3 is addressed by leakage audits, report-level paired distributions, length diagnostics, the corrective chronology, and explicit transfer limitations. Table~\ref{tab:claim-evidence-map} records this mapping before the algorithmic details.
+
+\begin{table}[H]
+\caption{Claim--evidence map. Each row states the strongest interpretation permitted by the corresponding artifact.}
+\label{tab:claim-evidence-map}\centering\small
+\begin{tabularx}{\textwidth}{p{1.1cm}p{3.2cm}p{4.1cm}X}
+\toprule
+RQ & Primary contrast or artifact & Supported statement & Excluded interpretation\\
+\midrule
+RQ1 & Seven conditions, $K\in\{5,10\}$, identical candidates & Descriptive Executive-Summary overlap and redundancy on the retained test reports & Length-controlled, population-wide, or operational superiority\\
+RQ2 & Full minus registered unrenormalized no-CF, paired by report & Effect of setting the $C_i$ coefficient from 0.15 to zero with other absolute coefficients fixed & Pure information-only isolation, physical causal effect, or benefit of all possible counterfactual designs\\
+RQ3 & Leakage audit, length ledger, exact sensitivity, chronology, rights ledger & Boundaries on internal validity, fairness, reproducibility, and transfer & Summary safety, expert usefulness, or title-concordant maintenance validation\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The unit of analysis is the report, not the sentence. Sentences within a report share topic, vocabulary, layout, and reference-summary content and are therefore not treated as independent observations. Candidate-level quantities are used by the selector, while all registered uncertainty summaries resample or permute the 15 report-level differences. This distinction prevents the 12,924 candidates from being misreported as an inferential sample size.
+
+\subsection{Source PDFs, Inclusion, and Leakage Gates}
+
+The manifest binds 40 complete local PDFs with distinct SHA-256 values and 3200 declared pages. A deterministic full-PDF builder retained 27 reports and excluded 13 before outcome computation. The retained data comprise 12 development and 15 test reports. Their complete, development, and test SHA-256 values are \texttt{87F7F754...AA15}, \texttt{27CE41D...7F79}, and \texttt{A9342BD...D127}. Figure~\ref{fig:data-flow} summarizes the construction.
+
+Supplementary Table~S1 is the rights-safe sampling frame for all 40 reports. For every source it records a non-verbatim report identifier, genre, declared pages, reference word count where a valid reference was detected, candidate count, split or exclusion branch, reason, source-navigation locator, and permission status. The branch is exhaustive: 27 inclusion records and 13 exclusion records equal the 40-report inventory. Because redistribution rights were not established for the PDFs or extracted prose, neither is included in the transferable package. The metadata inventory supports audit and source navigation; it is not a substitute for permission.
+
+Inclusion required a complete readable PDF, a detectable summary reference, a non-empty post-summary candidate region, and passage of the registered extraction-quality gates. Exclusion was decided before outcome computation and remained visible in the inventory. This procedure reduces discretionary removal after seeing ROUGE values, but it also changes the estimand: the results concern reports that satisfy the builder's document and reference requirements, not every NERC publication. A report without a conventional Executive Summary may be operationally important yet unavailable to the present automatic evaluation.
+
+Development and test assignment was performed at report level so that sentences from one source could not cross partitions. The 12 development reports supported configuration selection; the 15 test reports were used once in the authorized corrective evaluation. Reference-summary text was used only for development scoring or final evaluation, never as a candidate. The builder preserved report ID, page interval, source order, and candidate ID so that every downstream score could be joined back to the extraction record without fuzzy text matching.
+
+\begin{figure}[H]
+\includegraphics[width=\textwidth]{figures/fig02_dataset_flow.pdf}
+\caption{Dataset construction and partitioning. Conservative boundary and quality gates retained 27 of 40 full PDFs. The 12-report development split was used for configuration selection; one authorized run evaluated the 15-report test split.}
+\label{fig:data-flow}
+\end{figure}
+
+Candidates begin after a conservatively detected Executive Summary boundary, and no fixed sentence cap is applied. The builder emits 12,924 candidates, with 51--1898 per report; 25 reports have more than 80. An independent rebuild found zero reference/body page-interval overlap, zero normalized exact candidate/reference match, zero normalized common substring of at least 50 characters, and zero occurrences of eight registered extraction-pollution patterns. These checks address registered leakage and pollution modes but do not establish semantic cleanliness of every sentence.
+
+The four leakage checks cover complementary failure paths. Page-interval separation detects gross boundary failure. Normalized exact matching detects a reference sentence copied into the candidate region despite page separation. Long common-substring search detects partially fused or repeated reference content. The pollution patterns target recurrent PDF-extraction artifacts registered before scoring. Passing all four gates increases confidence that overlap is not trivially caused by direct summary reuse, but it cannot rule out legitimate paraphrase, repeated boilerplate, or facts stated both in the body and summary.
+
+Rights handling is orthogonal to leakage. A document can be scientifically eligible but unsuitable for redistribution. The local restricted compartment therefore holds the source-derived candidate and prediction text, while the transferable compartment contains hashes, non-verbatim metadata, configurations, aggregate records, code, tests, and the ID-to-page locator. This separation allows an editor or authorized reviewer to reproduce provenance checks without implying that third-party text has become openly licensed.
+
+\subsection{Sentence Roles and Typed Textual Proxy Graph}
+
+Each candidate receives lexical evidence for root cause, trigger event, propagation or response, impact, and mitigation. Positive top-score ties abstain rather than using fixed role order; 111 development ties all received no dominant role and no incident directed edge. No silver role label is supplied to the v0.3 selector.
+
+For each role, the implementation counts registered cue classes in the candidate and then normalizes evidence within the report. Report-level normalization prevents a cue-rich long report from mechanically assigning larger feature magnitudes than a short report. A dominant role is assigned only when one positive role score is uniquely maximal. The abstention rule is intentionally conservative: it trades graph coverage for protection against arbitrary tie resolution. An abstaining sentence can still be selected through centroid relevance, position, or redundancy-aware scoring, but it contributes no typed outgoing or incoming path edge.
+
+Table~\ref{tab:taxonomy} gives the executable taxonomy. The cues are substring-based lexical indicators, normalized within a report. A unique positive maximum assigns a dominant role; an all-zero vector or equal positive maximum yields abstention. The system does not detect grammatical scope, factual status, or document-level coreference.
+
+\begin{table}[H]
+\caption{Executable role and transition taxonomy. These are lexical text proxies, not expert labels or physical relations.}
+\label{tab:taxonomy}\centering\small
+\begin{tabularx}{\textwidth}{p{2.2cm}XX}
+\toprule
+Role & Representative registered cue classes & Permitted outgoing transitions\\
+\midrule
+Root cause & cause, due-to, failure, and protection-setting terms & trigger; propagation or response; mitigation\\
+Trigger event & fault, outage, initiation, trip, and fire terms & propagation or response; impact\\
+Propagation or response & trip, voltage, frequency, islanding, load-shed, reserve, and flow terms & impact\\
+Impact & quantities with grid units, customer, load, loss, and unavailability terms & mitigation\\
+Mitigation & recommendation, corrective, preventive, and standard terms & none\\
+Abstention & no positive cue, or more than one equal positive maximum & none\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+A directed edge is allowed only for registered stage-monotone role transitions whose sentence positions differ by at most 12. Let $d_{ij}=|\operatorname{pos}(i)-\operatorname{pos}(j)|$, let $J_{ij}$ be token-set Jaccard overlap, and let $r_i,r_j\in[0,1]$ be the unit-scaled dominant-role scores. The frozen edge weight is
+\[
+w_{ij}=\operatorname{round}_{12}\!\left[0.45\exp(-d_{ij}/5)+0.30J_{ij}+0.25\min(r_i,r_j)\right].
+\]
+Thus $w_{ij}\in[0,1]$. Normalized weighted degree forms graph salience $G_i$. Figure~\ref{fig:algorithm} displays the executable flow and its claim boundary.
+
+The edge gate has two semantic/positional parts. The source and target roles must appear in the stage-monotone transition registry in Table~\ref{tab:taxonomy}, and their sentence indices must lie within the 12-position horizon. The implementation uses absolute positional distance and therefore does \emph{not} require the source-role sentence to occur earlier in document order; edge direction comes from the role transition, not chronology. The weight rewards proximity, lexical continuity, and confident role assignments. A high weight therefore means ``nearby, lexically connected, and compatible with the registered role progression''; it does not mean that a domain expert verified the relation or its temporal order.
+
+These choices make the graph sparse and document specific. Sparse construction limits path enumeration and improves inspectability, while document-specific normalization avoids comparing raw node degrees across reports of very different size. The design also creates known blind spots. A causal statement whose evidence and consequence are separated by more than 12 candidates cannot form an edge; a relation expressed through coreference may have low token overlap; a role-compatible edge may point against document chronology; and a valid sentence with two equally strong role cues abstains. These are algorithmic consequences rather than post hoc explanations of individual outcomes.
+
+\begin{figure}[H]
+\includegraphics[width=\textwidth]{figures/fig01_algorithm.pdf}
+\caption{Implemented \cges{} pipeline. The five channels $Q,R,G,C,P$ enter the weighted combination in parallel; registered unrenormalized no-CF sets only $C$ to zero before the same selector. Roles, edges, and node deletions are deterministic textual proxies, not a learned graph neural network, physical simulator, or causal identification.}
+\label{fig:algorithm}
+\end{figure}
+
+\subsection{Typed Path-Deletion Structural Perturbation}
+
+Let $\mathcal{P}(G)$ be the set of simple, stage-monotone paths with two to four edges beginning at a root-cause or trigger node and ending at an impact or mitigation node. For path $p$,
+\begin{equation}
+\operatorname{strength}(p)=\left(\prod_{e\in p}w_e\right)^{1/|p|}\frac{\max\operatorname{stage}(p)-\min\operatorname{stage}(p)}{4}.
+\end{equation}
+The graph utility and raw deletion score are
+\begin{equation}
+U(G)=\sum_{p\in\mathcal{P}(G)}\operatorname{strength}(p),\qquad
+C_i=U(G)-U(G_{-i})=\sum_{p\ni i}\operatorname{strength}(p).
+\end{equation}
+Unlike weighted degree, $C_i$ depends on qualified multi-edge path membership, role order, and the geometric mean of edge weights. A registered counterexample gives two nodes equal weighted degree but unequal qualified-path membership. Unit tests verify deletion-loss equality, deterministic scaling, cache equivalence, and fail-closed work limits. These checks establish software and mathematical non-identity, not physical causality or effectiveness.
+
+The functional has three design properties under a fixed qualified-path set: non-negativity when edge weights are non-negative; nullity for a node that belongs to no qualified path; and additivity over the qualified paths that contain the deleted node. More precisely, if deleting node $i$ removes exactly those paths containing $i$ and does not change the weights of paths that remain, then $C_i=\sum_{p\ni i}\operatorname{strength}(p)$. This proposition is an accounting identity for a fixed textual graph, not a causal-identification theorem. It can fail as a model of semantic influence when deletion would change role assignments, coreference, discourse interpretation, or the weights of surviving relations; the implemented perturbation intentionally holds those quantities fixed.
+
+Table~\ref{tab:toy-path} provides a synthetic walk-through that is independent of the experimental corpus. Consider five source-ordered nodes with roles root cause, trigger, propagation, impact, and mitigation and four compatible edge weights. The four qualified paths that begin at the root-cause or trigger node and end at impact or mitigation have strengths 0.566964, 0.741559, 0.367423, and 0.542282 under Equation~(1), giving $U(G)=2.218228\approx2.218$. Deleting the propagation node removes all four paths, so $C_{q}\approx2.218$; deleting the root-cause node removes only the two paths that start there, so $C_{r}=1.308523\approx1.309$. The example shows why path participation and stage span matter beyond local edge totals.
+
+\begin{table}[H]
+\caption{Synthetic typed-path example used only to explain the registered computation; it is not an experimental observation.}
+\label{tab:toy-path}\centering\small
+\begin{tabular}{llll}
+\toprule
+Nodes on path & Edge weights & Stage-span factor & Path strength\\
+\midrule
+$r\rightarrow t\rightarrow q\rightarrow i$ & 0.8, 0.6, 0.9 & $3/4$ & 0.567\\
+$r\rightarrow t\rightarrow q\rightarrow i\rightarrow m$ & 0.8, 0.6, 0.9, 0.7 & $4/4$ & 0.741\\
+$t\rightarrow q\rightarrow i$ & 0.6, 0.9 & $2/4$ & 0.367\\
+$t\rightarrow q\rightarrow i\rightarrow m$ & 0.6, 0.9, 0.7 & $3/4$ & 0.542\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The equality $C_i=\sum_{p\ni i}\operatorname{strength}(p)$ follows because node deletion removes exactly the qualified paths containing $i$ and leaves the remaining path strengths unchanged. The implementation nevertheless recomputes or cache-checks the deleted graph rather than assuming equivalence silently. This creates a testable invariant: direct deletion loss, membership-sum loss, and cached loss must agree within the registered numeric tolerance. Failure of that invariant terminates the run.
+
+\subsection{Scoring and Selection}
+
+The development-selected Full score is
+\begin{equation}
+S_i=0.40Q_i+0.20R_i+0.15G_i+0.15C_i+0.10P_i,
+\end{equation}
+where $Q_i$ is lexical centroid relevance, $R_i$ role evidence, $G_i$ weighted-degree salience, $C_i$ normalized path-deletion loss, and $P_i$ a positional prior. Greedy selection subtracts $0.50$ times the maximum token-set Jaccard overlap with an already selected sentence. Path and expansion caps are 250,000 and 2,000,000 and fail closed on exhaustion.
+
+The registered no-CF ablation changes only the coefficient of $C_i$ from 0.15 to zero. It does not renormalize any remaining coefficient or alter candidates, graph construction, redundancy penalty, tie rules, or budgets. Consequently, the nominal positive-channel weight decreases from 1.00 to 0.85 while the redundancy coefficient remains 0.50; relative to the remaining positive scale, that penalty is $0.50/0.85=0.5882$, 17.6\% larger than 0.50. The contrast therefore estimates coefficient removal under the frozen unrenormalized scoring rule, including this relative-scale coupling, rather than a pure information-only contribution of $C_i$.
+
+Each score channel has a distinct interpretation. $Q_i$ rewards similarity to the report centroid and can favor generic report language. $R_i$ rewards registered cause, event, impact, and mitigation cues but is vulnerable to cue ambiguity. $G_i$ rewards local connectivity under the typed edge rules, whereas $C_i$ rewards membership in complete qualified paths and can therefore differ from degree. $P_i$ is a weak source-order prior. Report-level normalization places these channels on a common numeric scale without making their semantics interchangeable.
+
+The redundancy term is applied only after base scores are fixed. It penalizes the greatest token-set overlap with the already selected set, so a sentence can be highly salient yet deferred when it repeats an earlier choice. The penalty does not evaluate semantic contradiction, complementary details, or paraphrases with little token overlap. This separation makes the selector reproducible and allows the registered ablation to remove $C_i$ under fixed absolute coefficients, but the unrenormalized scale coupling prevents pure component isolation and the lexical penalty limits the kinds of discourse diversity the method can recognize.
+
+Selection proceeds deterministically in five steps: (1) construct report-level candidates and normalized feature channels; (2) build the typed graph and enumerate qualified paths within the registered caps; (3) compute the five-channel base score for every candidate; (4) choose the highest current score, breaking an exact tie by stable source order; and (5) update the redundancy penalty and repeat until $K$ items or all candidates are exhausted. The final set is reordered to source order for presentation. No stochastic decoding, model sampling, or LLM call occurs in this selector.
+
+The dominant computational cost arises from candidate-pair edge checks and bounded path enumeration. The frozen implementation screens every ordered source--target pair, so edge construction is $O(n^2)$. The absolute 12-position gate limits admitted local ordered pairs to at most approximately $24n$ apart from boundary effects, but it is applied after the quadratic pair scan; no sliding-window optimization is claimed. Path enumeration can still grow combinatorially in a dense compatible region, which motivates the explicit 250,000-path and 2,000,000-expansion caps. A cap is a validity boundary, not a performance optimization: the implementation fails closed instead of returning a partially enumerated score that would be incomparable with other reports.
+
+The output is designed for source navigation rather than stand-alone decision support. The frozen prediction record preserves report ID and sentence ID; a deterministic, non-verbatim locator ledger joins those identifiers to page, source order, report metadata, and source URL using the protected candidate table. All 1,575 selected references resolved uniquely to an integer page within the declared PDF range. Thus, the page can be recovered through the locator ledger, but it was not emitted directly in the prediction JSONL. A reviewer can reopen the page, read the surrounding section, and inspect claims omitted from the extract. No output should be used for an operational decision without this source check. In particular, missing mitigations, qualifications, negation, or uncertainty can make a fluent extract unsafe.
+
+\subsection{Known Linguistic Failure Modes}
+
+No qualified experts supplied role or relation gold labels. Accordingly, Table~\ref{tab:taxonomy} is a summary of executable behavior rather than validated semantic annotation; the exact lexicon, normalization, transitions, and tests are preserved in the packaged code snapshot, while the public repository remains unsynchronized. Ambiguous lexical ties abstain mechanically, but an unambiguous wrong cue can still assign a role. Negated statements (for example, a sentence saying that an outage did not occur) can activate an event cue because negation scope is not modeled. Hypothetical, conditional, quoted, or historical events can likewise receive factual-looking roles. A transition may connect lexically compatible sentences within 12 positions even when discourse context does not support the relation. These cases define an error taxonomy for future expert evaluation; they are not counts of verified errors in the present corpus.
+
+The taxonomy separates errors at four layers. A \textit{segmentation error} produces an extraction unit that fuses prose with a table, heading, or footnote. A \textit{role error} assigns the wrong dominant role or abstains on a semantically clear sentence. An \textit{edge error} connects two individually plausible roles without a supported discourse relation. A \textit{selection error} omits necessary context or repeats content even when the underlying roles and edges are reasonable. These layers require different remedies and different gold data; measuring only final ROUGE cannot identify which layer failed.
+
+Future annotation should therefore preserve both item-level labels and adjudication provenance. At minimum, reviewers would mark extraction-unit validity, dominant role or abstention, directed relation support, source faithfulness, and unsafe omission. Agreement should be computed before adjudication, and unresolved cases retained rather than forced into consensus. The current study does not substitute model-generated labels for that process.
+
+\subsection{Development Selection and Comparators}
+
+The 12-report development search evaluated 144 registered configurations. Its ordered objective maximized mean ROUGE-L F1 at $K=5$, then mean ROUGE-1 F1, lower redundancy, and earliest ledger position. Grid index 60 was selected, with mean development ROUGE-L F1 0.1195126 and ROUGE-1 F1 0.2713870. Full minus registered unrenormalized no-CF development ROUGE-L was $-0.0056652$; this negative result was retained before the formal test.
+
+Seven frozen conditions share the same candidate space: Lead, lexical Centroid, TextRank, Semantic-MMR, Role, graph without CF (strict), and Full \cges{}. Semantic-MMR uses a frozen local all-MiniLM-L6-v2 snapshot and greedily maximizes $0.5\cos(e_i,\bar e_D)-0.5\max_{j\in A}\cos(e_i,e_j)$ \cite{reimers2019sentencebert}. Its symmetric coefficient was not optimized on development or test outcomes.
+
+The comparator set is designed to expose distinct sources of performance. Lead tests positional structure. Centroid tests lexical representativeness. TextRank tests an untyped similarity graph. Semantic-MMR tests dense semantic relevance with diversity. Role tests whether lexical discourse evidence helps without graph structure. Registered no-CF retains the typed graph while setting the deletion coefficient to zero without renormalization, and Full restores the 0.15 coefficient. The comparison therefore characterizes the frozen coefficient rule, including its scale coupling, rather than a pure channel-information effect. The set supports mechanism triangulation but is not an exhaustive survey of neural summarizers.
+
+Hyperparameter opportunity is not balanced across all systems. Full \cges{} inherited a 144-configuration development search, whereas the Semantic-MMR relevance/diversity coefficient was fixed at 0.5 and TextRank used its frozen implementation. This asymmetry favors caution when interpreting system-level ranks. The registered no-CF comparison is methodologically stronger for RQ2 because it shares the selected absolute weights, graph, candidates, and selector and differs in one registered coefficient, while retaining the disclosed relative-scale coupling to redundancy.
+
+\begin{table}[H]
+\caption{Tuning opportunity and inferential role. The reported intervals condition on the selected Full configuration and do not include model-selection uncertainty.}
+\label{tab:tuning-opportunity}\centering\small
+\begin{tabular}{p{0.25\textwidth}p{0.22\textwidth}p{0.40\textwidth}}
+\toprule
+Comparison object & Development opportunity & Licensed interpretation\\
+\midrule
+Full \cges{} & 144 registered configurations & Selected deterministic system; selection uncertainty omitted\\
+Unrenormalized no-CF & Same absolute weights, $C=0$ only & Primary coefficient-removal comparator; redundancy is relatively stronger\\
+Semantic-MMR & Coefficient fixed at 0.5 & Exploratory system comparator with unequal tuning opportunity\\
+TextRank & Frozen implementation defaults & Exploratory system comparator with unequal tuning opportunity\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Sentence-count budgets were chosen because every method can return exactly five or ten source units without truncating a selected unit. This improves procedural consistency but not informational equality: one extracted unit can contain far more words than another. The output-length audit was therefore added after execution as a diagnostic. A new word-budget selector would answer a useful but different question and would require a newly frozen experiment rather than retroactively altering the present comparison.
+
+\subsection{Frozen Evaluation and Statistical Interpretation}
+
+The v0.3.1 freeze registers ROUGE-L F1 as primary and three Full-minus-baseline contrasts (registered unrenormalized no-CF, Semantic-MMR, TextRank) at each budget. Paired report-level percentile bootstrap intervals use 10,000 resamples. For paired deltas $d_1,\ldots,d_{15}$, each resample draws 15 reports with replacement and yields mean $\bar d_b$. The registered tail quantity is
+\begin{equation}
+t_{\mathrm{boot}}=2\min\left\{B^{-1}\sum_{b=1}^{B}\mathbb{1}(\bar d_b\leq0),\;B^{-1}\sum_{b=1}^{B}\mathbb{1}(\bar d_b\geq0)\right\},\quad B=10{,}000.
+\end{equation}
+Because these resamples are centered on the observed deltas rather than generated under a null, $t_{\mathrm{boot}}$ is a descriptive bootstrap sign-tail estimator, not a calibrated hypothesis-test $p$ value. The frozen machine values and their registered Holm transformation are preserved as provenance, but no significance claim is based on them. ROUGE-1, ROUGE-2, redundancy, and other pairings are descriptive \cite{cameron2008bootstrap}.
+
+After the run, without rerunning any model or changing a prediction, we added an unregistered exact paired sign-flip sensitivity. For each contrast, all $2^{15}=32{,}768$ report-level sign assignments were enumerated and the two-sided value was the proportion whose absolute mean was at least the observed absolute mean. This procedure assumes report-level independence and sign exchangeability (equivalently, symmetry of paired errors around zero under the null); it does not follow from the data and may be fragile for heterogeneous reports. Zero deltas remain invariant. The six exact values were adjusted as one family by Holm's step-down procedure \cite{holm1979simple}. This analysis is labelled post-run sensitivity rather than confirmatory inference. The freeze binds data, code, configuration, model tree, dependency lock, tests, and corrective history.
+
+One authorized physical run produced 210 rows ($15\times7\times2$). Independent post-run audit rehashed 31 frozen files, recalculated all 28 aggregate values and all six contrast records with maximum absolute discrepancy zero, and returned PASS. The evidence class remains post-audit corrective descriptive.
+
+All feature channels are normalized within each report before weighted combination. This limits domination by raw report length or graph density, but it does not make scores comparable across unrelated corpora. Stable source order resolves exact score ties, and every graph-based condition uses the same deterministic rule. The implementation records selected sentence identifiers before rendering text, allowing the audit to distinguish ranking behavior from extraction or formatting errors. This distinction matters in technical PDFs, where a nominal sentence can contain a fused table row, heading, or footnote.
+
+The metric hierarchy treats Executive-Summary ROUGE-L F1 as the primary lexical-overlap outcome and ROUGE-1, ROUGE-2, and redundancy as descriptive secondary outcomes. ROUGE checks whether extracts recover wording present in the official summary; it does not measure factual entailment, operational usefulness, or whether an omitted qualification creates risk. We therefore keep mechanism activity, lexical overlap, output length, and computational behavior as separate evidence classes instead of combining them into one success label.
+
+Three audit layers guard the evaluation. Input audits verify file hashes, report partitions, page boundaries, and leakage gates. Execution audits verify the expected condition--budget row set, stable identifiers, and source-text correspondence. Analysis audits regenerate aggregate tables and paired contrasts from the immutable ledger. Passing these checks establishes process integrity only; it cannot compensate for a selected corpus, a limited metric, or an underperforming component.
+
+Reproducibility is organized as a chain of identities rather than a single script. The source manifest binds document metadata and local hashes; the builder binds the retained candidate records and split; the freeze binds code, configuration, dependency lock, tests, and expected input hashes; the run records all 210 method--budget outputs; and the audit recomputes aggregates and contrasts from the immutable ledger. A discrepancy at any upstream identity invalidates downstream equality even if a final table happens to match.
+
+The chain also separates scientific repeatability from distributability. An authorized reviewer with lawful access to the source documents can rebuild candidates and inspect selected text. A public reader can verify non-verbatim metadata, code, configuration, aggregate calculations, and the locator structure, but cannot reconstruct protected source text from the transferable package alone. The Data Availability Statement reports this limitation explicitly.
+
+\subsection{Post-Unblinding Development-Only Calibration}
+
+After the v0.3.1 test result was revealed, a separate exploratory program evaluated 147 semantically deduplicated configurations using only the frozen 12-report development file (SHA-256 \texttt{27CE41D...7F79}). It varied counterfactual weight over seven values from 0 to 0.20, three weight-allocation rules, three path horizons, and three gating rules; duplicate settings were removed. Guards and the run manifest record \texttt{test\_input\_accessed=false} and \texttt{formal\_output\_accessed=false}. This chronology makes the analysis post-unblinding even though it did not read test artifacts.
+
+Twelve leave-one-report-out development folds selected a zero-CF winner in 12/12 folds. The best nonzero candidate under the registered exploratory tie-break used weight 0.025, won 0/12 folds, and remained below strict zero-CF by 0.00131 at $K=5$ and 0.00091 at $K=10$; both development bootstrap intervals crossed zero. These findings do not replace v0.3.1 and were never evaluated on the revealed 15-report test set. They diagnose integration behavior and constrain future protocol design; they provide no confirmatory performance evidence.
+
+\subsection{Generative-AI Assistance and Verification Boundary}
+
+The OpenAI Codex agent interface was used to assist with prose drafting and editing, experiment and audit planning suggestions, Python and \LaTeX{} development and review, provenance-record preparation, and manuscript build and visual-quality checks. All numerical results reported in this article were obtained from the frozen experiment ledgers or from documented local code execution; Codex output was not used as a source of experimental measurements. No generative-AI system was treated as a qualified power-grid expert, human annotator, or adjudicator. All figures are code-native outputs generated locally from the packaged scripts and stated data sources. The authors reviewed the assisted work and retain responsibility for the study and manuscript.
+
+\section{Results}
+
+\subsection{Dataset and Execution Integrity}
+
+Table~\ref{tab:audit} reports the principal audit quantities. Candidate page boundaries remained strictly after reference-summary pages for all 15 test reports, and every selected sentence ID/text pair matched its frozen source candidate.
+
+\begin{table}[H]
+\caption{Dataset and execution audit; the formal paired evaluation unit is the test report ($n=15$).}
+\label{tab:audit}\centering
+\begin{tabular}{lr}
+\toprule
+Item & Audited value\\
+\midrule
+Source PDFs / declared pages & 40 / 3200\\
+Included / excluded reports & 27 / 13\\
+Development / test reports & 12 / 15\\
+Candidate sentences & 12,924\\
+Reference/body page overlaps & 0\\
+Exact normalized reference/candidate matches & 0\\
+Common substrings $\geq50$ characters & 0\\
+Prediction rows / expected rows & 210 / 210\\
+Frozen-file hash checks at execution & 77 / 77 passed\\
+Independent current rehashes & 31 / 31 passed\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Aggregate Test Results}
+
+The 27 retained reports are a deliberately bounded subset of the 40 inspected PDFs. Exclusion was part of corpus construction, not missing-at-random attrition. Candidate extraction produced 12,924 units after reference/body separation and normalization. Report-level pairing is essential because these units are nested within documents and source formatting differs substantially. Treating candidates as independent observations would produce artificial precision and reward longer documents. The reported $n=15$ therefore denotes test reports throughout; sentence- and path-level counts are diagnostic workloads rather than statistical sample sizes.
+
+The three zero leakage quantities address complementary failure modes. Page overlap tests the structural boundary, normalized equality catches a whole reference sentence repeated in the body, and the 50-character screen detects substantial copied fragments that survive segmentation differences. None proves semantic independence between an Executive Summary and its body: both describe the same event by design. They instead prevent direct reference text from entering the candidate pool through page or extraction mistakes.
+
+Table~\ref{tab:all-results} contains all seven conditions and four recorded metrics at both budgets. Full \cges{} exceeded Semantic-MMR and TextRank on mean ROUGE-L at each equal-sentence budget but was below registered unrenormalized no-CF. Because extraction-unit lengths differ materially, these comparisons are not word- or token-budget controlled. Figure~\ref{fig:aggregate} visualizes the same ROUGE-L means and does not add a statistical test.
+
+\begin{table}[H]
+\caption{Macro-mean results over $n=15$ test reports at equal sentence counts, not equal word counts. Bold marks only the observed maximum ROUGE-L within a budget; underlining marks the minimum redundancy. Neither convention is an inferential conclusion.}
+\label{tab:all-results}\centering\small
+\begin{tabular}{llrrrr}
+\toprule
+$K$ & Condition & R-1 F1 & R-2 F1 & R-L F1 & Redundancy\\
+\midrule
+5 & Lead & 0.1633 & 0.0545 & 0.0878 & 0.0668\\
+5 & Centroid & 0.1955 & 0.0457 & 0.0939 & 0.2333\\
+5 & TextRank & 0.1508 & 0.0356 & 0.0806 & 0.2560\\
+5 & Semantic-MMR & 0.1783 & 0.0433 & 0.0853 & \underline{0.0237}\\
+5 & Role & 0.1889 & 0.0557 & 0.0934 & 0.0862\\
+5 & Graph no-CF & 0.2497 & 0.0648 & \textbf{0.1094} & 0.0798\\
+5 & Full \cges{} & 0.2359 & 0.0611 & 0.1060 & 0.0745\\
+\midrule
+10 & Lead & 0.2617 & 0.0811 & 0.1158 & 0.0554\\
+10 & Centroid & 0.2809 & 0.0683 & 0.1196 & 0.2011\\
+10 & TextRank & 0.2470 & 0.0615 & 0.1156 & 0.2149\\
+10 & Semantic-MMR & 0.2840 & 0.0728 & 0.1133 & \underline{0.0269}\\
+10 & Role & 0.3132 & 0.0848 & 0.1257 & 0.0550\\
+10 & Graph no-CF & 0.3471 & 0.0930 & \textbf{0.1310} & 0.0746\\
+10 & Full \cges{} & 0.3366 & 0.0874 & 0.1276 & 0.0667\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\includegraphics[width=\textwidth]{figures/fig03_aggregate_rougel.pdf}
+\caption{Mean Executive-Summary ROUGE-L F1 for the seven frozen conditions ($n=15$ reports) at equal sentence counts but unequal word counts. Bars are descriptive macro-means; paired distributions and sensitivity results appear in Figure~\ref{fig:paired} and Tables~\ref{tab:contrasts}--\ref{tab:signflip}.}
+\label{fig:aggregate}
+\end{figure}
+
+Increasing the budget from five to ten sentences raised mean ROUGE-L for every condition, as expected when more source content is admitted. The ordering was not identical across methods: Role moved from 0.0934 to 0.1257 and became the strongest non-graph comparator at $K=10$, whereas Centroid was the strongest non-graph comparator at $K=5$. A result at only one extract length would therefore incompletely characterize these systems. This pattern does not imply that the larger budget is operationally preferable; a reviewer may value brevity, coverage, and omission risk differently.
+
+The secondary metrics support a similarly bounded interpretation. Registered unrenormalized no-CF had the largest observed ROUGE-1, ROUGE-2, and ROUGE-L mean at both budgets. Semantic-MMR had the lowest redundancy, but its shorter outputs and explicit diversity objective make quality attribution difficult. Full \cges{} reduced redundancy relative to no-CF at both budgets while also reducing all three ROUGE means. The Full configuration thus expresses a measurable coverage--diversity trade-off, not a uniformly better operating point.
+
+\subsection{Post-Run Output-Length and Extraction-Unit Diagnostics}
+
+Without rerunning selection or changing any prediction, a hash-pinned script counted Unicode whitespace-delimited words and Unicode characters in every selected unit of the immutable ledger. Supplementary Table~S2 contains all 14 condition--budget groups and per-report records. Table~\ref{tab:length-audit} shows the four conditions used in the headline interpretation. The displayed long-unit and Table-marker counts are selection instances, so a unit selected by more than one condition or budget is counted in each corresponding output.
+
+\begin{table}[H]
+\caption{Post-run descriptive output-length diagnostics. ``$>100$'' counts selected-unit instances longer than 100 words; ``Table'' counts units containing the exact case-sensitive string. These quantities do not alter the frozen experiment.}
+\label{tab:length-audit}\centering\small
+\begin{tabular}{llrrrrr}
+\toprule
+$K$ & Condition & Mean words & Mean characters & $>100$ & Table & Maximum words\\
+\midrule
+5 & Full \cges{} & 287.7 & 1843.6 & 12 & 14 & 140\\
+5 & Graph no-CF & 329.0 & 2099.9 & 15 & 16 & 270\\
+5 & Semantic-MMR & 184.7 & 1242.1 & 5 & 9 & 138\\
+5 & TextRank & 177.0 & 1125.1 & 1 & 7 & 124\\
+10 & Full \cges{} & 568.9 & 3619.5 & 25 & 26 & 270\\
+10 & Graph no-CF & 596.9 & 3822.5 & 28 & 26 & 270\\
+10 & Semantic-MMR & 354.5 & 2361.2 & 7 & 16 & 138\\
+10 & TextRank & 369.0 & 2329.7 & 4 & 18 & 130\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Figure~\ref{fig:length} makes the output-length mismatch visible. At $K=5$, Full used 56\% more words than Semantic-MMR and 63\% more than TextRank on average; at $K=10$, the corresponding increases were 61\% and 54\%. These ratios are derived only from the frozen selections and are not performance-normalized scores.
+
+\begin{figure}[H]
+\includegraphics[width=0.90\textwidth]{figures/fig05_output_length.pdf}
+\caption{Mean selected words per test report for the four headline conditions. Values reproduce Table~\ref{tab:length-audit}; they are post-run diagnostics of immutable predictions, not a retuned word-budget experiment.}
+\label{fig:length}
+\end{figure}
+
+Full averaged 103.0 and 214.5 more words than Semantic-MMR at $K=5$ and $K=10$, and 110.7 and 199.9 more than TextRank. Among its 225 selected-unit instances, 37 exceeded 100 words, 40 contained ``Table'', and the maximum was 270 words. These diagnostics reveal fused table, heading, footnote, or line-break blocks in the sentence-level extraction units. Consequently, the observed ROUGE advantages over Semantic-MMR and TextRank are equal-sentence but unequal-word comparisons and do not establish fair length-matched superiority. Constructing newly selected word-budget systems on the revealed test would be a new post hoc experiment and was not done.
+
+A fair word-budget study would have to specify the budget before ranking, define how partially fitting units are handled, and apply an equivalent constraint to every comparator. It would also need a fresh development set for the diversity coefficient and graph weights, followed by an untouched test set. Truncating the present outputs after selection would not answer the same question because it could cut a technical statement mid-clause and would preserve the advantage obtained while ranking long fused units. The audit therefore identifies a requirement for the next experiment rather than offering a post hoc correction.
+
+The long-unit counts locate a concrete extraction risk. Units exceeding 100 words and units containing ``Table'' show that PDF layout sometimes survives the sentence splitter as one selectable block. Such blocks can contain many reference-summary tokens and thereby increase ROUGE without providing a concise sentence. They may remain useful source locators, but they weaken sentence-budget comparisons and motivate layout-aware segmentation before external validation.
+
+\subsection{Registered Contrasts}
+
+Table~\ref{tab:contrasts} gives the six registered contrasts. Full minus registered unrenormalized no-CF was $-0.003332$ at $K=5$ and $-0.003360$ at $K=10$; both intervals crossed zero. Thus, neither development nor test evidence supports a lexical-overlap benefit under the frozen counterfactual coefficient rule.
+
+No minimum important difference was specified, and no qualified-reader outcome was collected. Consequently, even a numerically or statistically distinguishable ROUGE-L contrast would not establish a practically meaningful improvement in maintenance review. Practical significance and equivalence are unidentifiable from the retained automatic endpoints.
+
+Full exceeded Semantic-MMR and TextRank at both equal-sentence budgets on this split, but the output-length audit shows that Full used substantially more words; no length-controlled superiority is claimed. The two registered machine sign-tail values stored as 0.0 mean only that zero smaller-tail draws occurred among 10,000 observed-delta bootstrap resamples. They are shown as ``0/10,000 tail draws,'' not as probabilities of zero or conventional $p$ values. The immutable machine artifact retains its original numeric values.
+
+\begin{table}[H]
+\caption{Registered Full-minus-baseline Executive-Summary ROUGE-L contrasts, paired by test report ($n=15$). Intervals are 95\% report-composition bootstrap intervals for the mean paired difference across these 15 retained reports, not population confidence intervals. The final column is the unadjusted registered descriptive sign-tail estimator, not a calibrated $p$ value; stored Holm-transformed versions remain provenance only and support no claim.}
+\label{tab:contrasts}\centering\small
+\begin{tabular}{llrrr}
+\toprule
+$K$ & Baseline & Mean difference & 95\% comp. interval & Unadjusted $t_{boot}$\\
+\midrule
+5 & No-CF (unren.) & -0.003332 & [-0.010889, 0.002826] & 0.3544\\
+5 & Semantic-MMR & 0.020737 & [0.012765, 0.028354] & 0/10,000 tail draws\\
+5 & TextRank & 0.025438 & [0.017542, 0.033722] & 0/10,000 tail draws\\
+10 & No-CF (unren.) & -0.003360 & [-0.008306, 0.001040] & 0.1444\\
+10 & Semantic-MMR & 0.014360 & [0.006082, 0.022215] & 0.0008\\
+10 & TextRank & 0.012029 & [0.004397, 0.019241] & 0.0022\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:signflip} reports the unregistered post-run sensitivity. The exact values preserve the qualitative conclusion: the no-CF contrasts do not provide evidence of a positive counterfactual contribution, whereas the observed differences versus Semantic-MMR and TextRank are directionally stable under the stated sign-exchangeability assumption. Because the corpus is selected and $n=15$, this does not establish population-wide superiority.
+
+\begin{table}[H]
+\caption{Unregistered exact paired sign-flip sensitivity from the immutable prediction ledger ($n=15$, $2^{15}=32{,}768$ assignments per contrast). Holm adjustment covers all six values.}
+\label{tab:signflip}\centering\small
+\begin{tabular}{llrrr}
+\toprule
+$K$ & Baseline & Signs $+/-/0$ & Exact two-sided $p$ & Holm-adjusted $p$\\
+\midrule
+5 & No-CF (unren.) & 7/7/1 & 0.436768 & 0.436768\\
+5 & Semantic-MMR & 14/1/0 & 0.000305 & 0.001526\\
+5 & TextRank & 14/1/0 & 0.000122 & 0.000732\\
+10 & No-CF (unren.) & 6/8/1 & 0.200684 & 0.401367\\
+10 & Semantic-MMR & 11/4/0 & 0.006592 & 0.026367\\
+10 & TextRank & 13/2/0 & 0.009644 & 0.028931\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Figure~\ref{fig:paired} exposes every report-level difference. Full and unrenormalized no-CF selected different sentence sequences in 28 of 30 report--budget cells, and their base scores differed in all 30, confirming an active coefficient rule but not a benefit.
+
+\begin{figure}[H]
+\includegraphics[width=\textwidth]{figures/fig04_paired_differences.pdf}
+\caption{Per-report paired Executive-Summary ROUGE-L differences for the six registered contrasts ($n=15$). Horizontal colored segments denote means; black lines denote zero; panel titles give positive/negative/zero sign counts. Rights-safe report indices map to non-verbatim metadata in Supplementary Table~S1.}
+\label{fig:paired}
+\end{figure}
+
+The signs clarify heterogeneity hidden by macro-means. Against strict no-CF, Full was positive and negative on equally many non-tied reports at $K=5$, and negative on more reports at $K=10$. Against Semantic-MMR and TextRank, positive signs predominated, but these comparisons retain the output-length confound. The paired analysis shows that the observed sign was not confined to a few reports, while leaving unresolved whether it would survive matched lengths or a new corpus.
+
+The bootstrap intervals and exact sign-flip sensitivity answer related but different questions. The percentile interval shows the range of report-composition means produced by resampling the observed reports; its finite estimand is the unweighted mean paired difference across these 15 retained reports. The exact sign-flip calculation instead asks how unusual the absolute paired mean would be under all sign assignments, conditional on the observed magnitudes and a symmetry assumption. Agreement in direction across the two analyses increases transparency, but neither removes selection of the corpus, creates a random population sample, or corrects unequal output lengths.
+
+The registered contrast family also limits selective interpretation. Only Full versus strict no-CF, Semantic-MMR, and TextRank at the two budgets was designated for paired contrast reporting. The complete seven-condition table remains available for context, yet comparisons discovered by scanning all metrics and methods are descriptive. This avoids turning the best observed cell into an unregistered claim. The same rule applies to redundancy: Full's lower redundancy than no-CF is informative about the selected extracts, but it was not registered as evidence that compensates for lower ROUGE.
+
+At the report level, a positive lexical-overlap delta can arise from selecting a genuinely central passage, retrieving a long unit containing several relevant clauses, or echoing frequent terminology. The current automatic metrics cannot distinguish these mechanisms. Page-linked outputs make later qualitative audit possible, but no qualified semantic adjudication was completed for this study. Consequently, the quantitative analysis is strongest as a reproducible screen of ranking behavior and weakest as a judgment of engineering summary quality.
+
+Table~\ref{tab:evidence-matrix} separates observations from the claims they can support. Successful software execution, proxy-benchmark overlap, component attribution, and operational usefulness require increasingly strong validation designs.
+
+\begin{table}[H]
+\caption{Evidence-to-claim interpretation for the completed experiment.}
+\label{tab:evidence-matrix}\centering\small
+\begin{tabular}{p{0.26\textwidth}p{0.28\textwidth}p{0.36\textwidth}}
+\toprule
+Evidence & Supported statement & Statement not supported\\
+\midrule
+Hash, row-set, and source checks & Frozen pipeline executed reproducibly & Algorithm is accurate or useful\\
+Full versus named baselines & Descriptive equal-sentence differences on 15 reports & Length-controlled or population-wide superiority\\
+Full versus unrenormalized no-CF & Coefficient was active; gain under the frozen rule was not shown & Pure channel effect or general counterfactual benefit\\
+Path-limit diagnostics & Registered caps were not approached & Runtime scalability on arbitrary corpora\\
+Public technical-report proxy & Method can be studied without confidential work orders & Effectiveness in maintenance operations\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Computational Diagnostics}
+
+Across 19,008 Full/no-CF sentence-score comparisons, 9774 were nonzero and the maximum absolute difference was 0.15. Maximum observed path expansions were 19,638 of the 2,000,000 cap, and maximum qualifying paths were 16,182 of 250,000; no fail-closed path limit was approached. These diagnostics confirm that the mechanism executed as specified, but do not convert it into a useful ranking component.
+
+The separation between activity and efficacy is central. Nonzero score differences show that the path-deletion term was not silently disabled, while changed sequences in 28 of 30 cells show that it affected the downstream selector. The negative mean contrast then indicates that this activity did not improve the registered lexical-overlap target. Conversely, the distance from the caps shows only that these reports were computationally manageable; it is not an asymptotic benchmark or a guarantee for denser graphs.
+
+\subsection{Exploratory Development Calibration Result}
+
+The post-unblinding development-only calibration did not find a defensible nonzero counterfactual coefficient. Candidate C046, with zero counterfactual weight, won every one of the 12 leave-one-report-out folds. The best nonzero candidate, C055 with weight 0.025, won no fold and remained slightly below its strict-zero comparison at both budgets. The original frozen 0.15-weight development configuration was below strict zero by 0.00567 at $K=5$ and 0.00257 at $K=10$. These development findings are reported because they followed disclosure of the formal result; they cannot replace, tune, or reinterpret the immutable v0.3.1 test.
+
+This calibration narrows the plausible diagnosis. The formal negative contrast is unlikely to be repaired merely by selecting a smaller positive coefficient within the explored development grid, because strict zero won every held-out development fold. A redesigned mechanism may require different path semantics, learned role confidence, or an objective aligned with factual coverage rather than lexical overlap. Testing such a change against the revealed reports would be exploratory; confirmation must begin with a new freeze and unseen evaluation units.
+
+\subsection{Answers to the Research Questions}
+
+For RQ1, the Full condition has higher mean Executive-Summary ROUGE-L than Semantic-MMR and TextRank at both registered sentence budgets, and the paired signs favor Full on most reports. This is a reproducible observation on the 15-report split. It is not a fair word-budget superiority result because Full outputs are 54--63\% longer than those two baselines on average. Centroid and Role also show that the relative ordering of non-graph comparators depends on the selected budget.
+
+For RQ2, the registered unrenormalized coefficient-removal evidence is unfavorable. Full is lower than no-CF by 0.003332 at $K=5$ and 0.003360 at $K=10$; the intervals cross zero, report-level signs are mixed, and development-only calibration favors zero weight. The score and sequence diagnostics demonstrate that the channel executed and changed ranking. They do not demonstrate that typed path deletion improves the registered outcome, and the contrast does not separate path information from its relative-scale coupling to redundancy. This distinction rules out both a silent no-op explanation and an unsupported benefit claim.
+
+For RQ3, the strongest supported contribution is auditability. Complete prediction rows, source correspondence, leakage gates, hashes, page locators, paired distributions, length diagnostics, and incident chronology can be independently inspected. External validity remains narrow because the reports come from one public organization, extraction units contain layout artifacts, comparator tuning is asymmetric, and neither expert semantic quality nor maintenance-work-order usefulness was measured.
+
+Taken together, the answers favor a mechanism-focused rather than application-success interpretation. The graph representation and perturbation are viable research objects, while the current integration and evaluation reveal concrete redesign needs: layout-aware units, matched word budgets, balanced tuning opportunity, richer role semantics, and new expert-reviewed data. Reporting those needs is part of the empirical result, not merely future-work boilerplate.
+
+\section{Discussion}
+
+\subsection{Supported Interpretation}
+
+The rebuild establishes a cleaner experimental object than R1: complete-PDF candidates, multi-level summary-leakage checks, a recorded development search, a path-based score distinct from degree, a Semantic-MMR baseline, and report-level paired estimates. Full \cges{} had higher mean Executive-Summary ROUGE-L than Semantic-MMR and TextRank on this retained split, but used markedly more words at both equal-sentence budgets. The unregistered exact sign-flip sensitivity retained the ROUGE directions after six-value Holm adjustment under a stated sign-exchangeability assumption; it does not control output length or turn the corrective split into confirmatory evidence.
+
+System-level baseline differences should not be attributed to the named counterfactual mechanism. Unrenormalized no-CF produced the highest observed ROUGE-1, ROUGE-2, and ROUGE-L at both budgets, while the Full-minus-no-CF intervals crossed zero. The proper conclusion is that path deletion is an identifiable structural feature whose value under the frozen coefficient rule was not demonstrated; a pure channel effect remains unidentified because of relative-scale coupling.
+
+\subsection{Causal and Counterfactual Boundaries}
+
+The graph organizes text into role-conditioned paths. Direction and path score are reproducible hypotheses, not validated relations in grid physics. Node deletion measures the dependence of graph utility on one sentence; it is not a potential-outcome estimand, a do-intervention on grid state, or evidence that an event would change if a sentence were absent. The title must therefore be read together with these boundaries.
+
+Figure~\ref{fig:evidence-ladder} summarizes this boundary. Each upward step requires evidence absent from the preceding one: length matching for a fair summarization comparison, external data for population transfer, and qualified users plus safety-oriented outcomes for maintenance utility. The present study deliberately stops at the lower steps.
+
+\begin{figure}[H]
+\includegraphics[width=0.88\textwidth]{figures/fig06_evidence_ladder.pdf}
+\caption{Claim boundary for the current evidence. Green denotes an audited observation or bounded descriptive result, amber denotes a named component claim not demonstrated, and red denotes validation not performed.}
+\label{fig:evidence-ladder}
+\end{figure}
+
+\subsection{Maintenance-Workflow Transfer}
+
+NERC reliability and disturbance reports can inform maintenance-oriented lessons-learned review, but work orders and inspection records differ in vocabulary, length, asset granularity, narrative structure, and reference-summary availability. Current evidence measures Executive-Summary lexical overlap on a selected NERC technical-report proxy corpus and motivates, but does not validate, a maintenance-review use case. It does not establish effectiveness for operational maintenance reports.
+
+The most defensible near-term role is decision support for source navigation. An extract can direct an engineer to candidate passages while the original report remains authoritative. Deployment would additionally require asset-specific terminology, access controls, provenance links, abstention when parsing fails, and evaluation of missed hazards. These requirements should be designed with users before any field claim is made.
+
+\subsection{Limitations}
+
+The test set contains only 15 selected public reports from one organization and derives from a population inspected during corrective reconstruction. Official Executive Summaries are long references, and ROUGE/redundancy do not measure factual sufficiency, engineering usefulness, unsafe omission, or causal-chain correctness. Equal sentence counts yielded unequal word budgets, and fused table, heading, footnote, or line-break blocks occurred among extraction units; therefore current baseline advantages are not length controlled. Semantic-MMR used a fixed coefficient of 0.5 whereas \cges{} received a 144-configuration development search, so comparator tuning budgets were asymmetric. Role and edge construction lack blinded qualified-expert validation, and the ambiguity/negation/hypothetical taxonomy has no expert-gold error counts. Third-party rights restrict redistribution of PDFs and verbatim extracted text. The public repository has not yet been asserted to match the exact final-candidate package.
+
+Post hoc tuning after seeing these results cannot rehabilitate the current test as confirmatory. The completed 147-configuration development-only calibration selected zero CF in all 12 folds and did not support its best nonzero setting. It did not access test input or formal output files, does not replace v0.3.1, and must not be evaluated on the revealed 15 reports. Any redesigned integration requires a new, genuinely unseen holdout.
+
+Cross-report revised editions, recurring institutional boilerplate, and near-duplicate passages were not audited as dependence structures. Report-level independence is therefore an unresolved assumption in both the bootstrap description and sign-flip sensitivity.
+
+\subsection{Future Validation}
+
+Future work should freeze a license-cleared corpus of work orders or maintenance narratives at report or site level and create an untouched external holdout. Qualified power-grid personnel should independently score source faithfulness, coverage of cause/event/impact/mitigation, engineering usefulness, and unsafe omissions; disagreement and adjudication should be retained, and inter-rater agreement reported. LLM judgments may support annotation workflow experiments but must not be labeled expert validation.
+
+The next protocol should compare fixed sentence and fixed word budgets, include a layout-aware extraction baseline, and give all learned or tuned systems comparable development resources. A hierarchical analysis can separate report, site, and organization variation. Component evaluation should pre-register both a lexical target and a human-centered target so that a structural mechanism is not optimized solely to imitate Executive-Summary wording. Release should preserve identifiers, hashes, and non-verbatim locators even where document licenses prevent redistribution.
+
+\section{Conclusions}
+
+\cges{} was rebuilt as a deterministic, auditable extractive method for long power-system technical reports. Its typed role graph, path-deletion perturbation, stable selector, complete-PDF candidate construction, and multi-level leakage gates provide a reproducible algorithmic object. The title's maintenance setting remains the intended application direction; the evaluated population is a selected public NERC proxy corpus rather than operational work orders.
+
+On 15 test reports, Full \cges{} achieved Executive-Summary ROUGE-L F1 of 0.1060 and 0.1276 at five and ten sentences. These means exceeded Semantic-MMR and TextRank under equal sentence counts. Full nevertheless averaged 103.0/214.5 more words than Semantic-MMR and 110.7/199.9 more than TextRank, so the experiment does not establish length-controlled superiority. The post-run audit turns this limitation into an explicit design constraint instead of concealing it behind aggregate scores.
+
+The named counterfactual coefficient did not deliver the hypothesized gain under the frozen unrenormalized rule. Full was below no-CF by approximately 0.0033 at both budgets, both paired composition intervals crossed zero, and a post-unblinding development-only calibration selected zero counterfactual weight in all 12 leave-one-report-out folds. At the same time, nonzero score differences and changed selections verify that the coefficient executed. This is an informative negative finding: structural path deletion is implemented and inspectable, but its value under the registered lexical-overlap rule was not demonstrated, and pure component attribution requires a future renormalized ablation.
+
+The contribution is an auditable method, a traceable proxy benchmark, and a calibrated evidence boundary. It does not establish real-world causal identification, summary safety, maintenance-work-order effectiveness, or operational decision readiness. Extracts should be used only to navigate to authoritative sources. A credible next test requires layout-aware units, equal word budgets, symmetrically tuned comparators, a new sealed title-concordant holdout, and independent evaluation by qualified power-grid personnel. Preserving the distinction between executed mechanism and supported claim is necessary for reproducible and responsible maintenance-oriented research.
+
+\supplementary{The final-candidate manifest separates transferable non-verbatim material from a restricted-local compartment. The transferable set contains the 40-report rights-safe inventory; six exact sign-flip records; complete post-unblinding calibration code, 10 tests, verifier, state, four ledgers, decision, run manifest, audit, and three core code snapshots; output-length records for all 14 condition--budget groups; the 1,575-row non-verbatim page-locator ledger; configuration/freeze/authorization/dependency and independent-audit records; code-native figures with per-artifact lineage; and a 23-item citation-context audit. The restricted-local compartment binds the immutable 210-row prediction ledger because it contains verbatim derived text; it is excluded from the safe editor ZIP unless third-party permission is confirmed. Source PDFs and full extracted datasets are never packaged. Required-role, forbidden-file, exact-set, byte, and SHA-256 checks are machine verified.}
+\authorcontributions{Conceptualization, B.L. and Y.Y.; methodology, B.L.; software, B.L.; validation, B.L.; formal analysis, B.L.; investigation, B.L.; resources, Y.Y.; data curation, B.L.; writing---original draft preparation, B.L.; writing---review and editing, B.L. and Y.Y.; visualization, B.L.; supervision, Y.Y.; project administration, Y.Y.; funding acquisition, Y.Y. All authors have read and agreed to the published version of the manuscript.}
+\funding{This research was funded by the Science and Technology Research Project of State Grid Fujian Electric Power Co., Ltd., grant number 521300250006. The funder had no role in the design of the study; in the collection, analyses, or interpretation of data; in the writing of the manuscript; or in the decision to publish the results.}
+\institutionalreview{Not applicable. This computational study uses published technical reports and does not involve human participants or animals.}
+\informedconsent{Not applicable.}
+\dataavailability{Code is intended for release at \url{https://github.com/gaoxingkele/c2ges}. The repository must be synchronized, licensed, tagged, archived, and verified from a fresh clone before submission; this final candidate does not assert that its current public contents reproduce the reported artifacts. Owing to third-party licensing restrictions, source PDFs and verbatim derived text are not publicly redistributed. Subject to applicable permissions, restricted materials needed for editorial and peer-review verification may be requested from the corresponding author. Rights-safe metadata, hashes, configurations, the non-verbatim selected-ID-to-page locator, descriptive diagnostic records, and reproducibility records accompany the manuscript-bound package.}
+\acknowledgments{The OpenAI Codex agent interface was used for the generative-AI-assisted activities described in Materials and Methods. The exact backend model identifier and version were not retained in the project records. The authors reviewed the outputs and retain responsibility for the manuscript; Codex was not treated as an author, qualified power-grid expert, human annotator, or adjudicator.}
+\conflictsofinterest{The authors declare no conflicts of interest.}
+
+\begin{adjustwidth}{-\extralength}{0cm}
+\reftitle{References}
+\bibliography{references_cited_verified}
+\PublishersNote{}
+\end{adjustwidth}
+\end{document}

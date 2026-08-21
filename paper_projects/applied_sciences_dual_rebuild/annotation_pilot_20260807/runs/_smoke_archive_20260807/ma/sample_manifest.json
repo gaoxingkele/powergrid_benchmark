@@ -1,0 +1,187 @@
+{
+  "pilot": "ma_sqlgrid",
+  "seed": 20260807,
+  "pilot_size": 25,
+  "protocol_sha256": "6d5a0398083def9762295e13365636ca4ae9434b785371e88df9773ac1dd1ff5",
+  "sampling_rule": "Random(20260807); RTS: shuffle family list + items within family, round-robin pick 14; then SimBench same procedure pick 11",
+  "n_rts": 14,
+  "n_simbench": 11,
+  "items": [
+    {
+      "question_id": "RTS_AUTO_033",
+      "dataset_id": "RTS_GMLC_AUTO_PILOT",
+      "question": "For 2020-07-07, summarize total day-ahead generation by fuel.",
+      "sql": "SELECT g.fuel, ROUND(SUM(d.generation_mw), 2) AS total_generation_mwh FROM dispatch_da d JOIN generators g ON d.generator_uid = g.generator_uid WHERE d.timestamp >= '2020-07-07 00:00:00' AND d.timestamp < datetime('2020-07-07 00:00:00', '+1 day') GROUP BY g.fuel ORDER BY total_generation_mwh DESC, g.fuel;",
+      "template_family": "F07_dispatch_fuel_daily_aggregate"
+    },
+    {
+      "question_id": "RTS_AUTO_045",
+      "dataset_id": "RTS_GMLC_AUTO_PILOT",
+      "question": "Return the five renewable generators with the highest available MW at 2020-01-01 04:00:00, including their fuel labels.",
+      "sql": "SELECT r.generator_uid, g.fuel, r.available_mw FROM renewable_availability_da r JOIN generators g ON r.generator_uid = g.generator_uid WHERE r.timestamp = '2020-01-01 04:00:00' ORDER BY r.available_mw DESC, r.generator_uid LIMIT 5;",
+      "template_family": "F09_renewable_availability_topk"
+    },
+    {
+      "question_id": "RTS_AUTO_002",
+      "dataset_id": "RTS_GMLC_AUTO_PILOT",
+      "question": "How many Solar-fueled generators are there and what is their total maximum capacity?",
+      "sql": "SELECT g.fuel, COUNT(*) AS generator_count, ROUND(SUM(c.pmax_mw), 2) AS total_pmax_mw FROM generators g JOIN generator_constraints c ON g.generator_uid = c.generator_uid WHERE g.fuel = 'Solar' GROUP BY g.fuel;",
+      "template_family": "F02_capacity_aggregate_by_fuel"
+    },
+    {
+      "question_id": "RTS_AUTO_024",
+      "dataset_id": "RTS_GMLC_AUTO_PILOT",
+      "question": "Return the top 10 generators by maximum MW capacity.",
+      "sql": "SELECT g.generator_uid, g.fuel, c.pmax_mw FROM generators g JOIN generator_constraints c ON g.generator_uid = c.generator_uid ORDER BY c.pmax_mw DESC, g.generator_uid LIMIT 10;",
+      "template_family": "F05_capacity_topk"
+    },
+    {
+      "question_id": "RTS_AUTO_016",
+      "dataset_id": "RTS_GMLC_AUTO_PILOT",
+      "question": "List generators connected to buses in area 1, with their bus names and fuels.",
+      "sql": "SELECT g.generator_uid, b.bus_name, g.fuel FROM generators g JOIN buses b ON g.bus_id = b.bus_id WHERE b.area = 1 ORDER BY b.bus_name, g.generator_uid;",
+      "template_family": "F04_generator_bus_join"
+    },
+    {
+      "question_id": "RTS_AUTO_013",
+      "dataset_id": "RTS_GMLC_AUTO_PILOT",
+      "question": "Which generators require at least 4 hours of minimum up time?",
+      "sql": "SELECT g.generator_uid, g.unit_type, c.min_up_time_hr FROM generators g JOIN generator_constraints c ON g.generator_uid = c.generator_uid WHERE c.min_up_time_hr >= 4 ORDER BY c.min_up_time_hr DESC, g.generator_uid;",
+      "template_family": "F03_operating_constraint_filter"
+    },
+    {
+      "question_id": "RTS_AUTO_051",
+      "dataset_id": "RTS_GMLC_AUTO_PILOT",
+      "question": "Return the top 1 generators by non-fuel start cost, excluding missing values.",
+      "sql": "SELECT g.generator_uid, g.fuel, c.nonfuel_start_cost_usd FROM generator_costs c JOIN generators g ON c.generator_uid = g.generator_uid WHERE c.nonfuel_start_cost_usd IS NOT NULL ORDER BY c.nonfuel_start_cost_usd DESC, g.generator_uid LIMIT 1;",
+      "template_family": "F11_cost_topk"
+    },
+    {
+      "question_id": "RTS_AUTO_037",
+      "dataset_id": "RTS_GMLC_AUTO_PILOT",
+      "question": "What was the average day-ahead load for each region on 2020-01-02?",
+      "sql": "SELECT region, ROUND(AVG(load_mw), 2) AS average_load_mw FROM load_timeseries_da WHERE timestamp >= '2020-01-02 00:00:00' AND timestamp < datetime('2020-01-02 00:00:00', '+1 day') GROUP BY region ORDER BY region;",
+      "template_family": "F08_regional_load_daily_aggregate"
+    },
+    {
+      "question_id": "RTS_AUTO_046",
+      "dataset_id": "RTS_GMLC_AUTO_PILOT",
+      "question": "What was the maximum day-ahead spinning reserve requirement for each product on 2020-01-01?",
+      "sql": "SELECT reserve_product, ROUND(MAX(requirement_mw), 3) AS maximum_requirement_mw FROM reserve_requirements_da WHERE timestamp >= '2020-01-01 00:00:00' AND timestamp < datetime('2020-01-01 00:00:00', '+1 day') GROUP BY reserve_product ORDER BY reserve_product;",
+      "template_family": "F10_reserve_daily_aggregate"
+    },
+    {
+      "question_id": "RTS_AUTO_030",
+      "dataset_id": "RTS_GMLC_AUTO_PILOT",
+      "question": "Which generators produced positive output at 2020-07-05 04:00:00 in the all-transmission day-ahead solution?",
+      "sql": "SELECT generator_uid, generation_mw FROM dispatch_da WHERE timestamp = '2020-07-05 04:00:00' AND transmission_scenario = 'allTX' AND generation_mw > 0 ORDER BY generation_mw DESC, generator_uid;",
+      "template_family": "F06_dispatch_timestamp_filter"
+    },
+    {
+      "question_id": "RTS_AUTO_005",
+      "dataset_id": "RTS_GMLC_AUTO_PILOT",
+      "question": "List the generator identifiers and unit types for Hydro-fueled units.",
+      "sql": "SELECT generator_uid, unit_type FROM generators WHERE fuel = 'Hydro' ORDER BY generator_uid;",
+      "template_family": "F01_generator_fuel_filter"
+    },
+    {
+      "question_id": "RTS_AUTO_031",
+      "dataset_id": "RTS_GMLC_AUTO_PILOT",
+      "question": "For 2020-07-05, summarize total day-ahead generation by fuel.",
+      "sql": "SELECT g.fuel, ROUND(SUM(d.generation_mw), 2) AS total_generation_mwh FROM dispatch_da d JOIN generators g ON d.generator_uid = g.generator_uid WHERE d.timestamp >= '2020-07-05 00:00:00' AND d.timestamp < datetime('2020-07-05 00:00:00', '+1 day') GROUP BY g.fuel ORDER BY total_generation_mwh DESC, g.fuel;",
+      "template_family": "F07_dispatch_fuel_daily_aggregate"
+    },
+    {
+      "question_id": "RTS_AUTO_042",
+      "dataset_id": "RTS_GMLC_AUTO_PILOT",
+      "question": "Return the five renewable generators with the highest available MW at 2020-01-01 01:00:00, including their fuel labels.",
+      "sql": "SELECT r.generator_uid, g.fuel, r.available_mw FROM renewable_availability_da r JOIN generators g ON r.generator_uid = g.generator_uid WHERE r.timestamp = '2020-01-01 01:00:00' ORDER BY r.available_mw DESC, r.generator_uid LIMIT 5;",
+      "template_family": "F09_renewable_availability_topk"
+    },
+    {
+      "question_id": "RTS_AUTO_008",
+      "dataset_id": "RTS_GMLC_AUTO_PILOT",
+      "question": "How many Oil-fueled generators are there and what is their total maximum capacity?",
+      "sql": "SELECT g.fuel, COUNT(*) AS generator_count, ROUND(SUM(c.pmax_mw), 2) AS total_pmax_mw FROM generators g JOIN generator_constraints c ON g.generator_uid = c.generator_uid WHERE g.fuel = 'Oil' GROUP BY g.fuel;",
+      "template_family": "F02_capacity_aggregate_by_fuel"
+    },
+    {
+      "question_id": "SB-AUTO-021",
+      "dataset_id": "SIMBENCH_AUTO_PILOT",
+      "question": "Show transformer names with their high- and low-voltage bus names.",
+      "sql": "SELECT t.name AS transformer_name, hb.name AS high_voltage_bus, lb.name AS low_voltage_bus FROM transformers t JOIN buses hb ON hb.bus_id = t.hv_bus_id JOIN buses lb ON lb.bus_id = t.lv_bus_id ORDER BY t.transformer_id",
+      "template_family": "cross_asset_join"
+    },
+    {
+      "question_id": "SB-AUTO-017",
+      "dataset_id": "SIMBENCH_AUTO_PILOT",
+      "question": "How many buses belong to each nominal voltage level?",
+      "sql": "SELECT nominal_kv, COUNT(*) AS bus_count FROM buses GROUP BY nominal_kv ORDER BY nominal_kv DESC",
+      "template_family": "asset_aggregation"
+    },
+    {
+      "question_id": "SB-AUTO-001",
+      "dataset_id": "SIMBENCH_AUTO_PILOT",
+      "question": "How many buses are represented in this SimBench network?",
+      "sql": "SELECT COUNT(*) AS bus_count FROM buses",
+      "template_family": "asset_inventory"
+    },
+    {
+      "question_id": "SB-AUTO-028",
+      "dataset_id": "SIMBENCH_AUTO_PILOT",
+      "question": "Which transformer has the largest rated power?",
+      "sql": "SELECT transformer_id, name, rated_power_mva FROM transformers ORDER BY rated_power_mva DESC, transformer_id LIMIT 1",
+      "template_family": "ranked_assets"
+    },
+    {
+      "question_id": "SB-AUTO-033",
+      "dataset_id": "SIMBENCH_AUTO_PILOT",
+      "question": "Which buses have no incident line?",
+      "sql": "SELECT b.bus_id, b.name FROM buses b LEFT JOIN lines l1 ON l1.from_bus_id = b.bus_id LEFT JOIN lines l2 ON l2.to_bus_id = b.bus_id WHERE l1.line_id IS NULL AND l2.line_id IS NULL ORDER BY b.bus_id",
+      "template_family": "network_topology"
+    },
+    {
+      "question_id": "SB-AUTO-010",
+      "dataset_id": "SIMBENCH_AUTO_PILOT",
+      "question": "Which generators are controllable?",
+      "sql": "SELECT generator_id, name, generator_type FROM generators WHERE controllable = 1 ORDER BY generator_id",
+      "template_family": "threshold_filter"
+    },
+    {
+      "question_id": "SB-AUTO-023",
+      "dataset_id": "SIMBENCH_AUTO_PILOT",
+      "question": "Count loads by the nominal voltage of their connected bus.",
+      "sql": "SELECT b.nominal_kv, COUNT(*) AS load_count FROM loads l JOIN buses b ON b.bus_id = l.bus_id GROUP BY b.nominal_kv ORDER BY b.nominal_kv DESC",
+      "template_family": "cross_asset_join"
+    },
+    {
+      "question_id": "SB-AUTO-015",
+      "dataset_id": "SIMBENCH_AUTO_PILOT",
+      "question": "What is the average line length in kilometres?",
+      "sql": "SELECT ROUND(AVG(length_km), 6) AS average_line_length_km FROM lines",
+      "template_family": "asset_aggregation"
+    },
+    {
+      "question_id": "SB-AUTO-006",
+      "dataset_id": "SIMBENCH_AUTO_PILOT",
+      "question": "How many switches are represented?",
+      "sql": "SELECT COUNT(*) AS switch_count FROM switches",
+      "template_family": "asset_inventory"
+    },
+    {
+      "question_id": "SB-AUTO-027",
+      "dataset_id": "SIMBENCH_AUTO_PILOT",
+      "question": "Which five lines are the longest?",
+      "sql": "SELECT line_id, name, length_km FROM lines ORDER BY length_km DESC, line_id LIMIT 5",
+      "template_family": "ranked_assets"
+    },
+    {
+      "question_id": "SB-AUTO-035",
+      "dataset_id": "SIMBENCH_AUTO_PILOT",
+      "question": "Which lines connect buses with different nominal voltages?",
+      "sql": "SELECT l.line_id, l.name, fb.nominal_kv AS from_kv, tb.nominal_kv AS to_kv FROM lines l JOIN buses fb ON fb.bus_id = l.from_bus_id JOIN buses tb ON tb.bus_id = l.to_bus_id WHERE fb.nominal_kv <> tb.nominal_kv ORDER BY l.line_id",
+      "template_family": "network_topology"
+    }
+  ],
+  "limited_to": 2
+}

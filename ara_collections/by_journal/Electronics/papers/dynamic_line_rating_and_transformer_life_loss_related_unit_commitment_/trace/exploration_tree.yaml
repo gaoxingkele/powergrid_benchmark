@@ -1,0 +1,135 @@
+tree:
+  - id: N01
+    type: question
+    support_level: explicit
+    source_refs: ["§1 Introduction", "Abstract"]
+    title: "How to keep power dispatch secure and economic under extreme high temperature?"
+    description: >
+      Root question: extreme heat degrades line thermal stability and accelerates transformer aging,
+      while conventional UC uses SLR and ignores transformer lifetime loss. Can a UC model internalize
+      both effects?
+    children:
+      - id: N02
+        type: question
+        support_level: explicit
+        source_refs: ["§2.1", "§2.2"]
+        title: "Can real-time thermal balance recover line capacity that SLR discards?"
+        description: >
+          Formulate conductor thermal balance (convective/radiative/solar) and derive a
+          temperature-dependent ampacity Imax(Ta).
+        children:
+          - id: N03
+            type: decision
+            support_level: explicit
+            source_refs: ["§2.1 Eqs. 1-8"]
+            title: "Adopt three-component steady-state conductor temperature model"
+            description: >
+              θss = β0 + β1 I^2 + β2 I^4, decomposing ambient/solar rise, resistive rise, and a
+              higher-order radiative correction (adopted from temperature-dependent power flow, ref [19]).
+          - id: N04
+            type: decision
+            support_level: explicit
+            source_refs: ["§2.2 Eq. 9"]
+            title: "Neglect thermal-inertia term (assume steady state)"
+            description: >
+              For long time scales exp(-t/τ) → 0, so θ(t) ≈ θss; wind and solar assumed constant over
+              the period. Simplifies the rating to a closed-form Imax (Eq. 10).
+          - id: N05
+            type: experiment
+            support_level: explicit
+            source_refs: ["§5 Figure 4", "§5 Figure 5"]
+            title: "DLR-constrained UC vs conventional SLR UC"
+            description: "Compare transmission-capacity utilization and interface flows in hot regions."
+            evidence: ["C01", "C03"]
+      - id: N06
+        type: question
+        support_level: explicit
+        source_refs: ["§3.1", "§3.2"]
+        title: "Can transformer aging be turned into a dispatch-controllable cost?"
+        description: >
+          Build hot-spot temperature model (top-oil + winding rises) and monetize aging via Arrhenius
+          loss-of-life + linear damage accumulation.
+        children:
+          - id: N07
+            type: decision
+            support_level: explicit
+            source_refs: ["§3.2 §5 Eqs. 17-21"]
+            title: "Fix OA/ONAN cooling parameters"
+            description: >
+              FT = 1.4, n = 0.9, m = 0.8, θQC = 22 C; rated top-oil rise 56.3 C gives 98 C hot-spot at
+              20 C ambient (per empirical values, ref [23]).
+          - id: N08
+            type: decision
+            support_level: explicit
+            source_refs: ["§3.2 Eqs. 20-21"]
+            title: "Use Arrhenius loss-of-life + Miner's-rule accumulation"
+            description: >
+              D_i = exp(KA/383 - KA/(TH+273)); 98 C = rated life, +6 C doubles aging; 30-year nominal
+              life; cost scaled by transformer investment (IEEE/ANSI C57.91, ref [22]).
+          - id: N09
+            type: experiment
+            support_level: explicit
+            source_refs: ["§5 Figure 6", "§5 Table 2"]
+            title: "Hot-spot temperature & life-loss cost: TL-TF vs conventional"
+            description: "Compare hot-spot trajectory vs 98 C bound and transformer loss cost."
+            evidence: ["C02"]
+      - id: N10
+        type: question
+        support_level: explicit
+        source_refs: ["§4.1 Eq. 22"]
+        title: "How to combine DLR limit and life-loss cost in one UC objective?"
+        description: >
+          Compose F = Ccoal + CTF + CW + CUD with temperature-dependent capacity constraint (Eq. 31)
+          and DC-power-flow GSDF network model.
+        children:
+          - id: N11
+            type: decision
+            support_level: explicit
+            source_refs: ["§4.2 Eq. 28"]
+            title: "Linearize network via GSDF / DC power flow"
+            description: "Line flows linear in injections; enables MILP formulation solvable in Gurobi."
+          - id: N12
+            type: experiment
+            support_level: explicit
+            source_refs: ["§5 Figure 4", "§5 Table 2"]
+            title: "Full TL-TF UC vs conventional: cost and dispatch reallocation"
+            description: >
+              Compare total operating cost, cost components, and per-unit output stacks; observe
+              hot-region Unit 2 suppression.
+            evidence: ["C03"]
+      - id: N13
+        type: experiment
+        support_level: explicit
+        source_refs: ["§5 Table 4"]
+        title: "Temperature-scaling sensitivity (λ = 0.9-1.2)"
+        description: >
+          Scale all regional temperature curves by λ; record life-loss cost and cost-reduction ratio
+          for both models. Cost-reduction ratio widens with λ.
+        evidence: ["C04"]
+      - id: N14
+        type: experiment
+        support_level: explicit
+        source_refs: ["§5 Table 3"]
+        title: "Wind-penalty and transformer-investment sensitivity"
+        description: >
+          Sweep wind-curtailment penalty {100,300,500,1000} and investment {190,230,260}; total cost
+          traces a U-shape in the penalty.
+        evidence: ["C05"]
+      - id: N15
+        type: dead_end
+        support_level: explicit
+        source_refs: ["§1 (ref [12])"]
+        title: "Dynamic transformer rating models under abnormal heat"
+        description: >
+          Prior dynamic-rating + lifetime-loss scheduling (ref [12]) rejected as a basis because it
+          "may become invalid under abnormal high-temperature conditions, where thermal stability
+          parameters change drastically."
+      - id: N16
+        type: dead_end
+        support_level: explicit
+        source_refs: ["§1 (ref [13])"]
+        title: "Historical failure-probability economic models"
+        description: >
+          Failure-probability economic models (ref [13]) rejected because models "based on historical
+          failure probabilities are inadequate for assessing unexpected fault risks under extreme
+          weather conditions."

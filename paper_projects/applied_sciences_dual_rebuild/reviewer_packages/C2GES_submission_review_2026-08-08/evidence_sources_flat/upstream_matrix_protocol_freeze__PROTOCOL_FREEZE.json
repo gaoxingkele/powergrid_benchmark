@@ -1,0 +1,44 @@
+{
+  "schema_version": "c2ges-upstream-uncertainty-v1",
+  "protocol_id": "C2GES-UPSTREAM-OOF-5x5-20260806",
+  "frozen_at_local": "2026-08-06T16:59:18+08:00",
+  "status": "FROZEN_NOT_RUN",
+  "claim_boundary": "Quantifies sensitivity to document-grouped upstream role refits and downstream training seeds on FEVER. It does not establish NERC or power-grid-domain accuracy.",
+  "data_manifest_sha256": "ebccec847886e7f8478869ac0e83c3fd2a2e7fdefd244c6868eb97281554b89f",
+  "limits": {
+    "train": 8000,
+    "dev": 1500,
+    "test": 1500
+  },
+  "upstream_seeds": [3101, 3102, 3103, 3104, 3105],
+  "upstream_folds": 5,
+  "downstream_seeds": [2026, 2027, 2028, 2029, 2030],
+  "encoder": "sentence-transformers/all-MiniLM-L6-v2",
+  "encoder_revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+  "epochs": 4,
+  "learning_rate": 0.001,
+  "device": "cpu",
+  "primary_k": 3,
+  "cutoffs": [1, 3, 5, 10],
+  "child_bootstrap_samples": 2000,
+  "planned_upstream_ledgers": 5,
+  "planned_downstream_runs": 25,
+  "planned_prediction_rows": 1350000,
+  "primary_estimand": "claim-weighted exact sentence-ID macro F1 at label-blind deployment-valid K=3 under predicted roles",
+  "primary_variance_question": "How much reported C2GES performance and the full-minus-label-blind role contrast vary across independently refitted grouped OOF upstream ledgers and downstream seeds.",
+  "analysis": {
+    "cluster": "underlying test document",
+    "upstream_unit": "complete OOF ledger and train-only dev/test role model",
+    "downstream_unit": "complete training seed within upstream ledger",
+    "bootstrap_draws": 10000,
+    "signflip_draws": 100000,
+    "multiplicity": "Holm over the frozen primary contrast family",
+    "report_all_cells": true
+  },
+  "stopping_rule": "Run every frozen child exactly once. Stop only on objective integrity or infrastructure failure, retain the incident and partial outputs, and do not substitute seeds or models.",
+  "code_sha256": {
+    "runner": "625e174002b99d229bf1fdd5adab1936d93863c55a89ca9fbff3a45421c2bb5f",
+    "predictor": "532e846e6601457e7494a146628c911830577673d4bff83bceaa407b295380ce",
+    "selector": "473b36c3beabe8dfabdb6ec138fbbf1fce82a1e3a4e85fdb2965890debfa33f8"
+  }
+}

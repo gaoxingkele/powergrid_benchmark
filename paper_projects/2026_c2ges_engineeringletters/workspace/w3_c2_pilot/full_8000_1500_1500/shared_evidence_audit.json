@@ -1,0 +1,679 @@
+{
+  "passed": true,
+  "check_count": 47,
+  "failure_count": 0,
+  "checks": [
+    {
+      "id": "dataset_counts",
+      "passed": true,
+      "evidence": {
+        "train": 8000,
+        "dev": 1500,
+        "test": 1500
+      }
+    },
+    {
+      "id": "document_split_disjoint",
+      "passed": true,
+      "evidence": {
+        "grouping_key": "underlying_document_id (original FEVER Wikipedia document_id/title)",
+        "instances": {
+          "train": 8000,
+          "dev": 1500,
+          "test": 1500
+        },
+        "unique_documents": {
+          "train": 745,
+          "dev": 141,
+          "test": 145
+        },
+        "pairwise_overlap": {
+          "train_vs_dev": {
+            "count": 0,
+            "document_ids": []
+          },
+          "train_vs_test": {
+            "count": 0,
+            "document_ids": []
+          },
+          "dev_vs_test": {
+            "count": 0,
+            "document_ids": []
+          }
+        },
+        "overlap_document_count": 0,
+        "passed": true
+      }
+    },
+    {
+      "id": "dataset_content_hash_present",
+      "passed": true,
+      "evidence": {
+        "train": {
+          "sha256": "f5fa4f5a6367cf90721071e9a10a3b364f03a387d5bacd061d1f8f42fe70d804",
+          "file_count": 8000
+        },
+        "dev": {
+          "sha256": "534d9b2f6d7a148410b2725d9feba73cc17cf08c8c768b7fc9cbab3cb030f173",
+          "file_count": 1500
+        },
+        "test": {
+          "sha256": "fff475583c9603673134614b06d17229f6711f3e55e80ac5412462845bdc63b8",
+          "file_count": 1500
+        },
+        "corpus_sha256": "683694b87a9842e54eb48aad1aaff85f1105e150f10e9e43fa7efe915a36af20"
+      }
+    },
+    {
+      "id": "title_alias_review_complete",
+      "passed": true,
+      "evidence": {
+        "method_scope": "Wikipedia title strings only; does not prove absence of semantic, redirect, content, or entity aliases",
+        "normalization": "URL decode + Unicode NFKC + casefold + underscore/space and punctuation normalization",
+        "base_alias_rule": "remove one trailing parenthetical disambiguator and leading 'the'",
+        "near_duplicate_rule": {
+          "sequence_matcher_threshold": 0.92,
+          "character_trigram_jaccard_prefilter": 0.72
+        },
+        "unique_titles": {
+          "train": 745,
+          "dev": 141,
+          "test": 145
+        },
+        "cross_split_pairs_examined": 233515,
+        "hard_exact_alias_count": 0,
+        "review_candidate_count": 1,
+        "unreviewed_candidate_count": 0,
+        "confirmed_alias_count": 0,
+        "reviewed_distinct_entity_count": 1,
+        "automatic_exact_alias_gate_passed": true,
+        "canonical_freeze_ready": true,
+        "caveat": "A passing automatic gate must not be described as complete semantic deduplication.",
+        "audit_json_sha256": "e1d3e4855aec1e1641406bce3c8092e8ca2c6a3a116e59753a771d9e0de6f6c4"
+      }
+    },
+    {
+      "id": "title_alias_scope_caveat",
+      "passed": true,
+      "evidence": "Wikipedia title strings only; does not prove absence of semantic, redirect, content, or entity aliases"
+    },
+    {
+      "id": "upstream_full_counts",
+      "passed": true,
+      "evidence": {
+        "train": 8000,
+        "dev": 1500,
+        "test": 1500
+      }
+    },
+    {
+      "id": "upstream_oof_contract",
+      "passed": true,
+      "evidence": {
+        "features": "claim text only",
+        "train_predictions": "out-of-fold; folds grouped by underlying Wikipedia document",
+        "dev_test_predictions": "model fitted only on train",
+        "gold_role_in_predictions_file": "audit/evaluation only; never supplied as a model feature"
+      }
+    },
+    {
+      "id": "upstream_data_disjoint",
+      "passed": true,
+      "evidence": {
+        "grouping_key": "underlying_document_id",
+        "unique_documents": {
+          "train": 745,
+          "dev": 141,
+          "test": 145
+        },
+        "pairwise_overlap": {
+          "train_vs_dev": {
+            "count": 0,
+            "document_ids": []
+          },
+          "train_vs_test": {
+            "count": 0,
+            "document_ids": []
+          },
+          "dev_vs_test": {
+            "count": 0,
+            "document_ids": []
+          }
+        },
+        "overlap_document_count": 0,
+        "passed": true
+      }
+    },
+    {
+      "id": "oracle-label:identity",
+      "passed": true,
+      "evidence": "oracle-label"
+    },
+    {
+      "id": "oracle-label:counts",
+      "passed": true,
+      "evidence": [
+        8000,
+        1500,
+        1500
+      ]
+    },
+    {
+      "id": "oracle-label:k_values",
+      "passed": true,
+      "evidence": [
+        1,
+        3,
+        5,
+        10
+      ]
+    },
+    {
+      "id": "oracle-label:bootstrap_config",
+      "passed": true,
+      "evidence": 2000
+    },
+    {
+      "id": "oracle-label:cluster_unit",
+      "passed": true,
+      "evidence": "underlying_wikipedia_document"
+    },
+    {
+      "id": "oracle-label:leakage",
+      "passed": true,
+      "evidence": {
+        "grouping_key": "underlying_document_id",
+        "unique_documents": {
+          "train": 745,
+          "dev": 141,
+          "test": 145
+        },
+        "pairwise_overlap": {
+          "train_vs_dev": {
+            "count": 0,
+            "document_ids": []
+          },
+          "train_vs_test": {
+            "count": 0,
+            "document_ids": []
+          },
+          "dev_vs_test": {
+            "count": 0,
+            "document_ids": []
+          }
+        },
+        "overlap_document_count": 0,
+        "passed": true
+      }
+    },
+    {
+      "id": "oracle-label:resource_success",
+      "passed": true,
+      "evidence": {
+        "protocol": "oracle-label",
+        "status": "success",
+        "failure": null,
+        "command": [
+          "C:\\Users\\10175\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+          "D:\\aicoding\\powergrid_benchmark\\paper_projects\\2026_c2ges_engineeringletters\\source\\code\\c2ges_learnable.py",
+          "--data",
+          "paper_projects\\2026_c2ges_engineeringletters\\workspace\\fever_benchmark_document_grouped",
+          "--out",
+          "paper_projects\\2026_c2ges_engineeringletters\\workspace\\w3_c2_pilot\\full_8000_1500_1500\\oracle",
+          "--protocol",
+          "oracle-label",
+          "--train-limit",
+          "8000",
+          "--dev-limit",
+          "1500",
+          "--test-limit",
+          "1500",
+          "--epochs",
+          "4",
+          "--bootstrap-samples",
+          "2000",
+          "--eval-k",
+          "1,3,5,10",
+          "--train-k",
+          "3",
+          "--seed",
+          "2026",
+          "--device",
+          "cpu"
+        ],
+        "started_utc": "2026-08-05T04:53:26.612797+00:00",
+        "finished_utc": "2026-08-05T04:56:48.197019+00:00",
+        "wall_seconds": 201.5842571999965,
+        "resource_sampling": {
+          "method": "psutil RSS sum over runner process tree",
+          "sample_interval_seconds": 0.2,
+          "samples": 978,
+          "peak_tree_rss_bytes": 1352196096,
+          "peak_tree_rss_gib": 1.2593307495117188,
+          "peak_process_count": 1,
+          "minimum_system_available_memory_bytes": 50684375040,
+          "minimum_system_available_memory_gib": 47.2035026550293,
+          "limitations": "RSS polling may miss sub-interval spikes; GPU memory is not measured; concurrent system workloads affect available-memory readings."
+        },
+        "logs": {
+          "stdout_sha256": "7810ee65aa41c815faa10544ccf693f47f4e3c68ebef8fd6d331d5101116eb2f",
+          "stderr_sha256": "dce220d8cf7ea036a321fd783689a6198f7b6910bdd9cbfc55e38a365aa00c40"
+        }
+      }
+    },
+    {
+      "id": "oracle-label:not_end_to_end",
+      "passed": true,
+      "evidence": {
+        "role_source": "human_gold_FEVER_veracity_label",
+        "is_end_to_end": false,
+        "reporting_constraint": "Conditional evidence-selection only; MUST NOT be reported as end-to-end performance."
+      }
+    },
+    {
+      "id": "oracle-label:shared_input_hashes",
+      "passed": true,
+      "evidence": {
+        "train": "f5fa4f5a6367cf90721071e9a10a3b364f03a387d5bacd061d1f8f42fe70d804",
+        "dev": "534d9b2f6d7a148410b2725d9feba73cc17cf08c8c768b7fc9cbab3cb030f173",
+        "test": "fff475583c9603673134614b06d17229f6711f3e55e80ac5412462845bdc63b8"
+      }
+    },
+    {
+      "id": "oracle-label:prediction_row_count",
+      "passed": true,
+      "evidence": {
+        "found": 54000,
+        "expected": 54000
+      }
+    },
+    {
+      "id": "oracle-label:full_qids_each_k",
+      "passed": true,
+      "evidence": {
+        "1": 1500,
+        "3": 1500,
+        "5": 1500,
+        "10": 1500
+      }
+    },
+    {
+      "id": "oracle-label:shared_test_qids",
+      "passed": true,
+      "evidence": 1500
+    },
+    {
+      "id": "predicted-label:identity",
+      "passed": true,
+      "evidence": "predicted-label"
+    },
+    {
+      "id": "predicted-label:counts",
+      "passed": true,
+      "evidence": [
+        8000,
+        1500,
+        1500
+      ]
+    },
+    {
+      "id": "predicted-label:k_values",
+      "passed": true,
+      "evidence": [
+        1,
+        3,
+        5,
+        10
+      ]
+    },
+    {
+      "id": "predicted-label:bootstrap_config",
+      "passed": true,
+      "evidence": 2000
+    },
+    {
+      "id": "predicted-label:cluster_unit",
+      "passed": true,
+      "evidence": "underlying_wikipedia_document"
+    },
+    {
+      "id": "predicted-label:leakage",
+      "passed": true,
+      "evidence": {
+        "grouping_key": "underlying_document_id",
+        "unique_documents": {
+          "train": 745,
+          "dev": 141,
+          "test": 145
+        },
+        "pairwise_overlap": {
+          "train_vs_dev": {
+            "count": 0,
+            "document_ids": []
+          },
+          "train_vs_test": {
+            "count": 0,
+            "document_ids": []
+          },
+          "dev_vs_test": {
+            "count": 0,
+            "document_ids": []
+          }
+        },
+        "overlap_document_count": 0,
+        "passed": true
+      }
+    },
+    {
+      "id": "predicted-label:resource_success",
+      "passed": true,
+      "evidence": {
+        "protocol": "predicted-label",
+        "status": "success",
+        "failure": null,
+        "command": [
+          "C:\\Users\\10175\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+          "D:\\aicoding\\powergrid_benchmark\\paper_projects\\2026_c2ges_engineeringletters\\source\\code\\c2ges_learnable.py",
+          "--data",
+          "paper_projects\\2026_c2ges_engineeringletters\\workspace\\fever_benchmark_document_grouped",
+          "--out",
+          "paper_projects\\2026_c2ges_engineeringletters\\workspace\\w3_c2_pilot\\full_8000_1500_1500\\predicted",
+          "--protocol",
+          "predicted-label",
+          "--train-limit",
+          "8000",
+          "--dev-limit",
+          "1500",
+          "--test-limit",
+          "1500",
+          "--epochs",
+          "4",
+          "--bootstrap-samples",
+          "2000",
+          "--eval-k",
+          "1,3,5,10",
+          "--train-k",
+          "3",
+          "--seed",
+          "2026",
+          "--device",
+          "cpu",
+          "--predicted-labels",
+          "paper_projects\\2026_c2ges_engineeringletters\\workspace\\w3_c2_pilot\\full_8000_1500_1500\\upstream_labels\\predicted_labels.json"
+        ],
+        "started_utc": "2026-08-05T04:57:23.663665+00:00",
+        "finished_utc": "2026-08-05T05:00:35.411825+00:00",
+        "wall_seconds": 191.74811209999461,
+        "resource_sampling": {
+          "method": "psutil RSS sum over runner process tree",
+          "sample_interval_seconds": 0.2,
+          "samples": 931,
+          "peak_tree_rss_bytes": 1353916416,
+          "peak_tree_rss_gib": 1.2609329223632812,
+          "peak_process_count": 1,
+          "minimum_system_available_memory_bytes": 52347650048,
+          "minimum_system_available_memory_gib": 48.75254821777344,
+          "limitations": "RSS polling may miss sub-interval spikes; GPU memory is not measured; concurrent system workloads affect available-memory readings."
+        },
+        "logs": {
+          "stdout_sha256": "48689ce52cafb2244d2faef9edd2e1fb3781307b5a489d62aed0b92b5ce86375",
+          "stderr_sha256": "0c33be8631d8a51cc1448e66344d4dda5d7b49527323eeee7e3b2be9b3ac8b33"
+        }
+      }
+    },
+    {
+      "id": "predicted-label:end_to_end",
+      "passed": true,
+      "evidence": {
+        "role_source": "external_predictions",
+        "is_end_to_end": true,
+        "reporting_constraint": "Include the upstream label predictor and its errors when reporting end-to-end performance."
+      }
+    },
+    {
+      "id": "predicted-label:shared_input_hashes",
+      "passed": true,
+      "evidence": {
+        "train": "f5fa4f5a6367cf90721071e9a10a3b364f03a387d5bacd061d1f8f42fe70d804",
+        "dev": "534d9b2f6d7a148410b2725d9feba73cc17cf08c8c768b7fc9cbab3cb030f173",
+        "test": "fff475583c9603673134614b06d17229f6711f3e55e80ac5412462845bdc63b8"
+      }
+    },
+    {
+      "id": "predicted-label:prediction_row_count",
+      "passed": true,
+      "evidence": {
+        "found": 54000,
+        "expected": 54000
+      }
+    },
+    {
+      "id": "predicted-label:full_qids_each_k",
+      "passed": true,
+      "evidence": {
+        "1": 1500,
+        "3": 1500,
+        "5": 1500,
+        "10": 1500
+      }
+    },
+    {
+      "id": "predicted-label:shared_test_qids",
+      "passed": true,
+      "evidence": 1500
+    },
+    {
+      "id": "label-blind:identity",
+      "passed": true,
+      "evidence": "label-blind"
+    },
+    {
+      "id": "label-blind:counts",
+      "passed": true,
+      "evidence": [
+        8000,
+        1500,
+        1500
+      ]
+    },
+    {
+      "id": "label-blind:k_values",
+      "passed": true,
+      "evidence": [
+        1,
+        3,
+        5,
+        10
+      ]
+    },
+    {
+      "id": "label-blind:bootstrap_config",
+      "passed": true,
+      "evidence": 2000
+    },
+    {
+      "id": "label-blind:cluster_unit",
+      "passed": true,
+      "evidence": "underlying_wikipedia_document"
+    },
+    {
+      "id": "label-blind:leakage",
+      "passed": true,
+      "evidence": {
+        "grouping_key": "underlying_document_id",
+        "unique_documents": {
+          "train": 745,
+          "dev": 141,
+          "test": 145
+        },
+        "pairwise_overlap": {
+          "train_vs_dev": {
+            "count": 0,
+            "document_ids": []
+          },
+          "train_vs_test": {
+            "count": 0,
+            "document_ids": []
+          },
+          "dev_vs_test": {
+            "count": 0,
+            "document_ids": []
+          }
+        },
+        "overlap_document_count": 0,
+        "passed": true
+      }
+    },
+    {
+      "id": "label-blind:resource_success",
+      "passed": true,
+      "evidence": {
+        "protocol": "label-blind",
+        "status": "success",
+        "failure": null,
+        "command": [
+          "C:\\Users\\10175\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+          "D:\\aicoding\\powergrid_benchmark\\paper_projects\\2026_c2ges_engineeringletters\\source\\code\\c2ges_learnable.py",
+          "--data",
+          "paper_projects\\2026_c2ges_engineeringletters\\workspace\\fever_benchmark_document_grouped",
+          "--out",
+          "paper_projects\\2026_c2ges_engineeringletters\\workspace\\w3_c2_pilot\\full_8000_1500_1500\\label_blind",
+          "--protocol",
+          "label-blind",
+          "--train-limit",
+          "8000",
+          "--dev-limit",
+          "1500",
+          "--test-limit",
+          "1500",
+          "--epochs",
+          "4",
+          "--bootstrap-samples",
+          "2000",
+          "--eval-k",
+          "1,3,5,10",
+          "--train-k",
+          "3",
+          "--seed",
+          "2026",
+          "--device",
+          "cpu"
+        ],
+        "started_utc": "2026-08-05T05:00:51.299402+00:00",
+        "finished_utc": "2026-08-05T05:04:10.657651+00:00",
+        "wall_seconds": 199.3578634000005,
+        "resource_sampling": {
+          "method": "psutil RSS sum over runner process tree",
+          "sample_interval_seconds": 0.2,
+          "samples": 965,
+          "peak_tree_rss_bytes": 1388576768,
+          "peak_tree_rss_gib": 1.293212890625,
+          "peak_process_count": 3,
+          "minimum_system_available_memory_bytes": 52172468224,
+          "minimum_system_available_memory_gib": 48.58939743041992,
+          "limitations": "RSS polling may miss sub-interval spikes; GPU memory is not measured; concurrent system workloads affect available-memory readings."
+        },
+        "logs": {
+          "stdout_sha256": "eab32064f2264af05035654aac9f0e2eea9509b8a072861d3d69ed16c5c88ac0",
+          "stderr_sha256": "7c319ce3440240a9d008ee6e123feffd5b3d24883838447aceef25d7a1c2d4ee"
+        }
+      }
+    },
+    {
+      "id": "label-blind:end_to_end",
+      "passed": true,
+      "evidence": {
+        "role_source": "constant_unknown_role",
+        "is_end_to_end": true,
+        "reporting_constraint": "No gold or predicted veracity label is exposed to the selector."
+      }
+    },
+    {
+      "id": "label-blind:shared_input_hashes",
+      "passed": true,
+      "evidence": {
+        "train": "f5fa4f5a6367cf90721071e9a10a3b364f03a387d5bacd061d1f8f42fe70d804",
+        "dev": "534d9b2f6d7a148410b2725d9feba73cc17cf08c8c768b7fc9cbab3cb030f173",
+        "test": "fff475583c9603673134614b06d17229f6711f3e55e80ac5412462845bdc63b8"
+      }
+    },
+    {
+      "id": "label-blind:prediction_row_count",
+      "passed": true,
+      "evidence": {
+        "found": 54000,
+        "expected": 54000
+      }
+    },
+    {
+      "id": "label-blind:full_qids_each_k",
+      "passed": true,
+      "evidence": {
+        "1": 1500,
+        "3": 1500,
+        "5": 1500,
+        "10": 1500
+      }
+    },
+    {
+      "id": "label-blind:shared_test_qids",
+      "passed": true,
+      "evidence": 1500
+    },
+    {
+      "id": "oracle-label:role_contract",
+      "passed": true,
+      "evidence": "all prediction rows satisfy protocol role source"
+    },
+    {
+      "id": "predicted-label:role_contract",
+      "passed": true,
+      "evidence": "all prediction rows satisfy protocol role source"
+    },
+    {
+      "id": "label-blind:role_contract",
+      "passed": true,
+      "evidence": "all prediction rows satisfy protocol role source"
+    }
+  ],
+  "failures": [],
+  "corpus_sha256": "683694b87a9842e54eb48aad1aaff85f1105e150f10e9e43fa7efe915a36af20",
+  "artifact_sha256": {
+    "cross_protocol_cluster_bootstrap.json": "a4629f825e00c17029f80ef3d61377e41e5c70a1e37621df3b6519ed210a9853",
+    "label_blind/checkpoint.pt": "ea1e35da70e93af4f9d63aa98f5d5f3e3d96c1b34759ca4a1620d8ef7c0eeb2c",
+    "label_blind/leakage_audit.json": "bcd620900b7e96c071bc1cd937d0474237ec4b9ef3a719cc416a8ff02e194eaa",
+    "label_blind/predictions.jsonl": "13395e334bdda9de2a961bee250e1d46e534bfd26f2cc0f75007a04abbbc7c8b",
+    "label_blind/process_stderr.log": "7c319ce3440240a9d008ee6e123feffd5b3d24883838447aceef25d7a1c2d4ee",
+    "label_blind/process_stdout.log": "eab32064f2264af05035654aac9f0e2eea9509b8a072861d3d69ed16c5c88ac0",
+    "label_blind/provenance.json": "2f226218894ef1905637158478d4051d228bff33cf8e74c4109c156581533a23",
+    "label_blind/resource_usage.json": "2ef444b3022e373fc0d365eed1fa466af5b221681930f194999c986bb35972ca",
+    "label_blind/run_config.json": "61088f008db161ff91e2a143ca35a7d94d29626c3fdf06c6c9b9305467242ab4",
+    "label_blind/summary.json": "3a12313a1eb02e7af812cec768fd1023037a162285af1131b61f2efa260458ed",
+    "oracle/checkpoint.pt": "ddac73ab5f5898d10c55be3f14cc034fd908993226b6543a2e598f0127f671ce",
+    "oracle/leakage_audit.json": "bcd620900b7e96c071bc1cd937d0474237ec4b9ef3a719cc416a8ff02e194eaa",
+    "oracle/predictions.jsonl": "89f9d24c2f5377ab2cced0b3fe9d2913af612862f523f86d3991fc117311f406",
+    "oracle/process_stderr.log": "dce220d8cf7ea036a321fd783689a6198f7b6910bdd9cbfc55e38a365aa00c40",
+    "oracle/process_stdout.log": "7810ee65aa41c815faa10544ccf693f47f4e3c68ebef8fd6d331d5101116eb2f",
+    "oracle/provenance.json": "34a36b85399550df47cd3817ac04a55982abda28f84905dc0f67922b2db133de",
+    "oracle/resource_usage.json": "be756594e10eb93f212241aefabd0d840c874ab2a229c4de26fa183a721d6fe6",
+    "oracle/run_config.json": "d6b454cb9fc790cf70afb132cfaf7c9ade795f718e1fe37409526e9e56fcf000",
+    "oracle/summary.json": "6309dbd1b1eebffebf476f2d0a0e376a4ff9ed5ce6e249b9c0606408eb293eac",
+    "predicted/checkpoint.pt": "c978ab4346499a99eac4cf307b1ca2baaed4f3a4a599e8fee90a196107507908",
+    "predicted/leakage_audit.json": "bcd620900b7e96c071bc1cd937d0474237ec4b9ef3a719cc416a8ff02e194eaa",
+    "predicted/predictions.jsonl": "ebac18b85cd7ec2b1ea5a73c7c3ff4492b51cbf9d2ea1e3af9bab589ed014ebe",
+    "predicted/process_stderr.log": "0c33be8631d8a51cc1448e66344d4dda5d7b49527323eeee7e3b2be9b3ac8b33",
+    "predicted/process_stdout.log": "48689ce52cafb2244d2faef9edd2e1fb3781307b5a489d62aed0b92b5ce86375",
+    "predicted/provenance.json": "12f9f40b62dd9a06402844cac285e92f6e7fda9af48c561b13ebec8936e00bc4",
+    "predicted/resource_usage.json": "ac3f10d7cee11b86c02fe2396ff0cd595134a226ab6a701fa51177f877db1b12",
+    "predicted/run_config.json": "e9bbb534ebcfc5cc86c3fb1b6cb21a37e41622c57607808ec45f1a4643ba572a",
+    "predicted/summary.json": "5157a721608d63fd0d685cecc72e69169ce823d915cea753bece98471b473e20",
+    "upstream_labels/full_train_model.joblib": "780630498979a62abe45874796332fc42ec64bb2432f9cb158bc09db5ddee1e3",
+    "upstream_labels/metrics.json": "49769784ea3d8fc74916f99d81ce3fc280eb3ce554e42bf5718e722759f633b9",
+    "upstream_labels/predicted_labels.json": "96c31a5f536928532091a7554c8c43f2179532776eb74f4e7b174cb143bcb625",
+    "upstream_labels/predicted_labels_dev.json": "f0708a8fea2164dd42a61e85f15b8766237472679bd34944ec75a9963963f85d",
+    "upstream_labels/predicted_labels_test.json": "1c187c61d634787a4cffbe58d76a8ab5fb44b25d80b21f5b82623693b4ffc42d",
+    "upstream_labels/predicted_labels_train.json": "f4dd896e4295081cd94f4ceb8a501bfd6f1d0ed50421cab3e821968fe38be5a1",
+    "upstream_labels/predictions.jsonl": "101b1107099e85ef14413b488cb43e4dfe7e7665856a5a0787061c616ef3ee7f",
+    "upstream_labels/provenance.json": "5adf09bb2b54b446656df5debc391dfd41fbfe30d100f834d9b34b53f5b1ce7a"
+  }
+}

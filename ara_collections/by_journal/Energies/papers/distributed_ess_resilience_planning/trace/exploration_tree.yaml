@@ -1,0 +1,182 @@
+tree:
+  nodes:
+
+    # ===== Question Nodes =====
+
+    - id: RQ1
+      type: question
+      support_level: explicit
+      source_refs: ["Section 1.1, p.1-2"]
+      title: "How can DESS planning improve distribution network resilience under high renewable uncertainty?"
+      description: >
+        Core research question: given stochastic DG output and fluctuating loads, what planning
+        methodology for distributed energy storage can best enhance operational resilience at
+        node, block, and grid levels?
+
+    - id: RQ2
+      type: question
+      support_level: explicit
+      source_refs: ["Section 1.2, p.2-3"]
+      title: "What is the limitation of existing DESS planning approaches under heterogeneous source-load conditions?"
+      description: >
+        Existing approaches use cluster-based or sensitivity-based methods with deterministic
+        scenarios and limited functional objectives. This leads to over-allocation, reduced
+        utilization, and suboptimal economics in large-scale heterogeneous networks.
+
+    - id: RQ3
+      type: question
+      support_level: explicit
+      source_refs: ["Section 1.2, p.3"]
+      title: "Can priority-index-based sequential planning outperform one-shot and global-traversal approaches?"
+      description: >
+        The paper tests three alternative planning strategies (global traversal, one-shot priority,
+        sequential priority) to determine which yields the best resilience outcomes across
+        multiple spatial scales.
+
+    # ===== Decision Nodes =====
+
+    - id: D01
+      type: decision
+      support_level: explicit
+      source_refs: ["Section 3.2, p.10-11"]
+      title: "Use GMM with RV-coefficient initialization for renewable scenario generation"
+      description: >
+        Decision to use improved GMM (parametric statistical) over deep generative methods
+        for scenario generation.
+      choice: "GMM with RV-coefficient K-means initialization"
+      alternatives: ["Deep generative methods (GANs, VAEs) - rejected for lack of interpretability", "Standard K-means without RV coefficient - rejected for not preserving extreme scenarios"]
+
+    - id: D02
+      type: decision
+      support_level: explicit
+      source_refs: ["Section 3.3, p.11-12"]
+      title: "Construct priority index using Critic-method weighted indicators"
+      description: >
+        Decision to combine 7 quality indicators (I1-I7) via Critic objective weighting plus
+        efficiency indicator (matching degree) into a single priority index per node.
+      choice: "Critic objective weighting for quality indicators"
+      alternatives: ["Subjective/AHP weighting - rejected for lack of objectivity", "Equal weighting of all indicators - rejected for ignoring indicator information content", "Single-criterion sensitivity indices (voltage, loss) - rejected for limited scope"]
+
+    - id: D03
+      type: decision
+      support_level: explicit
+      source_refs: ["Section 4.1, p.16-17"]
+      title: "Adopt sequential (iterative) planning with priority-index updating"
+      description: >
+        Decision to recalculate priority indices after each DESS deployment iteration,
+        updating the generalized load curve, rather than using a single fixed ranking.
+      choice: "Sequential (iterative) planning with priority-index recalculation"
+      alternatives: ["One-shot priority ranking (Case 2) - causes spatial over-concentration", "Global traversal search (Case 1) - no demand-based prioritization"]
+
+    - id: D04
+      type: decision
+      support_level: explicit
+      source_refs: ["Section 5, p.23-25"]
+      title: "Design node-block-grid multi-dimensional evaluation framework"
+      description: >
+        Decision to evaluate resilience at three spatial scales (node, block, grid) rather
+        than only system-level metrics.
+      choice: "Node-block-grid hierarchical evaluation with 7 indicators (O1-G2)"
+      alternatives: ["Single system-level metric only - rejected for not capturing local effects", "Only node-level evaluation - rejected for missing coordination effects"]
+
+    - id: D05
+      type: decision
+      support_level: explicit
+      source_refs: ["Section 4.2, p.17-19"]
+      title: "Use weighted-sum multi-objective optimization (not Pareto exploration)"
+      description: >
+        Decision to normalize and combine four objectives (F1-F4) into a single weighted
+        composite rather than exploring the full Pareto front.
+      choice: "Weighted-sum aggregation after per-objective normalization"
+      alternatives: ["Full Pareto front exploration - computationally expensive and may not yield a single planning decision", "Epsilon-constraint method - not explored"]
+
+    # ===== Experiment Nodes =====
+
+    - id: EXP01
+      type: experiment
+      support_level: explicit
+      source_refs: ["Section 3.4.2, p.14"]
+      title: "GMM scenario generation with 5 clusters optimal by CH index"
+      description: >
+        GMM with RV-coefficient K-means initialization applied to historical wind/PV data
+        from Zhejiang. CH index confirms K=5 as optimal.
+      result: "PV scenarios show clear diurnal patterns; wind scenarios show complex multimodal patterns. The algorithm captures essential operational characteristics of distributed generation."
+
+    - id: EXP02
+      type: experiment
+      support_level: explicit
+      source_refs: ["Section 3.4.3, p.15"]
+      title: "Critic weighting produces objective priority indices"
+      description: >
+        Critic method applied to quality indicators across nodes. Weights: I1=0.05, I2=0.19,
+        I3=0.15, I4=0.08, I5=0.18, I6=0.17, I7=0.19.
+      result: "Primary load share (I2) and customer complaints (I7) receive highest weights (0.19), reflecting their information content and importance for resilience assessment."
+
+    - id: EXP03
+      type: experiment
+      support_level: explicit
+      source_refs: ["Section 4.3, p.19-22"]
+      title: "Case comparison: global traversal vs. one-shot priority vs. sequential priority"
+      description: >
+        Three cases compared with 3 DESS units each under identical budget.
+        Case 1: scattered nodes with lowest economic benefit.
+        Case 2: concentrated in Block 21 (nodes 121, 157 both in block 21).
+        Case 3: distributed across blocks 26, 21, 15 with highest benefit.
+      result: "Case 3 achieves highest economic benefit (865,200 CNY/year) and most balanced spatial distribution across three distinct blocks. Case 2 causes over-concentration in Block 21."
+
+    - id: EXP04
+      type: experiment
+      support_level: explicit
+      source_refs: ["Section 5, p.24-26"]
+      title: "Multi-dimensional evaluation confirms Case 3 superiority across all scales"
+      description: >
+        Node-level (O1, O2, O3), block-level (L1, L2), and grid-level (G1, G2) evaluation
+        across three cases.
+      result: "Largest improvements: G2 +324% (grid uniformity), O2 +102% (economic efficiency), L1 +82% (block matching), L2 +70% (quality satisfaction). Case 3 leads all metrics."
+
+    # ===== Dead-End Nodes =====
+
+    - id: DE01
+      type: dead_end
+      support_level: explicit
+      source_refs: ["Section 6, p.27"]
+      title: "No extreme event resilience evaluation"
+      hypothesis: "The proposed DESS planning framework also improves resilience to extreme weather events and N-k contingencies."
+      failure_mode: "The framework only evaluates day-to-day operational resilience under DG uncertainty. No extreme event scenarios are modeled."
+      lesson: "Future work should incorporate extreme weather and N-k contingency modeling into the evaluation framework."
+
+    - id: DE02
+      type: dead_end
+      support_level: explicit
+      source_refs: ["Section 4.2, p.18-19"]
+      title: "Weighted-sum method limits Pareto exploration"
+      hypothesis: "Exploring the full Pareto front would reveal alternative DESS configurations with different trade-offs between economic and technical objectives."
+      failure_mode: "The weighted-sum method may not capture solutions in non-convex regions of the Pareto front."
+      lesson: "Future studies use epsilon-constraint or evolutionary multi-objective methods to explore the full trade-off space."
+
+    - id: DE03
+      type: dead_end
+      support_level: explicit
+      source_refs: ["Section 3.4.1, p.12"]
+      title: "Single case study validation (Zhejiang only)"
+      hypothesis: "The proposed method generalizes to other distribution network topologies, voltage levels, and regulatory environments."
+      failure_mode: "Only validated on one real distribution grid in Zhejiang Province with specific load characteristics."
+      lesson: "Multi-region validation across different network configurations and regulatory contexts is needed for generalizability claims."
+
+  edges:
+    - [RQ1, D01]
+    - [RQ1, D02]
+    - [RQ1, D03]
+    - [RQ1, D04]
+    - [RQ1, D05]
+    - [RQ2, D01]
+    - [RQ2, D02]
+    - [RQ3, D03]
+    - [D01, EXP01]
+    - [D02, EXP02]
+    - [D03, EXP03]
+    - [D04, EXP04]
+    - [EXP03, EXP04]
+    - [EXP01, DE01]
+    - [D05, DE02]
+    - [EXP03, DE03]

@@ -1,0 +1,827 @@
+Date of publication xxxx 00, 0000, date of current version xxxx 00, 0000.
+Digital Object Identifier 10.1109/ACCESS.XXXX.XXXXXXX
+
+
+
+
+An Operating-State Retrieval Framework and
+Reproducible Curtailment-Risk Benchmark for
+Power System Decision Support
+AUTHOR DETAILS REQUIRED BEFORE SUBMISSION
+1
+    [AUTHOR INPUT REQUIRED: complete institutional addresses]
+Corresponding author: [AUTHOR INPUT REQUIRED: name and e-mail].
+Funding and sponsor information must be confirmed by the authors before submission.
+
+
+
+
+      ABSTRACT Public evaluation assets for renewable-curtailment forecasting remain limited because studies
+      commonly use private single-system data, task-specific targets, and incomparable protocols. We construct a
+      reproducible curtailment-risk benchmark from the open Reliability Test System Grid Modernization Lab
+      Consortium data. A fixed reference operating policy with a 70% system non-synchronous-penetration-
+      type cap converts 8760 hours of day-ahead load and renewable generation into a method-independent
+      risk proxy, while an onset slice evaluates transitions from quiet to material-curtailment conditions. Under
+      one leakage-free temporal split, training-window-calibrated warning thresholds, and ten seeded runs for
+      stochastic methods, we compare DSTAR-GRU–a gated-recurrent operating-state retrieval framework–with
+      eight baselines and five mechanism controls. Retrieval improves 1-hour mean absolute error relative to
+      the prespecified retrieval-removal and retrieval-degradation controls, but reduces 24-hour onset-warning
+      performance relative to no-retrieval and raw-feature-retrieval variants. Persistence achieves the lowest overall
+      mean absolute error at both horizons, whereas ridge regression leads 24-hour onset detection. A fixed-
+      cap transport check on NREL-118 produces no positive target hours, indicating that the policy-derived
+      task requires system-specific calibration. The benchmark therefore reveals a horizon-dependent role for
+      retrieval and separates overall accuracy from operationally relevant onset warning without implying general
+      forecasting superiority.
+
+
+      INDEX TERMS renewable energy curtailment, benchmark, reproducibility, case-based retrieval, metric
+      learning, time-series forecasting, early warning, RTS-GMLC, naive baselines
+
+
+
+A. INTRODUCTION                                                                  conventions; no public benchmark defines the task, no eval-
+                                                                                 uation protocol isolates the operationally critical onset hours
+High instantaneous wind and solar shares can force cur-
+                                                                                 where curtailment emerges after quiet conditions, and statisti-
+tailment when acceptance limits bind. International reviews
+                                                                                 cal practice is thin. This absence is consequential because cur-
+document volumes and causes across multiple systems [1],
+                                                                                 tailment series are sparse and highly persistent: 91.8% of the
+national studies identify their drivers [2], and planning analy-
+                                                                                 hours in our benchmark have zero curtailment. Forecasting-
+ses show that some curtailment can be economically rational
+                                                                                 methodology research further shows that, on such series, eval-
+[3]. One explicit mechanism is the system non-synchronous
+                                                                                 uations without strong naive baselines and leak-free protocols
+penetration (SNSP) limit used on the all-island Irish system
+                                                                                 can overstate the value of learned methods [7], [8]. A public
+for frequency stability [4]. When the cap binds, curtailment
+                                                                                 test system suitable for building such a benchmark exists:
+follows from load and renewable trajectories, making cap-
+                                                                                 RTS-GMLC provides a full year of time-synchronized day-
+driven risk forecastable. Day-ahead SNSP forecasting has
+                                                                                 ahead load, wind, and solar series with open licensing [6].
+accordingly been demonstrated on Irish system data [5].
+   Anticipating curtailment, however, currently has no shared                       A second, older gap concerns how decision support should
+measurement infrastructure. Each study forecasts its own                         use historical operating experience. Retrieving similar past
+signal on its own (usually private) data with its own evaluation                 situations is a recurring idea in power-system decision sup-
+
+VOLUME 11, 2023                                                                                                                                1
+                        Author et al.: An Operating-State Retrieval Framework and Reproducible Curtailment-Risk Benchmark for Power System Decision Support
+
+
+
+port. Its uses range from similar-day load forecasting in early             onset warning and exposes when operating-state retrieval is
+expert systems and case-based reasoning for network oper-                   helpful, neutral, or harmful.
+ations [10] to analog ensembles in weather and renewable                      Section II reviews the relevant literature, and Section III
+forecasting [9] and, more recently, Siamese metric learning on              specifies the benchmark. Sections IV–V define the frame-
+power signals. Yet every one of these lines validates retrieval             work, controls, and experimental protocol. Sections VI–VII
+at a single task and a fixed horizon on its own data. Whether               report and interpret the results, followed by limitations and
+the same retrieval mechanism helps or hurts as the forecast                 conclusions in Sections VIII–IX.
+horizon changes has not been measured under controlled con-
+ditions in the studies reviewed here; practitioners considering
+retrieval-based tools therefore lack comparative evidence.
+                                                                            B. RELATED WORK
+   This paper addresses both gaps through a framework-
+                                                                            1) Curtailment forecasting and renewable accommodation
+and-benchmark study in which retrieval is evaluated as a
+                                                                            assessment
+conditional mechanism rather than assumed to be uniformly
+beneficial. The contributions are:                                          The empirical curtailment literature is predominantly retro-
+                                                                            spective. Bird et al. [1] review international levels, causes, and
+    1. A reproducible, method-agnostic public curtailment-                  mitigation, while Luo et al. [2] analyze China’s Three-North
+       risk benchmark. A fixed reference operating policy                   wind curtailment. Yasuda et al. [11] relate annual curtailment
+       (70% SNSP-type acceptance cap) converts the full-                    rate to renewable share, Frew et al. [3] study economically op-
+       year RTS-GMLC day-ahead series into a reference-                     timal marginal curtailment, and Newbery [12] examines Irish
+       policy curtailment-risk proxy target that no method can              wind build-out against interconnection and storage. These
+       influence. It is not an observed dispatch-curtailment                studies quantify or explain curtailment rather than predict its
+       record. An onset-slice protocol scores early warning at              short-horizon onset.
+       emergence hours (proxy rate ≥ 0.02 at the target hour                   The predictive strand is thin and system-specific.
+       and < 0.02 at observation time); detection thresholds                O’Sullivan et al. [4] establish the frequency-stability basis
+       are calibrated on the training window identically for                of the Irish SNSP limit — the operational cap that makes
+       every method; and seeded comparisons use Mann–                       curtailment a deterministic function of load and renewable
+       Whitney U tests with Holm correction over ten seeds.                 trajectories once it binds. Cardo-Miota et al. [5] forecast day-
+       The complete construction is executable code (Section                ahead SNSP trajectories for the same system with a machine-
+       III).                                                                learning pipeline, the closest existing work to curtailment-risk
+    2. An operating-state retrieval framework with                          early warning; the target is a continuous penetration signal on
+       matched controls. DSTAR-GRU couples a GRU en-                        one system’s data, without a released benchmark or an event-
+       coder to shared-encoder (Siamese-style) k-NN retrieval               level protocol. Hadian and Naderkhani [13] compare classical
+       in the learned embedding space, with a validation-                   and deep models for curtailment time-series point forecasting,
+       selected blend of model head and retrieved analogs.                  finding GRU best, again without reusable evaluation assets.
+       Its evaluation suite contains eight baselines spanning               Related net-load forecasting work [14] anticipates the accom-
+       naive, linear, instance-based, recurrent, decomposition-             modation problem but does not map forecasts to curtailment-
+       linear, and temporal-convolutional families, plus five               risk events. Across the studies reviewed here, we found no
+       single-switch ablations that isolate the embedding, the              public curtailment-risk benchmark that combines an onset-
+       retrieval bank, its size, the encoder cell, and one input            oriented evaluation slice with seeded statistics. The bench-
+       feature (Section IV).                                                mark introduced here is designed to fill that documented gap.
+    3. A statistically resolved map of retrieval’s horizon-
+       dependent utility. At 1 h, DSTAR-GRU signifi-                        2) Retrieval, analogues, and metric learning in power
+       cantly improves curtailment MAE over the prespec-                    system decision support
+       ified retrieval-removal and retrieval-degradation con-
+                                                                            Reasoning from similar past operating states is a recurring
+       trols NoSiamese, NoRetrievalBank, and SmallBank, as
+                                                                            proposal with a long pedigree. Rahman and Bhatnagar [15]
+       well as the non-retrieval LSTM and MLP baselines
+                                                                            encoded similar-day operator heuristics in a 1988 expert-
+       (Holm-adjusted p ≤ 0.0041); the TCN contrast is un-
+                                                                            system load forecaster; Mandal et al. [16] retrieved Euclidean
+       resolved by the prespecified unpaired test. At 24 h,
+                                                                            similar days to drive several-hour-ahead neural load forecast-
+       removing retrieval or using raw-feature retrieval signif-
+                                                                            ing; Lora et al. [17] forecast next-day market prices purely by
+       icantly improves onset F1 (Holm-adjusted p ≤ 0.0040).
+                                                                            weighted nearest neighbors over historical price trajectories.
+       Persistence leading overall MAE and ridge regression
+                                                                            Case-based reasoning carried the idea into operations proper:
+       leading day-ahead onset detection further show why
+                                                                            Xu et al. [10] run the full retrieve–reuse–revise–retain cycle
+       benchmark conclusions must be metric- and horizon-
+                                                                            over network operating cases for coordinated voltage control.
+       specific (Section VI).
+                                                                            In weather-driven forecasting, the analog ensemble of Delle
+  Together, these contributions turn a sparse proxy series into             Monache et al. [9] retrieves the most similar past forecasts and
+a benchmark that distinguishes continuation accuracy from                   uses their verifying observations as a predictive distribution,
+2                                                                                                                                      VOLUME 11, 2023
+Author et al.: An Operating-State Retrieval Framework and Reproducible Curtailment-Risk Benchmark for Power System Decision Support
+
+
+
+
+with successful transfers to wind power [18] and solar power                    curtailment-risk early-warning benchmark that combines an
+[19]. Most recently, metric learning has replaced hand-crafted                  onset protocol with seeded statistics; existing curtailment
+similarity: Siamese networks learn embeddings for appliance                     work is commonly retrospective or uses continuous proxies
+identification in non-intrusive load monitoring [20] and, com-                  from private single-system data. (G2) Retrieval-based deci-
+bined with k-NN, for power-quality disturbance classification                   sion support has not been characterized across horizons on a
+[21].                                                                           common public benchmark with matched controls, leaving its
+   Across the reviewed retrieval studies, validation is typically               horizon dependence insufficiently documented. Contribution
+confined to one task and one horizon or narrow horizon band                     1 addresses G1, while Contributions 2–3 address G2 through
+on study-specific data. Matched non-retrieval controls are                      an implemented framework and a cross-horizon mechanism
+also uncommon, leaving the contribution of retrieval itself                     analysis.
+difficult to isolate. This paper therefore asks whether the same
+retrieval mechanism helps or hurts as the horizon grows. The
+observed sign reversal between 1 h and 24 h shows why the
+                                                                                C. THE CURTAILMENT-RISK BENCHMARK
+distinction matters on the present benchmark.
+                                                                                The benchmark is defined by five design decisions, each
+3) Naive baselines and benchmark design in time-series                          stated with its rationale. The construction is fully imple-
+forecasting                                                                     mented in src/powergrid_benchmark/mintou_real_curt
+Forecasting competitions motivate the benchmark protocol.                       (run version public_rts_curtailment_v5_onset_eval);
+M3 shows that sophisticated methods do not necessarily beat                     every rule below is inspectable code.
+simple references [22]. Hyndman and Koehler demonstrate
+that common errors can degenerate on intermittent, near-                        1) Method-independent task construction
+zero series and propose scaled evaluation [23]. Later M-                        The substrate is the RTS-GMLC day-ahead hourly series [6]:
+competitions compare entrants with naive combinations at                        system-aggregated load, wind, and solar for a full year (8760
+scale [7], [24], [25].                                                          hours). A fixed reference operating policy converts these
+   In energy forecasting, GEFCom2014 establishes competition-                   inputs into a curtailment-risk proxy target. It does not recon-
+grade protocol design [26], and community guidance requires                     struct observed dispatch. At every hour, accepted renewable
+verification against persistence and other standardized refer-                  generation under the reference rule is capped at 70% of load,
+ences [27]. Surveys identify temporal leakage, missing naive
+baselines, and inappropriate metrics as recurrent failures [28].                                                                max(0, rt − ut )
+Kapoor and Narayanan document similar reproducibility                                ut = min(rt , 0.70 · dt ),          yt =                    ,
+                                                                                                                                 max(1, rt )
+failures across machine-learning science [8]. RTS-GMLC [6]
+supplies the public, synchronized load and renewable data                          where rt is available renewable power (wind + PV), dt
+needed for an auditable benchmark.                                              is load, and yt ∈ [0, 1] is the reference-policy curtailment-
+   Recent IEEE Access load-forecasting studies continue to                      risk proxy. The cap represents an SNSP-class instantaneous
+combine temporal representation learning with tensor graph                      non-synchronous penetration rule [4]. The proxy is method-
+convolution or TimesNet–Crossformer–LSTM stacks [29],                           independent because it is computed once from public inputs
+[30]. Their prediction targets differ from curtailment onset,                   before model fitting. It is also sparse and bursty: 8.2% of
+but they reinforce a relevant evaluation requirement: a re-                     hours have nonzero proxy curtailment, 7.6% exceed the 0.02
+trieval benchmark should include competent deep temporal                        onset threshold, the maximum rate is 0.383, and the implied
+controls as well as naive and linear references. We therefore                   curtailed-energy share is 2.68% (Fig. 1a–b).
+use the same recurrent training protocol for DSTAR-GRU and                         Each forecasting method sees the same seven hourly fea-
+its matched no-retrieval LSTM control, while treating broader                   tures: load, wind, PV, net load, load ramp, renewable share,
+architecture searches as outside the benchmark’s mechanism-                     and a topology-stress proxy computed from RTS-GMLC
+isolation purpose.                                                              branch ratings. The features form 48-hour windows and are z-
+   This literature motivates three design choices: persistence                  normalized with training-split statistics. Models predict yt+h
+and seasonal-naive are included as first-class methods; event                   for h ∈ {1, 24}, representing intra-hour operational adjust-
+and onset metrics complement aggregate error on the sparse                      ment and day-ahead scheduling, respectively.
+target; and learned-method comparisons use temporal splits,
+multiple seeds, and multiplicity correction. It also shapes                     2) Temporal protocol
+interpretation. Persistence leading overall MAE is consistent                   The split is strictly temporal. The first 70% of target hours
+with the M-competition record and therefore provides a useful                   form the training window, whose final 15% (hours 5212–
+validity check on the protocol.                                                 6131) is reserved for model selection and calibration. The
+                                                                                last 30% (2628 hours) is the test split. There is no shuffling
+4) Gap statement                                                                or random split; every learned method is trained, selected,
+At the intersection, two gaps emerge from the literature                        and calibrated using only information available before the test
+reviewed here. (G1) We found no reproducible public                             period, following standard leak-avoidance guidance [28].
+VOLUME 11, 2023                                                                                                                                      3
+                            Author et al.: An Operating-State Retrieval Framework and Reproducible Curtailment-Risk Benchmark for Power System Decision Support
+
+
+
+
+FIGURE 1. Reference-policy curtailment-risk proxy target. (a) Full-year proxy-rate series under the fixed 70% SNSP-type policy, with temporal fit, validation,
+and test boundaries. (b) Monthly sparsity of nonzero and threshold-significant (≥0.02) proxy hours. (c) Test-split excerpt illustrating a proxy onset.
+
+
+
+3) Onset-slice evaluation
+Overall MAE on a series that is 91.8% zeros mostly mea-                                                                2PR
+                                                                                                               F1 =        .
+sures whether a method predicts ‘‘no curtailment’’ smoothly                                                            P+R
+— a job persistence does almost optimally. The operational                          A complementary event metric evaluates exceedance of
+value of a curtailment-risk tool, by contrast, concentrates at                    a high-curtailment threshold. That threshold is the median
+the onset hours: the moments where significant curtailment                        positive training rate, floored at 0.02. A stress-subset MAE
+emerges after quiet conditions, which are precisely the hours                     over test hours in the top training quartile of renewable share
+where persistence-type reasoning structurally cannot warn                         completes the metric set.
+(its forecast is the quiet past). The benchmark therefore de-
+fines, for horizon h:                                                             4) Statistical protocol
+                                                                                  Every stochastic method runs with ten fixed seeds; de-
+            onsett ⇐⇒ yt ≥ 0.02 ∧ yt−h < 0.02,                                    terministic methods (persistence, seasonal, ridge, raw-
+   i.e., significant curtailment at the target hour that was                      feature k-NN) contribute single rows and are compared
+absent at observation time (Fig. 1c). The test split contains                     descriptively by their means. Pairwise comparisons be-
+57 onset hours at h=1 and 172 at h=24. Let Ih denote the                          tween the framework and each seeded opponent use
+corresponding onset index set. The restricted regression error                    the two-sided Mann–Whitney U test, with Holm correc-
+is                                                                                tion within each horizon across 27 tests (three metrics
+                                                                                  × nine seeded opponents). The complete primary table
+                                      1 X
+                MAEonset (h) =             |yt − ŷt |.                           reports rank-biserial effects and pointwise, multiplicity-
+                                     |Ih |                                        unadjusted 5000-resample intervals for mean differences
+                                           t∈Ih
+   For onset detection, each continuous prediction is thresh-                     (real_curtailment_primary_inference_v2.csv);
+olded into a warning. The threshold is calibrated separately                      Holm p-values determine significance. Exact paired sign-flip
+for each method on the training-window onsets by maxi-                            tests form a post-freeze sensitivity analysis because stochas-
+mizing F1 over a 40-point quantile grid, and is then applied                      tic methods share seed indices. Neither seed-based interval
+unchanged to the test split. With precision P = TP/(TP+FP)                        covers year-to-year or event-block uncertainty.
+and recall R = TP/(TP + FN ), the score is
+4                                                                                                                                             VOLUME 11, 2023
+Author et al.: An Operating-State Retrieval Framework and Reproducible Curtailment-Risk Benchmark for Power System Decision Support
+
+
+
+
+5) Reference-cap choice and sensitivity of the task
+The 70% cap lies within the documented SNSP operating                                                                                                X
+                                                                                dtq = ∥Eθ⋆ (Xt ) − Eθ⋆ (Xq )∥2 ,              Nk (t) = arg min             dtq .
+range; the Irish limit increased from 50% toward 75% [4].                                                                                   I⊂Tfit
+                                                                                                                                                     q∈I
+It is a benchmark parameter rather than a truth claim. Table 1                                                                              |I|=k
+
+recomputes the target at caps 0.60, 0.70, and 0.80. Tightening                     The retrieval estimate and convex blend are
+the cap to 0.60 raises the event share to 13.3% and produces
+263 day-ahead test onsets, while relaxing it to 0.80 lowers the                                                      1 X
+                                                                                                         ŷret
+                                                                                                           t+h =         yq+h ,
+share to 3.5% and produces 86 onsets.                                                                                k
+                                                                                                                       q∈Nk (t)
+    All model comparisons use cap 0.70. Whether the naive-
+baseline ordering and retrieval sign reversal persist at the
+other caps remains untested. The series-level sensitivity char-                       ŷt+h (α) = αŷhead           ret
+                                                                                                     t+h + (1 − α)ŷt+h ,               0 ≤ α ≤ 1.
+acterizes that future experiment without implying a method-                       The blend coefficient is chosen once on the validation slice,
+level result.                                                                   never on test outcomes:
+
+6) Construct validity and method-independent target
+                                                                                                     1       X
+construction                                                                    αh⋆ = arg min                        |yt+h − ŷt+h (α)| ,    A = {0, .2, .4, .5, .6, .8
+                                                                                          α∈A     |Tval |
+Construct validity depends on separating the forecasting tar-                                               t∈Tval
+get from the algorithms evaluated against it. The fixed ref-                       The query and bank branches share Eθ⋆ , so we use
+erence policy therefore computes the proxy target once, be-                     Siamese-style only to describe weight sharing. There is no
+fore any model is fitted, and the resulting series is shared                    separately optimized contrastive loss. The learned geometry
+unchanged by every baseline, framework configuration, and                       is induced by the forecasting objective and tested through the
+ablation. Each compared learning method is trained from                         NoSiamese/raw-space control.
+data, and each ablation changes one implemented mecha-
+nism rather than a hand-assigned performance constant. This                     1) Design
+construction prevents method-specific terms from entering                       DSTAR-GRU (‘‘Digital-twin Siamese Temporal Alignment
+the label definition and makes adverse results–including the                    and Retrieval GRU’’) has three stages:
+lack of an overall DSTAR-GRU advantage–interpretable as
+                                                                                   1. Encoder. A single-layer GRU (hidden size 48) reads
+properties of the tested methods rather than of the target gen-
+                                                                                      the 48 h × 7-feature window; the final hidden state is
+erator. Detailed development history and superseded artifacts
+                                                                                      both the regression representation (a linear head pre-
+are retained with the reproducibility materials but are not part
+                                                                                      dicts ŷhead ) and the embedding for retrieval. Training
+of the empirical claim.
+                                                                                      minimizes MSE with Adam, with the best-validation-
+                                                                                      loss checkpoint retained.
+                                                                                   2. Shared-encoder retrieval. The training (fit-split) win-
+D. THE OPERATING-STATE RETRIEVAL FRAMEWORK                                            dows form a retrieval bank in the learned embedding
+Figure 2 locates the trainable and retrieval stages inside the                        space. For each query window, the k = 8 nearest bank
+method-independent benchmark and evaluation pipeline. The                             entries (Euclidean distance between embeddings) are
+target and temporal/onset protocol are fixed before model                             retrieved, and their known targets averaged into ŷret .
+fitting; the fit-split retrieval bank and prediction head meet                        Query and bank use the same trained encoder.
+only at the validation-selected blend; and held-out evaluation                     3. Validated blend. The final prediction is αŷhead + (1 −
+applies the same horizon-specific metrics and multiplicity                            α)ŷret , with α selected from {0, 0.2, 0.4, 0.5, 0.6, 0.8,
+correction to every method.                                                           1.0} by validation-slice MAE.
+   Formal definitions. Let Xt = [xt−47 , . . . , xt ] ∈ R48×7 be a                The framework view is that stage 2 is a pluggable decision-
+standardized observation window and Eθ the shared recurrent                     support mechanism — ‘‘what happened after the most similar
+encoder. Its final state and direct regression output are                       past operating states?’’ — whose value must be measured, not
+                                                                                assumed. Everything in Sections IV-B/C exists to measure it.
+                                             ⊤
+             ht = Eθ (Xt ),         ŷhead
+                                      t+h = wh ht + bh .
+                                                                                2) Baselines
+   The encoder parameters are fitted only on the fit split by
+                                                                                Eight baselines span the method families the benchmark
+the horizon-specific squared-error objective
+                                                                                should discriminate (Table 2). Persistence uses the last ob-
+                              1 X                 2                            served curtailment rate and provides the required naive refer-
+           θ⋆ = arg min             yt+h − ŷhead
+                                             t+h     .                          ence. Seasonal-24h uses the same hour on the previous day;
+                        θ   |Tfit |
+                                   t∈Tfit
+                                                                                at h=24, it is identical to persistence by construction. The
+   The bank Bh = {(Eθ⋆ (Xq ), yq+h ) : q ∈ Tfit } uses the same                 learned non-retrieval baselines are Ridge regression on the
+frozen encoder as the query branch. For a query t, distance                     flattened window (λ = 10−3 ), a 96/48-unit ReLU MLP, an
+and the k-neighbor index set are                                                LSTM in the same capacity class as the framework encoder,
+VOLUME 11, 2023                                                                                                                                               5
+                           Author et al.: An Operating-State Retrieval Framework and Reproducible Curtailment-Risk Benchmark for Power System Decision Support
+
+
+
+TABLE 1. Series-level sensitivity of the benchmark target to the acceptance cap (from figures/cap_sensitivity.json; onset threshold 0.02, test split
+= final 30%).
+
+
+Acceptance cap        Nonzero hours         Hours ≥ 0.02          Mean rate             Curtailed energy       Test onsets (1 h)     Test onsets (24 h)
+0.60                  14.16%                13.31%                0.0251                5.85%                  68                    263
+0.70 (benchmark)      8.24%                 7.56%                 0.0107                2.68%                  57                    172
+0.80                  3.94%                 3.52%                 0.0036                0.95%                  31                    86
+
+
+
+
+FIGURE 2. End-to-end benchmark and operating-state retrieval architecture. Solid arrows denote the prediction path. The lower strip lists evaluation
+outputs rather than trainable inputs and therefore cannot feed information back into the model.
+
+
+
+DLinear with a fixed moving-average trend/season decom-                        share hidden size 48. The framework therefore has no capac-
+position, and a causal TCN with dilations 1–8. Finally, kNN-                   ity advantage over the LSTM baseline (GRU encoder ≈ 8.3k
+RawFeature performs k = 8 retrieval in the raw flattened-                      parameters, LSTM ≈ 11.0k, and MLP ≈ 37.1k). The onset
+feature space without representation learning. DLinear and                     detection threshold is calibrated by one identical procedure
+TCN use the same optimizer, validation checkpointing, epoch                    for every method, including baselines. Deterministic methods
+ceiling, features, clipping rule, and ten seeds as the other                   are exactly reproducible and run once. No method receives
+learned models; they were added before their test results were                 task-specific tuning beyond the shared grid stated in Table 3.
+inspected.                                                                     Predictions are clipped to [0, 1] for all methods.
+
+3) Mechanism ablations                                                         2) Hyperparameter disclosure
+Five single-switch ablations isolate the design choices. NoSi-                 3) Computational footprint
+amese retrieves in raw feature space but retains the GRU                       The full protocol contains 14 methods over two horizons and
+head and blend, distinguishing it from kNN-RawFeature.                         archives 208 method–seed results (ten seeds for stochastic
+NoRetrievalBank uses only the GRU head; SmallBank re-                          methods; one exact run for deterministic methods). A single
+stricts the bank to the most recent 168 h; LSTMEncoder                         framework train-and-evaluate pass takes roughly 7 s at the 1
+replaces the GRU while preserving retrieval; and NoTopol-                      h horizon, and the complete benchmark reruns in well under
+ogy removes the topology-stress feature. Each flips exactly                    an hour on a desktop CPU. The released command rebuilds
+one switch against the full framework, so any significant                      the target, trains the compared methods, and regenerates the
+difference can be attributed to that switch within the stated                  result tables.
+design.
+
+
+                                                                               F. RESULTS
+E. EXPERIMENTAL SETUP                                                          1) Overall accuracy and naive-reference performance
+1) Fairness statement                                                          Table 4 and Fig. 3 report the per-horizon leaderboards. At the
+All learned methods share the feature set, 48 h windows,                       1 h horizon, Persistence has the lowest curtailment MAE
+normalization statistics, temporal splits, MSE loss, Adam op-                  (0.00691), 10.3% below the framework (0.00770, rank 4/14,
+timizer (10−3 ), 20-epoch ceiling with best-validation check-                  std 0.00026 over ten seeds). At 24 h, raw-feature kNN is the
+pointing, batch size 256, and ten seeds. Recurrent models also                 strongest non-degenerate baseline (0.01946, 5.3% below the
+6                                                                                                                                          VOLUME 11, 2023
+Author et al.: An Operating-State Retrieval Framework and Reproducible Curtailment-Risk Benchmark for Power System Decision Support
+
+
+
+
+TABLE 2. Methods (from the run configuration; descriptions abbreviated).
+
+
+Method                                              Role                                                   Mechanism
+DSTAR-GRU                                           framework                                              GRU encoder + Siamese retrieval in learned embedding +
+                                                                                                           validated blend
+Persistence                                         baseline                                               last observed curtailment rate
+Seasonal-24h                                        baseline                                               previous-day same-hour rate
+Ridge                                               baseline                                               linear, flattened window, λ = 10−3
+MLP                                                 baseline                                               96/48 ReLU, flattened window
+LSTM                                                baseline                                               recurrent head, no retrieval
+DLinear                                             baseline                                               fixed trend/season decomposition with linear heads
+TCN                                                 baseline                                               causal dilated temporal convolutions
+kNN-RawFeature                                      baseline                                               k-NN in raw feature space, no learning
+Ablation-NoSiamese                                  ablation                                               retrieval in raw space (keeps GRU head + blend)
+Ablation-NoRetrievalBank                            ablation                                               GRU head only
+Ablation-SmallBank                                  ablation                                               bank = most recent 168 h
+Ablation-LSTMEncoder                                ablation                                               LSTM encoder, same retrieval
+Ablation-NoTopology                                 ablation                                               topology-stress feature removed
+
+
+TABLE 3. Complete hyperparameter disclosure (source: pipeline constants in mintou_real_curtailment.py).
+
+
+Item                                                                          Value
+Series length / horizons                                                      8760 h / 1 h, 24 h
+Input window / features                                                       48 h / 7 (load, wind, PV, net load, load ramp, renewable share, topology stress)
+Normalization                                                                 z-score, training-split statistics
+Split                                                                         first 70% train (last 15% of it = validation), final 30% test; temporal
+GRU / LSTM                                                                    1 layer, hidden 48, linear head
+DLinear / TCN                                                                 moving average 7; causal Conv1d channels 32, dilations 1–8
+MLP                                                                           336–96–48–1, ReLU
+Optimizer / loss / epochs / batch                                             Adam 10−3 / MSE / 20 (best-val checkpoint) / 256
+Retrieval                                                                     k = 8, Euclidean, bank = fit split (SmallBank: last 168 h)
+Blend grid                                                                    α ∈ {0, 0.2, 0.4, 0.5, 0.6, 0.8, 1.0}, selected on validation MAE
+Ridge                                                                         λ = 10−3 , fit on train+validation
+Event threshold                                                               median positive training rate, floored at 0.02
+Onset threshold / detection calibration                                       0.02 / per-method F1-max over 40 quantiles (0.5–0.999) of training predictions
+Seeds / statistics                                                            10 fixed seeds for stochastic methods / two-sided Mann–Whitney U + Holm (27 tests per
+                                                                              horizon); exact paired sensitivity
+
+
+
+
+framework’s 0.02054, rank 8/14), with Persistence/Seasonal-                     0.176, and LSTM 0.174. The framework’s two encoder-
+24h 0.9% below the framework. The modern TCN is fifth                           variant ablations nominally edge it, but the contrasts against
+at 1 h (0.00834) and eleventh at 24 h (0.02220); the pre-                       those variants remain unresolved after Holm correction; the
+specified unpaired test does not separate it from DSTAR-                        framework therefore does not lead the 1 h onset ranking. On
+GRU at either horizon, while the post-freeze paired sensitivity                 onset MAE at 1 h, the framework (0.0488) is significantly
+resolves only the small 1 h difference. DLinear is substantially                worse than LSTM (0.0438, Holm p = 0.0239), NoRetrieval-
+weaker (0.02202 and 0.02823). Thus the modern controls                          Bank (0.0419, p = 0.00402), and LSTMEncoder (0.0468, p =
+narrow the architectural comparison without overturning the                     0.00874). Accurate warning classification therefore does not
+benchmark’s naive-baseline result.                                              imply the most accurate onset-hour magnitudes.
+   The event-level metric sharpens the same point at the day-                      At 24 h, the day-ahead warning task relevant to scheduling,
+ahead scale. At 24 h, the framework’s high-curtailment event                    the leaders are Ridge (onset F1 0.236) and raw-feature k-
+F1 is 0.034 versus 0.340 for persistence. The MSE-trained                       NN (0.226), followed by the framework’s own NoSiamese
+regressors tend toward near-zero predictions on a mostly-                       ablation (0.225). The framework ranks seventh (0.177). Day-
+zero series and miss events, whereas persistence repeats the                    ahead onset warning on this benchmark is a simple-methods
+preceding day’s events. The SmallBank ablation is the ex-                       regime: linear regression over the raw feature window, or
+treme case: its 24 h MAE is the best of all fourteen methods                    nearest neighbors in raw feature space, beat every deep and
+(0.01534) while its event F1 is 0.000. The benchmark re-                        retrieval-augmented configuration tested. Improving rare-
+tains both metric families so that this near-constant-predictor                 onset detection without sacrificing overall calibration is there-
+pathology remains visible.                                                      fore the benchmark’s principal open problem.
+
+2) Onset warning: the operationally relevant slice reorders                     3) The scale-dependent utility of retrieval: significant in both
+the field                                                                       directions
+The onset slice changes the overall-MAE ordering. At 1 h,                       Fig. 4 presents the paper’s central component result, drawn
+Persistence falls to an onset F1 of 0.042 because repeating                     from the Holm-corrected comparisons in real_curtailment_sig
+the last value cannot anticipate hours defined by change.                          At 1 h, learned-embedding retrieval is supported by
+LSTMEncoder and NoTopology reach 0.185, the framework                           its matched controls. On curtailment MAE, the framework
+VOLUME 11, 2023                                                                                                                                                  7
+                         Author et al.: An Operating-State Retrieval Framework and Reproducible Curtailment-Risk Benchmark for Power System Decision Support
+
+
+
+TABLE 4. Leaderboards (mean over seeds; from real_curtailment_leaderboard.csv). PS = Persistence, S24 = Seasonal-24h. Bold = framework.
+Horizon 1 h:
+
+
+Rank                Method                Role                  MAE                   Onset F1               Onset MAE             Event F1
+1                   Persistence           baseline              0.00691               0.042                  0.0675                0.770
+2                   Ablation-NoTopology   ablation              0.00751               0.185                  0.0474                0.659
+3                   Ablation-             ablation              0.00763               0.185                  0.0468                0.681
+                    LSTMEncoder
+4                   DSTAR-GRU             framework             0.00770               0.176                  0.0488                0.674
+5                   TCN                   baseline              0.00834               0.165                  0.0487                0.701
+6                   LSTM                  baseline              0.00966               0.174                  0.0438                0.724
+7                   Ablation-             ablation              0.01241               0.163                  0.0419                0.696
+                    NoRetrievalBank
+8                   Ablation-NoSiamese    ablation              0.01281               0.089                  0.0488                0.542
+9                   kNN-RawFeature        baseline              0.01281               0.089                  0.0488                0.542
+10                  MLP                   baseline              0.01294               0.162                  0.0487                0.631
+11                  Ablation-SmallBank    ablation              0.01534               0.042                  0.0694                0.000
+12                  Ridge                 baseline              0.01984               0.143                  0.0446                0.435
+13                  Seasonal-24h          baseline              0.02036               0.076                  0.0704                0.342
+14                  DLinear               baseline              0.02202               0.122                  0.0404                0.266
+
+
+TABLE 5. Leaderboards (mean over seeds; from real_curtailment_leaderboard.csv). PS = Persistence, S24 = Seasonal-24h. Bold = framework.
+Horizon 24 h:
+
+
+Rank                Method                Role                  MAE                   Onset F1               Onset MAE             Event F1
+1                   Ablation-SmallBank    ablation              0.01534               0.123                  0.1324                0.000
+2                   Ablation-NoSiamese    ablation              0.01946               0.225                  0.1068                0.132
+3                   kNN-RawFeature        baseline              0.01946               0.226                  0.1068                0.132
+4                   Ablation-             ablation              0.02032               0.169                  0.1111                0.068
+                    LSTMEncoder
+5                   Ablation-NoTopology   ablation              0.02035               0.175                  0.1109                0.062
+6                   Persistence           baseline              0.02036               0.123                  0.1323                0.340
+7                   Seasonal-24h          baseline              0.02036               0.123                  0.1323                0.340
+8                   DSTAR-GRU             framework             0.02054               0.177                  0.1108                0.034
+9                   Ablation-             ablation              0.02195               0.207                  0.1098                0.000
+                    NoRetrievalBank
+10                  LSTM                  baseline              0.02196               0.211                  0.1090                0.019
+11                  TCN                   baseline              0.02220               0.183                  0.1112                0.022
+12                  Ridge                 baseline              0.02428               0.236                  0.1065                0.025
+13                  MLP                   baseline              0.02664               0.206                  0.1023                0.168
+14                  DLinear               baseline              0.02823               0.165                  0.1013                0.044
+
+
+
+
+is significantly better than NoSiamese (raw-space retrieval;                 NoSiamese (pointwise 95% CI [-0.0573, -0.0391]), -0.0302
+Holm p = 0.00172), NoRetrievalBank (no retrieval; p =                        for NoRetrievalBank ([-0.0431, -0.0170]), and -0.0340 for
+0.00402), SmallBank (p = 0.00172), LSTM (p = 0.00402),                       LSTM ([-0.0453, -0.0231]); paired Holm p values are 0.0176,
+and MLP (p = 0.00402). The retrieval-preserving LSTMEn-                      0.0234, and 0.0176. The same adverse pattern appears in 24
+coder and NoTopology variants are unresolved against the full                h overall MAE against NoSiamese (Holm p = 0.00172).
+framework. In the paired sensitivity analysis, the DSTAR-                       Both directions carry corrected significance. The con-
+minus-opponent MAE differences are -0.00511 for NoSi-                        trolled comparison therefore provides evidence of a horizon-
+amese (pointwise 95% bootstrap CI [-0.00528, -0.00496])                      dependent sign reversal for this retrieval mechanism on the
+and -0.00471 for NoRetrievalBank ([-0.00540, -0.00401]);                     stated benchmark. Section VII examines explanations consis-
+both paired Holm p = 0.0176. TCN is unresolved under the                     tent with the observed ordering.
+prespecified Mann–Whitney family (p = 0.312), although the                      Figure 5 exposes the seed-level distributions behind the
+post-freeze paired sensitivity detects a smaller difference of -             principal point estimates. At 1 h, DSTAR-GRU has lower
+0.00064 ([-0.00135, -0.00016], paired Holm p = 0.0469). The                  overall MAE than NoRetrievalBank and MLP, whereas
+matched ablations therefore support learned-space retrieval                  NoRetrievalBank has lower onset MAE. At 24 h, DSTAR-
+over its removal and degradation controls, while the TCN                     GRU remains below those learned comparators in overall
+comparison remains test-dependent.                                           MAE, but MLP has lower onset MAE. Thus the overall and
+                                                                             onset slices can favor different mechanisms even within the
+  At 24 h onset warning, the same mechanism is signifi-
+                                                                             same horizon; the boxplots make that trade-off visible without
+cantly harmful on this benchmark. The framework’s onset
+                                                                             replacing the corrected pairwise tests.
+F1 (0.177) is below NoSiamese (0.225, Holm p = 0.00172),
+NoRetrievalBank (0.207, p = 0.00394), and LSTM (0.211, p
+= 0.00384). MLP (0.206) does not survive Holm correction                     4) Stress subset
+(adjusted p = 0.0947) and is treated as unresolved. Paired                   On the high-renewable-share test subset (top training quartile
+DSTAR-minus-opponent onset-F1 differences are -0.0481 for                    of renewable share), the ordering mirrors the overall MAE ta-
+8                                                                                                                                          VOLUME 11, 2023
+Author et al.: An Operating-State Retrieval Framework and Reproducible Curtailment-Risk Benchmark for Power System Decision Support
+
+
+
+
+FIGURE 3. Leaderboards at both horizons for curtailment-rate MAE (left; error bars = std over 10 seeds where applicable) and onset F1 (right). The
+framework is not the leader in the displayed cells; the identity of the leading method changes with horizon and metric.
+
+
+
+bles (framework 0.0222 at 1 h vs. Persistence 0.0199; 0.0463                    at 24 h. The LSTM averages about 3.02 s and 2.96 s, while
+at 24 h vs. NoSiamese/kNN 0.0435): the framework degrades                       the MLP requires only 0.27–0.28 s. Raw-space retrieval is
+gracefully under stress but exhibits no relative advantage                      slower than DSTAR-GRU because distance calculations use
+there, and we make no stress-scenario claim.                                    the full flattened window. These desktop-CPU timings are
+                                                                                implementation measurements, not asymptotic benchmarks;
+5) Multi-Metric Rank Profile and Computational Cost                             they nevertheless rule out a hidden efficiency advantage as an
+A single leaderboard obscures the extent to which the metric                    explanation for the accuracy comparisons.
+determines the preferred method. Figure 6 ranks the nine best                      The combined evidence gives a three-part decision rule.
+aggregate profiles at each horizon over five readouts: overall                  DSTAR-GRU is defensible when short-horizon learned-
+MAE, onset MAE, stress-subset MAE, event F1, and onset                          model accuracy and analogue retrieval are required; LSTM is
+F1. The ranks are computed from the same frozen rows used                       the leaner learned alternative; and simple raw-feature or linear
+in Table 4; no metric weights are introduced. At 1 h, DSTAR-                    methods remain the correct day-ahead onset references. The
+GRU ranks fourth on overall and stress MAE, seventh on                          framework is neither the universal accuracy winner nor the
+onset MAE, fifth on event F1, and third on onset F1. At 24                      cheapest model.
+h it occupies ranks 7–8 on all five readouts. The heat map
+therefore makes the negative day-ahead result harder to miss                    6) Modern Temporal Controls and Fixed-Cap
+than a single selected metric would. It also shows why we do                    Transportability
+not form a composite score: any weighting of error and event-                   Figure 8 joins two predeclared stress tests of scope. One
+detection columns would encode an operational preference                        adds DLinear and a causal TCN under the same data, opti-
+that is absent from the public data.                                            mizer, validation checkpointing, epoch ceiling, clipping, and
+   Figure 7 adds the corresponding compute–error view. The                      ten seeds as the existing learned models. TCN approaches
+framework averages 6.66 s per seeded run at 1 h and 6.48 s                      DSTAR-GRU at 1 h (MAE 0.00834 versus 0.00770) and 24
+VOLUME 11, 2023                                                                                                                                      9
+                           Author et al.: An Operating-State Retrieval Framework and Reproducible Curtailment-Risk Benchmark for Power System Decision Support
+
+
+
+
+FIGURE 4. Component comparisons under Holm-adjusted Mann–Whitney tests (10 seeds). (a) At 1 h, DSTAR-GRU has significantly lower curtailment MAE
+than NoSiamese, NoRetrievalBank, SmallBank, LSTM, and MLP among the controls shown. The retrieval-preserving ablations and TCN are unresolved
+under the prespecified test. (b) At 24 h, DSTAR-GRU has lower onset F1 than NoRetrievalBank, NoSiamese, and LSTM.
+
+
+TABLE 6. Selected compute–error readouts from the frozen run archive. Times are mean seconds per train-and-evaluate run; deterministic baselines are
+omitted because their timings are not comparable to model fitting.
+
+
+Method                        1 h time (s)                   1 h MAE                         24 h time (s)                  24 h MAE
+DSTAR-GRU                     6.66                           0.00770                         6.48                           0.02054
+LSTM                          3.02                           0.00966                         2.96                           0.02196
+MLP                           0.27                           0.01294                         0.28                           0.02664
+Ablation-NoRetrievalBank      5.67                           0.01241                         5.71                           0.02195
+Ablation-NoSiamese            11.28                          0.01281                         11.24                          0.01946
+
+
+
+h (0.02220 versus 0.02054). Neither difference is significant                  G. DISCUSSION
+in the prespecified unpaired analysis; the paired sensitivity                  1) Why retrieval helps at 1 h
+resolves the 1 h contrast only (mean difference -0.00064,                      At the short horizon the target is dominated by continua-
+pointwise 95% CI [-0.00135, -0.00016], adjusted p = 0.0469).                   tion: most hours continue a quiet or an active regime, and
+DLinear is worse on both horizons. These results reduce                        the retrieval average over eight similar operating states acts
+the concern that the retrieval finding depends on omitting                     as a smoother anchored in realized outcomes, correcting
+temporal-convolutional and decomposition-linear controls,                      the GRU head’s residual noise. The ablation geometry sup-
+but they do not make the framework the overall winner                          ports this interpretation. Raw-space retrieval (NoSiamese,
+because Persistence and raw kNN remain stronger on their                       MAE 0.01281) is worse than learned-embedding retrieval
+respective headline cells.                                                     (0.00770). Thus, the curtailment-trained encoder learns a
+   The second test applies the fixed 70% reference-cap con-                    similarity representation that predicts near-term curtailment
+struction, unchanged, to the public NREL-118 load, wind,                       more accurately than raw Euclidean proximity on this bench-
+and solar time series. Across 8784 aligned hours, renewable                    mark. This is the controlled counterpart of what the analog-
+share has mean 0.103, 95th percentile 0.262, and maximum                       ensemble literature observes in weather-driven forecasting
+0.369. It never reaches the 0.70 cap, so the derived target con-               [9], [18], [19]: analogs work when the mapping from state
+tains zero positive hours. A cross-system accuracy ranking is                  to short-term outcome is locally smooth.
+therefore not identifiable under this task definition. The cap is
+a policy parameter rather than a universal physical constant;                  2) Why the same mechanism harms 24 h onset warning
+transferring the benchmark requires a policy-calibrated ac-                    Onset hours are, by definition, hours where the future does
+ceptance rule specified before model comparison. Lowering                      not resemble the recent past. A query window observed at
+the cap after observing NREL-118 would instead make the                        an onset-minus-24 h moment describes quiet conditions; its
+external task definition result-dependent.                                     nearest neighbors in any space are overwhelmingly other
+                                                                               quiet windows, whose subsequent targets are mostly zeros.
+                                                                               Averaging them drags the blended prediction toward zero
+                                                                               exactly where warning requires signal — retrieval acts as
+10                                                                                                                                        VOLUME 11, 2023
+Author et al.: An Operating-State Retrieval Framework and Reproducible Curtailment-Risk Benchmark for Power System Decision Support
+
+
+
+
+FIGURE 5. Seed-level uncertainty for DSTAR-GRU and two learned non-retrieval comparators. Boxes show the interquartile range and median over 10
+seeds; whiskers extend to 1.5 times the interquartile range. Panels report overall and onset MAE at 1 h and 24 h. Statistical decisions in the text use the
+prespecified Holm-adjusted Mann–Whitney comparisons rather than visual overlap of the boxes.
+
+
+
+a persistence prior, and persistence is the one behavior that                    configuration also performs strongly on 24 h plain MAE
+cannot warn (Persistence onset F1: 0.042 at 1 h, 0.123 at 24 h).                 while its event F1 is zero. The benchmark therefore separates
+The learned embedding aggravates rather than mitigates this                      capabilities instead of reducing them to one favorable score.
+failure. MSE training on a 92%-zero series favors distinctions                      The practical guidance follows directly. Retrieval-
+associated with typical outcomes and may suppress rare pre-                      augmented models are defensible for short-horizon curtail-
+onset cues retained by raw features. Consistent with this                        ment estimation. For day-ahead onset warning, however, cur-
+explanation, raw-space retrieval (NoSiamese, onset F1 0.225)                     rent evidence favors simple regression on raw features. Any
+significantly outperforms learned-space retrieval (0.177) at                     retrieval-based day-ahead product should demonstrate that it
+24 h. The validation-selected blend weight cannot rescue this,                   has overcome the persistence-prior failure mode documented
+because it is selected on overall validation MAE, an objective                   here.
+persistence-like behavior flatters. We offer these as mecha-
+nism hypotheses consistent with all observed orderings, not as                   4) Implications for benchmarked decision support
+proven causal claims; targeted probes (onset-oriented blend
+                                                                                 The framework does not lead the aggregate leaderboard, but
+selection, class-balanced embedding objectives) are natural
+                                                                                 the matched controls reveal a more useful design result: re-
+next experiments the benchmark makes cheap.
+                                                                                 trieval has opposite consequences for short-horizon estima-
+                                                                                 tion and day-ahead onset warning. This distinction would
+3) What the benchmark discriminates                                              be hidden by a single overall error score. For decision sup-
+Across Table 4 and Figures 3–5, the leader changes with                          port, the benchmark therefore supplies two concrete require-
+horizon and metric. Persistence leads 1 h MAE, learned re-                       ments. A proposed short-horizon method should improve on
+trieval methods are competitive on 1 h onset F1, and simple                      persistence without sacrificing event behavior, and a day-
+regressors lead 24 h onset F1. A degenerate near-climatology                     ahead warning method should exceed the ridge baseline while
+VOLUME 11, 2023                                                                                                                                           11
+                           Author et al.: An Operating-State Retrieval Framework and Reproducible Curtailment-Risk Benchmark for Power System Decision Support
+
+
+
+
+FIGURE 6. Within-task method ranks computed from real_curtailment_results.csv. Rank 1 denotes the best mean for the indicated metric; lower is
+better for error columns and higher is better for F1 columns. Only the nine methods with the best mean rank at each horizon are displayed. The panel is
+descriptive and does not replace the prespecified pairwise tests.
+
+
+
+
+FIGURE 7. Mean wall-clock time and curtailment MAE for learned methods and retrieval ablations at both horizons. Circles denote the framework or
+external learned baselines; squares denote ablations. Values are means of the archived seeded runs on the same CPU environment.
+
+
+
+avoiding the retrieval-induced persistence prior identified                          OPF, unit commitment, or historical operator records.
+here. The contribution is the reproducible task, the controlled                      Labels are internally consistent and reproducible, but
+characterization of retrieval, and the metric structure needed                       they proxy operational curtailment; no AC-OPF, unit-
+to evaluate subsequent methods against those requirements.                           commitment, or AC-feasibility claim attaches to any-
+                                                                                     thing in this paper.
+                                                                                  2. Single identified test system, single weather year. All
+                                                                                     model rankings are on RTS-GMLC and one supplied
+H. LIMITATIONS
+                                                                                     meteorological year. The fixed-cap NREL-118 check
+     1. Policy-derived labels. This benchmark evaluates                              produces no positive target hours, so it identifies a
+        curtailment-risk forecasting, not dispatch feasibility.                      task-transport boundary rather than an external accu-
+        Curtailment is defined by one fixed SNSP-type refer-                         racy result. A second-system comparison requires a
+        ence policy — an acceptance-rule proxy — not by AC-
+12                                                                                                                                        VOLUME 11, 2023
+Author et al.: An Operating-State Retrieval Framework and Reproducible Curtailment-Risk Benchmark for Power System Decision Support
+
+
+
+
+FIGURE 8. (a) Curtailment-rate MAE for DSTAR-GRU, TCN, and DLinear under the shared ten-seed protocol. (b) NREL-118 renewable-share statistics
+relative to the fixed 0.70 reference cap. No NREL-118 hour reaches the cap; consequently, no external model ranking is reported.
+
+
+
+      policy-calibrated acceptance rule fixed independently                     onset detection, and a near-climatology ablation shows that
+      of the test outcomes; multi-year re-instantiations are                    low MAE can coexist with zero event F1. The central result
+      also needed.                                                              is therefore a cross-horizon reversal in retrieval utility, not a
+   3. Single cap value for model results. Model compar-                         universal ranking of forecasting architectures.
+      isons are at cap 0.70 only; Table 1 characterizes the                        The fixed-cap NREL-118 check produces no positive tar-
+      task at 0.60/0.80, but method rankings at those caps are                  get hours, so cross-system use requires policy recalibration
+      unverified and are future work.                                           before predictive comparison. Within its tested scope, the
+   4. Onset sample sizes. The test split contains 57 (1 h) and                  benchmark provides a public, statistically controlled basis for
+      172 (24 h) onset hours; F1 estimates at these counts                      developing models that must balance continuation accuracy,
+      carry meaningful variance, which is why all compar-                       event detection, and onset warning.
+      ative statements rest on the seeded, Holm-corrected
+      protocol rather than point differences.
+   5. No probabilistic evaluation. The benchmark scores
+                                                                                J. ACKNOWLEDGMENT
+      point predictions and thresholded warnings; probabilis-
+      tic scoring (e.g., pinball loss, reliability of predicted                 During the preparation of this work, the authors used Claude
+      onset probabilities) is a protocol extension we have not                  (Anthropic) for drafting and language-editing assistance. All
+      implemented.                                                              experimental design, code, data processing, results, and anal-
+   6. Topology feature, not topology capability. The                            ysis were produced and verified by the authors. The authors
+      topology-stress input is a static branch-rating proxy; the                reviewed and revised all assisted content and take full respon-
+      NoTopology ablation shows it is not load-bearing (no                      sibility for the publication.
+      significant difference in any direction). No topology-
+                                                                                FUNDING
+      uncertainty handling capability is claimed.
+                                                                                [AUTHOR INPUT REQUIRED: insert the funder and grant
+                                                                                number in the IEEE first-page funding footnote, or state that
+                                                                                the work received no external funding.]
+I. CONCLUSION
+This paper develops a reproducible public benchmark for                         K. DATA AVAILABILITY AND REPRODUCIBILITY
+curtailment-risk decision support on RTS-GMLC. A method-                        All inputs are public: RTS-GMLC is available from
+independent proxy target follows a fixed 70% SNSP-type ref-                     the GridMod repository (https://github.com/GridMod/RTS-
+erence policy, and an onset slice complements aggregate error                   GMLC) [6], and the NREL-118 time-series files are
+with the transition behavior most relevant to early warning.                    distributed with the NREL synthetic test-system as-
+   On this benchmark, learned-embedding retrieval signif-                       sets. The benchmark construction, 14 methods, ab-
+icantly improves 1 h MAE relative to the prespecified                           lations, and statistical protocol are implemented in
+retrieval-removal and retrieval-degradation controls (Holm                      src/powergrid_benchmark/mintou_real_curtailment
+p ≤ 0.0041). The same mechanism reduces 24 h onset-                             (run version public_rts_curtailment_v6_modern_tempor
+warning performance, where no-retrieval and raw-feature-                        the frozen-cap applicability audit is implemented in
+retrieval variants perform better (Holm p ≤ 0.0040). Persis-                    mintou_p1_nrel_validation.py. Fixed seeds re-
+tence leads aggregate MAE, ridge regression leads day-ahead                     generate the 208 per-run records, leaderboard, primary ef-
+VOLUME 11, 2023                                                                                                                                  13
+                              Author et al.: An Operating-State Retrieval Framework and Reproducible Curtailment-Risk Benchmark for Power System Decision Support
+
+
+
+fect/interval table, exact paired-sensitivity table, configura-                      [16] P. Mandal, T. Senjyu, N. Urasaki, and T. Funabashi, "A neural network
+tion, and transportability summary. Deprecated proxy arti-                                based several-hour-ahead electric load forecasting using similar days ap-
+                                                                                          proach," International Journal of Electrical Power & Energy Systems, vol.
+facts remain marked as historical and are excluded from                                   28, no. 6, pp. 367–373, 2006, doi: 10.1016/j.ijepes.2005.12.007.
+every reported result. The complete code, configurations,                            [17] A. T. Lora, J. M. R. Santos, A. G. Exposito, J. L. M. Ramos, and J. C.
+evidence tables, and vector figure sources are included in                                R. Santos, "Electricity market price forecasting based on weighted nearest
+                                                                                          neighbors techniques," IEEE Transactions on Power Systems, vol. 22, no.
+the supplementary review package and are available from the                               3, pp. 1294–1301, 2007, doi: 10.1109/TPWRS.2007.901670.
+corresponding author.                                                                [18] S. Alessandrini, L. Delle Monache, S. Sperati, and J. N. Nissen, "A
+                                                                                          novel application of an analog ensemble for short-term wind power
+                                                                                          forecasting," Renewable Energy, vol. 76, pp. 768–781, 2015, doi:
+CONFLICTS OF INTEREST                                                                     10.1016/j.renene.2014.11.061.
+                                                                                     [19] S. Alessandrini, L. Delle Monache, S. Sperati, and G. Cervone, "An
+The authors declare no conflicts of interest.                                             analog ensemble for short-term probabilistic solar power forecast," Applied
+                                                                                          Energy, vol. 157, pp. 95–110, 2015, doi: 10.1016/j.apenergy.2015.08.011.
+                                                                                     [20] L. De Baets, C. Develder, T. Dhaene, and D. Deschrijver, "Detection of
+                                                                                          unidentified appliances in non-intrusive load monitoring using siamese
+                                                                                          neural networks," International Journal of Electrical Power & Energy
+REFERENCES                                                                                Systems, vol. 104, pp. 645–653, 2019, doi: 10.1016/j.ijepes.2018.07.026.
+ [1] L. Bird et al., "Wind and solar energy curtailment: A review of international   [21] R. Zhu, X. Gong, S. Hu, and Y. Wang, "Power quality disturbances classi-
+     experience," Renewable and Sustainable Energy Reviews, vol. 65, pp. 577–             fication via fully-convolutional Siamese network and k-nearest neighbor,"
+     586, 2016, doi: 10.1016/j.rser.2016.06.082.                                          Energies, vol. 12, no. 24, Art. no. 4732, 2019, doi: 10.3390/en12244732.
+ [2] G. Luo, Y. Li, W. Tang, and X. Wei, "Wind curtailment of China’s                [22] S. Makridakis and M. Hibon, "The M3-Competition: results, conclusions
+     wind power operation: Evolution, causes and solutions," Renewable                    and implications," International Journal of Forecasting, vol. 16, no. 4, pp.
+     and Sustainable Energy Reviews, vol. 53, pp. 1190–1201, 2016, doi:                   451–476, 2000, doi: 10.1016/S0169-2070(00)00057-1.
+     10.1016/j.rser.2015.09.075.                                                     [23] R. J. Hyndman and A. B. Koehler, "Another look at measures of forecast
+ [3] B. Frew et al., "The curtailment paradox in the transition to high so-               accuracy," International Journal of Forecasting, vol. 22, no. 4, pp. 679–
+     lar power systems," Joule, vol. 5, no. 5, pp. 1143–1167, 2021, doi:                  688, 2006, doi: 10.1016/j.ijforecast.2006.03.001.
+     10.1016/j.joule.2021.03.021.                                                    [24] S. Makridakis, E. Spiliotis, and V. Assimakopoulos, "The M4 Com-
+                                                                                          petition: 100,000 time series and 61 forecasting methods," Interna-
+ [4] J. O’Sullivan, A. Rogers, D. Flynn, P. Smith, A. Mullane, and M. O’Malley,
+                                                                                          tional Journal of Forecasting, vol. 36, no. 1, pp. 54–74, 2020, doi:
+     "Studying the maximum instantaneous non-synchronous generation in an
+                                                                                          10.1016/j.ijforecast.2019.04.014.
+     island system—Frequency stability challenges in Ireland," IEEE Trans-
+                                                                                     [25] S. Makridakis, E. Spiliotis, and V. Assimakopoulos, "M5 accuracy
+     actions on Power Systems, vol. 29, no. 6, pp. 2943–2951, 2014, doi:
+                                                                                          competition: Results, findings, and conclusions," International
+     10.1109/TPWRS.2014.2316974.
+                                                                                          Journal of Forecasting, vol. 38, no. 4, pp. 1346–1364, 2022, doi:
+ [5] J. Cardo-Miota, R. Trivedi, S. Patra, S. Khadem, and M. Bahloul,
+                                                                                          10.1016/j.ijforecast.2021.11.013.
+     "Data-driven approach for day-ahead System Non-Synchronous Pene-
+                                                                                     [26] T. Hong, P. Pinson, S. Fan, H. Zareipour, A. Troccoli, and R. J. Hyndman,
+     tration forecasting: A comprehensive framework, model development
+                                                                                          "Probabilistic energy forecasting: Global Energy Forecasting Competition
+     and analysis," Applied Energy, vol. 362, Art. no. 123006, 2024, doi:
+                                                                                          2014 and beyond," International Journal of Forecasting, vol. 32, no. 3, pp.
+     10.1016/j.apenergy.2024.123006.
+                                                                                          896–913, 2016, doi: 10.1016/j.ijforecast.2016.02.001.
+ [6] C. Barrows et al., "The IEEE Reliability Test System: A proposed 2019           [27] D. Yang et al., "Verification of deterministic solar forecasts," Solar Energy,
+     update," IEEE Transactions on Power Systems, vol. 35, no. 1, pp. 119–127,            vol. 210, pp. 20–37, 2020, doi: 10.1016/j.solener.2020.04.019.
+     2020, doi: 10.1109/TPWRS.2019.2925557.                                          [28] H. Hewamalage, K. Ackermann, and C. Bergmeir, "Forecast evalua-
+ [7] S. Makridakis, E. Spiliotis, and V. Assimakopoulos, "Statistical and                 tion for data scientists: common pitfalls and best practices," Data Min-
+     machine learning forecasting methods: Concerns and ways forward,"                    ing and Knowledge Discovery, vol. 37, no. 2, pp. 788–832, 2023, doi:
+     PLOS ONE, vol. 13, no. 3, Art. no. e0194889, 2018, doi: 10.1371/jour-                10.1007/s10618-022-00894-5.
+     nal.pone.0194889.                                                               [29] J. Zhang, B. Yu, H. Lai, L. Liu, J. Zhou, F. Lou, Y. Ni, Y. Peng, and Z.
+ [8] S. Kapoor and A. Narayanan, "Leakage and the reproducibility crisis in               Yu, "LoadSeer: Exploiting Tensor Graph Convolutional Network for Power
+     machine-learning-based science," Patterns, vol. 4, no. 9, Art. no. 100804,           Load Forecasting With Spatio-Temporal Characteristics," IEEE Access,
+     2023, doi: 10.1016/j.patter.2023.100804.                                             vol. 12, pp. 190337–190346, 2024, doi: 10.1109/ACCESS.2024.3514174.
+ [9] L. Delle Monache, F. A. Eckel, D. L. Rife, B. Nagarajan, and K.                 [30] J. He, K. Yuan, Z. Zhong, and Y. Sun, "Enhancing Short-Term
+     Searight, "Probabilistic weather prediction with an analog ensemble,"                Power Load Forecasting With a TimesNet-Crossformer-LSTM Ap-
+     Monthly Weather Review, vol. 141, no. 10, pp. 3498–3516, 2013, doi:                  proach," IEEE Access, vol. 12, pp. 56774–56788, 2024, doi: 10.1109/AC-
+     10.1175/MWR-D-12-00281.1.                                                            CESS.2024.3383912.
+[10] T. Xu, N. S. Wade, E. M. Davidson, P. C. Taylor, S. D. J. McArthur, and
+     W. G. Garlick, "Case-based reasoning for coordinated voltage control on
+     distribution networks," Electric Power Systems Research, vol. 81, no. 12,       AUTHOR BIOGRAPHIES
+     pp. 2088–2098, 2011, doi: 10.1016/j.epsr.2011.08.005.                           [AUTHOR INPUT REQUIRED: add an IEEE Access short
+[11] Y. Yasuda et al., "C-E (curtailment – Energy share) map: An objective and       biography and photograph for every author after the refer-
+     quantitative measure to evaluate wind and solar curtailment," Renewable
+     and Sustainable Energy Reviews, vol. 160, Art. no. 112212, 2022, doi:           ences.]
+     10.1016/j.rser.2022.112212.
+[12] D. Newbery, "National Energy and Climate Plans for the island of Ireland:
+     wind curtailment, interconnectors and storage," Energy Policy, vol. 158,
+     Art. no. 112513, 2021, doi: 10.1016/j.enpol.2021.112513.
+[13] H. Hadian and F. Naderkhani, "Deep learning-based models for wind and
+     solar curtailment forecasting," in Proc. 7th Int. Conf. Energy Harvesting,
+     Storage, and Transfer (EHST), 2023, paper 120, doi: 10.11159/ehst23.120.
+[14] A. Kaur, L. Nonnenmacher, and C. F. M. Coimbra, "Net load forecasting
+     for high renewable energy penetration grids," Energy, vol. 114, pp. 1073–
+     1084, 2016, doi: 10.1016/j.energy.2016.08.067.
+[15] S. Rahman and R. Bhatnagar, "An expert system based algorithm for short
+     term load forecast," IEEE Transactions on Power Systems, vol. 3, no. 2, pp.
+     392–399, 1988, doi: 10.1109/59.192889.
+
+14                                                                                                                                                     VOLUME 11, 2023
+

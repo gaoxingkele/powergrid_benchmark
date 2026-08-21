@@ -1,0 +1,47 @@
+{
+  "schema_version": "ma-sqlgrid-query-blind-operator-policy-v2",
+  "seed": 20260805,
+  "policy_basis": "schema types, foreign keys, base-row domains, and whole risk families required by the independent design audit; no SQL literal or model outcome may be read",
+  "sentinel_prefix": "SYNV2",
+  "state_plan": [
+    {"state": "T0_snapshot", "operator": "snapshot"},
+    {"state": "T1_insertion_permutation_a", "operator": "permutation", "permutation_seed": 11},
+    {"state": "T1_insertion_permutation_b", "operator": "permutation", "permutation_seed": 29},
+    {"state": "T1_insertion_permutation_c", "operator": "permutation", "permutation_seed": 47},
+    {"state": "L1_exact_clone_retained", "operator": "cohorts", "cohorts": ["exact"]},
+    {"state": "L2_attribute_rotation_retained", "operator": "cohorts", "cohorts": ["rotate"]},
+    {"state": "L3_relation_rewire_retained", "operator": "cohorts", "cohorts": ["rewire"]},
+    {"state": "L4_numeric_time_shift_retained", "operator": "cohorts", "cohorts": ["shift"]},
+    {"state": "L5_combined_retained", "operator": "cohorts", "cohorts": ["combined"]},
+    {"state": "L6_two_cohorts_retained", "operator": "cohorts", "cohorts": ["exact", "combined"]},
+    {"state": "T3_categorical_covering", "operator": "categorical_covering"},
+    {"state": "T4_numeric_date_boundaries", "operator": "numeric_date_boundaries"},
+    {"state": "T4b_dense_calendar_boundaries", "operator": "dense_calendar_boundaries"},
+    {"state": "T5_null_witnesses", "operator": "null_witnesses"},
+    {"state": "T6_relationship_anti_join_cover", "operator": "relationship_anti_join_cover"},
+    {"state": "T6b_isolated_parent_cover", "operator": "isolated_parent_cover"},
+    {"state": "T7_topology_motifs", "operator": "topology_motifs"},
+    {"state": "T8_string_decoys", "operator": "string_decoys"}
+  ],
+  "boundary_policy": {
+    "numeric_points": ["below_min", "min", "midpoint", "max", "above_max", "max_tie"],
+    "real_epsilon": 0.125,
+    "integer_epsilon": 1,
+    "date_offset_days": 37
+  },
+  "categorical_policy": {
+    "asset_types": ["type_name", "voltage_class", "manufacturer"],
+    "locations": ["region", "criticality"],
+    "technicians": ["specialty", "home_region", "active"],
+    "assets": ["status"],
+    "work_orders": ["priority", "status", "fault_code"],
+    "maintenance_logs": ["action_type"],
+    "sensor_readings": ["sensor_type", "unit", "alarm_flag"],
+    "grid_topology": ["connection_type", "switch_status"]
+  },
+  "schema_lifecycle_sentinels": {
+    "work_orders.status": ["cancelled"]
+  },
+  "string_decoys": ["upper", "lower", "prefix", "suffix", "outer_space", "punctuation"],
+  "retain_all_v1_operator_families": true
+}

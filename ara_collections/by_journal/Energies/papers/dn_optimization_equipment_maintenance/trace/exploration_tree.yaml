@@ -1,0 +1,108 @@
+tree:
+  - id: Q01
+    type: question
+    support_level: explicit
+    source_refs: ["Page 1, Abstract", "Page 2, Section 1"]
+    title: "How can distribution network flexibility be improved under high renewable penetration?"
+    description: "The paper asks how to co-optimize grid reconfiguration and source-load dispatch to address flexibility deficits caused by renewable energy uncertainty."
+
+  - id: Q02
+    type: question
+    support_level: explicit
+    source_refs: ["Page 2, Section 1"]
+    title: "How to evaluate and incorporate flexibility into dispatch decisions?"
+    description: "The second research question focuses on quantifying flexibility and embedding it into operational optimization to improve robustness and efficiency."
+
+  - id: D01
+    type: decision
+    support_level: explicit
+    source_refs: ["Page 2, Section 2"]
+    title: "Two-layer architecture: separate topology and dispatch optimization"
+    choice: "Decompose the problem into an upper layer (topology reconfiguration with flexibility index) and a lower layer (distributed robust dispatch with DRO)."
+    alternatives:
+      - "Monolithic single-layer optimization (rejected due to complexity)"
+      - "Sequential optimization without feedback (rejected; loses coordination benefits)"
+    evidence: [C05]
+
+  - id: D02
+    type: decision
+    support_level: explicit
+    source_refs: ["Page 5, Section 2.2"]
+    title: "DRO with comprehensive norm ambiguity set"
+    choice: "Use joint 1-norm and infinity-norm constraints on scenario probabilities to construct the ambiguity set, balancing robustness against conservatism."
+    alternatives:
+      - "Stochastic programming with fixed probabilities (rejected; lacks robustness)"
+      - "Traditional robust optimization with worst-case protection (rejected; overly conservative)"
+      - "Single-norm ambiguity set (rejected; less tight than joint constraints)"
+    evidence: [C02]
+
+  - id: D03
+    type: decision
+    support_level: explicit
+    source_refs: ["Page 6, Section 2.3"]
+    title: "Hybrid ACO-FHO-DE metaheuristic solver"
+    choice: "Combine ACO (global path exploration), FHO (local refinement), and DE (mutation/crossover) with Tent chaos mapping and adaptive weights."
+    alternatives:
+      - "Single metaheuristic (ACO, FHO, or DE alone)"
+      - "Mathematical programming (MILP/MIQP solvers via YALMIP)"
+    evidence: [C03]
+
+  - id: E01_node
+    type: experiment
+    support_level: explicit
+    source_refs: ["Pages 9-12, Section 3.1"]
+    title: "Three-scheme comparison: flexibility and interconnection effects"
+    result: "Scheme 3 (flexibility + interconnection) achieves lowest comprehensive cost and flexibility deficits across all grids. Grid flexibility deficits reduced from 0.18/0.31 (Scheme 1) to 0.04/0.06 (Scheme 3) for Grids 1 and 2."
+    evidence: [C01, C04]
+    also_depends_on:
+      - D01
+      - D03
+
+  - id: E02_node
+    type: experiment
+    support_level: explicit
+    source_refs: ["Pages 12-14, Section 3.2"]
+    title: "Monte Carlo comparison of DRO vs deterministic/stochastic/robust"
+    result: "Proposed DRO achieves lowest average and maximum cost across 500 scenarios. 6.8% average cost reduction vs traditional robust; up to 14.5% vs deterministic."
+    evidence: [C02]
+    also_depends_on:
+      - D01
+      - D02
+      - D03
+
+  - id: E03_node
+    type: experiment
+    support_level: explicit
+    source_refs: ["Pages 11-12, Section 3.1"]
+    title: "Grid interconnection impact on sub-grid resource balancing"
+    result: "Interconnection enables dynamic supply-demand balance across grids. Grid 1 curtailed wind-solar drops from 253 kWh (Scheme 1) to 82 kWh (Scheme 3). Grid 2 drops from 297 to 54 kWh."
+    evidence: [C01]
+    also_depends_on:
+      - D01
+
+  - id: DE01
+    type: dead_end
+    support_level: inferred
+    title: "Predictive maintenance quantification"
+    hypothesis: "Branch flexibility adequacy directly quantifies equipment maintenance needs and schedules."
+    failure_mode: "The paper claims the model 'contributes to predictive maintenance' but provides no quantitative validation linking FBF values to maintenance outcomes, outage rates, or equipment lifetime. The claim is only qualitative (Section 4)."
+    lesson: "Future work should define specific maintenance metrics (MTBF, maintenance cost reduction, outage frequency) and correlate them with FBF optimization results."
+    evidence: [C04]
+    source_refs: ["Page 15, Section 4", "Page 16, Section 5 (Future Work)"]
+
+  - id: DE02
+    type: dead_end
+    support_level: explicit
+    source_refs: ["Page 16, Section 5"]
+    title: "Scalability to ultra-large systems"
+    hypothesis: "The hybrid metaheuristic algorithm can scale to large distribution systems with hundreds or thousands of nodes."
+    failure_mode: "The paper acknowledges that 'it may encounter scalability challenges when applied to ultra-large distribution systems or real-time operation scenarios.' Validation is limited to a 62-node system."
+    lesson: "Future work should test on larger systems (e.g., IEEE 8500-node) and explore algorithmic acceleration techniques."
+    evidence: [C03]
+
+  - id: Q03
+    type: question
+    support_level: inferred
+    title: "How does the two-layer feedback loop affect convergence?"
+    description: "The iterative feedback between upper-layer topology optimization and lower-layer dispatch creates a coupled optimization that may have convergence issues. The paper describes the iteration as continuing 'until the system reaches convergence' but does not provide convergence guarantees or complexity analysis."
+    source_refs: ["Page 6, Section 2.3"]

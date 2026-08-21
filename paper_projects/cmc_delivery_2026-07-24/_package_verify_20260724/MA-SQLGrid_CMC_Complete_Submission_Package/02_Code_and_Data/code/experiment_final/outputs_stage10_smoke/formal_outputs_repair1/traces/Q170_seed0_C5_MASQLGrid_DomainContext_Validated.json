@@ -1,0 +1,82 @@
+{
+  "prompt": "You are generating candidate SQLite SQL for CHESS-style MA-SQLGrid.\n\nReturn 3 distinct read-only SQLite SELECT queries as a numbered list. Do not include explanation.\nDo not use INSERT, UPDATE, DELETE, DROP, PRAGMA, or multiple statements.\nUse only the selected context, normalization hints, and inferred output-form hints below. Candidate queries should differ in plausible joins/projections while respecting the inferred projection count and relevant literal predicates.\n\nCondition: C5_MASQLGrid_DomainContext_Validated\n\nSQLite selected context:\nTables and selected columns:\n- asset_types(asset_type_id) -- equipment type catalog such as Transformer, Breaker, Line, Relay, Substation, Capacitor\n- assets(asset_id, asset_type_id, location_id) -- individual grid assets with names, type, location, install date, status, and MW capacity\n- grid_topology(edge_id, upstream_asset_id, downstream_asset_id) -- directed upstream/downstream asset connections and switch status\n- maintenance_logs(log_id, work_order_id, technician_id) -- maintenance actions, timestamps, notes, and parts cost\n- technicians(technician_id) -- maintenance technicians, specialties, home regions, and active flag\n- work_orders(work_order_id, asset_id, assigned_technician_id, priority, status, fault_code) -- maintenance work orders with priority, status, schedule, completion date, and fault code\nJoin paths:\n- assets.asset_type_id = asset_types.asset_type_id\n- work_orders.asset_id = assets.asset_id\n- work_orders.assigned_technician_id = technicians.technician_id\n- maintenance_logs.work_order_id = work_orders.work_order_id\n- maintenance_logs.technician_id = technicians.technician_id\n- grid_topology.upstream_asset_id = assets.asset_id\n- grid_topology.downstream_asset_id = assets.asset_id\nExact database values matched from the question:\n- work_orders.fault_code: TEMP\nPower-grid domain normalization hints inferred from the question:\n- work_orders.fault_code = \"TEMP\"\nAnswer-shape hints inferred from the question text:\n- expected column count: 4\n- row granularity: multi-row\n- deterministic ordering needed: True\n- Project work_order_id, asset_id, status, and priority.\n\nQuestion ID: Q170\nQuestion: List work orders with fault code TEMP.\n",
+  "rank_trace": [
+    {
+      "candidate_index": 0,
+      "column_count": 4,
+      "empty_result": false,
+      "exec_error": "",
+      "exec_ok": true,
+      "expected_column_count": 4,
+      "missing_value_hints": [],
+      "order_ok": true,
+      "order_required": true,
+      "ranker_score": 33,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": true,
+      "sql": "SELECT wo.work_order_id, wo.asset_id, wo.status, wo.priority FROM work_orders AS wo WHERE wo.fault_code = 'TEMP' ORDER BY wo.work_order_id, wo.asset_id, wo.status, wo.priority;",
+      "value_hint_count": 1,
+      "value_hits": 1
+    },
+    {
+      "candidate_index": 1,
+      "column_count": 4,
+      "empty_result": false,
+      "exec_error": "",
+      "exec_ok": true,
+      "expected_column_count": 4,
+      "missing_value_hints": [],
+      "order_ok": true,
+      "order_required": true,
+      "ranker_score": 32,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": true,
+      "sql": "SELECT wo.work_order_id, wo.asset_id, wo.status, wo.priority FROM work_orders AS wo JOIN assets AS a ON a.asset_id = wo.asset_id WHERE wo.fault_code = 'TEMP' ORDER BY wo.priority, wo.status, wo.work_order_id, wo.asset_id;",
+      "value_hint_count": 1,
+      "value_hits": 1
+    },
+    {
+      "candidate_index": 2,
+      "column_count": 4,
+      "empty_result": false,
+      "exec_error": "",
+      "exec_ok": true,
+      "expected_column_count": 4,
+      "missing_value_hints": [],
+      "order_ok": true,
+      "order_required": true,
+      "ranker_score": 31,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": true,
+      "sql": "SELECT wo.work_order_id, wo.asset_id, wo.status, wo.priority FROM work_orders AS wo LEFT JOIN technicians AS t ON t.technician_id = wo.assigned_technician_id WHERE wo.fault_code = 'TEMP' ORDER BY wo.status, wo.priority, wo.work_order_id, wo.asset_id;",
+      "value_hint_count": 1,
+      "value_hits": 1
+    },
+    {
+      "candidate_index": 3,
+      "column_count": 0,
+      "empty_result": false,
+      "exec_error": "incomplete input",
+      "exec_ok": false,
+      "expected_column_count": 4,
+      "missing_value_hints": [
+        "work_orders.fault_code = \"TEMP\""
+      ],
+      "order_ok": false,
+      "order_required": true,
+      "ranker_score": -18,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": false,
+      "sql": "SELECT;",
+      "value_hint_count": 1,
+      "value_hits": 0
+    }
+  ],
+  "raw_response": "1. ```sql\nSELECT\n  wo.work_order_id,\n  wo.asset_id,\n  wo.status,\n  wo.priority\nFROM work_orders AS wo\nWHERE wo.fault_code = 'TEMP'\nORDER BY wo.work_order_id, wo.asset_id, wo.status, wo.priority;\n```\n\n2. ```sql\nSELECT\n  wo.work_order_id,\n  wo.asset_id,\n  wo.status,\n  wo.priority\nFROM work_orders AS wo\nJOIN assets AS a\n  ON a.asset_id = wo.asset_id\nWHERE wo.fault_code = 'TEMP'\nORDER BY wo.priority, wo.status, wo.work_order_id, wo.asset_id;\n```\n\n3. ```sql\nSELECT\n  wo.work_order_id,\n  wo.asset_id,\n  wo.status,\n  wo.priority\nFROM work_orders AS wo\nLEFT JOIN technicians AS t\n  ON t.technician_id = wo.assigned_technician_id\nWHERE wo.fault_code = 'TEMP'\nORDER BY wo.status, wo.priority, wo.work_order_id, wo.asset_id;\n```",
+  "repair_raw_response": "",
+  "repaired_sql": ""
+}

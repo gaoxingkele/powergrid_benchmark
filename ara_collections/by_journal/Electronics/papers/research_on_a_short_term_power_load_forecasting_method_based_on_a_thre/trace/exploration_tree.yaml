@@ -1,0 +1,107 @@
+tree:
+  - id: N01
+    type: question
+    support_level: explicit
+    source_refs: ["Abstract", "§1", "§2"]
+    title: "How to fuse multi-source heterogeneous features for short-term load forecasting?"
+    description: >
+      Single-channel deep models entangle heterogeneous modalities (periodic time codes, delayed
+      weather, trend+noise load) in one representation, causing information loss. Central question:
+      can independent per-modality encoding plus late fusion improve STLF accuracy?
+    children:
+      - id: N02
+        type: decision
+        support_level: explicit
+        source_refs: ["§2.3", "Figure 7", "ref [17]"]
+        title: "Adopt three independent LSTM channels fused late by a CNN"
+        description: >
+          Motivated by multi-modal late-fusion theory (ref [17]): encode time, weather, and
+          historical load in separate LSTM channels; concatenate + transpose; fuse with 2× Conv1D +
+          MaxPooling1D + FC. Rejects single-channel early fusion.
+        children:
+          - id: N03
+            type: decision
+            support_level: explicit
+            source_refs: ["§2.3", "Figure 7", "§4 conclusions"]
+            title: "Use same-hour prior-day historical-load input for full next-day curve"
+            description: >
+              Historical-load channel uses same-time value from prior day(s) so each output maps to a
+              same-time future point — an improved single-step design producing a consecutive-day
+              forecast (addresses the one-point-only limitation of prior hybrids).
+          - id: N04
+            type: experiment
+            support_level: explicit
+            source_refs: ["Table 1", "§3"]
+            title: "Activation-function ablation"
+            description: >
+              Compared Sigmoid, Tanh, ReLU, Leaky ReLU on the tuned three-channel model.
+            evidence: ["C03"]
+            children:
+              - id: N05
+                type: dead_end
+                support_level: explicit
+                source_refs: ["Table 1", "§3"]
+                title: "ReLU rejected (worst accuracy)"
+                description: >
+                  ReLU gave the worst MAPE (dead-unit zero-gradient branch stalls weight updates);
+                  saturating Sigmoid/Tanh also worse than Leaky ReLU. Leaky ReLU selected.
+          - id: N06
+            type: experiment
+            support_level: explicit
+            source_refs: ["Table 2", "§3"]
+            title: "Optimizer ablation"
+            description: >
+              Compared SGD, RMSprop, Nadam, Adam on the tuned model.
+            evidence: ["C04"]
+            children:
+              - id: N07
+                type: dead_end
+                support_level: explicit
+                source_refs: ["Table 2", "§3"]
+                title: "SGD / RMSprop / Nadam rejected"
+                description: >
+                  SGD worst; RMSprop converged faster early but lost on final accuracy; Nadam's
+                  Nesterov look-ahead raised MAPE 6.2% vs Adam. Adam selected.
+          - id: N08
+            type: experiment
+            support_level: explicit
+            source_refs: ["Table 3", "§3"]
+            title: "Historical-load lookback-length study"
+            description: >
+              Varied lookback 1–4 prior days (same hour) for the historical-load channel.
+            evidence: ["C05"]
+            children:
+              - id: N09
+                type: dead_end
+                support_level: explicit
+                source_refs: ["Table 3", "§3"]
+                title: "Longer lookbacks rejected (sharp degradation at 4 days)"
+                description: >
+                  MAPE worsens monotonically 1→4 days, jumping to 4.520% at 4 days. 1-day lookback
+                  selected.
+          - id: N10
+            type: experiment
+            support_level: explicit
+            source_refs: ["Table 4", "Figure 9", "Figure 10", "§4(1)"]
+            title: "Model comparison on Tétouan City dataset"
+            description: >
+              Three-channel LSTM-CNN vs LSTM, CNN-LSTM, TCN. Three-channel best on RMSE/MAE/MAPE;
+              gentlest residuals; best sudden-change tracking.
+            evidence: ["C01", "C02", "C06"]
+          - id: N11
+            type: experiment
+            support_level: explicit
+            source_refs: ["Table 5", "Figure 11", "Figure 12", "§4(2)"]
+            title: "Model comparison on Electrician Cup dataset"
+            description: >
+              Three-channel LSTM-CNN vs LSTM, CNN-LSTM, TCN. Three-channel best on all metrics
+              (MAPE 0.974%); stable residuals; accurate morning/evening tracking.
+            evidence: ["C01", "C02", "C06"]
+      - id: N12
+        type: decision
+        support_level: inferred
+        title: "Baseline fairness: matched hyperparameters for LSTM/CNN-LSTM/S-LSTM, best-tuned for others"
+        description: >
+          Reconstructed from §4: LSTM/CNN-LSTM/S-LSTM baselines share the three-channel model's
+          hyperparameters; the remaining baselines (e.g. TCN) were tuned to best over multiple runs.
+          Presented as inferred design rationale, not a literal session record.

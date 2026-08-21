@@ -1,0 +1,78 @@
+{
+  "schema_version": "c2ges-bge-prospective-freeze-v1",
+  "frozen_at_local": "2026-08-06T01:00:00+08:00",
+  "status": "FROZEN_NOT_RUN",
+  "formal_execution_authorized": true,
+  "formal_outputs_at_freeze": 0,
+  "independent_from_round3_family": true,
+  "freeze_content_sha256": "ace48ac0ab12d6177ab251193332652ebcdeb2d363d2484762b24c552dd446d1",
+  "freeze_content_definition": "SHA-256 of PROTOCOL_FREEZE.md",
+  "inputs": {
+    "data_manifest": {
+      "path": "paper_projects/2026_c2ges_engineeringletters/workspace/fever_benchmark_document_grouped/manifest.json",
+      "bytes": 1539,
+      "sha256": "ebccec847886e7f8478869ac0e83c3fd2a2e7fdefd244c6868eb97281554b89f",
+      "test_partition_sha256": "fff475583c9603673134614b06d17229f6711f3e55e80ac5412462845bdc63b8",
+      "test_claims": 1500,
+      "test_document_clusters": 145
+    },
+    "model": {
+      "name": "BAAI/bge-reranker-base",
+      "revision": "2cfc18c9415c912f9d8155881c133215df768a70",
+      "inventory": {
+        "file_count": 6,
+        "bytes": 1134374819,
+        "files": [
+          {"path": "config.json", "bytes": 799, "sha256": "289adf7ada1eb6b4afa7589a48a032d45a076cf2e46dcdb3b4cabc33be14f708"},
+          {"path": "model.safetensors", "bytes": 1112206140, "sha256": "ced967c45fd1902eb92716c9ceeca7c95a936770ea9db611f5a841b926e33fbd"},
+          {"path": "sentencepiece.bpe.model", "bytes": 5069051, "sha256": "cfc8146abe2a0488e9e2a0c56de7952f7c11ab059eca145a0a727afce0db2865"},
+          {"path": "special_tokens_map.json", "bytes": 279, "sha256": "d5469a60db23249c7f8945013d78df30b44b6bf686c6bb4740f4223f77b1b535"},
+          {"path": "tokenizer.json", "bytes": 17098107, "sha256": "9eb652ac4e40cc093272bbbe0f55d521cf67570060227109b5cdc20945a4489e"},
+          {"path": "tokenizer_config.json", "bytes": 443, "sha256": "a1d6bc8734a6f635dc158508bef000f8e2e5a759c7d92f984b2c86e5ff53425b"}
+        ]
+      }
+    },
+    "reference_ledgers": {
+      "c2ges_seed_2026": {"path": "paper_projects/2026_c2ges_engineeringletters/workspace/w3_c2_pilot/full_8000_1500_1500/label_blind/predictions.jsonl", "bytes": 38840997, "rows": 54000, "sha256": "13395E334BDDA9DE2A961BEE250E1D46E534BFD26F2CC0F75007A04ABBBC7C8B"},
+      "c2ges_seed_2027": {"path": "paper_projects/2026_c2ges_engineeringletters/workspace/w4_c2_five_seed/seed_2027/label_blind/predictions.jsonl", "bytes": 38840153, "rows": 54000, "sha256": "3A34376D982E1107808AEC2D4C46D70075E6B843A35A97FF8E1506D36F942FC8"},
+      "c2ges_seed_2028": {"path": "paper_projects/2026_c2ges_engineeringletters/workspace/w4_c2_five_seed/seed_2028/label_blind/predictions.jsonl", "bytes": 38840575, "rows": 54000, "sha256": "8F6C004072BDFC4F7C4DB7F8FF61F9335F3777277DF74F6ADC53E612B3ABBD6C"},
+      "c2ges_seed_2029": {"path": "paper_projects/2026_c2ges_engineeringletters/workspace/w4_c2_five_seed/seed_2029/label_blind/predictions.jsonl", "bytes": 38839932, "rows": 54000, "sha256": "47F0BBE8FF1F45CDCDAFC2B9340EA24320E425A6BEE450A0610033926D1AACFB"},
+      "c2ges_seed_2030": {"path": "paper_projects/2026_c2ges_engineeringletters/workspace/w4_c2_five_seed/seed_2030/label_blind/predictions.jsonl", "bytes": 38841157, "rows": 54000, "sha256": "BC41BE1A8908931F571DCF9C10D27879147F459CD2C6D54F4C2FDBB9D71973E4"},
+      "minilm": {"path": "paper_projects/applied_sciences_dual_rebuild/C2GES/addon_round3/runs/cross_encoder_prospective/predictions.jsonl", "bytes": 4585991, "rows": 6000, "sha256": "9941CFEAF5E8092A2735A5B7D3385E256687659FAA5D6AAF7D1718551EE86EF6"}
+    }
+  },
+  "code": {
+    "protocol_markdown_sha256": "ace48ac0ab12d6177ab251193332652ebcdeb2d363d2484762b24c552dd446d1",
+    "runner_sha256": "3269172178d655211fe5cf72a1406afd20ba5a349bb3745da2ced8c679aa182c",
+    "analysis_sha256": "113e7a97f4c79b0a53c0dc915202ddbf66d71f17473ac669eff2597a8d099c06",
+    "validator_sha256": "015198d2b15a22134e701868d3742e0a24cba09f1a2fc4d63d82776f8cc91a78",
+    "parent_crossencoder_runner_sha256": "509220e67a7120e3604206d27582585268b17a11109afbd49f53d78c6d8bede7"
+  },
+  "execution": {
+    "device": "cpu",
+    "batch_size": 32,
+    "max_length": 512,
+    "seed": 20260806,
+    "cutoffs": [1, 3, 5, 10],
+    "tie_rule": "stable descending score then original sentence order",
+    "expected_claims": 1500,
+    "expected_document_clusters": 145,
+    "expected_prediction_rows": 6000
+  },
+  "statistics": {
+    "primary_k": 3,
+    "primary_endpoint": "claim-weighted exact sentence-ID evidence F1",
+    "primary_comparisons": ["c2ges_full", "bm25", "minilm_cross_encoder"],
+    "difference_sign": "BGE minus comparator",
+    "cluster_unit": "underlying_document_id",
+    "bootstrap_draws": 10000,
+    "bootstrap_seed_base": 20270806,
+    "interval_label": "95% document-cluster composition-sensitivity percentile interval",
+    "signflip_samples": 100000,
+    "signflip_seed_base": 20260806,
+    "signflip_sidedness": "two-sided",
+    "multiplicity": "Holm across exactly three comparisons",
+    "alpha": 0.05
+  },
+  "claim_boundary": "Human-gold FEVER zero-shot BGE comparison only; not NERC, power-grid deployment, population inference, or BGE fine-tuning evidence."
+}

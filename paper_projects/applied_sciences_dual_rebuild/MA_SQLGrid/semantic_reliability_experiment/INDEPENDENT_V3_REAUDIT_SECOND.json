@@ -1,0 +1,181 @@
+{
+  "schema_version": "ma-sqlgrid-independent-v3-reaudit-v1",
+  "audit_variant": "independent-second-read-only-reaudit",
+  "audited_at_utc": "2026-08-05T14:12:42.7658102Z",
+  "decision": "BLOCK",
+  "authorizes_formal_score": false,
+  "required_gates_all_pass": false,
+  "freeze_path": "PROTOCOL_FREEZE_V3_DRAFT.json",
+  "freeze_content_sha256": "92e62f6983527c02117352f273eb7510de887836bdd0a35b9519cbd00cd3f3bc",
+  "freeze_file_sha256": "aa88e6bc7370edb5a100f674a22e933445666e4a851dceb87c4fff63862887c7",
+  "freeze_file_bytes": 13316,
+  "audit_boundary": {
+    "formal_stage_b_executed": false,
+    "formal_outcomes_accessed": false,
+    "freeze_or_code_modified": false,
+    "allowed_evidence": "frozen inputs, manifests, traces, pre-score gold coverage, review chain, canonical-v2 identity, source inspection, and synthetic/pre-score tests only"
+  },
+  "test_evidence": {
+    "command": "python -m unittest discover -s tests -p test_*.py -v",
+    "tests_run": 16,
+    "tests_passed": 16,
+    "tests_failed": 0,
+    "freeze_verifier": "V3_FREEZE_VERIFY PASS 92e62f6983527c02117352f273eb7510de887836bdd0a35b9519cbd00cd3f3bc"
+  },
+  "gates": [
+    {
+      "id": "G1_INPUT_IDENTITY",
+      "status": "PASS",
+      "evidence": {
+        "freeze_content_hash_recomputed": true,
+        "freeze_file_hash_matches_requested": true,
+        "frozen_files_matching": "21/21",
+        "immutable_inputs_matching": "2/2",
+        "canonical_v2_accepted_inputs_matching": "13/13",
+        "qwen_prediction_keys": "720/720 unique; 720 success",
+        "granite_prediction_keys": "720/720 unique; 720 success",
+        "each_ledger_data_code_configuration_hashes_are_singletons": true
+      }
+    },
+    {
+      "id": "G2_STAGE_A_BLINDNESS",
+      "status": "PASS",
+      "evidence": {
+        "prediction_or_score_inputs_accessed_by_pre_score_coverage": false,
+        "stage_a_benchmark_or_ledger_cli_or_literal_paths": false,
+        "stage_a_no_questions_predictions_scores_test": "PASS",
+        "claim": "Stage A is database/operator-policy driven and query/ledger blind"
+      }
+    },
+    {
+      "id": "G3_STATE_REPRODUCIBILITY",
+      "status": "PASS",
+      "evidence": {
+        "states_total": 18,
+        "semantic_states": 15,
+        "physical_order_diagnostic_states": 3,
+        "state_file_hashes_matching_manifest": "18/18",
+        "trace_file_hashes_matching_manifest": "18/18",
+        "independent_rerun_state_hash_pairs": "18/18",
+        "independent_rerun_trace_hash_pairs": "18/18",
+        "sqlite_version": "3.49.1"
+      }
+    },
+    {
+      "id": "G4_DATABASE_AND_GOLD_VALIDITY",
+      "status": "PASS",
+      "evidence": {
+        "state_integrity_ok": "18/18",
+        "state_foreign_key_violations_zero": "18/18",
+        "gold_executions": 3240,
+        "gold_execution_errors": 0,
+        "questions": 180,
+        "states": 18
+      }
+    },
+    {
+      "id": "G5_GOLD_STATE_COVERAGE",
+      "status": "PASS",
+      "evidence": {
+        "changed_denotation_union": "180/180",
+        "uncovered_questions": 0,
+        "snapshot_empty_questions": 5,
+        "all_snapshot_empty_nonempty_in_at_least_two_states": true,
+        "coverage_artifact_sha256": "4bc6c04c56248b2f51116be6899b769bf6b28ff67226ba4995b32544d4d3cf8a"
+      }
+    },
+    {
+      "id": "G6_ORDER_REVIEW_AND_ADJUDICATION",
+      "status": "PASS",
+      "evidence": {
+        "reviewer_a_complete": "114/114",
+        "reviewer_b_complete": "114/114",
+        "reviewer_a_total_order_valid": 0,
+        "reviewer_b_total_order_valid": 0,
+        "adjudication_holds": 114,
+        "automatic_order_insensitive_questions": 66,
+        "reviewer_a_sha256": "47244d5e144a5b4173994399774fb2e27e04f4b95e1ce65879f38d6d9287dd1d",
+        "reviewer_b_sha256": "1efbe567213cf2f1a29e6ca8d20e2224d82a4576473f4ecd2397b90c50bf3c4e",
+        "adjudication_sha256": "afa677f152136e9fb8a9d3ce9f8bd63b1b08a2f27abcb402a72dc21c0f3909b7",
+        "review_hash_chain_bound_and_verified": true
+      }
+    },
+    {
+      "id": "G7_COMPARISON_CONTRACT",
+      "status": "PASS",
+      "evidence": {
+        "frozen_comparator_sha256": "790695b74b32810bfe36fc12d24db2412260173477ca64cb6070ebc41a27027f",
+        "duplicate_preserving_unordered_matching_test": "PASS",
+        "ordered_sequence_test": "PASS",
+        "numeric_tolerance_boundary_test": "PASS",
+        "null_and_header_policy_test": "PASS",
+        "column_policy": "headers_are_diagnostic_only_denotation_is_primary"
+      }
+    },
+    {
+      "id": "G8_STAGE_B_FAIL_CLOSED_LOADING",
+      "status": "BLOCK",
+      "evidence": {
+        "frozen_stage_b_sha256": "9f474382570996f31d4c04617ffca210552e447b1e0942e0c28dbe0880d4b233",
+        "audit_and_companion_schema_gate_present": true,
+        "exact_audit_file_sha_and_bytes_gate_present": true,
+        "canonical_v2_physical_identity_gate_present": true,
+        "freeze_has_prediction_bindings": false,
+        "freeze_has_pre_score": false,
+        "stage_b_dereferences_prediction_bindings": "stage_b_score_v2.py:77",
+        "stage_b_dereferences_pre_score": "stage_b_score_v2.py:84",
+        "stage_b_verifies_frozen_files_array": false,
+        "stage_b_verifies_immutable_questions_and_database_hashes": false,
+        "stage_b_verifies_stage_manifest_physical_sha_and_bytes": false,
+        "stage_b_verifies_launch_policy_physical_sha_and_bytes": false
+      },
+      "block_reasons": [
+        "The exact v3 freeze omits both prediction_bindings and pre_score, although the frozen Stage-B scorer requires both. The exact frozen protocol therefore cannot reach scoring and cannot bind backbone labels to ledger paths or the order checklist.",
+        "Stage B trusts the current launch policy, questions file, and Stage-A manifest without checking their frozen physical SHA-256 and byte counts, and it never verifies the frozen_files array. Post-audit substitution is therefore not fully fail-closed."
+      ]
+    },
+    {
+      "id": "G9_STATISTICS_AND_DENOMINATORS",
+      "status": "PASS",
+      "evidence": {
+        "atomic_rows": "25920 = 2*4*180*18",
+        "primary_semantic_state_rows": "7920 = 2*4*66*15",
+        "order_hold_diagnostic_rows": "16416 = 2*4*114*18",
+        "primary_predictions": "528 = 2*4*66",
+        "order_hold_predictions": "912 = 2*4*114",
+        "semantic_and_states": 15,
+        "physical_states_excluded_from_primary": 3,
+        "one_missing_atomic_row_fails_closed_test": "PASS",
+        "nine_test_holm_family": true,
+        "cluster_map": "180 questions; 70 declared and 70 actual clusters",
+        "randomization_seed": 20260805,
+        "cluster_sign_flip_samples": 100000,
+        "cluster_bootstrap_samples": 20000,
+        "interval_label": "composition-sensitivity"
+      }
+    },
+    {
+      "id": "G10_RELEASE_AUDIT_SPECIFICATION",
+      "status": "PASS",
+      "evidence": {
+        "release_builder_frozen": true,
+        "release_verifier_frozen": true,
+        "release_manifest_hashes_all_artifacts": true,
+        "release_verifier_rehashes_all_artifacts": true,
+        "atomic_and_suite_denominators_verified": true,
+        "nine_contrast_holm_family_verified": true,
+        "csv_to_tex_source_hash_verified": true,
+        "csv_to_svg_source_hash_verified": true,
+        "analysis_summary_lineage_sha256_present": true
+      }
+    }
+  ],
+  "blocking_gate_ids": [
+    "G8_STAGE_B_FAIL_CLOSED_LOADING"
+  ],
+  "required_remediation": [
+    "Create a new freeze revision that includes explicit qwen/granite prediction and manifest bindings plus the pre-score order-checklist binding; this necessarily changes the freeze content SHA.",
+    "Make Stage B verify the frozen-file inventory, launch-policy identity, immutable question/database identities, and Stage-A manifest physical SHA-256/bytes before loading their content.",
+    "Re-run the complete independent audit against the new freeze and bind that exact audit file with a launch companion before any formal Stage-B execution."
+  ]
+}

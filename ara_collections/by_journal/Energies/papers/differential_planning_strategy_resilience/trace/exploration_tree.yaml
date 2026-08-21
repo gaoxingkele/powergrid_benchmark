@@ -1,0 +1,196 @@
+tree:
+  nodes:
+    - id: "root"
+      type: "question"
+      support_level: "explicit"
+      source_refs: ["Page 1-2 (Introduction)"]
+      description: "How to enhance distribution network resilience against extreme natural disasters through cost-effective line hardening, while accounting for the fact that hardening decisions affect failure probabilities?"
+
+    - id: "d_approach_selection"
+      type: "decision"
+      support_level: "explicit"
+      source_refs: ["Page 3"]
+      title: "Select robust optimization vs stochastic programming vs distributionally robust optimization"
+      description: "Three approaches considered: robust optimization (worst-case over all outcomes, overly conservative), stochastic programming (single known distribution, ignores distributional uncertainty), distributionally robust optimization (worst-case over distribution in ambiguity set, balances risk and performance)."
+      choice: "Distributionally robust optimization"
+      alternatives: "Robust optimization; Stochastic programming"
+      evidence: ["C03"]
+
+    - id: "d_ddu_modeling"
+      type: "decision"
+      support_level: "explicit"
+      source_refs: ["Page 2-3"]
+      title: "Incorporate decision-dependent uncertainty vs treat failure probability as exogenous"
+      description: "Decision to model failure probability as dependent on hardening decisions (DDU) rather than assuming fixed exogenous failure probabilities."
+      choice: "DDU-based modeling"
+      alternatives: "Exogenous uncertainty (failure probability independent of hardening)"
+      evidence: ["C01"]
+
+    - id: "d_multi_level_vs_binary"
+      type: "decision"
+      support_level: "explicit"
+      source_refs: ["Page 2, Page 6"]
+      title: "Multi-level graduated hardening vs single-level binary hardening"
+      description: "Decision to model three discrete hardening levels with different costs and coefficients rather than binary (hardened/not hardened)."
+      choice: "Multi-level hardening (3 levels with graduated costs: 200k/300k/500k CNY)"
+      alternatives: "Single-level binary hardening (hardened or not)"
+      evidence: ["C01"]
+
+    - id: "d_ambiguity_set"
+      type: "decision"
+      support_level: "explicit"
+      source_refs: ["Page 4"]
+      title: "Select norm-bounded ambiguity set vs KL divergence vs JS divergence"
+      description: "Compared l1-norm, l-infinity-norm, KL divergence, and JS divergence. Selected l1 + l-infinity because they are linearly tractable."
+      choice: "l1-norm + l-infinity-norm ambiguity set"
+      alternatives: "KL divergence ambiguity set; JS divergence ambiguity set"
+      evidence: ["C03"]
+
+    - id: "d_resilience_measures"
+      type: "decision"
+      support_level: "explicit"
+      source_refs: ["Page 6-8"]
+      title: "Select which post-disaster resilience measures to integrate"
+      description: "Decision to integrate network reconfiguration, demand response, EV-V2G, and MEG deployment alongside line hardening."
+      choice: "Integrate reconfiguration + demand response + EV V2G + MEG + hardening"
+      alternatives: "Hardening only; Hardening + reconfiguration only"
+      evidence: ["C02"]
+
+    - id: "d_ccg_algorithm"
+      type: "decision"
+      support_level: "explicit"
+      source_refs: ["Page 9-10"]
+      title: "Select C&CG algorithm with fault-state pruning for solving tri-level DRO"
+      description: "Use Column-and-Constraint Generation with customized endogenous cutting planes for DDU constraints, combined with fault-state pruning."
+      choice: "Customized C&CG with fault-state pruning (alpha_cut = 0.95)"
+      alternatives: "Standard C&CG without pruning; Benders decomposition"
+      evidence: ["C05"]
+
+    - id: "d_sensitivity_analysis"
+      type: "decision"
+      support_level: "explicit"
+      source_refs: ["Page 10-12"]
+      title: "Select Sobol' global sensitivity analysis for interpretability"
+      description: "Apply Sobol' variance-based global sensitivity analysis to quantify marginal contribution of each reinforcement measure to system resilience."
+      choice: "Sobol' global sensitivity analysis (first-order and total-effect indices)"
+      alternatives: "Local sensitivity analysis; One-at-a-time sensitivity analysis"
+      evidence: ["C04"]
+
+    - id: "e_case1_vs_case2"
+      type: "experiment"
+      support_level: "explicit"
+      source_refs: ["Table 2", "Figure 4"]
+      title: "Compare DDU multi-level hardening vs single-level hardening"
+      description: "Experiment comparing Case 1 (traditional single-level hardening without DDU) and Case 2 (proposed DDU multi-level hardening) on IEEE 33-bus system."
+      result: "DDU model reduces total cost by CNY 2.37 million compared to single-level when failure probability is considered. Case 2 reinforces 1-2^3, 2-3^2, 3-23^1, 23-24^1 (total 3222.9) vs Case 1: 1-2^2, 2-3^2, 3-23^2, 23-24^2 (total 2551.2). The DDU model achieves cost savings through graduated hardening allocation."
+      evidence: ["C01"]
+
+    - id: "e_five_case_comparison"
+      type: "experiment"
+      support_level: "explicit"
+      source_refs: ["Table 2", "Table 3", "Table 9"]
+      title: "Five-case comparative analysis of coordinated resilience measures"
+      description: "Systematic comparison from Case 1 (basic) through Case 5 (full DRO + all measures) on IEEE 33-bus and 123-bus systems."
+      result: "Load loss rate decreases from 50.64% (Case 3) to 36.91% (Case 4) when DR, EV, and MEG are added. Total cost from Case 3 (2962.7) to Case 4 (2319.3). Average cost reduction of 16.89% from coordinated optimization. Same trend confirmed on IEEE 123-bus."
+      evidence: ["C02"]
+
+    - id: "e_dro_vs_deterministic"
+      type: "experiment"
+      support_level: "explicit"
+      source_refs: ["Table 3"]
+      title: "DRO vs deterministic optimization (Case 4 vs Case 5)"
+      description: "Comparing Case 4 (deterministic) and Case 5 (DRO) at four budget levels on IEEE 33-bus."
+      result: "Case 5 nominal cost slightly higher than Case 4 (2367.1 vs 2319.2 at budget 12). Case 5 worst-case cost lower than Case 4 worst-case cost. DRO acts as financial insurance against worst-case scenarios. As budget increases, the cost gap narrows because critical lines become hardened in both cases."
+      evidence: ["C03"]
+
+    - id: "e_confidence_sensitivity"
+      type: "experiment"
+      support_level: "explicit"
+      source_refs: ["Table 6"]
+      title: "Sensitivity analysis of confidence set parameters"
+      description: "9 combinations of alpha_1 (0.2/0.5/0.9) and alpha_infinity (0.5/0.9/0.99) tested."
+      result: "Total cost increases with both confidence parameters. alpha_infinity has stronger effect (cost ranges 2337.9-2366.3) than alpha_1 (cost ranges 2337.9-2338.1). The l-infinity norm is the binding constraint on the ambiguity set."
+      evidence: ["C03"]
+
+    - id: "e_sobol_analysis"
+      type: "experiment"
+      support_level: "explicit"
+      source_refs: ["Figure 6", "Table 7"]
+      title: "Sobol' global sensitivity analysis of reinforcement decisions"
+      description: "First-order and total-effect Sobol' indices for 8 candidate lines across 5 budget levels."
+      result: "At low budgets (12-15): lines 1-2, 2-3, 31-32 have highest Si values. At higher budget (24): lines 31-32 (ST=0.35) and 32-33 (ST=0.29) show strong interaction effects (ST >> Si). Lines with low Si and STi across all budgets can be deprioritized."
+      evidence: ["C04"]
+
+    - id: "e_scenario_pruning"
+      type: "experiment"
+      support_level: "explicit"
+      source_refs: ["Table 8"]
+      title: "Fault-state pruning computational efficiency verification"
+      description: "Comparison of reducing 2, 3, or 4 fault states against no-reduction baseline on IEEE 33-bus."
+      result: "Reduce 3 states: 1.00% error, 73.22% time reduction (2711s to 726s). Reduce 2 states: 0.67% error, 47.4% reduction. Reduce 4 states: 14.60% error (unacceptable). Optimal trade-off is reducing 3 states."
+      evidence: ["C05"]
+
+    - id: "e_ieee123_validation"
+      type: "experiment"
+      support_level: "explicit"
+      source_refs: ["Table 9"]
+      title: "Scalability validation on IEEE 123-bus system"
+      description: "Five-case analysis repeated on larger IEEE 123-bus system to verify scalability."
+      result: "Same cost trends observed: Case 1 (13104) < Case 2 (14884) < Case 4 (13531) < Case 5 (13701). Case 5 takes 10.1h on 123-bus vs ~45min on 33-bus. DRO premium and coordination benefits replicate on larger system."
+      evidence: ["C01", "C02", "C03"]
+
+    - id: "deadend_full_level_hardening"
+      type: "dead_end"
+      support_level: "explicit"
+      source_refs: ["Page 2"]
+      title: "Full-level (binary) hardening is suboptimal"
+      description: "Traditional uniform full-level hardening was considered and rejected due to excessive conservatism and long solving time."
+      hypothesis: "Single-level binary hardening could adequately protect the distribution network"
+      failure_mode: "Single-level hardening is either insufficient (if all lines are hardened to the same degree) or wasteful (over-hardening low-priority lines). It cannot allocate resources differentially."
+      lesson: "Multi-level graduated hardening is necessary for cost-effective resilience enhancement."
+
+    - id: "deadend_kl_divergence"
+      type: "dead_end"
+      support_level: "explicit"
+      source_refs: ["Page 4"]
+      title: "KL and JS divergence ambiguity sets were considered but rejected"
+      description: "KL divergence and JS divergence were evaluated as alternatives for the ambiguity set but rejected due to nonlinear complexity."
+      hypothesis: "KL or JS divergence could provide a better ambiguity set for the DRO formulation"
+      failure_mode: "KL and JS divergences involve nonlinear terms that make the optimization problem significantly harder to solve compared to the linearly tractable l1-norm constraints."
+      lesson: "l1-norm + l-infinity-norm ambiguity sets provide a good balance of tractability and distributional robustness."
+
+  edges:
+    - from: "root"
+      to: "d_approach_selection"
+    - from: "root"
+      to: "d_ddu_modeling"
+    - from: "d_approach_selection"
+      to: "d_ambiguity_set"
+    - from: "d_ddu_modeling"
+      to: "d_multi_level_vs_binary"
+    - from: "d_approach_selection"
+      to: "d_ccg_algorithm"
+    - from: "d_multi_level_vs_binary"
+      to: "d_resilience_measures"
+    - from: "d_ddu_modeling"
+      to: "d_sensitivity_analysis"
+    - from: "d_multi_level_vs_binary"
+      to: "e_case1_vs_case2"
+    - from: "d_resilience_measures"
+      to: "e_five_case_comparison"
+    - from: "d_ambiguity_set"
+      to: "e_dro_vs_deterministic"
+    - from: "d_ambiguity_set"
+      to: "e_confidence_sensitivity"
+    - from: "d_sensitivity_analysis"
+      to: "e_sobol_analysis"
+    - from: "d_ccg_algorithm"
+      to: "e_scenario_pruning"
+    - from: "e_case1_vs_case2"
+      to: "e_ieee123_validation"
+    - from: "e_five_case_comparison"
+      to: "e_ieee123_validation"
+    - from: "d_approach_selection"
+      to: "deadend_full_level_hardening"
+    - from: "d_ambiguity_set"
+      to: "deadend_kl_divergence"

@@ -1,0 +1,41 @@
+{
+  "protocol_id": "MA-SQLGRID-EXTERNAL-ANNOTATION-STAGE2-v1.1",
+  "frozen_at": "2026-08-07",
+  "supersedes": "MA-SQLGRID-EXTERNAL-ANNOTATION-PILOT-v1.0 (SHA-256 6D5A0398083DEF9762295E13365636CA4AE9434B785371E88DF9773AC1DD1FF5); pilot outputs remain archived under runs/ma_pilot/ and are NOT reused",
+  "status": "FROZEN_FOR_STAGE2",
+  "governance": "Machine-adjudicated SILVER labels only. The 91 candidates are AUTO_CANDIDATE, not human gold; outputs must never be reported as external gold accuracy.",
+  "reason_for_revision": "Pilot (25 items) showed A/B agreement 1.00 with all semantically_correct=true: the sample had no discriminating power. v1.1 adds a blinded negative-control set (deterministically perturbed wrong SQL) so annotator error-detection can be measured, and extends scope to all 91 candidates.",
+  "task": {
+    "unit": "one external grid-domain question + one candidate SQL + schema context + deterministic execution facts",
+    "source_data": "unchanged from v1.0",
+    "scope": "ALL 91 original candidates PLUS 30 blinded negative controls (see negative_controls)",
+    "input_to_annotators": "unchanged from v1.0; annotators cannot distinguish originals from negatives (identical prompt form)"
+  },
+  "negative_controls": {
+    "count": 30,
+    "generation": "deterministic script with seed 20260807; source = 30 sampled originals (15 RTS + 15 SimBench); exactly one perturbation applied per control",
+    "perturbation_families": [
+      "drop_filter: remove the WHERE clause (or one ANDed predicate)",
+      "wrong_filter_value: replace a string literal in WHERE with a different plausible value from the same column domain",
+      "wrong_column: swap one SELECT column for another column of the same table",
+      "drop_order: remove ORDER BY when the question implies ordering/limit",
+      "wrong_aggregation: swap AVG/SUM/MAX/MIN/COUNT where applicable"
+    ],
+    "registration": "controls get ids NEG_<source_question_id>__<family>; the manifest maps control id -> source id, family, expected verdict semantically_correct=false; annotator prompts never reveal control status",
+    "sandbox": "controls go through the same read-only execution step; most remain executable (that is the point: executability is not correctness)",
+    "success_criterion": "blinded detection rate = fraction of controls where the final label has semantically_correct=false; reported per family; no fixed pass threshold, but a rate below 0.7 must be flagged as an annotator-reliability limitation in the report"
+  },
+  "models": "unchanged from v1.0",
+  "generation_params": {"temperature": 0, "max_tokens": 1024},
+  "prompt_template": "unchanged from v1.0 (question id is echoed in the [QUESTION] line as in the pilot fix)",
+  "deterministic_checks": "unchanged from v1.0",
+  "adjudication_rule": "unchanged from v1.0",
+  "agreement_metrics": "v1.0 metrics PLUS blinded negative detection rate (overall and per family)",
+  "stop_conditions": [
+    "5 consecutive auth or format failures for one model -> halt and report",
+    "served model id differs from frozen id (DeepSeek rolling alias deepseek-v4-flash excepted) -> halt and report",
+    "total stage-2 calls exceed the budget in STAGE2_AUTHORIZATION_20260807.json -> halt"
+  ],
+  "ledger_requirements": "unchanged from v1.0; stage-2 outputs go to runs/ma_stage2/ and must not overwrite runs/ma_pilot/",
+  "prohibited": "unchanged from v1.0"
+}

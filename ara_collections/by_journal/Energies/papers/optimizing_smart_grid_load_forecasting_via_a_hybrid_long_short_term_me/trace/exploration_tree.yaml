@@ -1,0 +1,155 @@
+tree:
+  - id: N01
+    type: question
+    support_level: explicit
+    source_refs: ["Abstract", "Section 1", "Section 1.2"]
+    title: "How to minimize short-term electricity load forecasting error on high-resolution (15-min) grid data?"
+    description: >
+      Central research question. Existing single-model approaches (statistical ARIMA/SARIMA,
+      standalone LSTM, standalone XGBoost) each leave residual error on the Elia 15-min load
+      series because they capture only temporal dependency or non-linear structure but not both.
+      The paper seeks a combination that inherits each model family's strength.
+    children:
+      - id: N02
+        type: gap
+        support_level: explicit
+        source_refs: ["Section 1", "Section 2"]
+        title: "No single model minimizes both absolute and relative error on volatile high-resolution load"
+        description: >
+          Statistical models (ARIMA, SARIMA) cannot model non-linearity; LSTM captures temporal
+          patterns but struggles with spikes; XGBoost handles non-linearity but lacks sequence
+          memory. Prior hybrids in literature (Table 2 studies) mostly use coarser hourly/national
+          data that smooths fluctuations.
+        children:
+          - id: N03
+            type: decision
+            support_level: explicit
+            source_refs: ["Section 3", "Figure 1", "Section 3.2", "Section 3.6"]
+            title: "Cascade LSTM temporal learner with XGBoost residual/refinement stage"
+            description: >
+              The key architectural decision: rather than pick one model family, feed the LSTM
+              output (or the LSTM's residual error) into a downstream XGBoost regressor so the
+              tree-based model learns the non-linear residual structure that the sequence model
+              leaves behind. Formalized as y_final = f_XGB(y_LSTM) (Eq. 10).
+            evidence: ["C01"]
+            children:
+              - id: N04
+                type: experiment
+                support_level: explicit
+                source_refs: ["Section 4.2", "Table 1", "Sections 4.4.1-4.4.3"]
+                title: "Standalone-vs-hybrid comparative evaluation on Elia grid load"
+                description: >
+                  Train LSTM (2x50 neurons, seq_len 60), XGBoost (grid-searched), and the LSTM-XGBoost
+                  hybrid on Elia 15-min 2022 data; compute RMSE, MAPE, R2 for all three. Hybrid attains
+                  lowest RMSE (106.54) and MAPE (1.18%) while tying best R2 (0.994).
+                evidence: ["C01", "C02"]
+                children:
+                  - id: N05
+                    type: experiment
+                    support_level: explicit
+                    source_refs: ["Section 4.5", "Figure 7"]
+                    title: "Regime-level error analysis via prediction overlays"
+                    description: >
+                      Visual comparison (4 panels) of actual vs predicted load across LSTM, XGBoost,
+                      and hybrid ensemble, focusing on error behavior during spike/volatile periods
+                      vs calm periods. Demonstrates hybrid tracks best during dynamic variations.
+                    evidence: ["C01", "C03"]
+                    children:
+                      - id: N06
+                        type: observation
+                        support_level: explicit
+                        source_refs: ["Section 4.5", "Figure 7"]
+                        title: "Hybrid improvement is largest during high-volatility / spike regimes"
+                        description: >
+                          LSTM "struggles during sudden spikes" and XGBoost "exhibits lower sensitivity
+                          to spikes but underperforms for continuous patterns." The hybrid "combines the
+                          strengths of both," showing largest improvement where LSTM error peaks.
+                        evidence: ["C03"]
+              - id: N07
+                type: experiment
+                support_level: explicit
+                source_refs: ["Section 4.2", "Table 1", "Sections 4.4.1-4.4.3"]
+                title: "Per-metric decomposition of model ranking"
+                description: >
+                  Decompose Table 1 results by metric: observe that the XGBoost-to-hybrid improvement
+                  appears in RMSE and MAPE but NOT in R2 (both tied at 0.994). R2 is saturated at the
+                  ceiling and is an insensitive discriminator on this data.
+                evidence: ["C02"]
+              - id: N08
+                type: experiment
+                support_level: explicit
+                source_refs: ["Section 4.6", "Table 2"]
+                title: "Comparison against recent state-of-the-art forecasting studies"
+                description: >
+                  Compare this hybrid (15-min, RMSE 106.54 MW, MAPE 1.18%) against studies [35]
+                  ARIMA-LSTM (hourly, MAPE 2.828%), [36] TimeGAN-CNN-LSTM (15-min, MAPE 4.486%),
+                  [37] DNN (hourly, RMSE 50.34 MW), [38] CNN-BiLSTM-Attention (MAPE 1.08-1.67%),
+                  [39] CNN-LSTM (hourly, RMSE 538.71). Argues resolution confound.
+                evidence: ["C05"]
+          - id: N09
+            type: decision
+            support_level: explicit
+            source_refs: ["Section 2.3", "Section 1.2", "Section 4.6", "Abstract"]
+            title: "Test attention augmentation on the hybrid cascade"
+            description: >
+              The paper experimentally added an attention mechanism to the LSTM-XGBoost hybrid,
+              hypothesizing it could help the model focus on informative time steps in the sequence.
+              Tested but did not improve accuracy.
+            evidence: ["C04"]
+            children:
+              - id: N10
+                type: experiment
+                support_level: explicit
+                source_refs: ["Section 4.6", "Abstract", "Section 1.2", "Section 2.3"]
+                title: "Attention-augmented hybrid trial"
+                description: >
+                  Attention mechanism added to the hybrid LSTM-XGBoost pipeline; evaluated against
+                  the plain hybrid. Results: "limited benefit" / accuracy "inferior to the base
+                  hybrid model." Attention was removed from the final architecture.
+                evidence: ["C04"]
+                children:
+                  - id: N11
+                    type: dead_end
+                    support_level: explicit
+                    source_refs: ["Section 4.6", "Abstract", "Section 1.2", "Section 2.3"]
+                    title: "Attention mechanism dropped — no accuracy improvement"
+                    description: >
+                      The attention variant did not outperform the plain hybrid; exact metrics not
+                      published (only qualitative statement). Documented as a dead end — the paper
+                      honestly reports that added architectural complexity does not guarantee gains.
+                    evidence: ["C04"]
+          - id: N12
+            type: decision
+            support_level: inferred
+            title: "Use the Elia 15-min single-operator grid data for evaluation"
+            description: >
+              The paper selects one publicly available dataset at high resolution (15-min) to
+              demonstrate the hybrid's advantage. Single-grid, single-year — adequate for a
+              method demonstration but limits generalizability claims. No comparison on
+              multiple datasets or resolutions within the same experimental setup.
+      - id: N13
+        type: dead_end
+        support_level: inferred
+        title: "Hyperparameter sensitivity not explored"
+        description: >
+          The paper states in Future Work that "a systematic hyperparameter sensitivity analysis"
+          on LSTM units, sequence length, epochs, and train/test splits has not been done. The
+          implications of sequence length (60), grid search range for XGBoost, and LSTM layer
+          count (2x50) on the reported metrics are untested.
+      - id: N14
+        type: dead_end
+        support_level: inferred
+        title: "No code, hardware, or seed reproducibility"
+        description: >
+          The paper reports no source code release, no hardware configuration, no optimizer
+          settings, no epoch count, and no random seeds — making independent replication
+          of the reported metrics infeasible from the paper text alone.
+      - id: N15
+        type: dead_end
+        support_level: inferred
+        title: "Train/test split ambiguity unresolved"
+        description: >
+          The paper gives two conflicting split descriptions (date-based Jan-Nov vs Dec in
+          Section 3.5, and 80/20 in Section 4.1). These are not equivalent, and the paper
+          never reconciles them. This ambiguity prevents unambiguous reconstruction of the
+          evaluation setup.

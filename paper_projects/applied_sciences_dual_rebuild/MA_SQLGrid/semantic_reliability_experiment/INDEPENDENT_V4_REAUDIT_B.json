@@ -1,0 +1,153 @@
+{
+  "schema_version": "ma-sqlgrid-independent-v3-reaudit-v1",
+  "audit_variant": "independent-v4-reaudit-b",
+  "audited_at_utc": "2026-08-05T14:26:29.8266540Z",
+  "decision": "PASS_AUTHORIZE_FORMAL_SCORE",
+  "authorizes_formal_score": true,
+  "required_gates_all_pass": true,
+  "freeze_path": "PROTOCOL_FREEZE_V4_DRAFT.json",
+  "freeze_content_sha256": "0d817c6597f3b6528d7c8a24da96a5f1685fabd65e00f75def8d24de1ac1e791",
+  "freeze_file_sha256": "73cacffbf2bb647c0dc1d1c4e67dbadc08ce01ba7124b418a54cf432552b0064",
+  "freeze_file_bytes": 19639,
+  "audit_boundary": {
+    "formal_stage_b_executed": false,
+    "formal_outcomes_accessed": false,
+    "freeze_or_code_modified": false,
+    "preflight_only": true,
+    "launch_companion_still_required": true
+  },
+  "verification_summary": {
+    "unit_tests": "19/19 PASS",
+    "freeze_verifier": "V4_FREEZE_VERIFY PASS 0d817c6597f3b6528d7c8a24da96a5f1685fabd65e00f75def8d24de1ac1e791",
+    "valid_synthetic_preflight": "STAGE_B_V4_PREFLIGHT_PASS authorization=1 canonical=1 ledgers=1440 states=18 order=114 sql_executions=0 output_written=0",
+    "invalid_gate_preflight": "returncode=1; required re-audit gates not all PASS; output absent; SQL executions 0",
+    "formal_v4_results_before_and_after": "absent/absent"
+  },
+  "gates": [
+    {
+      "id": "G1_INPUT_IDENTITY",
+      "status": "PASS",
+      "evidence": {
+        "freeze_file_identity": "SHA/bytes exact",
+        "freeze_content_hash_recomputed": true,
+        "frozen_files": "28/28",
+        "immutable_inputs": "2/2",
+        "canonical_v2_bindings": "2/2",
+        "canonical_v2_accepted_inputs": "13/13",
+        "prediction_bindings": "2/2 physical SHA/bytes",
+        "qwen_ledger": "720 rows; 720 unique keys; 720 success",
+        "granite_ledger": "720 rows; 720 unique keys; 720 success"
+      }
+    },
+    {
+      "id": "G2_STAGE_A_BLINDNESS",
+      "status": "PASS",
+      "evidence": {
+        "prediction_or_score_inputs_accessed_during_gold_coverage": false,
+        "stage_a_no_benchmark_or_ledger_inputs_test": "PASS"
+      }
+    },
+    {
+      "id": "G3_STATE_REPRODUCIBILITY",
+      "status": "PASS",
+      "evidence": {
+        "partition": "18 = 15 semantic + 3 physical diagnostics",
+        "state_hashes": "18/18",
+        "trace_hashes": "18/18",
+        "rerun_state_trace_pairs": "18/18 exact",
+        "stage_a_manifests": "2/2 physical SHA/bytes",
+        "sqlite_version": "3.49.1"
+      }
+    },
+    {
+      "id": "G4_DATABASE_AND_GOLD_VALIDITY",
+      "status": "PASS",
+      "evidence": {
+        "database_identity": "SHA/bytes exact",
+        "integrity_checks": "18/18 ok",
+        "foreign_key_violations": 0,
+        "gold_executions": 3240,
+        "gold_execution_errors": 0
+      }
+    },
+    {
+      "id": "G5_GOLD_STATE_COVERAGE",
+      "status": "PASS",
+      "evidence": {
+        "changed_denotation_union": "180/180",
+        "uncovered_questions": 0,
+        "snapshot_empty_nonempty_in_at_least_two_states": true,
+        "coverage_physical_identity": "SHA/bytes exact"
+      }
+    },
+    {
+      "id": "G6_ORDER_REVIEW_AND_ADJUDICATION",
+      "status": "PASS",
+      "evidence": {
+        "reviewer_a": "114/114; total-order-valid 0",
+        "reviewer_b": "114/114; total-order-valid 0",
+        "adjudication_holds": 114,
+        "automatic_primary_questions": 66,
+        "review_a_b_adjudication_chain": "3/3 physical hashes and internal hash links exact",
+        "order_checklist_rows_loaded_in_preflight": 114
+      }
+    },
+    {
+      "id": "G7_COMPARISON_CONTRACT",
+      "status": "PASS",
+      "evidence": {
+        "comparator_physical_identity": "SHA/bytes exact",
+        "duplicate_order_numeric_null_header_tests": "PASS",
+        "read_only_lexical_and_sqlite_authorizer_tests": "PASS"
+      }
+    },
+    {
+      "id": "G8_STAGE_B_FAIL_CLOSED_LOADING",
+      "status": "PASS",
+      "evidence": {
+        "prediction_bindings_present": true,
+        "pre_score_binding_present": true,
+        "all_stage_b_freeze_keys_present": true,
+        "frozen_files_live_checks": "28/28",
+        "immutable_input_live_checks": "2/2",
+        "policy_live_check": "SHA/bytes exact",
+        "stage_a_manifest_live_check": "SHA/bytes exact",
+        "canonical_v2_live_checks": "2/2",
+        "valid_audit_companion_preflight": "PASS with 0 SQL and 0 output",
+        "invalid_one_block_gate": "rejected with nonzero return and no output"
+      }
+    },
+    {
+      "id": "G9_STATISTICS_AND_DENOMINATORS",
+      "status": "PASS",
+      "evidence": {
+        "atomic_rows": "25920 = 2*4*180*18",
+        "primary_semantic_state_rows": "7920 = 2*4*66*15",
+        "order_hold_diagnostic_rows": "16416 = 2*4*114*18",
+        "primary_predictions": "528 = 2*4*66",
+        "order_hold_predictions": "912 = 2*4*114",
+        "missing_atomic_row_fail_closed_test": "PASS",
+        "physical_states_excluded_from_primary_test": "PASS",
+        "cluster_map": "180 questions; 70 clusters",
+        "holm_family": 9,
+        "randomization_seed": 20260805,
+        "cluster_sign_flip_samples": 100000,
+        "cluster_bootstrap_samples": 20000
+      }
+    },
+    {
+      "id": "G10_RELEASE_AUDIT_SPECIFICATION",
+      "status": "PASS",
+      "evidence": {
+        "analysis_builder_verifier_physical_identity": "frozen and exact",
+        "release_artifact_rehashing": true,
+        "atomic_suite_denominator_checks": true,
+        "nine_test_holm_check": true,
+        "csv_to_tex_svg_source_hash_trace": true,
+        "analysis_summary_lineage": true
+      }
+    }
+  ],
+  "blocking_gate_ids": [],
+  "authorization_condition": "Formal Stage-B may start only after a launch companion binds this exact audit file path, SHA-256, and byte count together with the exact v4 freeze content SHA."
+}

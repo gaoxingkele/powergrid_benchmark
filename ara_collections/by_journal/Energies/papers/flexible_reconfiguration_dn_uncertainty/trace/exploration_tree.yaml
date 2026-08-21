@@ -1,0 +1,135 @@
+exploration_tree:
+  - node_01:
+      id: Q01
+      type: question
+      parent: null
+      description: "How can distribution network operating costs be minimized under renewable generation and load uncertainty?"
+      timestamp: "2024-01"
+      status: resolved
+      resolution: "Formulate as a dynamic reconfiguration problem with scenario-based uncertainty modeling, solved using a metaheuristic algorithm."
+
+  - node_02:
+      id: D01
+      type: decision
+      parent: Q01
+      description: "Select complete dynamic reconfiguration over decomposition approaches"
+      rationale: "Complete dynamic reconfiguration considers all 24 periods simultaneously and captures full time-coupling effects, avoiding approximation errors from period decomposition."
+      alternative: "Decomposition methods (multi-group FCMC, optimal period division) reduce computational burden but introduce approximation errors."
+      status: implemented
+      timestamp: "2024-02"
+
+  - node_03:
+      id: Q02
+      type: question
+      parent: D01
+      description: "Which optimization algorithm should be used for the DR problem given its nonlinear, non-convex, combinatorial nature?"
+      timestamp: "2024-02"
+      status: resolved
+      resolution: "Select the Coati Optimization Algorithm (COA), a recent metaheuristic with demonstrated exploration-exploitation balance."
+
+  - node_04:
+      id: D02
+      type: decision
+      parent: Q02
+      description: "Adopt COA as the primary optimization algorithm"
+      rationale: "COA's two-phase structure (global iguana hunting and local predator escape) provides natural exploration-exploitation balance. It has not previously been applied to distribution network reconfiguration, offering novelty."
+      alternative: "PSO, GWO, MFSMA, and other established metaheuristics could be used, but COA is selected for novelty and potential performance advantage."
+      status: implemented
+      timestamp: "2024-03"
+
+  - node_05:
+      id: E01
+      type: experiment
+      parent: D01
+      description: "Four-case comparison: initial config, static reconfig without DG, static reconfig with DG, dynamic reconfig with uncertainty"
+      rationale: "Case-based comparison isolates the individual and combined effects of reconfiguration type and DG integration."
+      outcome: "Case 4 (dynamic reconfig with uncertainty) achieves lowest total cost (USD 2626.39 on IEEE 33-bus)."
+      status: completed
+      timestamp: "2024-06"
+
+  - node_06:
+      id: D03
+      type: decision
+      parent: Q01
+      description: "Model uncertainty via scenario-based approach with Weibull, Beta, and Normal PDFs"
+      rationale: "Scenario-based approach is computationally tractable and captures the probabilistic nature of wind, solar, and load uncertainty without requiring closed-form stochastic programming solutions."
+      alternative: "Monte Carlo simulation (computationally expensive), robust optimization (may be overly conservative), or point estimate methods."
+      status: implemented
+      timestamp: "2024-03"
+
+  - node_07:
+      id: Q03
+      type: question
+      parent: D01
+      description: "What objective function components should be included in the DR formulation?"
+      timestamp: "2024-02"
+      status: resolved
+      resolution: "Include power loss cost, voltage deviation penalty, switching cost, upstream power purchase cost, PV generation cost, and wind generation cost."
+
+  - node_08:
+      id: D04
+      type: decision
+      parent: Q03
+      description: "Include six cost components in objective function"
+      rationale: "Most DR studies ignore voltage deviation costs and renewable generation costs. Including all six components (Closs, CVD, CSW, Cupn, CPV, CWind) provides a more comprehensive economic formulation."
+      alternative: "Simplified objectives (e.g., only Closs and CSW) as used in many prior works."
+      status: implemented
+      timestamp: "2024-03"
+
+  - node_09:
+      id: E02
+      type: experiment
+      parent: D02
+      description: "COA vs PSO comparison on IEEE 33-bus DR problem"
+      rationale: "Head-to-head comparison with established algorithm (PSO) demonstrates the relative effectiveness of COA."
+      outcome: "COA achieves lower total cost (USD 2626.39 vs USD 2634.58) and lower switching cost (USD 10 vs USD 18) than PSO."
+      status: completed
+      timestamp: "2024-07"
+
+  - node_10:
+      id: DE01
+      type: dead_end
+      parent: D01
+      description: "Single-configuration static reformation cannot capture time-varying benefits"
+      rationale: "Static reconfiguration (single topology for 24 h) is inadequate for systems with highly variable load and renewable generation profiles, as demonstrated by higher costs in Cases 2 and 3."
+      status: closed
+      timestamp: "2024-04"
+
+  - node_11:
+      id: Q04
+      type: question
+      parent: D03
+      description: "Does dynamic reconfiguration affect system reliability?"
+      timestamp: "2024-08"
+      status: resolved
+      resolution: "Add EENS analysis to compare reliability impact across reconfiguration strategies."
+
+  - node_12:
+      id: E03
+      type: experiment
+      parent: Q04
+      description: "EENS reliability assessment for all four cases"
+      rationale: "Quantify the reliability impact of different reconfiguration strategies using Expected Energy Not Supplied metric."
+      outcome: "Case 4 achieves lowest EENS (12.0879 MWh/year total), demonstrating reliability benefit of dynamic reconfiguration."
+      status: completed
+      timestamp: "2024-09"
+
+  - node_13:
+      id: D05
+      type: decision
+      parent: Q01
+      description: "Validate on both IEEE 33-bus academic system and TPC 83-bus real utility system"
+      rationale: "Dual validation demonstrates both benchmark comparability and real-world applicability."
+      alternative: "Validation on only one system (common in literature) would limit generalizability."
+      status: implemented
+      timestamp: "2024-05"
+
+  - node_14:
+      id: E04
+      type: experiment
+      parent: D05
+      description: "Four-case comparison on TPC 83-bus real system"
+      rationale: "Validate scalability and generalizability of the proposed DR+COA approach on a larger, real-world distribution network."
+      outcome: "Case 4 achieves lowest total cost (USD 18,378.23) with 16.08% loss reduction vs baseline, confirming IEEE 33-bus findings."
+      status: completed
+      timestamp: "2024-10"

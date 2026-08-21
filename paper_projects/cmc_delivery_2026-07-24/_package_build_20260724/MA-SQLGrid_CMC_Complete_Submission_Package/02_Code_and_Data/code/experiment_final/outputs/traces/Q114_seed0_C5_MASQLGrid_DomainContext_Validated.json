@@ -1,0 +1,102 @@
+{
+  "prompt": "You are generating candidate SQLite SQL for CHESS-style MA-SQLGrid.\n\nReturn 3 distinct read-only SQLite SELECT queries as a numbered list. Do not include explanation.\nDo not use INSERT, UPDATE, DELETE, DROP, PRAGMA, or multiple statements.\nUse only the selected context, normalization hints, and inferred output-form hints below. Candidate queries should differ in plausible joins/projections while respecting the inferred projection count and relevant literal predicates.\n\nCondition: C5_MASQLGrid_DomainContext_Validated\n\nSQLite selected context:\nTables and selected columns:\n- asset_types(asset_type_id) -- equipment type catalog such as Transformer, Breaker, Line, Relay, Substation, Capacitor\n- assets(asset_id, asset_name, asset_type_id, location_id) -- individual grid assets with names, type, location, install date, status, and MW capacity\n- grid_topology(edge_id, upstream_asset_id, downstream_asset_id) -- directed upstream/downstream asset connections and switch status\n- locations(location_id) -- grid yards, substations, regions, coordinates, and location criticality\n- sensor_readings(reading_id, asset_id) -- time-series sensor readings for assets with sensor type, value, unit, and alarm flag\n- work_orders(work_order_id, asset_id, assigned_technician_id, priority, status) -- maintenance work orders with priority, status, schedule, completion date, and fault code\nJoin paths:\n- assets.asset_type_id = asset_types.asset_type_id\n- assets.location_id = locations.location_id\n- work_orders.asset_id = assets.asset_id\n- sensor_readings.asset_id = assets.asset_id\n- grid_topology.upstream_asset_id = assets.asset_id\n- grid_topology.downstream_asset_id = assets.asset_id\nExact database values matched from the question:\n- assets.asset_name: TX-004\nPower-grid domain normalization hints inferred from the question:\n- assets.asset_name = \"TX-004\"\nAnswer-shape hints inferred from the question text:\n- expected column count: 3\n- row granularity: multi-row\n- deterministic ordering needed: True\n- Project work_order_id, status, and scheduled_date unless question asks for aggregation.\n\nQuestion ID: Q114\nQuestion: List work orders linked to asset TX-004.\n",
+  "rank_trace": [
+    {
+      "candidate_index": 0,
+      "column_count": 0,
+      "empty_result": false,
+      "exec_error": "no such column: wo.schedule_date",
+      "exec_ok": false,
+      "expected_column_count": 3,
+      "missing_value_hints": [],
+      "order_ok": true,
+      "order_required": true,
+      "ranker_score": -3,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": false,
+      "sql": "SELECT wo.work_order_id, wo.status, wo.schedule_date FROM work_orders AS wo JOIN assets AS a ON wo.asset_id = a.asset_id WHERE a.asset_name = 'TX-004' ORDER BY wo.work_order_id;",
+      "value_hint_count": 1,
+      "value_hits": 1
+    },
+    {
+      "candidate_index": 1,
+      "column_count": 3,
+      "empty_result": false,
+      "exec_error": "",
+      "exec_ok": true,
+      "expected_column_count": 3,
+      "missing_value_hints": [],
+      "order_ok": true,
+      "order_required": true,
+      "ranker_score": 32,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": true,
+      "sql": "SELECT wo.work_order_id, wo.priority, wo.status FROM work_orders AS wo WHERE wo.asset_id = ( SELECT a.asset_id FROM assets AS a WHERE a.asset_name = 'TX-004' ) ORDER BY wo.work_order_id;",
+      "value_hint_count": 1,
+      "value_hits": 1
+    },
+    {
+      "candidate_index": 2,
+      "column_count": 0,
+      "empty_result": false,
+      "exec_error": "no such column: wo.schedule_date",
+      "exec_ok": false,
+      "expected_column_count": 3,
+      "missing_value_hints": [],
+      "order_ok": true,
+      "order_required": true,
+      "ranker_score": -5,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": false,
+      "sql": "SELECT wo.work_order_id, wo.status, wo.schedule_date FROM assets AS a JOIN work_orders AS wo ON wo.asset_id = a.asset_id LEFT JOIN asset_types AS at ON a.asset_type_id = at.asset_type_id WHERE a.asset_name = 'TX-004' ORDER BY wo.work_order_id, wo.status;",
+      "value_hint_count": 1,
+      "value_hits": 1
+    },
+    {
+      "candidate_index": 3,
+      "column_count": 0,
+      "empty_result": false,
+      "exec_error": "no such column: wo.work_order_id",
+      "exec_ok": false,
+      "expected_column_count": 3,
+      "missing_value_hints": [
+        "assets.asset_name = \"TX-004\""
+      ],
+      "order_ok": false,
+      "order_required": true,
+      "ranker_score": -18,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": false,
+      "sql": "SELECT wo.work_order_id, wo.status, wo.schedule_date;",
+      "value_hint_count": 1,
+      "value_hits": 0
+    },
+    {
+      "candidate_index": 4,
+      "column_count": 0,
+      "empty_result": false,
+      "exec_error": "no such column: wo.work_order_id",
+      "exec_ok": false,
+      "expected_column_count": 3,
+      "missing_value_hints": [
+        "assets.asset_name = \"TX-004\""
+      ],
+      "order_ok": false,
+      "order_required": true,
+      "ranker_score": -19,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": false,
+      "sql": "SELECT wo.work_order_id, wo.priority, wo.status;",
+      "value_hint_count": 1,
+      "value_hits": 0
+    }
+  ],
+  "raw_response": "1. ```sql\nSELECT wo.work_order_id, wo.status, wo.schedule_date\nFROM work_orders AS wo\nJOIN assets AS a ON wo.asset_id = a.asset_id\nWHERE a.asset_name = 'TX-004'\nORDER BY wo.work_order_id;\n```\n\n2. ```sql\nSELECT wo.work_order_id, wo.priority, wo.status\nFROM work_orders AS wo\nWHERE wo.asset_id = (\n  SELECT a.asset_id\n  FROM assets AS a\n  WHERE a.asset_name = 'TX-004'\n)\nORDER BY wo.work_order_id;\n```\n\n3. ```sql\nSELECT wo.work_order_id, wo.status, wo.schedule_date\nFROM assets AS a\nJOIN work_orders AS wo ON wo.asset_id = a.asset_id\nLEFT JOIN asset_types AS at ON a.asset_type_id = at.asset_type_id\nWHERE a.asset_name = 'TX-004'\nORDER BY wo.work_order_id, wo.status;\n```",
+  "repair_raw_response": "",
+  "repaired_sql": ""
+}

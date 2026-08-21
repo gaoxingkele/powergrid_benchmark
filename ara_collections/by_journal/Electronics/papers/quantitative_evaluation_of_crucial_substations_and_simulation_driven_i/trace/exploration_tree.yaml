@@ -1,0 +1,158 @@
+tree:
+  - id: N01
+    type: question
+    support_level: explicit
+    source_refs: ["§1", "§2.1"]
+    title: "How do commissioning delays of planned substations propagate into multi-voltage grid investment?"
+    description: >
+      Central question: quantify the compound/cascading effect of delayed substation
+      commissioning on multi-voltage (220/110/10 kV) grid evolution and investment
+      efficiency, and identify which planned substations are critical.
+    children:
+      - id: N02
+        type: question
+        support_level: explicit
+        source_refs: ["§1"]
+        title: "Why is existing work insufficient?"
+        description: >
+          Prior planning research focuses on load-uncertainty plan generation and
+          multi-voltage optimization but overlooks the financial impact of deviations
+          from the optimal plan; evaluation index systems lack empirical validation.
+        children:
+          - id: N03
+            type: dead_end
+            support_level: explicit
+            source_refs: ["§1", "§3 (RW07-11)"]
+            title: "Load-uncertainty-only planning does not answer the delay-cost question"
+            description: >
+              Deep-learning / fuzzy / game-theoretic / robust-optimization planning
+              (Refs 7-11) optimize siting/sizing under uncertainty but do not quantify
+              delay-induced investment cascades. Rejected as insufficient for the gap.
+          - id: N04
+            type: dead_end
+            support_level: explicit
+            source_refs: ["§1 (RW16-18)"]
+            title: "Static evaluation index systems are unvalidated against realized cost"
+            description: >
+              Index frameworks (Refs 16-18) select indicators by expert judgment with
+              limited empirical validation; no tie to downstream realized construction cost.
+      - id: N05
+        type: decision
+        support_level: explicit
+        source_refs: ["§1 (contributions)", "§2", "§3"]
+        title: "Couple a static AHP criticality score with a dynamic grid-evolution simulation"
+        description: >
+          Design decision: build a cheap static criticality score AND an expensive
+          physics-based evolution simulation, then use the simulation to validate the
+          score against delay-induced incremental cost (data-physics fusion).
+        children:
+          - id: N06
+            type: decision
+            support_level: explicit
+            source_refs: ["§2.1"]
+            title: "Define five load/topology criticality indices (Eqs. 1-5)"
+            description: >
+              Load level, LV-grid influence (10 kV line count), power supply coverage,
+              spatial influence, load density.
+          - id: N07
+            type: decision
+            support_level: explicit
+            source_refs: ["§2.2", "Table 1", "Table 2"]
+            title: "Weight indices via AHP with the Santy scale"
+            description: >
+              Build the pairwise comparison matrix on the 1-9 Santy scale; derive weights
+              by column-sum normalization and row averaging.
+            children:
+              - id: N08
+                type: experiment
+                support_level: explicit
+                source_refs: ["Table 3", "§2.2"]
+                title: "Derive weights and verify consistency"
+                description: >
+                  Weights (0.385, 0.043, 0.120, 0.226, 0.226); CR = 0.00726 < 0.1.
+                  Load level dominates; 10 kV line-count influence is smallest.
+                evidence: ["C01"]
+          - id: N09
+            type: decision
+            support_level: explicit
+            source_refs: ["§2.2", "Eq. 7"]
+            title: "Use sum normalization instead of fixed-limit normalization"
+            description: >
+              Relative scoring (Eq. 7) to avoid subjective upper/lower score limits.
+          - id: N10
+            type: decision
+            support_level: explicit
+            source_refs: ["§3.1", "§3.2", "§3.3"]
+            title: "Build a GA-solved multi-voltage evolution model with auto reconfiguration"
+            description: >
+              Minimize per-horizon total cost (Eq. 8) across 220/110/10 kV; auto tee-off
+              ('3T') and 10 kV feeder provisioning; radial dual-supply anti-loop constraint.
+              Solved by genetic algorithm (gen 200, pop 800, crossover 0.5, mutation 0.5).
+      - id: N11
+        type: experiment
+        support_level: explicit
+        source_refs: ["§4.1", "§4.2", "Table 4", "Table 5"]
+        title: "Score the six new 110 kV substations in the case grid"
+        description: >
+          Compute indices (Table 4) and composite scores (Table 5) for substations 1-6;
+          No. 1 highest (0.2035), No. 6 lowest (0.1367).
+        evidence: ["C01"]
+      - id: N12
+        type: experiment
+        support_level: explicit
+        source_refs: ["§4.1", "Figure 3", "Figure 4"]
+        title: "Run the baseline on-schedule grid evolution (2020->2025->2035)"
+        description: >
+          Establish reference per-layer costs (Table 6, original planning program) with all
+          six substations commissioned on schedule.
+        evidence: ["C04"]
+      - id: N13
+        type: experiment
+        support_level: explicit
+        source_refs: ["§4.3", "Figure 5", "Figure 6", "Table 6"]
+        title: "Paired delay experiment: high-criticality No. 1 vs low-criticality No. 6"
+        description: >
+          Postpone each substation's commissioning by one horizon; No. 1 delay raises total
+          cost 3.95%, No. 6 delay 1.63%; cost concentrates in the 10 kV layer and persists.
+        evidence: ["C03", "C04", "C05"]
+      - id: N14
+        type: experiment
+        support_level: explicit
+        source_refs: ["§4.4", "Table 7", "Figure 7"]
+        title: "Six-substation deferral sweep and score-cost regression"
+        description: >
+          Defer each substation individually; regress incremental cost on importance score;
+          significant positive/linear relationship (Figure 7).
+        evidence: ["C02", "C03"]
+      - id: N15
+        type: decision
+        support_level: explicit
+        source_refs: ["§4.3", "§4.4", "§6 (conclusions)"]
+        title: "Derive the delay-sequencing rule: defer least-critical substations first"
+        description: >
+          Because delay cost rises with criticality, prioritize protecting high-score
+          substations and deferring low-score ones.
+        evidence: ["C03"]
+      - id: N16
+        type: observation
+        support_level: explicit
+        source_refs: ["§4.4", "Table 7"]
+        title: "Score-cost relationship is not strictly monotonic"
+        description: >
+          Substation 5 (score 0.1905) has the highest incremental cost (4.24%), above
+          substation 1 (score 0.2035, 3.95%) - a strong trend with a local order violation.
+      - id: N17
+        type: dead_end
+        support_level: inferred
+        title: "Claimed 'superior accuracy vs conventional approaches' is not benchmarked"
+        description: >
+          The abstract asserts superiority over conventional approaches, but no head-to-head
+          baseline comparison is run in the paper. Marked as an unsupported/absent branch.
+      - id: N18
+        type: question
+        support_level: explicit
+        source_refs: ["§5", "§6"]
+        title: "Future work"
+        description: >
+          Incorporate additional factors (e.g., DC feeder integration) and explore mitigation
+          strategies for unavoidable delays.

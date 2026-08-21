@@ -1,0 +1,68 @@
+{
+  "protocol_id": "MA-SQLGRID-EXTERNAL-ANNOTATION-PILOT-v1.0",
+  "frozen_at": "2026-08-07",
+  "status": "FROZEN_FOR_PILOT",
+  "governance": "Machine-adjudicated SILVER labels only. The 91 candidates are AUTO_CANDIDATE, not human gold; outputs of this protocol must never be reported as external gold accuracy. No human review gate is included in this pilot.",
+  "parent_plan": "paper_projects/applied_sciences_dual_rebuild/LLM_API_AUTHORIZATION_AND_ADJUDICATION_PLAN_2026-08-07.md (sections 4.1, 4.2, 4.4, 6 stage 1)",
+  "task": {
+    "unit": "one external grid-domain question + one auto-candidate reference SQL + its database schema context",
+    "source_data": {
+      "questions_rts": "paper_projects/applied_sciences_dual_rebuild/MA_SQLGrid/data/rts_gmlc_pilot/artifacts/questions_auto_candidate.jsonl (55)",
+      "questions_simbench": "paper_projects/applied_sciences_dual_rebuild/MA_SQLGrid/data/simbench_pilot/questions_auto_candidate.csv (36)",
+      "candidate_sql_and_status": "paper_projects/applied_sciences_dual_rebuild/MA_SQLGrid/external_protocol/artifacts/reference_sql_evaluation.jsonl (91)",
+      "databases": {
+        "RTS_GMLC_AUTO_PILOT": "paper_projects/applied_sciences_dual_rebuild/MA_SQLGrid/data/rts_gmlc_pilot/artifacts/database.sqlite",
+        "SIMBENCH_AUTO_PILOT": "paper_projects/applied_sciences_dual_rebuild/MA_SQLGrid/data/simbench_pilot/simbench_mv_urban.sqlite"
+      }
+    },
+    "input_to_annotators": "question text + candidate SQL + compact schema listing (tables/columns/FKs) + deterministic execution facts (executable, row_count, columns). NO prior labels, NO other annotator output, NO gold_result hashes",
+    "annotator_output_schema": {
+      "question_id": "string, must echo input",
+      "answerable_by_schema": "boolean",
+      "required_tables": "array of table names from the schema",
+      "sql_readonly": "boolean",
+      "semantically_correct": "boolean: does the SQL fully and exactly answer the question semantics (columns, filters, aggregation, ordering, units/time)",
+      "issues": {
+        "wrong_columns": "boolean",
+        "wrong_filter": "boolean",
+        "wrong_aggregation": "boolean",
+        "wrong_join": "boolean",
+        "wrong_order_or_limit": "boolean",
+        "wrong_units_or_time_range": "boolean",
+        "incomplete_answer": "boolean"
+      },
+      "error_classification": "none | semantic_mismatch | syntax_risk | unsafe | incomplete_answer | not_answerable | other",
+      "minimal_fix": "string or null (<= 40 words)",
+      "confidence": "high | medium | low",
+      "abstain": "boolean",
+      "abstain_reason": "string or null"
+    }
+  },
+  "sampling": {
+    "pilot_size": 25,
+    "seed": 20260807,
+    "rule": "deterministic RNG(seed) stratified by dataset_id proportional to 55:36 (14 RTS_GMLC + 11 SIMBENCH), spread across template_family; sample ids are part of the frozen ledger"
+  },
+  "models": {
+    "annotator_A": {"provider": "DeepSeek direct", "base_url_env": "DEEPSEEK_BASE_URL", "key_env": "DEEPSEEK_API_KEY", "model": "deepseek-chat"},
+    "annotator_B": {"provider": "Google Gemini direct", "base_url": "https://generativelanguage.googleapis.com/v1beta", "key_env": "GEMINI_API_KEY", "model": "gemini-2.5-flash"},
+    "adjudicator_C": {"provider": "OpenAI via Cloubic gateway", "base_url_env": "CLOUBIC_BASE_URL", "key_env": "CLOUBIC_API_KEY", "model": "gpt-5.4", "note": "C sees only disagreements; not a generator in the evaluated system"}
+  },
+  "generation_params": {"temperature": 0, "max_tokens": 1024, "response_format": "single JSON object, no prose outside JSON"},
+  "prompt_template": "You are auditing a candidate reference SQL for a power-grid text-to-SQL benchmark item.\n\n[DATABASE SCHEMA]\n{compact schema listing}\n\n[QUESTION] {question}\n\n[CANDIDATE SQL]\n{sql}\n\n[DETERMINISTIC EXECUTION FACTS] executable={executable}, row_count={row_count}, result_columns={columns}\n\nTask: judge whether the candidate SQL semantically and completely answers the question under this schema. Executability alone is NOT sufficient.\nReturn ONLY one JSON object matching this schema: {schema}",
+  "deterministic_checks": [
+    "candidate SQL executed in read-only SQLite sandbox BEFORE prompting (URI mode=ro, PRAGMA query_only=ON, authorizer rejects writes, 10s timeout, 5000-row output cap)",
+    "JSON parses and matches schema",
+    "required_tables subset of schema tables",
+    "question_id echoes input"
+  ],
+  "adjudication_rule": "C is invoked only when A and B disagree on answerable_by_schema, semantically_correct, or error_classification, or when either abstains. C sees the question, schema, SQL, execution facts, both labels anonymized as annotator_1/annotator_2, and check results. C outputs a final label with the same schema plus adjudication_note, or ABSTAIN.",
+  "agreement_metrics": ["raw agreement on semantically_correct", "Cohen's kappa on semantically_correct", "adjudication rate", "abstain rate", "format failure rate", "API failure rate"],
+  "stop_conditions": [
+    "5 consecutive auth or format failures for one model -> halt and report",
+    "served model id differs from frozen id -> halt that annotator and report",
+    "total calls exceed 400 -> halt"
+  ],
+  "ledger_requirements": "append-only raw responses; separate parsed labels; record model id, timestamp, prompt_sha256, input/output tokens, latency; never log API keys; sandbox execution facts are part of the ledger",
+  "prohibited": ["calling these labels human gold or external gold accuracy", "modifying the databases", "deleting failed or disagreed records", "retrying because a result is disliked"]
+}

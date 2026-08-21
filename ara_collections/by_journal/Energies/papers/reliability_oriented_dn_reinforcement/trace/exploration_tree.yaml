@@ -1,0 +1,89 @@
+# Exploration Tree -- Research Process DAG
+
+root: "Distribution System Reliability Reinforcement Planning"
+children:
+  - node: "Problem Definition"
+    children:
+      - node: "Literature Review"
+        children:
+          - node: "Traditional Simulation (MCS) Methods [6-8,14,20]"
+            description: "High computational burden, limited suitability for long-term planning"
+          - node: "Analytical & Simplified Methods [9-13,15-17,22]"
+            description: "Improved efficiency but reduced modeling granularity"
+          - node: "Operational & Recovery Models [19,21]"
+            description: "Focus on thermal limits, neglect DG intermittency and long-term planning"
+          - node: "Recent ADN Planning [23-28]"
+            description: "Lack unified reinforcement framework with hierarchical contingency recovery"
+    - node: "Research Gaps"
+      children:
+        - node: "Gap 1: Separate planning vs. operations"
+          description: "Existing approaches treat long-term reinforcement and contingency management separately"
+        - node: "Gap 2: Missing hierarchical recovery"
+          description: "Limited integration of restoration and islanding within unified planning framework"
+        - node: "Gap 3: Computational burden"
+          description: "MCS-based approaches too slow for optimization-in-the-loop assessment"
+
+  - node: "Proposed Methodology"
+    children:
+      - node: "Probabilistic Scenario Modeling"
+        children:
+          - node: "Load PDF (Normal)"
+          - node: "Solar Irradiance PDF (Beta)"
+          - node: "Wind Speed PDF (Weibull)"
+          - node: "Scenario Matrix Construction"
+      - node: "Reinforcement Planning Formulation"
+        children:
+          - node: "Objective Function (NPV minimization)"
+          - node: "Investment Components: CENS, CTL, CNOS, CUPG"
+          - node: "Reliability Constraints: SAIDI, ENS thresholds"
+          - node: "Penalty Mechanism for Constraint Violations"
+      - node: "GA-Based Optimization"
+        children:
+          - node: "Chromosome Encoding (binary + integer)"
+          - node: "Fitness Evaluation"
+          - node: "Selection / Crossover / Mutation"
+      - node: "Hierarchical Contingency Recovery"
+        children:
+          - node: "Success Mode 1: Network Restoration"
+            description: "Restoration via tie lines + switching, subject to thermal/voltage/power balance constraints"
+          - node: "Success Mode 2: Intentional Islanding"
+            description: "Island operation using local DGs, subject to DG adequacy constraint"
+          - node: "Failure Mode"
+      - node: "Reliability Assessment"
+        children:
+          - node: "Define SPi, ABC, PRC sets"
+          - node: "Forward/Backward Sweep Load Flow"
+          - node: "Compute SAIDI, ASAI, ENS per bus"
+
+  - node: "Case Studies"
+    children:
+      - node: "54-Bus Distribution System"
+        children:
+          - node: "3 substations, 50 feeders, 8 candidate tie lines"
+          - node: "15 kV nominal voltage"
+          - node: "Table 6 reliability parameters: feeders 0.21/km, 8h; substations 0.6/100, 24h"
+      - node: "Case Study 1: CDG Only"
+        children:
+          - node: "15 CDG locations"
+          - node: "Result: 5 tie lines, 4 feeder upgrades, 47% ENS reduction, NPV=$8,845,220"
+      - node: "Case Study 2: CDG + Wind + PV"
+        children:
+          - node: "15 CDG + 5 Wind-DG + 5 PV-DG locations"
+          - node: "Result: 4 tie lines, 6 feeder upgrades, 52% ENS reduction, NPV=$9,140,302"
+
+  - node: "Discussion & Limitations"
+    children:
+      - node: "N-1 only (not N-k or HILP events)"
+      - node: "Static PDFs may need recalibration for volatile weather/EV penetration"
+      - node: "Steady-state analysis only (no dynamic stability)"
+      - node: "GA computational intensity for very large networks"
+      - node: "Constant 5% loss assumption during islanding"
+
+  - node: "Future Work"
+    children:
+      - node: "Energy Storage Systems integration"
+      - node: "Dynamic stability analysis"
+      - node: "Dynamic microgrid boundary management"
+      - node: "Active network management with demand response"
+      - node: "Resilience metrics for HILP events"
+      - node: "Multi-objective optimization (reliability, carbon, power quality)"

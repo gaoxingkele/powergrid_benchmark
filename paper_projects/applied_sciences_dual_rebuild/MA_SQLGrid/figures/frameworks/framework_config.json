@@ -1,0 +1,93 @@
+{
+  "schema_version": "ma-framework-config-1.1",
+  "data_status": "protocol_only_no_unfrozen_results",
+  "style": {"palette": "Okabe-Ito", "font": "DejaVu Sans", "minimum_font_pt": 9.0, "png_dpi": 450},
+  "figures": [
+    {
+      "id":"ma_f01_pipeline","figsize":[13.2,6.6],"font_size":10.0,
+      "caption":"MA-SQLGrid protocol-level pipeline. A natural-language request is grounded against schema and sampled values, compressed into a task-relevant context, augmented by an explicit answer-shape contract, and translated into SQL. A safe parser and reference-answer-independent validator either accepts the query or sends it through bounded repair before read-only execution. Every transition is retained in an audit trace. The figure defines registered structure and reports no performance.",
+      "source_evidence":["MASTER_EXECUTION_PLAN.md Sections 3.2, 3.5-3.7","experiment_registry.json MA-M01, MA-A01, MA-X01","MA_SQLGrid/external_protocol/artifacts/manifest.json"],
+      "groups":[
+        {"x":0.12,"y":0.16,"w":0.41,"h":0.69,"label":"Context grounding and generation","fill":"#F5F5F5","linestyle":"dashed"},
+        {"x":0.55,"y":0.16,"w":0.35,"h":0.69,"label":"Safety, verification and execution","fill":"#FAFAFA","linestyle":"dashdot"}
+      ],
+      "nodes":[
+        {"id":"q","x":0.075,"y":0.55,"w":0.095,"h":0.18,"label":"Natural-language\nrequest","fill":"#F0E442","hatch":"..","linestyle":"solid","shape":"round","weight":"bold","font_size":9.2},
+        {"id":"schema","x":0.18,"y":0.72,"w":0.11,"h":0.14,"label":"Schema +\nsampled values","fill":"#56B4E9","hatch":"//","linestyle":"solid","shape":"square","font_size":9.2},
+        {"id":"ground","x":0.31,"y":0.55,"w":0.12,"h":0.18,"label":"Schema linking +\nvalue normalization","fill":"#0072B2","hatch":"//","linestyle":"solid","shape":"round","weight":"bold","font_size":9.0},
+        {"id":"compact","x":0.45,"y":0.55,"w":0.11,"h":0.18,"label":"Task-relevant\ncontext","fill":"#56B4E9","hatch":"//","linestyle":"solid","shape":"round","font_size":9.2},
+        {"id":"shape","x":0.45,"y":0.28,"w":0.11,"h":0.13,"label":"Answer-shape\ncontract","fill":"#CC79A7","hatch":"xx","linestyle":"dashed","shape":"square","font_size":9.0},
+        {"id":"llm","x":0.59,"y":0.55,"w":0.10,"h":0.18,"label":"SQL\ngeneration","fill":"#009E73","hatch":"\\\\","linestyle":"solid","shape":"round","weight":"bold"},
+        {"id":"safe","x":0.72,"y":0.55,"w":0.11,"h":0.16,"label":"Safe parser\n+ validator","fill":"#E69F00","hatch":"--","linestyle":"dashdot","shape":"diamond","weight":"bold","font_size":8.7},
+        {"id":"repair","x":0.59,"y":0.28,"w":0.11,"h":0.14,"label":"Repair pass","fill":"#D55E00","hatch":"+","linestyle":"dashed","shape":"round","font_size":9.0},
+        {"id":"exec","x":0.84,"y":0.55,"w":0.09,"h":0.18,"label":"Read-only\nSQLite execution","fill":"#009E73","hatch":"\\\\","linestyle":"solid","shape":"square","font_size":9.0},
+        {"id":"trace","x":0.94,"y":0.55,"w":0.075,"h":0.16,"label":"Answer +\naudit trace","fill":"#F0E442","hatch":"..","linestyle":"solid","shape":"round","font_size":8.7}
+      ],
+      "edges":[
+        {"source":"q","target":"ground"},{"source":"schema","target":"ground"},{"source":"ground","target":"compact"},{"source":"compact","target":"llm"},
+        {"source":"shape","target":"llm","style":"dashed"},{"source":"llm","target":"safe"},{"source":"safe","target":"exec"},{"source":"exec","target":"trace"},
+        {"source":"safe","target":"repair","style":"dashed"},{"source":"repair","target":"llm","style":"dashed"}
+      ],
+      "notes":[{"x":0.60,"y":0.09,"text":"Validation uses schema/execution evidence—not reference SQL or reference answers.","ha":"center","style":"italic"}]
+    },
+    {
+      "id":"ma_f02_factorial_external_flow","figsize":[13.2,7.2],"font_size":9.8,
+      "caption":"Registered 2×2 context-by-shape factorial and external-database evidence flow. GridDB-Maintenance is development-touched; RTS-GMLC and SimBench currently contain unsealed automatic candidates and must pass the eligibility gate before benchmark promotion. Identical paired questions and database snapshots feed all Full/Compact × Shape/No-Shape cells. Immutable instance outputs proceed to independent paired statistics and the E4 audit; no outcome values are shown.",
+      "source_evidence":["experiment_registry.json MA-M01-M04, MA-M02","MA_SQLGrid/external_protocol/artifacts/manifest.json","MA_SQLGrid/data/rts_gmlc_pilot/W3_RTS_GMLC_REPORT.md","MA_SQLGrid/data/simbench_pilot/W3_SIMBENCH_REPORT.md"],
+      "groups":[
+        {"x":0.02,"y":0.15,"w":0.27,"h":0.72,"label":"Sources and eligibility","fill":"#F7F7F7","linestyle":"dashed"},
+        {"x":0.32,"y":0.15,"w":0.43,"h":0.72,"label":"Paired 2 × 2 factorial","fill":"#FAFAFA","linestyle":"solid"},
+        {"x":0.78,"y":0.15,"w":0.20,"h":0.72,"label":"Evidence freeze","fill":"#F7F7F7","linestyle":"dashdot"}
+      ],
+      "nodes":[
+        {"id":"d1","x":0.075,"y":0.73,"w":0.10,"h":0.12,"label":"GridDB\ndevelopment-touched","fill":"#56B4E9","hatch":"//","linestyle":"solid","shape":"round","font_size":8.5},
+        {"id":"d2","x":0.075,"y":0.49,"w":0.10,"h":0.12,"label":"RTS-GMLC\nauto · unsealed","fill":"#E69F00","hatch":"--","linestyle":"dashed","shape":"round","font_size":8.5},
+        {"id":"d3","x":0.075,"y":0.25,"w":0.10,"h":0.12,"label":"SimBench\nauto · unsealed","fill":"#E69F00","hatch":"--","linestyle":"dashed","shape":"round","font_size":8.5},
+        {"id":"gate","x":0.22,"y":0.49,"w":0.10,"h":0.20,"label":"Eligibility gate\nlicense · split\nexecution · review","fill":"#D55E00","hatch":"++","linestyle":"dashdot","shape":"round","font_size":8.2},
+        {"id":"pair","x":0.38,"y":0.50,"w":0.09,"h":0.16,"label":"Same item +\nsame snapshot","fill":"#F0E442","hatch":"..","linestyle":"solid","shape":"round","font_size":8.7},
+        {"id":"fn","x":0.52,"y":0.70,"w":0.12,"h":0.12,"label":"Full · No shape","fill":"#0072B2","hatch":"//","linestyle":"solid","shape":"square"},
+        {"id":"fs","x":0.67,"y":0.70,"w":0.12,"h":0.12,"label":"Full · Shape","fill":"#CC79A7","hatch":"xx","linestyle":"dashed","shape":"square"},
+        {"id":"cn","x":0.52,"y":0.38,"w":0.12,"h":0.12,"label":"Compact · No shape","fill":"#009E73","hatch":"\\\\","linestyle":"solid","shape":"square","font_size":8.7},
+        {"id":"cs","x":0.67,"y":0.38,"w":0.12,"h":0.12,"label":"Compact · Shape","fill":"#E69F00","hatch":"--","linestyle":"dashed","shape":"square","font_size":8.7},
+        {"id":"runs","x":0.595,"y":0.20,"w":0.14,"h":0.08,"label":"Models × repetitions","fill":"#F0E442","hatch":"..","linestyle":"solid","shape":"round","font_size":8.5},
+        {"id":"instances","x":0.82,"y":0.62,"w":0.08,"h":0.16,"label":"Instance outputs\nconfig · log · hash","fill":"#56B4E9","hatch":"//","linestyle":"solid","shape":"round","font_size":8.2},
+        {"id":"audit","x":0.94,"y":0.62,"w":0.08,"h":0.16,"label":"Paired statistics\n+ E4 audit","fill":"#009E73","hatch":"\\\\","linestyle":"dashdot","shape":"round","font_size":8.2},
+        {"id":"freeze","x":0.88,"y":0.28,"w":0.12,"h":0.12,"label":"Canonical evidence\n+ claim ledger","fill":"#F0E442","hatch":"..","linestyle":"solid","shape":"round","font_size":8.5}
+      ],
+      "edges":[
+        {"source":"d1","target":"gate"},{"source":"d2","target":"gate"},{"source":"d3","target":"gate"},{"source":"gate","target":"pair"},
+        {"source":"pair","target":"fn"},{"source":"pair","target":"fs"},{"source":"pair","target":"cn"},{"source":"pair","target":"cs"},
+        {"source":"runs","target":"fn","style":"dotted"},{"source":"runs","target":"fs","style":"dotted"},{"source":"runs","target":"cn","style":"dotted"},{"source":"runs","target":"cs","style":"dotted"},
+        {"source":"fn","target":"instances"},{"source":"fs","target":"instances"},{"source":"cn","target":"instances"},{"source":"cs","target":"instances"},
+        {"source":"instances","target":"audit"},{"source":"audit","target":"freeze"}
+      ]
+    },
+    {
+      "id":"ma_f03_human_review_sealed_gate","figsize":[13.2,7.2],"font_size":9.8,
+      "caption":"Human-review and sealed-test eligibility gate. Machine precheck only prioritizes risk. Two real reviewers independently assess every promoted item; a third person adjudicates conflicts, then corrected SQL is re-executed and hashed. Development-visible items can become human-reviewed unsealed data but cannot retroactively become sealed. Only previously unused, family-isolated and access-controlled items may enter a one-time sealed run after method freeze.",
+      "source_evidence":["MA_SQLGrid/data/human_review_packet/REVIEW_PROTOCOL.md","MA_SQLGrid/data/human_review_packet/W4_MA_HUMAN_REVIEW_PACKET_REPORT.md","experiment_registry.json MA-M04"],
+      "groups":[
+        {"x":0.02,"y":0.14,"w":0.62,"h":0.74,"label":"Quality review","fill":"#FAFAFA","linestyle":"dashed"},
+        {"x":0.66,"y":0.14,"w":0.32,"h":0.74,"label":"Separate sealed-test gate","fill":"#F7F7F7","linestyle":"dashdot"}
+      ],
+      "nodes":[
+        {"id":"auto","x":0.075,"y":0.55,"w":0.10,"h":0.17,"label":"AUTO_CANDIDATE\nRTS + SimBench","fill":"#E69F00","hatch":"--","linestyle":"dashed","shape":"round","weight":"bold","font_size":8.7},
+        {"id":"machine","x":0.20,"y":0.55,"w":0.10,"h":0.17,"label":"Machine precheck\ntriage only","fill":"#56B4E9","hatch":"//","linestyle":"dashed","shape":"square","font_size":8.7},
+        {"id":"a","x":0.34,"y":0.71,"w":0.11,"h":0.13,"label":"Real reviewer A\nindependent","fill":"#0072B2","hatch":"//","linestyle":"solid","shape":"round","font_size":8.7},
+        {"id":"b","x":0.34,"y":0.37,"w":0.11,"h":0.13,"label":"Real reviewer B\nindependent","fill":"#009E73","hatch":"\\\\","linestyle":"solid","shape":"round","font_size":8.7},
+        {"id":"agree","x":0.48,"y":0.55,"w":0.11,"h":0.17,"label":"Agreement + κ\nconflict extraction","fill":"#CC79A7","hatch":"xx","linestyle":"dashdot","shape":"square","font_size":8.7},
+        {"id":"adjud","x":0.60,"y":0.55,"w":0.09,"h":0.15,"label":"Adjudicate\nre-execute · hash","fill":"#D55E00","hatch":"++","linestyle":"dashdot","shape":"round","font_size":8.0},
+        {"id":"human","x":0.73,"y":0.71,"w":0.10,"h":0.12,"label":"Human-reviewed\nunsealed","fill":"#F0E442","hatch":"..","linestyle":"solid","shape":"round","font_size":8.5},
+        {"id":"criteria","x":0.72,"y":0.34,"w":0.10,"h":0.16,"label":"Never used\nfamily isolated\naccess controlled","fill":"#E69F00","hatch":"--","linestyle":"dashdot","shape":"square","font_size":7.8},
+        {"id":"eligible","x":0.82,"y":0.34,"w":0.075,"h":0.14,"label":"All gates\npass?","fill":"#E69F00","hatch":"--","linestyle":"dashdot","shape":"diamond","font_size":7.8},
+        {"id":"freeze","x":0.90,"y":0.34,"w":0.075,"h":0.14,"label":"Freeze method\nconfig · hashes","fill":"#56B4E9","hatch":"//","linestyle":"solid","shape":"square","font_size":7.5},
+        {"id":"sealed","x":0.94,"y":0.69,"w":0.075,"h":0.13,"label":"One-time\nsealed run","fill":"#009E73","hatch":"\\\\","linestyle":"solid","shape":"round","font_size":8.2}
+      ],
+      "edges":[
+        {"source":"auto","target":"machine"},{"source":"machine","target":"a"},{"source":"machine","target":"b"},{"source":"a","target":"agree"},{"source":"b","target":"agree"},{"source":"agree","target":"adjud"},
+        {"source":"adjud","target":"human","style":"dashed"},{"source":"adjud","target":"criteria"},{"source":"criteria","target":"eligible"},{"source":"eligible","target":"freeze"},{"source":"freeze","target":"sealed"}
+      ],
+      "notes":[{"x":0.82,"y":0.075,"text":"Any failed gate → unsealed. Prior development use cannot be undone.","ha":"center","style":"italic"}]
+    }
+  ]
+}

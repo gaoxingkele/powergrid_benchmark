@@ -1,0 +1,123 @@
+exploration_tree:
+  central_question: >
+    How can short-term power load forecasting accuracy be improved through
+    hybrid deep learning models with adaptive feature fusion?
+
+  root_decisions:
+    - decision: Architecture paradigm — hybrid deep learning over standalone models
+      rationale: >
+        Standalone CNN lacks temporal scope; standalone LSTM suffers gradient
+        decay on long sequences; standalone Transformer loses local pattern
+        fidelity. A hybrid approach can combine complementary strengths.
+      alternatives_considered:
+        - "Pure CNN with dilated convolutions (TCN-like)"
+        - "Pure LSTM with attention mechanism"
+        - "Transformer-only with architectural modifications"
+      selected: BiLSTM + Transformer cascade with dynamic fusion
+
+    - decision: Fusion strategy — Dynamic Adaptive Fusion over static concatenation
+      rationale: >
+        Static fusion (concatenation, summation) applies uniform weighting
+        regardless of input context. Dynamic adaptation allows the model to
+        reweight feature channels and temporal positions based on the specific
+        characteristics of each input instance.
+      alternatives_considered:
+        - "Simple feature concatenation (baseline)"
+        - "Weighted summation with fixed weights"
+        - "CBAM-style sequential channel-spatial attention"
+        - "Standard self-attention fusion"
+      selected: DAF with dual-path (channel + temporal) adaptive weighting and nonlinear interaction
+
+    - decision: Local enhanced attention over global self-attention
+      rationale: >
+        Global Transformer self-attention dilutes local temporal patterns.
+        Adding a local mask constrains attention to neighborhood windows,
+        preserving fine-grained local context while maintaining global
+        pattern capture through residual connections.
+      alternatives_considered:
+        - "Pure global self-attention"
+        - "Windowed attention (Swin-style)"
+        - "Dilated attention with skip connections"
+      selected: Self-attention with local mask matrix M
+
+  experiments:
+    - id: E01
+      name: Full Benchmark Comparison
+      description: >
+        Evaluate DAF-BT against 8 baseline models (CNN, LSTM, GRU, TCN,
+        CNN-LSTM, Transformer, TCN-GRU, TCN-LSTM-Attention) using MAE,
+        RMSE, MAPE, R².
+      models_compared: 9
+      evidence: [Table 2, Figure 5, Figure 6]
+
+    - id: E02
+      name: Multi-Time-Scale Evaluation
+      description: >
+        Assess model performance at daily (48-step) and weekly (336-step)
+        forecasting horizons with qualitative and quantitative analysis.
+      sub_experiments:
+        - daily_load_curves: [Figure 7, Figure 8]
+        - weekly_load_curves: [Figure 9, Figure 10]
+      evidence: [Figures 7-10]
+
+    - id: E03
+      name: Ablation Study
+      description: >
+        Isolate contribution of each architectural component by evaluating
+        6 model variants systematically.
+      variants:
+        - "BiLSTM only"
+        - "Transformer only"
+        - "BiLSTM + DAF"
+        - "BiLSTM + Transformer"
+        - "Transformer + DAF"
+        - "BiLSTM + Transformer + DAF (Full)"
+      evidence: [Table 3, Figure 11, Figure 12]
+
+    - id: E04
+      name: Complexity and Efficiency
+      description: >
+        Quantify parameter count, training time per epoch, and inference
+        time per sample for 5 models.
+      evidence: [Table 4]
+
+    - id: E05
+      name: Qualitative Scenario Evaluation
+      description: >
+        Visual assessment of model behavior during peak loads, valley
+        periods, and weekend transition boundaries.
+      evidence: [Figures 5-12]
+
+  findings:
+    - finding: >
+        DAF-BT achieves best overall accuracy: MAE=4.560, RMSE=5.925,
+        MAPE=1.58%, R²=0.983, outperforming all 8 baselines.
+      supporting_experiments: [E01]
+      claims_supported: [C01, C02, C04]
+
+    - finding: >
+        DAF module contributes more to accuracy than stacking additional
+        temporal layers (Transformer-DAF MAPE 1.74% > BiLSTM-Transformer
+        MAPE 2.04%).
+      supporting_experiments: [E03]
+      claims_supported: [C06]
+
+    - finding: >
+        DAF module adds minimal overhead: 0.12M params, 2.2s/epoch
+        training increase, 1.8ms inference increase.
+      supporting_experiments: [E04]
+      claims_supported: [C05]
+
+    - finding: >
+        Model maintains superior tracking during challenging transition
+        periods (weekend boundaries, PV fluctuation periods, peak/valley
+        transitions).
+      supporting_experiments: [E02, E05]
+      claims_supported: [C04]
+
+    - finding: >
+        Feature fusion mechanism (DAF) generalizes across backbone
+        architectures — consistently improves both BiLSTM and Transformer
+        individually.
+      supporting_experiments: [E03]
+      claims_supported: [C01, C03]

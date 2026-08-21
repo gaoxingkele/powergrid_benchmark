@@ -1,0 +1,388 @@
+% Supplementary Materials for the CMC (Tech Science Press) submission of MA-SQLGrid.
+% Compiled separately from paper_cmc.tex; uploaded as a separate file on submission.
+\documentclass[11pt]{article}
+\usepackage[letterpaper,margin=2.5cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{mathpazo}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{adjustbox}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+
+\emergencystretch=3em
+
+% Supplementary numbering
+\renewcommand{\thesection}{S\arabic{section}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\theequation}{S\arabic{equation}}
+
+\title{Supplementary Materials for\\``MA-SQLGrid: A Multi-Stage Context-Grounding Framework for Text-to-SQL over Power Grid Maintenance Databases''}
+\author{Bijing Liu, Chenglong Sun and Yong Yang}
+\date{}
+
+\begin{document}
+\maketitle
+
+\noindent This document contains the supplementary materials referenced from the main text: the verbatim prompt templates for the five experimental conditions (Section~\ref{sup:prompts}), the per-question case SQL listings for the three case studies (Section~\ref{sup:cases}), the supplementary tables (Section~\ref{sup:tables}, Tables S1--S7), and the scale-robustness experiment details (Section~\ref{sup:scale}, Tables S8--S9). All contents are reproduced from the archived experiment artifacts; no experimental number differs from the released run records.
+
+\section{Prompt Templates for the Five Conditions}\label{sup:prompts}
+
+All five conditions share fixed prompt templates; only the context block differs. The templates below are reproduced verbatim from the archived experiment runner, and every rendered prompt (with its hash) is included in the released traces. Placeholders in angle brackets are filled per question.
+
+\subsection{Direct-Generation Template (C1--C4)}
+
+\begin{small}
+\begin{verbatim}
+You are a Text-to-SQL system for a synthetic
+SQLite power-grid maintenance database.
+
+Return exactly one read-only SQLite SELECT
+query. Do not include markdown or explanation.
+Do not use INSERT, UPDATE, DELETE, DROP,
+PRAGMA, or multiple statements.
+Use only the provided database context. When
+normalization hints or answer-shape hints are
+present, treat them as question-derived
+constraints. Match the requested projection
+count and include relevant literal predicates.
+
+Condition: <condition name>
+
+<context block>
+
+Question ID: <question id>
+Question: <question text>
+\end{verbatim}
+\end{small}
+
+The context block is the only element that varies across conditions: C1 inserts the full raw \texttt{schema.sql}; C2 inserts a rendered dump of the full schema plus the enumerated distinct values of all non-ID columns; C3 inserts the generically selected schema subset produced by lexical matching without domain rules, value normalization, or shape hints; C4 inserts the compact domain context shown below.
+
+\subsection{Rendered Compact Domain Context (C4/C5), Example for Q021}
+
+\begin{small}
+\begin{verbatim}
+SQLite selected context:
+Tables and selected columns:
+- asset_types(asset_type_id) -- equipment type
+  catalog such as Transformer, Breaker, Line,
+  Relay, Substation, Capacitor
+- assets(asset_id, asset_name, asset_type_id,
+  location_id, status) -- individual grid
+  assets with names, type, location, install
+  date, status, and MW capacity
+- grid_topology(edge_id, upstream_asset_id,
+  downstream_asset_id) -- directed
+  upstream/downstream asset connections and
+  switch status
+- locations(location_id) -- grid yards,
+  substations, regions, coordinates, and
+  location criticality
+- sensor_readings(reading_id, asset_id) --
+  time-series sensor readings for assets with
+  sensor type, value, unit, and alarm flag
+- work_orders(work_order_id, asset_id,
+  assigned_technician_id) -- maintenance work
+  orders with priority, status, schedule,
+  completion date, and fault code
+Join paths:
+- assets.asset_type_id =
+  asset_types.asset_type_id
+- assets.location_id = locations.location_id
+- work_orders.asset_id = assets.asset_id
+- sensor_readings.asset_id = assets.asset_id
+- grid_topology.upstream_asset_id =
+  assets.asset_id
+- grid_topology.downstream_asset_id =
+  assets.asset_id
+Exact database values matched from the
+question:
+- assets.status: offline
+Power-grid domain normalization hints inferred
+from the question:
+- assets.status = "offline"
+Answer-shape hints inferred from the question
+text:
+- expected column count: 1
+- row granularity: multi-row
+- deterministic ordering needed: True
+- Project asset_name for asset listing
+  questions.
+\end{verbatim}
+\end{small}
+
+\subsection{Candidate-Generation Template (C5)}
+
+\begin{small}
+\begin{verbatim}
+You are generating candidate SQLite SQL for
+CHESS-style MA-SQLGrid.
+
+Return 3 distinct read-only SQLite SELECT
+queries as a numbered list. Do not include
+explanation.
+Do not use INSERT, UPDATE, DELETE, DROP,
+PRAGMA, or multiple statements.
+Use only the selected context, normalization
+hints, and inferred output-form hints below.
+Candidate queries should differ in plausible
+joins/projections while respecting the
+inferred projection count and relevant literal
+predicates.
+
+Condition: <condition name>
+
+<compact domain context block, as in C4>
+
+Question ID: <question id>
+Question: <question text>
+\end{verbatim}
+\end{small}
+
+\subsection{Bounded Repair Template (C5, at Most One Call)}
+
+\begin{small}
+\begin{verbatim}
+Repair this SQLite SELECT query using only
+selected context and inferred hints.
+
+Return exactly one read-only SQLite SELECT
+query. Do not include markdown or explanation.
+
+<compact domain context block, as in C4>
+
+Question ID: <question id>
+Question: <question text>
+Previous SQL: <selected candidate SQL>
+Reference-free validation result:
+<JSON validation record: exec_ok, shape_ok,
+order_ok, empty result, matched and missing
+value hints>
+\end{verbatim}
+\end{small}
+
+The repair prompt receives only the reference-free validation signal; it never receives gold SQL, gold rows, evaluator verdicts, or dataset metadata.
+
+\section{Case Analysis SQL Listings}\label{sup:cases}
+
+Three cases drawn verbatim from the archived traces illustrate the mechanism, the value of validation, and its boundary. These are the full per-question SQL listings summarized in Section~5.6 of the main text.
+
+\paragraph{Case 1 (contract enforcement, Q021).} The question asks: ``Which assets are offline?'' The gold query returns one column, \texttt{asset\_name}, filtered by \texttt{assets.status = 'offline'} and ordered by asset name. The full-schema-values baseline (C2) generates
+\begin{small}
+\begin{verbatim}
+SELECT asset_name FROM assets WHERE status = 'offline';
+\end{verbatim}
+\end{small}
+it uses the right predicate but omits the required deterministic ordering and is scored as a denotation mismatch under the order-sensitive evaluator. The compact domain context records the normalized hint \texttt{assets.status = "offline"} and an inferred shape with one projected column, multi-row output, and required ordering. Under that context, C4 generates
+\begin{small}
+\begin{verbatim}
+SELECT asset_name FROM assets WHERE status = 'offline' ORDER BY asset_name;
+\end{verbatim}
+\end{small}
+while C5 generates the equivalent aliased form. Both match the validated denotation. This is the modal pattern behind the strict-metric gap and is exactly the contract-conformance effect quantified in Section~5.2 of the main text.
+
+\paragraph{Case 2 (execution-guided reranking, Q110).} The question asks: ``List work orders linked to asset REL-002.'' The first C5 candidate,
+\begin{small}
+\begin{verbatim}
+SELECT wo.work_order_id, wo.status, wo.schedule
+FROM work_orders AS wo
+JOIN assets AS a ON wo.asset_id = a.asset_id
+WHERE a.asset_name = 'REL-002'
+ORDER BY wo.work_order_id;
+\end{verbatim}
+\end{small}
+references the nonexistent column \texttt{wo.schedule} and fails execution. The reference-free ranker demotes it and selects the second candidate, a subquery formulation projecting \texttt{work\_order\_id}, \texttt{priority}, and \texttt{status}, which executes and matches the gold denotation. Under C4, which returns only the first formulation, this question is lost. This is the recovery mode that explains most of C5's reduction of execution errors from 20 to 5.
+
+\paragraph{Case 3 (repair success and failure on one question family, Q161 versus Q156/Q157/Q158/Q160/Q162).} \sloppy Six test questions share the template ``Which work orders are assigned to technician \emph{X}?'' The compact context for these questions selects \texttt{work\_orders(work\_order\_id, asset\_id, assigned\_technician\_id, priority, status)} but omits the \texttt{scheduled\_date} column, while the shape hint asks the model to project \texttt{work\_order\_id}, \texttt{status}, and \texttt{scheduled\_date} and the table comment mentions ``schedule.'' Given this inconsistent evidence, the generator hallucinates \texttt{wo.schedule\_date} (or \texttt{wo.schedule}) in every candidate. For Q161 the single bounded repair call, prompted with the execution error, rewrites the column to the correct \texttt{scheduled\_date} and the repaired query matches the gold denotation. For the other five questions the repair reproduces the same nonexistent column and is rejected, leaving the execution error in place; these five are exactly the residual C5 execution errors in Table~\ref{tab:sup-error-taxonomy}. The family shows both faces of bounded repair: it can fix a locally diagnosable naming error, but it cannot reliably recover information that the compact context itself dropped, since the repair prompt reuses that same context. The root cause is a schema-selection miss, which is why the main text attributes the main effect to context construction and treats validation as a bounded second layer.
+
+\section{Supplementary Tables}\label{sup:tables}
+
+\begin{table}[htbp]
+\caption{Implementation details fixed in the reported MA-SQLGrid run.}
+\label{tab:sup-implementation}
+\centering
+\small
+\begin{tabularx}{\textwidth}{p{0.25\textwidth}X}
+\toprule
+\textbf{Component} & \textbf{Fixed implementation detail} \\
+\midrule
+Schema selection & Lexical question/schema matching, domain phrase rules, exact value mentions, and foreign-key expansion over selected seed tables with a maximum of six tables. \\
+Value inventory & Distinct local database values are enumerated for non-ID categorical/date/status columns; matched literals and fixed domain-normalization rules are rendered as compact hints. \\
+Answer-shape inference & Rule classes infer projection count, row granularity, count/group/top-k/latest/list forms, and deterministic ordering cues from the question text. A post-generation held-out diagnostic found 0 column-count mismatches over 180 test questions; this audit did not feed prompts, rankers, repairs, or candidate selection. \\
+C5 candidate policy & At most five SQL candidates are generated at temperature 0; one bounded repair attempt is allowed only after reference-free validation flags execution, shape, value, or ordering problems. \\
+C5 ranker weights & Safe SQL $+10/-20$, execution $+10/-15$, shape $+6/-5$, ordering $+3/-2$, empty result $-2$, value hit $+4$, missing value hint $-3$, and deterministic tie-break $-\text{candidate index}$. \\
+No-gold contract & Prediction records exclude gold SQL, gold denotation rows, evaluator correctness, expected hashes, required-literal metadata, answer-shape metadata, and order-sensitive metadata. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[htbp]
+\caption{Dataset characterization for GridDB-Maintenance-v2 v0.1.}
+\label{tab:sup-dataset}
+\centering
+\small
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Aspect} & \textbf{Observed value} \\
+\midrule
+Total question-SQL pairs & 200 \\
+Dev/test split & Q001--Q020 dev, Q021--Q200 test \\
+Test questions used in formal results & 180 \\
+Database tables & 8 \\
+Main entity/value tables & assets; asset types; locations; work orders; sensor readings; technicians; topology; maintenance logs \\
+Difficulty labels & 74 easy, 102 medium, 24 hard \\
+Common SQL feature tags & filter 187, order-by 131, join 113, aggregation 66, time predicate 33 \\
+Main value vocabularies & asset type, status, region, priority, fault code, sensor type, topology switch state \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[htbp]
+\caption{Paired comparisons on the test split. A-only and B-only count questions answered correctly by only one condition.}
+\label{tab:sup-paired}
+\centering
+\small
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lrrrrrr}
+\toprule
+\textbf{Comparison} & \textbf{A-only} & \textbf{B-only} & \textbf{Both correct} & \textbf{Both wrong} & \textbf{Mean difference} & \textbf{Exact sign p} \\
+\midrule
+C4 vs C2 & 49 & 2 & 77 & 52 & 0.2611 & 1.179e-12 \\
+C5 vs C2 & 56 & 4 & 75 & 45 & 0.2889 & 9.085e-13 \\
+C5 vs C4 & 12 & 7 & 119 & 42 & 0.0278 & 0.3593 \\
+\bottomrule
+\end{tabular*}
+\end{table}
+
+\begin{table}[htbp]
+\caption{Measured resource consumption per question for the \texttt{deepseek-chat} second-generator run (provider-reported usage; direct endpoint with negligible fixed serving overhead). C5 combines candidate generation and, when triggered, one repair call.}
+\label{tab:sup-deepseek-tokens}
+\centering
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrr}
+\toprule
+\textbf{Condition} & \textbf{Input tokens (mean)} & \textbf{Output tokens (mean)} & \textbf{Latency ms (mean)} & \textbf{Latency ms (median)} & \textbf{First-attempt calls} \\
+\midrule
+C2 & 2011.6 & 49.9 & 1051.9 & 1021.0 & 180/180 \\
+C4 & 509.3 & 46.6 & 1054.0 & 1003.5 & 180/180 \\
+C5 & 680.5 & 186.2 & 3014.2 & 1965.5 & 178/180 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[htbp]
+\caption{Execution accuracy by question tag using existing formal-run logs. Rows are overlapping diagnostic subsets.}
+\label{tab:sup-tags}
+\centering
+\small
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lrrrrr}
+\toprule
+\textbf{Tag} & \textbf{Test questions} & \textbf{C2} & \textbf{C4} & \textbf{C5} & \textbf{C4--C2} \\
+\midrule
+Join & 102 & 0.382 & 0.598 & 0.657 & +0.216 \\
+Aggregation & 59 & 0.847 & 0.847 & 0.831 & +0.000 \\
+Order-by & 114 & 0.132 & 0.535 & 0.596 & +0.404 \\
+Top-k & 18 & 0.000 & 0.889 & 0.833 & +0.889 \\
+Time predicate & 30 & 0.000 & 0.533 & 0.567 & +0.533 \\
+Group-by & 12 & 0.417 & 0.333 & 0.417 & $-$0.083 \\
+Topology traversal & 11 & 0.091 & 0.818 & 0.909 & +0.727 \\
+Self-join & 9 & 0.111 & 0.889 & 1.000 & +0.778 \\
+Filter & 170 & 0.441 & 0.718 & 0.753 & +0.276 \\
+\bottomrule
+\end{tabular*}
+\end{table}
+
+\begin{table}[htbp]
+\caption{Residual error taxonomy from the archived formal run. Counts are over 180 test questions. The taxonomy assigns each incorrect prediction to a primary evaluator error category; it is not the same object as the answer-shape accuracy metric, and the execution-error column does not contradict the safe-SQL rate (those queries pass the read-only guard but fail when executed against the SQLite schema).}
+\label{tab:sup-error-taxonomy}
+\centering
+\small
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lrrrr}
+\toprule
+\textbf{Condition} & \textbf{Correct} & \textbf{Shape mismatch} & \textbf{Wrong denotation} & \textbf{Execution error} \\
+\midrule
+C1 & 71 & 95 & 14 & 0 \\
+C2 & 79 & 90 & 11 & 0 \\
+C3 & 72 & 67 & 26 & 15 \\
+C4 & 126 & 0 & 34 & 20 \\
+C5 & 131 & 0 & 44 & 5 \\
+\bottomrule
+\end{tabular*}
+\end{table}
+
+\begin{table}[htbp]
+\caption{Claim-to-evidence map for the reported MA-SQLGrid results.}
+\label{tab:sup-claims}
+\centering
+\footnotesize
+\begin{tabularx}{\textwidth}{p{0.24\textwidth}Xp{0.28\textwidth}}
+\toprule
+\textbf{Claim} & \textbf{Supporting evidence} & \textbf{Boundary} \\
+\midrule
+Compact domain context is the main mechanism gain under the strict answer-contract metric & C4 reaches 126/180 and 0.7000 accuracy; C4 vs C2 has 49 C4-only correct cases, 2 C2-only cases, and +0.2611 mean difference & Applies to GridDB-Maintenance-v2 v0.1 under the fixed generator and the single archived formal pass; the sensitivity analysis in Section~5.2 of the main text shows the gain is dominated by projection/ordering contract conformance, not row-content retrieval \\
+MA-SQLGrid reduces context relative to full-schema-values prompting & C4 uses 259.2 estimated template tokens versus 710.3 for C2 (63.5\% smaller) while improving strict accuracy from 0.4389 to 0.7000; measured API input falls from 6346.7 to 4859.0 tokens per question (23.4\%) & Template tokens are runner estimates; the measured saving is smaller because a fixed serving-side overhead is shared by all conditions \\
+Validation improves the final result modestly & C5 reaches 131/180 and 0.7278; C5 vs C4 has 12 C5-only and 7 C4-only correct cases & C5 over C4 is small and not a strong standalone superiority claim; latency increases to 5562.5 ms \\
+Answer-shape hints materially affect C4 generation & Removing C4 shape hints lowers execution accuracy from 126/180 to 77/180 and answer-shape accuracy from 0.8889 to 0.4389 & Same fixed GridDB test split and generator; only the shape-hint channel is removed \\
+Value hints add a smaller prompt-side gain & Removing C4 value hints lowers execution accuracy from 126/180 to 118/180 & One no-value prediction had a provider/extraction failure and was counted as an error; no cross-domain claim is made \\
+The result is evidence-faithful and leakage-controlled & 900 predictions/scores, zero contract errors, zero unsafe SQL, zero provider/extraction errors, and zero leakage-scan problems & Does not imply production readiness or external benchmark transfer \\
+The main effects replicate on a second independent generator & \texttt{deepseek-chat} with byte-identical prompts: C4 over C2 +0.3611 strict (0.3389 to 0.7000), C5 over C4 +0.0667 (0.7667); projection-tolerant reversal replicates (C2 0.8500 versus C4 0.7944); direct-endpoint input-token reduction 74.7\% & Two generator families only (one closed, one open-weight); aggregate-level comparison with no per-question cross-model significance test; C5 stage reimplemented from specification (98.8\% selection agreement with the archive) \\
+The statistical interpretation is bounded & Paired sign tests compare per-question outcomes on 180 test items; seed 0 is a deterministic pass label; three temperature-0 repeats of C4/C5 on \texttt{deepseek-chat} show a maximum accuracy spread of 1.1 points and 98.3\% per-question verdict agreement & Run-to-run stability is measured only for the second generator; no multi-seed study exists for the original generator \\
+The compact-context and validation gains persist at tenfold database scale with bounded input tokens & On the x10 database (10x rows, two distractor tables, byte-identical 180 questions), \texttt{deepseek-chat} gives C4 0.5944 versus C2 0.3333 strict (+26.1 points) and C5 0.6500 (+5.6); C4 input tokens stay flat (509.3 to 504.0 per question) versus +51\% growth for C2; rebuilt contexts verified byte-identical to the archive on v0.1 (180/180) & Second generator only (original serving stack unavailable); the C4/C5 absolute drop from v0.1 is entirely attributable to the \texttt{LIMIT 80} value-inventory truncation (byte-identical prompts 101/149 versus 102/149; changed prompts 6/31 versus 23/31); distractor tables stress only C2 because the C4/C5 builders use a fixed eight-table catalog (Section~\ref{sup:scale}) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\clearpage
+\section{Scale Robustness at Tenfold Database Size}\label{sup:scale}
+
+This section documents the scale-robustness experiment summarized in Section~5.5 of the main text. A deterministic tenfold-scaled variant of the database (\texttt{griddb\_maintenance\_v2\_x10}) was built: every entity table receives ten times the rows (for example, 180 assets instead of 18), and two distractor tables (\texttt{vegetation\_inspections}, \texttt{spare\_parts\_inventory}) are added to the schema. The 180 test questions and their gold SQL are byte-identical to v0.1, and all 200 gold queries were re-validated against the scaled database before any model call (zero gold-validation errors). Because the original \texttt{gpt-5.4-mini} serving stack is no longer available, the experiment measures scale robustness on the second generator: C2, C4, and C5 were re-run with \texttt{deepseek-chat} at temperature 0 (540 primary calls plus 13 bounded repair calls, zero provider errors, safe-SQL rate 1.0 in all conditions) and compared against the same generator's v0.1 run. Condition contexts were rebuilt with the original context-builder modules received from the experiment machine after the initial artifact release; as a fidelity check, on the v0.1 database those builders reproduce the archived formal-run prompts byte-for-byte (180/180 for both C2 and C4).
+
+\begin{table}[htbp]
+\caption{Full metric comparison for the scale-robustness run (\texttt{deepseek-chat}, byte-identical 180-question test split). Strict: paper primary metric. Order-insensitive: multiset row comparison, exact projection width. Projection-tolerant: order-insensitive and tolerant to column permutation/subset, as in the main-text convention-sensitivity analysis.}
+\label{tab:sup-x10-metrics}
+\centering
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrrr}
+\toprule
+\textbf{Condition} & \textbf{Strict v0.1} & \textbf{Strict x10} & \textbf{Order-insens.\ v0.1} & \textbf{Order-insens.\ x10} & \textbf{Proj.-tolerant v0.1} & \textbf{Proj.-tolerant x10} \\
+\midrule
+C2 & 0.3389 (61/180) & 0.3333 (60/180) & 0.3667 & 0.3667 & 0.8500 & 0.8167 \\
+C4 & 0.7000 (126/180) & 0.5944 (107/180) & 0.7944 & 0.6944 & 0.7944 & 0.6944 \\
+C5 & 0.7667 (138/180) & 0.6500 (117/180) & 0.8278 & 0.7000 & 0.8278 & 0.7000 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{table}[htbp]
+\caption{Token economics at scale (\texttt{deepseek-chat}, provider-reported means per question; C5 includes repair calls when triggered).}
+\label{tab:sup-x10-tokens}
+\centering
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrr}
+\toprule
+\textbf{Condition} & \textbf{Input tokens v0.1} & \textbf{Input tokens x10} & \textbf{Growth} & \textbf{Output tokens x10} & \textbf{Latency ms x10} \\
+\midrule
+C2 & 2011.6 & 3042.6 & +51\% & 48.6 & 989.7 \\
+C4 & 509.3 & 504.0 & $-$1\% (flat) & 47.3 & 1115.9 \\
+C5 & 680.5 & 560.5 & $-$18\% & 180.3 & 1834.1 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+Table~\ref{tab:sup-x10-metrics} shows that the compact-context advantage persists at +26.1 points strict (C4 0.5944 versus C2 0.3333; +36.1 at v0.1) and that validation still adds +5.6 points (versus +6.7 at v0.1). The convention-sensitivity pattern also persists: 99 of C2's 120 strict errors are shape mismatches, so under the projection-tolerant reading C2 again overtakes the compact conditions (0.8167 versus 0.6944/0.7000), exactly as at v0.1; C4/C5 gain from order-insensitivity but nothing further from projection tolerance, also as at v0.1. Table~\ref{tab:sup-x10-tokens} shows the token divergence: the C2 full-schema-values prompt grew +51\% in measured input tokens and must keep growing with database size (it enumerates the schema DDL and the full value dictionary), whereas the C4 compact context stayed flat, making compact grounding roughly six times cheaper in input tokens at the x10 scale. The builder-side context estimates diverge the same way: the C2 context grows from 631 to 1125 estimated tokens (+78\%) while the C4 context stays at 174 to 176.
+
+\paragraph{Value-inventory truncation artifact (complete diagnosis).} The absolute C4/C5 drop from v0.1 is entirely attributable to a fixed-cap value-inventory truncation, localized as follows. The pilot builder's value inventory enumerates \texttt{SELECT DISTINCT <col> ... ORDER BY <col> LIMIT 80} per column. At v0.1 all 18 asset names fit within the cap; at x10 there are 180 distinct \texttt{asset\_name} values and the alphabetical top-80 cuts off before the RL-*/SB-*/TX-* names, including the TX-001 to TX-004 literals referenced by test questions, so the affected questions lose their matched-value lines and normalization hints. The decomposition is exact: 149 of the 180 C4 prompts are byte-identical between v0.1 and x10, and on those the x10 run scores 101/149 against 102/149 for the v0.1 predictions re-scored on the x10 database (no scale effect); the entire drop sits in the 31 changed-prompt questions, which fall from 23/31 to 6/31 correct. Two corroborating observations complete the picture. First, C5's repair trigger fires less often at x10 (13 versus 52 repairs) because fewer inferred value hints produce fewer missing-value-hint flags, a downstream symptom of the same truncation. Second, re-scoring the v0.1 predictions on the x10 database moves C4 only from 0.7000 to 0.6944 and leaves C5 at 0.7667, so the v0.1 numbers were not inflated by coincidental denotation matches on tiny tables.
+
+\paragraph{Boundaries.} The two distractor tables stress only C2, whose prompt includes their DDL and values: the C4/C5 builders enumerate a fixed eight-table catalog, so the distractors are excluded from the compact context by construction, not by learned schema selection. Part of C4's token boundedness comes from the same \texttt{LIMIT 80} cap that causes the accuracy artifact, so the compact context is bounded partly at the cost of value recall. A deployment-grade version should replace the fixed-cap alphabetical value scan with a scalable value index (for example CHESS-style keyword or hash-based value retrieval) once a column exceeds roughly 80 distinct values.
+
+\end{document}

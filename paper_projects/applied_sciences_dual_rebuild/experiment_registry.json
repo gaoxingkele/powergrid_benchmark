@@ -1,0 +1,259 @@
+{
+  "schema_version": "1.0",
+  "policy": {
+    "evidence_levels": {
+      "E0": "registered only; no execution evidence",
+      "E1": "smoke test with schema/log checks",
+      "E2": "stratified pilot with cost and failure audit",
+      "E3": "full registered run with immutable predictions and complete metadata",
+      "E4": "E3 plus independent recomputation, statistical audit, artifact hashes, and PI freeze"
+    },
+    "main_table_minimum": "E4",
+    "supplement_minimum": "E3",
+    "prohibited": [
+      "fabricated or manually transcribed numerical results",
+      "post-hoc subset selection to obtain significance",
+      "calling AI-assisted labels human-gold",
+      "using development-touched instances as a sealed test",
+      "promoting an experiment with unresolved leakage, license, safety, or provenance defects"
+    ]
+  },
+  "experiments": [
+    {
+      "id": "MA-M01", "paper": "MA-SQLGrid", "rq": ["MA-RQ1"], "class": "main",
+      "priority": "required", "datasets": ["MA-D1", "MA-D2", "MA-D3"],
+      "split": "frozen database-specific dev/test; template families and databases isolated; D1 is development-touched and is not called sealed",
+      "conditions": ["schema-only", "full-schema-values", "CHESS-lite", "MA-SQLGrid-no-validator", "MA-SQLGrid-full"],
+      "replication": "2 or more model families; deterministic service repeated 3 times or 25% stratified consistency audit",
+      "primary_metrics": ["strict_execution_accuracy", "content_tolerant_execution_accuracy", "safe_sql_rate"],
+      "cluster_unit": "question_id", "tests": ["paired cluster bootstrap 95% CI", "McNemar exact", "Holm"],
+      "figures": ["MA-F04 main accuracy with CI", "MA-F05 cross-database heatmap"],
+      "tables": ["MA-T03 primary benchmark"], "minimum_main_table_evidence": "E4",
+      "blocking_conditions": ["MA-D2/D3 license or gold audit failure", "asymmetric prompts", "provider failure >1%", "safe_sql_rate <100%"],
+      "status": "registered"
+    },
+    {
+      "id": "MA-M02", "paper": "MA-SQLGrid", "rq": ["MA-RQ2"], "class": "main",
+      "priority": "required", "datasets": ["MA-D1", "MA-D2"],
+      "split": "same frozen questions in all four cells; identical database snapshot per pair",
+      "conditions": ["Full+NoShape", "Full+Shape", "Compact+NoShape", "Compact+Shape"],
+      "replication": "2 models x 3 repeats; all 2x2 cells complete",
+      "primary_metrics": ["strict_execution_accuracy", "content_tolerant_execution_accuracy", "shape_accuracy"],
+      "cluster_unit": "question_id", "tests": ["paired bootstrap main effects and interaction", "McNemar exact", "Holm"],
+      "figures": ["MA-F06 factorial interaction"], "tables": ["MA-T04 factorial effects"],
+      "minimum_main_table_evidence": "E4",
+      "blocking_conditions": ["prediction_count below registered Cartesian product", "shape leakage", "condition-specific database context"],
+      "status": "registered"
+    },
+    {
+      "id": "MA-M03", "paper": "MA-SQLGrid", "rq": ["MA-RQ6"], "class": "main",
+      "priority": "required", "datasets": ["MA-D2", "MA-D3"],
+      "split": "leave-database-out and leave-template-family-out; no template ancestor crosses split",
+      "conditions": ["strongest generic baseline", "MA-SQLGrid-full"],
+      "replication": "all frozen test questions; model repetitions follow MA-M01",
+      "primary_metrics": ["strict_execution_accuracy", "content_tolerant_execution_accuracy"],
+      "cluster_unit": "template_family_id", "tests": ["paired cluster bootstrap 95% CI", "McNemar exact"],
+      "figures": ["MA-F05 transfer heatmap"], "tables": ["MA-T03 primary benchmark"],
+      "minimum_main_table_evidence": "E4", "blocking_conditions": ["template leakage", "fewer than two eligible databases"],
+      "status": "registered"
+    },
+    {
+      "id": "MA-M04", "paper": "MA-SQLGrid", "rq": ["MA-RQ6"], "class": "main",
+      "priority": "required", "datasets": ["MA-Sealed"],
+      "split": "50-100 never-developed questions stratified by database x template family x intent; run once after method freeze",
+      "conditions": ["strongest frozen baseline", "MA-SQLGrid-full"], "replication": "single sealed execution with immutable raw responses",
+      "primary_metrics": ["strict_execution_accuracy", "safe_sql_rate"], "cluster_unit": "question_id",
+      "tests": ["paired bootstrap 95% CI", "McNemar exact"], "figures": [], "tables": ["MA-T03 sealed-test panel"],
+      "minimum_main_table_evidence": "E4", "blocking_conditions": ["prior exposure", "threshold changed after unsealing", "less than 15% human-authored/deeply rewritten"],
+      "status": "blocked_pending_sealed_set"
+    },
+    {
+      "id": "MA-A01", "paper": "MA-SQLGrid", "rq": ["MA-RQ3"], "class": "ablation",
+      "priority": "required", "datasets": ["MA-D1", "MA-D2"], "split": "same frozen paired test items",
+      "conditions": ["full without validator", "full with bounded validator"], "replication": "same model response candidates and execution environment",
+      "primary_metrics": ["repair_precision", "repair_recall", "harm_rate", "net_accuracy_gain"], "cluster_unit": "question_id",
+      "tests": ["paired bootstrap 95% CI", "McNemar exact"], "figures": ["MA-F07 validator transition matrix"],
+      "tables": ["MA-T05 ablation and repair"], "minimum_main_table_evidence": "E4",
+      "blocking_conditions": ["gold SQL visible to validator", "unbounded repair", "repair trace missing"], "status": "registered"
+    },
+    {
+      "id": "MA-A02", "paper": "MA-SQLGrid", "rq": ["MA-RQ2"], "class": "ablation",
+      "priority": "required", "datasets": ["MA-D1", "MA-D2"], "split": "paired frozen items",
+      "conditions": ["no value normalization", "no schema linking", "no compact selection", "full pipeline"], "replication": "same seeds/models as main experiment",
+      "primary_metrics": ["strict_execution_accuracy", "schema_linking_recall"], "cluster_unit": "question_id",
+      "tests": ["paired bootstrap 95% CI", "Holm"], "figures": [], "tables": ["MA-T05 component ablation"],
+      "minimum_main_table_evidence": "E4", "blocking_conditions": ["components not independently switchable", "prompt budget differs without reporting"], "status": "registered"
+    },
+    {
+      "id": "MA-R01", "paper": "MA-SQLGrid", "rq": ["MA-RQ4"], "class": "robustness",
+      "priority": "required", "datasets": ["MA-D1", "MA-D2"], "split": "derived snapshots preserve gold answers and paired question IDs",
+      "conditions": ["rows-x1", "rows-x10", "rows-x100"], "replication": "same question/model cells",
+      "primary_metrics": ["strict_execution_accuracy", "sqlite_execution_ms"], "cluster_unit": "question_id",
+      "tests": ["cluster bootstrap trend CI"], "figures": ["MA-F08 scale robustness"], "tables": [],
+      "minimum_main_table_evidence": "E4", "blocking_conditions": ["answer-changing replication", "snapshot hash missing"], "status": "registered"
+    },
+    {
+      "id": "MA-R02", "paper": "MA-SQLGrid", "rq": ["MA-RQ4"], "class": "robustness",
+      "priority": "required", "datasets": ["MA-D1", "MA-D2"], "split": "identical distractor database supplied to full and compact paths",
+      "conditions": ["0 distractor tables", "2 distractor tables", "5 distractor tables", "10 distractor tables"],
+      "replication": "paired questions across perturbation levels", "primary_metrics": ["strict_execution_accuracy", "schema_linking_recall", "input_tokens"],
+      "cluster_unit": "question_id", "tests": ["cluster bootstrap trend CI", "Holm"], "figures": ["MA-F08 distractor robustness"],
+      "tables": [], "minimum_main_table_evidence": "E4", "blocking_conditions": ["asymmetric distractor visibility", "gold-answer-changing distractors"], "status": "registered"
+    },
+    {
+      "id": "MA-R03", "paper": "MA-SQLGrid", "rq": ["MA-RQ4"], "class": "robustness",
+      "priority": "required", "datasets": ["MA-D2", "MA-D3"], "split": "reversible perturbation map retained",
+      "conditions": ["column reorder", "alias rename", "description removal", "similar column names", "missing values"],
+      "replication": "paired clean/perturbed item", "primary_metrics": ["strict_execution_accuracy", "valid_sql_rate"], "cluster_unit": "question_id",
+      "tests": ["paired bootstrap 95% CI", "McNemar exact", "Holm"], "figures": ["MA-F08 perturbation robustness"],
+      "tables": ["MA-Supp robustness detail"], "minimum_main_table_evidence": "E4", "blocking_conditions": ["irreversible schema mapping", "perturbation changes semantic answer"], "status": "registered"
+    },
+    {
+      "id": "MA-R04", "paper": "MA-SQLGrid", "rq": ["MA-RQ4"], "class": "robustness",
+      "priority": "recommended", "datasets": ["MA-D1", "MA-D2"], "split": "human-audited meaning-preserving query variants",
+      "conditions": ["original", "abbreviation", "colloquial", "synonym", "unit rewrite", "mixed Chinese-English terminology"],
+      "replication": "one or more frozen variants per question", "primary_metrics": ["strict_execution_accuracy"], "cluster_unit": "source_question_id",
+      "tests": ["cluster bootstrap 95% CI"], "figures": [], "tables": ["MA-Supp language robustness"],
+      "minimum_main_table_evidence": "E4", "blocking_conditions": ["meaning equivalence not audited", "language coverage too small"], "status": "registered"
+    },
+    {
+      "id": "MA-S01", "paper": "MA-SQLGrid", "rq": ["MA-RQ3"], "class": "sensitivity",
+      "priority": "required", "datasets": ["MA-D1-dev", "MA-D2-dev"], "split": "threshold selection on dev only; test evaluated once after freeze",
+      "conditions": ["repair trigger thresholds", "maximum repair attempts 0/1/2"], "replication": "frozen response candidates",
+      "primary_metrics": ["net_accuracy_gain", "harm_rate", "retry_rate"], "cluster_unit": "question_id",
+      "tests": ["bootstrap 95% CI on frozen test setting"], "figures": ["MA-F09 sensitivity and Pareto"], "tables": [],
+      "minimum_main_table_evidence": "E4", "blocking_conditions": ["test-tuned threshold", "unregistered search range"], "status": "registered"
+    },
+    {
+      "id": "MA-X01", "paper": "MA-SQLGrid", "rq": ["MA-RQ5"], "class": "efficiency",
+      "priority": "required", "datasets": ["MA-D1", "MA-D2", "MA-D3"], "split": "same paired requests; warm-up excluded by frozen rule",
+      "conditions": ["all main baselines and MA-SQLGrid"], "replication": "minimum 3 timed repeats or all API calls",
+      "primary_metrics": ["input_tokens", "output_tokens", "cost_usd", "latency_p50", "latency_p95", "retry_rate", "sqlite_execution_ms"],
+      "cluster_unit": "question_id", "tests": ["paired bootstrap 95% CI"], "figures": ["MA-F09 accuracy-cost Pareto", "MA-F10 latency distribution"],
+      "tables": ["MA-T06 efficiency"], "minimum_main_table_evidence": "E4", "blocking_conditions": ["price snapshot missing", "cache/warm-up policy differs", "failed requests excluded"], "status": "registered"
+    },
+    {
+      "id": "MA-X02", "paper": "MA-SQLGrid", "rq": ["MA-RQ3", "MA-RQ4"], "class": "error_analysis",
+      "priority": "required", "datasets": ["MA-D1", "MA-D2", "MA-D3"], "split": "stratified errors from frozen canonical predictions",
+      "conditions": ["schema", "value", "join", "filter", "aggregation", "projection/order", "syntax", "validator harm"],
+      "replication": "two independent labels for a registered error sample; adjudicate conflicts",
+      "primary_metrics": ["error_category_count", "inter_annotator_agreement"], "cluster_unit": "question_id",
+      "tests": ["bootstrap category proportions"], "figures": ["MA-F07 error transition", "MA-F11 audited cases"],
+      "tables": ["MA-Supp error taxonomy"], "minimum_main_table_evidence": "E4", "blocking_conditions": ["analyst sees condition during blind labeling", "unresolved conflicts"], "status": "registered"
+    },
+    {
+      "id": "C2-M01", "paper": "C2GES", "rq": ["C2-RQ1"], "class": "main",
+      "priority": "required", "datasets": ["C2-D1-FEVER"],
+      "split": "group by underlying Wikipedia title/document_id; no document crosses train/dev/test",
+      "conditions": ["oracle-label", "predicted-label", "label-blind"], "replication": "5 fixed training seeds",
+      "primary_metrics": ["evidence_f1_at_k", "recall_at_k", "mrr", "ndcg_at_k"], "cluster_unit": "document_id",
+      "tests": ["document-cluster bootstrap 95% CI", "paired permutation or Wilcoxon", "Holm"],
+      "figures": ["C2-F04 FEVER main CI", "C2-F05 seed distribution"], "tables": ["C2-T03 primary benchmark"],
+      "minimum_main_table_evidence": "E4", "blocking_conditions": ["claim_id used as document_id", "document leakage", "oracle protocol presented as end-to-end"], "status": "registered"
+    },
+    {
+      "id": "C2-M02", "paper": "C2GES", "rq": ["C2-RQ1"], "class": "main",
+      "priority": "required", "datasets": ["C2-D1-FEVER"], "split": "same candidates and document-grouped test",
+      "conditions": ["Lead-k", "TF-IDF", "BM25", "TextRank/LexRank", "SBERT", "cross-encoder MiniLM", "BGE reranker", "query-only learned", "C2GES"],
+      "replication": "learned systems 5 seeds; deterministic baselines one frozen run plus reproducibility rerun",
+      "primary_metrics": ["evidence_f1_at_k", "recall_at_k", "mrr", "ndcg_at_k"], "cluster_unit": "document_id",
+      "tests": ["document-cluster bootstrap 95% CI", "paired test vs preregistered primary baseline", "Holm"],
+      "figures": ["C2-F04 baseline comparison"], "tables": ["C2-T03 primary benchmark"],
+      "minimum_main_table_evidence": "E4", "blocking_conditions": ["different candidate pools", "missing strong rerankers", "seed cherry-picking"], "status": "registered"
+    },
+    {
+      "id": "C2-M03", "paper": "C2GES", "rq": ["C2-RQ4", "C2-RQ5"], "class": "main",
+      "priority": "required_if_power_grid_title", "datasets": ["C2-D2-NERC"],
+      "split": "event-family grouped; past-year to future-year OOD panel; no related report crosses sides",
+      "conditions": ["BM25", "BGE", "C2GES", "controlled zero-shot LLM"], "replication": "all audited queries; model seeds where applicable",
+      "primary_metrics": ["role_macro_f1", "evidence_recall_at_k", "reading_compression", "redundancy_rate"], "cluster_unit": "document_id",
+      "tests": ["document-cluster bootstrap 95% CI", "paired test", "Holm"],
+      "figures": ["C2-F09 NERC role confusion", "C2-F10 NERC transfer"], "tables": ["C2-T05 NERC transfer"],
+      "minimum_main_table_evidence": "E4", "blocking_conditions": ["no real human audit", "AI-assisted labels called gold", "event-family leakage"],
+      "status": "blocked_pending_human_audit"
+    },
+    {
+      "id": "C2-A01", "paper": "C2GES", "rq": ["C2-RQ2"], "class": "ablation",
+      "priority": "required", "datasets": ["C2-D1-FEVER"], "split": "document-grouped frozen test",
+      "conditions": ["full", "no role head", "fixed lexicon role", "query-only role"], "replication": "5 seeds",
+      "primary_metrics": ["evidence_f1_at_k", "worst_role_f1"], "cluster_unit": "document_id",
+      "tests": ["document-cluster bootstrap 95% CI", "paired test", "Holm"], "figures": ["C2-F06 ablation waterfall"],
+      "tables": ["C2-T04 ablations"], "minimum_main_table_evidence": "E4", "blocking_conditions": ["role labels leaked", "only best seed reported"], "status": "registered"
+    },
+    {
+      "id": "C2-A02", "paper": "C2GES", "rq": ["C2-RQ2"], "class": "ablation",
+      "priority": "required", "datasets": ["C2-D1-FEVER"], "split": "document-grouped frozen test",
+      "conditions": ["full", "no local chain", "no mixture floor", "pointwise loss", "frozen encoder"], "replication": "5 seeds",
+      "primary_metrics": ["evidence_f1_at_k", "mrr", "ndcg_at_k"], "cluster_unit": "document_id",
+      "tests": ["document-cluster bootstrap 95% CI", "Holm"], "figures": ["C2-F06 ablation waterfall"],
+      "tables": ["C2-T04 ablations"], "minimum_main_table_evidence": "E4", "blocking_conditions": ["training budget differs without disclosure", "configuration hashes missing"], "status": "registered"
+    },
+    {
+      "id": "C2-S01", "paper": "C2GES", "rq": ["C2-RQ3"], "class": "sensitivity",
+      "priority": "required", "datasets": ["C2-D1-FEVER", "C2-D2-NERC"], "split": "frozen test, no K tuning on test",
+      "conditions": ["K=1", "K=3", "K=5", "K=10"], "replication": "5 seeds for learned models",
+      "primary_metrics": ["precision_at_k", "recall_at_k", "f1_at_k", "reading_compression"], "cluster_unit": "document_id",
+      "tests": ["document-cluster bootstrap 95% CI"], "figures": ["C2-F07 K sensitivity"], "tables": [],
+      "minimum_main_table_evidence": "E4", "blocking_conditions": ["K selected on test", "candidate pool smaller than K"], "status": "registered"
+    },
+    {
+      "id": "C2-S02", "paper": "C2GES", "rq": ["C2-RQ2", "C2-RQ6"], "class": "sensitivity",
+      "priority": "recommended", "datasets": ["C2-D1-FEVER"], "split": "dev selects one operating point; test reports frozen point and registered curve",
+      "conditions": ["candidate pool size", "mixture weights", "role floor"], "replication": "3-5 seeds for reduced grid; 5 seeds at frozen point",
+      "primary_metrics": ["evidence_f1_at_k", "latency_ms"], "cluster_unit": "document_id",
+      "tests": ["bootstrap 95% CI at frozen point"], "figures": ["C2-F08 weight/sensitivity"], "tables": [],
+      "minimum_main_table_evidence": "E4", "blocking_conditions": ["test-guided hyperparameter selection", "search space not logged"], "status": "registered"
+    },
+    {
+      "id": "C2-R01", "paper": "C2GES", "rq": ["C2-RQ3"], "class": "robustness",
+      "priority": "required", "datasets": ["C2-D1-FEVER", "C2-D2-NERC"], "split": "predefined document-length quantiles from test metadata",
+      "conditions": ["short", "medium", "long", "very long"], "replication": "all frozen test documents",
+      "primary_metrics": ["evidence_f1_at_k", "recall_at_k"], "cluster_unit": "document_id",
+      "tests": ["document-cluster bootstrap 95% CI", "interaction/trend test"], "figures": ["C2-F08 length robustness"],
+      "tables": ["C2-Supp strata"], "minimum_main_table_evidence": "E4", "blocking_conditions": ["post-hoc bin edges", "small strata without disclosure"], "status": "registered"
+    },
+    {
+      "id": "C2-R02", "paper": "C2GES", "rq": ["C2-RQ3"], "class": "robustness",
+      "priority": "required", "datasets": ["C2-D1-FEVER"], "split": "meaning-preserving paraphrases audited independently of systems",
+      "conditions": ["original claim", "lexical paraphrase", "syntactic paraphrase", "distractor phrase"], "replication": "paired variants grouped by source claim",
+      "primary_metrics": ["evidence_f1_at_k", "rank_stability"], "cluster_unit": "document_id",
+      "tests": ["document-cluster bootstrap 95% CI"], "figures": [], "tables": ["C2-Supp robustness"],
+      "minimum_main_table_evidence": "E4", "blocking_conditions": ["semantic drift", "system-aware paraphrase selection"], "status": "registered"
+    },
+    {
+      "id": "C2-R03", "paper": "C2GES", "rq": ["C2-RQ3", "C2-RQ5"], "class": "robustness",
+      "priority": "required", "datasets": ["C2-D2-NERC"], "split": "five roles fixed before evaluation",
+      "conditions": ["root cause", "trigger", "propagation/response", "impact", "mitigation"], "replication": "all audited queries",
+      "primary_metrics": ["per_role_precision", "per_role_recall", "per_role_f1", "worst_role_f1"], "cluster_unit": "document_id",
+      "tests": ["document-cluster bootstrap 95% CI"], "figures": ["C2-F09 role confusion"], "tables": ["C2-T05 role results"],
+      "minimum_main_table_evidence": "E4", "blocking_conditions": ["role definitions changed after results", "human audit absent"], "status": "blocked_pending_human_audit"
+    },
+    {
+      "id": "C2-X01", "paper": "C2GES", "rq": ["C2-RQ6"], "class": "efficiency",
+      "priority": "required", "datasets": ["C2-D1-FEVER", "C2-D2-NERC"], "split": "same candidate pools and hardware; frozen warm-up policy",
+      "conditions": ["BM25", "SBERT", "cross-encoder", "BGE", "C2GES", "controlled LLM"], "replication": "minimum 3 timed repeats",
+      "primary_metrics": ["latency_p50", "latency_p95", "queries_per_second", "peak_cpu_memory", "peak_gpu_memory", "parameter_count", "energy_if_available"],
+      "cluster_unit": "document_id", "tests": ["paired bootstrap 95% CI for per-query measures"],
+      "figures": ["C2-F11 accuracy-latency Pareto"], "tables": ["C2-T06 efficiency"], "minimum_main_table_evidence": "E4",
+      "blocking_conditions": ["hardware differs without normalization", "failed queries excluded", "warm-up policy differs"], "status": "registered"
+    },
+    {
+      "id": "C2-X02", "paper": "C2GES", "rq": ["C2-RQ5"], "class": "error_analysis",
+      "priority": "required", "datasets": ["C2-D1-FEVER", "C2-D2-NERC"], "split": "predefined stratified sample from canonical outputs; blind method identity during labeling",
+      "conditions": ["correct", "partially correct", "role mismatch", "cross-paragraph failure", "table/OCR failure", "redundant evidence"],
+      "replication": "at least 10 publication cases; two labels and conflict resolution for quantitative taxonomy",
+      "primary_metrics": ["category_count", "reading_compression", "redundancy_rate"], "cluster_unit": "document_id",
+      "tests": ["bootstrap category proportions"], "figures": ["C2-F12 interpretable cases"], "tables": ["C2-Supp error taxonomy"],
+      "minimum_main_table_evidence": "E4", "blocking_conditions": ["cherry-picked cases", "method identity not blinded", "source sentence IDs missing"], "status": "registered"
+    },
+    {
+      "id": "C2-X03", "paper": "C2GES", "rq": ["C2-RQ4"], "class": "data_quality",
+      "priority": "required_if_quantitative_NERC", "datasets": ["C2-D2-NERC"], "split": "20-30 reports and 100-150 questions independently labeled by two real power-system reviewers; third-person adjudication",
+      "conditions": ["annotator A", "annotator B", "adjudicated"], "replication": "all selected items independently labeled before adjudication",
+      "primary_metrics": ["raw_agreement", "sentence_set_f1", "kappa_or_krippendorff_alpha", "conflict_rate"], "cluster_unit": "document_id",
+      "tests": ["document-cluster bootstrap 95% CI for agreement"], "figures": ["C2-F03 annotation workflow"], "tables": ["C2-T02 dataset quality"],
+      "minimum_main_table_evidence": "E4", "blocking_conditions": ["AI agents represented as human experts", "reviewer identities/qualifications not documented", "conflicts unresolved"],
+      "status": "blocked_pending_human_audit"
+    }
+  ]
+}

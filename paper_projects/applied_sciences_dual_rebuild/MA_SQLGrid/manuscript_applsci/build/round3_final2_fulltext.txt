@@ -1,0 +1,3119 @@
+Article
+
+MA-SQLGrid: A Controlled Factorial Study of Context
+Grounding for Text-to-SQL over a Power-Grid Maintenance
+Database
+W10_FRONT_MATTER: AUTHOR NAMES REQUIRED
+W10_FRONT_MATTER: AFFILIATIONS AND AUTHOR E-MAIL ADDRESSES REQUIRED
+* W10_FRONT_MATTER: CORRESPONDING AUTHOR AND E-MAIL REQUIRED
+
+Featured Application
+
+1
+
+The framework demonstrates an auditable read-only prototype for natural-language querying of structured power-grid maintenance data. A human must inspect generated SQL
+and source rows before consequential use. Current quantitative evidence is limited to
+one GridDB benchmark; no deployed maintenance workflow or field decision has been
+validated.
+
+2
+
+Abstract
+
+7
+
+Power-grid text-to-SQL must remain read-only and return intended results. We evaluate
+MA-SQLGrid through two frozen, GridDB-tailored prompt factors: a context package and
+a structural/SQL-operation hint. Qwen2.5-Coder-7B Q4_K_M and Granite-3.3-8B Q4_K_M
+each produced one prediction in every cell of a paired 2-by-2 design over 180 questions
+(1440 predictions). After Holm adjustment, no factorial execution effect or cross-backbone
+modifier was promoted; a secondary manipulation check showed greater projected-column
+adherence under the hint. In a frozen 700-call component study, presented value evidence
+improved Qwen execution by 0.1059 (95% composition-sensitivity interval [0.0282, 0.2013],
+adjusted p = 0.0310) but not Granite execution; deterministic selection was not promoted.
+We then re-executed every archived prediction on 15 deterministic semantic stress states
+and three insertion-order diagnostics. Two blinded agent technical reviewers held all 114
+order-sensitive questions, leaving 66 for an automated endpoint. The 15-state logical-AND
+execution-agreement rates ranged from 0.6212 to 0.8182; none of nine effects survived
+Holm correction. This retrospective stress test reduces single-snapshot ambiguity but is
+not a human semantic audit. GridDB is a synthetic, development-visible 8-table/98-row
+database; no multi-run replication or external accuracy is claimed. The evidence supports a
+bounded case study, not a universal prompt recipe.
+
+8
+
+Keywords: text-to-SQL; power-grid maintenance; context grounding; factorial experiment;
+execution equality; local language models; reproducibility
+
+3
+4
+5
+6
+
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+
+25
+26
+
+Received:
+Accepted:
+Published:
+Copyright: © 2026 by the authors.
+Submitted to Appl. Sci. for possible
+open access publication under the
+terms and conditions of the Creative
+Commons Attribution (CC BY) license.
+
+1. Introduction
+
+27
+
+Power-grid engineers routinely work with relational records describing equipment,
+inspections, maintenance orders, defects, and operating conditions. Direct SQL access
+is precise, but it assumes that a user knows the database schema, joins, identifiers, and
+aggregation conventions. Text-to-SQL systems promise a more accessible interface: a user
+asks a question in ordinary language, and a model produces a query whose execution
+
+Version August 5, 2026 submitted to Appl. Sci.
+
+https://doi.org/10.3390/app1010000
+
+28
+29
+30
+31
+32
+
+Version August 5, 2026 submitted to Appl. Sci.
+
+2 of 25
+
+returns the requested records. In an engineering setting, however, plausible-looking SQL is
+not sufficient. A query may execute against the wrong table, omit a required aggregation,
+return an unintended projection, or silently use an identifier that exists but has a different
+domain meaning.
+Modern language models can translate questions into SQL when supplied with schema
+context, demonstrations, or constrained decoding. Established benchmarks such as Spider
+emphasize generalization across databases, while constrained decoders such as PICARD
+show the value of preventing invalid token sequences [1,2]. Subsequent work has explored
+schema linking, execution-guided selection, prompt design, and large-language-model
+evaluation [3–5]. These advances do not remove an applied design question: which parts
+of the database context and output contract should be placed in the prompt, and do their
+effects persist across model backbones?
+Schema presentation, value exposure, domain normalization, and answer specification
+are often changed together. A system may shorten the schema, replace a global value
+dictionary with question-matched values, add normalization rules, and state SQL-operation
+requirements in one revised prompt, then attribute any improvement to “schema selection”
+or “formatting.” Such labels would be inaccurate here. MA-SQLGrid instead audits the
+two interventions actually executed: a bundled context package and a question-derived
+composite structural/SQL-operation hint. Each question appears in all four cells, so
+package effects and their interaction can be estimated without confusing question difficulty
+with prompt condition.
+The structural endpoint is deliberately separated from semantic correctness. A response can return the requested number of projected columns while retrieving incorrect
+content. We therefore make strict execution equality the primary endpoint and use one
+common-target projected-column diagnostic in every cell. This diagnostic requires successful execution and equality between the result-column count and a single project-authored
+target frozen per question; it does not validate row granularity, ordering, or meaning.
+A useful engineering conclusion must therefore be based on the executed result, not on
+structural conformity alone.
+The revised study also separates canonical evidence from development-visible material. The primary GridDB corpus contains 200 questions, of which 20 are development
+records and 180 form the factorial evaluation partition. This partition has been used in
+prior local development and is therefore not described as a newly administered sealed
+benchmark. Two local, quantized instruction backbones were run under frozen configurations, and independent audit scripts directly re-executed all 1440 predictions. An earlier
+interrupted Qwen directory is quarantined and excluded from every canonical table.
+For external scope, we materialize relational pilots from RTS-GMLC and SimBench.
+Their schemas and automatically constructed question–SQL candidates provide a realistic
+test of protocol plumbing, safety checks, and schema portability. They do not yet provide
+human-gold external accuracy: zero of the 91 external candidates have completed the
+prepared two-reviewer adjudication process. A Qwen diagnostic run over these candidates
+is retained outside the canonical evidence chain because comparing model outputs with
+automatic candidate SQL cannot substitute for expert semantic validation.
+This article makes five bounded contributions. First, it specifies an executed text-toSQL pipeline with explicit gold isolation, one-call generation, parsing, safety validation,
+and ledger writing. Second, it decomposes two GridDB-tailored prompt packages in a
+paired 2 × 2 design. Third, it reports two complete local-model runs with hash-bound
+model snapshots, prompt and data artifacts, failure accounting, and direct SQLite reexecution. Fourth, it states a finite-set inference hierarchy with cluster-level sign flips,
+family-wise Holm correction, and separately labeled composition sensitivity. Fifth, it adds
+
+https://doi.org/10.3390/app1010000
+
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+
+Version August 5, 2026 submitted to Appl. Sci.
+
+3 of 25
+
+a prospectively frozen component study of presented value evidence and deterministic
+candidate selection, alongside a data card, selector audit, and explicit external-validation
+gate.
+The empirical result is narrower than the original architectural expectation. The
+composite hint clearly increases common-target projected-column conformity for both
+tested backbones, but none of the nine primary factorial execution tests survives familywise correction. Presented value evidence has a positive execution effect for Qwen only, and
+deterministic candidate selection is not promoted for either snapshot. Accordingly, MASQLGrid is presented as an auditable case study, not as proof that every stage independently
+improves accuracy.
+The remainder of the paper reviews text-to-SQL grounding and power-grid data applications, defines the data and framework, specifies the factorial and statistical protocol,
+reports cell-level and cross-backbone results, discusses operational implications and limitations, and identifies the human and repository gates that remain before submission and
+external deployment.
+
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+
+2. Related Work
+
+98
+
+2.1. Text-to-SQL and Cross-Database Evaluation
+
+99
+
+Text-to-SQL research has progressed from template and grammar systems to neural parsers and instruction-tuned language models. Spider established a cross-domain,
+cross-database setting in which train and test databases differ, forcing models to interpret
+unfamiliar schemas rather than memorize query templates [1]. Its difficulty also highlighted
+the need to evaluate structural decisions such as joins, nesting, aggregation, grouping, and
+ordering. Later benchmarks and surveys catalogued continuing challenges in schema
+linking, compositional generalization, ambiguous questions, and realistic database content
+[3,6,7].
+Execution-based evaluation answers a question that string match cannot: whether
+the predicted query produces the intended result on a particular database state. Exact
+SQL match can penalize semantically equivalent queries, whereas execution equality can
+fail to distinguish nonequivalent queries on an insufficiently discriminating database.
+Applied work should therefore freeze the execution contract, retain the predicted SQL,
+and state the database boundary. In this study, strict result equality is primary; projectedcolumn conformity and error categories are separate diagnostics. We do not claim semantic
+equivalence beyond the frozen database instances.
+Constrained decoding and execution guidance reduce invalid outputs. PICARD incrementally rejects tokens that cannot form admissible SQL [2]. Execution-guided approaches
+test candidate queries against a database and use failures or results during selection. MASQLGrid uses a lighter boundary: the generator is prompted once under a frozen condition,
+then a deterministic parser and read-only validator classify and execute the output. No
+gold SQL or gold result is available during generation or candidate selection.
+Large language models make prompt context a central design variable. Schema serialization, examples, column descriptions, value samples, and explicit output instructions
+compete for a finite context budget. Empirical studies show that model performance
+can depend strongly on representation and demonstration choices [4,5,8]. Yet combined
+prompt revisions do not reveal causal contribution. Our factorial design estimates two
+interventions separately and shows that a prompt feature can improve response conformity
+more reliably than semantic execution.
+
+100
+
+https://doi.org/10.3390/app1010000
+
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+
+Version August 5, 2026 submitted to Appl. Sci.
+
+4 of 25
+
+2.2. Schema Linking, Context Selection, and Response Contracts
+
+129
+
+Schema linking connects question spans to tables, columns, values, and relationships
+[9–11]. A full schema preserves all available elements but may introduce distractors, longrange dependencies, and token cost. Compact context aims to retain question-relevant
+elements while removing low-relevance structure. This creates a recall–precision trade-off:
+excluding a needed join key is catastrophic, while retaining unrelated tables may confuse a
+generator. Deterministic introspection and selection make this trade-off auditable.
+Output contracts describe what a response should contain. In text-to-SQL, such
+guidance can specify projected fields, row granularity, ordering, aggregation, grouping/HAVING, or LIMIT behavior. The intervention tested here is consequently broader
+than an answer-format hint and is explicitly corpus-tailored. We record only a commontarget projected-column indicator independently of execution equality. The two endpoints
+must not be merged: high column-count conformity shows reception of one structural
+instruction, not correctness of the returned database content.
+Recent domain-oriented systems combine schema retrieval, value grounding, decomposition, and repair, including CHESS and the Applied Sciences DKA-SQL study [12,13].
+DKA-SQL is a direct power-grid text-to-SQL precedent, so our novelty is not being the
+first grid text-to-SQL framework. Its published evidence, workflow, models, and corpora
+differ materially from ours, and no official implementation or immutable prompt/code
+release was located in the Round-1 audit; we therefore make no numerical superiority or
+reproduction claim. A 2 × 2 design estimates the bundled context-package effect, compositehint effect, and difference-in-differences interaction. Repeating the same design for two
+backbones is a sensitivity analysis, not a general model-family study.
+
+130
+
+2.3. Power-Grid Databases and AI-Assisted Access
+
+152
+
+Power-system datasets mix network topology, asset attributes, time series, costs, constraints, maintenance records, and event narratives. RTS-GMLC provides a reproducible
+test-system resource with buses, branches, generators, loads, renewable profiles, reserves,
+and dispatch-related data [14]. SimBench supplies benchmark networks for multiple voltage levels and scenarios [15]. Both resources can be transformed into relational databases
+that exercise selections, joins, aggregation, ranking, and topology-oriented questions.
+These public engineering resources are attractive for external validation, but database
+availability does not create a text-to-SQL benchmark automatically. Natural-language
+questions and reference SQL must be semantically reviewed, units and tie handling must
+be specified, and ambiguous projections must be resolved. Automatically generated pairs
+are useful for building and testing the pipeline, yet their agreement with a model output is
+not human-gold accuracy. The present paper treats the external resources accordingly.
+Recent work applies language models to grid-domain information extraction, including a semantic-dependency and lexical-embedding RoBERTa design in this journal [16].
+Relational-provenance research in the same venue further motivates preserving query and
+source lineage [17]. The central risk is that fluent output can be mistaken for validated
+engineering reasoning. Text-to-SQL offers a comparatively inspectable interface because
+the generated query and returned rows can be reviewed. That advantage depends on a
+read-only execution policy, stable database provenance, and conservative claims about
+what the execution demonstrates.
+
+153
+
+https://doi.org/10.3390/app1010000
+
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+
+Version August 5, 2026 submitted to Appl. Sci.
+
+5 of 25
+
+3. Materials and Methods
+
+173
+
+3.1. Task Definition and Evidence Boundary
+
+174
+
+Let xi be a natural-language question, Di a read-only database, Si its introspected
+schema, and yi⋆ a reference query used only by the offline evaluator. For context-package
+condition c ∈ {0, 1} and composite-hint condition h ∈ {0, 1}, the model produces
+
+175
+
+yei,c,h = M (Ci,c,h ; θ, ρ),
+
+(1)
+
+178
+
+where θ is a frozen model snapshot and decoding configuration and ρ is the prompt
+template. The two executed packages are
+
+179
+
+Ci,0,h = Pfull (Si , V ) ⊕ hH ( xi ),
+
+Ci,1,h = Pcompact ( xi , Si , V ) ⊕ hH ( xi ),
+
+176
+177
+
+180
+
+(2)
+
+181
+
+where Pfull contains complete eight-table DDL plus a global permitted-value dictionary,
+whereas Pcompact contains question-selected tables/columns, retained joins, matched values,
+and handcrafted normalization/predicate hints. Thus c is a bundled package factor, not an
+isolated schema-length intervention. H is a GridDB-tailored composite structural/SQLoperation hint, not a pure formatting hint.
+The parser and validator return either one admissible query or a terminal error:
+
+182
+
+ybi,c,h = R(yei,c,h , Di ).
+
+183
+184
+185
+186
+187
+
+(3)
+
+188
+
+R removes presentation wrappers, rejects multiple statements and write-capable statements,
+checks a single SELECT or WITH form, and executes admissible SQL against a database
+opened read-only. It never sees yi⋆ or its result while selecting a candidate.
+The experiment estimates prompt intervention effects, not a sealed generalization score.
+GridDB’s 180 evaluation records have been exposed during earlier project development;
+they are held out from the current prompt-construction code but are not described as neverseen data. External candidates are development-visible and automatically generated. These
+boundaries are carried into the title interpretation, abstract, Results, and Data Availability
+Statement.
+
+189
+190
+191
+192
+193
+194
+195
+196
+197
+
+3.2. MA-SQLGrid Processing Pipeline
+
+198
+
+Figure 1 and Algorithm 1 describe the executed path. It contains no candidate ranking,
+repair loop, or repeated generation. Gold SQL and gold results enter only after a terminal
+ledger row has been written.
+
+199
+
+Executed one-pass MA-SQLGrid pipeline
+Question +
+frozen DB
+
+Prompt package
+context × hint
+
+Frozen local
+backbone
+
+Parse • validate
+execute
+
+Terminal evidence ledger
+IDs • hashes • raw response • SQL • status • tokens • latency
+
+One generation per question/cell/backbone • no candidate ranking • no repair loop
+
+Figure 1. Executed MA-SQLGrid path. Each backbone makes one generation per question and
+factorial cell; the offline gold boundary follows terminal ledger writing.
+
+https://doi.org/10.3390/app1010000
+
+200
+201
+
+Version August 5, 2026 submitted to Appl. Sci.
+
+6 of 25
+
+Algorithm 1 Executed one-call factorial pipeline
+1: Input: question xi , read-only SQLite snapshot Di , frozen model Mb , cell (c, h ).
+2: Assert that the prompt-path record contains no gold SQL, gold result, or answer field.
+3: Freeze introspected tables, columns, primary/foreign keys, descriptions, and permitted
+
+values.
+4: if c = 0 then
+5:
+serialize complete DDL and the global value inventory.
+6: else
+7:
+tokenize xi ; match permitted values; fire frozen synonym, date, numeric, topol-
+
+ogy, aggregation, and domain-literal rules; select seed schema; expand foreign-key
+paths to at most six tables; serialize selected schema, joins, matched values, and
+normalization hints.
+8: end if
+9: if h = 1 then
+10:
+append the frozen projected-column, row-granularity, ordering, aggregation, grouping/HAVING, projection, and LIMIT instructions derived from xi .
+11: end if
+12: Serialize the common safety instruction, condition label, question ID, context, and
+question; hash prompt and context; assert absence of the literal gold SQL.
+13: Make exactly one deterministic model request; parse the first WITH/SELECT candidate
+through its first semicolon.
+14: Require one read-only statement; execute admissible SQL against Di ; write raw response, parsed SQL, status, errors, hashes, tokens, latency, and retry count to the
+terminal ledger.
+15: Only then compare the executed result with the frozen reference result offline.
+The parser boundary is deliberately narrow: it retains the first candidate through the
+first semicolon before validation. We therefore claim that the parsed candidate passed the
+single-statement read-only validator, not that arbitrary later raw-response text was formally
+proven harmless. Every attempt carries stable question, cell, model, run, prompt, context,
+database, code, and configuration identifiers.
+
+202
+
+3.3. Prompt Packages and Factor Audit
+
+207
+
+The full package is constant across questions apart from the question text: all eighttable DDL and a sorted global dictionary drawn from permitted non-ID categorical, date,
+and text columns. The compact package first matches permitted values, applies frozen
+corpus-tailored phrase and normalization rules, selects seed tables/columns, expands
+foreign-key connections to at most six tables, and serializes joins, matched values, and
+predicate hints. If selection omits a needed element, the model cannot recover it from gold
+metadata.
+The composite hint can specify the expected projected-column count, row granularity,
+ordering need, COUNT/AVG/SUM/MIN/MAX, GROUP BY/HAVING, exact projection fields, descending order, or LIMIT. Its serialization also differs between full and compact packages.
+The estimand is therefore the effect of this frozen composite package as actually delivered;
+it is not the effect of a generic answer-format sentence.
+For the representative question “How many alarmed readings does each asset
+have?”, F00 contains complete DDL and the global dictionary; F01 adds a two-column,
+multi-row, ordered COUNT(*) hint. F10 contains six graph-expanded tables, the
+sensor_readings.asset_id = assets.asset_id join and the normalization alarm_flag
+= 1; F11 adds the corresponding two-column, multi-row, ordering and count instructions.
+Across all 180 questions, question ID, database, common safety instruction, model settings,
+one-call policy, parser, validator, and offline evaluator are invariant. Prompt-field auditing
+confirms that F00/F01 always contain full DDL and the global dictionary, F10/F11 always
+
+208
+
+https://doi.org/10.3390/app1010000
+
+203
+204
+205
+206
+
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+
+Version August 5, 2026 submitted to Appl. Sci.
+
+7 of 25
+
+contain selected schema and joins, and the composite hint occurs only in F01/F11. Matched
+values occur for 162 questions and normalization hints for 170, by construction rather than
+missing data.
+
+228
+
+3.4. Data Resources
+3.4.1. GridDB Primary Corpus
+
+231
+
+229
+230
+
+232
+
+GridDB-Maintenance-v2 v0.1 is a small synthetic SQLite case study with 8 tables and 98
+rows: asset_types (6), assets (18), grid_topology (9), locations (8), maintenance_logs
+(8), sensor_readings (26), technicians (8), and work_orders (15). It contains 200 naturallanguage–SQL records: 20 development and 180 factorial-evaluation questions. All 200
+references executed during dataset generation. The 180 evaluation records comprise 66
+easy, 91 medium, and 23 hard items and map to 70 normalized gold-SQL structural clusters
+(sizes 1–19; 58 singletons), which form the resampling and randomization unit.
+Coverage tags overlap: the formal set includes 170 filters, 114 ordering queries, 102
+joins, 59 aggregations, 30 time predicates, 18 top-k requests, 12 GROUP BY, 11 topology
+traversals, nine self-joins, six nested queries, and smaller numbers of DISTINCT, HAVING,
+pattern, scalar-function, left-join, and null cases. Five reference queries return no rows
+on the frozen snapshot. Equality on one database state can therefore accept accidental
+equivalence, and these counts are coverage descriptors rather than independent question
+families.
+The current inventory did not locate a clear redistribution license for the underlying
+GridDB question records. We therefore retain the local hashes and derived statistics but do
+not assume permission to redistribute the raw corpus. This is a data-governance limitation
+and a pre-submission repository action, not a reason to omit provenance.
+Gold SQL and derived results are removed before prompt construction. The builder
+asserts that exact gold SQL does not occur in any serialized prompt. Prompt and data
+hashes are identical across the two backbone runs: the registered prompt-set SHA-256
+is 28009f5b...491ad5, and the data SHA-256 is 199fcf7c...8f266. Full digests are preserved in the manifests.
+
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+
+3.4.2. RTS-GMLC Portability Pilot
+
+256
+
+The RTS-GMLC relational pilot contains 10 tables and 360,530 rows. It includes 73
+buses, 120 branches, 158 generators, generator costs and constraints, 26,352 load rows,
+254,736 renewable-profile rows, reserve requirements and products, and 52,416 day-ahead
+dispatch rows. The builder constructs 55 automatic candidates across 11 template families,
+with five instances per family.
+All 55 reference statements pass the registered read-only executability checks. This
+confirms that the database, questions, SQL strings, and evaluator are mechanically connected. It does not establish that the natural-language questions are unambiguous or
+that the automatically generated SQL is expert-correct. The source notice and attribution
+requirements are retained for later license review.
+
+257
+
+3.4.3. SimBench Portability Pilot
+
+267
+
+The SimBench pilot uses the 1-MV-urban0-sw network and materializes eight tables
+containing a network record, two voltage levels, 144 buses, 147 lines, two transformers, 139
+loads, 134 generators, and 305 switches. It supplies 36 automatic candidates: six each for
+single-table retrieval, filtering, aggregation, joins, top-k retrieval, and topology questions.
+Four reference queries return empty result sets and remain in the review packet. Empty
+references are not silently removed because they reveal evaluator behavior, but equality on
+two empty outputs is less discriminating than equality on populated outputs. SimBench
+
+https://doi.org/10.3390/app1010000
+
+258
+259
+260
+261
+262
+263
+264
+265
+266
+
+268
+269
+270
+271
+272
+273
+274
+
+Version August 5, 2026 submitted to Appl. Sci.
+
+8 of 25
+
+1.6.2 provenance and its database/content licensing conditions are recorded separately
+from the code license.
+
+275
+276
+
+Table 1. Data resources and their permitted evidence role. Automatic denotes machine-constructed
+candidates that have not completed independent expert review.
+Resource
+GridDB
+RTS-GMLC
+SimBench
+
+Questions
+
+Factorial prompts
+
+Tables
+
+Rows
+
+180 evaluation
+55 automatic
+36 automatic
+
+720 per backbone
+220 diagnostic
+144 diagnostic
+
+8
+10
+8
+
+98
+360,530
+874
+
+Evidence role
+canonical paired experiment
+plumbing/portability only
+plumbing/portability only
+
+3.4.4. Human-Review Gate
+
+277
+
+The external review packet contains all 91 candidates and two independent reviewer
+forms. At the current cutoff, no form has been completed and no disagreement has been
+adjudicated. Machine triage marks four records high priority, 69 medium priority, and 18
+low priority; these labels organize review and are not expert judgements.
+A future external accuracy claim requires completion of both forms, retention of
+disagreements, adjudication under the frozen manual, and preferably a newly authored
+sealed subset that has not been exposed with model output. Figure 2 makes this boundary
+explicit. Material on the left is available now; claims on the right remain blocked.
+
+278
+279
+280
+281
+282
+283
+284
+285
+
+Evidence promotion and sealed external gate
+
+91 visible
+auto-candidates
+
+Dual review +
+adjudication
+
+Human-reviewed UNSEALED
+visible candidates only
+
+New isolated
+sealed set
+
+One no-drop
+frozen run
+
+Eligible confirmatory evidence
+after audit + license clearance
+
+No failed item dropped • separate dataset reporting • access log • permanent artifact
+
+Figure 2. External evidence gate. Automatic candidates support protocol diagnostics, while humangold and sealed external accuracy require independent review and adjudication.
+
+3.5. Factorial Experimental Design
+
+286
+
+The two factors are context package c and composite hint h. We use c = 0 for fullDDL/global-values and c = 1 for compact/domain-grounded context; h = 0 omits and
+h = 1 includes the composite hint. This gives F00, F01, F10, and F11. The same 180
+questions appear in every cell for each backbone, producing 720 predictions per run and
+1440 canonical predictions overall.
+
+287
+
+https://doi.org/10.3390/app1010000
+
+288
+289
+290
+291
+
+Version August 5, 2026 submitted to Appl. Sci.
+
+9 of 25
+
+Frozen 2 × 2 prompt-package experiment
+Composite hint OFF
+
+Composite hint ON
+
+FULL
+
+F00
+Full DDL
++ global values
+
+F01
+F00 + composite
+SQL hint
+
+COMPACT
+
+F10
+Selected schema
++ domain grounding
+
+F11
+F10 + composite
+SQL hint
+
+Context
+package
+
+Qwen-7B: one 180 × 4 run
+Granite-8B: one 180 × 4 run
+
+1,440 canonical predictions total; “context” is a bundled package intervention
+Figure 3. Paired factorial design and external-validation boundary. The primary GridDB experiment
+and the automatic external pilots are not pooled.
+
+The Qwen run uses repository Qwen/Qwen2.5-Coder-7B-Instruct-GGUF, revision 13fb94bf..., Q4_K_M, with model SHA-256 509287f7...94d3c. The Granite run uses repository ibm-granite/granite-3.3-8b-instruct-GGUF, revision
+e40e9dd..., Q4_K_M, with SHA-256 77bcee06...15dca. Both use llama.cpp revision
+b9637@aedb2a5..., temperature 0, a fixed seed of 20260805, maximum 800 output tokens,
+zero configured retries, and one generation per prompt.
+Each run is a frozen deterministic execution, not a multi-seed sampling study. Model
+decoding reproducibility does not imply model-family robustness, and a different quantization, runtime, or hardware backend could change outputs. The second backbone is
+therefore a planned sensitivity analysis over an identical prompt ledger.
+The Qwen clean run completed 720 of 720 calls with no provider, parse, retry, resume, or scoring error. An earlier directory contains 857 generations after overlapping
+harness processes were detected following a tool timeout. That directory is quarantined,
+documented as an incident, and excluded from canonical aggregation. The Granite run
+completed 720 of 720 calls in one foreground harness with no errors.
+3.6. Outcomes and Scoring
+
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+
+307
+
+Strict execution equality on the frozen database state is
+zi,c,h,b = 1[Exec(ybi,c,h,b , Di ) ≡ Exec(yi⋆ , Di )],
+
+308
+
+(4)
+
+309
+
+where b indexes the backbone. The frozen equivalence contract compares projected values,
+row multiplicity, ordering when required, null values, and numeric tolerance. Failed
+parsing, unsafe output, and execution error remain failures in the all-attempt denominator.
+The common-target projected-column diagnostic is
+
+310
+
+qi,c,h,b = 1[ybi,c,h,b executes and K (ybi,c,h,b , Di ) = k⋆i ],
+
+(5)
+
+where K is the number of projected result columns and k⋆i is one frozen project-authored
+target applied identically to all four cells and both backbones. The target distribution is 61
+one-column, 31 two-column, 57 three-column, and 31 four-column questions. The same
+project annotation supplies the target exposed by the hint package and the target used by
+this diagnostic. Therefore q is a direct adherence/manipulation check, not independent
+
+https://doi.org/10.3390/app1010000
+
+311
+312
+313
+
+314
+
+315
+316
+317
+318
+319
+
+Version August 5, 2026 submitted to Appl. Sci.
+
+10 of 25
+
+corroboration of semantic benefit. This corrects the former condition-dependent diagnostic,
+which used a one-column default in no-hint cells. We report z̄ and q̄ separately; q neither
+establishes semantic equivalence nor validates ordering or row granularity.
+
+320
+
+3.7. Retrospective Multi-State Reliability Stress Test
+
+323
+
+Single-snapshot agreement can accept SQL programs that happen to return the same
+values on one database state. We therefore constructed a query-blind deterministic stress
+suite after the canonical predictions had been archived. Stage A materializes 18 hash-bound
+database states without reading a predicted query: the original snapshot; 14 additional
+semantic states covering retained clones, attribute rotations, relationship rewiring, numeric
+and temporal shifts, categorical and boundary witnesses, nulls, anti-joins, isolated parents,
+topology motifs, and string decoys; and three insertion-order permutations. The first 15
+states form the semantic suite. The three physical permutations diagnose order dependence
+but never enter the semantic logical-AND endpoint.
+Two independently blinded agent technical reviewers examined the 114 questions
+whose metadata marked ordering as relevant, including all 18 top-k items, without seeing
+model predictions or stress-test outcomes. They agreed that none had a request, metadata
+record, schema constraint, and gold ordering specification sufficient for automatic totalorder comparison. All 114 are therefore held from claim-promoting analysis; the remaining
+66 order-insensitive questions form the finite automatic subset. This agent review is a
+protocol-safety screen, not qualified human annotation of question–SQL correctness.
+For prediction j and semantic state s ∈ S15 , let a j,s indicate equality between the
+predicted- and gold-query results under the same value, multiplicity, null, and numerictolerance contract. The reliability endpoint is
+
+324
+
+r j = ∏ a j,s .
+
+(6)
+
+321
+322
+
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+
+343
+
+s∈S15
+
+Every error remains a failure. Exact denominators are 25,920 atomic executions (1440 × 18),
+7920 primary semantic rows (528 × 15), and 16,416 held diagnostic rows (912 × 18). Before
+output was committed, a T0 gate had to reproduce all 1440 canonical labels. The same
+three within-backbone contrasts and three cross-backbone modifiers are evaluated with
+m = r on this 66-question subset, as a third and distinct nine-test Holm family. The frozen
+release uses 100,000 cluster sign flips and 20,000 cluster bootstrap draws. Its base seed
+is 20260805; for zero-based family index i, sign-flip and bootstrap seeds are respectively
+base+1000 + i and base+10000 + i. Because the eligible subset has only 12 normalized-SQL
+clusters, a post-review sensitivity enumerates all 212 = 4096 sign assignments exactly
+and supplies the displayed raw p-values; the Holm conclusion is unchanged. Cluster
+sizes are 18, 15, 12, 8, 6, and seven singletons (range 1–18; median 1; 59/66 questions in
+the five largest clusters). This imbalance motivates composition-sensitivity rather than
+population-confidence intervals. Because the test is retrospective and gold-query based, it
+is described as automated multi-state agreement, not semantic certification.
+3.8. Statistical Analysis
+
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+
+358
+
+For outcome m ∈ {z, q}, the compact/domain-grounded package main effect,
+composite-hint main effect, and interaction are
+
+359
+360
+
+(m)
+
+(7)
+
+361
+
+∆ H,b = 21 [(m̄0,1,b − m̄0,0,b ) + (m̄1,1,b − m̄1,0,b )],
+
+(m)
+
+(8)
+
+362
+
+(m)
+
+(9)
+
+363
+
+∆C,b = 21 [(m̄1,0,b − m̄0,0,b ) + (m̄1,1,b − m̄0,1,b )],
+
+∆CH,b = (m̄1,1,b − m̄1,0,b ) − (m̄0,1,b − m̄0,0,b ).
+
+https://doi.org/10.3390/app1010000
+
+Version August 5, 2026 submitted to Appl. Sci.
+
+11 of 25
+
+A positive context effect favors the compact/domain-grounded bundle; a positive hint
+effect favors the composite hint. The interaction is the difference between hint effects under
+the two packages.
+All point estimates are exact, equally question-weighted contrasts on the finite frozen
+set. The normalized-gold-SQL mapping supplies a dependence proxy with 70 groups, 58
+singletons, and a maximum group size of 19; these groups are not claimed to be authoring
+templates or a probability sample. For each core contrast, 100,000 Monte Carlo sign flips
+reverse every aligned difference within a group together. The plus-one correction prevents
+zero Monte Carlo p-values [18]. The primary family contains exactly nine execution tests:
+the three factorial effects for each backbone and three Granite-minus-Qwen modifiers.
+Holm’s procedure controls this family [19]. A separate secondary family applies the same
+nine-test structure to common-target adherence, explicitly as a manipulation check. This
+post-review hierarchy was frozen on 5 August 2026; it is not presented as preregistration.
+We also make 20,000 paired group-bootstrap draws, retaining every question and
+all aligned cells/backbones in a sampled group [20,21]. Their percentile limits are called
+composition-sensitivity intervals: they describe sensitivity to the observed group mix and
+are not confidence intervals for an unstated external question population. A coarser 39group difficulty-by-feature proxy supplies a second composition analysis. Both mappings
+preserve question-level weighting. Cluster sign flips rely on an explicit within-group
+symmetry boundary [22]. Question-level McNemar outputs remain descriptive because
+they ignore the grouped dependence [23].
+Cross-backbone modifiers are calculated from question-aligned outcome differences
+before dependence-group resampling. For example,
+(m)
+
+(m)
+
+(m)
+
+∆ B× H = ∆ H,Granite − ∆ H,Qwen .
+
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381
+382
+383
+384
+385
+386
+
+(10)
+
+387
+
+The three-way modifier analogously compares the two context–hint interactions. These
+estimands describe the two tested snapshots only.
+
+388
+
+3.9. Prospectively Frozen Component Experiments
+
+390
+
+After the factorial analysis and review exposed the bundled nature of the prompt
+packages, we froze a separate component protocol before generating its formal outputs. E1
+isolates presented value evidence. Its V0 and V1 prompts share the question, selected schema,
+join paths, composite structural hint, model settings, and candidate request; V1 alone
+contains exact matched values and question-derived normalization-value evidence. This is
+a presentation ablation, not a pure retrieval test. The intervention changes the prompt for
+170 questions in 61 normalized-SQL groups; ten byte-identical cases receive V1 only and
+are excluded from E1.
+E2 evaluates a deterministic, reference-answer-independent candidate selector on all
+180 V1 questions. Each response requests up to three candidates. The frozen ranker uses
+only read-only safety, SQLite executability, output-column shape, ordering, non-empty
+execution, and presented-value coverage; it seals its choice before gold SQL or results
+are loaded. E2 compares the selected candidate with the first candidate. Rescue, harm,
+selection-change, and oracle-at-three counts are descriptive, and oracle-at-three is never a
+deployable result. There is no repair call.
+E4 records paired telemetry for consecutive V0/V1 calls under deterministic balanced
+AB/BA order. The formal schedule contains 350 scored calls per backbone—170 V0/V1
+pairs plus ten V1-only calls—or 700 scored calls total, after four unscored warm-up calls per
+backbone. Temperature, seed, backend, and loaded snapshot match within each backbone;
+maximum output length is 600 tokens. An input whitelist excludes gold SQL, required
+literals, annotated answer fields, and results before prompt construction.
+
+391
+
+https://doi.org/10.3390/app1010000
+
+389
+
+392
+393
+394
+395
+396
+397
+398
+399
+400
+401
+402
+403
+404
+405
+406
+407
+408
+409
+410
+411
+
+Version August 5, 2026 submitted to Appl. Sci.
+
+12 of 25
+
+E1 and E2 report question-weighted execution-equality differences, 20,000 groupbootstrap composition intervals, and 100,000 group sign flips. Holm correction is applied
+to two tests within E1 and separately to two tests within E2. The two Granite-minus-Qwen
+modifiers form a secondary two-test family. Positive component efficacy requires a positive
+estimate, an interval excluding zero, and adjusted p < 0.05. The protocol does not define
+one successful backbone as replication. E4 is estimation-focused; because the required
+no-competing-process/thermal attestation is missing, latency remains diagnostic even
+though retry incidence was zero. Model-reported token differences remain reportable.
+
+412
+
+3.10. Reproducibility and Audit
+
+420
+
+Both canonical runs preserve prompts, raw predictions, scores, server streams, manifests, model hashes, prompt/data/code/configuration hashes, and completion counts.
+The v2 reanalysis contains all 1440 aligned rows, corrected common-target outcomes,
+prompt/context statistics, factor-field checks, and an offline selector audit. The v3 inference
+release is additive: a fail-closed preflight verifies 18 v2 inputs against a hand-frozen contract
+before reproducing the finite-set estimates, the two nine-test families, the 70- and 39-group
+composition analyses, and the frozen target distribution. Its runtime lock records 5 August
+2026 and no model rerun.
+Independent audit scripts reconstruct prompt/cell keys and directly execute every
+predicted query against SQLite. The Qwen and Granite audits each reproduce 720 of 720
+execution verdicts; the v2 release recomputes the common-target diagnostic without model
+reruns. Question-level McNemar fields remain archived for traceability but are not used in
+the v3 promotion rule.
+The multi-state release is separately hash-bound. Two independent pre-score audits
+authorized the exact v5 freeze only after zero-SQL authorization checks and a 1620-query
+T0-only preflight with zero mismatches. Formal scoring then produced 25,920 atomic rows.
+Two independent post-score audits rebuilt all 1440 suite records and all nine contrasts;
+the second additionally performed 29,160 independent read-only SQL executions. Both
+confirmed the fixed denominators, 1440/1440 T0 continuity, artifact hashes, and release
+manifest before manuscript integration. Because the original audit manifest retains machinespecific absolute paths, an additive portable manifest expresses all 18 artifacts relative to
+a declared repository root. Its verifier passes both in place and from a clean copied root
+containing 19 checked files including the root marker. This mechanical portability check
+does not resolve the separate license and public-DOI gates.
+
+421
+
+3.11. Public Baseline and Closest-Work Boundary
+
+445
+
+Round-1 work prepared a draft protocol for a future same-environment BIRD MiniDev study. The official 500-item SQLite subset over 11 databases was downloaded, hashbound, safely expanded, and preflighted under the protocol-pinned SQLite 3.40.1 runtime;
+all 500 gold queries completed. The 39-item technical freeze and independent sign-off are
+complete, but the 5000-call launch remains locked pending explicit human authorization.
+No model call has started, and no BIRD result enters this article.
+DKA-SQL reports a power-grid corpus and BIRD evaluation, domain-knowledge
+adaptation, verification, multiple models, and a different evaluation boundary [13]. MASQLGrid instead studies 180 GridDB questions, four internal prompt packages, one generation per cell, complete ledgers, and cluster-aware paired effects. Because the audit
+found no official DKASQL implementation, immutable prompts, or environment lock, the
+present work is neither a DKASQL reproduction nor a head-to-head comparison. A future
+independently implemented comparator must be labeled “DKASQL-style” and run under
+the same data, model, prompt-budget, decoding, evaluator, and hardware contract.
+
+446
+
+https://doi.org/10.3390/app1010000
+
+413
+414
+415
+416
+417
+418
+419
+
+422
+423
+424
+425
+426
+427
+428
+429
+430
+431
+432
+433
+434
+435
+436
+437
+438
+439
+440
+441
+442
+443
+444
+
+447
+448
+449
+450
+451
+452
+453
+454
+455
+456
+457
+458
+459
+
+Version August 5, 2026 submitted to Appl. Sci.
+
+13 of 25
+
+Table 2. Qualitative closest-work boundary. Published DKASQL scores are not imported because no
+common corpus, implementation, model snapshot, or evaluator is available.
+Dimension
+
+DKASQL (Applied Sciences, 2025)
+
+Present MA-SQLGrid study
+
+Consequence
+
+Question
+Domain data
+Public benchmark
+Workflow
+Open implementation
+
+Dynamic domain-knowledge adaptation
+ElecSQL (104 pairs)
+BIRD validation reported
+Extraction/generation/verification
+None located in Round-1 audit
+
+Paired prompt-package effects
+GridDB (180; 8 tables/98 rows)
+BIRD draft only; no run
+One generation; no repair
+Hash-bound local ledgers/audits
+
+Different contribution type
+No shared grid corpus
+No numerical comparison
+Non-equivalent intervention
+No reproduction claim
+
+The external Qwen run over 364 automatic candidate prompts is retained as a diagnostic artifact only. It produced 321 executable outputs and 43 execution errors; 15
+were automatic-reference diagnostic matches. Because the reference pairs lack completed
+human review, 15/364 is not reported as accuracy and does not enter any hypothesis test
+or canonical figure.
+
+460
+461
+462
+463
+464
+
+4. Results
+
+465
+
+4.1. Integrity and Complete Cell Results
+
+466
+
+The accepted evidence contains exactly 1440 predictions: 180 questions, four cells, and
+two backbones. All calls terminated successfully at the provider and parser boundary, all
+scheduled records are present, and direct re-execution reproduced every stored execution
+verdict. Table 3 and Figure 4 use the corrected common-target projected-column endpoint.
+
+467
+468
+469
+470
+
+Table 3. Execution equality and common-target projected-column outcomes. Each cell contains all
+180 attempts; intervals describe sensitivity to the empirical composition of 70 dependence-proxy
+groups.
+Backbone
+
+Cell
+
+Exec.
+
+Common cols.
+
+Exec. sensitivity interval
+
+Cols. sensitivity interval
+
+Qwen
+Qwen
+Qwen
+Qwen
+Granite
+Granite
+Granite
+Granite
+
+F00
+F01
+F10
+F11
+F00
+F01
+F10
+F11
+
+0.4222
+0.7167
+0.4333
+0.6000
+0.4278
+0.5556
+0.4111
+0.6000
+
+0.5222
+0.9667
+0.5889
+0.9611
+0.5222
+0.8778
+0.5667
+0.9222
+
+[0.2025,0.6368]
+[0.5280,0.8603]
+[0.2099,0.6415]
+[0.4306,0.7569]
+[0.2086,0.6346]
+[0.3843,0.7143]
+[0.1951,0.6091]
+[0.4054,0.7538]
+
+[0.3057,0.7337]
+[0.9274,0.9904]
+[0.3804,0.7735]
+[0.9192,0.9872]
+[0.3071,0.7362]
+[0.7459,0.9716]
+[0.3542,0.7415]
+[0.8609,0.9615]
+
+POINT ESTIMATES ONLY — no cell-level error bars
+
+(a) Execution equality
+
+(b) Common-target projected-column conformity
+96.7
+
+Proportion (direct labels: %)
+
+1.0
+
+96.1
+
+92.2
+
+87.8
+
+0.9
+0.8
+
+71.7
+
+0.7
+60.0
+
+0.5
+
+60.0
+
+55.6
+
+0.6
+42.8
+
+42.2
+
+58.9
+52.2
+
+43.3
+
+41.1
+
+Qwen
+
+0.4
+0.3
+
+56.7
+
+52.2
+
+Granite
+F00
+
+F01
+F10
+Factorial condition
+
+F11
+
+F00
+
+F01
+F10
+Factorial condition
+
+F11
+
+v2 template-cluster composition-sensitivity intervals are intentionally omitted here; cluster-aware intervals are reported for registered contrasts.
+
+Figure 4. Cell-level execution equality and common-target projected-column conformity. The
+structural diagnostic is not semantic correctness.
+
+Execution results are unchanged from the audited ledgers. Without the composite
+hint, Qwen obtains 0.4222 under the full package and 0.4333 under the compact/domaingrounded package; Granite obtains 0.4278 and 0.4111. With the hint, Qwen reaches 0.7167
+
+https://doi.org/10.3390/app1010000
+
+471
+472
+473
+
+Version August 5, 2026 submitted to Appl. Sci.
+
+14 of 25
+
+and 0.6000, whereas Granite reaches 0.5556 and 0.6000. These are exact descriptions of the
+frozen 180-question set. Cell-wise comparisons from the earlier analysis are not used for
+promotion under the v3 core factorial hierarchy.
+The corrected common-target diagnostic is 0.5222 in F00 for both backbones. Qwen
+then obtains 0.9667, 0.5889, and 0.9611 in F01, F10, and F11; Granite obtains 0.8778, 0.5667,
+and 0.9222. These no-hint values replace the former condition-dependent endpoint. High
+hint-cell conformity coexists with much lower execution equality, showing that the expected
+number of columns can be returned while tables, filters, joins, or aggregations remain
+wrong.
+
+474
+
+4.2. Within-Backbone Factorial Effects
+
+483
+
+Table 4 and Figure 5 report the three effects for both endpoints. For Qwen, the
+composite-hint execution effect is +0.2306, the package–hint interaction is –0.1278, and the
+compact/domain-grounded package main effect is –0.0528. For Granite, the corresponding
+estimates are +0.1583, +0.0611, and +0.0139. Composition-sensitivity intervals under both
+the 70-group and 39-group mappings retain the direction of several Qwen contrasts, but
+they are not promotion tests.
+
+484
+
+475
+476
+477
+478
+479
+480
+481
+482
+
+485
+486
+487
+488
+489
+
+Table 4. Within-backbone factorial effects under the corrected endpoints. Intervals use 20,000 paired
+resamples of 70 normalized-SQL dependence-proxy groups and are composition-sensitivity limits,
+not population confidence intervals.
+
+Backbone
+
+Endpoint
+
+Effect
+
+Qwen
+Qwen
+Qwen
+Qwen
+Qwen
+Qwen
+Granite
+Granite
+Granite
+Granite
+Granite
+Granite
+
+Execution
+Execution
+Execution
+Common columns
+Common columns
+Common columns
+Execution
+Execution
+Execution
+Common columns
+Common columns
+Common columns
+
+Context package
+Composite hint
+Interaction
+Context package
+Composite hint
+Interaction
+Context package
+Composite hint
+Interaction
+Context package
+Composite hint
+Interaction
+
+Estimate
+
+Sens. low
+
+Sens. high
+
+-0.0528
+0.2306
+-0.1278
+0.0306
+0.4083
+-0.0722
+0.0139
+0.1583
+0.0611
+0.0444
+0.3556
+0.0000
+
+-0.1131
+0.0573
+-0.2447
+-0.0210
+0.2115
+-0.2051
+-0.0588
+-0.0207
+-0.0519
+-0.0565
+0.1352
+-0.2181
+
+0.0000
+0.4343
+-0.0343
+0.0978
+0.6122
+0.0223
+0.0791
+0.3689
+0.1989
+0.1392
+0.5793
+0.2013
+
+Execution equality
+
+Common-target projected columns
+
+Interaction
+
+Interaction
+
+Structural hint
+
+Structural hint
+
+Context package
+
+Context package
+
+−0.2 −0.1 0.0 0.1 0.2
+Paired effect
+
+0.3
+
+0.4
+
+Qwen
+Granite
+
+−0.2
+
+0.0
+
+0.2
+Paired effect
+
+0.4
+
+0.6
+
+Figure 5. Factorial effects for execution equality and the common-target structural diagnostic. Positive
+values favor the compact/domain-grounded package or composite hint as applicable.
+
+Table 5 gives the frozen promotion analysis. Zero of nine primary execution tests
+survives Holm correction: Qwen’s hint effect has raw/adjusted p = 0.01372/0.09604, its
+
+https://doi.org/10.3390/app1010000
+
+490
+491
+
+Version August 5, 2026 submitted to Appl. Sci.
+
+15 of 25
+
+interaction 0.00919/0.07352, the hint modifier 0.00640/0.05760, and the three-way modifier
+0.07010/0.42060. We therefore withdraw language describing any factorial execution effect
+or modifier as statistically nonzero. In the separate secondary family, only the commontarget hint effects survive: +0.4083 for Qwen (adjusted p = 0.000090) and +0.3556 for
+Granite (p = 0.01944). These two results confirm instruction uptake because the hint
+supplies the target later scored; they do not independently establish semantic benefit.
+
+492
+493
+494
+495
+496
+497
+
+Table 5. Core v3 inference hierarchy. The first nine rows form the primary execution family; the
+final nine form a separate secondary adherence/manipulation-check family. All p-values use 100,000
+group sign flips and Holm adjustment within the stated family.
+
+Endpoint
+
+Scope
+
+Effect
+
+Estimate
+
+Raw p
+
+Holm p
+
+execution
+execution
+execution
+execution
+execution
+execution
+execution
+execution
+execution
+
+Qwen
+Qwen
+Qwen
+Granite
+Granite
+Granite
+Granite−Qwen
+Granite−Qwen
+Granite−Qwen
+
+context package
+structural hint
+interaction
+context package
+structural hint
+interaction
+backbone×context
+backbone×hint
+backbone×interaction
+
+−0.0528
++0.2306
+−0.1278
++0.0139
++0.1583
++0.0611
++0.0667
+−0.0722
++0.1889
+
+0.105229
+0.013720
+0.009190
+0.850211
+0.154798
+0.558904
+0.414776
+0.006400
+0.070099
+
+0.526145
+0.096039
+0.073519
+1.000000
+0.619194
+1.000000
+1.000000
+0.057599
+0.420596
+
+structural
+structural
+structural
+structural
+structural
+structural
+structural
+structural
+structural
+
+Qwen
+Qwen
+Qwen
+Granite
+Granite
+Granite
+Granite−Qwen
+Granite−Qwen
+Granite−Qwen
+
+context package
+structural hint
+interaction
+context package
+structural hint
+interaction
+backbone×context
+backbone×hint
+backbone×interaction
+
++0.0306
++0.4083
+−0.0722
++0.0444
++0.3556
++0.0000
++0.0139
+−0.0528
++0.0722
+
+0.576814
+0.000010
+0.418106
+0.513215
+0.002430
+1.000000
+0.893011
+0.477075
+0.665233
+
+1.000000
+0.000090
+1.000000
+1.000000
+0.019440
+1.000000
+1.000000
+1.000000
+1.000000
+
+The 70-group mapping has 58 singletons and maximum size 19. Repeating composition resampling with 39 difficulty-by-feature groups leaves the Qwen execution hint limits
+above zero ([+0.0292, +0.4693]) and the three-way modifier limits above zero ([+0.0104,
++0.4575]), while the corresponding 70-group limits are [+0.0548, +0.4355] and [+0.0090,
++0.4321]. These concordant signs are useful sensitivity descriptions, but they do not override
+the primary family-wise tests or create a sampled superpopulation.
+
+498
+
+4.3. Cross-Backbone Effect Modification
+
+504
+
+Granite’s execution hint effect is 0.0722 lower than Qwen’s; the execution packageeffect modifier is +0.0667 and the execution three-way modifier is +0.1889. None survives
+the primary nine-test correction. For the corrected common-target endpoint, the hint
+modifier is –0.0528 and the three-way modifier is +0.0722; neither survives the secondary
+family correction. These finite-set differences motivate testing the complete model–prompt
+combination, but they do not establish backbone effect modification beyond the two
+snapshots.
+
+505
+
+4.4. Retrospective Multi-State Reliability Results
+
+512
+
+The v5 scorer produced all 25,920 registered prediction–state rows, and its T0 slice
+reproduced the canonical snapshot verdicts for 1440/1440 predictions. Table 6 reports the
+66-question automatic subset. T0 agreement is high in several cells because order-sensitive
+questions have been removed from this analysis; requiring agreement on every one of the
+15 semantic states lowers or preserves every cell rate. The 15-state logical-AND rates range
+
+513
+
+https://doi.org/10.3390/app1010000
+
+499
+500
+501
+502
+503
+
+506
+507
+508
+509
+510
+511
+
+514
+515
+516
+517
+
+Version August 5, 2026 submitted to Appl. Sci.
+
+16 of 25
+
+from 0.6212 (Granite F01) to 0.8182 (Granite F00). These rates quantify robustness to the
+constructed state suite, not population accuracy.
+
+518
+519
+
+Table 6. Snapshot and 15-state logical-AND execution agreement on the 66 order-insensitive questions.
+F00/F01 use full context without/with the hint; F10/F11 use compact context without/with the hint.
+The 114 order-sensitive questions are held from this automatic endpoint.
+
+Backbone
+
+Cell
+
+T0 agreement
+
+T0 rate
+
+15-state AND
+
+Suite rate
+
+Qwen
+Qwen
+Qwen
+Qwen
+
+F00
+F01
+F10
+F11
+
+65/66
+64/66
+64/66
+54/66
+
+0.9848
+0.9697
+0.9697
+0.8182
+
+49/66
+48/66
+53/66
+43/66
+
+0.7424
+0.7273
+0.8030
+0.6515
+
+Granite
+Granite
+Granite
+Granite
+
+F00
+F01
+F10
+F11
+
+62/66
+47/66
+64/66
+62/66
+
+0.9394
+0.7121
+0.9697
+0.9394
+
+54/66
+41/66
+51/66
+49/66
+
+0.8182
+0.6212
+0.7727
+0.7424
+
+Table 7 and Figure 6 apply the factorial hierarchy to r j . Exact enumeration of all 4096
+cluster-sign assignments gives raw values 0.750, 1.000, 1.000, 0.500, 1.000, 1.000, 0.500, 0.625,
+and 1.000 in table order; all nine Holm-adjusted values equal 1.0000, matching the frozen
+Monte Carlo conclusion. The largest point estimate is the Granite-minus-Qwen interaction
+(+0.3030), but its composition-sensitivity interval is [–0.1714, +0.8780] and its adjusted
+value is 1.0000. No multi-state context, hint, interaction, or cross-backbone modifier is
+therefore promoted. The 114 held questions were executed on all 18 states for diagnostics
+but contribute to none of these estimates.
+Table 7. Factorial effects on the 15-state logical-AND endpoint for n = 66 questions in 12 clusters per
+cell. Raw and Holm values use exact enumeration of 4096 cluster-sign assignments. Intervals use
+20,000 cluster bootstrap draws and describe composition sensitivity, not population confidence.
+
+Estimate
+
+Sensitivity interval
+
+Raw p
+
+Holm p
+
+hint
+context
+interaction
+
+-0.0833
+-0.0076
+-0.1364
+
+[-0.2476, +0.0606]
+[-0.2500, +0.3976]
+[-0.4643, +0.1707]
+
+0.7500
+1.0000
+1.0000
+
+1.0000
+1.0000
+1.0000
+
+Granite
+Granite
+Granite
+
+hint
+context
+interaction
+
+-0.1136
++0.0379
++0.1667
+
+[-0.2532, +0.0000]
+[-0.1622, +0.1930]
+[+0.0000, +0.4151]
+
+0.5000
+1.0000
+1.0000
+
+1.0000
+1.0000
+1.0000
+
+Granite - Qwen
+Granite - Qwen
+Granite - Qwen
+
+hint
+context
+interaction
+
+-0.0303
++0.0455
++0.3030
+
+[-0.0833, +0.0217]
+[-0.5526, +0.4464]
+[-0.1714, +0.8780]
+
+0.5000
+0.6250
+1.0000
+
+1.0000
+1.0000
+1.0000
+
+Backbone/modifier
+
+Effect
+
+Qwen
+Qwen
+Qwen
+
+https://doi.org/10.3390/app1010000
+
+520
+521
+522
+523
+524
+525
+526
+527
+
+Version August 5, 2026 submitted to Appl. Sci.
+
+17 of 25
+
+Retrospective multi-state reliability effects (66 order-insensitive questions)
+Exact enumeration: all Holm p = 1.000
+
+Qwen: hint
+Qwen: context
+Qwen: interaction
+Granite: hint
+Granite: context
+Granite: interaction
+Granite - Qwen: hint
+Granite - Qwen: context
+Granite - Qwen: interaction
+
+−0.6
+
+−0.4
+
+−0.2
+0.0
+0.2
+0.4
+0.6
+Effect on 15-state logical-AND execution agreement
+
+0.8
+
+Bars are 95% composition-sensitivity intervals, not population confidence intervals.
+Figure 6. Retrospective multi-state reliability effects for the 66 order-insensitive questions. Bars are
+95% composition-sensitivity intervals. Exact enumeration leaves all nine Holm-adjusted values at
+1.000.
+
+4.5. Prospective Component Results
+
+528
+
+The formal component run completed all 700 scored calls and the selection seal was
+created before offline gold loading. Table 8 reports the predeclared effects. E1 presented
+value evidence increases first-candidate Qwen execution equality by +0.1059 over 170
+eligible questions (95% composition-sensitivity interval [+0.0282, +0.2013], adjusted p =
+0.0310), satisfying the protocol’s positive-efficacy rule for that snapshot. Granite’s estimate
+is exactly zero with an interval spanning zero. The cross-backbone E1 modifier is not
+promoted, and the protocol explicitly records no cross-backbone replication.
+For E2, the selector changes 24 Qwen and 36 Granite choices. Relative to the first
+candidate, it rescues eight and harms one Qwen question, and rescues ten while harming
+none for Granite. The resulting execution effects are +0.0389 and +0.0556, respectively.
+Neither survives its two-test Holm family; the Granite interval excluding zero is therefore
+not sufficient for promotion. Oracle-at-three accuracies of 0.6389 and 0.4667 are gold-only
+diagnostics and are not deployable selector results.
+
+529
+
+Table 8. Prospectively frozen component effects. Intervals retain grouped questions together and
+describe composition sensitivity; the adjusted p-values implement the predeclared promotion rules.
+Experiment
+
+Backbone
+
+n
+
+Effect
+
+95% comp.-sens. interval
+
+p
+
+Holm p
+
+Decision
+
+E1
+E1
+E2
+E2
+
+Qwen
+Granite
+Qwen
+Granite
+
+170
+170
+180
+180
+
+0.106
+0.000
+0.039
+0.056
+
+[0.028, 0.201]
+[-0.190, 0.170]
+[-0.008, 0.107]
+[0.007, 0.123]
+
+0.0155
+1.0000
+0.5008
+0.0642
+
+0.0310
+1.0000
+0.5008
+0.1285
+
+positive
+not promoted
+not promoted
+not promoted
+
+https://doi.org/10.3390/app1010000
+
+530
+531
+532
+533
+534
+535
+536
+537
+538
+539
+540
+541
+
+Version August 5, 2026 submitted to Appl. Sci.
+
+18 of 25
+
+Cluster-aware primary component effects
+E1 Qwen
+
+E1 Granite
+
+E2 Qwen
+
+E2 Granite
+
+−0.20
+
+−0.15
+
+−0.10 −0.05 0.00
+0.05
+0.10
+0.15
+Paired frozen-state execution-equality difference
+
+0.20
+
+Figure 7. Prospectively frozen E1 and E2 effects on frozen-state execution equality. Error bars are 95%
+composition-sensitivity intervals; promotion additionally requires the registered Holm-adjusted test.
+
+Table 9. Reference-answer-independent selector diagnostics on the 180 V1 questions. Oracle-at-three
+is computed only after gold loading and is not a deployable result.
+Backbone
+Qwen
+Granite
+
+First equality
+
+Selected equality
+
+Changes
+
+Rescues
+
+Harms
+
+Oracle@3†
+
+0.583
+0.394
+
+0.622
+0.450
+
+24
+36
+
+8
+10
+
+1
+0
+
+0.639
+0.467
+
+† Gold-only diagnostic; not deployable.
+
+Frozen-state execution equality rate (n=180)
+
+Reference-free candidate selection on V1
+0.7
+0.6
+
+8 rescue / 1 harm
+
+0.5
+
+First candidate
+Validator selected
+10 rescue / 0 harm
+
+0.4
+0.3
+0.2
+0.1
+0.0
+
+Qwen
+
+Granite
+
+Figure 8. E2 first-candidate and selected frozen-state execution equality, with selection changes,
+rescues, and harms. Counts are descriptive; neither backbone’s E2 effect is promoted.
+
+E4 shows that V1 adds a mean 50.3 Qwen input tokens (interval [+45.7, +55.7]) and
+61.8 Granite input tokens ([+55.6, +69.2]). Total-token differences are +54.2 and +51.4.
+Paired geometric latency ratios are 1.0605 for Qwen and 0.9258 for Granite, but these are
+diagnostic only: the protocol-required efficiency attestation is absent, and order/drift fields
+show that uncontrolled runtime effects cannot be excluded. No latency, throughput, energy,
+or deployment-efficiency advantage is claimed.
+
+https://doi.org/10.3390/app1010000
+
+542
+543
+544
+545
+546
+547
+
+Version August 5, 2026 submitted to Appl. Sci.
+
+19 of 25
+
+4.6. Prompt Size and Offline Selector Coverage
+
+548
+
+The context audit in Figure 9 describes mechanisms without turning token counts into
+a latency claim. Mean Qwen input tokens are 2442.4 and 2490.3 under F00/F01 versus
+456.8 and 502.7 under F10/F11; Granite’s tokenizer records 2705.9, 2761.7, 588.3, and 638.2.
+Prompt wording is identical across backbones, but tokenizer-specific input counts differ.
+No controlled timing, energy, or memory comparison was registered.
+
+549
+
+(a) Compact-context coverage audit
+
+115/116
+(99.1%)
+
+Multi-table
+join path
+
+0.0
+
+0.2
+
+0.4
+0.6
+0.8
+Offline gold-retention rate
+
+1.0
+
+Mean model-token input
+
+155/180
+(86.1%)
+
+2500
+
+2442
+
+Qwen
+
+2762
+
+2706
+
+179/180
+(99.4%)
+
+All required
+columns
+
+551
+552
+553
+
+(b) Prompt-length manipulation
+3000
+
+All required
+tables
+
+550
+
+Granite
+
+2490
+
+2000
+
+1500
+
+1000
+457
+
+500
+
+0
+
+F00
+
+588
+
+F01
+F10
+Factorial condition
+
+638
+503
+
+F11
+
+Coverage is a post hoc offline diagnostic; token counts use each backbone's tokenizer.
+
+Figure 9. Prompt/context audit and offline selector coverage. Gold-required fields are used only
+after generation to diagnose the selector, never to build prompts.
+
+The compact builder selects exactly six tables and a mean of 16.68 columns per question
+(range 13–22). Offline comparison with gold-required fields gives mean table recall 0.9986
+and column recall 0.9467. It retains all required tables for 179/180 questions, all required
+columns for 155/180, and the required join path for 115/116 multi-table questions; one
+topology item has an incomplete join path. These figures explain why “compact” cannot be
+interpreted as a pure length factor and identify a prospective fallback target. Because the
+audit uses gold metadata after generation, it is diagnostic coverage, not an online selector
+score.
+
+554
+
+4.7. External Diagnostic
+
+562
+
+The external protocol contains 220 RTS-GMLC prompts and 144 SimBench prompts.
+In the Qwen diagnostic, all 364 calls returned safe single-statement SELECT queries. Fortythree failed execution: 20 referenced an absent fuel field, 12 an absent generator_id, nine
+an absent nonfuel_start_cost_usd, and two produced an ambiguous generator_uid.
+These errors reveal schema-serialization and column-grounding targets for development.
+The diagnostic produced 15 automatic-reference diagnostic matches, all in SimBench.
+This count is not external accuracy. The candidate pairs are development-visible, automatic,
+and unadjudicated, and the run itself can influence subsequent prompt repairs. It is retained
+as a failure-analysis artifact and excluded from Tables 3–4.
+
+555
+556
+557
+558
+559
+560
+561
+
+563
+564
+565
+566
+567
+568
+569
+570
+571
+
+5. Discussion
+
+572
+
+5.1. What the Evidence Supports
+
+573
+
+The clearest factorial result is the composite hint on the common-target projectedcolumn manipulation check. Both backbones show increases larger than 0.35 and survive
+the separate secondary family. Explicit structural and SQL-operation instructions therefore
+change projected-column adherence in this bounded experiment. Because the hint also
+contains aggregation, grouping, projection, ordering, and limit rules, this result cannot be
+reduced to generic formatting advice or promoted as independent semantic validation.
+
+574
+
+https://doi.org/10.3390/app1010000
+
+575
+576
+577
+578
+579
+
+Version August 5, 2026 submitted to Appl. Sci.
+
+20 of 25
+
+Factorial execution is more conditional. All nine primary tests fail Holm correction,
+even where composition-sensitivity intervals exclude zero. This divergence is not contradictory: randomization tests implement the predeclared finite-set promotion rule, whereas the
+intervals show how estimates change when the empirical group composition is reweighted.
+Neither is evidence from a random sample of databases or questions.
+The multi-state stress test strengthens the negative conclusion. Requiring one archived
+SQL program to agree with the gold query across 15 constructed states reduces every
+cell’s success count relative to or equal to its T0 count, and no factorial suite effect is
+promoted. This demonstrates that a single frozen snapshot can overstate reliability for
+some predictions. It does not prove full semantic equivalence: the states are deterministic
+constructions from one small database, the automatic subset covers only 12 normalized-SQL
+clusters, and all order-sensitive questions remain outside the primary suite.
+The compact/domain-grounded package does not show a uniformly positive independent effect. For Qwen its execution main effect is negative with an upper interval endpoint
+at zero; for Granite it is small and uncertain. The package is substantially shorter, but
+it simultaneously changes schema coverage, value presentation, join serialization, and
+normalization. It is therefore neither a pure schema-selection ablation nor evidence that
+shorter prompts improve accuracy.
+The prospective component results sharpen but do not universalize the architecture.
+Presented value evidence passes the efficacy rule for Qwen only; its zero Granite estimate
+and non-promoted modifier preclude a replicated or universal value-grounding claim. The
+deterministic selector yields rescues for both backbones but does not pass either adjusted
+test. Deployment teams should therefore validate the complete model–prompt–database
+combination under execution rather than assume that a stage label guarantees benefit.
+
+580
+
+5.2. Projected Columns versus Semantic Correctness
+
+604
+
+The gap between the common-target diagnostic and execution equality is a warning
+against surface-only evaluation. In Qwen F01, projected-column conformity is 0.9667 while
+execution equality is 0.7167. In Granite F01 the corresponding values are 0.8778 and 0.5556.
+A model can return the requested number of columns yet select the wrong table, field, filter,
+join, or aggregation.
+The projected-column diagnostic remains useful because it localizes one interface
+failure and shows that an intervention is received. It should be reported next to, not
+substituted for, execution. Row granularity and ordering were present in prompts but are
+not validated by this endpoint. Where a database state is insufficiently discriminating,
+manual semantic review or test-database augmentation is also needed.
+
+605
+
+5.3. Implications for Power-Grid Data Access
+
+615
+
+An operational interface should expose the generated SQL, database snapshot, schema
+context, and execution status. Read-only enforcement prevents accidental mutation but
+does not prevent a semantically wrong query from returning plausible rows. Highconsequence decisions therefore require review of both the SQL and the source data.
+The immediate beneficiaries of the prototype are maintenance engineers, asset-data
+analysts, and query reviewers retrieving inspection, alarm, or work-order records for
+human review. The system is not designed to issue protection actions, dispatch instructions,
+or autonomous maintenance decisions; it only proposes a read-only query whose SQL and
+returned rows remain inspectable.
+The external diagnostic is useful precisely because it fails visibly. Missing-column
+errors indicate that the model inferred familiar field names rather than grounding to the
+
+616
+
+https://doi.org/10.3390/app1010000
+
+581
+582
+583
+584
+585
+586
+587
+588
+589
+590
+591
+592
+593
+594
+595
+596
+597
+598
+599
+600
+601
+602
+603
+
+606
+607
+608
+609
+610
+611
+612
+613
+614
+
+617
+618
+619
+620
+621
+622
+623
+624
+625
+626
+
+Version August 5, 2026 submitted to Appl. Sci.
+
+21 of 25
+
+actual schema. Prompt repair should target these mismatches, then be evaluated on new or
+sealed items rather than repeatedly optimizing against the same 91 visible candidates.
+RTS-GMLC and SimBench broaden the engineering structures represented in the
+project: topology, generation, constraints, time series, and network elements. Their inclusion does not by itself validate maintenance-database generalization. A credible external
+benchmark needs domain experts to verify terminology, units, expected projections, acceptable equivalences, and tie rules.
+
+627
+
+5.4. Reproducibility and Negative Results
+
+634
+
+The quarantined Qwen incident demonstrates why result directories need immutable
+identity and process accounting. A directory containing more generations than the registered Cartesian design is not repaired by truncating it. The clean rerun provides a separate
+evidence chain, and the audit confirms that the contaminated output contributed no canonical row.
+Hash-bound artifacts reduce transcription and provenance errors. They do not make
+an exposed test partition sealed, resolve a missing data license, or turn automatic candidates
+into human labels. Reproducibility and evidential validity are related but distinct.
+The compact/domain-grounded package NO–GO is a useful result. The stage remains
+available for future selectors, but the paper does not assign it an independent benefit that
+the current data do not support. The prospective E2 selector also remains a NO–GO for
+promoted efficacy despite descriptive rescues. E1 supports presented value evidence for
+one snapshot only. BIRD model baselines remain unexecuted, and the E4 latency records
+remain diagnostic rather than comparative-efficiency evidence.
+
+635
+
+5.5. Limitations
+
+649
+
+The primary corpus is one synthetic 8-table, 98-row maintenance-oriented database
+and only 180 evaluation questions. Questions map to 70 normalized-SQL dependenceproxy groups, 58 of them singletons; grouped procedures respect this mapping, but it
+is not an authoring-template identifier and the corpus cannot represent the diversity of
+production schemas, permissions, missing values, units, or data quality.
+The evaluation partition was visible in earlier development. Gold fields are excluded
+from prompts and the formal runs are frozen, but prior analyst exposure prevents a sealedtest claim. The two model snapshots use Q4_K_M quantization and one llama.cpp revision.
+Results may differ for full-precision weights, alternative quantization, other runtimes,
+stochastic decoding, or hosted models.
+Only one generation is made per factorial prompt and one formal response per component condition. Temperature zero and fixed runtime settings improve repeatability, but
+they do not quantify decoding variance or server nondeterminism. The second backbone
+is sensitivity analysis, not replication, and no cross-backbone component effect satisfies
+a replication rule. Multi-run inference would require a prospectively frozen hierarchical
+analysis and materially greater compute.
+Execution equality is database-state dependent. Different SQL statements may agree
+accidentally on the current data, and minor projection differences may be judged wrong
+under the strict contract. The contract is intentionally fixed, yet no single automatic metric
+captures every notion of semantic equivalence.
+The 15-state suite addresses accidental equality only within its constructed witnesses.
+It was designed retrospectively, does not constitute an independent human semantic audit,
+and cannot certify behavior on unconstructed values or schemas. Two blinded agent
+technical reviewers conservatively held all 114 order-sensitive questions; qualified domain
+
+650
+
+https://doi.org/10.3390/app1010000
+
+628
+629
+630
+631
+632
+633
+
+636
+637
+638
+639
+640
+641
+642
+643
+644
+645
+646
+647
+648
+
+651
+652
+653
+654
+655
+656
+657
+658
+659
+660
+661
+662
+663
+664
+665
+666
+667
+668
+669
+670
+671
+672
+673
+
+Version August 5, 2026 submitted to Appl. Sci.
+
+22 of 25
+
+reviewers must still resolve intended ordering, ties, units, and result granularity before
+those questions support semantic claims.
+E4 records paired telemetry under a frozen order, but the required efficiency attestation
+is missing. Token deltas remain valid descriptive outputs; latency and throughput are
+diagnostic, and no energy or memory measurement supports deployment-efficiency claims.
+A confirmatory efficiency study requires independently verified process isolation, thermal
+state, common hardware, and separate generation/database timing.
+External candidates have not completed human review. Their automatic references
+and the Qwen diagnostic are development evidence only. No claim of RTS-GMLC or
+SimBench accuracy, cross-database generalization, or operational readiness follows from
+them.
+GridDB redistribution permission is unresolved, and derived RTS-GMLC and SimBench artifacts have source-specific notice and database-license obligations. A public
+artifact release must undergo human license review and receive a permanent repository
+DOI. Author identities, contributions, funding, conflicts, acknowledgments, and AI-use
+disclosure also require author confirmation.
+
+674
+
+5.6. Future Work
+
+690
+
+The immediate external study should complete two independent expert reviews of
+all candidates, retain disagreements, and adjudicate them under the frozen manual. A
+subsequent confirmatory set should be newly authored or deeply rewritten after the prompt
+and schema-repair work is frozen. This preserves a genuinely unexposed test.
+The compact/domain-grounded builder should be redesigned around reference-free
+coverage safeguards. Candidate columns and relationships could be accompanied by
+explicit connectivity checks and a fallback to the full package when join paths appear
+incomplete. The observed offline table/column recall cannot be used online because it
+depends on gold-required fields. Any replacement safeguard constitutes a new intervention
+and must be evaluated prospectively.
+The completed E2 replay should be followed only by a newly frozen selector revision;
+tuning against its visible rescues would make the present set development data. Efficiency
+confirmation requires controlled warm and cold runs, common hardware, token accounting,
+resident and accelerator memory, energy where possible, and separate model-generation
+and SQL-execution latency.
+After explicit human launch authorization, the technically frozen BIRD Mini-Dev protocol can add transparent direct, decomposition, schema-selection, and bounded executionfeedback baselines on the same two snapshots. Its 500/500 SQLite 3.40.1 gold-query
+preflight is a mechanical gate, not model evidence. It must not be described as DKASQL
+reproduction, because no official implementation was found. Additional backbones, sizes,
+quantizations, decoding settings, and repeated runs would test whether the finite-set
+execution contrasts persist.
+
+691
+
+6. Conclusions
+
+675
+676
+677
+678
+679
+680
+681
+682
+683
+684
+685
+686
+687
+688
+689
+
+692
+693
+694
+695
+696
+697
+698
+699
+700
+701
+702
+703
+704
+705
+706
+707
+708
+709
+710
+711
+712
+
+713
+
+MA-SQLGrid provides an auditable case study of context grounding for power-grid
+text-to-SQL. Across two independently audited local backbones, a GridDB-tailored composite structural/SQL-operation hint improves a common-target projected-column manipulation check, but none of nine primary factorial execution tests survives family-wise
+correction. The compact/domain-grounded package does not show an independent positive execution effect. In the separate 700-call component study, presented value evidence
+improves Qwen execution under the frozen rule but not Granite execution; deterministic
+candidate selection is not promoted for either snapshot. A retrospective 15-state logical-
+
+https://doi.org/10.3390/app1010000
+
+714
+715
+716
+717
+718
+719
+720
+721
+
+Version August 5, 2026 submitted to Appl. Sci.
+
+23 of 25
+
+AND stress test likewise promotes none of nine factorial reliability effects, while exposing
+lower agreement than the original snapshot in every cell.
+The practical conclusion is not that one prompt recipe or component universally wins.
+Model, schema/value context, handcrafted normalization, operation guidance, and candidate selection form a coupled system that must be evaluated with database execution.
+Hash-bound ledgers, explicit finite-set families, multi-state witnesses, composition sensitivity, sealed candidate selection, and negative results make this bounded conclusion
+reproducible. External RTS-GMLC and SimBench work remains a mechanically validated
+pilot until independent experts certify the question–SQL pairs and a sealed follow-up set
+is executed; BIRD remains an unexecuted model protocol despite its completed technical
+freeze and gold-query preflight.
+
+722
+
+Supplementary Materials: The local artifact tree contains complete Qwen and Granite factorial and
+component prompts, predictions, scores, selection seals, logs, manifests, independent audit reports,
+the v2/v3 canonical releases, the v5 multi-state release and review chain, figure and table sources,
+external protocol builders, and reviewer forms. W10_FRONT_MATTER: A LICENSE-REVIEWED
+PUBLIC REPOSITORY URL/DOI MUST BE ADDED BEFORE SUBMISSION.
+
+733
+
+723
+724
+725
+726
+727
+728
+729
+730
+731
+732
+
+734
+735
+736
+737
+
+Author Contributions: W10_FRONT_MATTER: CRediT roles and author initials require confirmation
+by all authors.
+
+738
+
+Funding: W10_FRONT_MATTER: AUTHOR-APPROVED FUNDING AND FUNDER-ROLE STATEMENT REQUIRED.
+
+740
+
+Institutional Review Board Statement: Not applicable to the present computational study of technical databases. W10_FRONT_MATTER: AUTHORS MUST CONFIRM THIS STATEMENT.
+
+742
+
+Informed Consent Statement: Not applicable. W10_FRONT_MATTER: AUTHORS MUST CONFIRM THIS STATEMENT.
+
+744
+
+Data Availability Statement: The local reproducibility package includes hash-bound prompts,
+predictions, scores, audits, generated tables and figures, and external-review templates. GridDB
+raw-record redistribution remains withheld pending permission review. RTS-GMLC and SimBench
+artifacts retain source-specific attribution and licensing obligations. W10_FRONT_MATTER: ADD A
+PERMANENT PUBLIC REPOSITORY URL/DOI AFTER LICENSE REVIEW.
+
+746
+
+Acknowledgments: W10_FRONT_MATTER: ACKNOWLEDGMENTS, IF ANY, REQUIRE AUTHOR
+APPROVAL.
+
+751
+
+Conflicts of Interest: W10_FRONT_MATTER: EACH AUTHOR MUST PROVIDE A CONFLICT-OFINTEREST DISCLOSURE.
+
+753
+
+Declaration of Generative AI Use
+
+739
+
+741
+
+743
+
+745
+
+747
+748
+749
+750
+
+752
+
+754
+
+755
+
+W10_FRONT_MATTER: Authors must disclose whether and how generative AI assisted study design, code, analysis, figures, or writing, including tool identity and human
+verification. No final author-approved declaration has been supplied. Machine-generated
+external question–SQL candidates are explicitly excluded from human-gold quantitative
+claims.
+
+756
+757
+758
+759
+760
+
+References
+
+761
+
+1.
+
+762
+
+2.
+
+Yu, T.; Zhang, R.; Yang, K.; Yasunaga, M.; Wang, D.; Li, Z.; Ma, J.; Li, I.; Yao, Q.; Roman, S.; et al. Spider: A Large-Scale
+Human-Labeled Dataset for Complex and Cross-Domain Semantic Parsing and Text-to-SQL Task. In Proceedings of the
+2018 Conference on Empirical Methods in Natural Language Processing. Association for Computational Linguistics, 2018, pp.
+3911–3921. https://doi.org/10.18653/v1/D18-1425.
+Scholak, T.; Schucher, N.; Bahdanau, D. PICARD: Parsing Incrementally for Constrained Auto-Regressive Decoding from
+Language Models. In Proceedings of the 2021 Conference on Empirical Methods in Natural Language Processing. Association for
+Computational Linguistics, 2021, pp. 9895–9901. https://doi.org/10.18653/v1/2021.emnlp-main.779.
+
+https://doi.org/10.3390/app1010000
+
+763
+764
+765
+766
+767
+768
+
+Version August 5, 2026 submitted to Appl. Sci.
+
+3.
+4.
+
+5.
+
+6.
+
+7.
+
+8.
+9.
+
+10.
+
+11.
+
+12.
+13.
+14.
+
+15.
+
+16.
+17.
+18.
+
+19.
+20.
+21.
+22.
+23.
+
+24 of 25
+
+Katsogiannis-Meimarakis, G.; Koutrika, G. A Survey on Deep Learning Approaches for Text-to-SQL. The VLDB Journal 2023,
+32, 905–936. https://doi.org/10.1007/s00778-022-00776-8.
+Nan, L.; Zhao, Y.; Zou, W.; Ri, N.; Tae, J.; Zhang, E.; Cohan, A.; Radev, D. Enhancing Text-to-SQL Capabilities of Large Language
+Models: A Study on Prompt Design Strategies. In Proceedings of the Findings of the Association for Computational Linguistics:
+EMNLP 2023. Association for Computational Linguistics, 2023, pp. 14935–14956. https://doi.org/10.18653/v1/2023.findingsemnlp.996.
+Sun, R.; Arik, S.O.; Sinha, R.; Nakhost, H.; Dai, H.; Yin, P.; Pfister, T. SQLPrompt: In-Context Text-to-SQL with Minimal
+Labeled Data. In Proceedings of the Findings of the Association for Computational Linguistics: EMNLP 2023. Association for
+Computational Linguistics, 2023, pp. 542–550. https://doi.org/10.18653/v1/2023.findings-emnlp.39.
+Lee, C.H.; Polozov, O.; Richardson, M. KaggleDBQA: Realistic Evaluation of Text-to-SQL Parsers. In Proceedings of the 59th
+Annual Meeting of the Association for Computational Linguistics and the 11th International Joint Conference on Natural Language
+Processing. Association for Computational Linguistics, 2021, pp. 2261–2273. https://doi.org/10.18653/v1/2021.acl-long.176.
+Li, J.; Hui, B.; Qu, G.; Yang, J.; Li, B.; Li, B.; Wang, B.; Qin, B.; Geng, R.; Huo, N.; et al. Can LLM Already Serve as a Database
+Interface? A Big Bench for Large-Scale Database Grounded Text-to-SQLs. In Proceedings of the Advances in Neural Information
+Processing Systems 36, 2023.
+Pourreza, M.; Rafiei, D. DIN-SQL: Decomposed In-Context Learning of Text-to-SQL with Self-Correction. In Proceedings of the
+Advances in Neural Information Processing Systems 36, 2023.
+Wang, B.; Shin, R.; Liu, X.; Polozov, O.; Richardson, M. RAT-SQL: Relation-Aware Schema Encoding and Linking for Text-toSQL Parsers. In Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics. Association for
+Computational Linguistics, 2020, pp. 7567–7578. https://doi.org/10.18653/v1/2020.acl-main.677.
+Lei, W.; Wang, W.; Ma, Z.; Gan, T.; Lu, W.; Kan, M.Y.; Chua, T.S. Re-examining the Role of Schema Linking in Text-to-SQL. In
+Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing. Association for Computational
+Linguistics, 2020, pp. 6943–6954. https://doi.org/10.18653/v1/2020.emnlp-main.564.
+Liu, A.; Hu, X.; Li, L.; Wen, L. Semantic Enhanced Text-to-SQL Parsing via Iteratively Learning Schema Linking Graph. In
+Proceedings of the 28th ACM SIGKDD Conference on Knowledge Discovery and Data Mining. Association for Computing
+Machinery, 2022, pp. 1021–1030. https://doi.org/10.1145/3534678.3539294.
+Talaei, S.; Pourreza, M.; Chang, Y.C.; Mirhoseini, A.; Saberi, A. CHESS: Contextual Harnessing for Efficient SQL Synthesis. arXiv
+preprint arXiv:2405.16755 2024, [2405.16755]. https://doi.org/10.48550/arXiv.2405.16755.
+Bian, H.; Li, G.; Wang, Y.; Fu, Q.; Shen, J.; Yao, X.; Wu, Z. DKASQL: Dynamic Knowledge Adaptation for Domain-Specific
+Text-to-SQL. Applied Sciences 2025, 15, 11121. https://doi.org/10.3390/app152011121.
+Barrows, C.; Bloom, A.; Ehlen, A.; Ikäheimo, J.; Jorgenson, J.; Krishnamurthy, D.; Lau, J.; McBennett, B.; O’Connell, M.; Preston,
+E.; et al. The IEEE Reliability Test System: A Proposed 2019 Update. IEEE Transactions on Power Systems 2020, 35, 119–127.
+https://doi.org/10.1109/TPWRS.2019.2925557.
+Meinecke, S.; Sarajlić, D.; Drauz, S.R.; Klettke, A.; Lauven, L.P.; Rehtanz, C.; Moser, A.; Braun, M. SimBench—A Benchmark
+Dataset of Electric Power Systems to Compare Innovative Solutions Based on Power Flow Analysis. Energies 2020, 13, 3290.
+https://doi.org/10.3390/en13123290.
+Meng, Q.; Zhang, X.; Dong, Y.; Chen, Y.; Lin, D. A Combined Semantic Dependency and Lexical Embedding RoBERTa Model for
+Grid Field Relational Extraction. Applied Sciences 2023, 13, 11074. https://doi.org/10.3390/app131911074.
+Tang, D.; Zhao, R.; Lin, Y.; Zhang, T.; Zhang, P. Modeling the Data Provenance of Relational Databases Supporting Full-Featured
+SQL and Procedural Languages. Applied Sciences 2023, 13, 64. https://doi.org/10.3390/app13010064.
+Phipson, B.; Smyth, G.K. Permutation p-Values Should Never Be Zero: Calculating Exact p-Values When Permutations Are
+Randomly Drawn. Statistical Applications in Genetics and Molecular Biology 2010, 9, Article 39. https://doi.org/10.2202/1544-6115.
+1585.
+Holm, S. A Simple Sequentially Rejective Multiple Test Procedure. Scandinavian Journal of Statistics 1979, 6, 65–70.
+Efron, B. Bootstrap Methods: Another Look at the Jackknife. The Annals of Statistics 1979, 7, 1–26. https://doi.org/10.1214/aos/
+1176344552.
+Cameron, A.C.; Gelbach, J.B.; Miller, D.L. Bootstrap-Based Improvements for Inference with Clustered Errors. The Review of
+Economics and Statistics 2008, 90, 414–427. https://doi.org/10.1162/rest.90.3.414.
+Canay, I.A.; Romano, J.P.; Shaikh, A.M. Randomization Tests under an Approximate Symmetry Assumption. Econometrica 2017,
+85, 1013–1030. https://doi.org/10.3982/ECTA13086.
+McNemar, Q. Note on the Sampling Error of the Difference between Correlated Proportions or Percentages. Psychometrika 1947,
+12, 153–157. https://doi.org/10.1007/BF02295996.
+
+https://doi.org/10.3390/app1010000
+
+769
+770
+771
+772
+773
+774
+775
+776
+777
+778
+779
+780
+781
+782
+783
+784
+785
+786
+787
+788
+789
+790
+791
+792
+793
+794
+795
+796
+797
+798
+799
+800
+801
+802
+803
+804
+805
+806
+807
+808
+809
+810
+811
+812
+813
+814
+815
+816
+817
+818
+819
+820
+
+Version August 5, 2026 submitted to Appl. Sci.
+
+25 of 25
+
+Disclaimer/Publisher’s Note: The statements, opinions and data contained in all publications are solely those of the individual
+author(s) and contributor(s) and not of MDPI and/or the editor(s). MDPI and/or the editor(s) disclaim responsibility for any injury to
+people or property resulting from any ideas, methods, instructions or products referred to in the content.
+
+https://doi.org/10.3390/app1010000
+
+821
+822
+823
+
+

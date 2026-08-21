@@ -1,0 +1,50 @@
+{
+  "approval_id": "DUAL-LLM-ANNOTATION-20260807-03",
+  "approved_by": "project author (via chat instruction 2026-08-07: '继续完成，不要修改稿件，只需要完成数据处理和标注，然后写一个说明文档')",
+  "approved_at": "2026-08-07",
+  "scope": [
+    "MA_STAGE2_LOOSE_ENDS: fix 3 flagged candidates as versioned v2 artifact + re-annotate; deterministic column-check layer over 121 items",
+    "MA_SEALED_SET_STAGE3: generate ~85 new question-SQL pairs (new template families on existing RTS-GMLC and SimBench pilot DBs), freeze, annotate with 30 blinded negative controls",
+    "C2GES_SEALED_SET_STAGE3: freeze 75 questions from 15 unused NERC audit docs, annotate under v1.1 prompt + v1.2 resolution"
+  ],
+  "protocol_sha256": {
+    "MA-SEALED-SET-FREEZE-v1.0": "FC422FEF02B278D60B6E3850604EAB2E02F0683F7AF02115B6153FB36DC32A4E",
+    "C2GES-SEALED-SET-FREEZE-v1.0": "F1929EE62529D96794082A8868B628837ED51EF8A628FCCFAA812EFBD3D14EB0"
+  },
+  "providers_and_models": [
+    {
+      "role": "annotator_a",
+      "provider": "DeepSeek direct",
+      "model": "deepseek-chat (served as deepseek-v4-flash, recorded per call)"
+    },
+    {
+      "role": "annotator_b",
+      "provider": "Google Gemini direct",
+      "model": "gemini-2.5-flash"
+    },
+    {
+      "role": "adjudicator_c",
+      "provider": "OpenAI via Cloubic gateway",
+      "model": "gpt-5.4"
+    }
+  ],
+  "max_calls": 550,
+  "data_scope": [
+    "public NERC event-analysis audit JSONs (25 unused docs)",
+    "synthetic RTS-GMLC/SimBench pilot databases (project-generated)"
+  ],
+  "prohibited_actions": [
+    "不得修改两篇稿件",
+    "不得把 LLM 标签称为真人专家金标",
+    "不得覆盖或修改已有 91 条候选原始文件与 pilot/stage2 输出",
+    "不得删除失败或分歧记录",
+    "不得因结果内容而重试",
+    "API key 不得写入任何文件或日志"
+  ],
+  "stop_conditions": [
+    "累计调用达 550 停止（阶段2 已用 518，独立计数）",
+    "连续 5 次鉴权或格式错误停止",
+    "served model 与冻结不符停止（deepseek-v4-flash 豁免）",
+    "sealed set 在冻结哈希写入前不得进入任何标注调用"
+  ]
+}

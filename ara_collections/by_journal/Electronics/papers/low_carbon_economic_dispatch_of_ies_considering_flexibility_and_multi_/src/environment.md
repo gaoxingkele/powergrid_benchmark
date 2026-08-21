@@ -1,0 +1,24 @@
+# Environment
+
+- **Language/runtime**: Not specified in paper. Optimization performed with commercial solver + a metaheuristic; no code repository released.
+- **Framework/solvers**:
+  - Lower-level model: **CPLEX 12.10** (commercial MILP/QP solver).
+  - Upper-level model: **improved PSO (IPSO)** with DBO-tuned parameters (implementation language not stated).
+  - Baselines for comparison: standard PSO, Dung Beetle Optimizer (DBO).
+  - Multi-attribute selection: TOPSIS.
+- **Hardware**: Not specified in paper. Runtimes reported in seconds (PSO 134 s, DBO 117 s, IPSO 105 s over 30 runs), implying a single workstation, but CPU/GPU/RAM not stated.
+- **Data sources**:
+  - Typical-day (24 h) wind/solar output and electric/heat/cooling load forecasts — cited from ref [30] (Du, H., Master's thesis, Northeast Electric Power University, 2025); shown in Figure 4.
+  - Device / storage parameters — Table 1 (ref [30]).
+  - Demand-response compensation prices — Table 2.
+  - Time-of-use interactive electricity prices — Table 3 (ref [31]).
+  - Electric-vehicle category parameters — Table 4 (ref [30]).
+  - Carbon / green-certificate coefficients — cited from ref [29] (Xie, J., Master's thesis, Yanshan University, 2025); numeric values not reproduced.
+  - Data Availability Statement: "The data presented in this study are available in this article."
+- **Key dependencies**: CPLEX 12.10; PSO/DBO implementations (versions/libraries not specified).
+- **Protocols**:
+  - Scenario design: five nested scenarios (§4.2) forming a mechanism ablation.
+  - Algorithm evaluation: population 50, 200 max iterations; 30 independent runs per algorithm; TOPSIS closeness to the ideal solution as the quality metric (§4.3).
+  - Parameter sanity check (§4.1): inertia weight linearly decreasing 0.9→0.4, c1=2, c2=1.5 (note: differs from adaptive Eq. 26/27 forms).
+- **Random seeds**: Not specified in paper (stability assessed via 30 independent runs rather than fixed seeds).
+- **Code availability**: No code released. The novel IPSO update mechanism (printed Eqs. 26–31) is reconstructed as a grounded stub in src/execution/improved_pso.py; all other components are described only in prose/equations and live in logic/solution/.

@@ -1,0 +1,173 @@
+# Exploration tree — reconstructed research DAG for
+# "Multi-Level Network Topology and Time Series Multi-Scenario Optimization Planning Method
+#  for Hybrid AC/DC Distribution Systems in Data Centers" (Electronics 2025, 14, 264)
+# support_level: explicit = directly grounded in the paper; inferred = reconstruction of its logic.
+
+tree:
+  - id: N01
+    type: question
+    support_level: explicit
+    source_refs: ["§1", "§2 opening"]
+    title: "How should the physical-level network topology of an AC/DC distribution system be designed for data-center access?"
+    description: >
+      Data-center equipment is predominantly DC-driven; multi-level network-topology design for
+      data-center AC/DC access is named the first key difficulty (§1, end of literature review).
+    children:
+      - id: N02
+        type: analysis
+        support_level: explicit
+        source_refs: ["§2.1"]
+        title: "Adaptability analysis of AC/DC distribution access in data centers"
+        description: >
+          Internal factors (economic: higher converter/equipment cost but ~1/3 equipment-room
+          footprint, ~50% footprint reduction, ~40% equipment saving; technical: fault
+          ride-through, phase/frequency-independent interconnection, ~5-8% loss saving, MV-DC
+          economical when convergence radius > 5 km and capacity >= 10 MW) and external factors
+          (socio-economic growth, rising DC-load share) drive DC voltage-level selection.
+      - id: N03
+        type: dead_end
+        support_level: explicit
+        source_refs: ["§1 (refs [7])"]
+        title: "Generic chain topology rejected as-is for data centers"
+        description: >
+          Chain structure is simple and convenient to implement, but a short-circuit fault in any
+          line affects the intermediate converter station — inadequate for data-center
+          reliability tiers without tier-aware redundancy design.
+      - id: N04
+        type: dead_end
+        support_level: explicit
+        source_refs: ["§1 (refs [7])"]
+        title: "Generic ring topology rejected as-is for data centers"
+        description: >
+          Ring supply reliability is high but system expansion is inconvenient and a converter-
+          station fault propagates fault current to all parts of the system — mismatched to
+          data-center growth and tier requirements.
+      - id: N05
+        type: decision
+        support_level: explicit
+        source_refs: ["§2.2", "Table 1", "Figures 1-5"]
+        evidence: [C07]
+        title: "Design tier-aware multi-level flexible-DC supply architectures"
+        description: >
+          Map GB50174 grades A/B/C to Uptime/TIA Tiers I-IV (Table 1) and design a 750 V DC-bus
+          architecture per tier: dual hot-standby buses with 2N/2(N+1) UPS for A/Tier IV-III
+          (Figure 1); single path with N+1 redundancy for B/Tier II (Figures 2-3); single
+          non-redundant path for C/Tier I (Figures 4-5).
+
+  - id: N06
+    type: question
+    support_level: explicit
+    source_refs: ["§1", "§3 opening"]
+    title: "How to plan a hybrid AC/DC distribution network as DG penetration and data-center DC-load density grow?"
+    description: >
+      DG infiltration and rising DC-load density change node structure and operation mode and
+      raise planning uncertainty; traditional single-forecast planning cannot track the
+      scenario-dependent optimum.
+    children:
+      - id: N07
+        type: decision
+        support_level: explicit
+        source_refs: ["§3.1", "Eqs. 1-7"]
+        evidence: [C06]
+        title: "Formulate a three-objective time-series multi-scenario planning model"
+        description: >
+          Minimize (f1) annual economic cost = DG investment/O&M + line DC retrofit/new-build +
+          DG-, load-, and line-converter costs; (f2) annual network loss; (f3) max line
+          voltage-stability index — all as probability-weighted sums over typical time-series
+          scenarios (d_j, p_{s,j}, T slots).
+      - id: N08
+        type: decision
+        support_level: explicit
+        source_refs: ["§3.2", "Eqs. 8-10"]
+        title: "Impose AC/DC power-balance, voltage, branch-power and capacity constraints"
+        description: >
+          AC node power balance (Eq. 8), data-center DC node power balance (Eq. 9), node-voltage
+          limits, branch active-power limits, DG/converter capacity limits (Eq. 10).
+      - id: N09
+        type: decision
+        support_level: explicit
+        source_refs: ["§4", "Eq. 11", "Figure 6"]
+        title: "Solve with Pareto-niche hybrid chaotic binary PSO (SABPSO)"
+        description: >
+          Binary-code particles over DG type/capacity, line DC-conversion flags and new-load-point
+          line choices (Eq. 11); Pareto dominance + crowding degree + elite retention; global
+          optimum via small-niche sharing; compromise solution via fuzzy affiliation and variance
+          assignment (§4.1-4.2, 14-step procedure).
+        children:
+          - id: N16
+            type: observation
+            support_level: explicit
+            source_refs: ["§4.2 steps (4) and (7)"]
+            title: "Gap: procedure references an undefined f4 and a 'lower-level objective function'"
+            description: >
+              Step (4) penalizes 'f1 and f4' and step (7) computes fitness from the lower-level
+              objective, implying a bi-level structure, but only f1-f3 are defined in §3.1; f4 is
+              never specified. Kept as a documented inconsistency, not resolved by invention.
+      - id: N10
+        type: experiment
+        support_level: explicit
+        source_refs: ["§5.1", "Figure 7"]
+        evidence: [C01, C06]
+        title: "E01 — 13-node single-stage planning: DC-load scenario vs all-AC scenario"
+        description: >
+          Scenario 1 (data-center DC + AC loads, PV/WT) yields a largely-DC optimal topology;
+          Scenario 2 (same loads all-AC) stays largely AC — DC share tracks DC-load/new-energy
+          proportion.
+      - id: N11
+        type: experiment
+        support_level: explicit
+        source_refs: ["§5.1", "Figure 8", "Table 3"]
+        evidence: [C01, C02]
+        title: "E02 — 13-node multi-stage topology evolution over 0-80% DC-load penetration"
+        description: >
+          Staged re-optimization at +10% penetration per 15-year cycle: no retrofit at 0-40%
+          (Phase I), staged bus/line DC retrofit from 50% (Phases II-IV); grid-connection buses
+          1-3 remain AC even at 80%.
+      - id: N12
+        type: experiment
+        support_level: explicit
+        source_refs: ["§5.2-5.3", "Tables 4-6", "Figures 9-10"]
+        evidence: [C03, C05]
+        title: "E03 — modified IEEE33 planning with DC retrofit/new-build enabled"
+        description: >
+          DC-modified lines and DG concentrate at feeder ends; new high-DC-share load points
+          connect via DC lines; objective values recorded in Table 6.
+      - id: N13
+        type: experiment
+        support_level: explicit
+        source_refs: ["§5.3", "Table 7"]
+        evidence: [C05]
+        title: "E04 — modified IEEE33 planning with DC forbidden"
+        description: >
+          Same system re-optimized with no DC supply allowed; hosted DG capacity drops relative
+          to the DC-enabled plan.
+      - id: N14
+        type: experiment
+        support_level: explicit
+        source_refs: ["§5.3", "Table 8", "Figure 11"]
+        evidence: [C04, C08]
+        title: "E05 — consider-DC vs exclude-DC objective and stability comparison"
+        description: >
+          Head-to-head comparison of cost components, annual loss, and per-branch/average
+          voltage-stability index between the E03 and E04 optima.
+      - id: N15
+        type: experiment
+        support_level: explicit
+        source_refs: ["§5.4", "Table 9"]
+        evidence: [C09]
+        title: "E06 — regional practical-engineering DC-interconnection evaluation"
+        description: >
+          Load-rate analysis of feeder/link pairs across four substations; unbalanced pairs
+          flagged as DC-interconnection candidates, with operating soft-straightened lines
+          (707, 717) as precedent.
+
+  - id: N17
+    type: experiment
+    support_level: explicit
+    source_refs: ["§2.2", "Table 1", "Figures 1-5"]
+    evidence: [C07]
+    also_depends_on: [N05]
+    title: "E07 — design-adequacy analysis of the multi-level topology by reliability tier"
+    description: >
+      Qualitative check that each tier's architecture meets its redundancy requirement
+      (dual-bus hot standby vs N+1 vs single path); no numeric availability computed.

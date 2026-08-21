@@ -1,0 +1,240 @@
+# Exploration tree — reconstruction of the review's argument structure.
+# This is a review/survey: no original experimental trajectory exists. "experiment" nodes are the
+# review's literature-synthesis analyses (E01–E11 in logic/experiments.md); "dead_end" nodes are
+# approaches the review EXPLICITLY reports as inadequate in the surveyed literature (with source
+# refs) — none is invented. Nodes marked `inferred` reconstruct the paper's logic, not a session log.
+
+tree:
+  - id: N01
+    type: question
+    support_level: explicit
+    source_refs: ["§1", "§1.2", "Abstract"]
+    title: "How should energy storage be integrated in renewable-dominated AC microgrids so that macro-scale economic planning and micro-scale dynamic control are no longer decoupled?"
+    description: "Root question. IBRs strip rotational inertia (§1.1); BESS-as-NNS must defer pole-and-wire upgrades while keeping low-inertia grids stable; the literature treats planning, automation, and control as isolated domains."
+    evidence: [C01]
+    children:
+      - id: N02
+        type: experiment
+        support_level: explicit
+        source_refs: ["§1.3", "Figure 1"]
+        title: "PRISMA-informed literature screening (E10)"
+        description: "IEEE Xplore / ScienceDirect / Scopus / Web of Science, 2012–2026: 186 identified → 26 duplicates removed → 160 screened → 35 excluded → 125 sought → 2 not retrieved → 123 assessed → 20 excluded → 103 included, grouped into ESS integration / forecasting / techno-economic / optimization-control themes."
+        evidence: [C01]
+
+      - id: N03
+        type: question
+        support_level: explicit
+        source_refs: ["§2"]
+        title: "Which storage technology and integration topology should carry the microgrid?"
+        description: "Technology and topology decisions impose fundamental constraints on achievable control performance, economic optimization, and resilience."
+        evidence: [C07]
+        children:
+          - id: N04
+            type: experiment
+            support_level: explicit
+            source_refs: ["§2.1", "Table 1"]
+            title: "Cross-technology comparison of storage media (E01)"
+            description: "Li-ion, flow, lead-acid, supercapacitor, pumped hydro, flywheel, CAES, hydrogen/fuel-cell, thermal compared on energy density, response time, lifespan, applications."
+            evidence: [C07, C02]
+          - id: N05
+            type: experiment
+            support_level: explicit
+            source_refs: ["§2.2.3", "Table 2"]
+            title: "Storage-configuration comparison: battery-only vs SC-only vs HESS (E02)"
+            description: "HESS achieves multi-scale response and reduced degradation stress; SC buffers transients, battery protected."
+            evidence: [C07]
+          - id: N06
+            type: decision
+            support_level: explicit
+            source_refs: ["§2.2.3", "Figure 6", "Table 2"]
+            title: "Adopt battery+supercapacitor functional separation (HESS) as the degradation-mitigating architecture pattern"
+            description: "Batteries take medium/long-term balancing; supercapacitors take fast transients — reduces high-C-rate stress and aligns with degradation-aware planning."
+            evidence: [C07, C02]
+          - id: N07
+            type: decision
+            support_level: explicit
+            source_refs: ["§1.1", "§2", "Figure 3"]
+            title: "Keep AC microgrids as the reference infrastructure; solve AC-specific stability with hybrid control"
+            description: "Despite DC microgrids bypassing AC synchronization hurdles, AC remains dominant; the proposed reference architecture is AC-coupled with a central EMS (forecasting, optimisation, offline time-domain control)."
+            evidence: [C01]
+
+      - id: N08
+        type: question
+        support_level: explicit
+        source_refs: ["§3"]
+        title: "How is storage deployment made economically viable (NPC/LCOE minimization)?"
+        description: "Deployment is governed by CAPEX vs OPEX trade-offs and lifetime NPC/LCOE minimization, not technical feasibility alone."
+        evidence: [C02, C06]
+        children:
+          - id: N09
+            type: dead_end
+            support_level: explicit
+            source_refs: ["§3.1", "ref [28]"]
+            title: "Static cost analysis with fixed tariff inputs"
+            description: "Rejected: electricity prices are volatile/location-dependent; investor choice is sensitive to buy/sell price differences and feed-in tariffs — static price inputs limit durability of the analysis, so frameworks are assessed on managing dynamic price structures (TOU, peak penalties)."
+            evidence: [C06]
+          - id: N10
+            type: dead_end
+            support_level: explicit
+            source_refs: ["§3.4", "refs [39,40]"]
+            title: "HOMER's native optimizer and built-in dispatch strategies"
+            description: "Reported inadequate: the proprietary derivative-free optimizer converges to local optima [39]; built-in cycle-charging / load-following dispatch is too rigid for dynamic tariffs and high renewables [40]."
+            evidence: [C06, C02]
+          - id: N11
+            type: experiment
+            support_level: explicit
+            source_refs: ["§3.4", "Table 3"]
+            title: "External sizing optimization vs external dispatch control (E03)"
+            description: "Two remedies contrasted: capacity/CAPEX focus [39] vs operational-logic/OPEX focus [40]; environment (isolated/static vs grid-integrated/dynamic pricing) selects the winner."
+            evidence: [C06]
+          - id: N12
+            type: experiment
+            support_level: explicit
+            source_refs: ["§3.5", "Table 4"]
+            title: "Physical–economic tool alignment (E04)"
+            description: "PVsyst/Helioscope supply realistic yield and electrochemical degradation so HOMER Pro 3.18.4 schedules realistic replacement costs and grounds NPC minimization in physics."
+            evidence: [C08, C01]
+          - id: N13
+            type: decision
+            support_level: explicit
+            source_refs: ["§1.2.1", "§3.6"]
+            title: "Adopt degradation-aware modelling distinguishing calendar from cycle ageing"
+            description: "Static planning traps sizing in local optima; degradation-aware dispatch/sizing extends battery life and lowers lifecycle cost — the primary economic lever."
+            evidence: [C02]
+
+      - id: N14
+        type: question
+        support_level: explicit
+        source_refs: ["§1.2.2", "§4.1"]
+        title: "How to forecast load and renewable generation accurately enough for proactive EMS scheduling?"
+        description: "Accurate forecasting is the fundamental prerequisite for reliable microgrid operation and optimal dispatch."
+        evidence: [C05]
+        children:
+          - id: N15
+            type: dead_end
+            support_level: explicit
+            source_refs: ["§1.2.2", "§4.1"]
+            title: "Traditional statistical models (ARIMA/SARIMA) under non-stationary volatility"
+            description: "Reported inadequate: they demonstrate constraints under non-stationary or highly volatile scenarios and fail to capture highly non-linear modern loads."
+            evidence: [C05]
+          - id: N16
+            type: experiment
+            support_level: explicit
+            source_refs: ["§4.1", "Table 5"]
+            title: "Forecasting-accuracy and dispatch-impact synthesis (E05)"
+            description: "AI-driven forecasting studies [58,59,61,62] compared on accuracy metric and dispatch/economic impact."
+            evidence: [C05, C04]
+          - id: N17
+            type: experiment
+            support_level: explicit
+            source_refs: ["§4.3", "Table 6"]
+            title: "Data-preprocessing technique comparison (E06)"
+            description: "Scaling (Min–Max, Z-score) accelerates convergence; decomposition (EMD/VMD/WT) isolates trends from severe noise; PCA/STL for redundancy/seasonality."
+            evidence: [C05]
+
+      - id: N18
+        type: question
+        support_level: explicit
+        source_refs: ["§1.2.3", "§4.2", "§5"]
+        title: "Which control strategy maintains stability in low-inertia, inverter-dominated grids?"
+        description: "Control determines how BESS interacts with PV, loads, and grid under fast-varying renewable conditions."
+        evidence: [C04]
+        children:
+          - id: N19
+            type: dead_end
+            support_level: explicit
+            source_refs: ["§1.2.3", "§1.2 (Framework)", "§4.4"]
+            title: "Conventional rule-based / linear controllers"
+            description: "Reported inadequate: easy to use but struggle in dynamic high-renewable environments; often insufficient under fast-varying conditions and bypassed by fast transients."
+            evidence: [C04]
+          - id: N20
+            type: dead_end
+            support_level: explicit
+            source_refs: ["§1.2.3"]
+            title: "Model Predictive Control at scale"
+            description: "Bounded: MPC enhances tracking precision but introduces significant computational challenges at larger scales."
+            evidence: [C04]
+          - id: N21
+            type: decision
+            support_level: explicit
+            source_refs: ["§4.2", "ref [63]"]
+            title: "Adopt the hybrid GWO-PSO dual-strategy metaheuristic"
+            description: "GWO's superior exploration locates promising regions; PSO exploits the local optimum within them — resolving the exploration-vs-exploitation dilemma of standalone algorithms; alternatives noted: Slime Mould, GA [16,17]."
+            evidence: [C04]
+            children:
+              - id: N22
+                type: experiment
+                support_level: explicit
+                source_refs: ["Figure 7", "§4.2", "§5"]
+                title: "GWO-PSO workflow analysis (E11)"
+                description: "Alpha/beta/delta GWO search to iteration limit → transfer top GWO solutions as initial PSO particles → PSO velocity/position updates with pbest/gbest to convergence → output gbest for HRES control."
+                evidence: [C04]
+          - id: N23
+            type: experiment
+            support_level: inferred
+            source_refs: ["§4.2", "Eqs (1)-(5)"]
+            title: "Formalize the weighted multi-objective function the hybrid solver searches"
+            description: "Emissions (Eq 1), losses (Eq 2), autonomy/LPSP (Eq 3), cost incl. degradation (Eq 4), weighted total (Eq 5) — reconstructed as the analysis step that grounds the solver choice; the paper presents the equations, not a run."
+            evidence: [C04]
+
+      - id: N24
+        type: question
+        support_level: explicit
+        source_refs: ["§5"]
+        title: "Can BESS operated as a non-network solution defer capital-intensive network reinforcement?"
+        description: "Modern frameworks prioritize smart investment options over pole-and-wire upgrades."
+        evidence: [C09]
+        children:
+          - id: N25
+            type: experiment
+            support_level: explicit
+            source_refs: ["§5", "Table 7"]
+            title: "NNS integration-factor synthesis (E07)"
+            description: "Techno-economic feasibility, system health index, voltage stability, metaheuristic optimization, cost-reflective pricing mapped to the framework."
+            evidence: [C09]
+          - id: N26
+            type: experiment
+            support_level: explicit
+            source_refs: ["§5", "Table 8", "Eq (6)", "refs [72,74]"]
+            title: "Planning/control studies summary + expansion-cost objective (E08)"
+            description: "GWO reduces installation costs and grid dependence; multi-stage planning defers CAPEX; health-index incorporation extends asset lifespan; Eq (6) minimizes total expansion cost; STATCOM coordination secures transient voltage stability. Residual gap: combining algorithms with physical AC-microgrid constraints."
+            evidence: [C09, C02]
+
+      - id: N27
+        type: question
+        support_level: explicit
+        source_refs: ["§5 (BMS subsection)"]
+        title: "Which battery state metric should drive grid-aware dispatch?"
+        description: "The BMS must manage two distinct but correlated metrics: SoC and SoE (Eqs 7-11)."
+        evidence: [C03]
+        children:
+          - id: N28
+            type: dead_end
+            support_level: explicit
+            source_refs: ["§5 (BMS)", "refs [50,102]"]
+            title: "SoC-only dispatch"
+            description: "Reported inadequate for dispatch: SoC ignores nonlinear terminal-voltage dynamics, so it overestimates available capacity and causes unexpected power shortages; SoC remains appropriate for internal cell balancing."
+            evidence: [C03]
+          - id: N29
+            type: decision
+            support_level: explicit
+            source_refs: ["§5 (BMS)", "Eqs (7)-(11)", "refs [92,95-102]"]
+            title: "Prioritize SoE for load distribution / energy production, with SoC/SoE co-estimation"
+            description: "SoE integrates power (current x terminal voltage) and quantifies releasable energy; co-estimation cross-references the stable quadratic SoC-SoE correlation (Eq 11) to correct sensor noise and cumulative error."
+            evidence: [C03]
+          - id: N30
+            type: experiment
+            support_level: explicit
+            source_refs: ["Table 9", "§5 (BMS)"]
+            title: "SoC/SoE state-tracking and economic-operation synthesis (E09)"
+            description: "SoC tracking, SoE capacity-error reduction, and hybrid GWO-PSO tracking related to cell count, avoided shortages, and Total NPC."
+            evidence: [C03, C01, C04]
+
+      - id: N31
+        type: decision
+        support_level: explicit
+        source_refs: ["§1.3", "Figure 2", "§6"]
+        also_depends_on: [N03, N08, N14, N18, N24, N27]
+        title: "Propose the multi-layer deterministic synthesis framework as the review's answer"
+        description: "Inputs → PVsyst/ETAP physical modelling → HOMER Pro techno-economic planning & EMS → MATLAB/Simulink dynamic control validation → outputs, with operational results fed back to update constraints — treating storage integration as one tightly coupled multidimensional optimization problem. Future work: real-time HIL (OPAL-RT) and Structured Text/PLC deployment."
+        evidence: [C01, C08]

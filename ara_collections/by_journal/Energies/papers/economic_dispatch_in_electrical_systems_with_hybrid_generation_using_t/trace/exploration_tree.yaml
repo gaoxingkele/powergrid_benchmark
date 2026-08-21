@@ -1,0 +1,66 @@
+exploration_tree:
+  paper: "Economic Dispatch in Electrical Systems with Hybrid Generation Using the Differential Evolution Algorithm"
+  doi: "10.3390/en18133414"
+  nodes:
+    - id: root
+      label: "Economic dispatch in hybrid systems under energy constraints"
+      children:
+        - id: problem_formulation
+          label: "Mathematical formulation of EDHGS"
+          details:
+            - "Objective function: quadratic + sinusoidal (valve-point effect)"
+            - "Constraints: power balance, generation limits, water balance"
+            - "Penalty-based constraint enforcement"
+        - id: methodology
+          label: "Optimization and forecasting methodology"
+          children:
+            - id: monte_carlo
+              label: "Monte Carlo simulation for renewable forecasting"
+              details:
+                - "5 years of August data (2018-2022)"
+                - "Weibull PDF for wind and solar; GMM for temperature"
+                - "1000 simulations per variable"
+            - id: algorithms
+              label: "Metaheuristic optimization algorithms"
+              children:
+                - id: de
+                  label: "Differential Evolution (F=0.8, CR=0.9, 1000 iter)"
+                - id: pso
+                  label: "Particle Swarm Optimization (inertia [0.55, 1.1])"
+                - id: gwo
+                  label: "Grey Wolf Optimizer (20 agents, 2000 iter)"
+                - id: ca
+                  label: "Cultural Algorithm (pop=50, alpha=0.3, beta=0.5)"
+        - id: test_system
+          label: "Test system and scenarios"
+          details:
+            - "4 hydro, 5 thermal, 6 PV, 1 wind farm"
+            - "Scenario 1: drought / limited hydro"
+            - "Scenario 2: high water availability"
+            - "24-hour planning horizon"
+        - id: results
+          label: "Results and comparison"
+          children:
+            - id: scenario1
+              label: "Scenario 1 results"
+              details:
+                - "DE best cost: USD 4.2897e5"
+                - "DE avg cost: USD 4.2968e5"
+                - "DE avg time: 81.47 s"
+            - id: scenario2
+              label: "Scenario 2 results"
+              details:
+                - "DE best cost: USD 5.6531e5"
+                - "DE avg cost: USD 5.6589e5"
+                - "DE avg time: 84.08 s"
+            - id: sensitivity
+              label: "Sensitivity analysis (+/-10% demand)"
+              details:
+                - "DE maintained best performance"
+                - "Cost variation within +/-4%"
+        - id: conclusions
+          label: "Conclusions and future work"
+          details:
+            - "DE is best among four techniques for minimum cost"
+            - "Renewable integration reduces costs and emissions"
+            - "Future work: energy storage, LSTM forecasting, multi-node systems"

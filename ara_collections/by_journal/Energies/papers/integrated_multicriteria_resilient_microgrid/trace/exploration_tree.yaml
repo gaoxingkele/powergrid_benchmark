@@ -1,0 +1,83 @@
+exploration_tree:
+  version: "1.0"
+  paper: "Integrated Multi-Criteria Planning for Resilient Renewable Energy-Based Microgrid"
+
+  nodes:
+
+    - id: Q01
+      type: question
+      content: "How can VRE-based microgrid capacity sizing and operational planning be jointly optimized under uncertainty?"
+      parent: null
+      children: [Q02, Q03, D01]
+
+    - id: Q02
+      type: question
+      content: "What demand response mechanism best mitigates VRE variability without relying solely on expensive BESS?"
+      parent: Q01
+      children: [E01, D02]
+
+    - id: Q03
+      type: question
+      content: "Can accurate short-term forecasting compensate for uncertainty and reduce required storage capacity?"
+      parent: Q01
+      children: [E02, Q04]
+
+    - id: Q04
+      type: question
+      content: "How should the three competing objectives (cost, reliability, curtailment) be traded off?"
+      parent: Q03
+      children: [E03, D03]
+
+    - id: D01
+      type: decision
+      content: "Use MOPSO with TOPSIS ranking for multi-objective optimization of PV, WT, and BESS capacities"
+      parent: Q01
+      children: [Q02, Q03]
+
+    - id: D02
+      type: decision
+      content: "Propose novel SSAP VP-CPP DRP that adjusts prices dynamically based on supply-demand imbalance magnitude"
+      parent: Q02
+      children: [D03]
+
+    - id: D03
+      type: decision
+      content: "Compare SSAP VP-CPP against TOU VP-CPP across both deterministic and stochastic planning"
+      parent: Q04
+      children: [XN01]
+
+    - id: E01
+      type: experiment
+      content: "Simulate Cases 2-3: Deterministic planning with TOU VP-CPP vs SSAP VP-CPP DRPs"
+      parent: Q02
+      children: [E02]
+
+    - id: E02
+      type: experiment
+      content: "Simulate Cases 5-6: Stochastic planning with LSTM forecasting and both DRP types"
+      parent: Q03
+      children: [E03]
+
+    - id: E03
+      type: experiment
+      content: "Simulate all six cases and compare Pareto fronts, TOPSIS rankings, and component capacities"
+      parent: Q04
+      children: [XN01]
+
+    - id: XN01
+      type: dead_end
+      content: "LSTM provides point forecasts only — probabilistic forecasting (prediction intervals) not explored for risk-constrained optimization"
+      parent: D03
+      children: [XN02]
+
+    - id: XN02
+      type: dead_end
+      content: "Single geographic case study (Kenya) — generalizability to other regions/weather patterns not validated"
+      parent: XN01
+      children: [XN03]
+
+    - id: XN03
+      type: dead_end
+      content: "No grid-connected scenarios considered — potential benefits of power trading and grid backup not evaluated"
+      parent: XN02
+      children: []

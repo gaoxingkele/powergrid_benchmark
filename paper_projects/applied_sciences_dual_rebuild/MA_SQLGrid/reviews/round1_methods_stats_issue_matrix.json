@@ -1,0 +1,206 @@
+{
+  "schema_version": "ma-sqlgrid-round1-methods-stats-review-v1",
+  "review_date": "2026-08-05",
+  "target_journal": "Applied Sciences",
+  "section_fit": "Computing and Artificial Intelligence",
+  "decision": "major_revision",
+  "manuscript": {
+    "tex": "paper_projects/applied_sciences_dual_rebuild/MA_SQLGrid/manuscript_applsci/paper_applsci.tex",
+    "pdf": "paper_projects/applied_sciences_dual_rebuild/MA_SQLGrid/manuscript_applsci/build/paper_applsci.pdf",
+    "pages": 18
+  },
+  "independent_checks": {
+    "qwen_rows": 720,
+    "granite_rows": 720,
+    "total_rows": 1440,
+    "unique_questions": 180,
+    "conditions": 4,
+    "template_clusters": 70,
+    "family_clusters": 39,
+    "release_tests_passed": 6,
+    "release_tests_total": 6,
+    "cell_means_recomputed": true,
+    "factorial_effects_recomputed": true,
+    "cross_backbone_modifiers_recomputed": true,
+    "cross_backbone_mcnemar_holm_recomputed": true,
+    "citation_keys_missing": 0,
+    "pdf_visual_pages_inspected": [5, 7, 8, 10, 11, 12, 13, 14]
+  },
+  "major_issues": [
+    {
+      "id": "MA-R1-M01",
+      "severity": "major",
+      "title": "Answer-shape outcome uses a condition-dependent target",
+      "locations": [
+        "manuscript_applsci/paper_applsci.tex:166",
+        "paper_projects/2026_ma_sqlgrid_cmc/source/code/experiment_final/applsci_factorial.py:156",
+        "paper_projects/2026_ma_sqlgrid_cmc/source/smoke/dev_chess_style_pilot.py:842"
+      ],
+      "evidence": "F00/F10 clear inferred_shape; the validator defaults missing expected column count to 1, whereas F01/F11 use question-derived counts. Reviewer common-target rescore changed hint main effects from 0.4944/0.4528 to 0.4083/0.3556 for Qwen/Granite.",
+      "required_action": "Recompute the endpoint with one frozen target per question across all cells, independently audit it, regenerate artifacts and claims, and define whether the metric checks columns only or also granularity/order.",
+      "verification": "All four cells use identical per-question target metadata; direct rescore and canonical tables agree for 1440 rows."
+    },
+    {
+      "id": "MA-R1-M02",
+      "severity": "major",
+      "title": "Schema-scope factor is a bundled context intervention",
+      "locations": [
+        "manuscript_applsci/paper_applsci.tex:93",
+        "paper_projects/2026_ma_sqlgrid_cmc/source/code/experiment_final/applsci_factorial.py:150"
+      ],
+      "evidence": "Full cells receive full schema plus global value dictionary; compact cells receive selected schema, matched values, and extra question-derived normalization hints.",
+      "required_action": "Relabel as a context-package factor and revise interpretations, or rerun a controlled schema-only factor with invariant value/normalization context.",
+      "verification": "A factor-invariance audit lists every prompt field and shows that only the declared intervention fields differ."
+    },
+    {
+      "id": "MA-R1-M03",
+      "severity": "major",
+      "title": "Answer-shape hint is a corpus-tailored composite intervention",
+      "locations": [
+        "manuscript_applsci/paper_applsci.tex:69",
+        "paper_projects/2026_ma_sqlgrid_cmc/source/smoke/dev_chess_style_pilot.py:473"
+      ],
+      "evidence": "Rules include exact projections, COUNT/AVG/SUM, GROUP BY/HAVING, ORDER BY and LIMIT; inferred column count matches all 180 exposed test metadata records.",
+      "required_action": "Disclose the frozen rules and development history, show representative prompts, and rename the factor to structural/SQL-operation hints unless a pure-shape intervention is rerun.",
+      "verification": "Methods and supplement permit independent reconstruction without reading gold metadata; claims are scoped to the exposed corpus."
+    },
+    {
+      "id": "MA-R1-M04",
+      "severity": "major",
+      "title": "Applied validation is limited to a tiny exposed synthetic database",
+      "locations": [
+        "manuscript_applsci/paper_applsci.tex:102",
+        "manuscript_applsci/paper_applsci.tex:134",
+        "manuscript_applsci/paper_applsci.tex:330"
+      ],
+      "evidence": "GridDB has 8 tables and 98 rows; its 180 evaluation questions were previously exposed. Zero of 91 external candidates have completed human review, and external results are noncanonical diagnostics.",
+      "required_action": "Fully disclose GridDB construction/size/templates and complete meaningful human external validation, preferably a new sealed set; otherwise narrow the title and applied claims to a controlled synthetic case study.",
+      "verification": "Data table contains comparable counts and provenance; external quantitative claims have completed dual review/adjudication and a frozen no-drop run."
+    },
+    {
+      "id": "MA-R1-M05",
+      "severity": "major",
+      "title": "McNemar inference ignores template-cluster dependence",
+      "locations": [
+        "manuscript_applsci/paper_applsci.tex:185",
+        "manuscript_applsci/paper_applsci.tex:240",
+        "manuscript_applsci/paper_applsci.tex:271"
+      ],
+      "evidence": "Question-level exact McNemar treats 180 pairs as independent although the analysis declares 70 dependent template clusters; Holm does not repair this dependence.",
+      "required_action": "Use cluster-aware inference or demote McNemar to descriptive sensitivity; define each Holm family explicitly.",
+      "verification": "All inferential decisions use the registered cluster unit and no mixed result is promoted through an independence-violating test."
+    },
+    {
+      "id": "MA-R1-M06",
+      "severity": "major",
+      "title": "DKASQL positioning and baseline adequacy are insufficient",
+      "locations": [
+        "manuscript_applsci/paper_applsci.tex:66"
+      ],
+      "evidence": "DKASQL is acknowledged as the direct same-journal predecessor but receives no systematic comparison; no reproduced domain or standard text-to-SQL baseline is reported.",
+      "required_action": "Add a technical comparator table, explain numerical comparability, add a standard direct baseline where feasible, and frame novelty as methodological unless superiority is demonstrated.",
+      "verification": "Novelty and baseline claims are traceable to a complete same-journal comparison rather than first-in-domain wording."
+    },
+    {
+      "id": "MA-R1-M07",
+      "severity": "major",
+      "title": "Methods are not self-contained enough to reproduce interventions",
+      "locations": [
+        "manuscript_applsci/paper_applsci.tex:90",
+        "manuscript_applsci/paper_applsci.tex:144",
+        "manuscript_applsci/paper_applsci.tex:158"
+      ],
+      "evidence": "Exact selection/hint/value rules, common shape scoring, prompt-length manipulation, software versions and hardware are absent. Full/no-hint context is 631 words; compact/no-hint mean is 150.3 words.",
+      "required_action": "Add algorithms, prompt examples, factor-invariance and length tables, exact scoring contract, environment/hardware, commands, artifact identifiers and statistical citations.",
+      "verification": "An independent reader can reconstruct every prompt and outcome from the paper and supplement."
+    },
+    {
+      "id": "MA-R1-M08",
+      "severity": "major",
+      "title": "Architecture figures depict unevaluated/inaccurate elements and are illegible at page scale",
+      "locations": [
+        "manuscript_applsci/figures/frameworks/ma_f01_pipeline.pdf",
+        "manuscript_applsci/figures/frameworks/ma_f02_factorial_external_flow.pdf",
+        "manuscript_applsci/figures/frameworks/ma_f03_human_review_sealed_gate.pdf"
+      ],
+      "evidence": "Figure 1 shows a repair pass absent from the formal factorial execution; Figure 3 says models by repetitions despite one generation per prompt; internal text is unreadable in the 18-page PDF.",
+      "required_action": "Remove or mark future components, correct labels, simplify diagrams, enlarge text, and complete manual page-scale QA.",
+      "verification": "All diagram text is readable at 100% page view and every depicted executed stage maps to Methods and artifacts."
+    },
+    {
+      "id": "MA-R1-M09",
+      "severity": "major",
+      "title": "Submission declarations and public artifact access are incomplete",
+      "locations": [
+        "manuscript_applsci/paper_applsci.tex:13",
+        "manuscript_applsci/paper_applsci.tex:347"
+      ],
+      "evidence": "Author, affiliation, CRediT, funding, conflict, acknowledgments, AI-use, public DOI/URL and confirmations remain placeholders; GridDB redistribution permission is unresolved.",
+      "required_action": "Complete all human-author fields, license review and permanent repository deposit without fabricating metadata.",
+      "verification": "No W10_FRONT_MATTER marker remains and the Data Availability Statement resolves each artifact/license boundary."
+    }
+  ],
+  "minor_issues": [
+    {
+      "id": "MA-R1-m01",
+      "severity": "minor",
+      "title": "Granite compact-shape Holm p-value is miscopied",
+      "evidence": "Manuscript reports 1.86e-4; granite_registered_contrasts.csv reports 1.861682221715455e-6.",
+      "required_action": "Correct from the canonical artifact after revising the inferential framework."
+    },
+    {
+      "id": "MA-R1-m02",
+      "severity": "minor",
+      "title": "Dichotomous statistical wording is too strong",
+      "evidence": "The paper uses nonzero modifier and reject equality wording.",
+      "required_action": "State that intervals exclude/cross zero and avoid treating non-rejection as equality."
+    },
+    {
+      "id": "MA-R1-m03",
+      "severity": "minor",
+      "title": "Dataset table mixes numeric and textual values",
+      "evidence": "GridDB Tables/Rows cells contain maintenance schema/local.",
+      "required_action": "Use 8 tables and 98 rows and add comparable provenance/review/license fields."
+    },
+    {
+      "id": "MA-R1-m04",
+      "severity": "minor",
+      "title": "Title plural exceeds the canonical database evidence",
+      "evidence": "Canonical accuracy uses one synthetic maintenance database; external databases are pilots and not maintenance benchmarks.",
+      "required_action": "Use singular database or controlled factorial study wording, with no operational inference."
+    },
+    {
+      "id": "MA-R1-m05",
+      "severity": "minor",
+      "title": "Reference audit is stale relative to final manuscript",
+      "evidence": "Audit describes Tang et al. as uncited reserve, but the assembled manuscript cites it.",
+      "required_action": "Synchronize the audit and add bootstrap/McNemar/Holm references."
+    },
+    {
+      "id": "MA-R1-m06",
+      "severity": "minor",
+      "title": "Visual QA records automated pass while manual review is pending",
+      "evidence": "visual_qa.json and VISUAL_QA.md retain manual_visual_review pending.",
+      "required_action": "Record real page-scale review and remediation before final release."
+    }
+  ],
+  "claim_assessment": {
+    "title": "overbroad_plural_minor_revision",
+    "abstract": "major_revision_due_to_shape_metric_and_factor_labels",
+    "execution_cell_results": "recomputed_and_consistent",
+    "execution_factorial_results": "numerically_consistent_but_context_factor_mislabeled",
+    "answer_shape_results": "not_valid_for_between_cell_inference_as_currently_scored",
+    "cross_backbone_modifiers": "numerically_consistent_and_bounded",
+    "external_accuracy": "correctly_not_claimed",
+    "operational_readiness": "not_established",
+    "dkasql_positioning": "insufficient"
+  },
+  "submission_blockers": [
+    "condition-invariant shape reanalysis",
+    "factor construct correction",
+    "cluster-aware inference correction",
+    "applied external validation or narrower claim",
+    "human author metadata and declarations",
+    "license-reviewed public repository DOI"
+  ]
+}

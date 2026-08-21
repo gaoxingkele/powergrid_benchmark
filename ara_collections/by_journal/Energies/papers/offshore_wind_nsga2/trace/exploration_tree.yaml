@@ -1,0 +1,118 @@
+# Exploration Tree for Paper #31
+# Multi-Objective Optimization of Offshore Wind Farm Configuration for Energy Storage Based on NSGA-II
+
+root:
+  id: root
+  label: "Offshore Wind Farm ESS Multi-Objective Optimization"
+  children:
+    - id: s1
+      label: "Problem Formulation"
+      children:
+        - id: s1a
+          label: "System Model & SOC Dynamics"
+          type: "model"
+          detail: "Figure 1; Equations 1-2"
+        - id: s1b
+          label: "Objective Functions"
+          type: "formulation"
+          detail: "Cost C_a (Eq 3-7) and Volatility sigma (Eq 8)"
+        - id: s1c
+          label: "Constraints"
+          type: "constraints"
+          detail: "SOC limits (Eq 9), Power limits (Eq 10-11), Grid code (Table 1)"
+        - id: s1d
+          label: "Three Schemes"
+          type: "design"
+          detail: "Scheme 1 (basic), Scheme 2 (spot market), Scheme 3 (arbitrage)"
+
+    - id: s2
+      label: "Algorithm Design"
+      children:
+        - id: s2a
+          label: "NSGA-II Implementation"
+          type: "algorithm"
+          detail: "Population 20, Offspring 60, Generations 300, Crossover/Mutation 0.5 (Figure 2)"
+        - id: s2b
+          label: "MOPSO Baseline"
+          type: "algorithm"
+          detail: "Population 50, Archive 100, W=0.4, C1=C2=1.5 (Table 4)"
+
+    - id: s3
+      label: "Weekly Optimization (Scheme 1)"
+      type: "experiment"
+      detail: "Dec 9-15, 2023 data; 40 MW wind farm"
+      children:
+        - id: s3a
+          label: "Pareto Frontier Generation"
+          type: "result"
+          detail: "Figure 3 — Cost vs Volatility trade-off"
+        - id: s3b
+          label: "Parameter Sensitivity"
+          type: "analysis"
+          detail: "Figure 4 (cost impact), Figure 5 (volatility impact)"
+        - id: s3c
+          label: "Battery Life Analysis"
+          type: "analysis"
+          detail: "Table 3 cycle counts; MLR model (Eq 14); Figure 6 corrected frontier"
+
+    - id: s4
+      label: "Annual Optimization & Algorithm Comparison"
+      type: "experiment"
+      children:
+        - id: s4a
+          label: "NSGA-II Annual Frontier"
+          type: "result"
+          detail: "Figure 11"
+        - id: s4b
+          label: "MOPSO Annual Frontier"
+          type: "result"
+          detail: "Figure 12"
+        - id: s4c
+          label: "xi Metric Comparison"
+          type: "analysis"
+          detail: "Tables 5 (NSGA-II) and 6 (MOPSO); NSGA-II achieves lower xi"
+        - id: s4d
+          label: "Optimal Configuration (Scheme 1)"
+          type: "conclusion"
+          detail: "Table 7 — NSGA-II: 4MW/28MWh vs MOPSO: 4MW/10MWh"
+
+    - id: s5
+      label: "Spot Market Schemes (2 & 3)"
+      type: "experiment"
+      detail: "Using 2024 Guangdong Province spot prices"
+      children:
+        - id: s5a
+          label: "Spot Price Pattern"
+          type: "data"
+          detail: "Figure 13 — Low price 3-5AM, High price 6-8PM"
+        - id: s5b
+          label: "Scheme 2 Frontier"
+          type: "result"
+          detail: "Figure 14a; Net cost = investment - spot revenue"
+        - id: s5c
+          label: "Scheme 3 Frontier"
+          type: "result"
+          detail: "Figure 14b; Peak-valley arbitrage strategy"
+        - id: s5d
+          label: "Scheme Comparison"
+          type: "analysis"
+          detail: "Table 8 — Scheme 3 achieves CNY 2.73M extra benefit"
+
+    - id: s6
+      label: "Optimal Configuration Selection"
+      type: "decision"
+      children:
+        - id: s6a
+          label: "Scheme 1 Selection"
+          detail: "Inflection point method -> 4MW/28MWh, CNY 349.31M, 18.92%"
+        - id: s6b
+          label: "Scheme 2 Selection"
+          detail: "Ideal point method -> 8MW/37MWh, CNY 242.77M, 17.84%"
+        - id: s6c
+          label: "Scheme 3 Switching Strategy"
+          detail: "Flexible between Scheme 2 (stability) and Scheme 3 (profit)"
+
+    - id: s7
+      label: "Conclusions"
+      type: "synthesis"
+      detail: "NSGA-II effective; spot market improves economics; life correction essential"

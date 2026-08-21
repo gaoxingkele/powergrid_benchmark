@@ -1,0 +1,72 @@
+{
+  "prompt": "You are generating candidate SQLite SQL for CHESS-style MA-SQLGrid.\n\nReturn 3 distinct read-only SQLite SELECT queries as a numbered list. Do not include explanation.\nDo not use INSERT, UPDATE, DELETE, DROP, PRAGMA, or multiple statements.\nUse only the selected context, normalization hints, and inferred output-form hints below. Candidate queries should differ in plausible joins/projections while respecting the inferred projection count and relevant literal predicates.\n\nCondition: C5_MASQLGrid_DomainContext_Validated\n\nSQLite selected context:\nTables and selected columns:\n- asset_types(asset_type_id) -- equipment type catalog such as Transformer, Breaker, Line, Relay, Substation, Capacitor\n- assets(asset_id, asset_name, asset_type_id, location_id) -- individual grid assets with names, type, location, install date, status, and MW capacity\n- grid_topology(edge_id, upstream_asset_id, downstream_asset_id) -- directed upstream/downstream asset connections and switch status\n- locations(location_id, location_name, region, criticality) -- grid yards, substations, regions, coordinates, and location criticality\n- sensor_readings(reading_id, asset_id) -- time-series sensor readings for assets with sensor type, value, unit, and alarm flag\n- work_orders(work_order_id, asset_id, assigned_technician_id) -- maintenance work orders with priority, status, schedule, completion date, and fault code\nJoin paths:\n- assets.asset_type_id = asset_types.asset_type_id\n- assets.location_id = locations.location_id\n- work_orders.asset_id = assets.asset_id\n- sensor_readings.asset_id = assets.asset_id\n- grid_topology.upstream_asset_id = assets.asset_id\n- grid_topology.downstream_asset_id = assets.asset_id\nExact database values matched from the question:\n- locations.criticality: critical\nPower-grid domain normalization hints inferred from the question:\n- locations.criticality = \"critical\"\n- locations.criticality = 'critical'\nAnswer-shape hints inferred from the question text:\n- expected column count: 2\n- row granularity: multi-row\n- deterministic ordering needed: True\n- Project asset_name and region.\n\nQuestion ID: Q029\nQuestion: Show assets in critical locations with their region.\n",
+  "rank_trace": [
+    {
+      "candidate_index": 0,
+      "empty_result": false,
+      "exec_ok": true,
+      "execution_error": "",
+      "missing_value_hints": [
+        "locations.criticality = 'critical'"
+      ],
+      "order_ok": false,
+      "ranker_score": 25.0,
+      "safe": true,
+      "shape_ok": true,
+      "sql": "SELECT a.asset_name, l.region  \n   FROM assets a  \n   JOIN locations l ON a.location_id = l.location_id  \n   WHERE l.criticality = 'critical';",
+      "value_hint_count": 2,
+      "value_hits": 1
+    },
+    {
+      "candidate_index": 1,
+      "empty_result": false,
+      "exec_ok": true,
+      "execution_error": "",
+      "missing_value_hints": [
+        "locations.criticality = 'critical'"
+      ],
+      "order_ok": true,
+      "ranker_score": 29.0,
+      "safe": true,
+      "shape_ok": true,
+      "sql": "SELECT a.asset_name, l.region  \n   FROM assets a  \n   JOIN locations l ON a.location_id = l.location_id  \n   WHERE l.criticality = \"critical\"  \n   ORDER BY a.asset_name;",
+      "value_hint_count": 2,
+      "value_hits": 1
+    },
+    {
+      "candidate_index": 2,
+      "empty_result": false,
+      "exec_ok": true,
+      "execution_error": "",
+      "missing_value_hints": [
+        "locations.criticality = 'critical'"
+      ],
+      "order_ok": true,
+      "ranker_score": 28.0,
+      "safe": true,
+      "shape_ok": true,
+      "sql": "SELECT a.asset_name, l.region  \n   FROM assets a  \n   JOIN locations l ON a.location_id = l.location_id  \n   JOIN asset_types t ON a.asset_type_id = t.asset_type_id  \n   WHERE l.criticality = 'critical'  \n   ORDER BY l.region, a.asset_name;",
+      "value_hint_count": 2,
+      "value_hits": 1
+    },
+    {
+      "candidate_index": 3,
+      "empty_result": false,
+      "exec_ok": true,
+      "execution_error": "",
+      "missing_value_hints": [
+        "locations.criticality = 'critical'"
+      ],
+      "order_ok": true,
+      "ranker_score": null,
+      "safe": true,
+      "shape_ok": true,
+      "sql": "SELECT a.asset_name, l.region FROM assets a JOIN locations l ON a.location_id = l.location_id WHERE l.criticality = 'critical' ORDER BY a.asset_name;",
+      "value_hint_count": 2,
+      "value_hits": 1
+    }
+  ],
+  "raw_response": "1. SELECT a.asset_name, l.region  \n   FROM assets a  \n   JOIN locations l ON a.location_id = l.location_id  \n   WHERE l.criticality = 'critical';\n\n2. SELECT a.asset_name, l.region  \n   FROM assets a  \n   JOIN locations l ON a.location_id = l.location_id  \n   WHERE l.criticality = \"critical\"  \n   ORDER BY a.asset_name;\n\n3. SELECT a.asset_name, l.region  \n   FROM assets a  \n   JOIN locations l ON a.location_id = l.location_id  \n   JOIN asset_types t ON a.asset_type_id = t.asset_type_id  \n   WHERE l.criticality = 'critical'  \n   ORDER BY l.region, a.asset_name;",
+  "repair_raw_response": "SELECT a.asset_name, l.region FROM assets a JOIN locations l ON a.location_id = l.location_id WHERE l.criticality = 'critical' ORDER BY a.asset_name",
+  "repaired_sql": "SELECT a.asset_name, l.region FROM assets a JOIN locations l ON a.location_id = l.location_id WHERE l.criticality = 'critical' ORDER BY a.asset_name;"
+}

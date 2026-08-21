@@ -1,0 +1,760 @@
+{
+  "dataset": "fever_filtered_evidence_selection",
+  "label_provenance": "human_gold",
+  "evidence_target_provenance": "FEVER_human_gold_evidence",
+  "selector_role_input_provenance": "external_predictions",
+  "protocol": "predicted-label",
+  "protocol_definition": {
+    "role_source": "external_predictions",
+    "is_end_to_end": true,
+    "reporting_constraint": "Include the upstream label predictor and its errors when reporting end-to-end performance."
+  },
+  "end_to_end": true,
+  "document_leakage_audit": {
+    "grouping_key": "underlying_document_id",
+    "unique_documents": {
+      "train": 745,
+      "dev": 141,
+      "test": 145
+    },
+    "pairwise_overlap": {
+      "train_vs_dev": {
+        "count": 0,
+        "document_ids": []
+      },
+      "train_vs_test": {
+        "count": 0,
+        "document_ids": []
+      },
+      "dev_vs_test": {
+        "count": 0,
+        "document_ids": []
+      }
+    },
+    "overlap_document_count": 0,
+    "passed": true
+  },
+  "bootstrap_cluster_unit": "underlying_wikipedia_document",
+  "k": 3,
+  "evaluated_k": [
+    1,
+    3,
+    5,
+    10
+  ],
+  "encoder": "sentence-transformers/all-MiniLM-L6-v2",
+  "architecture": "original",
+  "train_n": 8000,
+  "dev_n": 1500,
+  "test_n": 1500,
+  "best_dev_f1_during_train": 0.5020588137121766,
+  "mixture_weights": [
+    0.6979301571846008,
+    0.2520138621330261,
+    0.050056006759405136
+  ],
+  "test": {
+    "full": {
+      "n": 1500,
+      "evidence_precision": 0.39366666666666666,
+      "evidence_recall": 0.8452397453309218,
+      "evidence_f1": 0.4939708342798126,
+      "by_role": {
+        "supports": 0.497965037399609,
+        "refutes": 0.4851904005559105
+      }
+    },
+    "query_only": {
+      "n": 1500,
+      "evidence_precision": 0.38411111111111107,
+      "evidence_recall": 0.8252506325918091,
+      "evidence_f1": 0.4823640910230694,
+      "by_role": {
+        "supports": 0.48818031840053505,
+        "refutes": 0.4695783118627983
+      }
+    },
+    "no_role": {
+      "n": 1500,
+      "evidence_precision": 0.38611111111111107,
+      "evidence_recall": 0.8275180929092694,
+      "evidence_f1": 0.484040858699837,
+      "by_role": {
+        "supports": 0.4898762299897541,
+        "refutes": 0.47121299558703433
+      }
+    },
+    "no_graph": {
+      "n": 1500,
+      "evidence_precision": 0.39166666666666666,
+      "evidence_recall": 0.841892431533608,
+      "evidence_f1": 0.4917095936685719,
+      "by_role": {
+        "supports": 0.4960680928741485,
+        "refutes": 0.4821283299565265
+      }
+    },
+    "tfidf": {
+      "n": 1500,
+      "evidence_precision": 0.38233333333333336,
+      "evidence_recall": 0.817142922709099,
+      "evidence_f1": 0.478653174024691,
+      "by_role": {
+        "supports": 0.4904977308234839,
+        "refutes": 0.45261535300218486
+      }
+    },
+    "bm25": {
+      "n": 1500,
+      "evidence_precision": 0.38788888888888884,
+      "evidence_recall": 0.8306527351189116,
+      "evidence_f1": 0.4864023951739122,
+      "by_role": {
+        "supports": 0.49450673507497117,
+        "refutes": 0.4685866714255289
+      }
+    },
+    "sbert": {
+      "n": 1500,
+      "evidence_precision": 0.377,
+      "evidence_recall": 0.7958964238376002,
+      "evidence_f1": 0.46890598616496454,
+      "by_role": {
+        "supports": 0.4700155970350377,
+        "refutes": 0.4664667349772343
+      }
+    },
+    "lead_k": {
+      "n": 1500,
+      "evidence_precision": 0.33811111111111114,
+      "evidence_recall": 0.6923502218913983,
+      "evidence_f1": 0.41374812599394634,
+      "by_role": {
+        "supports": 0.4083787683966956,
+        "refutes": 0.42555155388896904
+      }
+    },
+    "lexcue": {
+      "n": 1500,
+      "evidence_precision": 0.3481111111111111,
+      "evidence_recall": 0.7186142162303927,
+      "evidence_f1": 0.42712696581024756,
+      "by_role": {
+        "supports": 0.4246945360278774,
+        "refutes": 0.4324741621975048
+      }
+    }
+  },
+  "dev": {
+    "full": {
+      "n": 1500,
+      "evidence_precision": 0.4066666666666667,
+      "evidence_recall": 0.8434439111542053,
+      "evidence_f1": 0.5020588137121766,
+      "by_role": {
+        "supports": 0.5070984817382506,
+        "refutes": 0.49151187959575376
+      }
+    },
+    "query_only": {
+      "n": 1500,
+      "evidence_precision": 0.39822222222222214,
+      "evidence_recall": 0.8338613955216897,
+      "evidence_f1": 0.49434121910634665,
+      "by_role": {
+        "supports": 0.5024646774087058,
+        "refutes": 0.47734057956635795
+      }
+    },
+    "no_role": {
+      "n": 1500,
+      "evidence_precision": 0.40066666666666667,
+      "evidence_recall": 0.8360225066328008,
+      "evidence_f1": 0.4965190449841726,
+      "by_role": {
+        "supports": 0.5047776736625887,
+        "refutes": 0.479235523110786
+      }
+    },
+    "no_graph": {
+      "n": 1500,
+      "evidence_precision": 0.40555555555555556,
+      "evidence_recall": 0.8413878887452417,
+      "evidence_f1": 0.5006778613312243,
+      "by_role": {
+        "supports": 0.5058505342834065,
+        "refutes": 0.48985257669933746
+      }
+    },
+    "tfidf": {
+      "n": 1500,
+      "evidence_precision": 0.3951111111111111,
+      "evidence_recall": 0.8249479657053186,
+      "evidence_f1": 0.4898320800972077,
+      "by_role": {
+        "supports": 0.4986987279777318,
+        "refutes": 0.47127610566683253
+      }
+    },
+    "bm25": {
+      "n": 1500,
+      "evidence_precision": 0.40066666666666667,
+      "evidence_recall": 0.8366491179844121,
+      "evidence_f1": 0.4965138625046867,
+      "by_role": {
+        "supports": 0.5114923182477209,
+        "refutes": 0.46516719739297574
+      }
+    },
+    "sbert": {
+      "n": 1500,
+      "evidence_precision": 0.3848888888888889,
+      "evidence_recall": 0.7934478412110765,
+      "evidence_f1": 0.47318184514697276,
+      "by_role": {
+        "supports": 0.47687363108743636,
+        "refutes": 0.4654557364262085
+      }
+    },
+    "lead_k": {
+      "n": 1500,
+      "evidence_precision": 0.37066666666666664,
+      "evidence_recall": 0.7335928550752081,
+      "evidence_f1": 0.4457330245489261,
+      "by_role": {
+        "supports": 0.43574859269493926,
+        "refutes": 0.4666282788412903
+      }
+    },
+    "lexcue": {
+      "n": 1500,
+      "evidence_precision": 0.37066666666666664,
+      "evidence_recall": 0.7607638846991789,
+      "evidence_f1": 0.4543206480365496,
+      "by_role": {
+        "supports": 0.45897665089836687,
+        "refutes": 0.44457664204738545
+      }
+    }
+  },
+  "bootstrap_test": {
+    "full_vs_tfidf": {
+      "mean": 0.015428880159806948,
+      "ci95": [
+        0.006012774674431891,
+        0.025436203839642367
+      ],
+      "p_two_sided": 0.001,
+      "cluster_unit": "underlying_wikipedia_document",
+      "cluster_count": 145
+    },
+    "full_vs_bm25": {
+      "mean": 0.0075698391170837065,
+      "ci95": [
+        -0.0011528986895470426,
+        0.016582718605808868
+      ],
+      "p_two_sided": 0.103,
+      "cluster_unit": "underlying_wikipedia_document",
+      "cluster_count": 145
+    },
+    "full_vs_sbert": {
+      "mean": 0.025088155009517606,
+      "ci95": [
+        0.012075564324104946,
+        0.039520221266152546
+      ],
+      "p_two_sided": 0.0,
+      "cluster_unit": "underlying_wikipedia_document",
+      "cluster_count": 145
+    },
+    "full_vs_query_only": {
+      "mean": 0.01164912114631555,
+      "ci95": [
+        0.004328022359285834,
+        0.01962566297127665
+      ],
+      "p_two_sided": 0.0,
+      "cluster_unit": "underlying_wikipedia_document",
+      "cluster_count": 145
+    },
+    "full_vs_no_role": {
+      "mean": 0.010012585977785548,
+      "ci95": [
+        0.0028246690307940346,
+        0.01785982100090573
+      ],
+      "p_two_sided": 0.005,
+      "cluster_unit": "underlying_wikipedia_document",
+      "cluster_count": 145
+    },
+    "full_vs_lexcue": {
+      "mean": 0.06693666983398504,
+      "ci95": [
+        0.046103164009162555,
+        0.09046179394467346
+      ],
+      "p_two_sided": 0.0,
+      "cluster_unit": "underlying_wikipedia_document",
+      "cluster_count": 145
+    }
+  },
+  "k_sensitivity": {
+    "1": {
+      "test": {
+        "full": {
+          "n": 1500,
+          "evidence_precision": 0.7886666666666666,
+          "evidence_recall": 0.6467291849762439,
+          "evidence_f1": 0.6774328330710684,
+          "by_role": {
+            "supports": 0.6836659657136636,
+            "refutes": 0.6637305734665575
+          }
+        },
+        "query_only": {
+          "n": 1500,
+          "evidence_precision": 0.778,
+          "evidence_recall": 0.641067280214339,
+          "evidence_f1": 0.6707915151297503,
+          "by_role": {
+            "supports": 0.6957192266030058,
+            "refutes": 0.6159930705051738
+          }
+        },
+        "no_role": {
+          "n": 1500,
+          "evidence_precision": 0.7793333333333333,
+          "evidence_recall": 0.6424291849762438,
+          "evidence_f1": 0.6721703030085384,
+          "by_role": {
+            "supports": 0.6957853583374208,
+            "refutes": 0.6202574628292677
+          }
+        },
+        "no_graph": {
+          "n": 1500,
+          "evidence_precision": 0.7846666666666666,
+          "evidence_recall": 0.6432291849762438,
+          "evidence_f1": 0.6738328330710684,
+          "by_role": {
+            "supports": 0.6813381286622571,
+            "refutes": 0.6573339849804167
+          }
+        },
+        "tfidf": {
+          "n": 1500,
+          "evidence_precision": 0.7633333333333333,
+          "evidence_recall": 0.6345687759408347,
+          "evidence_f1": 0.6627638626079801,
+          "by_role": {
+            "supports": 0.6929515898478071,
+            "refutes": 0.5964023556052906
+          }
+        },
+        "bm25": {
+          "n": 1500,
+          "evidence_precision": 0.8066666666666666,
+          "evidence_recall": 0.6695236294206882,
+          "evidence_f1": 0.6993632563514915,
+          "by_role": {
+            "supports": 0.7204217737594814,
+            "refutes": 0.6530704387659111
+          }
+        },
+        "sbert": {
+          "n": 1500,
+          "evidence_precision": 0.706,
+          "evidence_recall": 0.5735279029249617,
+          "evidence_f1": 0.6020525781408134,
+          "by_role": {
+            "supports": 0.6112657826442274,
+            "refutes": 0.5817992437207287
+          }
+        },
+        "lead_k": {
+          "n": 1500,
+          "evidence_precision": 0.6953333333333334,
+          "evidence_recall": 0.5517569627540215,
+          "evidence_f1": 0.5826696055578409,
+          "by_role": {
+            "supports": 0.5703317086354686,
+            "refutes": 0.6097919333338874
+          }
+        },
+        "lexcue": {
+          "n": 1500,
+          "evidence_precision": 0.5506666666666666,
+          "evidence_recall": 0.4312114767585356,
+          "evidence_f1": 0.4560431024313377,
+          "by_role": {
+            "supports": 0.4694740955082143,
+            "refutes": 0.4265178276717221
+          }
+        }
+      },
+      "full_vs_bm25": {
+        "mean": -0.021537274607194654,
+        "ci95": [
+          -0.05158099234627734,
+          0.007192998743850921
+        ],
+        "p_two_sided": 0.154,
+        "cluster_unit": "underlying_wikipedia_document",
+        "cluster_count": 145
+      },
+      "full_vs_no_role": {
+        "mean": 0.005461567240005092,
+        "ci95": [
+          -0.018769453064064166,
+          0.029293257994473788
+        ],
+        "p_two_sided": 0.648,
+        "cluster_unit": "underlying_wikipedia_document",
+        "cluster_count": 145
+      }
+    },
+    "3": {
+      "test": {
+        "full": {
+          "n": 1500,
+          "evidence_precision": 0.39366666666666666,
+          "evidence_recall": 0.8452397453309218,
+          "evidence_f1": 0.4939708342798126,
+          "by_role": {
+            "supports": 0.497965037399609,
+            "refutes": 0.4851904005559105
+          }
+        },
+        "query_only": {
+          "n": 1500,
+          "evidence_precision": 0.38411111111111107,
+          "evidence_recall": 0.8252506325918091,
+          "evidence_f1": 0.4823640910230694,
+          "by_role": {
+            "supports": 0.48818031840053505,
+            "refutes": 0.4695783118627983
+          }
+        },
+        "no_role": {
+          "n": 1500,
+          "evidence_precision": 0.38611111111111107,
+          "evidence_recall": 0.8275180929092694,
+          "evidence_f1": 0.484040858699837,
+          "by_role": {
+            "supports": 0.4898762299897541,
+            "refutes": 0.47121299558703433
+          }
+        },
+        "no_graph": {
+          "n": 1500,
+          "evidence_precision": 0.39166666666666666,
+          "evidence_recall": 0.841892431533608,
+          "evidence_f1": 0.4917095936685719,
+          "by_role": {
+            "supports": 0.4960680928741485,
+            "refutes": 0.4821283299565265
+          }
+        },
+        "tfidf": {
+          "n": 1500,
+          "evidence_precision": 0.38233333333333336,
+          "evidence_recall": 0.817142922709099,
+          "evidence_f1": 0.478653174024691,
+          "by_role": {
+            "supports": 0.4904977308234839,
+            "refutes": 0.45261535300218486
+          }
+        },
+        "bm25": {
+          "n": 1500,
+          "evidence_precision": 0.38788888888888884,
+          "evidence_recall": 0.8306527351189116,
+          "evidence_f1": 0.4864023951739122,
+          "by_role": {
+            "supports": 0.49450673507497117,
+            "refutes": 0.4685866714255289
+          }
+        },
+        "sbert": {
+          "n": 1500,
+          "evidence_precision": 0.377,
+          "evidence_recall": 0.7958964238376002,
+          "evidence_f1": 0.46890598616496454,
+          "by_role": {
+            "supports": 0.4700155970350377,
+            "refutes": 0.4664667349772343
+          }
+        },
+        "lead_k": {
+          "n": 1500,
+          "evidence_precision": 0.33811111111111114,
+          "evidence_recall": 0.6923502218913983,
+          "evidence_f1": 0.41374812599394634,
+          "by_role": {
+            "supports": 0.4083787683966956,
+            "refutes": 0.42555155388896904
+          }
+        },
+        "lexcue": {
+          "n": 1500,
+          "evidence_precision": 0.3481111111111111,
+          "evidence_recall": 0.7186142162303927,
+          "evidence_f1": 0.42712696581024756,
+          "by_role": {
+            "supports": 0.4246945360278774,
+            "refutes": 0.4324741621975048
+          }
+        }
+      },
+      "full_vs_bm25": {
+        "mean": 0.007853004613444157,
+        "ci95": [
+          -0.001502060141493429,
+          0.017281624258723014
+        ],
+        "p_two_sided": 0.096,
+        "cluster_unit": "underlying_wikipedia_document",
+        "cluster_count": 145
+      },
+      "full_vs_no_role": {
+        "mean": 0.009876286833823278,
+        "ci95": [
+          0.002571866022034701,
+          0.01787378514789402
+        ],
+        "p_two_sided": 0.008,
+        "cluster_unit": "underlying_wikipedia_document",
+        "cluster_count": 145
+      }
+    },
+    "5": {
+      "test": {
+        "full": {
+          "n": 1500,
+          "evidence_precision": 0.3057555555555556,
+          "evidence_recall": 0.9037848803701745,
+          "evidence_f1": 0.41512508994273706,
+          "by_role": {
+            "supports": 0.41739497377092605,
+            "refutes": 0.4101352173907905
+          }
+        },
+        "query_only": {
+          "n": 1500,
+          "evidence_precision": 0.3032222222222222,
+          "evidence_recall": 0.8951927928280868,
+          "evidence_f1": 0.4115459080135552,
+          "by_role": {
+            "supports": 0.41256097545972115,
+            "refutes": 0.40931449109032003
+          }
+        },
+        "no_role": {
+          "n": 1500,
+          "evidence_precision": 0.30375555555555556,
+          "evidence_recall": 0.8973581607934549,
+          "evidence_f1": 0.4124698094933389,
+          "by_role": {
+            "supports": 0.4142431646625927,
+            "refutes": 0.4085714530338492
+          }
+        },
+        "no_graph": {
+          "n": 1500,
+          "evidence_precision": 0.3057555555555556,
+          "evidence_recall": 0.9031547456900398,
+          "evidence_f1": 0.41495547992312704,
+          "by_role": {
+            "supports": 0.4168318742990002,
+            "refutes": 0.4108306129689153
+          }
+        },
+        "tfidf": {
+          "n": 1500,
+          "evidence_precision": 0.2993555555555556,
+          "evidence_recall": 0.8824503926356867,
+          "evidence_f1": 0.4062481965460294,
+          "by_role": {
+            "supports": 0.4099680921154107,
+            "refutes": 0.3980707715310355
+          }
+        },
+        "bm25": {
+          "n": 1500,
+          "evidence_precision": 0.3032222222222222,
+          "evidence_recall": 0.8913173312526254,
+          "evidence_f1": 0.4109063483357601,
+          "by_role": {
+            "supports": 0.41251763600831054,
+            "refutes": 0.4073642639212623
+          }
+        },
+        "sbert": {
+          "n": 1500,
+          "evidence_precision": 0.2986888888888889,
+          "evidence_recall": 0.8700177900530841,
+          "evidence_f1": 0.40328065474830194,
+          "by_role": {
+            "supports": 0.4025972728190059,
+            "refutes": 0.40478292930929133
+          }
+        },
+        "lead_k": {
+          "n": 1500,
+          "evidence_precision": 0.27735555555555563,
+          "evidence_recall": 0.7825620161973105,
+          "evidence_f1": 0.37088156144394535,
+          "by_role": {
+            "supports": 0.3659981957529651,
+            "refutes": 0.3816166361292346
+          }
+        },
+        "lexcue": {
+          "n": 1500,
+          "evidence_precision": 0.2836222222222222,
+          "evidence_recall": 0.8117989903342844,
+          "evidence_f1": 0.38060767182593813,
+          "by_role": {
+            "supports": 0.37905774619739235,
+            "refutes": 0.38401486441235727
+          }
+        }
+      },
+      "full_vs_bm25": {
+        "mean": 0.004181390736397645,
+        "ci95": [
+          -0.0018311569004961072,
+          0.011301954947603937
+        ],
+        "p_two_sided": 0.19,
+        "cluster_unit": "underlying_wikipedia_document",
+        "cluster_count": 145
+      },
+      "full_vs_no_role": {
+        "mean": 0.002635466432022289,
+        "ci95": [
+          -0.00112241007044801,
+          0.006693872931804329
+        ],
+        "p_two_sided": 0.185,
+        "cluster_unit": "underlying_wikipedia_document",
+        "cluster_count": 145
+      }
+    },
+    "10": {
+      "test": {
+        "full": {
+          "n": 1500,
+          "evidence_precision": 0.2490375661375661,
+          "evidence_recall": 0.9665160255866139,
+          "evidence_f1": 0.35598315782804435,
+          "by_role": {
+            "supports": 0.3532472389403981,
+            "refutes": 0.3619975125682646
+          }
+        },
+        "query_only": {
+          "n": 1500,
+          "evidence_precision": 0.24923756613756617,
+          "evidence_recall": 0.96621353178412,
+          "evidence_f1": 0.3562366951647597,
+          "by_role": {
+            "supports": 0.3537787175705839,
+            "refutes": 0.36164005315963255
+          }
+        },
+        "no_role": {
+          "n": 1500,
+          "evidence_precision": 0.2491708994708995,
+          "evidence_recall": 0.9664678052883934,
+          "evidence_f1": 0.35624390526544814,
+          "by_role": {
+            "supports": 0.35377739425715327,
+            "refutes": 0.3616660222154523
+          }
+        },
+        "no_graph": {
+          "n": 1500,
+          "evidence_precision": 0.24883756613756616,
+          "evidence_recall": 0.9662651431357314,
+          "evidence_f1": 0.3557707584721667,
+          "by_role": {
+            "supports": 0.35294283823326467,
+            "refutes": 0.3619873592532073
+          }
+        },
+        "tfidf": {
+          "n": 1500,
+          "evidence_precision": 0.24803756613756617,
+          "evidence_recall": 0.9608888129844013,
+          "evidence_f1": 0.3543918960042129,
+          "by_role": {
+            "supports": 0.3523586890758159,
+            "refutes": 0.3588614830898787
+          }
+        },
+        "bm25": {
+          "n": 1500,
+          "evidence_precision": 0.24663756613756616,
+          "evidence_recall": 0.9592554075009959,
+          "evidence_f1": 0.3529582574411935,
+          "by_role": {
+            "supports": 0.35078645699318406,
+            "refutes": 0.35773251386315036
+          }
+        },
+        "sbert": {
+          "n": 1500,
+          "evidence_precision": 0.24863756613756616,
+          "evidence_recall": 0.964569192789781,
+          "evidence_f1": 0.35545264405531224,
+          "by_role": {
+            "supports": 0.35203832205138763,
+            "refutes": 0.3629583284605282
+          }
+        },
+        "lead_k": {
+          "n": 1500,
+          "evidence_precision": 0.23690423280423284,
+          "evidence_recall": 0.885861039831628,
+          "evidence_f1": 0.33640418939335914,
+          "by_role": {
+            "supports": 0.3332056900284134,
+            "refutes": 0.34343543213378364
+          }
+        },
+        "lexcue": {
+          "n": 1500,
+          "evidence_precision": 0.24323756613756617,
+          "evidence_recall": 0.9282362831068715,
+          "evidence_f1": 0.3467166949104561,
+          "by_role": {
+            "supports": 0.3412219863798498,
+            "refutes": 0.35879568104063764
+          }
+        }
+      },
+      "full_vs_bm25": {
+        "mean": 0.0030599741585802275,
+        "ci95": [
+          0.0004633205202960705,
+          0.005721378494404235
+        ],
+        "p_two_sided": 0.026,
+        "cluster_unit": "underlying_wikipedia_document",
+        "cluster_count": 145
+      },
+      "full_vs_no_role": {
+        "mean": -0.000252276164455172,
+        "ci95": [
+          -0.0018298910039118807,
+          0.001172201971794065
+        ],
+        "p_two_sided": 0.772,
+        "cluster_unit": "underlying_wikipedia_document",
+        "cluster_count": 145
+      }
+    }
+  }
+}

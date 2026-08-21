@@ -1,0 +1,106 @@
+paper_id: "active_distribution_network_expansion_planning_based_on_wasserstein_di"
+collection: by_journal/Energies
+tree:
+  - id: N01
+    type: question
+    support_level: explicit
+    source_refs: ["1"]
+    title: "How can ADN expansion planning jointly optimize lines, SOPs, and interconnection switches under DG/load uncertainty?"
+    description: "Existing planning methods do not fully consider multiple uncertainties, differentiated regulation modes, or the cost of multiple types of interconnection switches. Large-scale problems at small granularity are also difficult to solve."
+    children:
+      - id: N02
+        type: decision
+        support_level: explicit
+        source_refs: ["2.2"]
+        title: "Choose uncertainty modeling method"
+        choice: "Distributionally robust optimization via Wasserstein distance ambiguity set"
+        alternatives:
+          - "Stochastic optimization (requires known distribution)"
+          - "Traditional robust optimization (too conservative)"
+          - "Interval optimization (limited by problem size)"
+        children:
+          - id: N03
+            type: decision
+            support_level: explicit
+            source_refs: ["4.2.1"]
+            title: "Choose constraint relaxation method"
+            choice: "SOCP relaxation of DistFlow equations"
+            alternatives:
+              - "Full nonconvex AC power flow (MINLP) -- intractable within 5h"
+              - "DC power flow -- too inaccurate for distribution networks"
+            children:
+              - id: N04
+                type: decision
+                support_level: explicit
+                source_refs: ["4.2.2"]
+                title: "Choose duality method for inner max function"
+                choice: "Lagrange duality to convert min-max to single-level min"
+                alternatives:
+                  - "Heuristic iterative algorithm"
+                  - "Complete enumeration over discrete scenarios"
+                children:
+                  - id: N05
+                    type: decision
+                    support_level: explicit
+                    source_refs: ["4.2.3"]
+                    title: "Choose bilinear term handling method"
+                    choice: "McCormick relaxation (convex envelopes)"
+                    alternatives:
+                      - "Bilinear-Removed method [30] -- 76% solution quality"
+                      - "IPOPT (direct MINLP) -- no solution in 5h"
+                    children:
+                      - id: N06
+                        type: dead_end
+                        support_level: explicit
+                        source_refs: ["Table 7"]
+                        title: "IPOPT fails on nonconvex MINLP"
+                        hypothesis: "IPOPT interior-point solver can handle the nonconvex MINLP"
+                        failure_mode: "No optimal solution within 5-hour time limit due to problem size and nonconvexity"
+                        lesson: "Convexification is necessary for this scale of planning problem"
+                      - id: N07
+                        type: dead_end
+                        support_level: explicit
+                        source_refs: ["Table 7"]
+                        title: "Bilinear-removed method sacrifices accuracy"
+                        hypothesis: "Removing bilinear terms entirely yields acceptable solution quality"
+                        failure_mode: "Achieves only 76% of McCormick solution quality (3.75 vs 4.93 x 10^7 CNY)"
+                        lesson: "McCormick relaxation provides a better accuracy-speed trade-off"
+
+      - id: N08
+        type: experiment
+        support_level: explicit
+        source_refs: ["5.2", "Table 3", "Table 4"]
+        title: "Comparative planning evaluation (E01)"
+        result: "Case 1 (collaborative) achieves highest net profit (4928.18); nearly 5% higher than Case 3 (4689.15)"
+        evidence: [C01, C04, "Table 3", "Table 4", "Figure 4", "Figure 5", "Figure 6"]
+        children:
+          - id: N09
+            type: experiment
+            support_level: explicit
+            source_refs: ["5.3", "Table 5", "Figure 7"]
+            title: "SOP impact on operation (Case 1 vs Case 4)"
+            result: "Case 4 operation profit drops >6%; DG accommodation drops from ~100% to 96.05%"
+            evidence: [C01, "Table 5", "Figure 7"]
+          - id: N10
+            type: experiment
+            support_level: explicit
+            source_refs: ["5.4", "Figure 8"]
+            title: "Cost sensitivity analysis (E04)"
+            result: "SOP installed capacity increases as unit cost decreases; interconnection switch count decreases proportionally"
+            evidence: [C03, C05, "Figure 8"]
+
+      - id: N11
+        type: experiment
+        support_level: explicit
+        source_refs: ["5.5", "Table 6"]
+        title: "Uncertainty method comparison (E02)"
+        result: "DRO (4928.18) sits between deterministic (5089.49) and robust (4770.01); improves >3% vs robust"
+        evidence: [C02, "Table 6"]
+
+      - id: N12
+        type: experiment
+        support_level: explicit
+        source_refs: ["5.6", "Table 7", "Figure 9"]
+        title: "Solution method comparison (E03)"
+        result: "McCormick achieves best solution (4.93 x 10^7 CNY) in 2.52h; max relative error <1.55%"
+        evidence: [C03, C05, "Table 7", "Figure 9"]

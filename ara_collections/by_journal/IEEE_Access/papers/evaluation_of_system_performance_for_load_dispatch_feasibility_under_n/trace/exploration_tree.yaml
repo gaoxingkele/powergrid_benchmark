@@ -1,0 +1,143 @@
+tree:
+  - id: N01
+    type: question
+    support_level: explicit
+    source_refs: ["§I", "§I-A Research Gaps", "Abstract"]
+    title: "Will a least-cost DA UC schedule stay feasible under N-1 generator outages?"
+    description: >
+      Central question: cost-only DA UC does not reveal whether the schedule survives the loss of a
+      single thermal generator. Can criticality, robustness, LOLP reliability, and a new operating
+      margin jointly quantify preparedness for real-time dispatch under N-1 generator contingencies?
+    children:
+      - id: N02
+        type: decision
+        support_level: explicit
+        source_refs: ["§IV", "§V (DP [12],[28],[29])"]
+        title: "Choose Dynamic Programming as the DA UC optimizer"
+        description: >
+          DP is selected because it yields the most optimal solution vs heuristic/metaheuristic
+          approaches [12], and matches the authors' prior DA-UC DP methodology [28].
+      - id: N03
+        type: decision
+        support_level: explicit
+        source_refs: ["§VI", "Fig. 4", "Table 2", "Table 3"]
+        title: "Use the 24-bus, 26-generator IEEE RTS with peak demand near installed capacity"
+        description: >
+          IEEE RTS chosen (3105 MW installed, peak 2670 MW). Near-capacity peak makes N-1 outages
+          consequential, exercising the feasibility question.
+      - id: N04
+        type: experiment
+        support_level: explicit
+        source_refs: ["§VII-A1", "Table 4", "Fig. 6"]
+        title: "Base Case — DA UC cost without contingencies"
+        description: >
+          DP DA UC at forecasted load, 10% CM, no outage. Establishes the $774,100 cumulative cost
+          benchmark used for all comparisons.
+        evidence: [C01]
+      - id: N05
+        type: experiment
+        support_level: explicit
+        source_refs: ["§VII-A2", "Table 5", "Table 6", "Fig. 5", "Fig. 7", "Fig. 8"]
+        title: "Case 1 — N-1 contingencies at 10% SR; rank criticality and robustness"
+        description: >
+          Re-solve DA UC for each of nine single-generator outages at CM 310.5 MW; compute percentage
+          cost rise, classify stable vs critical contingencies, identify robust vs weak buses.
+        evidence: [C02, C03, C06, C07]
+        children:
+          - id: N06
+            type: decision
+            support_level: explicit
+            source_refs: ["Table 5", "§VII-A2"]
+            title: "Rank weak buses by percentage rise in UC cost"
+            description: >
+              Buses 18 & 21 (400 MW) rank 1 (+15.67%); bus 23 (350/155 MW) rank 2; bus 2 rank 3;
+              bus 7 rank 4. Cy6 & Cy7 are the most critical contingencies.
+            evidence: [C02]
+          - id: N07
+            type: dead_end
+            support_level: explicit
+            source_refs: ["Table 5", "§VII-A2 (buses 1, 13, 15)"]
+            title: "Dead end — some outages give no uneconomical effect / lower cost"
+            description: >
+              Outage of the 20 MW unit (bus 1) gives 0% change; 197 MW (bus 13, -0.703%) and 12 MW
+              (bus 15, -0.01%) slightly DECREASE cost vs Base Case. These are not weak buses but the
+              robust buses (contingencies 4, 5 most stable). A cost-reducing outage is a genuine
+              non-intuitive finding, kept rather than discarded.
+            evidence: [C03]
+      - id: N08
+        type: experiment
+        support_level: explicit
+        source_refs: ["§IV-B Case 2", "§VI-B", "Table 6", "Table 8"]
+        title: "Case 2 — sweep spinning reserve 8% → 5% → 0% (CM 248/155/0 MW)"
+        description: >
+          Repeat per-contingency DA UC at reduced reserves to find the optimal CM. Dispatch capacity
+          rises 2857 → 2950 → 3105 MW.
+        evidence: [C04, C07]
+        children:
+          - id: N09
+            type: dead_end
+            support_level: explicit
+            source_refs: ["§VII-A2c", "Table 6"]
+            title: "Dead end — reducing CM 10%→8%→5% does not change DA UC cost or ranking"
+            description: >
+              Case 2(a) and 2(b) DA UC costs are identical to Case 1; the decrease from 10% to 8% to 5%
+              has no significant impact on cost, so criticality/robustness ranking is unchanged. Only
+              the 5%→0% step changes costs materially.
+          - id: N10
+            type: decision
+            support_level: explicit
+            source_refs: ["§VII-A2c", "§VII-C(d)", "Table 6"]
+            title: "0% CM (Case 2c) is the most economical for most contingencies"
+            description: >
+              With full reserve consumption (CM 0 MW), UC costs drop significantly for most simulated
+              contingencies; contingency 1 / bus 1 additionally becomes stable/robust.
+      - id: N11
+        type: experiment
+        support_level: explicit
+        source_refs: ["§VII-B", "Table 7", "Table 8", "Table 9", "Table 10"]
+        title: "Reliability estimation via LOLP across reserve levels"
+        description: >
+          Build COPT per case, compute hourly LOLP and 24-hour aggregate. LOLP = 0.050113 (Case 1),
+          0.0369387 (2a), 0.0153346 (2b), 0 (2c).
+        evidence: [C04, C08]
+        also_depends_on: [N05, N08]
+      - id: N12
+        type: experiment
+        support_level: explicit
+        source_refs: ["§VII-C", "Table 11", "Eq. 15"]
+        title: "Operating-margin evaluation"
+        description: >
+          Compute M_da^o = LOLP_max − LOLP per case: -0.000113 (Case 1), 0.0130613 (2a),
+          0.0346654 (2b), 0.05 (2c). Negative Case 1 margin flags at-limit operation.
+        evidence: [C05, C08]
+        also_depends_on: [N11]
+      - id: N13
+        type: dead_end
+        support_level: explicit
+        source_refs: ["§VII-C(c)", "§VII-C(3) Case 2(c)", "§VIII"]
+        title: "Dead end — 0% CM is most reliable but not usable in normal operation"
+        description: >
+          Zero CM gives LOLP 0 and margin 0.05 (best reliability) and lowest cost, BUT leaves no
+          headroom: higher risk of cascading failures/collapse under any further disturbance, so it is
+          reserved only for emergencies, not normal dispatch. The 'best' metric case is rejected as an
+          operating point.
+        evidence: [C04, C05]
+      - id: N14
+        type: decision
+        support_level: explicit
+        source_refs: ["§VII-D", "Table 12", "Table 13", "§IX"]
+        title: "Integrated feasibility assessment and corrective actions"
+        description: >
+          Assemble criticality, robustness, reliability, and margin per case (Tables 12, 13) to judge
+          real-time dispatch feasibility; recommend alternate generation installation preferably at
+          identified critical buses.
+        evidence: [C01, C07]
+        also_depends_on: [N05, N08, N11, N12]
+      - id: N15
+        type: question
+        support_level: inferred
+        title: "How does the framework extend beyond single thermal-generator contingencies?"
+        description: >
+          Reconstructed future-work branch (§VIII-B): extend to N-k / simultaneous outages, renewable
+          uncertainty and DER, larger systems, metaheuristics, LSTM-based real-time control, and
+          quantum/distributed optimization. Not executed in this paper.

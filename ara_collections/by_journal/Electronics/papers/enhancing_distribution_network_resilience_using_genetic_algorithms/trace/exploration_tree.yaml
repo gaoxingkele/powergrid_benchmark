@@ -1,0 +1,106 @@
+tree:
+  - id: N01
+    type: question
+    support_level: explicit
+    source_refs: ["§1 Introduction, p.2", "§5 Objective Function, p.8"]
+    title: "Can a GA embed resilience as an explicit objective and jointly improve steady-state and contingency performance of a DER-rich radial feeder?"
+    description: >
+      Central research question. Traditional distribution optimization targets voltage and loss but
+      not resilience; the paper asks whether folding a resilience penalty into a weighted GA objective
+      links conventional power-flow optimization with resilience assessment.
+    children:
+      - id: N02
+        type: decision
+        support_level: explicit
+        source_refs: ["§2 Resilience, p.4", "Figure 1, p.5"]
+        title: "Adopt the trapezoidal (not triangular) resilience-curve framing"
+        description: >
+          Choose the trapezoidal resilience curve to represent multi-stage degradation/recovery, and
+          split resilience into Operational vs Infrastructure dimensions used to interpret results.
+
+      - id: N03
+        type: decision
+        support_level: explicit
+        source_refs: ["§3 AI Techniques—GA, p.6", "refs [37-42]"]
+        title: "Select a tailored binary GA as the optimizer"
+        description: >
+          GA chosen based on the authors' prior success on power-system parameter-search problems
+          (arrester models, insulators, soil parameters). Canonical loop in Figure 2.
+
+      - id: N04
+        type: decision
+        support_level: explicit
+        source_refs: ["§5 Objective Function, p.9"]
+        title: "Define weighted multi-objective F = w1 f1 + w2 f2 + w3 f3 with a resilience penalty f3"
+        description: >
+          Key design leap — add a contingency-penalty term f3 (voltage collapse / overloads under DER
+          faults) to the voltage-profile and loss terms, scalarized with weights (0.4, 0.4, 0.2).
+        evidence: ["C01"]
+        children:
+          - id: N05
+            type: decision
+            support_level: explicit
+            source_refs: ["§5 Objective Function, p.9"]
+            title: "Use fixed objective weights (0.4, 0.4, 0.2)"
+            description: >
+              Equal priority to voltage/loss, lighter weight on resilience penalty. Single fixed
+              vector; no weight sweep reported (a limitation).
+
+      - id: N06
+        type: decision
+        support_level: explicit
+        source_refs: ["§4 Network Under Examination, p.7-8", "Table 1", "Table 2", "Figure 3"]
+        title: "Adopt a 6-bus radial feeder with DERs at buses 2, 3, 4 as the proof-of-concept system"
+        description: >
+          Simplified standard test bed; line R/X/thermal (Table 1) and constant-power loads (Table 2)
+          defined. Implemented in MATLAB R2025 + PowerFactory 2024.
+        children:
+          - id: N07
+            type: experiment
+            support_level: explicit
+            source_refs: ["§6 Results, p.9", "Table 3", "Figure 4"]
+            title: "Steady-state voltage-profile optimization (base vs GA)"
+            description: >
+              Optimize DER dispatch/reconfiguration; compare per-bus voltage. Min bus voltage rises
+              and the whole profile is pulled into the 0.95-1.05 band, benefit growing downstream.
+            evidence: ["C01", "C02"]
+
+          - id: N08
+            type: experiment
+            support_level: explicit
+            source_refs: ["§6 Results, p.10", "Table 4", "Figure 5"]
+            title: "Loss minimization and GA convergence"
+            description: >
+              Total real power loss reduced ~46%; convergence curve is a smooth single-elbow decline,
+              most gain in early generations.
+            evidence: ["C01", "C03"]
+
+          - id: N09
+            type: experiment
+            support_level: explicit
+            source_refs: ["§6 Results, p.10-11", "Table 6"]
+            title: "DER-trip contingency resilience assessment"
+            description: >
+              Fault-induced DER trip at bus 3. Optimized config holds higher min voltage, zero
+              overloads, and full load service versus the base case — resilience gain from f3.
+            evidence: ["C01", "C04"]
+            also_depends_on: ["N04"]
+
+          - id: N10
+            type: experiment
+            support_level: explicit
+            source_refs: ["§6 Results, p.11", "Table 5"]
+            title: "Read out optimal DER dispatch pattern"
+            description: >
+              Optimized P/Q at DERs — reactive absorption (negative Q) for voltage support, largest
+              real injection at central bus 3 for flow balance.
+            evidence: ["C04", "C05"]
+
+      - id: N11
+        type: decision
+        support_level: explicit
+        source_refs: ["§4, p.8", "§7 Conclusions, p.12"]
+        title: "Defer stochastic DERs, larger IEEE feeders, and time-series dynamics to future work"
+        description: >
+          Scope boundary explicitly stated: PV assumed dispatchable/deterministic here; future work
+          to extend to IEEE 13-/33-bus feeders and time-series resilience under variable generation.

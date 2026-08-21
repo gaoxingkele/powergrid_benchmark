@@ -1,0 +1,56 @@
+{
+  "approval_id": "DUAL-LLM-ANNOTATION-20260807-02",
+  "approved_by": "project author (via chat instruction 2026-08-07: '可以自行优化并解决数据相关的问题，必要的话，可以生成新的数据集，然后可以进入下一步阶段2')",
+  "approved_at": "2026-08-07",
+  "scope": [
+    "C2GES_NERC_STAGE2_FULL_75",
+    "MA_GRIDSQL_STAGE2_FULL_91_PLUS_30_NEGATIVES"
+  ],
+  "protocol_sha256": {
+    "C2GES-NERC-ANNOTATION-STAGE2-v1.1": "41053D9BC589CCF0411407072E7B2525847F02C39E514CCE6E0C0053C73B994F",
+    "MA-SQLGRID-EXTERNAL-ANNOTATION-STAGE2-v1.1": "926A08269217EF8337A8819FFD38DB2433EBE6065BE208240D1E40C938C7B75C",
+    "C2GES-NERC-ANNOTATION-STAGE2-v1.2": "40D5CC57981A9A156C74651356D1E2488232C4A49B4FC1C315F3BC7E3858BF38"
+  },
+  "providers_and_models": [
+    {
+      "role": "annotator_a",
+      "provider": "DeepSeek direct",
+      "model": "deepseek-chat (served as deepseek-v4-flash, recorded per call)"
+    },
+    {
+      "role": "annotator_b",
+      "provider": "Google Gemini direct",
+      "model": "gemini-2.5-flash"
+    },
+    {
+      "role": "adjudicator_c",
+      "provider": "OpenAI via Cloubic gateway",
+      "model": "gpt-5.4"
+    }
+  ],
+  "max_calls": 700,
+  "call_budget_breakdown_estimate": {
+    "c2ges_validation_gate": 24,
+    "c2ges_full": "150 annotation + up to 60 adjudication",
+    "ma_full": "242 annotation (121 items x 2) + up to 40 adjudication"
+  },
+  "data_scope": [
+    "public NERC event-analysis packet (blind_packet.jsonl, 15 documents)",
+    "synthetic RTS-GMLC/SimBench auto-candidate question-SQL items (project-generated, no personal or confidential data)"
+  ],
+  "prohibited_actions": [
+    "不得把 LLM 标签称为真人专家金标",
+    "不得覆盖 pilot 输出目录",
+    "不得删除失败或分歧记录",
+    "不得因结果内容而重试",
+    "不得自动投稿或公开发布",
+    "API key 不得写入任何文件或日志"
+  ],
+  "stop_conditions": [
+    "调用数达到 700 时停止",
+    "连续 5 次鉴权或格式错误时停止",
+    "served model 与冻结不符时停止（deepseek-v4-flash 滚动别名除外）",
+    "C2GES 验证门未通过（12 条复标裁决率 > 50%）时不进入全量，直接汇报"
+  ],
+  "note_20260807": "v1.1 C2GES gate failed (0.75>0.50); v1.2 replaces exact-set-equality trigger with two-tier deterministic+adjudication rule. MA v1.1 unchanged and released independently of the C2GES gate."
+}

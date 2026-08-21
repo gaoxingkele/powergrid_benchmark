@@ -1,0 +1,2374 @@
+Article
+
+SHIELD-MOEA: Scenario Screening with Disjoint Evaluation
+for Distribution-Network Resilience Planning
+Author Details Required before Submission
+
+
+                                          [AUTHOR INPUT REQUIRED: complete institutional addresses]
+                                          * Correspondence: [AUTHOR INPUT REQUIRED: corresponding author name and e-mail]
+
+
+                                          Abstract                                                                                            1
+
+
+                                          Distribution network planning under load, distributed-energy-resource, and outage uncer-            2
+
+                                          tainty requires portfolios that remain useful as binding stresses change. SHIELD-MOEA ex-           3
+
+                                          tends non-dominated sorting with selective worst-scenario screening and disjoint scenario           4
+
+                                          draws for search and final evaluation. On a reproducible SimBench-derived benchmark                 5
+
+                                          with 72 candidate actions, five objectives, and eight uncertainty experiments, the method           6
+
+                                          reaches pooled mean hypervolume 0.2740 over 30 seeded runs per stochastic method. This              7
+
+                                          is 5.09% above the strongest repair-matched baseline and 5.56% above plain NSGA-II. All             8
+
+                                          32 comparisons with four stochastic baselines are Holm-significant wins; sixteen gaps to            9
+
+                                          two deterministic rules are descriptive and favor SHIELD-MOEA. The margin persists                 10
+
+                                          for sampled worst-envelope hypervolume (+5.36%) and under evaluation stresses outside              11
+
+                                          the search ranges (+6.04%). Feasibility repair carries the main measured gain. Screening           12
+
+                                          reduces recorded search-phase plan–scenario evaluations by 65%, although no front-quality          13
+
+                                          difference is detected against no screening; hybrid variation and periodic re-screening are        14
+
+                                          also unresolved against simpler controls. A 1296-case composition-level AC check across            15
+
+                                          six networks yields aggregate feasibility 0.685, compared with 0.389 without planning              16
+
+                                          and 0.694 for matched-repair NSGA-II. The evidence supports a disjoint-evaluation plan-            17
+
+                                          ning workflow and selective scenario exposure, while identifying repair–rather than every          18
+
+                                          named operator–as the resolved performance mechanism.                                              19
+
+
+
+                                          Keywords: distribution network planning; power system resilience; scenario screening;              20
+
+                                          multi-objective evolutionary optimization; DER uncertainty; NSGA-II; SimBench; AC                  21
+
+                                          power flow validation                                                                              22
+
+
+
+
+                                          0.1. Introduction                                                                                  23
+
+
+                                               Resilience has moved from the margins of distribution planning to its center. Storm-          24
+
+                                          driven outages, heat-wave load peaks, rooftop photovoltaics, and other distributed energy          25
+
+                                          resources (DERs) create stress combinations not represented by historical load-duration            26
+
+                                          curves. Reliability-report archives document the resulting operational and economic                27
+
+                                          consequences [1,2]. At the same time, feeder reinforcement, storage, DER integration,              28
+
+Received:                                 and automation interact through a shared budget, and their value depends on the realized           29
+
+Accepted:                                 stress scenario. The planning decision is therefore inherently multi-objective: investment         30
+Published:
+                                          cost against losses, voltage exposure, reliability, and survivability under outages, all under     31
+Copyright: © 2026 by the authors.
+                                          scenario uncertainty.                                                                              32
+Submitted to Energies for possible open
+                                               Current methods leave a gap at the interface between the optimizer and the uncertainty        33
+access publication under the terms and
+conditions of the Creative Commons        model. Robust planning formulations can focus on a single worst case and scalarize the             34
+
+Attribution (CC BY) license.              objective space, limiting visibility of the cost-resilience trade surface [3,4]. Evolutionary      35
+
+
+
+
+Version August 13, 2026 submitted to Energies                                                            https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                  2 of 24
+
+
+
+                                    multi-objective methods expose that surface, but commonly evaluate candidates on a                   36
+
+                                    scenario set fixed before search [5,6]. The scenarios binding for mature plans, however,             37
+
+                                    may differ from those affecting the initial population. When the same scenario sample                38
+
+                                    steers and grades the search, sample-specific adaptation is also difficult to distinguish from       39
+
+                                    robustness. Distribution utility planning departments instead require investment fronts              40
+
+                                    that remain defensible under stress scenarios not used to tune the plans.                            41
+
+                                         This paper proposes SHIELD-MOEA, a scenario-selective extension of non-dominated                42
+
+                                    sorting for distribution resilience planning. The algorithm retains a standard multi-objective       43
+
+                                    backbone–crowding-based selection, hybrid GA/DE variation, and greedy feasibility repair–            44
+
+                                    and places its contribution at the optimizer–uncertainty interface. Every few generations, it        45
+
+                                    identifies the K scenarios on which the current population performs worst and uses them              46
+
+                                    for search-phase fitness. The final front is evaluated on a complete scenario set generated          47
+
+                                    with disjoint random seeds, preventing direct reuse of search realizations in the reported           48
+
+                                    score. We report mean and sampled worst-envelope hypervolume and supplement the                      49
+
+                                    proxy evaluation with pandapower AC power flow.                                                      50
+
+                                         Real resilience-investment records are utility-internal, so evaluation uses a repro-            51
+
+                                    ducible SimBench-derived benchmark [7]. Statistics from the 18 highest-stress subnets                52
+
+                                    generate 72 candidate actions. Eight experiments vary load, DER, and outage uncertainty,             53
+
+                                    including an unseen-stress setting whose evaluation scenarios are harsher than the search            54
+
+                                    scenarios. Candidate generation is shared with CARS-MODE (Section 2.4), as declared in               55
+
+                                    the Data Availability Statement.                                                                     56
+
+                                         The contributions of this paper are:                                                            57
+
+
+                                    1.    A disjoint-evaluation protocol for scenario-aware evolutionary planning. SHIELD-               58
+
+                                          MOEA scores final fronts on scenario draws not used during search, preventing direct           59
+
+                                          reuse of the realizations that guided optimization. An unseen-range experiment                 60
+
+                                          provides an additional test of search-range specialization (Sections 4.3 and 4.6).             61
+
+                                    2.    A selective worst-K screening mechanism with quantified evaluation economy. At                 62
+
+                                          the default configuration, screening reduces recorded search-phase plan–scenario               63
+
+                                          evaluations by 65% (51,200 to 17,920). No front-quality difference is detected against         64
+
+                                          no screening, and periodic re-screening remains unresolved against a fixed generation-         65
+
+                                          1 subset; screening is therefore an exposure-and-economy mechanism rather than a               66
+
+                                          demonstrated quality mechanism (Section 6.3).                                                  67
+
+                                    3.    A statistically grounded framework result with component attribution. Over eight               68
+
+                                          experiments and 30 seeds per stochastic method, SHIELD-MOEA reaches pooled                     69
+
+                                          mean hypervolume 0.2740, +5.09% over matched-repair NSGA-II and +5.56% over                    70
+
+                                          plain NSGA-II, with 32/32 Holm-significant stochastic-baseline wins. Repair is the             71
+
+                                          dominant resolved component (-8.10% when removed), whereas hybrid variation,                   72
+
+                                          dynamic re-screening, and the explicit resilience objective remain unresolved against          73
+
+                                          their direct controls (Sections 6.1 and 6.3).                                                  74
+
+                                    4.    Sampled-envelope, sensitivity, and cross-family AC diagnostics. The method retains             75
+
+                                          +5.36% sampled worst-envelope HV and +6.04% in the unseen-range experiment. A                  76
+
+                                          1296-case pandapower check across six networks yields aggregate feasibility 0.685              77
+
+                                          versus 0.389 without planning, while matched-repair NSGA-II reaches 0.694. A one-              78
+
+                                          at-a-time parameter sweep reports the setting at which separation from NSGA-II is              79
+
+                                          lost (Np = 60, p = 0.104) rather than presenting only favorable points (Sections 6.2,          80
+
+                                          6.4, and 6.5).                                                                                 81
+
+
+                                         Screening concentrates search-phase effort on difficult scenarios. At the default setting,      82
+
+                                    it removes 65% of plan–scenario evaluations without a detected change in mean front                  83
+
+                                    quality; the screening-off ablation differs by -0.48%, and periodic re-screening does not            84
+
+                                    outperform a generation-1 fixed worst-K set. Because the present objectives are closed-form,         85
+
+
+
+
+                                                                                                    https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                  3 of 24
+
+
+
+                                    the call reduction does not translate into lower wall-clock time at this scale. Screening            86
+
+                                    therefore supplies selective exposure and evaluation economy, while repair carries the               87
+
+                                    resolved component gain.                                                                             88
+
+                                         The paper proceeds as follows. Section 2 reviews related work. Section 3 defines the            89
+
+                                    planning problem and the public benchmark. Section 4 describes SHIELD-MOEA. Section 5                90
+
+                                    gives the experimental protocol. Section 6 reports results, Section 7 discusses them, Section        91
+
+                                    8 states limitations, and Section 9 concludes.                                                       92
+
+
+
+                                                                                                                                         93
+
+
+
+                                    0.2. Related Work                                                                                    94
+
+
+                                        SHIELD-MOEA draws on three bodies of literature that have so far evolved largely                 95
+
+                                    in parallel: resilience-oriented distribution planning under N-k and extreme-weather                 96
+
+                                    uncertainty, scenario generation and reduction for stochastic power system optimization,             97
+
+                                    and hybrid multi-objective evolutionary algorithms with robustness-aware objectives.                 98
+
+                                    Below we discuss each thread and identify the gap that motivates this paper.                         99
+
+
+
+                                    0.2.1. Resilience-Oriented Distribution Planning and Hardening Decisions                             100
+
+
+                                          Panteli and Mancarella [8] distinguish high-impact, low-probability events from or-            101
+
+                                    dinary reliability and hardening from operational adaptation. Bhusal et al. [9] document             102
+
+                                    the rapid growth of planning-stage resilience research. The dominant paradigm is robust              103
+
+                                    optimization over an N − k or weather-driven uncertainty set. Yuan et al. [3] formulate              104
+
+                                    a two-stage robust problem with adversarial component outages. Ma et al. [5] extend                  105
+
+                                    this logic to joint hardening and distributed-generation placement with wind-dependent               106
+
+                                    fragility, while Lin and Bie [6] add reconfiguration and DG islanding. Panteli et al. [10]           107
+
+                                    connect weather intensity to component failure through fragility curves.                             108
+
+                                          Practice-oriented studies consider resilient storage siting [11], zone-wise planning           109
+
+                                    under decision-dependent uncertainty [12], and genetic-algorithm-driven feeder hardening             110
+
+                                    [13]. Related work addresses resilient renewable microgrids [14] and islanding with fault            111
+
+                                    recovery [15]. A parallel strand grounds planning claims in full AC physics. Mahmoudi                112
+
+                                    and Alizadeh quantify errors caused by linearized expansion-planning models [16], while              113
+
+                                    Trivic and Savic combine NSGA-II storage planning with power-flow analysis [17]. This                114
+
+                                    evidence motivates the AC validation layer in Section 6.5.                                           115
+
+                                          A consistent pattern emerges across these studies. The trilevel robust models protect          116
+
+                                    against a single worst case and collapse the objective space to one scalar, so the planner           117
+
+                                    never sees the cost-resilience trade surface. The metaheuristic studies expose multiple              118
+
+                                    objectives, but they evaluate candidate plans on a scenario set fixed before the search starts,      119
+
+                                    and the same scenarios serve both to steer the search and to grade its output. None of them          120
+
+                                    guards against a plan that has quietly overfitted the scenario sample it was optimized on.           121
+
+
+
+                                    0.2.2. Scenario Generation, Reduction, and Screening in Stochastic Power System                      122
+
+                                    Optimization                                                                                         123
+
+
+                                          The second thread represents uncertainty through scenarios. Classical reduction se-            124
+
+                                    lects a subset while minimizing probability distance; reference approaches include the               125
+
+                                    Fortet–Mourier formulation [18] and forward/backward reduction [19]. Power-system                    126
+
+                                    applications adopted these methods early [20], and importance sampling made stochastic               127
+
+                                    unit commitment tractable [21]. Generative models later reproduced spatiotemporal re-                128
+
+                                    newable behavior without parametric assumptions [22]. Applications include stochastic                129
+
+                                    microgrid dispatch [23], distribution reconfiguration [24], and joint siting and sizing [25].        130
+
+                                          Recent work moves scenario machinery inside optimization. Li et al. learn an ambigu-           131
+
+                                    ity set for distributionally robust DG planning [26], while Zhou et al. use extreme-event            132
+
+
+
+
+                                                                                                    https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                4 of 24
+
+
+
+                                    scenarios in integrated energy planning [27]. Decision-dependent uncertainty [28] is the           133
+
+                                    closest mathematical-programming analogue to a scenario set that changes with candidate            134
+
+                                    decisions. Wu et al. preserve extreme wind, PV, and load combinations during generation            135
+
+                                    [29], paralleling the worst-K focus used here.                                                     136
+
+                                          Most reductions are executed once, judged by distributional fidelity, and reused for         137
+
+                                    every evaluation. The scenarios guiding search are therefore also used to grade the result.        138
+
+                                    This distinction may be less important in a single monolithic solve. In population search,         139
+
+                                    however, thousands of plans are compared while the binding scenarios can change with               140
+
+                                    the population. SHIELD-MOEA separates search guidance from final scoring and tests                 141
+
+                                    whether updating the guidance subset adds value.                                                   142
+
+
+
+                                    0.2.3. Hybrid Multi-Objective Evolutionary Algorithms and Robustness-Aware Objectives              143
+
+
+                                         The third thread concerns the optimizer. NSGA-II [30] and MOEA/D [31] remain                  144
+
+                                    common frameworks, with hypervolume [32] measuring front quality. Differential evo-                145
+
+                                    lution [33] supplies mutation behavior complementary to GA crossover, and Das and                  146
+
+                                    Suganthan [34] review blended DE strategies. Jin and Branke [35] survey optimization               147
+
+                                    under uncertain fitness, while Deb and Gupta [36] treat robustness as an objective over            148
+
+                                    perturbation neighborhoods.                                                                        149
+
+                                         Recent work evaluates candidate solutions across fixed scenario sets [37] or combines         150
+
+                                    decision preferences with variable-level uncertainty [38]. In both cases, the uncertainty set      151
+
+                                    remains fixed during the run. SHIELD-MOEA tests periodic scenario-subset updates and,              152
+
+                                    through a fixed worst-K control, whether those updates matter.                                     153
+
+                                         Recent power-planning studies hybridize evolutionary variation. Examples include              154
+
+                                    an improved NSGA-II for storage-and-EV co-optimization [39], a three-stage TER-NSGA-II             155
+
+                                    for resilient backbone-grid planning [40], and an enhanced beluga whale optimizer for              156
+
+                                    storage planning [41]. Under uncertainty, such methods commonly average fitness over               157
+
+                                    a fixed scenario sample or solve a robust reformulation before evolutionary search. The            158
+
+                                    former incurs repeated evaluation cost, whereas the latter leaves the scenario set outside         159
+
+                                    the evolving search state.                                                                         160
+
+                                         SHIELD-MOEA instead treats the evaluated scenario subset as a search-time quantity.           161
+
+                                    The subset is periodically updated toward scenarios that are difficult for the current popu-       162
+
+                                    lation. Evaluation on a disjoint scoring set then reports both mean and sampled worst-case         163
+
+                                    hypervolume. The targeted controls in Section 6.3 test whether periodic updating adds              164
+
+                                    value beyond a fixed generation-1 worst-K set.                                                     165
+
+
+
+                                    0.2.4. Relation to CARS-MODE and Gap Statement                                                     166
+
+
+                                          CARS-MODE [42] also studies evolutionary distribution planning on public benchmark- 167
+                                    derived portfolios. It adapts DE control parameters and repairs budget violations in an eco- 168
+                                    nomic DER-and-storage setting. SHIELD-MOEA instead studies the optimizer–uncertainty 169
+                                    interface. Its NSGA-II kernel combines GA/DE variation and repair, while screening sup- 170
+                                    plies search scenarios that remain disjoint from the final scoring draws. Load, DER, and 171
+                                    outage perturbations define the resilience setting. Only candidate generation is shared; the 172
+                                    methods and claims are independent.                                                           173
+
+                                          The gap lies at the interface of search and uncertainty. Resilience studies often grade 174
+                                    a robust solution or Pareto front on the same scenarios that guide optimization. Offline 175
+                                    reduction is blind to the evolving population, while hybrid MOEAs usually adapt operators 176
+                                    rather than exposure. SHIELD-MOEA combines worst-scenario screening, disjoint-draw 177
+                                    final scoring, and sampled worst-case hypervolume reporting. The fixed worst-K control 178
+                                    determines whether the adaptive update, rather than screening alone, is necessary.            179
+
+
+
+                                                                                                                                       180
+
+
+
+
+                                                                                                  https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                             5 of 24
+
+
+
+                                    0.3. Problem Formulation and Public Benchmark                                                                   181
+
+                                    0.3.1. Resilience-Oriented Planning as Scenario-Aware Multi-Objective Selection                                 182
+
+
+                                          Let A = { a1 , . . . , an } be the candidate-action pool. Action ai has cost k i and effect               183
+
+                                    coefficients (li , ui , hi , ri , gi ) for loss reduction, voltage-risk reduction, hosting-capacity gain,       184
+
+                                    reliability gain, and resilience gain. These coefficients are derived from public network                       185
+
+                                    statistics as described in Section 3.2. A plan is a binary vector x ∈ {0, 1}n . Uncertainty is                  186
+
+                                    represented by s = (λ, δ, σ ), where λ is a load multiplier, δ is a DER-output multiplier, and                  187
+
+                                    σ ∈ [0, 1] is outage severity.                                                                                  188
+
+                                          For plan x under scenario s, the benchmark defines                                                        189
+
+                                                                                                            !
+                                                                                              1 n
+                                                                                            120 i∑
+                                                              L( x, s) = max 0.015, L0 λ −            li x i ,
+                                                                                                   =1
+                                                                                                            !
+                                                                                             1 n
+                                                                                             10 i∑
+                                                              U ( x, s) = max 0.005, U0 λ −          ui xi ,
+                                                                                                  =1
+                                                                                                    !                                               190
+                                                                                         1 n
+                                                                                        28 i∑
+                                                                R( x ) = min 1, 0.35 +         ri xi ,
+                                                                                            =1
+                                                                                                             !
+                                                                                                 1 n
+                                                                                                24 i∑
+                                                               S( x, s) = min 1, 0.42(1 − σ ) +        gi x i .
+                                                                                                    =1
+
+                                         Here, L0 and U0 are network-level coefficients computed once from aggregate Sim-                           191
+
+                                    Bench statistics. L is a loss index, U is a voltage-risk index, R is a reliability proxy, and S is              192
+
+                                    a survivability proxy. The restoration-aware experiment replaces L with                                         193
+
+
+
+
+                                                                Le ( x, s) = L( x, s) 1 + 0.30σ 1 − S( x, s) ,
+                                                                                                           
+                                                                                                                                                    194
+
+
+                                          which couples loss exposure to plan survivability. With investment cost C ( x ) =                         195
+
+                                    ∑in=1 k i xi and scenario set S , the five-objective problem is                                                 196
+
+                                                                                
+                                                          min          F ( x ) = C ( x ), Es∈S [ L( x, s)], Es∈S [U ( x, s)],
+                                                         x ∈{0,1}n
+                                                                                                               
+                                                                                                                                                    197
+                                                                                  − R( x ), −Es∈S [S( x, s)]
+                                                                     subject to   C ( x ) ≤ B.
+                                         The budget B is the only hard constraint, and violation is measured as relative budget                     198
+
+                                    overrun. L, U, R, and S are transparent engineering proxies rather than power-flow                              199
+
+                                    solutions. Electrical claims are therefore delegated to the separate AC validation in Section                   200
+
+                                    6.5.                                                                                                            201
+
+
+
+                                    0.3.2. Candidate Pool Derived from SimBench                                                                     202
+
+
+                                         Candidate attributes derive deterministically from the SimBench complete mixed                             203
+
+                                    dataset [7]. The 18 subnets with the highest combined load and line-length stress are                           204
+
+                                    extracted from the load, line, and RES tables. Each supplies reinforcement, storage, DER-                       205
+
+                                    integration, and automation actions. Cost and effect coefficients are analytic functions of                     206
+
+                                    load, reactive load, line length, line count, renewable capacity, and loading.                                  207
+
+                                         The resulting pool contains n = 72 candidates under nominal budget B = 920, which                          208
+
+                                    makes roughly one sixth of the pool affordable. Every attribute traces to public data through                   209
+
+                                    published rules. The pool is a reproducible proxy rather than a costed engineering catalog,                     210
+
+                                    and its cost unit is synthetic (Section 8).                                                                     211
+
+
+
+
+                                                                                                               https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                        6 of 24
+
+
+
+                                    Table 1. The eight experiments. Ranges are uniform sampling intervals for (load multiplier lambda,
+                                    DER multiplier delta, outage severity sigma).
+
+                                                                                                                       Distinguishing
+                                    Experiment             lambda range        delta range        sigma range
+                                                                                                                       feature
+                                                                                                                       reference uncertainty
+                                    deterministic_vs_scenario
+                                                          0.95-1.25            0.7-1.3            0.00-0.25
+                                                                                                                       setting
+                                                                                                                       widened DER
+                                    der_uncertainty        0.95-1.25           0.4-1.7            0.00-0.25
+                                                                                                                       volatility
+                                    load_uncertainty       0.85-1.45           0.7-1.3            0.00-0.25            widened load band
+                                                                                                                       elevated outage
+                                    outage_contingency     0.95-1.25           0.7-1.3            0.10-0.55
+                                                                                                                       severity
+                                                                                                                       expected-loss
+                                    restoration_aware_evaluation
+                                                          0.95-1.25            0.7-1.3            0.10-0.55
+                                                                                                                       objective L^e
+                                                                                                                       screening-workload
+                                    scenario_screening_efficiency
+                                                           0.95-1.25           0.7-1.3            0.00-0.25
+                                                                                                                       accounting
+                                                                                                                       front-quality
+                                    pareto_quality         0.95-1.25           0.7-1.3            0.00-0.25
+                                                                                                                       replicate
+                                                                                                                       evaluation from
+                                                                                                                       non-overlapping
+                                                                                                                       ranges: lambda in
+                                    unseen_stress_generalization
+                                                          0.95-1.25 (search)   0.7-1.3 (search)   0.00-0.25 (search)
+                                                                                                                       [1.3,1.6], delta in
+                                                                                                                       [1.4,1.9], sigma in
+                                                                                                                       [0.4,0.7]
+
+
+
+                                    0.3.3. Scenario Model and the Eight Experiments                                                            212
+
+
+                                         Each experiment fixes ranges for the three scenario coordinates and draws |S| = 16                    213
+
+                                    scenarios uniformly with a fixed seed. Two independent scenario sets exist per experiment:                 214
+
+                                    a search set (seed A) that methods may use during optimization, and an evaluation set (seed                215
+
+                                    B, disjoint) on which every reported metric is computed. Table 1 lists the eight experiments.              216
+
+                                         The last experiment is the strictest test of the disjoint-evaluation design: its evaluation           217
+
+                                    scenarios are drawn from ranges that never intersect the search ranges, so any method that                 218
+
+                                    has specialized to its training scenarios is penalized at scoring time.                                    219
+
+
+
+                                    0.3.4. Shared Public Benchmark Statement                                                                   220
+
+
+                                         The SimBench-derived candidate-generation code is one versioned public artifact                       221
+
+                                    shared between this paper and the companion CARS-MODE study [42], so that the two                          222
+
+                                    methodologically independent algorithms remain comparable on a common footing. Ev-                         223
+
+                                    erything downstream – the scenario model, the uncertainty experiments, the screening                       224
+
+                                    mechanism under test, the evaluation protocol, and all analyses – is specific to this paper.               225
+
+
+
+                                                                                                                                               226
+
+
+
+                                    0.4. SHIELD-MOEA                                                                                           227
+
+
+                                          Figure 1 closes the method’s scenario-search loop. Each population induces a worst-K                 228
+
+                                    screened scenario subset, the hybrid variation operators generate candidate plans, budget                  229
+
+                                    repair restores feasibility, and robust environmental selection returns survivors. Unseen-                 230
+
+                                    stress and AC evaluations branch from the final archive and remain outside the optimization                231
+
+                                    loop.                                                                                                      232
+
+                                          SHIELD-MOEA exposes screening, repair, outage information, and the resilience                        233
+
+                                    objective as individual switches in the main ablation study. Additional matched controls                   234
+
+                                    compare hybrid variation with GA-only and DE-only search and periodic re-screening                         235
+
+                                    with a fixed generation-1 worst-K subset. This separation permits direct attribution for                   236
+
+                                    the main switches and targeted tests of the two multi-option mechanisms. The method                        237
+
+                                    is a resilience-oriented extension of NSGA-II [30]: it retains constraint-dominated non-                   238
+
+                                    dominated sorting and crowding-distance selection, and adds hybrid variation, scenario                     239
+
+                                    screening, and feasibility repair.                                                                         240
+
+
+
+
+                                                                                                         https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                                     7 of 24
+
+
+
+
+                                    Figure 1. SHIELD-MOEA architecture. Scenario screening is population dependent; the feedback
+                                    arrow denotes generational updating. The two validation branches use held-out stress scenarios or
+                                    AC power flow and do not feed into selection.
+
+
+                                          Formal definitions. For binary plan x, cost feasibility is                                                        241
+
+
+                                                                         n
+                                                             C(x) = ∑ c j x j ,               v B ( x ) = max(0, C ( x ) − B).                              242
+
+                                                                        j =1
+
+                                        Let f q ( x; s) be minimized objective q under search scenario s. At a screening generation,                        243
+
+                                    population-level scenario severity is                                                                                   244
+
+
+
+                                                                                                     Q
+                                                                                         1
+                                                                                       | Pt | x∑   ∑ ωq f˜q (x; s),
+                                                                        ρt (s) =                                                                            245
+
+                                                                                               ∈ P q =1
+                                                                                                  t
+
+                                          and the active subset is the worst K scenarios,                                                                   246
+
+
+
+
+                                                                                StK = arg max ∑ ρt (s).                                                     247
+                                                                                           A⊆Ssearch s∈A
+                                                                                            |A|=K
+
+                                         Between screening generations the active set is held fixed. Search fitness averages over                           248
+
+                                    that set,                                                                                                               249
+
+
+                                                                                              1
+                                                                               f¯qK ( x; t) =
+                                                                                              K        ∑ f q (x; s).                                        250
+
+                                                                                                      s∈StK
+
+                                          The GA channel applies uniform crossover followed by independent bit mutation,                                    251
+
+                                                     
+                                                      x (a) , U < 0.5,
+                                                GA       j       j
+                                               oj =                         o GA
+                                                                              j  ← 1 − o GA
+                                                                                         j  with probability 1/n.                                           252
+                                                      x (b) , otherwise,
+                                                             j
+
+                                          For the DE channel, a relaxed donor is formed and mapped to a stochastic bit,                                     253
+
+
+
+
+                                                                                           o DE
+                                                                                                                                    
+                                                z = gr 1 + F ( gr 2 − gr 3 ) ,               j  ∼ Bernoulli 0.08 + 0.82 I[z j ≥ 0.5] .                      254
+
+
+                                          Repair removes the least aggregate benefit per cost,                                                              255
+
+
+
+                                                                                            ∑q ωq b jq
+                                                                    j− = arg min                       ,        x j− ← 0,                                   256
+                                                                                j:x j =1       cj
+
+                                        repeating until v B ( x ) = 0. Held-out evaluation forms both mean and componentwise-                               257
+
+                                    worst objective vectors,                                                                                                258
+
+
+
+
+                                                                                                                       https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                             8 of 24
+
+
+
+
+                                                                      1
+                                                  f qmean ( x ) =              ∑ f q (x; s),
+                                                                    |Seval | s∈S
+                                                                                                   f qworst ( x ) = max f q ( x; s).
+                                                                                                                  s∈Seval
+                                                                                                                                                    259
+
+                                                                               eval
+
+                                       Their hypervolumes use separately frozen normalization bounds and the standard                               260
+
+                                    dominated-volume definition,                                                                                    261
+
+                                                                                                  !
+                                                                           [ Q
+                                                 HVz (P ; rz ) = λQ            ∏ [ f˜q,z (x), rq,z ] ,     z ∈ {mean, worst}.                       262
+
+                                                                           x ∈P q=1
+
+                                          Under the implemented schedule, the audited counter is                                                    263
+
+
+
+
+                                                      Cscreened = GNu K + Nr Np |S| = 12,800 + 5,120 = 17,920,                                      264
+
+
+                                        where union evaluation and ranking-round evaluation are disjoint terms. This is an                          265
+
+                                    implementation objective-call count, not a wall-clock claim.                                                    266
+
+
+
+                                    0.4.1. Non-Dominated Sorting Kernel (NSGA-II Framework)                                                         267
+
+
+                                         The kernel maintains a population of 40 binary plans over 40 generations. Environ-                         268
+
+                                    mental selection is constraint-dominated non-dominated sorting (feasible plans dominate                         269
+
+                                    infeasible ones; infeasible plans compare by budget violation) with crowding-distance                           270
+
+                                    truncation, following the standard NSGA-II procedure [30]. Initial plans are sparse random                      271
+
+                                    selections (3-18% density) repaired to the budget. Rationale: a standard, well-understood                       272
+
+                                    kernel ensures that whatever advantage appears is attributable to the scenario interface,                       273
+
+                                    not to bespoke selection machinery.                                                                             274
+
+
+
+                                    0.4.2. Hybrid GA/DE Variation                                                                                   275
+
+
+                                         Each generation produces 40 offspring. Half use uniform crossover followed by bit-flip                     276
+
+                                    mutation at rate 1/n. The other half use binary rand/1 differential evolution in relaxed                        277
+
+                                    space, followed by stochastic bit sampling with probabilities 0.9 and 0.08 for high and low                     278
+
+                                    activation. GA recombination preserves co-selected action blocks, while DE introduces                           279
+
+                                    direction-informed variation. Section 6.3 tests whether this hybrid improves on DE-only                         280
+
+                                    and GA-only controls.                                                                                           281
+
+
+
+                                    0.4.3. Worst-K Scenario Screening (The Adaptive Interface)                                                      282
+
+
+                                         At generation 1 and every Ts = 5 generations thereafter, the algorithm evaluates the                       283
+
+                                    current population on each of 16 search scenarios, ranks scenarios by the population’s                          284
+
+                                    mean normalized scalarized objective (worst first), and retains the top K = 4. Until the                        285
+
+                                    next screening event, parent–offspring selection uses only the active set. Let Np = 40,                         286
+
+                                    Nu = 2Np = 80, G = 40, |S| = 16, and Nr = 8 screening rounds (generations 1, 6, . . . ,                         287
+
+                                    36). The unscreened code path records Cfull = GNu |S| = 51,200 plan–scenario evaluations.                       288
+
+                                    The screened path records the disjoint terms Cactive = GNu K = 12,800 for union selection                       289
+
+                                    and Crank = Nr Np |S| = 5,120 for ranking the current population, totaling 17,920. Thus                         290
+
+                                    screening reduces this implementation counter by 65%; wall-clock savings are evaluated                          291
+
+                                    separately.                                                                                                     292
+
+
+
+                                    0.4.4. Feasibility Repair                                                                                       293
+
+
+                                          Every initial and offspring plan exceeding the budget is repaired greedily: the selected                  294
+
+                                    action with the worst aggregate benefit-to-cost ratio is dropped repeatedly until the plan                      295
+
+                                    is affordable. Rationale: under a hard budget, penalty-carrying infeasible plans waste                          296
+
+                                    population slots and blur dominance comparisons; repair keeps the entire population in                          297
+
+                                    the fundable region. The ablation study shows this operator carries the largest share of the                    298
+
+                                    method’s advantage (Section 6.3).                                                                               299
+
+
+
+
+                                                                                                               https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                   9 of 24
+
+
+
+                                    0.4.5. Resilience Objective and Outage Awareness in Search                                            300
+
+
+                                         The survivability objective -S(x,s) is part of the search-phase objective vector by default;     301
+
+                                    the corresponding ablation hides this column from selection while leaving the final five-             302
+
+                                    objective evaluation untouched. A second, sharper ablation zeroes the outage severity                 303
+
+                                    sigma during search only, making the search outage-blind while the evaluation still stresses          304
+
+                                    the plans. These two switches let us ask separately whether seeing the survivability trade-           305
+
+                                    off and experiencing outage stress during search matter – and the answers turn out to differ          306
+
+                                    (Sections 6.3 and 6.5).                                                                               307
+
+
+
+                                    0.4.6. Direct-Reuse-Leakage-Controlled Evaluation and Worst-Envelope Rationale                        308
+
+
+                                          No method – proposed, baseline, or ablation – is ever scored on scenarios it searched on.       309
+
+                                    The evaluation scenario set is drawn with a disjoint random seed (and, in the unseen-stress           310
+
+                                    experiment, from disjoint ranges); hypervolume is computed on the feasible non-dominated              311
+
+                                    front of each method’s final population against this set alone. Screening therefore influences        312
+
+                                    which plans are found, but has no channel into how they are graded.                                   313
+
+                                          We report two hypervolume variants. The standard mean hypervolume averages                      314
+
+                                    each objective over the 16 evaluation scenarios, then computes the dominated volume.                  315
+
+                                    The worst-case hypervolume takes the per-objective worst value over the 16 evaluation                 316
+
+                                    scenarios before computing the dominated volume. This is a deliberate design choice, not a            317
+
+                                    standard metric: in a resilience context, a plan whose mean performance is high but whose             318
+
+                                    tail scenario is poor (e.g., a plan that collapses under the single worst stress combination)         319
+
+                                    is an unacceptable plan. The worst-case readout is, however, more conservative and its                320
+
+                                    bounds depend on the scenario sample; we present it as a complementary diagnostic to the              321
+
+                                    mean metric, not as a replacement. The two metrics are computed under separate fixed                  322
+
+                                    normalization bounds (Section 5.3) and are comparable within their respective columns                 323
+
+                                    only.                                                                                                 324
+
+
+
+                                    0.4.7. Algorithm Summary                                                                              325
+
+
+                                    SHIELD-MOEA(candidates, budget, search_scenarios, seed):                                              326
+
+                                      initialize 40 sparse random plans; repair each to budget             # 4.4                          327
+
+                                      active <- search_scenarios                                                                          328
+
+                                      for gen = 1 .. 40:                                                                                  329
+
+                                        if screening enabled and gen = 1 (mod 5):                          # 4.3                          330
+
+                                          score each search scenario by population-mean scalarized fitness                                331
+
+                                          active <- worst 4 scenarios                                                                     332
+
+                                        offspring <- 20 by uniform crossover + bit-flip (1/n)              # 4.2                          333
+
+                                                     + 20 by binary DE (rand/1, stochastic thresholding)                                  334
+
+                                        repair offspring to budget                                         # 4.4                          335
+
+                                        F <- five-objective values of parents+offspring on active          # 4.5                          336
+
+                                        population <- constraint-dominated NDS + crowding (top 40)         # 4.1                          337
+
+                                      return feasible non-dominated front, evaluated on the DISJOINT                                      338
+
+                                             evaluation scenario set only                                  # 4.6                          339
+
+
+
+                                                                                                                                          340
+
+
+
+                                    0.5. Experimental Setup                                                                               341
+
+                                    0.5.1. Methods Compared                                                                               342
+
+
+                                         Table 2 lists eleven methods: SHIELD-MOEA, six baselines, and four single-switch                 343
+
+                                    ablations. Evolutionary baselines use reference implementations from pymoo [43], run on               344
+
+                                    the identical binary problem with the same population size and generation count and with              345
+
+                                    access to all 16 search scenarios.                                                                    346
+
+
+
+
+                                                                                                     https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                                  10 of 24
+
+
+
+                                    Table 2. Methods compared.
+
+                                    Method                               Role                                 Description
+                                                                                                              NSGA-II-style kernel + GA/DE hybrid
+                                    SHIELD-MOEA                          proposed                             variation + worst-K scenario screening +
+                                                                                                              repair
+                                                                                                              pymoo NSGA-II, binary encoding, budget
+                                    NSGA-II                              baseline
+                                                                                                              as constraint, full scenario set
+                                                                                                              NSGA-II followed by the same
+                                    NSGA-II+Repair                       baseline                             deterministic budget-repair rule as
+                                                                                                              SHIELD-MOEA
+                                    MOEA/D                               baseline                             pymoo MOEA/D, budget as penalty
+                                                                                                              single-objective GA on the normalized
+                                    GA                                   baseline
+                                                                                                              scalarized objective
+                                    Weighted Sum                         baseline                             weighted-benefit greedy fill under budget
+                                    Deterministic Planning               baseline                             cost-first greedy fill under budget
+                                    Ablation-NoScenarioScreen            ablation                             search on all 16 scenarios (screening off)
+                                    Ablation-NoRepair                    ablation                             feasibility repair disabled
+                                                                                                              survivability column hidden from search
+                                    Ablation-NoResilienceObj             ablation
+                                                                                                              selection
+                                                                                                              outage severity zeroed during search;
+                                    Ablation-NoOutage                    ablation
+                                                                                                              evaluation unchanged
+
+
+
+                                    0.5.2. Protocol                                                                                                        347
+
+
+                                         Each stochastic method runs 30 independent seeds per experiment. Weighted Sum and                                 348
+
+                                    Deterministic Planning are deterministic: the uniform 2640-row implementation archive                                  349
+
+                                    retains repeated invocations, but each rule has one effective observation per experiment.                              350
+
+                                    The seed-level inferential family therefore contains eight stochastic opponents, including                             351
+
+                                    four stochastic baselines and four ablations; sixteen deterministic baseline gaps are de-                              352
+
+                                    scriptive. Seeds are derived from a hash of (experiment, method, seed index), and all                                  353
+
+                                    population-based methods use population 40 and 40 generations.                                                         354
+
+
+
+                                    0.5.3. Metrics and Statistics                                                                                          355
+
+
+                                          The headline metric is the standard hypervolume of the feasible non-dominated front                              356
+
+                                    on the evaluation scenario set, computed with pymoo’s exact indicator at reference point                               357
+
+                                    1.1 per normalized dimension. Objective normalization uses fixed, method-independent                                   358
+
+                                    bounds computed once per experiment from a seeded reference sample (the empty plan,                                    359
+
+                                    all 72 single-action plans, and 2048 random budget-feasible plans, with a 5% margin), so no                            360
+
+                                    method’s own output can stretch or shrink the scale. The worst-case hypervolume applies                                361
+
+                                    the same construction to the per-objective worst value over the 16 evaluation scenarios,                               362
+
+                                    under its own fixed bounds; it is comparable across methods within the worst-case column                               363
+
+                                    (not against the mean column, whose normalization differs). An empty feasible front scores                             364
+
+                                    zero.                                                                                                                  365
+
+                                          Statistical comparisons are two-sided Mann–Whitney U tests between SHIELD-MOEA                                   366
+
+                                    and each of eight stochastic opponents per experiment (n = 30 per group), with Holm                                    367
+
+                                    correction [44] within each experiment. Rank-biserial correlation and 5000-resample boot-                              368
+
+                                    strap intervals report effect size and mean-difference uncertainty. The deterministic rules                            369
+
+                                    receive point comparisons without seed-level p-values. All reported conclusions use the                                370
+
+                                    method-independent standard hypervolume defined below.                                                                 371
+
+                                          For reproducibility, the transformations between raw objectives, fronts, statistics, and                         372
+
+                                    the AC check are specified explicitly. For objective j, the fixed reference sample supplies                            373
+
+                                    lower and upper bounds l j and u j ; every feasible objective vector is mapped by                                      374
+
+                                                                                    (      "                  #)
+                                                                                               f j (x) − lj
+                                                                     f˜j ( x ) = min 1, max 0,                     .                                       375
+                                                                                                  uj − lj
+
+                                          The feasible non-dominated set returned by method m in experiment e and seed r is                                376
+
+
+                                                              
+                                                        Pmer = x ∈ Xmer : C ( x ) ≤ B, ∄y ∈ Xmer with F̃ (y) ≺ F̃ ( x ) .                                  377
+
+
+
+
+                                                                                                              https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                           11 of 24
+
+
+
+                                        With reference point zref = (1.1, . . . , 1.1), the primary score is the dominated union                   378
+
+                                    volume                                                                                                         379
+
+                                                                                                               !
+                                                                                                         ref
+                                                                                        [
+                                                                HV (Pmer ) = λd                 [ F̃ ( x ), z ] ,                                  380
+
+                                                                                      x ∈Pmer
+
+                                        where λd denotes d-dimensional Lebesgue measure. The tail-oriented readout replaces                        381
+
+                                    each scenario-dependent objective by its observed maximum on the frozen evaluation                             382
+
+                                    scenarios,                                                                                                     383
+
+
+
+
+                                                                        f jwc ( x ) = max f j ( x, s),                                             384
+                                                                                    s∈Seval
+
+                                        before applying the same fixed-bound hypervolume construction. For two seed                                385
+
+                                    samples of size n1 and n2 , the reported rank statistic is                                                     386
+
+
+                                                                                                   n1
+                                                                                  n1 ( n1 + 1)
+                                                                 U1 = n1 n2 +                  − ∑ Ri ,                                            387
+                                                                                        2        i =1
+
+                                          and the monotone Holm adjustment over the M within-experiment comparisons is                             388
+
+
+                                                                             n                       o
+                                                              pHolm
+                                                               (i ) = max min  1, ( M − k + 1 ) p (k) .                                            389
+                                                                          k ≤i
+
+                                          Finally, screening workload is reported independently of wall-clock time. Including                      390
+
+                                    both active-set union evaluation and the full-set ranking rounds, the recorded reduction                       391
+
+                                    relative to full-scenario union evaluation is                                                                  392
+
+
+
+                                                                       GNu K + Nr Np |S|      17,920
+                                                       ηscreen = 1 −                     = 1−        = 0.65.                                       393
+                                                                           GNu |S|            51,200
+                                        The separate AC layer declares a mapped case feasible only when all three engineering                      394
+
+                                    conditions hold:                                                                                               395
+
+
+
+
+                                                   IAC = I (converged) I(0.95 ≤ Vb ≤ 1.05 ∀b) I( Lℓ ≤ 100% ∀ℓ).                                    396
+
+
+
+                                                                                                                                                   397
+
+
+
+                                    0.6. Results                                                                                                   398
+
+                                    0.6.1. Main Comparison                                                                                         399
+
+
+                                          Table 3 pools all 8 experiments x 30 seeds; Figure 2 shows the per-experiment distribu-                  400
+
+                                    tions for the six main methods and the pooled mean-versus-worst-case panel.                                    401
+
+                                          SHIELD-MOEA attains pooled mean hypervolume 0.27396 (std 0.02700), 5.09% above                           402
+
+                                    NSGA-II+Repair (0.26070) and 5.56% above plain NSGA-II. Repair explains part of the                            403
+
+                                    advantage, but targeted controls do not assign the remainder uniquely to screening or                          404
+
+                                    hybrid variation. All 32 comparisons with four stochastic baselines are Holm-significant                       405
+
+                                    wins, with no significant loss to any stochastic opponent. Weighted Sum and Deterministic                      406
+
+                                    Planning are lower in all sixteen descriptive experiment-level gaps and receive no seed-level                  407
+
+                                    tests.                                                                                                         408
+
+                                          The margin is largest in outage_contingency (+6.97%) and der_uncertainty (+6.54%)                        409
+
+                                    and remains positive in unseen_stress_generalization (+6.04%). The latter tests resistance to                  410
+
+                                    the frozen search ranges; it does not certify absence of scenario-distribution specialization.                 411
+
+                                          Three baseline behaviors deserve honest annotation rather than silence. First,                           412
+
+                                    MOEA/D collapses on this problem (pooled HV 0.00047): with the budget handled as a                             413
+
+                                    penalty, its decomposition weights drive it to near-empty portfolios (mean selected actions                    414
+
+                                    0.004). We report it as configured and note that a constraint-domination variant might                         415
+
+
+
+
+                                                                                                               https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                                          12 of 24
+
+
+
+                                    Table 3. Pooled leaderboard across eight experiments. Stochastic methods have 240 runs; determinis-
+                                    tic rules summarize eight unique outputs retained as 240 repeated provenance rows.
+
+                                    Method             Role         Mean HV        Std                Worst-case HV      Mean front size      Mean runtime (s)
+                                    Ablation-
+                                                     ablation       0.27467        0.02667            0.26976            38.9                 0.089
+                                    NoResilienceObj
+                                    SHIELD-
+                                                     proposed       0.27396        0.02700            0.26911            38.9                 0.089
+                                    MOEA
+                                    Ablation-
+                                                     ablation       0.27266        0.02627            0.26804            38.9                 0.079
+                                    NoScenarioScreen
+                                    Ablation-
+                                                     ablation       0.27125        0.02511            0.26610            38.4                 0.087
+                                    NoOutage
+                                    NSGA-II          baseline       0.25953        0.02816            0.25541            40.0                 0.092
+                                    NSGA-
+                                                     baseline       0.26070        0.02696            0.25654            40.0                 0.091
+                                    II+Repair
+                                    Ablation-
+                                                     ablation       0.25176        0.02919            0.24649            39.7                 0.058
+                                    NoRepair
+                                    GA               baseline       0.21987        0.02811            0.22107            1.0                  0.007
+                                    Deterministic
+                                                     baseline       0.02387        0.00124            0.02282            1.0                  0.0004
+                                    Planning
+                                    Weighted Sum     baseline       0.01963        0.00146            0.01805            1.0                  0.0004
+                                    MOEA/D           baseline       0.00047        0.00002            0.00047            1.0                  0.450
+
+
+                                    Table 4. SHIELD-MOEA vs. NSGA-II. Intervals are pointwise, multiplicity-unadjusted 5000-resample
+                                    bootstrap CIs for the mean HV difference; rrb is rank-biserial correlation. Holm correction covers
+                                    eight stochastic opponents per experiment and determines the significance statements.
+
+                                    Experiment           SHIELD          NSGA-II             ∆HV (95% CI)        rrb                       Holm p
+                                                                                             0.01515 [0.01096,
+                                    deterministic_vs_scenario
+                                                         0.26959         0.25444                                 0.791                     5.89e-7
+                                                                                             0.01945]
+                                                                                             0.01665 [0.01340,
+                                    der_uncertainty      0.27137         0.25471                                 0.971                     6.56e-10
+                                                                                             0.01988]
+                                                                                             0.01439 [0.01080,
+                                    load_uncertainty     0.26211         0.24772                                 0.842                     1.10e-7
+                                                                                             0.01802]
+                                                                                             0.01757 [0.01335,
+                                    outage_contingency 0.26982           0.25224                                 0.862                     5.05e-8
+                                                                                             0.02176]
+                                                                                             0.01170 [0.00793,
+                                    restoration_aware_evaluation
+                                                        0.33878          0.32708                                 0.736                     5.14e-6
+                                                                                             0.01577]
+                                                                                             0.01221 [0.00738,
+                                    scenario_screening_efficiency
+                                                         0.26703         0.25481                                 0.700                     1.33e-5
+                                                                                             0.01675]
+                                                                                             0.01375 [0.00882,
+                                    pareto_quality       0.26652         0.25276                                 0.676                     2.89e-5
+                                                                                             0.01868]
+                                                                                             0.01403 [0.00761,
+                                    unseen_stress_generalization
+                                                        0.24650          0.23247                                 0.571                     7.47e-4
+                                                                                             0.02033]
+
+
+
+                                    fare better; the competitive comparison is carried by NSGA-II. Second, the single-solution                                    416
+
+                                    methods (GA, Weighted Sum, Deterministic Planning) return one plan by construction, so                                        417
+
+                                    their hypervolume measures the quality of a point, not a front. Third, runtimes are of the                                    418
+
+                                    same order for the population methods (SHIELD-MOEA 0.089 s vs. NSGA-II 0.092 s per                                            419
+
+                                    run at this instance size); no efficiency claim is made from wall-clock at this scale.                                        420
+
+
+
+                                    0.6.2. Sampled Worst-Envelope Readout                                                                                         421
+
+
+                                          SHIELD-MOEA’s pooled sampled worst-envelope HV is 0.26911, +5.36% above NSGA-                                           422
+
+                                    II’s 0.25541 and close to its mean-HV margin. Within the evaluation sample, no mean–                                          423
+
+                                    envelope reversal is observed against this baseline. This diagnostic describes the 16 sampled                                 424
+
+                                    scenarios; it is not a bound on unobserved tail behavior.                                                                     425
+
+
+
+                                    0.6.3. Ablation Study: Where the Gain Actually Comes From                                                                     426
+
+
+                                         Figure 3 compares the full method against the four single-switch ablations, pooled                                       427
+
+                                    over all experiments and seeds.                                                                                               428
+
+                                         The attribution, stated without embellishment:                                                                           429
+
+
+                                    •     Feasibility repair is the main contributor. Disabling it costs 8.10% of pooled hyper-                                   430
+
+                                          volume (0.25176 vs. 0.27396) and is Holm-significant in all 8 experiments. Without                                      431
+
+                                          repair, offspring that overshoot the budget survive as infeasible passengers, and the                                   432
+
+                                          feasible front the evaluator extracts is built from a thinner effective population.                                     433
+
+
+
+
+                                                                                                                 https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                 13 of 24
+
+
+
+
+                                    Figure 2. Hypervolume distributions across eight experiments (30 seeds per box for stochastic
+                                    methods); deterministic rules are point estimates. The bottom panel pairs each method’s pooled
+                                    mean HV (filled) with its sampled worst-envelope HV (open).
+
+
+                                    •     Outage exposure is associated with a larger AC composition difference in outage-               434
+
+                                          heavy settings. Under the primary within-experiment opponent families, zero-                   435
+
+                                          ing outage severity is significant in outage_contingency (p = 0.032) and restora-              436
+
+                                          tion_aware_evaluation (p = 0.009). Under the supplementary outage-ablation fam-                437
+
+                                          ily across eight experiments, only restoration_aware_evaluation remains significant            438
+
+                                          (p = 0.024; outage_contingency p = 0.075). The fixed-mapping AC layer shows a                  439
+
+                                          descriptive composition difference (Section 6.5), not a seeded causal effect.                  440
+
+                                    •     Scenario screening reduces recorded evaluations without a resolved front-quality               441
+
+                                          difference. The screening-off ablation is nominally 0.48% higher and is unresolved             442
+
+                                          in every experiment. Screening removes 65% of the implementation’s plan–scenario               443
+
+                                          objective calls (Section 4.3), but equivalence was not tested. At this instance size,          444
+
+                                          bookkeeping offsets the call reduction in wall-clock time (0.089 s versus 0.079 s per          445
+
+                                          run); a deployment-time saving remains a hypothesis for simulators with expensive              446
+
+                                          scenario evaluation.                                                                           447
+
+                                    •     The explicit resilience objective does not raise mean hypervolume – a negative result          448
+
+                                          we retain in the headline. Hiding the survivability column from search selection               449
+
+                                          yields a pooled mean of 0.27467, nominally +0.26% above the full method, not Holm-             450
+
+                                          significant in any experiment (0/8; the per-experiment mean difference ranges from             451
+
+                                          -0.0035 to +0.0039 in absolute HV, i.e., the sign itself is unstable). The mechanistic         452
+
+                                          reading is that survivability, as constructed, is correlated with the reliability objective    453
+
+                                          through shared resilience-bearing actions (storage, automation), so four-objective             454
+
+                                          search selects nearly the same plans. We keep the objective because it exposes the cost-       455
+
+
+
+
+                                                                                                     https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                     14 of 24
+
+
+
+
+                                    Figure 3. Mean hypervolume (+/- std over 8 experiments x 30 seeds) of SHIELD-MOEA and the four
+                                    ablations. Callouts give the relative difference to the full method and the number of experiments (out
+                                    of 8) in which the difference is Holm-significant.
+
+
+                                          survivability trade-off explicitly on the returned front – a decision-support property             456
+
+                                          the planner loses otherwise – but we do not claim it improves search quality.                      457
+
+
+                                          Targeted variation and screening controls. Three additional controls use the identical             458
+
+                                    eight experiments, 30 seeds, population, generations, search/evaluation split, normaliza-                459
+
+                                    tion, and evaluation budget (720 runs). Pooled mean HV is 0.27425 for DE-only, 0.27408                   460
+
+                                    for a worst-K set fixed after generation 1, 0.27396 for SHIELD-MOEA, and 0.27014 for GA-                 461
+
+                                    only. After Holm correction within each experiment, the full hybrid significantly exceeds                462
+
+                                    GA-only in 3/8 experiments and is inseparable in the other five; it is inseparable from                  463
+
+                                    DE-only and fixed worst-K in all eight. Thus the data support neither a hybrid-variation                 464
+
+                                    gain nor a dynamic-re-screening gain. The narrower interpretation is that the full stack                 465
+
+                                    is strong relative to the external baselines, repair is load-bearing, and screening reduces              466
+
+                                    objective-call count; DE-only and one-shot worst-K are credible engineering simplifications              467
+
+                                    on this benchmark.                                                                                       468
+
+                                          Figure 4 shows the seed-level distributions for those controls. The pooled view is                 469
+
+                                    descriptive because scenario-specific scales differ; the formal verdict remains the per-                 470
+
+                                    experiment Holm analysis. It nevertheless makes both null results visible: the full method               471
+
+                                    overlaps DE-only and fixed worst-K, while GA-only is lower in only part of the experiment                472
+
+                                    set.                                                                                                     473
+
+
+
+                                    0.6.4. Parameter Sensitivity Analysis                                                                    474
+
+
+                                          We performed a one-at-a-time sensitivity analysis on the reference experiment (de-                 475
+
+                                    terministic_vs_scenario). The sweep covers population size Np ∈ {20, 40, 60} (default 40,                476
+
+                                    with NSGA-II rerun at each matched size), screening width K ∈ {2, 4, 8} (default 4), and                 477
+
+                                    screening period Ts ∈ {3, 5, 10} (default 5). Each point uses 10 independent seeds. Figure 5             478
+
+                                    and Table 5 summarize the results.                                                                       479
+
+                                          Note: the default configuration (population 40, K=4, T_s=5) appears once per sweep                 480
+
+                                    axis, so the table contains three default rows; they show slightly different SHIELD-MOEA                 481
+
+                                    means (0.2674, 0.2658, 0.2687) because each axis is drawn from an independent 10-seed                    482
+
+                                    stream – a normal consequence of sampling variance, not an inconsistency. For the same                   483
+
+                                    reason the NSGA-II reference is identical (0.2527) across the K and T_s rows, which reuse                484
+
+                                    the matched population-40 reference, while the population-size rows re-run NSGA-II at                    485
+
+                                    each matched size (0.2360, 0.2527, 0.2610).                                                              486
+
+                                          SHIELD-MOEA has a higher mean than NSGA-II at all nine parameter points, with                      487
+
+                                    a smallest absolute margin of 0.0061. Its mean varies by 5.0% of the default value across                488
+
+
+
+
+                                                                                                         https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                    15 of 24
+
+
+
+
+                                    Figure 4. Seed-level mechanism controls across eight experiments (240 runs per method). (a) Mean-
+                                    front hypervolume; (b) worst-case hypervolume. Boxes pool experiments and seeds and are therefore
+                                    descriptive. Per-experiment Holm tests show no separation between the full method and DE-only or
+                                    fixed worst-K in 8/8 experiments; the full method exceeds GA-only in 3/8.
+
+                                    Table 5. Exploratory parameter sweep (10 seeds per point). Reported Mann–Whitney p-values are
+                                    nominal and multiplicity-unadjusted.
+
+                                                                           SHIELD-MOEA HV
+                                    Parameter              Value                               NSGA-II reference     p (MWU)
+                                                                           (mean +/- std)
+                                    population size N_p    20              0.2583 +/- 0.0155   0.2360                0.011
+                                    population size N_p    40 (default)    0.2674 +/- 0.0108   0.2527                0.007
+                                    population size N_p    60              0.2671 +/- 0.0120   0.2610                0.104
+                                    screening width K      2               0.2715 +/- 0.0062   0.2527                0.0003
+                                    screening width K      4 (default)     0.2658 +/- 0.0108   0.2527                0.014
+                                    screening width K      8               0.2701 +/- 0.0079   0.2527                0.001
+                                    screening period T_s   3               0.2688 +/- 0.0074   0.2527                0.0008
+                                    screening period T_s   5 (default)     0.2687 +/- 0.0085   0.2527                0.002
+                                    screening period T_s   10              0.2671 +/- 0.0121   0.2527                0.017
+
+
+
+                                    the sweep; the K and Ts axes vary by 2.1% and 0.6%, respectively. At Np = 60, the raw                   489
+
+                                    comparison is unresolved (p = 0.104). Because the sweep has no confirmatory multiplicity                490
+
+                                    family, the section supports only descriptive sensitivity patterns.                                     491
+
+
+
+                                    0.6.5. AC Power-Flow Validation on Six Distribution Networks                                            492
+
+
+                                         Hypervolume on proxy objectives cannot certify electrical feasibility. The seed-0                  493
+
+                                    compromise composition from each method and experiment is therefore mapped onto                         494
+
+                                    four SimBench MV networks (rural, semi-urban, urban, and commercial), the CIGRE                         495
+
+                                    MV benchmark, and the IEEE 33-bus feeder. Fixed rules parallel the most-loaded lines,                   496
+
+                                    attach storage to the weakest-voltage load buses at ±3% of net load, and add PV equal                   497
+
+                                    to 4% of net load at the highest-load buses. Automation has no steady-state effect. The                 498
+
+                                    identical mapping logic is used across network families; no per-network optimizer tuning                499
+
+                                    is performed.                                                                                           500
+
+                                         Pandapower [45] solves AC power flow under base, 1.3x peak, 1.5x growth, 1.8x                      501
+
+                                    extreme growth, high-DER backfeed, and 1.5x growth with an N − 1 outage. The AC layer                   502
+
+                                    covers deterministic_vs_scenario, der_uncertainty, and outage_contingency, which expose                 503
+
+                                    the reference, widened DER, and elevated outage axes. A case is feasible when power flow                504
+
+                                    converges, voltages remain within [0.95, 1.05] pu, and line loading does not exceed 100%.               505
+
+                                         Each of the twelve planning/reference configurations faces 3 × 6 × 6 = 108 cases, for              506
+
+                                    1296 AC solves in total. The readout is a qualitative composition-level consistency check,              507
+
+
+
+
+                                                                                                        https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                         16 of 24
+
+
+
+
+                                    Figure 5. Parameter sensitivity over population size, screening width K, and screening period Ts (10
+                                    seeds per point; NSGA-II re-run at matched population sizes).
+
+                                    Table 6. AC validation summary over six networks (108 cases per method).
+
+                                                                                    Stress-only   Mean min Vm   Mean max      Mean losses
+                                    Method           Role        AC-feasible rate
+                                                                                    feasible      (pu)          loading (%)   (MW)
+                                    NoPlan           reference   0.389              0.333         0.940         78.6          0.569
+                                    NSGA-
+                                                     baseline    0.694              0.633         0.969         52.7          0.373
+                                    II+Repair
+                                    Ablation-
+                                                     ablation    0.694              0.633         0.969         54.3          0.384
+                                    NoRepair
+                                    SHIELD-MOEA proposed         0.685              0.622         0.969         52.7          0.377
+                                    Ablation-
+                                                     ablation    0.685              0.622         0.970         56.0          0.384
+                                    NoResilienceObj
+                                    NSGA-II          baseline    0.667              0.611         0.967         52.8          0.376
+                                    GA               baseline    0.667              0.600         0.969         48.1          0.362
+                                    Ablation-
+                                                     ablation    0.630              0.567         0.965         51.5          0.390
+                                    NoScenarioScreen
+                                    Ablation-
+                                                     ablation    0.574              0.533         0.969         67.0          0.463
+                                    NoOutage
+                                    Weighted Sum     baseline    0.417              0.333         0.945         73.7          0.537
+                                    Deterministic
+                                                     baseline    0.417              0.400         0.971         132.0         1.194
+                                    Planning
+                                    MOEA/D           baseline    0.389              0.333         0.940         78.6          0.569
+
+
+
+                                    not a seeded replication of the proxy comparison. Table 6 reports the aggregate results;                     508
+
+                                    Section 6.7 separates the network families.                                                                  509
+
+                                         Three findings, in decreasing order of importance:                                                      510
+
+
+                                    1.    The plans improve aggregate feasibility but do not lead the field. SHIELD-MOEA’s                       511
+
+                                          compositions are AC-feasible in 68.5% of cases (62.2% under stress-only), against a                    512
+
+                                          no-plan reference of 38.9% (33.3% stress-only). Mean minimum voltage improves from                     513
+
+                                          0.940 to 0.969 pu and mean maximum loading falls from 78.6% to 52.7%. Matched-                         514
+
+                                          repair NSGA-II is slightly higher in feasibility (69.4%), so no AC-superiority claim is                515
+
+                                          made.                                                                                                  516
+
+                                    2.    Outage-aware search is the component the physics layer differentiates. The                             517
+
+                                          NoOutage ablation–identical except that search never experiences outage severity–                      518
+
+                                          drops to an AC-feasible rate of 0.574 (0.533 stress-only), while mean maximum loading                  519
+
+                                          rises to 67.0%. This is composition-level differential evidence, not a seeded causal                   520
+
+                                          estimate; it shows that the proxy-level ablation understates a physically relevant                     521
+
+                                          change.                                                                                                522
+
+                                    3.    A cautionary baseline result. Cost-first Deterministic Planning attains only a 0.417                   523
+
+                                          AC-feasible rate and mean maximum loading 132.0%, because cheap actions add                            524
+
+                                          load-side assets without relieving binding corridors. Its loss value is also the largest               525
+
+                                          in Table 6.                                                                                            526
+
+
+
+                                    0.6.6. Quality–Cost and Resilience-Composition Diagnostics                                                   527
+
+
+                                         The pooled leaderboard alone cannot distinguish a method that is accurate but com-                      528
+
+                                    putationally wasteful from one that obtains a comparable front with less scenario exposure.                  529
+
+                                    Figure 7 therefore places each principal method in the mean-hypervolume/runtime plane                        530
+
+
+
+
+                                                                                                           https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                    17 of 24
+
+
+
+
+                                    Figure 6. Original SimBench-family AC slice. (a) AC-feasible rate over 72 network-by-scenario cases
+                                    and over stress scenarios only; the dashed line is the no-plan reference. (b) Mean maximum line
+                                    loading. The cross-family extension is reported in Table 6 and Figure 9.
+
+
+
+
+                                    Figure 7. Mean hypervolume versus mean runtime over the eight experiments and 30 seeds. Marker
+                                    area represents mean feasible-front size. The proposed method is highlighted for identification, not
+                                    to imply statistical dominance over the neighboring ablations.
+
+
+                                    using all frozen experiment-seed records. The chart is descriptive: runtimes are sub-second             531
+
+                                    and proxy evaluation is vectorized, so the horizontal coordinate is not a deployment bench-             532
+
+                                    mark. It nevertheless shows that SHIELD-MOEA occupies the high-hypervolume region                       533
+
+                                    with a runtime comparable to NSGA-II, whereas the penalty-based MOEA/D configu-                         534
+
+                                    ration is both slower and ineffective on the constrained binary problem. The strongest                  535
+
+                                    nominal result belongs to the NoResilienceObjective ablation, not to the full method; its               536
+
+                                    difference from SHIELD-MOEA is only 0.26%, and the contrast remains unresolved in all                   537
+
+                                    eight experiments.                                                                                      538
+
+                                          Tables 3 and 7 use the same frozen run archive, with Table 7 retaining more decimals              539
+
+                                    for selected methods. With K = 4 of 16 scenarios, active-set union evaluation is 75% smaller            540
+
+                                    than full-scenario union evaluation. Eight full-set ranking rounds add 5120 calls, yielding             541
+
+                                    the audited total 17,920 versus 51,200 (65% lower). These are objective-call counts, not                542
+
+                                    measured energy or time savings.                                                                        543
+
+
+
+
+                                                                                                       https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                      18 of 24
+
+
+
+                                    Table 7. Selected pooled quality–cost readouts from the frozen run archive.
+
+                                                                                                Relative HV vs.
+                                    Method              Mean HV             Mean runtime (s)                          Interpretation
+                                                                                                SHIELD
+                                    SHIELD-MOEA         0.27396             0.0889              0.00%                 full pipeline
+                                                                                                                      no detectable quality
+                                    NoScenarioScreen    0.27266             0.0792              -0.48%                loss from screening
+                                                                                                                      removal
+                                                                                                                      strongest standard
+                                    NSGA-II             0.25953             0.0924              -5.27%                evolutionary
+                                                                                                                      reference
+                                                                                                                      repair is
+                                    NoRepair            0.25176             0.0583              -8.10%
+                                                                                                                      load-bearing
+
+
+
+
+                                    Figure 8. Pooled reliability and survivability of compromise portfolios derived from the frozen
+                                    evaluation records; marker area represents worst-case hypervolume. The three readouts remain
+                                    separately encoded rather than being collapsed into a synthetic index.
+
+
+                                         Figure 8 separates the mean robustness score from its reliability and survivability                  544
+
+                                    components. SHIELD-MOEA has pooled reliability 0.9958, survivability 0.9940, and worst-                   545
+
+                                    case HV 0.2691. NSGA-II has slightly higher reliability (0.9972) but lower worst-case HV                  546
+
+                                    (0.2554); NoScenarioScreen has slightly higher survivability (0.9954) and a similar worst-                547
+
+                                    case HV (0.2680). These crossed rankings are exactly why the paper does not describe the                  548
+
+                                    explicit resilience objective or dynamic screening as independently accuracy-improving                    549
+
+                                    mechanisms.                                                                                               550
+
+                                         Taken together, the diagnostics narrow rather than broaden the claim. The full pipeline              551
+
+                                    is competitive in proxy quality and has higher sampled worst-case HV than the tested                      552
+
+                                    stochastic baselines, but the current instance is too cheap for a wall-clock speed claim. Its             553
+
+                                    supported elements are deterministic repair, auditable scenario-call reduction, disjoint-                 554
+
+                                    draw scoring, and a descriptive outage-aware composition check. Hybridization and                         555
+
+                                    periodic re-screening remain unresolved design choices awaiting a harder simulator-backed                 556
+
+                                    benchmark.                                                                                                557
+
+
+
+                                    0.6.7. Cross-Family AC Transportability                                                                   558
+
+
+                                         Figure 9 separates the expanded AC evidence by network family. On the four Sim-                      559
+
+                                    Bench networks, SHIELD-MOEA retains the original 0.708 feasible rate. On CIGRE MV it                      560
+
+                                    reaches 0.944, compared with 0.167 for no planning, but matched-repair NSGA-II reaches                    561
+
+                                    1.000. On IEEE 33-bus, both SHIELD-MOEA and matched-repair NSGA-II reach only 0.333,                      562
+
+                                    compared with 0.167 for no planning. The low absolute IEEE rate shows that a composition                  563
+
+
+
+
+                                                                                                         https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                                19 of 24
+
+
+
+                                    Table 8. Mechanism-level decision record.
+
+                                    Question                        Frozen comparison        Statistical result           Supported conclusion
+                                                                                             significant in 8/8
+                                    Is repair necessary?            SHIELD vs. NoRepair                                   yes, for front quality
+                                                                                             experiments
+                                    Is a front-quality difference   SHIELD vs.               no significant difference in no difference detected;
+                                    detected for screening?         NoScenarioScreen         8/8                          equivalence not tested
+                                    Is periodic re-screening
+                                                                    SHIELD vs. fixed         no significant difference in
+                                    better than a fixed worst-K                                                           not established
+                                                                    generation-1 worst-K     8/8
+                                    set?
+                                    Does hybrid variation beat                               no significant difference in
+                                                                    SHIELD vs. DE-only                                     not established
+                                    DE-only?                                                 8/8
+                                    Does outage exposure            SHIELD vs. NoOutage in                                 supported as a
+                                                                                             feasible rate 0.685 vs. 0.574
+                                    matter electrically?            AC layer                                               composition-level check
+
+
+
+
+                                    Figure 9. AC-feasible rates and mean minimum bus voltage by network family for the no-plan
+                                    reference, SHIELD-MOEA, and NSGA-II with matched repair. The dashed voltage line marks the
+                                    0.95 pu criterion. Each family uses the same three planning experiments and six operating scenarios.
+                                    SHIELD-MOEA improves over no planning in every family but does not outperform the matched-
+                                    repair comparator.
+
+
+                                    rule calibrated on SimBench does not automatically transfer to a radial feeder, even when it                        564
+
+                                    improves on doing nothing.                                                                                          565
+
+
+
+                                                                                                                                                        566
+
+
+
+                                    0.7. Discussion                                                                                                     567
+
+
+                                          What the evidence supports, component by component. The framework-level re-                                   568
+
+                                    sult is a 5.56% pooled margin over plain NSGA-II, 32/32 significant stochastic-baseline                             569
+
+                                    comparisons, and positive margins in the sampled worst-case and unseen-range diagnos-                               570
+
+                                    tics. Repair contributes most. Screening reduces recorded calls by 65%, while no quality                            571
+
+                                    difference is detected against no screening; periodic re-screening does not beat a fixed                            572
+
+                                    generation-1 worst-K set. Hybrid GA/DE does not beat DE-only. The AC composition                                    573
+
+                                    check shows a lower feasibility rate when outage exposure is removed (0.574 versus 0.685),                          574
+
+                                    but this fixed-mapping difference is descriptive rather than a seeded causal estimate. The                          575
+
+                                    method should therefore be read as an evaluated pipeline with repair and direct-reuse                               576
+
+                                    leakage control, not as evidence that every named operator is necessary.                                            577
+
+                                          Scenario selection as a design axis. Screening reduces objective calls, and no quality                        578
+
+                                    difference is detected against no screening; equivalence is not established. Dynamic updates                        579
+
+                                    also do not outperform a fixed generation-1 worst-K set. The supported design principle is                          580
+
+                                    selective search evaluation with a disjoint scoring set, not periodic adaptation itself. Using                      581
+
+                                    one scenario sample for both search decisions and final grading would leave the reported                            582
+
+                                    score vulnerable to scenario overfitting.                                                                           583
+
+                                          Positioning against CARS-MODE. The companion study [42] shares only the                                       584
+
+                                    candidate-derivation pipeline; it self-adapts operator parameters for an economically                               585
+
+
+
+
+                                                                                                                  https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                20 of 24
+
+
+
+                                    framed DER-integration problem, while this paper holds operators fixed and makes sce-               586
+
+                                    nario exposure adaptive for a resilience-framed problem. Neither method contains the                587
+
+                                    other’s mechanism.                                                                                  588
+
+                                         Practitioner reading. The full pipeline produces 4.8–7.0% higher mean hypervolume              589
+
+                                    than matched NSGA-II across the tested regimes. Ablations associate most of this difference         590
+
+                                    with repair rather than screening or hybrid variation. The selected compromise plans have           591
+
+                                    AC-feasible rates within the range of the strongest alternatives and avoid the loading              592
+
+                                    pattern observed for cost-first selection. Removing outage exposure leaves proxy quality            593
+
+                                    nearly unchanged but reduces AC feasibility in the displayed cases, supporting its inclusion        594
+
+                                    when resilience is the planning objective.                                                          595
+
+
+
+                                                                                                                                        596
+
+
+
+                                    0.8. Limitations                                                                                    597
+
+
+                                          We state the boundaries of this study explicitly.                                             598
+
+
+                                    1.    Recovery and restoration are not modeled. The scenario coordinate sigma scales a              599
+
+                                          survivability proxy, and the planning stage does not model post-event restoration,            600
+
+                                          network reconfiguration, or intentional islanding. The N-1 contingency appears only           601
+
+                                          in the AC validation layer. An element-level N-k sampling model with fragility-curve-         602
+
+                                          driven failures and post-event restoration optimization – in the tradition of [10,11] –       603
+
+                                          would deepen the resilience claim and simultaneously decorrelate survivability from           604
+
+                                          reliability (Section 6.3).                                                                    605
+
+                                    2.    Costs are synthetic. Candidate costs are analytic functions of subnet statistics in an        606
+
+                                          uncalibrated cost unit; no engineering-economic conclusion (payback, budget sizing)           607
+
+                                          should be drawn before calibration against published utility investment data.                 608
+
+                                    3.    Single planning benchmark family. All eight optimization experiments instantiate              609
+
+                                          one 72-candidate pool from one SimBench-derived extraction. CIGRE MV and IEEE                 610
+
+                                          33-bus extend only the AC validation layer; they do not provide independently                 611
+
+                                          optimized candidate pools. The component attribution therefore remains specific to            612
+
+                                          the SimBench-derived planning problem.                                                        613
+
+                                    4.    The AC layer validates plan compositions, not nodal designs. Compositions are                 614
+
+                                          mapped to six networks by fixed placement rules. A nodal siting/sizing formulation            615
+
+                                          on each feeder would provide a stronger transfer test and may change the low IEEE             616
+
+                                          33-bus feasible rates.                                                                        617
+
+                                    5.    Statistical caveats are part of the record. The advantage over NSGA-II loses signifi-         618
+
+                                          cance at population size 60 in the sensitivity sweep (p = 0.104), the scenario-screening      619
+
+                                          ablation remains unresolved in all eight experiments, and the NoResilienceObj ab-             620
+
+                                          lation nominally exceeds the full method; none of these facts is smoothed over in             621
+
+                                          Sections 6.3 and 6.4.                                                                         622
+
+                                    6.    Proxy objectives. The planning-stage objectives are engineering proxies; all electrical       623
+
+                                          statements rest on the pandapower validation layer, and claims outside its coverage           624
+
+                                          (six networks, six scenarios, composition granularity) are not made.                          625
+
+                                    7.    The worst-case hypervolume is sample-dependent. As a single-sample worst-case                 626
+
+                                          readout over 16 scenarios, it does not bound the true extremal performance of any             627
+
+                                          plan; it is a diagnostic complement to the mean metric, not a certification of robustness.    628
+
+                                    8.    Hybrid and dynamic-screening necessity are not established. The dedicated controls            629
+
+                                          now exist, but they return null results: hybrid GA/DE is statistically inseparable from       630
+
+                                          DE-only, and periodic re-screening is inseparable from a fixed generation-1 worst-            631
+
+                                          K set in all eight experiments. These mechanisms remain motivated defaults, not               632
+
+                                          demonstrated sources of the headline gain.                                                    633
+
+
+
+
+                                                                                                    https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                              21 of 24
+
+
+
+                                                                                                                                      634
+
+
+
+                                    0.9. Conclusions                                                                                  635
+
+
+                                          This paper asked how an evolutionary resilience-planning method can use selective           636
+
+                                    scenario exposure without grading final fronts on the same realizations that guided search.       637
+
+                                    SHIELD-MOEA combines worst-K screening with disjoint search and evaluation draws                  638
+
+                                    and reports sampled worst-envelope hypervolume alongside the mean. The experiments                639
+
+                                    support this separation as a reproducible evaluation design; periodic updating itself does        640
+
+                                    not improve front quality relative to a fixed worst-K control.                                    641
+
+                                          The full method has pooled mean hypervolume 5.09% above matched-repair NSGA-                642
+
+                                    II and 5.56% above plain NSGA-II over eight experiments and 30 seeds per stochastic               643
+
+                                    method. It wins all 32 Holm-corrected comparisons with stochastic baselines; sixteen              644
+
+                                    additional deterministic-rule gaps are descriptive and favor SHIELD-MOEA. The method              645
+
+                                    retains a 6.04% mean margin on unseen stress and a 5.36% margin on sampled worst-case             646
+
+                                    hypervolume. Across four SimBench networks, CIGRE MV, and IEEE 33-bus, its mapped                 647
+
+                                    compositions improve aggregate AC feasibility over no planning (0.685 versus 0.389) but           648
+
+                                    trail matched-repair NSGA-II (0.694).                                                             649
+
+                                          Component attribution is narrower. Repair contributes most. Screening reduces               650
+
+                                    recorded objective calls; no mean-hypervolume difference is detected, and equivalence             651
+
+                                    is not established. Dynamic re-screening does not beat fixed worst-K; hybrid variation            652
+
+                                    does not beat DE-only; and the resilience objective is a decision-support feature rather than     653
+
+                                    a performance feature. Under the fixed composition mapping, removing outage-aware                 654
+
+                                    search reduces six-network AC feasibility from 0.685 to 0.574 and raises mean maximum             655
+
+                                    loading from 52.7% to 67.0%.                                                                      656
+
+                                          Post-event recovery, element-level N − k modeling, monetary calibration, a second in-       657
+
+                                    dependently optimized benchmark system, and nodal AC differentiation remain necessary             658
+
+                                    extensions. Within the tested setting, the main contribution is a scenario-selective planning     659
+
+                                    workflow with disjoint final evaluation, a resolved repair effect, and explicit evidence on       660
+
+                                    where screening and hybridization do not add quality.                                             661
+
+
+
+                                                                                                                                      662
+
+
+
+                                    Author Contributions                                                                              663
+
+
+                                         [AUTHOR INPUT REQUIRED: insert the final author list, assign CRediT roles, and               664
+
+                                    obtain approval from every author.] All authors have read and agreed to the published             665
+
+                                    version of the manuscript.                                                                        666
+
+
+
+                                    Funding                                                                                           667
+
+
+                                        [AUTHOR INPUT REQUIRED: insert the verified funder, grant number, and APC                     668
+
+                                    funder, or state “This research received no external funding.”]                                   669
+
+
+
+                                    Institutional Review Board Statement                                                              670
+
+
+                                          Not applicable.                                                                             671
+
+
+
+                                    Informed Consent Statement                                                                        672
+
+
+                                          Not applicable.                                                                             673
+
+
+
+                                    Data Availability Statement                                                                       674
+
+
+                                         All data used in this study are public. Candidate and scenario experiments de-               675
+
+                                    rive from the SimBench complete mixed network 1-complete_data-mixed-all-0-sw                      676
+
+                                    (https://simbench.de), while AC validation uses four SimBench MV networks, CIGRE MV,              677
+
+
+
+
+                                                                                                  https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                     22 of 24
+
+
+
+                                    and IEEE 33-bus through pandapower (https://www.pandapower.org). The benchmark                           678
+
+                                    code, SHIELD-MOEA implementation, configurations, 2640 main implementation records,                      679
+
+                                    720 targeted-control records, effect and interval tables, cross-scenario ablations, sensitivity          680
+
+                                    sweep, 1296 AC-case records, and figure scripts are included in the supplementary package                681
+
+                                    and are available from the corresponding author. The deterministic rules are treated as                  682
+
+                                    n = 1 per experiment for inference. A persistent public archive can be supplied before                   683
+
+                                    publication, subject to source-data terms. Only candidate generation is shared with CARS-                684
+
+                                    MODE [42]; problem formulations, algorithms, run archives, and reported comparisons are                  685
+
+                                    paper-specific.                                                                                          686
+
+
+
+                                    Acknowledgments                                                                                          687
+
+
+                                          During the preparation of this manuscript, the authors used an AI-assisted coding                  688
+
+                                    environment for software development and a large language model for text editing and                     689
+
+                                    readability improvement. The authors reviewed and revised all assisted content and take                  690
+
+                                    full responsibility for the intellectual content and conclusions of the publication.                     691
+
+
+
+                                    Conflicts of Interest                                                                                    692
+
+
+                                          The authors declare no conflicts of interest.                                                      693
+
+
+
+                                                                                                                                             694
+
+
+
+                                                                                                                                             695
+
+                                    1.  Panteli, M.; Mancarella, P. Influence of extreme weather and climate change on the resilience of     696
+
+                                        power systems: Impacts and possible mitigation strategies. Electric Power Systems Research 2015,     697
+
+                                        127, 259-270. https://doi.org/10.1016/j.epsr.2015.06.012                                             698
+
+                                    2. Ton, D.T.; Wang, W.T.-P. A more resilient grid: The U.S. Department of Energy joins with              699
+
+                                        stakeholders in an R&D plan. IEEE Power and Energy Magazine 2015, 13(3), 26-34. https://doi.         700
+
+                                        org/10.1109/MPE.2015.2397337                                                                         701
+
+                                    3. Yuan, W.; Wang, J.; Qiu, F.; Chen, C.; Kang, C.; Zeng, B. Robust optimization-based resilient         702
+
+                                        distribution network planning against natural disasters. IEEE Transactions on Smart Grid 2016,       703
+
+                                        7(6), 2817-2826. https://doi.org/10.1109/TSG.2015.2513048                                            704
+
+                                    4. Mishra, D.K.; Eskandari, M.; Abbasi, M.H.; Sanjeevikumar, P.; Zhang, J.; Li, L. A detailed review     705
+
+                                        of power system resilience enhancement pillars. Electric Power Systems Research 2024, 230, 110223.   706
+
+                                        https://doi.org/10.1016/j.epsr.2024.110223                                                           707
+
+                                    5. Ma, S.; Chen, B.; Wang, Z. Resilience enhancement strategy for distribution systems under             708
+
+                                        extreme weather events. IEEE Transactions on Smart Grid 2018, 9(2), 1442-1451. https://doi.org/      709
+
+                                        10.1109/TSG.2016.2591885                                                                             710
+
+                                    6. Lin, Y.; Bie, Z. Tri-level optimal hardening plan for a resilient distribution system considering     711
+
+                                        reconfiguration and DG islanding. Applied Energy 2018, 210, 1266-1279. https://doi.org/10.1016/      712
+
+                                        j.apenergy.2017.06.059                                                                               713
+
+                                    7. Meinecke, S.; Sarajlic, D.; Drauz, S.R.; Klettke, A.; Lauven, L.-P.; Rehtanz, C.; Moser, A.; Braun,   714
+
+                                        M. SimBench – A benchmark dataset of electric power systems to compare innovative solutions          715
+
+                                        based on power flow analysis. Energies 2020, 13(12), 3290. https://doi.org/10.3390/en13123290        716
+
+                                    8. Panteli, M.; Mancarella, P. The grid: Stronger, bigger, smarter?: Presenting a conceptual             717
+
+                                        framework of power system resilience. IEEE Power and Energy Magazine 2015, 13(3), 58-66.             718
+
+                                        https://doi.org/10.1109/MPE.2015.2397334                                                             719
+
+                                    9. Bhusal, N.; Abdelmalak, M.; Kamruzzaman, M.; Benidris, M. Power system resilience: Current            720
+
+                                        practices, challenges, and future directions. IEEE Access 2020, 8, 18064-18086. https://doi.org/10   721
+
+                                        .1109/ACCESS.2020.2968586                                                                            722
+
+                                    10. Panteli, M.; Pickering, C.; Wilkinson, S.; Dawson, R.; Mancarella, P. Power system resilience to     723
+
+                                        extreme weather: Fragility modeling, probabilistic impact assessment, and adaptation measures.       724
+
+                                        IEEE Transactions on Power Systems 2017, 32(5), 3747-3757. https://doi.org/10.1109/TPWRS.2016        725
+
+                                        .2641463                                                                                             726
+
+
+
+
+                                                                                                        https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                       23 of 24
+
+
+
+                                    11. Chen, Y.; Shi, Q.; Tang, B.; Zhang, Y.; Wang, H. A distributed energy storage-based planning           727
+
+                                        method for enhancing distribution network resilience. Energies 2026, 19(2), 574. https://doi.org/      728
+
+                                        10.3390/en19020574                                                                                     729
+
+                                    12. Chen, X.; Liu, L.; Kang, X. A differential planning strategy for distribution network resilience       730
+
+                                        enhancement considering decision dependence uncertainty. Energies 2025, 18(23), 6353. https:           731
+
+                                        //doi.org/10.3390/en18236353                                                                           732
+
+                                    13. Maris, T.; Christodoulou, C.; Mladenov, V. Enhancing distribution network resilience using             733
+
+                                        genetic algorithms. Electronics 2025, 14(21), 4324. https://doi.org/10.3390/electronics14214324        734
+
+                                    14. Kiptoo, M.K.; Adewuyi, O.B.; Furukakoi, M.; Mandal, P.; Senjyu, T. Integrated multi-criteria           735
+
+                                        planning for resilient renewable energy-based microgrid considering advanced demand response           736
+
+                                        and uncertainty. Energies 2023, 16(19), 6838. https://doi.org/10.3390/en16196838                       737
+
+                                    15. Yang, Z.; Han, J.; Li, L.; Deng, Y.; Yang, F.; Lei, Y. Research of islanding operation and fault       738
+
+                                        recovery strategies of distribution network considering uncertainty of new energy. Electronics         739
+
+                                        2023, 12(20), 4230. https://doi.org/10.3390/electronics12204230                                        740
+
+                                    16. Mahmoudi, S.; Alizadeh, B. Simultaneous generation and network expansion planning in large-            741
+
+                                        scale power systems under exact AC power flow equations. IET Generation, Transmission and              742
+
+                                        Distribution 2022, 16(20), 4158-4175. https://doi.org/10.1049/gtd2.12586                               743
+
+                                    17. Trivic, B.; Savic, A. Optimal allocation and sizing of BESS in a distribution network with high        744
+
+                                        PV production using NSGA-II and LP optimization methods. Energies 2025, 18(5), 1076. https:            745
+
+                                        //doi.org/10.3390/en18051076                                                                           746
+
+                                    18. Dupacova, J.; Growe-Kuska, N.; Romisch, W. Scenario reduction in stochastic programming:               747
+
+                                        An approach using probability metrics. Mathematical Programming 2003, 95(3), 493-511. https:           748
+
+                                        //doi.org/10.1007/s10107-002-0331-0                                                                    749
+
+                                    19. Heitsch, H.; Romisch, W. Scenario reduction algorithms in stochastic programming. Com-                 750
+
+                                        putational Optimization and Applications 2003, 24(2-3), 187-206. https://doi.org/10.1023/A:            751
+
+                                        1021805924152                                                                                          752
+
+                                    20. Morales, J.M.; Pineda, S.; Conejo, A.J.; Carrion, M. Scenario reduction for futures market trading     753
+
+                                        in electricity markets. IEEE Transactions on Power Systems 2009, 24(2), 878-888. https://doi.org/      754
+
+                                        10.1109/TPWRS.2009.2016072                                                                             755
+
+                                    21. Papavasiliou, A.; Oren, S.S. Multiarea stochastic unit commitment for high wind penetration in a       756
+
+                                        transmission constrained network. Operations Research 2013, 61(3), 578-592. https://doi.org/10.1       757
+
+                                        287/opre.2013.1174                                                                                     758
+
+                                    22. Chen, Y.; Wang, Y.; Kirschen, D.; Zhang, B. Model-free renewable scenario generation using             759
+
+                                        generative adversarial networks. IEEE Transactions on Power Systems 2018, 33(3), 3265-3275.            760
+
+                                        https://doi.org/10.1109/TPWRS.2018.2794541                                                             761
+
+                                    23. Babatunde, O.; Fasesin, K.; Dosa, A.; Ighravwe, D.; Ogbemhe, J.; Olanrewaju, O. Multi-stage            762
+
+                                        stochastic MILP framework for renewable microgrid dispatch under high renewable penetration:           763
+
+                                        Optimizing variability and uncertainty management. Applied Sciences 2025, 15(19), 10303. https:        764
+
+                                        //doi.org/10.3390/app151910303                                                                         765
+
+                                    24. Esmaeilnezhad, B.; Amini, H.; Noroozian, R.; Jalilzadeh, S. Flexible reconfiguration for optimal       766
+
+                                        operation of distribution network under renewable generation and load uncertainty. Energies            767
+
+                                        2025, 18(2), 266. https://doi.org/10.3390/en18020266                                                   768
+
+                                    25. Wang, G.; Li, H.; Yang, X.; Lu, H.; Song, X.; Li, Z. Multi-objective site selection and capacity       769
+
+                                        determination of distribution network considering new energy uncertainties and shared energy           770
+
+                                        storage of electric vehicles. Electronics 2025, 14(1), 151. https://doi.org/10.3390/electronics14010   771
+
+                                        151                                                                                                    772
+
+                                    26. Li, P.; Shen, Y.; Shang, Y.; Alhazmi, M. Innovative distribution network design using GAN-             773
+
+                                        based distributionally robust optimization for DG planning. IET Generation, Transmission and           774
+
+                                        Distribution 2025, 19(1), e13350. https://doi.org/10.1049/gtd2.13350                                   775
+
+                                    27. Zhou, Y.; Li, X.; Han, H.; Wei, Z.; Zang, H.; Sun, G.; Chen, S. Resilience-oriented planning           776
+
+                                        of integrated electricity and heat systems: A stochastic distributionally robust optimization          777
+
+                                        approach. Applied Energy 2024, 353, 122053. https://doi.org/10.1016/j.apenergy.2023.122053             778
+
+                                    28. Yin, W.; Hou, Y. Models and applications of stochastic programming with decision-dependent             779
+
+                                        uncertainty in power systems: A review. IET Renewable Power Generation 2024, 18(14), 2819-2834.        780
+
+                                        https://doi.org/10.1049/rpg2.13082                                                                     781
+
+
+
+
+                                                                                                          https://doi.org/10.3390/en1010000
+Version August 13, 2026 submitted to Energies                                                                                           24 of 24
+
+
+
+                                    29. Wu, X.; Hao, Y.; Zhou, J.; Zhang, X.; Zhang, Y. A scenario generation method for wind/PV power             782
+
+                                        outputs and load sequences preserving extreme scenario characteristics. IET Renewable Power                783
+
+                                        Generation 2026, 20(1), e70185. https://doi.org/10.1049/rpg2.70185                                         784
+
+                                    30. Deb, K.; Pratap, A.; Agarwal, S.; Meyarivan, T. A fast and elitist multiobjective genetic algorithm:       785
+
+                                        NSGA-II. IEEE Transactions on Evolutionary Computation 2002, 6(2), 182-197. https://doi.org/10.1           786
+
+                                        109/4235.996017                                                                                            787
+
+                                    31. Zhang, Q.; Li, H. MOEA/D: A multiobjective evolutionary algorithm based on decomposition.                  788
+
+                                        IEEE Transactions on Evolutionary Computation 2007, 11(6), 712-731. https://doi.org/10.1109/               789
+
+                                        TEVC.2007.892759                                                                                           790
+
+                                    32. Zitzler, E.; Thiele, L. Multiobjective evolutionary algorithms: A comparative case study and               791
+
+                                        the strength Pareto approach. IEEE Transactions on Evolutionary Computation 1999, 3(4), 257-271.           792
+
+                                        https://doi.org/10.1109/4235.797969                                                                        793
+
+                                    33. Storn, R.; Price, K. Differential evolution – A simple and efficient heuristic for global optimization     794
+
+                                        over continuous spaces. Journal of Global Optimization 1997, 11(4), 341-359. https://doi.org/10.1          795
+
+                                        023/A:1008202821328                                                                                        796
+
+                                    34. Das, S.; Suganthan, P.N. Differential evolution: A survey of the state-of-the-art. IEEE Transactions       797
+
+                                        on Evolutionary Computation 2011, 15(1), 4-31. https://doi.org/10.1109/TEVC.2010.2059031                   798
+
+                                    35. Jin, Y.; Branke, J. Evolutionary optimization in uncertain environments – A survey. IEEE Transac-          799
+
+                                        tions on Evolutionary Computation 2005, 9(3), 303-317. https://doi.org/10.1109/TEVC.2005.846356            800
+
+                                    36. Deb, K.; Gupta, H. Introducing robustness in multi-objective optimization. Evolutionary Computa-           801
+
+                                        tion 2006, 14(4), 463-494. https://doi.org/10.1162/evco.2006.14.4.463                                      802
+
+                                    37. Zhao, C.; Zhou, Y.; Lai, X. An integrated framework with evolutionary algorithm for multi-                 803
+
+                                        scenario multi-objective optimization problems. Information Sciences 2022, 600, 342-361. https:            804
+
+                                        //doi.org/10.1016/j.ins.2022.03.093                                                                        805
+
+                                    38. Yadav, D.; Ramu, P.; Deb, K. Handling objective preference and variable uncertainty in evo-                806
+
+                                        lutionary multi-objective optimization. Swarm and Evolutionary Computation 2025, 94, 101860.               807
+
+                                        https://doi.org/10.1016/j.swevo.2025.101860                                                                808
+
+                                    39. He, R.; Hao, J.; Zhou, H.; Chen, F. Multi-objective collaborative optimization of distribution             809
+
+                                        networks with energy storage and electric vehicles using an improved NSGA-II algorithm.                    810
+
+                                        Energies 2025, 18(19), 5232. https://doi.org/10.3390/en18195232                                            811
+
+                                    40. Ding, J.; Liao, Q.; Tang, F.; Li, B.; Yu, Y.; Zhou, T. Bi-objective resilient backbone-grid planning via   812
+
+                                        a three-stage TER-NSGA-II approach considering pumped-storage hub effects. Energies 2026,                  813
+
+                                        19(12), 2798. https://doi.org/10.3390/en19122798                                                           814
+
+                                    41. Qi, H.; Zhao, C.; Yan, X.; Zhang, W.; Guo, F.; Zhang, L.; Yang, B.; Lu, H. Vulnerability-driven            815
+
+                                        multi-objective energy storage planning using enhanced beluga whale optimization for resilient             816
+
+                                        distribution networks. Energies 2026, 19(1), 210. https://doi.org/10.3390/en19010210                       817
+
+                                    42. Zhang, L.; Zheng, J.; Zhang, Z.; Ni, S.; Wu, G. CARS-MODE: Constraint-Aware Repair and                     818
+
+                                        Strategy-Pool Multi-Objective Differential Evolution for Distribution Network Expansion Plan-              819
+
+                                        ning. Unpublished manuscript, 2026; available to editors and reviewers on request.                         820
+
+                                    43. Blank, J.; Deb, K. pymoo: Multi-objective optimization in Python. IEEE Access 2020, 8, 89497-              821
+
+                                        89509. https://doi.org/10.1109/ACCESS.2020.2990567                                                         822
+
+                                    44. Holm, S. A simple sequentially rejective multiple test procedure. Scandinavian Journal of Statistics       823
+
+                                        1979, 6(2), 65-70.                                                                                         824
+
+                                    45. Thurner, L.; Scheidler, A.; Schafer, F.; Menke, J.-H.; Dollichon, J.; Meier, F.; Meinecke, S.; Braun, M.   825
+
+                                        pandapower – An open-source Python tool for convenient modeling, analysis, and optimization                826
+
+                                        of electric power systems. IEEE Transactions on Power Systems 2018, 33(6), 6510-6521. https:               827
+
+                                        //doi.org/10.1109/TPWRS.2018.2829021                                                                       828
+
+
+
+
+                                                                                                            https://doi.org/10.3390/en1010000
+

@@ -1,0 +1,72 @@
+{
+  "schema_version": "ma-public-bird-formal-incident-v1",
+  "incident_id": "MA-BIRD-QWEN-ATTEMPT1-RUNTIME-20260807",
+  "protocol_id": "MA-PUBLIC-BIRD-MINIDEV-v1.0",
+  "freeze_sha256": "29c780c63a2dc2baae221cfce52252c716d8720dbeecdc2f7a2fdd5756b42af5",
+  "human_approval": {
+    "approved_by_human": "DONG LUNHAI",
+    "approval_date": "2026-08-07",
+    "approval_time_local": "10:00",
+    "approval_timezone": "Asia/Shanghai"
+  },
+  "model": "qwen",
+  "output_directory": "MA_PUBLIC_BIRD_v1_qwen",
+  "status": "FAILED_RETAINED_NOT_RESUMABLE",
+  "formal_calls_completed": 341,
+  "final_score_rows_completed": 272,
+  "run_manifest_present": false,
+  "last_call": {
+    "call_index": 340,
+    "formal_call_number": 341,
+    "question_id": 701,
+    "db_id": "codebase_community",
+    "method": "B0_DIRECT",
+    "call": 1
+  },
+  "failure": {
+    "exception": "RuntimeError",
+    "message": "Frozen gold stopped executing at question 701",
+    "gate_behavior": "Runner stopped before writing the final-score row for question 701."
+  },
+  "root_cause": {
+    "classification": "OPERATOR_RUNTIME_DRIFT",
+    "used_runtime": {
+      "python": "3.12.10",
+      "sqlite": "3.49.1"
+    },
+    "frozen_runtime": {
+      "python": "3.10.11",
+      "sqlite": "3.40.1"
+    },
+    "question_701_diagnostic": {
+      "used_runtime_status": "TIMEOUT",
+      "used_runtime_elapsed_seconds": 180.00058530000388,
+      "frozen_runtime_status": "SAFE_EXECUTED",
+      "frozen_runtime_elapsed_seconds": 0.25069399998756126,
+      "frozen_runtime_result": [[0.6644518272425249]],
+      "original_frozen_preflight_status": "SAFE_EXECUTED",
+      "original_frozen_preflight_elapsed_seconds": 0.243524
+    }
+  },
+  "immutable_ledger_hashes": {
+    "call_ledger_sha256": "1177b8eb6b53880ca8dd98f97335f2670f4e8989f1c186bb73c94126fe67ce10",
+    "final_scores_sha256": "a1c83a656ba4e51530f021d81d1a1cab489e545e10b0f0a8c7e862657162af00"
+  },
+  "integrity_actions": [
+    "The failed output directory was retained and was not resumed, overwritten, or deleted.",
+    "The Qwen llama-server was stopped after the runner failure.",
+    "Granite was not started because the sequential Qwen completion gate was not satisfied.",
+    "No intermediate scores were promoted to the manuscript."
+  ],
+  "recovery_gate": {
+    "status": "NEW_HUMAN_AUTHORIZATION_REQUIRED",
+    "reason": "A clean replacement run would add 5000 generation calls after 341 incident calls, exceeding the original acknowledgement of 5000 total physical calls.",
+    "prohibited": [
+      "resume attempt 1",
+      "overwrite attempt 1",
+      "delete failed records",
+      "silently exclude the incident",
+      "start Granite before a clean Qwen completion"
+    ]
+  }
+}

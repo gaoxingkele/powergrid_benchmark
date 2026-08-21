@@ -1,0 +1,98 @@
+# Research Exploration Tree (DAG)
+
+tree:
+  - id: "root"
+    label: "Coordinated Source–Network–Storage Expansion Planning of ADNs"
+    children:
+      - id: "problem"
+        label: "Problem Formulation"
+        children:
+          - id: "gap-analysis"
+            label: "Gap Analysis"
+            detail: "Insufficient uncertainty characterization; inadequate flexible resource coordination; lack of integrated DG–E-SOP–network modeling"
+          - id: "objectives"
+            label: "Research Objectives"
+            detail: "Propose WGAN-GP scenario generation + E-SOP coordinated planning + SCCR algorithm"
+
+      - id: "scenario-generation"
+        label: "WGAN-GP Scenario Generation"
+        children:
+          - id: "wgan-theory"
+            label: "WGAN Theory"
+            detail: "Wasserstein distance as optimization objective; 1-Lipschitz constraint via gradient penalty"
+            children:
+              - id: "generator-arch"
+                label: "Generator Architecture"
+                detail: "FC + transposed convolution layers; noise vector Z(128) to 24×24 output"
+              - id: "discriminator-arch"
+                label: "Discriminator Architecture"
+                detail: "Convolution + FC layers; Wasserstein loss + gradient penalty"
+          - id: "scenario-validation"
+            label: "Scenario Validation"
+            detail: "CDF comparison (Figures 3, 4); K-medoids clustering with SC → 4 representative scenarios"
+
+      - id: "e-sop"
+        label: "E-SOP Structure"
+        children:
+          - id: "architecture"
+            label: "Device Architecture"
+            detail: "BESS integrated on DC side of SOP; shared DC bus; three AC terminals for feeders"
+          - id: "constraints"
+            label: "Operational Constraints"
+            detail: "Power balance (Eq.12); AC terminal capacity (Eq.14); BESS power/energy (Eqs.15-17)"
+
+      - id: "planning-model"
+        label: "ADN Expansion Planning Model"
+        children:
+          - id: "objective"
+            label: "Objective Function"
+            detail: "Minimize annualized comprehensive cost (investment + O&M)"
+            children:
+              - id: "investment-cost"
+                label: "Investment Cost"
+                detail: "Substations, feeders, DG (wind/PV), BESS, SOP — annualized via capital recovery factor"
+              - id: "om-cost"
+                label: "O&M Cost"
+                detail: "Equipment maintenance, electricity purchase, curtailment penalty (Eqs.8-11)"
+          - id: "constraints-detail"
+            label: "Constraints"
+            detail: "E-SOP, DG capacity, network topology, voltage/current, power flow (Eqs.12-27)"
+
+      - id: "solution-algorithm"
+        label: "SCCR Algorithm"
+        children:
+          - id: "relaxation"
+            label: "Convex Relaxation"
+            detail: "SOCP relaxation of non-convex power flow constraints"
+          - id: "iteration"
+            label: "Iterative Contraction"
+            detail: "Penalty terms + cutting-plane constraints; progressive tightening"
+          - id: "convergence"
+            label: "Convergence Check"
+            detail: "Relaxation gap < ε; achieved in 3 iterations; gap below 10^(-5)"
+
+      - id: "case-study"
+        label: "Case Study (54-bus ADN)"
+        children:
+          - id: "setup"
+            label: "System Setup"
+            detail: "Modified Portuguese 54-bus network; 4 substations; 7 candidate E-SOP branches"
+          - id: "results-uncertainty"
+            label: "Uncertainty Impact (Table 1)"
+            detail: "Planning with uncertainty ≈1.2% cost increase; improved flexibility"
+          - id: "results-e-sop"
+            label: "E-SOP Comparison (Table 2)"
+            detail: "E-SOP best: 1.4897M CNY; eliminates curtailment vs SOP-only/BESS-only"
+          - id: "results-algorithm"
+            label: "Algorithm Comparison (Table 3)"
+            detail: "SCCR: 3 iterations, 3.12h; CCP: 8 iterations, 8.32h; same accuracy"
+
+      - id: "conclusions"
+        label: "Conclusions & Future Work"
+        children:
+          - id: "main-findings"
+            label: "Main Findings"
+            detail: "WGAN-GP captures uncertainty; E-SOP enhances flexibility; SCCR efficient convergence"
+          - id: "future-work"
+            label: "Future Work"
+            detail: "Sensitivity analysis on renewable penetration limits and curtailment penalty factors"

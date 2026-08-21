@@ -1,0 +1,179 @@
+# Exploration tree — reconstructed from the published paper (no lab notes / repo available).
+# All nodes are grounded in the paper's own narrative; nodes reconstructing the authors'
+# reasoning order (rather than a recorded session) are marked support_level: inferred.
+
+tree:
+  - id: N01
+    type: question
+    support_level: explicit
+    source_refs: ["§1 (p.2)", "Abstract"]
+    title: "How to site and size ADN storage under high DG penetration using EV shared storage?"
+    description: >
+      Central question: analyze the impact of EV integration on ADNs and smooth DG output
+      uncertainty through EVs — "the questions of how to analyze the impact of electric vehicle
+      integration on ADNs and then smooth the uncertainty of DG through electric vehicles are
+      worthy of further study."
+    children:
+
+      - id: N02
+        type: question
+        support_level: explicit
+        source_refs: ["§3 (p.4)"]
+        title: "How to model DG (wind/PV) output randomness AND wind-solar correlation?"
+        description: >
+          "the influence of randomness and correlation of DG should be considered before it is
+          put into ADNs [27]."
+        children:
+          - id: N03
+            type: dead_end
+            support_level: explicit
+            source_refs: ["§3 (p.4), scheme (1)"]
+            title: "Weibull/Beta distribution assumption + reliability sampling"
+            description: >
+              Rejected: "this scheme only carries out reliability evaluation and analysis, which
+              cannot be applied to calculate the annual cost because it ignores the time scale of
+              DG data."
+          - id: N04
+            type: dead_end
+            support_level: explicit
+            source_refs: ["§3 (p.4), scheme (2)"]
+            title: "Day-ahead output prediction + error sampling"
+            description: >
+              Rejected: "the prediction limitations of this scheme are obvious; further processing
+              is needed for the predicted steps."
+          - id: N05
+            type: decision
+            support_level: explicit
+            source_refs: ["§3 (pp.4-5), Eq. 4, Eq. 5", "Figure 1"]
+            title: "Adopt KDE marginals + Frank copula joint sampling"
+            description: >
+              Non-parametric KDE fits per-period marginals without distributional assumptions;
+              Frank copula chosen because DG output "usually has a negative correlation and
+              complementarity" and Frank "can work with both non-negative and negative
+              correlations of variables [28]".
+            evidence: [C03]
+            children:
+              - id: N06
+                type: experiment
+                support_level: explicit
+                source_refs: ["§5 (p.7)", "Figure 4", "Figure 5"]
+                title: "E05 — generate 500 wind-solar scenarios, reduce to 5 weighted representatives"
+                description: >
+                  "500 wind-solar complementary scenarios are generated. Then, the generated new
+                  energy output scenarios can be reduced" — reduced sets retain spread and
+                  complementarity (Figures 4-5), reduction algorithm cited to [30,34,35].
+                evidence: [C03]
+
+      - id: N07
+        type: question
+        support_level: explicit
+        source_refs: ["§1 (p.2)", "§4.1 (p.5)"]
+        title: "How to handle EV-cluster output uncertainty / historical data bias?"
+        description: >
+          "due to the output uncertainty of the EV cluster, it was necessary to further process
+          the output of the EV cluster"; "the historical data bias of EVs is still one of the
+          reasons for the error."
+        children:
+          - id: N08
+            type: decision
+            support_level: explicit
+            source_refs: ["§4.1 (pp.5-6)", "Figure 2", "Figure 3"]
+            title: "Adopt CNN-BiLSTM to predict EV arrival/departure/initial-SOC"
+            description: >
+              CNN extracts local features with weight sharing [30]; Bi-LSTM's reverse pass "can
+              better connect historical data with future data [17]"; combination adopted from
+              CNN-BiLSTM load-forecasting prior art [29].
+            evidence: [C04]
+            children:
+              - id: N09
+                type: experiment
+                support_level: explicit
+                source_refs: ["§5 (p.8)", "Figure 6", "§6 conclusion (2)"]
+                title: "E06 — CNN-BiLSTM vs standalone CNN vs standalone Bi-LSTM on 40 test samples"
+                description: >
+                  CNN-BiLSTM tracks true EV inbound/outbound times and initial SOC more closely
+                  than either baseline; error reduction quantified in conclusion (2).
+                evidence: [C04]
+
+      - id: N10
+        type: decision
+        support_level: explicit
+        source_refs: ["§2 (p.3)", "§4.2 (p.6), Eqs. 6-9"]
+        title: "Model the EV station fleet as aggregate dispatchable shared storage"
+        description: >
+          Multi-type EV cluster at an EVS aggregated into one storage device with SOC dynamics,
+          expected end-SOC, SOC band, and power limits (Eqs. 6-9, per [31,32,33]) — substituting
+          for expensive dedicated storage whose upfront planning-stage investment is high.
+        evidence: [C01, C02]
+
+      - id: N11
+        type: decision
+        support_level: explicit
+        source_refs: ["§2 (p.3), Eqs. 1-3", "§6 conclusion (3)"]
+        title: "Cast planning as three simultaneous objectives (voltage fluctuation, loss, capacity) instead of a single target"
+        description: >
+          "compared with the traditional research scheme that takes a single variable as the
+          target for optimization, this paper considers the multi-objective optimization
+          algorithm to reflect the specific situation of ADNs more reasonably."
+        evidence: [C05]
+        children:
+          - id: N12
+            type: decision
+            support_level: explicit
+            source_refs: ["§1 (p.3)", "Figure A1"]
+            title: "Solve with MOPSO, calling CPLEX inside the loop"
+            description: >
+              MOPSO iterates particle fitness updates until convergence; the flowchart step reads
+              "Call the MOPSO function and use cplex to solve the optimal ADN scheme based on
+              multiple objectives". The abstract's "improved" MOPSO variant is not detailed in
+              the body.
+            children:
+              - id: N13
+                type: experiment
+                support_level: explicit
+                source_refs: ["§5 (pp.8-9)", "Table 1"]
+                title: "E01 — four-scenario objective comparison on IEEE 33-node"
+                description: >
+                  Scenarios: (1) no DG; (2) DG only; (3) DG + EVS storage; (4) DG + normal
+                  storage. EVS storage beats normal storage on voltage-fluctuation and loss
+                  objectives, at higher capacity objective.
+                also_depends_on: [N06, N09, N10]
+                evidence: [C01, C02, C05]
+              - id: N14
+                type: experiment
+                support_level: explicit
+                source_refs: ["§5 (pp.9-10)", "Figure 7"]
+                title: "E02 — 24-h node-voltage surface comparison, scenarios 1-3"
+                description: >
+                  DG access roughens the voltage surface; adding EVS storage smooths it; node-16
+                  deviation comparison reported in text.
+                evidence: [C01]
+              - id: N15
+                type: experiment
+                support_level: explicit
+                source_refs: ["§5 (p.10)", "Figure 8"]
+                title: "E03 — EVS charge/discharge-SOC operational trace under scenario 3"
+                description: >
+                  Two storage devices hold the SOC range during the 10:00-15:00 high-DG window,
+                  charging at DG surplus and discharging at DG deficit.
+                evidence: [C01]
+              - id: N16
+                type: experiment
+                support_level: explicit
+                source_refs: ["§5 (p.11)", "Figure 9", "§6 conclusion (1)"]
+                title: "E04 — final EVS siting (nodes 13 and 33) and average-voltage reduction"
+                description: >
+                  MOPSO selects nodes 13 and 33; average voltage at the sited nodes drops versus
+                  the pre-EVS level (percentages reported in text/conclusion).
+                evidence: [C01, C05]
+
+      - id: N17
+        type: open_question
+        support_level: explicit
+        source_refs: ["§5 (p.11)", "§6 (p.12)"]
+        title: "MOPSO solution efficiency is slow; practical EV factors unmodeled"
+        description: >
+          Stated limitations left for future work: "the solution efficiency of MOPSO is slow and
+          needs to be further improved and the model does not take into account more practical
+          issues such as EV queuing times"; future work adds EV path planning combined with ADN
+          networks.

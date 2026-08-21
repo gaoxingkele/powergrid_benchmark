@@ -1,0 +1,120 @@
+# Exploration Tree — Convex Hull Pricing Survey
+# Research DAG: nested tree with cross-edges (also_depends_on) forming a DAG.
+# Node types: question | experiment | decision | dead_end | pivot
+
+tree:
+  - id: N01
+    type: question
+    support_level: explicit
+    source_refs: ["§1"]
+    title: "How can energy prices reflect commitment costs without losing monotonicity?"
+    description: "ISOs set energy prices from economic dispatch (ED), which omits commitment costs and requires opaque uplift payments. The UC problem considers commitment costs but is non-convex, yielding non-monotonic prices. Convex hull pricing (CHP) resolves this."
+    children:
+
+      - id: N02
+        type: decision
+        support_level: explicit
+        source_refs: ["§1", "§2.2"]
+        title: "Organize CHP approaches into primal (UC-CHP) and dual (UC-Orig-Lagrangian-Dual) categories"
+        choice: "Two-category taxonomy: primal approaches solve the convexified UC problem requiring explicit convex envelope/hull; dual approaches solve the Lagrangian dual whose optimal multipliers equal convex hull prices."
+        alternatives:
+          - "Economic-analysis-only taxonomy (deferred to [19–21])"
+          - "Application-domain taxonomy (AC OPF, smart grid, demand response)"
+        children:
+
+          - id: N03
+            type: experiment
+            support_level: explicit
+            source_refs: ["§2.2", "§3.1"]
+            title: "E01: Verify primal-dual equivalence via conjugate-function properties"
+            result: "UC-CHP (per-unit decomposition) and UC-Convex (system-level) are equivalent via Properties 1 and 2 of conjugate functions. The UC-Orig-Lagrangian-Dual optimal multipliers equal the convex hull prices."
+            evidence: [C03, "Figure 1"]
+
+          - id: N04
+            type: experiment
+            support_level: explicit
+            source_refs: ["§3.2"]
+            title: "E02: Compare tight-formulation methods across tightness proofs and envelope conditions"
+            result: "All three tight-formulation methods ([7] network flow, [8] polyhedron, [9] state transition) rely on ramp-free constraints; integer relaxation yields the envelope iff fuel cost is convex over the convexified domain."
+            evidence: [C05, C06, "Figures 2–4"]
+
+          - id: N05
+            type: decision
+            support_level: explicit
+            source_refs: ["§3.3", "§3.4"]
+            title: "Handle non-tight formulations (with ramp rates)"
+            choice: "Two routes: (a) exact convex hull via status enumeration [10–13] or column generation [14]; (b) approximate hull via systematic 2/3-slot formulation tightening [8,32,35]"
+            alternatives:
+              - "Ignore ramp rates (impractical, [7–9] approach)"
+              - "Exact enumeration (heavy computational burden)"
+              - "Approximate hull (sacrifices exactness for scalability)"
+            children:
+
+              - id: N06
+                type: experiment
+                support_level: explicit
+                source_refs: ["§3.3"]
+                title: "E03a: Compare exact non-tight methods on constraint growth"
+                result: "Exact hull descriptions grow exponentially with time slots [28]; disjunctive [10], interval [11], DP [12,13] approaches all require many constraints from status enumeration; DW [14] may need many vertices."
+                evidence: [C07, "Figures 4–5"]
+
+              - id: N07
+                type: experiment
+                support_level: explicit
+                source_refs: ["§3.4"]
+                title: "E03b: Evaluate approximate hull: 4-step tightening procedure"
+                result: "Procedure: relax → drop fractional vertices → convert to constraints → parameterize. Applied for 2/3 slots, reused for arbitrary horizons. Accuracy measured by total uplift payments."
+                evidence: [C08, "Figure 6"]
+
+              - id: N08
+                type: dead_end
+                support_level: explicit
+                source_refs: ["§3.2"]
+                title: "Ramp-free assumption limits tightness methods"
+                hypothesis: "Basic constraints (3)–(9) without ramp rates give a tight formulation where integer relaxation suffices."
+                failure_mode: "Ramp-rate constraints (10)–(11) break tightness; tightness methods [7–9] become inapplicable."
+                lesson: "Tightness is necessary and sufficient for cheap convex hulls; ramp rates force expensive exact or approximate constructions."
+
+          - id: N09
+            type: experiment
+            support_level: explicit
+            source_refs: ["§4.1–§4.3"]
+            title: "E04: Compare dual methods on convergence and computational burden"
+            result: "Each remedy relocates the difficulty: subgradient zigzags; subdifferential smooths but is expensive per iteration; level method projects but multi-cut is heavy; SLR resolves fundamental convergence but has non-summable-stepsize speed limitation."
+            evidence: [C09, C10, "Figures 7–9"]
+
+          - id: N10
+            type: experiment
+            support_level: explicit
+            source_refs: ["§4.3"]
+            title: "E05: Evaluate SLR-based quality measure vs standard duality gap"
+            result: "The SLR-based upper-lower bound gap is more accurate and computationally cheaper than the standard duality gap. Tested on IEEE 118-bus system."
+            evidence: [C10, "Figure 9"]
+
+  - id: N11
+    type: experiment
+    support_level: explicit
+    source_refs: ["§5.2"]
+    title: "E06: Identify decarbonization-driven open challenges"
+    result: "Two challenge families: (1) new binary variables (storage, stability constraints, reserve commitments) with three open questions; (2) renewable uncertainty with four open questions."
+    evidence: [C11]
+    also_depends_on: [N01]
+
+  - id: N12
+    type: decision
+    support_level: explicit
+    source_refs: ["§5.1"]
+    title: "Identify improvement directions for both categories"
+    choice: "Primal: avoid full convex hull by focusing on facets adjacent to the optimal solution. Dual: exploit linear convergence potential of SLR [42,43]."
+    alternatives:
+      - "Continue using exact full-horizon hulls (computationally prohibitive)"
+      - "Accept subgradient zigzagging (no improvement)"
+    children:
+      - id: N13
+        type: dead_end
+        support_level: explicit
+        source_refs: ["§5.1"]
+        title: "System-level uplift evaluation insufficient for approximate hulls"
+        hypothesis: "Total uplift payments are sufficient for evaluating approximate convex hull accuracy."
+        failure_mode: "System-level total uplift may mask unit-level inaccuracies; different units may have very different uplift patterns."
+        lesson: "Unit-level metrics (RMSE, max/min errors of per-unit uplift) are needed for comprehensive evaluation."

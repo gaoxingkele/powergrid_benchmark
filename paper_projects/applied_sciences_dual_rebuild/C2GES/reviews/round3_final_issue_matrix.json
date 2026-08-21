@@ -1,0 +1,187 @@
+{
+  "review_round": 3,
+  "review_type": "independent_final_scientific_statistical_submission_audit",
+  "target": "MDPI Applied Sciences",
+  "decision": "major_revision",
+  "submission_ready": false,
+  "venue_fit_current": "medium",
+  "best_fit_section": "Computing and Artificial Intelligence",
+  "poor_fit_section": "Electrical, Electronics and Communications Engineering / power-systems-facing route without domain validation",
+  "manuscript": {
+    "tex": "paper_projects/applied_sciences_dual_rebuild/C2GES/manuscript_applsci/paper_applsci.tex",
+    "tex_sha256": "5CA575BA65AF87B0094CD964A9048314278AF53D46234774FC04AD9468FA70E7",
+    "pdf": "paper_projects/applied_sciences_dual_rebuild/C2GES/manuscript_applsci/build/paper_applsci.pdf",
+    "pdf_sha256": "96D648F34855AA01B1C606B96C52553946014BADD5BF741722C11BAD05FBA7A8",
+    "pdf_pages": 21,
+    "abstract_words": 163,
+    "figures": 9,
+    "tables": 7
+  },
+  "issues": [
+    {
+      "id": "R3-M01",
+      "severity": "major",
+      "category": "comparators_and_ablation",
+      "title": "Post-primary legacy-mode extraction does not close the modern-comparator or true no-floor gap",
+      "resolvable_by_authors": true,
+      "external_human_blocker": false,
+      "locations": [
+        "paper_applsci.tex:54",
+        "paper_applsci.tex:134-136",
+        "paper_applsci.tex:199-203",
+        "paper_applsci.tex:280-287",
+        "exploratory_v3/PROTOCOL_FREEZE.md"
+      ],
+      "evidence": "All nine pre-existing modes are disclosed and exhaustively extracted, but no contemporary cross-encoder/listwise reranker and no true no-floor or role-head-plus-floor removal were run. Existing SBERT/TF-IDF modes are component scorers, not modern interaction rerankers.",
+      "required_edits": [
+        "Prospectively freeze a compact add-on comparison family on unchanged documents, candidates, metrics, and budgets.",
+        "Include full, BM25, query-only, dense-only, no-local, true no-role/no-role-floor, true no-floor, and one feasible contemporary cross-encoder or listwise reranker.",
+        "Freeze snapshots and selection rules; report all planned cells and comparable resource boundaries.",
+        "Keep new results separate from canonical v2 and exploratory-v3, or substantially reframe the article as an audit artifact rather than claiming contemporary method placement."
+      ],
+      "related_prior_issues": ["R1-M07", "R2-M02"]
+    },
+    {
+      "id": "R3-M02",
+      "severity": "major",
+      "category": "exploratory_statistics",
+      "title": "Exploratory-v3 points and confidence intervals target different weighting estimands",
+      "resolvable_by_authors": true,
+      "external_human_blocker": false,
+      "locations": [
+        "exploratory_v3/build_exploratory_v3.py:76-77",
+        "exploratory_v3/build_exploratory_v3.py:85-91",
+        "exploratory_v3/build_exploratory_v3.py:98-115",
+        "exploratory_v3/validate_exploratory_v3.py",
+        "paper_applsci.tex:199-203",
+        "PDF:12"
+      ],
+      "evidence": "Point differences average seed-level claim-macro means, while document CIs average per-document means equally after pooling seeds. Unequal document claim counts make these different estimands. The validator independently recomputes means but not bootstrap intervals.",
+      "required_edits": [
+        "Choose and document either a claim-weighted or equal-document estimand.",
+        "For claim-macro F1, resample documents and pool all claims and all five seed rows in each sampled cluster, including duplicate clusters; otherwise recompute points as equal-document means.",
+        "Independently recompute interval endpoints and add that check to validation.",
+        "Regenerate exploratory tables, JSON/CSV, Figure 4, manifests, and manuscript values while preserving all eight contrasts and the exploratory label."
+      ],
+      "decision_impact_note": "This does not appear able to create a Holm-adjusted positive five-seed claim because the minimum two-sided exact seed-sign-flip p-value remains 0.0625, but the plotted uncertainty is not presently aligned with its point estimate."
+    },
+    {
+      "id": "R3-m01",
+      "severity": "minor",
+      "category": "figure_claim_boundary",
+      "title": "Figure 7 retains a non-dominated-envelope claim",
+      "resolvable_by_authors": true,
+      "external_human_blocker": false,
+      "locations": ["PDF:15", "figures/results/fig03_compute_accuracy_tradeoff.pdf", "paper_applsci.tex:235", "paper_applsci.tex:242-245"],
+      "evidence": "The text disclaims a Pareto frontier, but the graphic legend still says 'Non-dominated envelope' while BM25 and comparable end-to-end costs are absent.",
+      "required_edits": ["Remove the envelope line/legend and regenerate hashes, or measure all relevant systems under one comparable resource boundary before retaining it."],
+      "related_prior_issues": ["R2-m02"]
+    },
+    {
+      "id": "R3-m02",
+      "severity": "minor",
+      "category": "citation_metadata_and_rendering",
+      "title": "Proceedings metadata renders redundantly and one month macro is undefined",
+      "resolvable_by_authors": true,
+      "external_human_blocker": false,
+      "locations": ["references_cited_verified.bib", "build/paper_applsci.blg", "PDF:20-21"],
+      "evidence": "Multiple entries render 'In Proceedings of the Proceedings of ...'; BibTeX warns that string name 'jan' is undefined; the NERC program page uses access year 2026 as its displayed year without a verified publication date.",
+      "required_edits": [
+        "Normalize booktitle fields for the MDPI style so 'Proceedings of' appears once.",
+        "Use a literal month value such as {January} for the 2015 NERC report.",
+        "Unless an update/publication year is verified for the NERC program page, cite it as undated with an access date rather than inventing a publication year.",
+        "Rebuild and visually inspect every reference."
+      ]
+    },
+    {
+      "id": "R3-m03",
+      "severity": "minor",
+      "category": "visual_and_build_qa",
+      "title": "Framework label density and nonfatal PDF-string warnings remain",
+      "resolvable_by_authors": true,
+      "external_human_blocker": false,
+      "locations": ["PDF:6", "PDF:10", "build/paper_applsci.log", "figures/frameworks/c2_f03_evidence_audit_bootstrap.pdf"],
+      "evidence": "Framework Figures 1-3, especially Figure 3, have small internal labels at page scale. The log has two hyperref math-shift warnings and two underfull implementation-table boxes, but no clipping, undefined citations/references, or overfull boxes.",
+      "required_edits": ["Simplify or enlarge framework labels, make K=3 abstract metadata PDF-string safe, and clean the two underfull table cells where practical."],
+      "related_prior_issues": ["R2-m03"]
+    }
+  ],
+  "external_human_blockers": [
+    {
+      "id": "R3-H01",
+      "title": "Author metadata and declarations",
+      "locations": ["paper_applsci.tex:15-18", "paper_applsci.tex:306-315", "PDF:1", "PDF:19-20"],
+      "required_human_action": "Confirm author names, affiliations, e-mails, correspondence, CRediT roles, funding/funder role, ethics/consent wording, acknowledgments, conflicts, and final generative-AI-use declaration.",
+      "must_not_infer_or_fabricate": true
+    },
+    {
+      "id": "R3-H02",
+      "title": "Permanent artifact deposit and license review",
+      "locations": ["paper_applsci.tex:175", "paper_applsci.tex:300", "paper_applsci.tex:305", "paper_applsci.tex:310"],
+      "required_human_action": "Review redistribution rights, upload the permitted subset, mint a stable URL/DOI, and replace placeholders while preserving hashes and regeneration boundaries.",
+      "must_not_infer_or_fabricate": true
+    },
+    {
+      "id": "R3-H03",
+      "title": "Historical upstream revision is irrecoverable",
+      "locations": ["paper_applsci.tex:69", "paper_applsci.tex:310"],
+      "required_human_action": "Preserve the limitation and frozen cache/split hashes; do not claim exact upstream regeneration or invent a revision.",
+      "must_not_infer_or_fabricate": true
+    },
+    {
+      "id": "R3-H04",
+      "title": "NERC expert annotation is conditional on future stronger domain claims",
+      "locations": ["paper_applsci.tex:20-22", "paper_applsci.tex:261-268", "paper_applsci.tex:294"],
+      "required_human_action": "No human NERC annotation is required for the present prospective-title route. If validated power-grid performance is later claimed, obtain independent expert annotation, disagreement records, adjudication, agreement statistics, and a sealed test subset.",
+      "must_not_infer_or_fabricate": true
+    }
+  ],
+  "round2_closure": [
+    {"id": "R2-M01", "status": "closed_scientifically_prospective_title_route"},
+    {"id": "R2-M02", "status": "partially_closed_legacy_modes_complete_modern_and_no_floor_missing"},
+    {"id": "R2-M03", "status": "closed"},
+    {"id": "R2-M04", "status": "closed"},
+    {"id": "R2-M05", "status": "open_external_human_blocker"},
+    {"id": "R2-m01", "status": "closed"},
+    {"id": "R2-m02", "status": "partially_closed_graphic_label_remains"},
+    {"id": "R2-m03", "status": "open_minor"},
+    {"id": "R2-m04", "status": "closed"},
+    {"id": "R2-m05", "status": "open_external_human_blocker"}
+  ],
+  "verification": {
+    "superseded_claim_audit": "pass_6_of_6_classes_tex_and_pdf",
+    "claim_source_verifier": "pass_13_sources_8_generated_fragments_9_figures_28_citations",
+    "exploratory_v3_validator": "pass_15_ledgers_810000_rows_108_cells_max_mean_f1_diff_1.787e-14",
+    "independent_recompute_tests": "pass_4_of_4",
+    "compliance_regression_tests": "pass_5_of_5",
+    "bundle_verifier": "pass_11230_artifacts_689478296_bytes",
+    "canonical_v2_validation": "pass_180000_rows_15_runs_176_checks",
+    "pdf_visual_inspection": "pass_all_21_pages_with_minor_defects",
+    "new_exploratory_figure": "legible_all_8_contrasts_direction_and_exploratory_boundary_clear",
+    "canonical_manifest_sha256": "989E91C60EB48220E92A8EAC32047973FA0F7B5D407CC66AF0489F6A51CA4783",
+    "exploratory_protocol_sha256": "F77083B98C269180BD3CD458211A5948837596F73FEF592CA5A8BB463726B247",
+    "exploratory_artifact_manifest_sha256": "85E837388DCF53D7A25AEF29B037EC87BE2AE3A3DBA3721F67B4472E4BDC9154",
+    "bundle_manifest_sha256": "14CDE6F4141929832B2C9E8FF8ABC1963F34C2AA48B11FDE31642207CF3F9A72"
+  },
+  "passes": [
+    "Prospective power-grid title and application wording are honest",
+    "FEVER and NERC provenance are separated",
+    "No fabricated NERC performance or human-gold claim",
+    "Exploratory-v3 is explicitly post-primary and potentially previously inspected",
+    "All nine pre-existing modes and all frozen multiplicity families are retained",
+    "Holm-adjusted exploratory result is not promoted",
+    "Canonical role-effect and blanket-superiority NO-GO decisions are preserved",
+    "Previously inspected pilot seed is disclosed consistently",
+    "Oracle remains conditional and non-deployable",
+    "Abstract is below 200 words",
+    "Canonical and local reproducibility hashes verify",
+    "Prohibited legacy claims are absent"
+  ],
+  "final_gate": [
+    "Resolve R3-M01 contemporary comparator and true no-floor/no-role-floor evidence gap or substantially reframe article type and claims",
+    "Resolve R3-M02 exploratory estimand mismatch and independently validate interval endpoints",
+    "Correct Figure 7, bibliography rendering/metadata, and framework/build presentation defects",
+    "Rerun all verifiers and update every affected manifest/hash",
+    "Complete external author metadata/declarations and permanent license-reviewed artifact deposit"
+  ]
+}

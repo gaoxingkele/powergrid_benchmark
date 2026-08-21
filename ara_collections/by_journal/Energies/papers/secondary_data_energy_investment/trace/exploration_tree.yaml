@@ -1,0 +1,125 @@
+# Exploration Tree: Research DAG for Paper #30
+
+nodes:
+  - id: RQ1
+    label: "How can public secondary data be transformed into a comparable country-level matrix?"
+    type: research_question
+    support_level: resolved
+    children:
+      - id: DATA_SOURCES
+        label: "Identify 10+ public data sources (WDI, WGI, OWID, Ember, IRENA, NASA POWER, Eurostat, ENTSO-E, Countryeconomy)"
+        type: data_collection
+        support_level: resolved
+        children:
+          - id: CRITERIA_DEF
+            label: "Define 18 criteria in 6 dimensions with benefit/cost classification"
+            type: design_decision
+            support_level: resolved
+            children:
+              - id: NORM_EQ
+                label: "Apply min-max normalization (benefit and cost versions)"
+                type: implementation
+                support_level: resolved
+
+  - id: RQ2
+    label: "Which countries show stronger or weaker readiness across the six dimensions?"
+    type: research_question
+    support_level: resolved
+    children:
+      - id: BASELINE_RANK
+        label: "Equal-weight baseline ranking of 36 countries"
+        type: experiment
+        support_level: resolved
+        outcome: "Table 2: Norway 1st (0.675), Poland 36th (0.338)"
+        children:
+          - id: DIM_PROFILES
+            label: "Dimension-level readiness profiles (Figure 3)"
+            type: analysis
+            support_level: resolved
+            outcome: "Norway driven by energy security/institutions; US by market scale; uneven profiles"
+          - id: CONTRIB_ANALYSIS
+            label: "Criterion-level contribution analysis (Figure 4)"
+            type: analysis
+            support_level: resolved
+            outcome: "Norway: energy security; Portugal: solar/sustainability; Turkey: demand growth constrained by macro"
+
+  - id: RQ3
+    label: "How do stakeholder-specific decision profiles change country prioritization?"
+    type: research_question
+    support_level: resolved
+    children:
+      - id: PERSONA_DEF
+        label: "Define five persona weight vectors"
+        type: design_decision
+        support_level: resolved
+        children:
+          - id: PERSONA_RANK
+            label: "Persona-specific country rankings"
+            type: experiment
+            support_level: resolved
+            outcome: "Table 6: Denmark leads under sustainability; US leads under investor/grid operator"
+            children:
+              - id: PERSONA_PERTURB
+                label: "Weight perturbation (+/-10%, +/-20%)"
+                type: sensitivity_analysis
+                support_level: resolved
+
+  - id: RQ4
+    label: "Does the readiness ranking mainly reproduce wealth and institutional maturity?"
+    type: research_question
+    support_level: resolved
+    children:
+      - id: FAIRNESS_CHECK
+        label: "Correlation with GDP, institutions, renewable capacity, technical potential"
+        type: experiment
+        support_level: resolved
+        children:
+          - id: PARTIAL_CORR
+            label: "Partial-correlation diagnostics controlling for GDP and institutions"
+            type: analysis
+            support_level: resolved
+            outcome: "Additional dimensions contribute beyond wealth/institutions"
+          - id: SCATTER_PLOT
+            label: "Readiness vs GDP per capita scatter (Figure 5)"
+            type: visualization
+            support_level: resolved
+
+  - id: RQ5
+    label: "How stable are rankings under alternative weighting, perturbation, and simulated agents?"
+    type: research_question
+    support_level: resolved
+    children:
+      - id: ALTERNATIVE_WEIGHTS
+        label: "Entropy, CRITIC, hybrid weighting comparison"
+        type: experiment
+        support_level: resolved
+        outcome: "Table 4: Spearman 0.892-0.986"
+        children:
+          - id: SIM_AGENTS
+            label: "500 simulated decision agents"
+            type: simulation
+            support_level: resolved
+            outcome: "Table 8: Median Spearman 0.932, 4/5 top-5 overlap"
+          - id: FULL_ROBUSTNESS
+            label: "Consolidated stability table (persona, weighting, data treatment)"
+            type: analysis
+            support_level: resolved
+            outcome: "Table 8: Broad stability with expected variations"
+
+  - id: MODULAR_EXTENSIONS
+    label: "Modular methodological extensions (not empirically activated)"
+    type: framework_component
+    support_level: proposed
+    children:
+      - id: FUZZY_INTERVAL
+        label: "Panel-based fuzzy interval construction"
+        type: methodology_extension
+        support_level: proposed
+      - id: CAUSAL_WEIGHTING
+        label: "Causal-evidence weighting"
+        type: methodology_extension
+        support_level: proposed
+      - id: LLM_SALIENCE
+        label: "LLM-assisted salience weighting"
+        type: methodology_extension
+        support_level: proposed

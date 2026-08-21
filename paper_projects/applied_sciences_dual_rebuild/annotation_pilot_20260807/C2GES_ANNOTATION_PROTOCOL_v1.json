@@ -1,0 +1,58 @@
+{
+  "protocol_id": "C2GES-NERC-ANNOTATION-PILOT-v1.0",
+  "frozen_at": "2026-08-07",
+  "status": "FROZEN_FOR_PILOT",
+  "governance": "Machine-adjudicated SILVER labels only. Output of this protocol must never be described as human/expert gold. No human review gate is included in this pilot; final naming must be 'machine-adjudicated silver set'.",
+  "parent_plan": "paper_projects/applied_sciences_dual_rebuild/LLM_API_AUTHORIZATION_AND_ADJUDICATION_PLAN_2026-08-07.md (sections 4.1-4.3, 6 stage 1)",
+  "task": {
+    "unit": "one role-conditioned question over one NERC event-analysis document",
+    "source_data": "paper_projects/2026_c2ges_engineeringletters/workspace/simulated_expert_reannotation_2026-07-24/blind_packet.jsonl (15 public NERC documents, 75 questions, dev-visible)",
+    "input_to_annotators": "document sentences with stable sids + question + question role; NO prior labels, NO other annotator output",
+    "annotator_output_schema": {
+      "qid": "string, must echo input qid",
+      "answerable": "boolean",
+      "evidence_sentence_ids": "array of sid strings present in the document; empty allowed only when answerable=false or abstain=true",
+      "evidence_role": "one of: direct_answer | partial_answer | background | insufficient",
+      "flags": {
+        "cross_sentence": "boolean",
+        "negation": "boolean",
+        "condition": "boolean",
+        "time_qualifier": "boolean",
+        "entity_ambiguity": "boolean"
+      },
+      "answer_summary": "string, <= 60 words, empty when answerable=false",
+      "confidence": "high | medium | low (ranking only, NOT a calibrated probability)",
+      "rationale": "string, <= 60 words, must reference sids",
+      "abstain": "boolean",
+      "abstain_reason": "string or null"
+    }
+  },
+  "sampling": {
+    "pilot_size": 25,
+    "seed": 20260807,
+    "rule": "deterministic RNG(seed) stratified sample over the 75 questions: cover all 15 documents and all 5 roles as evenly as possible; sample ids are part of the frozen ledger"
+  },
+  "models": {
+    "annotator_A": {"provider": "DeepSeek direct", "base_url_env": "DEEPSEEK_BASE_URL", "key_env": "DEEPSEEK_API_KEY", "model": "deepseek-chat", "note": "record response-returned model id for version-drift check"},
+    "annotator_B": {"provider": "Google Gemini direct", "base_url": "https://generativelanguage.googleapis.com/v1beta", "key_env": "GEMINI_API_KEY", "model": "gemini-2.5-flash"},
+    "adjudicator_C": {"provider": "OpenAI via Cloubic gateway", "base_url_env": "CLOUBIC_BASE_URL", "key_env": "CLOUBIC_API_KEY", "model": "gpt-5.4", "note": "record upstream model id returned; C sees only disagreements"}
+  },
+  "generation_params": {"temperature": 0, "max_tokens": 1024, "response_format": "single JSON object, no prose outside JSON"},
+  "prompt_template": "You are annotating evidence for a question about a public NERC power-system event report.\n\n[DOCUMENT {doc_id}: {title}]\n{numbered sentences as [sid] text}\n\n[QUESTION] ({role}) {question}\n\nTask: decide whether the document answers the question; select the minimal sufficient evidence sentence ids; classify evidence role; set flags; give a short answer summary.\nRules: cite only existing sids; if the document lacks the information set answerable=false and evidence_role=insufficient; you may abstain.\nReturn ONLY one JSON object matching this schema: {schema}",
+  "deterministic_checks": [
+    "JSON parses and matches schema",
+    "every cited sid exists in the source document",
+    "evidence_sentence_ids non-empty when answerable=true and abstain=false",
+    "no duplicated sids after normalization",
+    "qid echoes input"
+  ],
+  "adjudication_rule": "C is invoked only when A and B disagree on answerable, evidence set (exact sid-set equality), or evidence_role, or when either abstains. C sees the document, question, both labels anonymized as annotator_1/annotator_2, and deterministic check results. C outputs a final label with the same schema plus adjudication_note, or ABSTAIN.",
+  "agreement_metrics": ["raw agreement on answerable", "evidence-set exact-match and Jaccard", "Cohen's kappa on answerable", "adjudication rate", "abstain rate", "format failure rate", "API failure rate"],
+  "stop_conditions": [
+    "5 consecutive auth or format failures for one model -> halt and report",
+    "any model returns a served model id different from the frozen id -> halt that annotator and report",
+    "total calls exceed 400 -> halt"
+  ],
+  "ledger_requirements": "append-only raw responses; separate parsed labels; record model id, timestamp, prompt_sha256, input/output tokens, latency, cost fields when returned; never log API keys",
+  "prohibited": ["calling these labels human gold", "deleting failed or disagreed records", "retrying because a result is disliked", "uploading anything beyond the public NERC packet"]
+}

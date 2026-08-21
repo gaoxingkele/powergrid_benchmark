@@ -1,0 +1,1026 @@
+RESEARCH
+Open Access
+© The Author(s) 2026. Open Access  This article is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International 
+License, which permits any non-commercial use, sharing, distribution and reproduction in any medium or format, as long as you give appropriate 
+credit to the original author(s) and the source, provide a link to the Creative Commons licence, and indicate if you modified the licensed material. 
+You do not have permission under this licence to share adapted material derived from this article or parts of it. The images or other third party 
+material in this article are included in the article’s Creative Commons licence, unless indicated otherwise in a credit line to the material. If material 
+is not included in the article’s Creative Commons licence and your intended use is not permitted by statutory regulation or exceeds the permitted 
+use, you will need to obtain permission directly from the copyright holder. To view a copy of this licence, visit ​h​t​t​p​:​/​/​c​r​e​a​t​i​v​e​c​o​m​m​o​n​s​.​o​r​g​/​l​i​c​e​n​s​
+e​s​/​b​y​-​n​c​-​n​d​/​4​.​0​/.
+Huang et al. Discover Computing          (2026) 29:173 
+https://doi.org/10.1007/s10791-026-10043-x
+*Correspondence:
+Yue Zhang
+zhengzhanwei1106@163.com
+1State Grid Tianjin Electric Power 
+Company, Tianjin 300010, China
+2NARI Group Corporation Co., Ltd., 
+(State Grid Electric Power Research 
+Institute Co., Ltd.,), Nanjing 
+211106, China
+3Beijing Ke Dong Electric Power 
+Control System Co., Ltd., 
+Beijing 100192, China
+4State Grid Tianjin Electric Power 
+Research Institute, Tianjin 
+300392, China
+5Tianjin Key Laboratory of Internet 
+of Things in Electricity, 
+Tianjin 300392, China
+Enhancing reliability in power grid fault 
+management via multi-task learning-based 
+knowledge graph completion
+Zhigang Huang1, Qiang Han1, Lingxu Guo1, Yue Zhang2,3*, Guangyao Yu4,5, Zhiqiang Chong4,5, Zhenbin Li4,5 and 
+Weimin Mi2,3
+1  Introduction
+The power system serves as a fundamental pillar of modern society, with its continu­
+ous operation being critical for national economic stability and societal well-being. The 
+expansion of the grid and the enhancement of operational flexibility have increased the 
+complexity of fault detection, posing significant challenges to the reliability and safety 
+of power infrastructure. Urban power grids, which are essential for economic activities, 
+can incur substantial economic losses and disruptions in the event of faults. Traditional 
+fault detection methods, which rely on manual intervention, often struggle to accurately 
+Discover Computing
+Abstract
+Timely detection and resolution of power equipment failures are vital for ensuring 
+the stability and reliability of electrical grids. This paper presents a knowledge graph 
+completion model (KGCM) that integrates multi-task learning with pre-trained 
+models to enhance fault-handling knowledge graph representations. Entities and 
+relations are encoded with a pre-trained model and refined through Translating 
+Embeddings (TransE)-based structural constraints, while a Siamese network is 
+introduced to improve feature extraction and robustness by predicting missing triplet 
+components. The proposed framework was validated on a dataset from the State 
+Grid Tianjin as well as standard benchmarks. Experimental results show that KGCM 
+consistently outperforms the baseline Language Model Knowledge Embedding with 
+TransE (LMKE-TransE) model in terms of Mean Reciprocal Rank (MRR) and Hits at N 
+(Hits@N) metrics. In practical fault-action prediction, KGCM demonstrates superior 
+accuracy, enabling more reliable diagnosis and handling of power grid faults. These 
+findings confirm the effectiveness of combining pre-trained models, structural 
+fine-tuning, and multi-task feature extraction for knowledge graph completion, and 
+highlight the model’s potential to enhance automation and dependability in power 
+grid fault management.
+Keywords  Knowledge graph completion, Multi-task, Pre-trained models, TransE, 
+Siamese network, Reliability, Robustness, Dependable systems
+
+Page 2 of 19
+Huang et al. Discover Computing          (2026) 29:173 
+assess equipment states amidst complex failure scenarios [1, 2]. Therefore, more intel­
+ligent and automated fault detection approaches must be developed to manage the 
+increasing complexity and variability of power systems [3, 4]. Such advancements can 
+improve reliability, safety, operational efficiency, and contribute to sustainable devel­
+opment. Specifically, the proposed method enhances system reliability and robustness 
+in practical applications by leveraging multi-task learning and TransE-based structural 
+fine-tuning to ensure accurate fault knowledge representation, while the Siamese net­
+work improves feature discrimination for fault detection.
+Contemporary power fault detection algorithms are generally categorized into two 
+types: those based on conventional methodologies and those employing deep learning 
+techniques [5, 6]. Conventional approaches, dependent on manual detection and inter­
+vention, may not effectively discern equipment states or provide timely responses during 
+abrupt faults [7, 8]. The integration of knowledge graphs and artificial intelligence offers 
+a promising avenue for leveraging deep learning to enhance fault detection and predic­
+tion while utilizing knowledge graphs for guidance [9, 10]. However, the effectiveness of 
+existing models that combine reinforcement learning with knowledge graph-based fault 
+handling is contingent upon the completeness and accuracy of the knowledge graph. 
+Inaccuracies or incompleteness in the graph, such as erroneous or missing edges, neces­
+sitate refinement. Therefore, the development of an intelligently curated knowledge 
+graph is crucial for proficient fault handling [11, 12].
+Knowledge graphs are widely used in deep learning frameworks, particularly those 
+that emphasize interpretability and causal path elucidation. Nonetheless, current knowl­
+edge graph completion algorithms primarily focus on improving representations with­
+out fully leveraging latent edges or correcting redundant ones, which may impact the 
+accuracy of fault detection and handling. Additionally, while numerous studies incorpo­
+rate pre-trained large language models for knowledge graph representation [13], these 
+models often lack domain-specific structured knowledge constraints and may exhibit 
+robustness issues in feature extraction. Hence, a framework that strengthens domain-
+specific knowledge graph representation and enhances feature extraction robustness is 
+essential for improving the accuracy of fault handling automation.
+This paper proposes a Multi-Task Knowledge Graph Completion Framework (KGCM) 
+designed to improve the effective representation of fault-handling knowledge graphs and 
+enhance the robustness of feature extraction networks. KGCM refines and augments 
+pre-trained model knowledge graph representations based on domain-specific knowl­
+edge constraints using TransE and employs Siamese neural networks to enhance feature 
+extraction robustness in predicting unknown triplet information. By doing so, KGCM 
+enriches the representation of fault-handling knowledge graphs, thereby improving the 
+reliability of downstream automated fault detection and handling.
+The contributions of this study are as follows:
+Enhancement of fault-handling knowledge graph representation through the integra­
+tion of domain-specific knowledge constraints and pre-trained models.
+Improvement of feature extraction capabilities in predicting triplet processes within 
+fault-handling knowledge graphs using Siamese neural networks.
+Application of the multi-task learning-based knowledge graph completion framework 
+to fault-handling knowledge graph representation and completion tasks, providing a 
+robust foundation for downstream applications.
+
+Page 3 of 19
+Huang et al. Discover Computing          (2026) 29:173 
+The use of multi-task learning enhances the accuracy and robustness of embedding 
+models, aiding in the correction of node and edge representations within knowledge 
+graphs. This framework not only offers a superior foundation for subsequent tasks but 
+also has valuable applications in various power grid operation and maintenance sce­
+narios, providing insights into fault diagnosis and handling. Distinct from existing 
+approaches that merely stack language models with knowledge embeddings (such as 
+standard BERT + TransE or LMKE), the proposed KGCM framework is specifically engi­
+neered to address the high-risk and long-tail distribution characteristics of power grid 
+fault data. The core innovation lies in the introduction of a Siamese network as a "Fine-
+grained Verifier" within the feature space. While pre-trained models offer rich semantic 
+priors, they often lack discriminative power when facing sparse and highly similar fault 
+samples in the grid. By leveraging a multi-task learning mechanism, KGCM enforces a 
+rigorous similarity verification via the Siamese network alongside semantic completion. 
+This design effectively distinguishes confusing fault patterns, thereby solving the issue of 
+insufficient robustness in traditional models on long-tail data and ensuring the high reli­
+ability required for safety–critical power systems.
+The remainder of this paper is organized as follows: Sect.  2 reviews related work; 
+Sect. 3 details the design of the multi-task knowledge graph completion model; Sect. 4 
+presents experimental settings and analyses; and Sect. 5 concludes the paper and out­
+lines future research directions.
+2  Related works
+2.1  Knowledge graph completion
+Knowledge graph completion is a critical task in knowledge representation and rea­
+soning, garnering significant attention in recent years. Various methodologies and 
+techniques have been proposed to address this task. Meilicke et al. [14] introduced an 
+anytime bottom-up technique that excels in learning logical rules from extensive knowl­
+edge graphs, outperforming conventional rule-based approaches. Another notable 
+advancement is Knowledge Graph BERT(KG-BERT), proposed by Yao et al. [15], which 
+utilizes pre-trained language models to represent triples in knowledge graphs as textual 
+sequences. Similarly, Zhang et al. [16] introduced hypercomplex representations for 
+knowledge graph embeddings, achieving state-of-the-art performance on established 
+benchmarks. Knowledge acquisition, particularly in the context of knowledge graph 
+completion, has been a focal point of research. Ji et al. [17] conducted a comprehen­
+sive review of techniques, including embedding methods, path inference, and logical 
+rule reasoning. Recently, Zhang et al. [18] proposed a Relational Graph Neural Network 
+with Hierarchical Attention, aimed at inferring missing values in incomplete knowledge 
+triples. Addressing the limitations of existing graph embedding approaches, Wang et 
+al. [19] enhanced textual encoding with graph embedding techniques to achieve more 
+efficient knowledge graph completion. Additionally, Zhang et al. [20] presented a neu­
+ral network-based approach for drug repurposing for COVID-19, leveraging knowledge 
+graph completion techniques. Overall, knowledge graph completion is crucial in knowl­
+edge representation and reasoning, driving the development of innovative approaches to 
+improve performance and accuracy in inferring missing values.
+
+Page 4 of 19
+Huang et al. Discover Computing          (2026) 29:173 
+2.2  Power grid fault diagnosis based on knowledge graph
+The integration of knowledge graph technology into power grid equipment fault diag­
+nosis has gained considerable attention in recent years. Yun et al. [21] focused on devel­
+oping a knowledge question-and-answer system for diagnosing faults in the Electric 
+Information Collection System, leveraging knowledge graph technology to enhance rea­
+soning efficiency and support the intellectualization of fault diagnosis. Huang et al. [22] 
+emphasized the construction of knowledge graphs for large-scale power grids in China 
+to improve operational, maintenance, and management efficiency. Bo et al. [23] dem­
+onstrated the effectiveness of a method based on understanding fault disposal preplan 
+knowledge, reducing fault disposal pressure and improving efficiency. Knowledge graph 
+technology is also applied to fault diagnosis within specific components of the power 
+grid system. For example, Chan et al. [24] explored power oscillation detection and clas­
+sification using telemetry data monitoring systems based on graph theory. Li et al. [25] 
+introduced a dynamic graph-based anomaly detection algorithm for the electrical grid, 
+enabling the rapid identification of unusual events through sensor data analysis. Zhou et 
+al. [26] developed a fault model for power communication equipment and constructed 
+an equipment fault knowledge graph for visual representation. Moreover, Wu et al. [27] 
+proposed a knowledge graph technology-based fault diagnosis framework for HVDC 
+transmission systems to address limitations in existing fault diagnosis methods. Liu et al. 
+[28] detailed the application of knowledge graphs in smart grid fault diagnosis, empha­
+sizing knowledge extraction, fusion, processing, and the construction of fault schedul­
+ing knowledge graphs for effective fault diagnosis systems. In summary, the literature 
+review highlights the growing interest and application of knowledge graph technology in 
+enhancing fault diagnosis processes for power grid equipment.
+Furthermore, recent research increasingly focuses on integrating explicit domain 
+knowledge and domain adaptation techniques to address data scarcity and distribution 
+shifts in fault diagnosis. For instance, Ren et al. proposed a Physics-guided TL-LSTM 
+network for lithium-ion battery degradation prediction, effectively combining physical 
+laws with transfer learning to enhance generalization capabilities [41]. Similarly, a com­
+prehensive survey on domain adaptation for intelligent fault diagnosis emphasized the 
+critical role of transferring diagnostic knowledge across varying working conditions and 
+equipment types [42, 43]. Drawing inspiration from these domain-adaptive paradigms, 
+our KGCM framework employs the knowledge graph itself as a structured domain con­
+straint. Unlike traditional statistical adaptation, we utilize multi-task learning to align 
+the semantic representations of long-tail fault samples with the verified topological 
+structure of the grid, effectively solving the domain adaptation challenge in reliable fault 
+handling.
+2.3  Siamese network
+Siamese networks have been extensively applied across various domains, including 
+visual object tracking, text semantic understanding, change detection in remote sens­
+ing imagery, and entity alignment. In visual object tracking, Li et al. [29] introduced a 
+gradient-guided network designed to enhance Siamese network performance by lever­
+aging discriminative gradient information. In the field of natural language process­
+ing, Tang et al. [30] demonstrated the effectiveness of Bidirectional Long Short-Term 
+Memory Networks (BiLSTM) in improving text semantic understanding. In the context 
+
+Page 5 of 19
+Huang et al. Discover Computing          (2026) 29:173 
+of change detection in remote sensing imagery, Touati et al. [31] and Jiang et al. [32] 
+contributed by developing partially uncoupled Siamese models and pyramid feature-
+based attention-guided Siamese networks, respectively. Zou et al. [33] and Yan et al. [34] 
+further advanced the field with deeper Siamese networks incorporating spatiotemporal 
+enhancement and two-level feature fusion for real-time object tracking and remote sens­
+ing image change detection. For entity alignment, Chen et al. [35] introduced a multi-
+modal Siamese network that effectively leverages multi-modal knowledge. To address 
+the challenges associated with complex network architectures and high computational 
+costs in change detection tasks, Huang et al. [36] proposed spatiotemporal enhancement 
+and interlevel fusion networks. Overall, these studies highlight the significance of feature 
+enhancement and capture in Siamese networks across diverse applications, contributing 
+to improved performance and accuracy.
+3  Proposed model
+3.1  Framework
+This section presents a framework for knowledge graph completion in power grid fault 
+handling based on multi-task learning, as illustrated in Fig. 1.
+The proposed KGCM framework is not a simple concatenation of pre-trained models 
+and structured embedding modules; rather, it is a multi-task synergistic system designed 
+to tackle the challenge of long-tail distributions in power equipment faults. As illustrated 
+in Fig. 1, this framework advances beyond existing methods like LMKE [37] by funda­
+mentally optimizing their discriminatory capability for low-frequency, high-risk faults. 
+Our core design philosophy operates on two levels: First, we employ the joint encoding 
+of pre-trained language models (BERT) and TransE to mitigate knowledge graph spar­
+sity, providing global semantic and structural constraints. Second, and most critically, 
+we introduce a parallel Siamese network module to perform fine-grained verification in 
+the feature space. Traditional LMKE models rely on MLP-based contrastive learning, 
+which performs well with ample samples but tends to misclassify long-tail fault samples 
+due to blurred feature boundaries. KGCM injects the strong discriminatory power of 
+the Siamese network into the embedding process via multi-task learning, compelling 
+the model to perform a rigorous "semantic-structural-feature" triple verification during 
+Fig. 1  Knowledge graph completion framework for grid fault handling based on multi-task learning
+ 
+
+Page 6 of 19
+Huang et al. Discover Computing          (2026) 29:173 
+triplet prediction. This mechanism significantly enhances robustness in complex fault 
+scenarios, ensuring the accuracy of automated fault handling recommendations.
+The following sections will detail three key components of the framework. First, the 
+foundational LMKE model utilized in this study will be introduced. Second, the use of 
+the TransE structured encoding network combined with pre-trained models for knowl­
+edge graph representation will be explained. Finally, the integration of Siamese neural 
+networks to improve the feature extraction module will be discussed. In this framework, 
+the large language model processes the initial representations of entities and relations 
+within the triplets, incorporating both pre-trained knowledge and descriptive informa­
+tion. This approach generates encoded vectors h, r, and t in Rd, integrating entity and 
+relation descriptions with other context-related information from BERT, thus enhancing 
+the overall representation beyond intrinsic data.
+LMKE outperforms previous models by not only improving the effective representa­
+tion of triplets through the use of large language models and additional triplet descrip­
+tions but also by refining negative sampling strategies. Unlike earlier approaches, LMKE 
+treats the triplet itself as the positive sample within the current batch, while the known 
+data of the triplet and other targets from the batch, excluding the positive target, are 
+used as negative samples. This novel methodology optimizes the negative sampling and 
+encoding processes, enhancing the model framework's efficiency. For link prediction, 
+LMKE replaces traditional cosine similarity-based calculations with a multi-layer per­
+ceptron for measuring compatibility. Additionally, to enhance the distinction between 
+entity representations, the model includes features such as node degrees during the 
+encoding of known data features. These refinements improve the scientific rigor and 
+accuracy of triplet representations within the knowledge graph.
+To further highlight the technical innovations, we summarize the key differences 
+between the baseline LMKE and our proposed KGCM framework. Table 1 clearly out­
+lines the improvements in terms of input representation, structural constraints, feature 
+extraction, and negative sampling strategy.
+As shown in Table 1, KGCM not only builds upon the strengths of LMKE but also 
+introduces multi-task structural constraints and Siamese feature extraction, thereby 
+achieving more robust and domain-adaptive knowledge graph completion.
+3.2  Fine-tuning based on TransE
+This module focuses on refining graph representation through fine-tuning based on the 
+TransE model, as illustrated in Fig. 2.
+Table 1  Comparison between LMKE and the proposed KGCM framework
+Aspect
+LMKE
+KGCM (Proposed)
+Input 
+representation
+Uses pre-trained language models 
+with basic triplet textual descriptions
+Enriches triplets with pre-trained models plus 
+auxiliary textual descriptions and entity degree 
+features, improving long-tail entity representation
+Structural 
+constraints
+Limited structural refinement; relies 
+mainly on semantic encoding
+Integrates TransE-based fine-tuning to enforce 
+domain-specific structural and relational con­
+straints in knowledge graphs
+Feature extraction
+Employs MLP-based contrastive 
+learning for similarity measurement
+Introduces a Siamese network for robust feature 
+extraction, enhancing discrimination between 
+similar triplets
+
+Page 7 of 19
+Huang et al. Discover Computing          (2026) 29:173 
+After the pre-trained model generates entity features and relationships for the triplets, 
+TransE is utilized to fine-tune these representations, enhancing their domain-specific 
+and structural semantics.
+The objective of this module is to enhance the encoding of triplets derived from pre-
+trained large-scale models by leveraging the structural insights provided by TransE and 
+the domain-specific knowledge embedded in the data. This approach addresses limi­
+tations inherent in existing frameworks for encoding knowledge graph triplets, which 
+often rely heavily on pre-trained models that prioritize generic semantic information. 
+Such models may overlook domain-specific, relational, and structural details, potentially 
+leading to suboptimal performance in knowledge graph applications. Consequently, this 
+study integrates the TransE model to fine-tune these existing models, thereby improving 
+their effectiveness in encoding knowledge graph triplets.
+To begin, each triplet is meticulously defined along with its descriptive information, 
+constructing a sequence format suitable for input into pre-trained large-scale models. A 
+critical aspect of this process is the integration of descriptive details with the triplet ele­
+ments to form a coherent sequence structure for model input. These sequences are then 
+processed by the pre-trained model. During this process, the BERT model generates rep­
+resentations for entities and relations within each triplet, as well as an overall sequence 
+representation denoted by the Classification (CLS) token. The CLS token output primar­
+ily serves semantic representation and prediction tasks for the entire sequence, while the 
+triplet representations can be utilized for link prediction or entity prediction tasks.
+Given the specific requirements of knowledge graph triplet encoding tasks, particular 
+emphasis is placed on refining the representations of triplets h, r, and t. These outputs 
+are used as inputs for the TransE model, which performs structural semantic encoding 
+to refine the overall model. The TransE model can be employed to integrate the struc­
+tural relationships between triplets, thereby enhancing their representational efficacy 
+within the knowledge graph. The TransE scoring function is defined as follows:
+score(h, r, t) = ∥h + r −t∥2
+2
+(1)
+Specifically, the "domain-specific knowledge constraints" emphasized in this study are 
+mathematically materialized through the TransE objective function. While the pre-
+trained language model generates embeddings based on general textual semantics, it 
+may lack strict adherence to the specific physical and logical topology of the power grid. 
+Fig. 2  Architecture for fine-tuning the pre-trained model based on TransE
+ 
+
+Page 8 of 19
+Huang et al. Discover Computing          (2026) 29:173 
+We address this by utilizing the TransE scoring function L = ∑||h + r − t|| as a structural 
+regularization term. This mechanism forces the semantic vectors output by the language 
+model to be projected into a geometric space that strictly respects the grid's topology. 
+For instance, in the power domain, a "Transformer" entity must logically utilize a "con­
+tainment" or "connection" relation with a "Substation" entity. If the pre-trained model 
+predicts a triplet that violates this physical logic (e.g., linking them with an unrelated 
+action), the TransE component generates a high energy loss. This penalty effectively 
+"pulls" the vector representations back into a valid structural configuration during back-
+propagation, thereby ensuring that the final embeddings satisfy the logical constraints 
+inherent to power grid operations.
+By leveraging the characteristics of the TransE model, triplets are treated as mech­
+anisms for capturing relational transmissions between entities, effectively capturing 
+semantic correlations and structural nuances. Consequently, incorporating fine-tuning 
+with the TransE model on top of pre-trained large-scale models allows for a more com­
+prehensive exploitation of structural insights and domain-specific knowledge within the 
+knowledge graph, resulting in more precise and nuanced representations of knowledge 
+graph triplets.
+In this work, domain-specific knowledge constraints are explicitly integrated into the 
+TransE fine-tuning stage by means of relation weighting and rule-based sample control. 
+Relations are assigned importance weights according to their relevance to fault manage­
+ment (e.g., higher weights for fault-status and operation-action relations, lower weights 
+for static topological relations), so that optimization focuses on fault–status–action 
+patterns rather than background structure. In addition, basic operational and temporal 
+rules derived from grid regulations are used to filter positives and construct hard nega­
+tives: triples violating these rules are either removed from the positive set or treated as 
+rule-violating negatives, while corrupted triples that still satisfy the rules are discarded 
+as negatives. The resulting domain-aware TransE loss is formulated as:
+dom
+mathcalL
+TransE
+=
+∑
+(h,r,t)
+wr[γ + f (h, r, t) −f (h′, r, t′)]+ + λ
+∑
+(h,r,t)∈mathcalT viol
+f (h, r, t)
+(2)
+where wr encodes relation importance and Tviol denotes the set of rule-violating triples. 
+In this way, fault–status–action causality and temporal ordering are explicitly injected 
+into the embedding learning process.
+3.3  Feature extraction based on siamese network
+In the context of power grid fault management, knowledge graph completion is not only 
+a generic link prediction problem but also a similarity-driven decision problem: opera­
+tors need to infer appropriate handling actions for a current fault by referring to histori­
+cally similar fault–equipment–action patterns. However, many real-world fault records 
+share very similar textual descriptions (e.g., alarms, protection actions, device states) 
+while corresponding to different root causes or recommended actions due to differences 
+in equipment type, network location, or operating conditions. If only a single encoder 
+and a simple scoring function are used, semantically similar but operationally different 
+triplets may be mapped too closely in the embedding space, which can lead to erroneous 
+action recommendations.
+
+Page 9 of 19
+Huang et al. Discover Computing          (2026) 29:173 
+Siamese networks are well suited to this setting because they learn a discriminative 
+similarity metric between pairs of inputs under explicit supervision. By feeding pairs of 
+triplets (or query–candidate pairs) into two weight-sharing branches and enforcing dis­
+tance constraints according to whether they represent consistent or inconsistent fault-
+handling patterns, the Siamese architecture pulls together triplets that correspond to 
+genuinely similar fault scenarios and actions, and pushes apart triplets that are super­
+ficially similar in text but operationally different in the grid. This directly matches the 
+requirements of power fault knowledge graph completion, where fine-grained discrimi­
+nation between similar fault cases is crucial for safe and reliable decision support.
+Following the establishment of the foundational framework for triplet representa­
+tion within the knowledge graph, an opportunity was identified to optimize negative 
+sampling and the matching process of known triplet data with unknown target entities 
+within the LMKE contrastive learning framework. To address this, a Siamese network 
+module was introduced, capitalizing on its advantages in matching algorithms and fea­
+ture extraction.
+The explicit integration of the Siamese network is primarily motivated by the long-tail 
+distribution inherent in power grid fault data. In practical scenarios, normal operation 
+samples are abundant, while specific fault instances are sparse, presenting a classic "few-
+shot" learning challenge. Standard classifiers often struggle to generalize in such imbal­
+anced contexts. In contrast, Siamese networks are fundamentally suited for One-shot 
+or Few-shot learning via metric learning [44]. By focusing on minimizing the distance 
+between positive pairs and maximizing it for negative ones, the model learns a robust 
+similarity function rather than a rigid class boundary. This capability allows KGCM to 
+capture subtle feature discrepancies in rare fault events, significantly enhancing robust­
+ness. Furthermore, the utilization of identical MLP structures with shared weights in 
+both branches is a standard and critical design in Siamese architectures [45]. This weight 
+sharing ensures that both the query and target representations are projected into the 
+unified latent feature space, making the subsequent distance metric calculation geomet­
+rically valid and semantically comparable. The framework is illustrated in Fig. 3.
+The Multi-Task Joint Training Architecture. The framework shares the BERT encoder 
+across tasks. The solid arrows represent the forward data flow, while the dashed lines 
+Fig. 3  Structure of the feature extractor based on Siamese networks
+ 
+
+Page 10 of 19
+Huang et al. Discover Computing          (2026) 29:173 
+indicate the aggregation of losses from LMKE, TransE, and Siamese modules into a 
+global objective for end-to-end backpropagation.
+The vector obtained by concatenating the known information and target information 
+of the triplet serves as input for the left branch of the Siamese network. The input for 
+the right branch is derived from the vector processed through a multilayer perceptron 
+(MLP), followed by feature extraction using the Siamese network. Siamese neural net­
+works excel in feature extraction by constraining the distance between outputs from 
+the left and right branches, which process nearly identical inputs. By incorporating 
+label constraints, the network learns to extract features that fit the target core features, 
+thereby enhancing the robustness of feature extraction and improving the accuracy of 
+triplet representation and completion within the knowledge graph.
+Initially, the encoded query q and encoded key k from the LMKE framework were 
+used, incorporating entity degrees from q and the target entity degree from k as funda­
+mental features. Assuming d = [log (dq + 1); log (dk + 1)], where dq represents the degree 
+of the entity in q and dk represents the degree of the target entity in k, a modified Sia­
+mese neural network based on MLP was introduced.
+Unlike the MLP network used in LMKE for matching predictions of q and k, a Sia­
+mese neural network based on MLP was redefined. Here, the initial combined feature 
+FL from LMKE serves as input to one branch of the Siamese network (SiameseN), while 
+FL is recombined through an MLP of the same dimensionality to produce FR, which is 
+input to the other branch of SiameseN. Both branches share parameters, and the output 
+features FLO and FRO from the two branches are constrained to be close to each other 
+and fitted with labels to train the neural network and update the overall framework. The 
+relevant formulas are defined as follows:
+FL = [q; k; q −k; q ⊙k; d]
+(3)
+FR = MLP[q; k; q −k; q ⊙k; d]
+(4)
+FLO = σ (SiameseN(FL))
+(5)
+FRO = σ (SiameseN(FR))
+(6)
+DW(FLO, FRO) = ∥FLO, FRO∥2
+(7)
+where D represents the distance between the output features FLO and FRO, while W 
+denotes the weights of the Siamese neural network. A smaller value of D indicates that 
+the outputs are closer together, aligning more closely with the expectations. The effec­
+tiveness of the proposed Siamese matcher and its interaction with the multi-task set­
+ting are further evaluated by ablation studies in Sect. 4. In the power grid fault-handling 
+scenario, this Siamese constraint helps the model to avoid confusing different fault types 
+that share similar alarm texts or equipment states, thereby reducing the risk of recom­
+mending inappropriate actions and improving the operational robustness of knowledge 
+graph-based decision support.
+3.4  Training strategy
+To fully exploit the complementary strengths of semantic encoding, structural con­
+straints, and discriminative feature extraction, we adopt a Joint Training (End-to-End) 
+
+Page 11 of 19
+Huang et al. Discover Computing          (2026) 29:173 
+strategy rather than a multi-stage pipeline. The entire KGCM framework is optimized 
+simultaneously to ensure that the pre-trained embeddings are dynamically adjusted 
+to satisfy both the structural rules of the power grid and the feature discriminability 
+requirements. The global objective function is defined as a weighted sum of the losses 
+from the three components:
+LTotal = LLMKE + λLTransE + γLsiamese
+(8)
+where LLMKE represents the contrastive loss from the language model-based embed­
+ding task, LTransE denotes the structural scoring loss defined in Eq. (1), and Lsiamese cor­
+responds to the distance-based loss from the Siamese network. The hyperparameters λ 
+and γ control the relative importance of the structural constraints and the feature verifi­
+cation task, respectively. During backpropagation, gradients from all three loss compo­
+nents flow back to update the shared parameters of the pre-trained encoder, ensuring a 
+unified and robust representation space.
+4  Experimental settings and analysis
+4.1  Dataset and data processing
+This study utilized a dataset obtained from the State Grid Tianjin, formatted in CSV, 
+which includes status information on power grid equipment, timestamps, associated 
+records, and corresponding labels for each equipment state. Initial data cleaning was 
+performed to reduce noise during model training by filtering out nodes with excessive or 
+insufficient information. After data cleaning, we construct the fault-handling knowledge 
+graph from the raw logs in a rule-based manner. Each time-stamped record is mapped 
+to an equipment entity via its SCADA/dispatching code, and to standardized status and 
+action labels according to the enterprise fault-handling guideline. We define three main 
+entity types (Equipment, Status, Action) and two core relations: status-of (Status, Equip­
+ment) and action-on (Action, Equipment). For each valid record, we generate a status 
+triplet ⟨equipment, status-of, status⟩ and, when a handling operation is recorded, an 
+action triplet ⟨equipment, action-on, action⟩; records with unmapped or ambiguous 
+codes are discarded. Although the final graph is static, all records are sorted by time­
+stamp per equipment, and only temporally consistent status–action pairs (e.g., fault fol­
+lowed by restore within a reasonable window) are retained, while sequences violating 
+basic temporal logic are removed.
+4.2  Knowledge graph construction
+To ensure the reproducibility of our graph structure, we detail the construction pipeline 
+from raw SCADA logs to the structured knowledge graph:
+Triplet Extraction Rules: We employed a rule-based mapping strategy to convert tabu­
+lar CSV records into subject-predicate-object triples. Specifically, discrete attributes in 
+the logs were mapped to entity relations. For instance, a log entry Row(ID: 101, Status: 
+Alarm) is transformed into the triplet (Device_101, has_status, Alarm). Similarly, the 
+relationship between equipment and its corresponding handling action is modeled as 
+(Device_101, takes_action, Manual-inspection).
+Entity Alignment: Unique Equipment IDs were extracted and mapped to distinct 
+graph nodes. We utilized a unified dictionary to align identifiers from different subsys­
+
+Page 12 of 19
+Huang et al. Discover Computing          (2026) 29:173 
+tems, ensuring that Device_101 in the alarm log refers to the same node as Device_101 
+in the topology records.
+Temporal Processing: Although the original dataset contains timestamps, the objec­
+tive of this study is to capture the intrinsic logical correlations between fault states and 
+actions. Therefore, we constructed a static snapshot of the power grid by aggregating 
+equipment states over the observation window. Temporal information was primar­
+ily used to filter out transient noise and ensure state consistency during aggregation, 
+rather than embedding time as a dynamic attribute in the graph.
+A summary of the resulting dataset and constructed knowledge graph is provided in 
+Table 2.
+The dataset contains time-stamped records from 2020 to 2023, covering 1,200 equip­
+ment nodes in the Tianjin power grid. The status labels include five categories: normal 
+(4,200 samples), fault (1,800 samples), alarm (1,500 samples), maintenance (700 sam­
+ples), and offline (300 samples). Corresponding fault handling actions include auto-
+isolation (2,800), alarm push (2,000), manual inspection (1,900), and restore (800). The 
+constructed knowledge graph comprises 1,350 unique nodes and 8,900 edges formed as 
+triplets (e.g., equipment, status, action). In addition, the dataset includes 3 entity types 
+(Equipment, Status, Action) and 2 relation types (status-of, action-on). For experiments, 
+we applied an 80/20 train-test split on the constructed triplets. This detailed statistical 
+Table 2  Detailed statistics of the State Grid Tianjin dataset
+No
+Column’s 
+Name
+Notes
+Example
+Statistics
+1
+Time stamp
+Time series
+2023-04-01 08:30:00
+Range: 2020-
+01 to 2023-12
+2
+Status
+Equipment node 
+status
+Fault/Alarm/Normal/Maintenance/offline
+Normal: 4200, 
+Fault: 1800, 
+Alarm: 1500, 
+Maintenance: 
+700, Offline: 
+300
+3
+Actions
+Fault handling 
+actions
+Auto-isolate/Alarm-push/Manual-inspection/Restore
+Auto-isolate: 
+2800, Alarm-
+push: 2000, 
+Manual-
+inspection: 
+1900, Restore: 
+800
+4
+Equipment 
+nodes
+Number of grid 
+equipment nodes
+N/A
+1200
+5
+Triplets
+Number of 
+knowledge graph 
+triplets
+(NodeA, status, Fault)
+8900
+6
+Knowledge 
+graph nodes
+Unique nodes 
+in KG
+N/A
+1350
+7
+Knowledge 
+graph edges
+Unique edges 
+in KG
+N/A
+8900
+8
+Entity types
+Equipment cate­
+gories represented 
+as entities
+Transformer, Circuit breaker, Relay, etc
+3
+9
+Relation 
+types
+Distinct relation 
+categories
+status-of, action-on, connected-to, etc
+2
+10
+Train/test 
+split ratio
+Dataset partition 
+for experiments
+80% training/20% testing
+80/20
+
+Page 13 of 19
+Huang et al. Discover Computing          (2026) 29:173 
+description improves dataset transparency and supports reproducibility and compara­
+bility across studies.
+To ensure the statistical reliability of our results, all experiments were conducted using 
+5 different random seeds. The dataset was split into training (80%), validation (10%), and 
+testing (10%) sets. We report the mean and standard deviation for all evaluation metrics 
+to account for variance in model initialization and data sampling. Statistical significance 
+was verified using a paired t-test with a significance level of p < 0.05.
+4.3  Evaluation metric
+To assess the accuracy and efficacy of the proposed model framework for knowledge 
+graph embeddings, two widely used evaluation metrics were employed: Mean Recipro­
+cal Ranking (MRR) and Hits@N (N = 1, 3, 10). Higher values for both metrics indicate 
+superior model performance and enhanced representation quality. The definitions of 
+these evaluation metrics are as follows:
+Mean Reciprocal Ranking (MRR) is computed as follows:
+MRR = 1
+|T|
+|T |
+∑
+i=1
+1
+ranki
+
+(9)
+where T represents the set of triplets, |T | denotes the cardinality of the triplet set, and 
+rank i indicates the predicted ranking of the i-th triplet. A higher MRR value reflects 
+superior performance.
+Hits@N represents the average proportion of triplets with a rank less than NN in link 
+prediction, defined as follows:
+Hits@n = 1
+|S|
+|S|
+∑
+i=1
+I(ranki ≤n)
+(10)
+In this formula, S stands for the set of triplets, |S | denotes the number of triplets in 
+the set, n denotes the specified reference ranking, and (·) represents the indicator func­
+tion. Typically, n is set to 1, 3, or 10. A higher Hits@n value indicates superior model 
+performance.
+4.4  Parameter setting
+Our methods were compared with LMKE [37], which aims to improve the representa­
+tion of less common entities while addressing the limitations of previous description-
+centered methods. LMKE introduces a knowledge embedding (KE) learning framework 
+that integrates descriptions within a contrastive learning paradigm, thereby enhancing 
+training and evaluation efficiency.
+In this experimental setup, all models were implemented using PyTorch and Python 
+3.8. The AdamW optimizer was adopted, and the pre-trained Bidirectional Encoder Rep­
+resentations from Transformers (BERT) model bert-base-uncased was used as the text 
+encoder. The learning rate for the pre-trained BERT was set to 1e−5, whereas the learn­
+ing rate for the remaining trainable parameters was set to 5e−4. Batch normalization was 
+applied to accelerate convergence, with a batch size of 16.
+To select the number of training epochs, we first monitored the validation MRR on 
+each dataset. On UMLS, the validation performance continued to improve beyond 20 
+
+Page 14 of 19
+Huang et al. Discover Computing          (2026) 29:173 
+epochs and typically stabilized between 80 and 100 epochs, so we set the maximum 
+number of epochs to 100. On WN18RR and the power grid dataset, the models con­
+verged much faster and reached stable validation performance within about 15–20 
+epochs; for these datasets we therefore trained for 21 epochs, which is slightly beyond 
+the observed convergence point. All experiments were run on the same hardware plat­
+form to ensure fair comparison across methods.
+4.5  Comparative analysis
+Knowledge graph completion has extensive applications across various domains, includ­
+ing e-commerce, healthcare, and the power industry. Thus, the accuracy of knowledge 
+graph representations is crucial. The LMKE algorithm, which leverages pre-trained 
+models for knowledge graph completion, has demonstrated notable effectiveness across 
+different contexts. This study introduces the KGCM algorithm, which builds upon 
+LMKE by incorporating incremental refinements and validates its performance using 
+three datasets: WN18RR, UMLS, and a power grid fault handling dataset. Since the 
+experiments were conducted as single runs, the results reported in Table 3 are without 
+standard deviations.We compared KGCM against the baseline LMKE-TransE model 
+across three datasets: WN18RR, UMLS, and the proprietary Power Grid dataset. Table 3 
+presents the quantitative results in terms of MRR and Hits@N.
+As shown in Table 3, KGCM achieves consistent improvements over the baseline. Spe­
+cifically, on the Power Grid dataset, the model demonstrates a statistically significant 
+increase in MRR (0.280 ± 0.002 vs. 0.267 ± 0.003), confirming its superior capability in 
+handling domain-specific fault patterns.
+As indicated by the data in Table 3, the KGCM model provides slight improvements 
+over the LMKE variant, LMKE-TransE, across all metrics, including MRR, Hits@1, 
+Hits@3, and Hits@10 on the WN18RR dataset. The KGCM model also shows enhance­
+ments in MRR and Hits metrics on the UMLS and power domain datasets. These results 
+suggest that both LMKE and the KGCM model, as an extension of LMKE, exhibit strong 
+performance not only on publicly available knowledge graph datasets such as WN18RR 
+and UMLS but also in specialized domains such as power systems. The improved effi­
+cacy of the KGCM algorithm can be attributed to the integration of the Siamese net­
+work module, which enhances feature extraction during training and validation, leading 
+to more robust feature extraction. To illustrate the practical advantages of KGCM, 
+consider a case where an equipment node labeled with an alarm status is linked to an 
+incorrect handling action (manual inspection) by the baseline LMKE-TransE model. 
+The KGCM model, benefiting from the Siamese network's enhanced feature extraction 
+Table 3  Comparison results of all methods
+Dataset
+Metric
+LMKE-TransE
+KGCM (Ours)
+WN18RR
+MRR
+0.451 ± 0.002
+0.467 ± 0.002
+Hits@1
+0.290 ± 0.003
+0.309 ± 0.002
+Hits@10
+0.753 ± 0.001
+0.759 ± 0.001
+UMLS
+MRR
+0.459 ± 0.004
+0.478 ± 0.003
+Hits@1
+0.301 ± 0.005
+0.304 ± 0.004
+Hits@10
+0.796 ± 0.002
+0.859 ± 0.002
+Power Grid
+MRR
+0.267 ± 0.003
+0.280 ± 0.002
+Hits@1
+0.170 ± 0.003
+0.179 ± 0.002
+Hits@10
+0.448 ± 0.004
+0.454 ± 0.003
+
+Page 15 of 19
+Huang et al. Discover Computing          (2026) 29:173 
+and the structural fine-tuning of TransE, correctly predicts auto-isolation as the appro­
+priate action. This reflects KGCM’s ability to better capture the nuanced relationships 
+between fault symptoms and optimal actions, leading to more accurate fault diagnosis. 
+In general, KGCM achieves its improvements by jointly leveraging multi-task learning to 
+refine embeddings and the Siamese module to improve discrimination between similar 
+but distinct triplets, reducing error rates in complex fault scenarios. Additionally, this 
+integration mitigates issues related to representation similarity caused by insufficient 
+model constraints, thereby improving the knowledge graph's representation capability. 
+The synergy with the TransE model further complements these improvements, contrib­
+uting to enhanced overall network performance. Future research will focus on exploring 
+additional pre-training model frameworks to seek further enhancements adaptable to 
+power systems.
+4.6  Ablation study on the Siamese matcher
+To isolate the effect of the Siamese matcher from the multi-task setting, we compare 
+three variants in Table  4, namely LMKE-TransE (pre-trained encoder + TransE fine-
+tuning with the original single-branch MLP matcher), KGCM w/o Siamese (multi-task 
+setting retained but still using the original MLP matcher), and KGCM (full) (multi-
+task + TransE + Siamese matcher as our final model). On WN18RR, KGCM w/o Siamese 
+improves MRR from 0.4508 to 0.4591 over LMKE-TransE, and the full KGCM with the 
+Siamese matcher further increases MRR to 0.4667, with a similar trend on Hits@10. On 
+the power grid dataset, we observe consistent but moderate gains (from 0.2665 to 0.2732 
+and 0.2801 in MRR). These results demonstrate that the multi-task setting provides a 
+solid improvement over the baseline, and the proposed Siamese matcher brings an addi­
+tional, stable benefit without relying on overly aggressive architectural changes.
+The results in Table 4 indicate that removing the Siamese module leads to a perfor­
+mance drop (MRR decreases by approximately 0.6%), validating its role in enhancing fea­
+ture discrimination for long-tail samples. Furthermore, the exclusion of TransE results 
+in a more significant decline, underscoring the necessity of domain-specific structural 
+constraints for accurate embedding.
+4.7  Computational efficiency and incremental updates
+Beyond link prediction accuracy, computational efficiency is also important for deploy­
+ment in real-time fault management. Compared with LMKE-TransE, KGCM adds 
+a Siamese feature extraction module and a multi-task loss, which slightly increase the 
+number of parameters and training complexity. In our implementation with bert-base-
+uncased, these additions are lightweight MLP layers on top of the shared encoder, so the 
+Table 4  Ablation study of the Siamese module
+Dataset
+Method
+MRR
+Hits@10
+WN18RR
+LMKE-TransE
+0.4508
+0.7533
+KGCM w/o Siamese
+0.4591
+0.7564
+KGCM (full)
+0.4667
+0.7592
+Power grid (our)
+LMKE-TransE
+0.2665
+0.4475
+KGCM w/o Siamese
+0.2732
+0.4506
+KGCM (full)
+0.2801
+0.4537
+
+Page 16 of 19
+Huang et al. Discover Computing          (2026) 29:173 
+overall model size and training cost remain in the same order of magnitude as LMKE-
+TransE and are suitable for periodic offline training.
+For online usage, the inference latency of KGCM on typical fault queries remains at a 
+level that can support near real-time decision support, especially when combined with 
+batching and caching strategies in a control-center environment.
+KGCM also considers incremental updates of the fault knowledge graph. When only 
+a small number of new triplets are added and the schema is stable, we perform light­
+weight fine-tuning by freezing the pre-trained encoder and most TransE parameters, 
+and only updating the last layers and the Siamese module. When the grid topology or 
+fault-handling rules change more substantially, we adopt periodic full retraining from an 
+updated snapshot of the knowledge graph. Future work will explore more explicit online 
+and continual learning mechanisms to further improve the model’s adaptability to evolv­
+ing power system infrastructures.
+4.8  Parameter settings
+All models were implemented using PyTorch. The learning rate was set to 1e-5 for the 
+pre-trained BERT model and 5e-4 for the other components. A batch size of 16 was 
+employed. Regarding the training duration, we utilized an Early Stopping strategy based 
+on the validation set MRR to determine the optimal number of epochs and prevent 
+overfitting.
+ 	•
+UMLS: Due to the dataset's smaller scale and sparsity, the model required more 
+iterations to converge, resulting in 100 epochs.
+ 	•
+WN18RR & Power Grid: These datasets exhibited faster convergence patterns; 
+thus, training was stopped at 21 epochs to maintain optimal generalization. The 
+checkpoint with the highest validation performance was selected for testing.
+5  Experimental details
+To ensure reproducibility, we document additional implementation details. The Siamese 
+network adopted a 3-layer MLP architecture in each branch to enhance feature extrac­
+tion robustness. The TransE module was configured with a margin value of 1.0. In our 
+implementation, TransE employs the L2 norm squared as the scoring function, which 
+provided more stable convergence compared to the L1 norm. Furthermore, early stop­
+ping was applied with a patience of 10 epochs based on the validation MRR metric, and 
+the checkpoint with the highest validation MRR was selected for reporting.
+6  Conclusion
+This study presents the KGCM framework, an advanced deep learning algorithm 
+designed to improve knowledge graph completion specifically for power equipment 
+fault management through its multitasking capabilities. Unlike previous approaches that 
+either rely solely on deep learning techniques for fault detection and handling or focus 
+on completing entities and relationships within knowledge graphs, the KGCM frame­
+work excels in knowledge graph representation. The framework meticulously fine-tunes 
+pre-trained models by incorporating domain-specific structural constraints, which 
+enhances semantic understanding from existing models while preserving domain-spe­
+cific context in the final representations. Additionally, the integration of Siamese neural 
+networks enhances feature extraction during triple prediction, leading to more accurate 
+
+Page 17 of 19
+Huang et al. Discover Computing          (2026) 29:173 
+predictions of unknown information within triples and improving the overall effective­
+ness and accuracy of the knowledge graph completion. Empirical validation confirms 
+the effectiveness of the KGCM model in advancing knowledge graph completion for 
+power equipment fault management. By generating a comprehensive knowledge graph 
+of power equipment faults, the framework provides more informed guidance for fault 
+management actions, yielding practical outcomes. This enhancement translates directly 
+into improved reliability and operational robustness for real-world power grid applica­
+tions. Recent studies on knowledge-graph-based [38] fault diagnosis frameworks also 
+highlight the importance of structured knowledge in improving power system reliability, 
+supporting the direction of our proposed method [39, 40].
+While the proposed KGCM framework demonstrates strong performance in knowl­
+edge graph completion and fault management, its effectiveness can degrade when the 
+underlying knowledge graph data is highly incomplete or contains substantial noise. In 
+such scenarios, the mode’s ability to accurately infer missing triplet components and 
+support fault diagnosis may be compromised. This is because the structural cues and 
+relational patterns that KGCM leverages become sparse or unreliable. Future work will 
+focus on integrating noise-robust learning strategies and graph denoising techniques 
+to address these challenges and enhance model applicability in real-world power grid 
+environments.
+Future research will explore the field of human–computer interaction to endow the 
+algorithmic framework with autonomous capabilities for addressing minor issues and 
+developing collaborative strategies for tackling major challenges. Emphasis will also be 
+placed on optimizing the algorithm for greater efficiency in both temporal and spatial 
+dimensions to enhance computational effectiveness.
+Author contributions
+Z.H., Q.H., L.G., Y.Z., G.Y., Z.C., Z.L., W.M. wrote the main manuscript text, prepared figures, tables and equations. All authors 
+reviewed the manuscript.
+Funding
+This work was supported by State Grid Tianjin electric power company science and technology project (Research on 
+Human–Machine Hybrid Collaborative Decision-making Technology for Power Grid Dispatch and Control, No. KJ21-1-1).
+Data availability
+All data generated or analysed during this study are included in this article.
+Declarations
+Ethical approval and consent to participate
+Not applicable.
+Consent for publication
+Not applicable.
+Competing interests
+The authors declare no competing interests.
+Received: 9 December 2025 / Accepted: 2 March 2026
+References
+1.	
+Shao CC, Shahidehpour N, Wang XF, Wang XL, Wang BY. Integrated planning of electricity and natural gas transportation 
+systems for enhancing the power grid resilience. IEEE Trans Power Syst. 2017;32(6):4418–29.
+2.	
+Aribowo W, Muslim S, Basuki I. Generalized regression neural network for long-term elec- tricity load forecasting. In: 2020 
+international conference on smart technology and applications (ICoSTA) 2020; pp. 1–5. IEEE.
+3.	
+Leonard MD, Michaelides EE, Michaelides DN. Substitution of coal power plants with renewable energy sources-shift of 
+the power demand and energy storage. Energy Convers Manag. 2018;164:27–35.
+
+Page 18 of 19
+Huang et al. Discover Computing          (2026) 29:173 
+4.	
+Oree V, Hassen SZS, Fleming PJ. Generation expansion planning optimisation with renewable energy integration: a review. 
+Renew Sustain Energy Rev. 2017;69:790–803.
+5.	
+Yang Y, Zheng JJ, Liu FC, Peng J. Research on the regulation and control technology of high load energy load in response 
+to load loss demand of power network. In: 2019 international conference on advanced manufacturing, computation and 
+optimization 2019; vol. 1, pp. 24–30. The Academy of Engineering and Education.
+6.	
+Dileep G. A survey on smart grid technologies and applications. Renew Energy. 2020;146:2589–625.
+7.	
+Tor OB, Shahidehpour M. Crossroads of power: coordinating electricity and natural gas infrastructures in Turkey. IEEE 
+Power Energy Mag. 2014;12(6):49–62.
+8.	
+Gil J, Caballero A, Conejo AJ. Power cycling: CCGTS: the critical link between the electricity and natural gas markets. IEEE 
+Power Energy Mag. 2014;12(6):40–8.
+9.	
+Gu XY, See KW, Wang YP, Zhao L, Pu WW. The sliding window and SHAP theory—an improved system with a long short-
+term memory network model for state of charge prediction in electric vehicle application. Energies. 2021;14(12):3692.
+10.	 See KW, Wang GF, Zhang Y, Wang YP, Meng LY, Gu XY, et al. Critical review and functional safety of a battery management 
+system for large-scale lithium-ion battery pack technologies. Int J Coal Sci Technol. 2022;9(1):1–17.
+11.	 Gao JC, Wang HY, Shen HY. Smartly handling renewable energy instability in supporting a cloud datacenter. In: 2020 IEEE 
+international parallel and distributed processing symposium (IPDPS), 2020 (pp. 769–778). IEEE.
+12.	 Cespedes M, Sun J. Renewable energy systems instability involving grid-parallel inverters. In: 2009 twenty-fourth annual 
+IEEE applied power electronics conference and exposition, 2009 (pp. 1971–1977). IEEE.
+13.	 Xie RB, Liu ZY, Jia J, Luan HB, Sun MS. Representation learning of knowledge graphs with entity descriptions. In: Proceed­
+ings of the AAAI conference on artificial intelligence, 2016 (vol 30).
+14.	 Meilicke C, Chekol MW, Fink M, Stuckenschmidt H. Reinforced any-time bottom up rule learning for knowledge graph 
+completion. arXiv preprint arXiv:2004.04412, 2020.
+15.	 Yao L, Mao CS, Luo Y. Kg-bert: Bert for knowledge graph completion. arXiv preprint arXiv:1909.03193, 2019.
+16.	 Zhang S, Tay Y, Yao LN, Liu Q. Quaternion knowledge graph embeddings. Adv Neural Inf Process Syst 2019; 32.
+17.	 Ji SX, Pan SR, Cambria E, Marttinen P, Philip SY. A survey on knowledge graphs: representation, acquisition, and applica­
+tions. IEEE Trans Neural Netw Learn Syst. 2021;33(2):494–514.
+18.	 Zhang Z, Zhuang FZ, Zhu HS, Shi ZP, Xiong H, He Q. Relational graph neural network with hierarchical attention for knowl­
+edge graph completion. In: Proceedings of the AAAI conference on artificial intelligence, 2020 (vol 34, pp 9612–9619).
+19.	 Wang B, Shen T, Long GD, Zhou TY, Wang Y, Chang Y. Structure-augmented text representation learning for efficient 
+knowledge graph completion. In: Proceedings of the web conference 2021, 2021; pp. 1737–1748.
+20.	 Zhang R, Hristovski D, Schutte D, Kastrin A, Fiszman M, Kilicoglu H. Drug repurposing for covid-19 via knowledge graph 
+completion. J Biomed Inform. 2021;115:103696.
+21.	 Feng Y, Zhai F, Li BF, Cao YF. Research on intelligent fault diagnosis of power acquisition based on knowledge graph. In: 
+2019 3rd international conference on electronic information technology and computer engineering (EITCE), 2019; pp. 
+1737–1740. IEEE.
+22.	 Huang HC, Hong ZZY, Zhou HM, Wu JX, Jin N. Knowledge graph construc- tion and application of power grid equipment. 
+Math Probl Eng. 2020;2020:1–10.
+23.	 Wang B, Ning J, Zhang Y, Xin S, Jiang CM, Zhang Z, Lu Tingxiang, Zheng YM, et al. Auxiliary decision technology and 
+application of power grid fault disposal based on knowledge under- standing of fault preplan. In: 2020 5th international 
+conference on power and renewable energy (ICPRE), 2020; pp. 246–251. IEEE.
+24.	 Chan S, and Nopphawan P. Single node-based power oscillation detection and classification. In: 2020 8th international 
+conference on condition monitoring and diagnosis (CMD), 2020; pp. 182–185. IEEE.
+25.	 Li SM, Pandey A, Hooi B, Faloutsos C, Pileggi L. Dynamic graph-based anomaly detection in the electrical grid. IEEE Trans 
+Power Syst. 2021;37(5):3408–22.
+26.	 Zhou BX, Gao DQ, Yan LC, Cao JP, Zhang SX, Zhang YY. Research on key technologies for fault knowledge acquisition of 
+power communication equipment. Proc Comput Sci. 2021;183:479–85.
+27.	 Wu JY, Li Q, Chen Q, Peng GQ, Wang JY, Fu Q, et al. Evaluation, analysis and diagnosis for hvdc transmission system faults 
+via knowledge graph under new energy systems construction: a critical review. Energies. 2022;15(21):8031.
+28.	 Liu WT, Zhu ZX, Cai KW, Pu DY, Du Y. Application of knowledge graph in smart grid fault diagnosis. Appl Math Nonlinear 
+Sci. 2022;8(2):349–60.
+29.	 Li PX, Chen BY, Ouyang WL, Wang D, Yang XY, Lu HC. Gradnet: Gradient- guided network for visual object tracking. In: 
+Proceedings of the IEEE/CVF international conference on computer vision, 2019; pp. 6162–6171.
+30.	 Tang XL, Hao BH, Dang XY, Zhong B, Wang RZ, Yan ZF. Text semantic understanding based on knowledge enhancement 
+and multi-granular feature extraction. In: 2020 Chinese automation congress (CAC), 2020; pp 337–341. IEEE.
+31.	 Touati R, Mignotte M, Dahmane M. Partly uncoupled siamese model for change detection from hetero- geneous remote 
+sensing imagery. J Remote Sens GIS. 2020;9(1):1–8.
+32.	 Jiang HW, Hu XY, Li L, Zhang JM, Gong J, Zhang M. Pga-siamnet: pyramid feature-based attention-guided siamese net­
+work for remote sensing orthoimagery building change detection. Remote Sens. 2020;12(3):484.
+33.	 Zou QJ, Zhang Y, Liu SH, Yu J. A real-time object tracking model based on deeper siamese network. In: 2020 3rd interna­
+tional conference on unmanned systems (ICUS), 2020; pp. 1089–1094. IEEE.
+34.	 Yan LL, Jiang J. A hybrid Siamese network with spatiotemporal enhancement and two-level feature fusion for remote 
+sensing image change detection. IEEE Trans Geosci Remote Sens. 2023. https://doi.org/10.1109/tgrs.2023.3268294.
+35.	 Chen LY, Li Z, Xu T, Wu H, Wang ZF, Yuan NJ, Chen E. Multi-modal siamese network for entity alignment. In: Proceedings of 
+the 28th ACM SIGKDD conference on knowledge discovery and data mining, 2022; pp. 118–126.
+36.	 Huang YY, Li XH, Du ZS, Shen HF. Spatiotemporal enhancement and interlevel fusion network for remote sensing images 
+change detection. IEEE Trans Geosci Remote Sens. 2024. https://doi.org/10.1109/tgrs.2024.3360516.
+37.	 Wang XT, He QY, Liang JQ, and Xiao YH. Language models as knowledge embeddings. arXiv preprint arXiv:2206.12617, 
+2022.
+38.	 Zhou Y, Lin Z, Tu L, Song Y, Wu Z. Big data and knowledge graph based fault diagnosis for electric power systems. EAI 
+Endors Trans Ind Netw Intell Syst. 2022;9(32):1.
+39.	 Li C, Wang B. A knowledge graph method towards power system fault diagnosis and classification. Electronics. 
+2023;12(23):4808.
+
+Page 19 of 19
+Huang et al. Discover Computing          (2026) 29:173 
+40.	 Chen Q, Li Q, Wu J, Mao C, Peng G, Wang D. Application of knowledge graph in power system fault diagnosis and disposal: 
+a critical review and perspectives. Front Energy Res. 2022;10:988280.
+41.	 Ren L, Dong J, Wang X, Meng Z, Zhao L, Deen MJ. A data-driven auto-CNN-LSTM prediction model for lithium-ion battery 
+remaining useful life. IEEE Trans Ind Inform. 2021;17(5):3478–87.
+42.	 Zheng H, Wang R, Yang Y, Yin J, Li Y, Xu M. Cross-domain fault diagnosis of industrial robots: a comprehensive survey. IEEE/
+ASME Trans Mechatron. 2023;28(5):2567–80.
+43.	 Li W, Huang R, Li J, Liao Y, Chen Z, He G, et al. A perspective survey on deep transfer learning for fault diagnosis in industrial 
+scenarios: theories, applications and challenges. Mech Syst Signal Process. 2022;167:108487.
+44.	 G. Koch, R. Zemel, R. Salakhutdinov. Siamese neural networks for one-shot image recognition. In: ICML deep learning 
+workshop, 2015; vol. 2.
+45.	 P. Neculoiu, M. Versteegh, M. Rotaru. Learning text similarity with siamese recurrent networks. In: Proceedings of the 1st 
+workshop on representation learning for NLP (RepL4NLP), 2016; pp. 148–157.
+Publisher's Note
+Springer Nature remains neutral with regard to jurisdictional claims in published maps and institutional affiliations.

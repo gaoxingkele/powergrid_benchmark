@@ -1,0 +1,106 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=2.2cm]{geometry}
+\usepackage{booktabs,tabularx,array}
+\usepackage[hidelinks]{hyperref}
+\newcommand{\cges}{C\textsuperscript{2}GES}
+\title{Supplementary Materials for\\
+\cges{}: Structure-Aware Extractive Summarization of Long Power-System Technical Reports with Typed-Path Graphs}
+\author{Liu Bijing and Yang Yong}
+\date{}
+\begin{document}
+\maketitle
+
+\section*{Contents and Data Files}
+
+This supplement separates scientific interpretation from implementation records. It contains four tables referenced by the main manuscript. Machine-readable files are provided under \texttt{transferable/}: the non-verbatim sampling frame, aggregate metrics, paired ROUGE-L differences, output-length records, exact sign-flip results, page locators, and the development-only calibration report. Source PDFs and verbatim extracted passages are excluded because third-party redistribution permission has not been established.
+
+\section*{Table S1. Rights-Safe Sampling Frame}
+
+The complete 40-row sampling frame is supplied as the CSV file \texttt{rights\_safe\_report\_metadata.csv} under \texttt{transferable/rights\_safe\_metadata/}.
+
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+Quantity & Value\\
+\midrule
+Inspected complete PDFs & 40\\
+Declared pages & 3200\\
+Retained / excluded reports & 27 / 13\\
+Development / test reports & 12 / 15\\
+Non-summary candidates & 12,924\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Table S2. Output-Length Records}
+
+The complete 14 condition--budget summary is supplied as \texttt{output\_length\_summary.csv}; per-report values are in \texttt{output\_length\_per\_report.csv}. Both files are in the post-run diagnostics subdirectory.
+
+\begin{center}
+\small
+\begin{tabular}{llrrrrr}
+\toprule
+$K$ & Condition & Mean words & Mean chars. & $>100$ & Table & Max. words\\
+\midrule
+5 & Full \cges{} & 287.7 & 1843.6 & 12 & 14 & 140\\
+5 & Strict variant & 329.0 & 2099.9 & 15 & 16 & 270\\
+5 & Semantic-MMR & 184.7 & 1242.1 & 5 & 9 & 138\\
+5 & TextRank & 177.0 & 1125.1 & 1 & 7 & 124\\
+10 & Full \cges{} & 568.9 & 3619.5 & 25 & 26 & 270\\
+10 & Strict variant & 596.9 & 3822.5 & 28 & 26 & 270\\
+10 & Semantic-MMR & 354.5 & 2361.2 & 7 & 16 & 138\\
+10 & TextRank & 369.0 & 2329.7 & 4 & 18 & 130\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Table S3. Corpus and Implementation Checks}
+
+\begin{center}
+\begin{tabularx}{\textwidth}{Xr}
+\toprule
+Checked property & Recorded result\\
+\midrule
+Reference/body page-interval overlap & 0\\
+Normalized exact candidate/reference matches & 0\\
+Normalized common substrings of at least 50 characters & 0\\
+Report--condition--budget records / expected records & 210 / 210\\
+Selected source references resolved to a valid page & 1575 / 1575\\
+Maximum path expansions / configured limit & 19,638 / 2,000,000\\
+Maximum qualifying paths / configured limit & 16,182 / 250,000\\
+Full/strict score comparisons changed & 9774 / 19,008\\
+Report--budget selection sequences changed & 28 / 30\\
+Aggregate and paired-contrast recomputation & Exact agreement\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+Detailed checks are retained with the corresponding code and archived run records. Passing these checks establishes consistency of the reported computation; it does not determine semantic summary quality.
+
+\section*{Table S4. Exact Paired Sign-Flip Sensitivity}
+
+For each contrast, all $2^{15}=32{,}768$ report-level sign assignments were enumerated. The procedure assumes report-level independence and sign exchangeability. Holm adjustment treats the six values as one family.
+
+\begin{center}
+\small
+\begin{tabular}{llrrr}
+\toprule
+$K$ & Baseline & Signs $+/-/0$ & Exact $p$ & Holm-adjusted $p$\\
+\midrule
+5 & Strict variant & 7/7/1 & 0.436768 & 0.436768\\
+5 & Semantic-MMR & 14/1/0 & 0.000305 & 0.001526\\
+5 & TextRank & 14/1/0 & 0.000122 & 0.000732\\
+10 & Strict variant & 6/8/1 & 0.200684 & 0.401367\\
+10 & Semantic-MMR & 11/4/0 & 0.006592 & 0.026367\\
+10 & TextRank & 13/2/0 & 0.009644 & 0.028931\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+These post-result values are sensitivity analyses. The main manuscript emphasizes effect sizes, paired distributions, and report-composition intervals.
+
+\section*{Exploratory Development-Only Calibration}
+
+The complete chronology, configuration space, leave-one-report-out results, and machine-readable records are described in \texttt{transferable/POST\_UNBLINDING\_DEV\_CALIBRATION\_SUPPLEMENT.md}. A zero path-deletion weight was selected in all 12 development folds; the analysis was not applied to the retained 15-report test set.
+
+\end{document}

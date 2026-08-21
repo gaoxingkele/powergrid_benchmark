@@ -1,0 +1,94 @@
+{
+  "schema_version":"c2-framework-config-1.1",
+  "data_status":"protocol_only_no_unfrozen_results",
+  "style":{"palette":"Okabe-Ito","font":"DejaVu Sans","minimum_font_pt":8.0,"png_dpi":450},
+  "figures":[
+    {
+      "id":"c2_f01_three_protocols","figsize":[13.2,7.4],"font_size":9.8,
+      "caption":"Parallel C2GES evaluation protocols over the same claims, candidate sentences and frozen instances. Oracle-label exposes the human veracity role and is conditional rather than end-to-end. Predicted-label obtains a role from a leakage-controlled upstream classifier and is end-to-end. Label-blind exposes no role and is also end-to-end. Candidate pools and evidence metrics remain aligned across protocols.",
+      "source_evidence":["MASTER_EXECUTION_PLAN.md Sections 4.3-4.6","experiment_registry.json C2-M01","W1_ACCEPTANCE_REPORT.md three-protocol contract","CLAIM_LEDGER.md C2-C02"],
+      "groups":[
+        {"x":0.18,"y":0.67,"w":0.67,"h":0.24,"label":"Oracle-label · conditional diagnostic","fill":"#FAFAFA","linestyle":"dashed"},
+        {"x":0.18,"y":0.38,"w":0.67,"h":0.24,"label":"Predicted-label · end-to-end","fill":"#F7F7F7","linestyle":"solid"},
+        {"x":0.18,"y":0.09,"w":0.67,"h":0.24,"label":"Label-blind · end-to-end","fill":"#FAFAFA","linestyle":"dashdot"}
+      ],
+      "nodes":[
+        {"id":"input","x":0.075,"y":0.50,"w":0.105,"h":0.20,"label":"Same claim\ncandidates\ndocument","fill":"#F0E442","hatch":"..","linestyle":"solid","shape":"round","weight":"bold","font_size":8.7},
+        {"id":"gold","x":0.29,"y":0.79,"w":0.13,"h":0.12,"label":"Human veracity role","fill":"#CC79A7","hatch":"xx","linestyle":"dashed","shape":"square"},
+        {"id":"up","x":0.29,"y":0.50,"w":0.13,"h":0.12,"label":"OOF/train-only\nrole predictor","fill":"#0072B2","hatch":"//","linestyle":"solid","shape":"square"},
+        {"id":"none","x":0.29,"y":0.21,"w":0.13,"h":0.12,"label":"No role exposed","fill":"#E69F00","hatch":"--","linestyle":"dashdot","shape":"square"},
+        {"id":"oracle","x":0.52,"y":0.79,"w":0.15,"h":0.12,"label":"C2GES · human role","fill":"#D55E00","hatch":"++","linestyle":"dashed","shape":"round"},
+        {"id":"pred","x":0.52,"y":0.50,"w":0.15,"h":0.12,"label":"C2GES · predicted role","fill":"#009E73","hatch":"\\\\","linestyle":"solid","shape":"round"},
+        {"id":"blind","x":0.52,"y":0.21,"w":0.15,"h":0.12,"label":"C2GES · role disabled","fill":"#56B4E9","hatch":"//","linestyle":"dashdot","shape":"round"},
+        {"id":"e1","x":0.75,"y":0.79,"w":0.14,"h":0.12,"label":"Ranked evidence IDs\nconditional","fill":"#CC79A7","hatch":"xx","linestyle":"dashed","shape":"round"},
+        {"id":"e2","x":0.75,"y":0.50,"w":0.14,"h":0.12,"label":"Ranked evidence IDs\nend-to-end","fill":"#009E73","hatch":"\\\\","linestyle":"solid","shape":"round"},
+        {"id":"e3","x":0.75,"y":0.21,"w":0.14,"h":0.12,"label":"Ranked evidence IDs\nend-to-end","fill":"#56B4E9","hatch":"//","linestyle":"dashdot","shape":"round"},
+        {"id":"metrics","x":0.93,"y":0.50,"w":0.10,"h":0.18,"label":"Aligned metrics\ncost · error audit","fill":"#F0E442","hatch":"..","linestyle":"solid","shape":"round","weight":"bold","font_size":8.5}
+      ],
+      "edges":[
+        {"source":"input","target":"gold"},{"source":"input","target":"up"},{"source":"input","target":"none"},{"source":"gold","target":"oracle"},{"source":"up","target":"pred"},{"source":"none","target":"blind"},
+        {"source":"oracle","target":"e1"},{"source":"pred","target":"e2"},{"source":"blind","target":"e3"},{"source":"e1","target":"metrics"},{"source":"e2","target":"metrics"},{"source":"e3","target":"metrics"}
+      ],
+      "notes":[{"x":0.52,"y":0.025,"text":"Only role availability changes; instances, candidate pools and metrics remain paired.","ha":"center","style":"italic"}]
+    },
+    {
+      "id":"c2_f02_oof_document_split","figsize":[13.2,7.3],"font_size":9.4,
+      "caption":"Leakage-controlled document grouping and out-of-fold upstream-label generation. All claims sharing an underlying Wikipedia document are assigned atomically to train, development or test. Training documents alone are divided into grouped folds: each held-out fold receives predictions from a classifier fitted on the remaining folds. A final upstream classifier fitted on all training documents predicts roles for development and test. Claim-level pseudo-document identifiers are not used and test labels never enter training.",
+      "source_evidence":["W1_ACCEPTANCE_REPORT.md grouped document split","W2_ACCEPTANCE_REPORT.md StratifiedGroupKFold OOF protocol","MASTER_EXECUTION_PLAN.md Sections 4.4 and 4.6","CLAIM_LEDGER.md C2-C02"],
+      "groups":[
+        {"x":0.02,"y":0.14,"w":0.31,"h":0.72,"label":"Atomic document-group split","fill":"#FAFAFA","linestyle":"dashed"},
+        {"x":0.36,"y":0.14,"w":0.39,"h":0.72,"label":"Train-only OOF and final fit","fill":"#F7F7F7","linestyle":"solid"},
+        {"x":0.79,"y":0.14,"w":0.19,"h":0.72,"label":"Predicted roles + audit","fill":"#FAFAFA","linestyle":"dashdot"}
+      ],
+      "nodes":[
+        {"id":"docs","x":0.07,"y":0.50,"w":0.10,"h":0.18,"label":"Claims keyed by\nunderlying document_id","fill":"#F0E442","hatch":"..","linestyle":"solid","shape":"round","weight":"bold","font_size":8.4},
+        {"id":"split","x":0.195,"y":0.50,"w":0.07,"h":0.16,"label":"Normalize title /\nassign document\ngroup","fill":"#D55E00","hatch":"++","linestyle":"dashdot","shape":"round","font_size":7.8},
+        {"id":"train","x":0.29,"y":0.72,"w":0.075,"h":0.11,"label":"Train docs","fill":"#0072B2","hatch":"//","linestyle":"solid","shape":"square","font_size":8.4},
+        {"id":"dev","x":0.29,"y":0.49,"w":0.075,"h":0.11,"label":"Dev docs","fill":"#E69F00","hatch":"--","linestyle":"dashed","shape":"square","font_size":8.4},
+        {"id":"test","x":0.29,"y":0.26,"w":0.075,"h":0.11,"label":"Test docs","fill":"#CC79A7","hatch":"xx","linestyle":"dashdot","shape":"square","font_size":8.4},
+        {"id":"folds","x":0.43,"y":0.72,"w":0.10,"h":0.12,"label":"Grouped folds\nF1 … FK","fill":"#56B4E9","hatch":"//","linestyle":"solid","shape":"round"},
+        {"id":"fitk","x":0.57,"y":0.72,"w":0.11,"h":0.12,"label":"Fit K−1 folds\npredict held-out","fill":"#009E73","hatch":"\\\\","linestyle":"solid","shape":"round","font_size":8.8},
+        {"id":"oof","x":0.70,"y":0.72,"w":0.09,"h":0.12,"label":"Train OOF roles","fill":"#009E73","hatch":"\\\\","linestyle":"solid","shape":"square","font_size":8.5},
+        {"id":"full","x":0.50,"y":0.31,"w":0.12,"h":0.13,"label":"Fit on all\ntrain documents","fill":"#0072B2","hatch":"//","linestyle":"solid","shape":"round"},
+        {"id":"devpred","x":0.70,"y":0.47,"w":0.09,"h":0.12,"label":"Dev roles","fill":"#E69F00","hatch":"--","linestyle":"dashed","shape":"round"},
+        {"id":"testpred","x":0.70,"y":0.25,"w":0.09,"h":0.12,"label":"Test roles","fill":"#CC79A7","hatch":"xx","linestyle":"dashdot","shape":"round"},
+        {"id":"audit","x":0.89,"y":0.49,"w":0.11,"h":0.17,"label":"document_id\ncoverage · hash audit","fill":"#F0E442","hatch":"..","linestyle":"dashdot","shape":"round","weight":"bold","font_size":8.5}
+      ],
+      "edges":[
+        {"source":"docs","target":"split"},{"source":"split","target":"train"},{"source":"split","target":"dev"},{"source":"split","target":"test"},
+        {"source":"train","target":"folds"},{"source":"folds","target":"fitk"},{"source":"fitk","target":"oof"},{"source":"train","target":"full"},
+        {"source":"full","target":"devpred"},{"source":"full","target":"testpred"},{"source":"dev","target":"devpred","style":"dashed"},{"source":"test","target":"testpred","style":"dashdot"},
+        {"source":"oof","target":"audit"},{"source":"devpred","target":"audit"},{"source":"testpred","target":"audit"}
+      ],
+      "notes":[{"x":0.56,"y":0.075,"text":"Development/test gold roles never enter the upstream predictor.","ha":"center","style":"italic"}]
+    },
+    {
+      "id":"c2_f03_evidence_audit_bootstrap","figsize":[13.2,8.2],"font_size":10.2,
+      "caption":"Evidence artifact audit and document-clustered inference flow. Per-instance outputs retain source-document and evidence-sentence identifiers, configuration, seed and provenance hashes. The strict gate rejects missing fields, duplicates, incomplete method-by-item cells, inconsistent hashes and document coverage. Unique complete pairs are resampled by underlying document for paired bootstrap confidence intervals; registered paired tests and Holm adjustment feed E4 canonical evidence. No result values are shown.",
+      "source_evidence":["shared/stat_audit.py","shared/README.md C2GES example","experiment_registry.json C2-M01-M03","MASTER_EXECUTION_PLAN.md Sections 4.6 and 9"],
+      "groups":[
+        {"x":0.02,"y":0.15,"w":0.27,"h":0.70,"label":"Immutable instance evidence","fill":"#FAFAFA","linestyle":"dashed"},
+        {"x":0.33,"y":0.15,"w":0.34,"h":0.70,"label":"Strict artifact gate","fill":"#F7F7F7","linestyle":"dashdot"},
+        {"x":0.71,"y":0.15,"w":0.27,"h":0.70,"label":"Paired inference and E4 evidence","fill":"#FAFAFA","linestyle":"solid"}
+      ],
+      "nodes":[
+        {"id":"pred","x":0.07,"y":0.63,"w":0.10,"h":0.16,"label":"Evidence IDs\nmethod + seed","fill":"#0072B2","hatch":"//","linestyle":"solid","shape":"round","font_size":9.2},
+        {"id":"metrics","x":0.07,"y":0.31,"w":0.10,"h":0.14,"label":"Item metrics\n+ failures","fill":"#F0E442","hatch":"..","linestyle":"solid","shape":"round","font_size":9.2},
+        {"id":"meta","x":0.22,"y":0.48,"w":0.10,"h":0.18,"label":"Document + item IDs\nconfig + hashes","fill":"#56B4E9","hatch":"//","linestyle":"solid","shape":"square","font_size":9.0},
+        {"id":"schema","x":0.38,"y":0.65,"w":0.10,"h":0.15,"label":"Required fields\nunique IDs","fill":"#E69F00","hatch":"--","linestyle":"dashed","shape":"square","font_size":8.5},
+        {"id":"cart","x":0.51,"y":0.65,"w":0.10,"h":0.15,"label":"Complete method\nby item grid","fill":"#D55E00","hatch":"++","linestyle":"dashdot","shape":"square","font_size":9.0},
+        {"id":"cluster","x":0.51,"y":0.31,"w":0.11,"h":0.16,"label":"Document coverage\n+ hash","fill":"#CC79A7","hatch":"xx","linestyle":"dashdot","shape":"square","font_size":9.0},
+        {"id":"pass","x":0.63,"y":0.48,"w":0.075,"h":0.13,"label":"Audit\nPASS?","fill":"#009E73","hatch":"\\\\","linestyle":"solid","shape":"diamond","font_size":8.0},
+        {"id":"pairs","x":0.75,"y":0.48,"w":0.09,"h":0.15,"label":"Complete\npaired items","fill":"#009E73","hatch":"\\\\","linestyle":"solid","shape":"round","font_size":9.0},
+        {"id":"boot","x":0.85,"y":0.67,"w":0.10,"h":0.14,"label":"Document bootstrap\n95% CI","fill":"#0072B2","hatch":"//","linestyle":"solid","shape":"square","font_size":9.0},
+        {"id":"tests","x":0.85,"y":0.30,"w":0.10,"h":0.14,"label":"Paired test\n+ Holm","fill":"#E69F00","hatch":"--","linestyle":"dashed","shape":"square","font_size":8.5},
+        {"id":"canon","x":0.94,"y":0.48,"w":0.07,"h":0.16,"label":"E4 tables\nfigures\nclaim ledger","fill":"#F0E442","hatch":"..","linestyle":"solid","shape":"round","weight":"bold","font_size":7.8}
+      ],
+      "edges":[
+        {"source":"pred","target":"meta"},{"source":"metrics","target":"meta"},{"source":"meta","target":"schema"},{"source":"schema","target":"cart"},{"source":"cart","target":"cluster"},{"source":"cluster","target":"pass"},
+        {"source":"pass","target":"pairs"},{"source":"pairs","target":"boot"},{"source":"pairs","target":"tests"},{"source":"boot","target":"canon"},{"source":"tests","target":"canon"}
+      ],
+      "notes":[{"x":0.50,"y":0.085,"text":"Audit failures remain explicit; they are not silently repaired inside the comparison.","ha":"center","style":"italic"}]
+    }
+  ]
+}

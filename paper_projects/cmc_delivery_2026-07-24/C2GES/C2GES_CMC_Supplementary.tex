@@ -1,0 +1,231 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{mathpazo}
+\usepackage[hidelinks]{hyperref}
+
+\emergencystretch=3em
+
+% Supplementary numbering: Table S1, Figure S1, Eq. (S1), Section S1
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\theequation}{S\arabic{equation}}
+\renewcommand{\thesection}{S\arabic{section}}
+
+\newcommand{\cges}{C\textsuperscript{2}GES}
+
+\title{Supplementary Materials for:\\
+``Causal-Role-Aware Extractive Evidence Selection for Power Grid Reliability Reports''}
+\author{Bijing Liu and Yong Yang}
+\date{}
+
+\begin{document}
+\maketitle
+
+\noindent This supplement provides supporting material referenced from the main text: the full $K$-sensitivity results with per-budget paired bootstrap comparisons (Section~\ref{sec:s1}), per-document dispersion details (Section~\ref{sec:s2}), computational complexity (Section~\ref{sec:s3}), the artifact and hyperparameter map (Section~\ref{sec:s4}), an additional qualitative case (Section~\ref{sec:s5}), learned/LLM comparison detail (Section~\ref{sec:s6}), and the complete deterministic scoring and role-stratified tables moved from the length-limited main manuscript (Section~\ref{sec:s7}). All numbers come from the completed run artifacts included in the released package.
+
+\section{Supplemental $K$-Sensitivity Results}
+\label{sec:s1}
+
+Table~\ref{tab:s1} reports a bounded $K$-sensitivity check for the fixed final scorer and the key retrieval baselines. The primary benchmark budget remains $K=3$; the additional $K=1$ and $K=5$ evaluations are not used to select a new operating point.
+
+\begin{table}[ht]
+\centering
+\caption{Supplemental $K$-sensitivity evidence F1 (best value per column in bold)}
+\label{tab:s1}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Method} & $\mathbf{K=1}$ & $\mathbf{K=3}$ & $\mathbf{K=5}$ \\
+\midrule
+TF-IDF query retrieval & 0.1783 & 0.2122 & 0.2162 \\
+BM25 query retrieval & 0.1857 & 0.2273 & 0.2208 \\
+SBERT query retrieval & 0.1560 & 0.1972 & 0.2042 \\
+Full \cges{} reranker & \textbf{0.2133} & \textbf{0.2983} & \textbf{0.2850} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The \cges{} advantage is largest and statistically supported at $K=3$, where the document-cluster bootstrap gain over BM25 is $+0.0710$ evidence F1 with 95\% CI $[0.0423, 0.1000]$. At $K=5$, \cges{} remains ahead of BM25 by $+0.0643$ evidence F1 with 95\% CI $[0.0331, 0.0961]$. At $K=1$, \cges{} has the highest aggregate F1, but its paired gains over TF-IDF and BM25 have confidence intervals that cross zero, so the stricter one-sentence setting should be interpreted as suggestive rather than conclusive.
+
+The supplement artifact additionally records paired document-cluster bootstrap comparisons against the semantic baseline at every budget, and these are reported here for completeness. The gain over SBERT query retrieval is $+0.0573$ evidence F1 (95\% CI $[0.0093, 0.1013]$, $p=0.0182$) at $K=1$ and $+0.0808$ ($[0.0387, 0.1208]$, $p<0.001$) at $K=5$; at $K=5$ the gain over TF-IDF query retrieval is $+0.0688$ ($[0.0421, 0.0949]$, $p<0.001$). At the primary $K=3$ budget, the SBERT comparison is significant not only for F1 but also for evidence precision ($+0.1067$, $[0.0683, 0.1467]$) and evidence recall ($+0.0996$, $[0.0575, 0.1408]$). These additional contrasts come from a single run artifact and are not corrected for multiple comparisons; only the TF-IDF comparison at $K=3$ retains pre-specified primary status, and the $K=1$ SBERT result in particular should be read as diagnostic, since it would not survive a conservative correction over the nine baseline comparisons in the artifact.
+
+\section{Per-Document Dispersion Details}
+\label{sec:s2}
+
+Cross-document heterogeneity on this benchmark is substantial. The standard deviations reported in Table 3 of the main text are computed over the 200 question-level scores and are of the same order as the means (about 0.24 against a mean of 0.2983 for the full reranker), which is expected for a strict top-$K$ set-overlap metric scored per question.
+
+Aggregating to the document level, per-document mean evidence F1 for the full \cges{} reranker ranges from 0.0800 to 0.5219 across the 40 documents (mean 0.2983, sample standard deviation 0.1092), with no document at zero. BM25 query retrieval spans 0.0571 to 0.5000, and SBERT query retrieval leaves one document with no recovered evidence at all. Because documents, not questions, are the natural unit of this heterogeneity, all interval estimates in the main text use document-cluster bootstrap resampling (resampling the 40 documents rather than the 200 role questions), since questions from the same document share report context, sentence pools, and annotation history.
+
+\section{Computational Complexity of the \cges{} Reranker}
+\label{sec:s3}
+
+The computational cost of \cges{} is limited because the method reranks sentences within a single report or excerpt. If a document contains $n$ sentences and text features have effective dimension $d$, computing query relevance with sparse vectors costs $O(nd)$ in the worst case but is lower under sparse indexing. Role compatibility costs $O(nm)$, where $m$ is the number of role and domain cue features. A naive chain-consistency computation over all sentence pairs costs $O(n^2|\mathcal{R}|)$, but a local context window reduces the cost to $O(nh|\mathcal{R}|)$, where $h$ is the window radius recorded in the implementation configuration. Sorting costs $O(n\log n)$, and the top-$K$ selection can be implemented as $O(n\log K)$ if needed. Since the benchmark contains 40 reports or excerpts and 200 role-conditioned questions, this lightweight design is appropriate for reproducible evaluation without requiring large-scale neural training.
+
+Runtime and hardware are reported for reproducibility, not as a research contribution. Experiments were executed in an environment with CUDA GPU availability on an NVIDIA RTX A6000 with 49140 MB of VRAM. The evaluated methods are lightweight sentence rankers over 40 reports or excerpts, so the computational bottleneck is feature extraction and sentence scoring rather than large model training. This setup makes the benchmark practical to rerun and supports direct inspection of predictions, ablations, and role-conditioned errors.
+
+\section{Hyperparameter Settings and Artifact-to-Table Evidence Map}
+\label{sec:s4}
+
+Table~\ref{tab:s2} lists the complete experimental settings using short method abbreviations. Abbreviations: Lead = leading-sentence positional selector; TFQ = TF-IDF query retrieval; TFC = TF-IDF centroid salience; TNR = TextRank with NetworkX; LXR = LexRank; CTR = causal trigger ranker; SBQ = SBERT query retrieval; C2G = the full \cges{} reranker; QOnly = \cges{} query-only ablation; NoRole = \cges{} without role compatibility; NoGraph = \cges{} without chain consistency.
+
+\begin{table}[ht]
+\centering
+\caption{Hyperparameter settings}
+\label{tab:s2}
+\begin{tabular}{ll}
+\toprule
+\textbf{Setting} & \textbf{Value} \\
+\midrule
+Task & Role-conditioned evidence-ID selection \\
+Dataset & 40 docs, 200 questions \\
+Evidence IDs & 608 \\
+Roles/doc & 5 \\
+Budget & $K=3$ \\
+Split & Doc-level 5-fold \\
+Fold rule & SHA256 mod 5 \\
+Primary metric & Evidence F1 \\
+Main methods & Lead, TFQ, TFC, TNR, LXR, CTR, SBQ, C2G (+ BM25 supplement) \\
+Ablations & QOnly, NoRole, NoGraph, C2G \\
+Selected weights & $w_q=0.52$, $w_r=0.40$, $w_g=0.08$ \\
+Graph-active roles & Propagation/response, mitigation \\
+BM25 parameters & $k_1=1.5$, $b=0.75$, lowercase regex tokenization \\
+Label status & Agent-verified candidate \\
+Execution count & 1 \\
+Hardware & NVIDIA RTX A6000, CUDA, 49140 MB VRAM \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The SBERT baseline is recorded as the semantic-query condition in the Executor artifact; model checkpoint details are part of the reproducibility package rather than a separate experimental result. TF-IDF baselines use the same sentence and question text normalization as the \cges{} lexical query component, and graph-centrality baselines use the same sentence pool as the evidence-ID evaluation.
+
+The released package (\url{https://github.com/gaoxingkele/c2ges}, release v0.2.0) contains the complete post-freeze supplement artifact (\path{supplement/bm25_k_sensitivity/summary.json}) together with machine-derived tables and a cross-check script (\path{code/analyze_supplement_evidence.py}). This artifact directly evidences: the main-results rows for TF-IDF query, BM25 query, SBERT query, and full \cges{} in Table 3 of the main text (all reported means and standard deviations for F1, precision, recall, and ROUGE-L); the ablation aggregates in Section 5.4 of the main text (query-only 0.2152, no-role 0.2295, no-graph 0.2923) and therefore the ablation mean differences in Table 6 of the main text; the full $K\in\{1,3,5\}$ sensitivity results in Table~\ref{tab:s1}; the paired document-cluster bootstrap comparisons of full \cges{} against the three query baselines at every $K$ (10000 samples, seed 20260626); the role-stratified values in Tables 4, 5, and 7 of the main text; the per-document dispersion figures in Section~\ref{sec:s2}; and the dataset lineage and verification counts in Section 3 of the main text. The supplement's independently seeded bootstrap reproduces the main-text bootstrap mean differences exactly; its confidence-interval endpoints for the TF-IDF and SBERT comparisons agree with the printed Executor values to within 0.002, the residual difference reflecting the two runs' independent bootstrap seeds.
+
+Results not covered by this artifact---the five weak-baseline rows of Table 3 of the main text (lead, TF-IDF centroid, TextRank, LexRank, causal trigger ranker), the confidence intervals and p-values of the four ablation and fixed-legacy comparisons in Table 6, the fixed-legacy condition itself, the cross-validation protocol record, and the qualitative case studies of Section 5.6---are evidenced by the original Executor run artifacts (\path{summary.json}, \path{details.jsonl}, \path{cv_protocol.json}, \path{heldout_predictions.jsonl}, \path{metadata.json} from the role-selective graph-gate package), which are included in release v0.2.0 under \path{supplement/c2ges_role_selective_graph/}. An independent recomputation from \path{details.jsonl} (2400 rows, 12 conditions $\times$ 200 questions) verified all 108 manuscript-versus-artifact checks, including the Table 3 means and standard deviations, all Table 6 intervals and p-values, and the \path{cv_protocol.json} fold-selection record. The learned and LLM baseline results of Section 5.5 of the main text are evidenced by the corresponding per-run \path{summary.json} and \path{details.jsonl} files under \path{baseline_runs/} in the same release.
+
+\section{Additional Qualitative Case: Trigger-Event Failure Pattern}
+\label{sec:s5}
+
+A second failure pattern appears in \path{nerc_012_january_11_oscillation_event_report::trigger_event}. The question asks what event conditions marked the start of the Florida oscillation and activated cyclical turbine valve behavior. The candidate evidence set includes the time-line sentence about the oscillation observed around 08:11:16 UTC and the sentence describing PLI operation causing intercept valves to shut and reopen periodically. Full \cges{} selects broader executive-summary and oscillation-description sentences, while TF-IDF retrieves one of the trigger sentences. This shows that the current role cues can prefer general event descriptions over precise trigger-time evidence when the report contains repeated descriptions of the same disturbance.
+
+\section{Paired-Comparison Detail and Run Cost for the Learned and LLM Baselines}
+\label{sec:s6}
+
+This section provides the full statistical detail behind the learned and LLM baseline comparison in Section 5.5 of the main text. All three baselines were executed with the protocol-matched harness from the released code package on the same 200 questions, the same sentence pools, the same $K=3$ budget, and the same evaluation metrics as the main experiments; all 200 questions returned valid $K=3$ predictions in every run. Paired statistics use the same document-cluster bootstrap (resampling the 40 documents, 10000 samples) applied per-question against the Executor run's \path{details.jsonl}. Both neural rerankers ran locally on CPU; the LLM baseline used the \texttt{deepseek-chat} endpoint at temperature 0 with one call per question.
+
+\begin{table}[ht]
+\centering
+\caption{Own-score document-cluster bootstrap 95\% CIs (evidence F1) and paired comparisons of the learned and LLM baselines (delta = row method $-$ column method; document-cluster bootstrap, 10000 samples)}
+\label{tab:s6}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llccc}
+\toprule
+\textbf{Method} & \textbf{Own F1 [95\% CI]} & \textbf{vs. Full \cges{}} & \textbf{vs. TF-IDF query} & \textbf{vs. SBERT query} \\
+\midrule
+BGE reranker (BAAI/bge-reranker-base) & 0.2604 [0.2278, 0.2946] & $-0.0379$ $[-0.0739, -0.0010]$, $p=0.0448$ & $+0.0482$ $[+0.0210, +0.0747]$, $p<0.001$ & $+0.0632$ $[+0.0260, +0.0995]$, $p=0.0006$ \\
+Cross-encoder (ms-marco-MiniLM-L-6-v2) & 0.2787 [0.2492, 0.3095] & $-0.0196$ $[-0.0539, +0.0140]$, $p=0.246$ & $+0.0665$ $[+0.0389, +0.0941]$, $p<0.001$ & $+0.0815$ $[+0.0544, +0.1069]$, $p<0.001$ \\
+LLM zero-shot (deepseek-chat, temp.\ 0) & 0.5887 [0.5569, 0.6182] & $+0.2905$ $[+0.2533, +0.3255]$, $p<0.001$ & $+0.3765$, $p<0.001$ & $+0.3915$, $p<0.001$ \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+Both neural rerankers land between BM25 (0.2273) and full \cges{} (0.2983), as anticipated for general-domain cross-encoder rerankers applied without domain adaptation, and both beat the lexical and semantic query baselines significantly. Against full \cges{}, the BGE deficit is borderline significant at the 0.05 level (the CI upper endpoint is $-0.0010$), and the cross-encoder deficit is not statistically significant; no significant advantage of \cges{} over the cross-encoder is claimed.
+
+Measured LLM run cost and latency: 200 API calls (one per question), roughly 8.5 minutes wall clock ($\approx$2.5 s per call including one full-document prompt per call), and an estimated $\approx$0.8M input tokens across the run (reconstructed from prompt text; the harness client does not record the provider's usage block), corresponding to approximately US\$0.2--0.3 for the full benchmark at published cache-miss rates---versus zero marginal inference cost for \cges{} and local CPU inference for the two neural rerankers. The p-values reported as $<$0.001 correspond to bootstrap p-values below the resolution of 10000 samples.
+
+\section{Complete Scoring Specification and Role-Stratified Results}
+\label{sec:s7}
+
+This section preserves the detailed method and role-wise tables removed from the main manuscript solely to meet the target journal length. No values or definitions were changed.
+
+\begin{table}[ht]
+\centering
+\small
+\caption{Causal roles and representative NERC-style evidence cues}
+\begin{tabular}{lp{11.5cm}}
+\toprule
+\textbf{Causal Role} & \textbf{Representative Evidence Cues} \\
+\midrule
+Trigger event & fault, trip, outage, line fault, oscillation began, relay operated \\
+Root cause & failed surge arrester, generator step-up transformer, incorrect setting, equipment failure, protection misoperation \\
+Propagation or response & underfrequency, voltage ride-through, relay action, operator response, cascading, automatic control \\
+Impact & load shed, MW reduction, customer interruption, generation loss, equipment damage, net-load increase \\
+Mitigation & restoration, corrective action plan, recommendation, repair, replacement, protection-setting change \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\footnotesize
+\caption{Complete deterministic scoring specification for the revised \cges{} reranker}
+\begin{tabular}{p{2.7cm}p{6.0cm}p{6.0cm}}
+\toprule
+\textbf{Component} & \textbf{Definition} & \textbf{Values Used} \\
+\midrule
+Query relevance $Q(s,q)$ & TF-IDF cosine similarity between each sentence and the role question, followed by min-max normalization & English stopwords; max features 8000; n-grams (1,2) \\
+Role compatibility $R(s,r)$ & Cue-hit score plus engineering-unit and domain-abbreviation bonuses, followed by per-role min-max normalization & cue counts 15/21/21/19/19; cue weight $1.0+0.15(\ell-1)$; unit bonus 0.8; abbreviation bonus 0.25 \\
+Sentence graph $p(j,k)$ & Weighted sequential and semantic proximity between sentence $j$ and neighbor $k$ & $0.45\exp(-|j-k|/4.0)+0.55\cos_{\rm tfidf}(s_j,s_k)$; sequential distance capped at 8; semantic edges below 0.08 set to 0 \\
+Neighbor roles $A_{r,r'}$ & Role-adjacency support used by the chain score & trigger: root/propagation; root: trigger/propagation; propagation: root/trigger/impact; impact: propagation/mitigation; mitigation: impact/propagation \\
+Chain support $C(s_k,r')$ & Neighbor's normalized role score, aggregated through $p(j,k)$ & ordered-neighbor weight 1.0; reverse/cross-reference weight 0.45; min-max normalized \\
+Revised graph signal $G$ & Role-gated chain signal & $G=\mathrm{minmax}(R(s,r)\times\mathrm{chain}(s,D,r))$; active only for propagation/response and mitigation \\
+Mixture weights & Document-level 5-fold selected additive weights & $w_q=0.52$, $w_r=0.40$, $w_g=0.08$; seven candidates evaluated within folds \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\small
+\caption{Per-role full-\cges{} evidence metrics and role-aware deltas}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Role} & \textbf{F1} & \textbf{Precision} & \textbf{Recall} & \textbf{vs. TF-IDF} & \textbf{vs. NoRole} \\
+\midrule
+Trigger event & 0.3114 & 0.2833 & 0.4000 & +0.1006 & +0.0723 \\
+Root cause & 0.2594 & 0.2500 & 0.2896 & +0.0470 & +0.0475 \\
+Propagation/response & 0.2611 & 0.2750 & 0.2625 & +0.0436 & +0.0281 \\
+Impact & 0.3429 & 0.3500 & 0.3625 & +0.1438 & +0.0988 \\
+Mitigation & 0.3167 & 0.3167 & 0.3479 & +0.0955 & +0.0971 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\small
+\caption{Role-stratified evidence F1 at $K=3$}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Role} & \textbf{BM25 Query} & \textbf{NoRole} & \textbf{Full \cges{}} & \textbf{Full $-$ BM25} \\
+\midrule
+Trigger event & 0.2250 & 0.2392 & 0.3114 & +0.0864 \\
+Root cause & 0.2154 & 0.2119 & 0.2594 & +0.0440 \\
+Propagation/response & 0.2289 & 0.2330 & 0.2611 & +0.0321 \\
+Impact & 0.2181 & 0.2440 & 0.3429 & +0.1248 \\
+Mitigation & 0.2490 & 0.2195 & 0.3167 & +0.0676 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\small
+\caption{Role-stratified evidence-F1 effect of role-selective graph consistency}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Role} & \textbf{Full \cges{}} & \textbf{NoGraph} & \textbf{Delta} \\
+\midrule
+Trigger event & 0.3114 & 0.3114 & 0.0000 \\
+Root cause & 0.2594 & 0.2594 & 0.0000 \\
+Propagation/response & 0.2611 & 0.2527 & +0.0083 \\
+Impact & 0.3429 & 0.3429 & 0.0000 \\
+Mitigation & 0.3167 & 0.2952 & +0.0214 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}

@@ -1,0 +1,22 @@
+{
+  "protocol_id": "C2GES-SEALED-SET-FREEZE-v1.0",
+  "frozen_at": "2026-08-07",
+  "status": "FROZEN_FOR_STAGE3",
+  "governance": "Sealed-set discipline: the packet is assembled, hashed and frozen BEFORE any annotator call. Labels remain machine-adjudicated SILVER, never human gold.",
+  "parent_protocols": ["C2GES-NERC-ANNOTATION-STAGE2-v1.2 (40D5CC57981A9A156C74651356D1E2488232C4A49B4FC1C315F3BC7E3858BF38)"],
+  "generation": {
+    "source": "paper_projects/2026_c2ges_engineeringletters/workspace/verification_pilot/agent_audit_40doc/*.json (public NERC event-analysis reports, agent_verified_candidate status)",
+    "selection_rule": "deterministic: sort unused doc ids (excluding the 15 dev-visible blind_packet docs), take the first 15 with >= 40 sentences and 5 causal_questions each; all 5 role-conditioned questions per doc are included",
+    "target_size": "15 docs x 5 roles = 75 questions",
+    "freeze_artifact": "runs/c2ges_stage3/sealed_packet.jsonl (same schema as blind_packet.jsonl: doc_id, title, source_url, sentences[{sid,text}], questions[{qid,role,question}]) + sealed_manifest.json (per-doc sha256 + set-level sha256, custodian='annotation-pipeline', no-leakage declaration)"
+  },
+  "annotation": {
+    "prompt": "v1.1 prompt_template (R1-R7, qid echo) unchanged",
+    "resolution": "v1.2 two-tier rule unchanged (Tier-1 deterministic: subset_minimal / intersection_consensus; Tier-2 adjudicator C on substantive conflicts)",
+    "models_and_params": "unchanged (A=DeepSeek, B=Gemini, C=gpt-5.4 via Cloubic; temperature 0; max_tokens 1024)",
+    "validation_gate": "not required (v1.2 already gated on dev set); C-timeout technical retries allowed up to 2 per item, unresolved recorded",
+    "output_dir": "runs/c2ges_stage3/"
+  },
+  "metrics": "v1.2 metric set; sealed results reported separately from the dev-visible 75",
+  "prohibited": "unchanged from v1.0"
+}

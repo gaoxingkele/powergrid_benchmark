@@ -1,0 +1,1303 @@
+Citation: Guo, J.; Chen, B.; Li, Z.; Liu,
+B.; Wu, W.; Yang, J. Optimizing
+Renewable Strategies for Emission
+Reduction Through Robotic Process
+Automation in Smart Grid
+Management. Atmosphere 2024, 15,
+1429. https://doi.org/10.3390/
+atmos15121429
+Academic Editors: Omar Awad,
+Zhenbin Chen and Ahmed N. Abdalla
+Received: 28 September 2024
+Revised: 15 November 2024
+Accepted: 19 November 2024
+Published: 27 November 2024
+Copyright: © 2024 by the authors.
+Licensee MDPI, Basel, Switzerland.
+This article is an open access article
+distributed under the terms and
+conditions of the Creative Commons
+Attribution (CC BY) license (https://
+creativecommons.org/licenses/by/
+4.0/).
+Article
+Optimizing Renewable Strategies for Emission Reduction
+Through Robotic Process Automation in Smart Grid Management
+Jiuyu Guo 1, Bin Chen 1, Zeke Li 1, Bijing Liu 2,*, Wei Wu 1 and Junjie Yang 3
+1
+State Grid Fujian Electric Power Co., Ltd., Fuzhou 350001, China; guo_jiuyu@fj.sgcc.com.cn (J.G.);
+13506990860@139.com (B.C.); lizeke@139.com (Z.L.); wuwei@fj.sgcc.com.cn (W.W.)
+2
+Nanrui Group Co., Ltd. (State Grid Electric Power Research Institute Co., Ltd.), Nanjing 211106, China
+3
+Pingtan Research Institute of Xiamen University, Pingtan Comprehensive Experimental Zone,
+Fuzhou 350400, China; youngboy@xmu.edu.cn
+*
+Correspondence: liubijingsgcc2@outlook.com
+Abstract: The integration of renewable energy into Intelligent Distribution Networks (IDNs) is chal-
+lenged by the inherent variability and fluctuations in energy supply, particularly with photovoltaic
+(PV) generation as the primary form of distributed generation (DG). However, managing the fluctua-
+tions and variability in renewable energy supply presents significant challenges. To address these
+complexities, it is vital to optimally coordinate flexible resources from source–network–storage–load
+(SNSL) in a manner that aligns with cross-sectoral emission reduction strategies while enhancing grid
+stability and efficiency. This paper addresses these challenges by proposing a strategy that optimizes
+the coordination of PV-based DG, storage, and load resources through Robotic Process Automation
+(RPA) to enhance grid stability and support emissions reduction. We use a two-layer dispatching
+framework: the lower-layer model, formulated as a quadratic programming problem, maximizes PV
+utilization for individual users, while the upper-layer model, based on a second-order cone relaxation
+approach, manages the overall IDN to minimize operational costs. The iterative solution leverages
+tie-line power flow as boundary information to ensure convergence across the network. Validated
+on an enhanced IEEE 33-bus system, the approach demonstrates a 62% increase in PV-based DG
+consumption and a 25% reduction in active power losses, highlighting its potential to improve grid
+efficiency and contribute to emission reduction goals.
+Keywords: emission; robotic process automation; distributed dispatching; resource management
+1. Introduction
+The rapid advancement of smart grid technologies and the increasing integration of
+distributed generation (DG) into Intelligent Distribution Networks (IDNs) have introduced
+both opportunities and challenges in modern energy systems. Distributed energy sources,
+including solar, wind, and other renewable technologies, promise a more sustainable
+and decentralized energy future [1,2]. However, managing the inherent fluctuation and
+variability in energy supply poses significant challenges to grid stability, reliability, and
+economic efficiency [3,4]. The need to optimally coordinate flexible resources, such as
+source–network–storage–load (SNSL), in this complex landscape has become critical to
+ensure the seamless operation of smart grids [5]. In response, innovative technologies such
+as Robotic Process Automation (RPA) have gained prominence for their ability to automate
+repetitive tasks, streamline operations, and enhance the adaptability of grid management
+systems [6,7].
+Previous research has extensively explored methods for optimizing distributed energy
+resources within Intelligent Distribution Networks. In [2], economic dispatching methods
+were examined with a focus on handling renewable energy uncertainties and demand-
+side responses, emphasizing the necessity for adaptive models to manage unpredictable
+Atmosphere 2024, 15, 1429. https://doi.org/10.3390/atmos15121429
+https://www.mdpi.com/journal/atmosphere
+
+Atmosphere 2024, 15, 1429
+2 of 24
+fluctuations in supply and demand. In [8], the study applies machine learning to opti-
+mize wireless charging for electric buses within a Nguyen–Dupuis network, focusing on
+enhancing efficiency and sustainability in urban transit. By modeling dynamic charging
+needs, the research offers insights into reducing infrastructure dependence and improving
+fleet performance through predictive charging strategies. In [9], the authors investigate
+dynamic wireless power transfer (DWPT) in a multi-depot, multi-product delivery supply
+chain, highlighting DWPT’s potential to improve logistics efficiency. The study under-
+scores DWPT’s benefits in reducing downtime and infrastructure requirements, providing
+a framework for sustainable energy use in complex delivery networks. In [10], the authors
+propose an optimization planning method for distributed generation based on the steady-
+state security region of the distribution network. Both studies underline the importance
+of addressing variability in DG for improving the resilience and efficiency of distribution
+networks. Further advancements in optimizing microgrid clusters are presented by [11],
+who develop a distributed scheduling method based on the distributed Newton method.
+Ref. [12] focuses on the distributed multi-scenario optimal sizing of integrated electricity
+and gas systems, addressing the need for coordination across multiple layers of resource
+management. Ref. [13] proposes a distributed optimization method with weighted gradi-
+ents for the economic dispatch of multi-microgrid systems, emphasizing the benefits of
+weighted optimization in complex energy systems. Ref. [14] introduces a genetic algorithm
+applied to optimize voltage-led customer load services, further illustrating the role of
+optimization algorithms in improving energy dispatching efficiency. Ref. [15] proposes
+a multi-criteria decision-making approach for the design and management of renewable
+energy communities, focusing on the integration of diverse renewable resources and energy
+storage solutions. The study emphasizes the need for system optimization and demand-
+side management to ensure that renewable energy is maximized while minimizing grid
+dependency and operational costs.
+Managing uncertainty and variability in renewable energy sources is a recurring theme
+in the literature. Ref. [4] further expanded on the planning and management of distributed
+generations and energy storage using a bi-level programming approach, emphasizing the
+need for coordinated planning in active distribution networks. Ref. [16] addressed uncer-
+tainty in renewable energy generation and proposed methods for improving grid stability
+and dispatching. Ref. [17] introduced a stochastic economic dispatch method, considering
+voltage-sensitive loads as reserves, which improved flexibility in handling unpredictable
+changes in load demand. Ref. [18] addressed the challenges of deep photovoltaic (PV) pen-
+etration in distribution networks, where correlated net bus load forecast errors significantly
+affect system stability. Ref. [19] developed a fast sensitivity method for determining line
+loss and node voltages in active distribution networks. Ref. [20] proposed a two-layer,
+two-stage dispatching strategy for active distribution networks with microgrid interactions,
+highlighting the need for advanced optimization techniques that can handle the dynamic
+interactions between distributed resources. Ref. [21], a study on the integration of Soft
+Open Points (SOPs) for supply restoration in active distribution networks, offered a direct
+parallel to focus on optimizing power flows in IDNs. The SOP integration methods used
+here could enhance the approach by further improving flexibility and energy distribution
+in a proposed RPA-based dispatching model. Ref. [22] introduced advanced optimization
+techniques for energy storage systems using a dual-stage approach, which can complement
+the method used for integrating energy storage in IDNs. The use of improved gravitational
+search algorithms adds a novel dimension to energy management strategies that could in-
+form enhancements to the optimization framework. Ref. [23] focused on large-scale electric
+vehicle (EV) dispatching through second-order cone programming, which resonates with
+the use of similar mathematical methods in a smart grid model. This paper’s strategies
+for managing large-scale energy dispatch could offer new insights for extending a model
+to accommodate emerging technologies like EVs. Ref. [24] emphasized the optimization
+of battery energy storage systems for peak load shifting and voltage distribution, which
+aligns with work on improving energy storage management. The insights on peak load
+
+Atmosphere 2024, 15, 1429
+3 of 24
+management could further refine the dispatching strategy to handle load fluctuations more
+effectively in smart grids. Ref. [25] proposed decomposition and coordination methods for
+economic dispatch in active distribution networks, providing a strong foundation for the
+multi-layered approach proposed in their model. The paper’s techniques for coordinating
+multiple microgrids could enhance the efficiency of the IDN framework, improving re-
+source allocation across the network. Ref. [26], a study focusing on optimizing photovoltaic
+and energy storage integration in rural microgrids, offered useful parallels for work on
+distributed generation management. While the context is rural microgrids, the strategies
+for enhancing energy storage dispatch and renewable integration could be adapted to
+improve resource utilization in the IDN model. Ref. [27] introduced a two-stage demand
+response model with battery energy storage, providing valuable techniques for managing
+energy storage in a smart grid system. The optimization strategies for demand response
+could inform improvements in the approach to balancing active and reactive power in
+distributed networks.
+Despite the extensive body of literature on smart grid optimization and automation
+technologies, a notable gap exists in the integration of RPA into the distributed dispatching
+and adaptive resource management of IDNs. While several studies have examined opti-
+mization techniques for dispatching DG and microgrid systems, the incorporation of RPA
+as a strategic tool for managing the complexities of SNSL resources remains underexplored.
+Existing models often lack the ability to fully automate resource coordination across mul-
+tiple layers of a distribution network, resulting in suboptimal dispatching and delayed
+response to real-time fluctuations in energy supply. This study addresses key gaps in
+smart grid optimization by integrating Robotic Process Automation (RPA) into distributed
+dispatching and adaptive resource management within Intelligent Distribution Networks
+(IDNs), enabling automated and efficient real-time responses to energy fluctuations. By
+introducing a novel laminar flow structure inspired by communication systems, the re-
+search optimally coordinates source–network–storage–load (SNSL) resources, achieving
+streamlined pre-scheduled dispatching and enhanced grid stability. A unique two-layer
+dispatching model is developed, with a lower-layer quadratic programming model for
+distributed generation (DG) users and an upper-layer second-order cone relaxation model
+for the overall IDN. These models are solved iteratively, maximizing user economic benefits
+while minimizing operational costs for the IDN, thus enhancing flexibility and efficiency
+across network resources. Validated on the IEEE 33-bus system, this approach demon-
+strates significant improvements, including a 62% increase in DG consumption and a 25%
+reduction in active power losses, highlighting the potential of RPA-driven solutions in
+future smart grid management.
+This paper is organized as follows: It begins with an Introduction Section that high-
+lights the motivation for integrating Robotic Process Automation (RPA) into Intelligent
+Distribution Networks (IDNs) to tackle challenges in renewable energy management. The
+Related Work Section reviews existing research on smart grid optimization, coordinated
+dispatching models, and RPA applications, pinpointing a significant gap in automated
+resource management within IDNs. The Proposed Model introduces a two-layer dispatch-
+ing framework, where a lower-layer quadratic programming model manages distributed
+generation (DG) resources and an upper-layer model, utilizing second-order cone relax-
+ation, optimizes the entire IDN. The Results and Discussion Sections evaluate the model’s
+effectiveness through simulations, including pre-scheduled dispatching strategies, sensi-
+tivity analyses on factors like DG output, and the influence of centralized resources on
+IDN performance, emphasizing improvements in DG utilization and reductions in power
+losses. Finally, the Conclusion Section summarizes this study’s contributions, illustrating
+the potential of RPA-enhanced smart grid automation to improve flexibility and efficiency
+and proposing directions for future research in automated IDN management.
+
+Atmosphere 2024, 15, 1429
+4 of 24
+2. Related Work
+2.1. Robotic Process Automation (RPA)
+The use of Robotic Process Automation (RPA) in energy systems is an emerging field.
+RPA is recognized for its ability to automate repetitive tasks and streamline operations
+in various industries. Ref. [3] proposed a distributionally robust reactive power dispatch
+model, incorporating a Wasserstein distance to handle uncertainties in active distribu-
+tion networks. Both studies contribute to the development of multi-layered optimization
+frameworks that align with the goals of this paper, particularly the integration of RPA into
+distributed dispatching. Ref. [7] demonstrated the development of intelligent RPA in a
+Brazilian utility case study, where automation enhanced the scalability and coordination
+of energy dispatching. Refs. [28,29] explored the impact of RPA on enterprise resource
+planning (ERP) systems and risk management in automation, providing insights into how
+automation can be applied in complex systems such as smart grids. Ref. [30] provided
+valuable insights into the security challenges surrounding Robotic Process Automation
+(RPA), which is critical for ensuring the reliability and safety of automated processes in
+smart grids. Although the focus is primarily on security, these insights are useful for
+strengthening the security framework in RPA-based energy dispatching system, ensuring
+a robust and secure operation. Ref. [31], a study on network reconfiguration and voltage
+regulation, offered relevant insights for managing unbalanced distribution systems, which
+could complement RPA-based dispatching in IDNs. The combination of reconfiguration
+and distributed energy resource control aligns well with goal of improving grid flexibility
+and stability. Ref. [32] introduced self-learning capabilities for RPA, which could signifi-
+cantly enhance the adaptability of the proposed RPA-based dispatching system. Although
+their primary application is in business processes, the self-learning mechanisms could be
+leveraged to improve real-time decision-making and automation in smart grids. Ref. [33]
+provided technical insights into the design and implementation of RPA systems, which
+are crucial for understanding how to optimize a RPA-based smart grid dispatching sys-
+tem. The system design strategies outlined here could help to improve the scalability and
+efficiency of RPA in the model. In [34], a study on the benefits of RPA in supply chains,
+the authors highlighted parallels with work in energy systems, emphasizing RPA’s role in
+improving process efficiency. The benefit realization techniques discussed could inform
+how researchers measure and evaluate the impact of RPA on energy dispatching in a
+smart grid model. Ref. [35] covered RPA tools and technologies across various industries,
+providing a broad view of their applications, including in energy management. The ex-
+ploration of RPA’s industrial applications offers useful insights into how these tools can
+be adapted and scaled for energy grid management and optimization. Ref. [36] discussed
+the combination of RPA and AI-powered services to increase productivity and reduce
+waste, which could inspire the future integration of AI into RPA systems for enhancing op-
+timization. Although primarily focused on industrial services, the AI-driven productivity
+improvements could be applied to smart grid management for greater efficiency. Ref. [37]
+explored RPA’s transformative power in Industry 4.0, offering insights into its potential
+to revolutionize energy grid management by automating complex tasks. The focus on
+business transformation through RPA could provide a framework for understanding how
+RPA can reshape distributed energy management and improve automation in IDNs.
+2.2. Coordinated Dispatching Model
+The integration of diverse flexible resources, each managed by different stakeholders
+within an Intelligent Distribution Network (IDN), is depicted in Figure 1. In this setup,
+users possess the authority to dispatch distributed generation (DG) and distributed energy
+storage (ES) systems. On the other hand, the Grid Management Operator (GMO) has
+control over the dispatching of centralized ES, capacitor banks (CBs), static var generators
+(SVGs), and other equipment owned by the IDN. The dispatching process for all these
+resources can be structured into a primary problem and several sub-problems. The primary
+
+Atmosphere 2024, 15, 1429
+5 of 24
+problem corresponds to the IDN’s overall dispatching model, while the sub-problems
+represent the dispatching models for individual users with DG.
+Figure 1. Integration of flexible resources and stakeholder roles within the Intelligent Distribution
+Network (IDN).
+For users with DG, the optimization objective is to formulate a dispatching strategy
+for their DG and ES resources based on a TPU pricing mechanism to maximize economic
+benefits. Meanwhile, the Distribution System Operator (DSO) must consider the safe and
+reliable operation of the entire IDN. The power flow on the tie-line serves as the Boundary
+Information Exchange (BIE) between the upper-level model (IDN dispatching) and the
+lower-level model (user dispatching), facilitating coordination between the two levels.
+Ref. [38] explores state-of-the-art technologies in solar-powered DC microgrids with hybrid
+energy storage systems, emphasizing the roles of converter topologies in optimizing energy
+flow. They highlight that the integration of a hybrid approach addresses the challenges
+of variable renewable energy generation by improving system flexibility and enhancing
+power quality. Ref. [39] proposes a power management strategy for DC microgrids with
+a focus on state-of-charge (SOC) restoration and voltage stability through an improved
+voltage-shifting controller. Their approach optimizes energy storage by ensuring efficient
+charge–discharge cycles and maintaining a stable voltage, crucial for integrating renewable
+energy sources.
+The dispatching model for users with DG focuses on optimizing the generation and
+consumption of energy from DG and distributed ES resources to achieve maximum eco-
+nomic benefits while maintaining grid stability. The optimization is conducted over a given
+time horizon, often divided into time slots (e.g., hourly intervals), based on a time-of-use
+(TPU) pricing mechanism that reflects the variation in electricity prices throughout the day.
+The primary goal of the user dispatching model is to maximize economic benefits,
+which are achieved by optimizing the energy generated by DG, the power stored in or
+discharged from the ES system, and the energy exchanged with the grid. The optimization
+is impacted by TPU pricing, which determines when it is most cost-effective to sell or
+buy electricity.
+The objective is to maximize revenue from selling excess energy generated by the
+DG to the grid while minimizing the cost of buying energy and storing it in the ES. The
+objective function can be mathematically expressed as
+JMax. = ∑
+T
+t=1
+
+PDG(t) · λs(t) −PESin(t) · λb(t) −Cop(PDG(t))
+
+(1)
+where J is the total economic benefit over the time horizon T, PDG(t) is the power generated
+by DG at time t, λs(t) is the electricity selling price at time t, PESin(t) is the power stored
+
+Atmosphere 2024, 15, 1429
+6 of 24
+in the ES system at time t (i.e., the energy purchased from the grid for storage in the ES
+system), λb(t) is the electricity buying price at time t, and Cop(PDG (t)) is the operational
+cost associated with running the DG at time t.
+The dispatching model is subject to a set of operational and technical constraints that
+ensure the safe and efficient operation of both the user’s energy system and the overall
+Intelligent Distribution Network (IDN).
+At each time step, the total power generated, stored, and imported/exported must
+balance with the user’s load demand. This is represented as
+PDG(t) + PES_out(t) + Pgrid (t) = Pload (t) + PES_in(t)
+(2)
+where PDG (t) is the power generated by DG at time t, PES_out (t) is the power discharged
+from the ES system at time t, Pgrid (t) is the power exchanged with the grid at time t (positive
+for import and negative for export), Pload (t) is the user’s total load demand at time t, and
+PES_in (t) is the power charged into the ES system at time t.
+This constraint ensures that the user’s power generation, storage, and exchange with
+the grid meet their energy consumption requirements.
+The energy storage system must operate within its capacity and power limits. The
+charging and discharging of the ES are governed by the following constraints:
+PES_min ≤PES_out(t), PES_in(t) ≤PES_max
+(3)
+where PES_min and PES_max represent the minimum and maximum power that can be
+discharged from/charged into the ES system, respectively.
+The state of charge (SOC) of the energy storage must be maintained within acceptable
+limits to prevent overcharging or deep discharging:
+SOCmin ≤SOC(t) ≤SOCmax
+(4)
+The SOC of the ES at any time t is updated based on the charging and discharging
+operations as follows:
+SOC(t + 1) = SOC(t) + ηch · PES_in(t) · ∆t −PES_out(t)
+ηdis
+· ∆t
+(5)
+where ηch and ηdis are the charging and discharging efficiencies, respectively, while ∆t is
+the duration of each time step.
+The power output of the DG is limited by its operational capacity, ensuring it operates
+within safe limits:
+PDG_min ≤PDG(t) ≤PDG_max
+(6)
+where PDG_min and PDG_max represent the minimum and maximum power output capacities
+of the DG, respectively.
+The time-of-use pricing mechanism affects the dispatching strategy. The user aims
+to purchase electricity when prices are low (e.g., during off-peak hours) and sell excess
+electricity when prices are high (e.g., during peak hours). The optimization problem seeks
+to adjust the timing of energy generation, consumption, and storage to take advantage
+of the varying electricity prices throughout the day: λs(t) > λb(t) during peak hours
+and λb(t) < λs(t) during off-peak hours. This TPU-based strategy ensures that energy is
+bought and sold at the most cost-effective times, leading to optimized economic benefits
+for the user.
+In addition to meeting the user’s economic objectives, the safe operation of the IDN
+must be ensured. This includes maintaining grid stability by ensuring that power flows on
+
+Atmosphere 2024, 15, 1429
+7 of 24
+the tie-line between the user and the grid remain within allowable limits, as well as that
+voltage and frequency stability are preserved:
+Ptie_min ≤Ptie(t) ≤Ptie_max
+(7)
+where Ptie (t) represents the power flow across the tie-line between the user’s system and
+the IDN at time t, while Ptie_max defines the limits within which power flows must be
+maintained to ensure the safe operation of the IDN.
+To ensure voltage stability in the IDN, the voltage at each bus must be maintained
+within predefined limits. The voltage at bus i at time t, denoted as Vi(t), should remain
+within the allowable range:
+Vmin ≤Vi(t) ≤Vmax
+(8)
+where Vmin and Vmax are the minimum and maximum allowable voltage levels, respectively,
+Vi (t) is the voltage at bus i at time t.
+The GMO can control voltage stability using devices such as capacitor banks (CBs)
+and static var generators (SVGs), which adjust reactive power flows to maintain acceptable
+voltage levels across the network.
+3. Proposed Model
+The optimization of both user and Intelligent Distribution Network (IDN) objectives
+within the RPA process is structured in a two-layer model. The lower-layer model aims
+to maximize the user’s economic benefit by optimizing the use of distributed generation
+(DG) and energy storage (ES) systems. This is achieved by maximizing revenue from
+selling electricity, minimizing costs from buying power, and accounting for operational
+expenses of photovoltaic (PV) and ES systems over a given time period T. The objective
+function in this layer includes terms for selling and buying electricity prices, λs(t) and λb(t),
+and the total operating costs, Ctotal(t), which depend on PV generation and ES charging
+efficiency. This lower-layer model is solved using quadratic programming, balancing
+power flows and SOC within specified limits. In the upper-layer model, the focus shifts
+to minimizing the IDN’s total operational costs, incorporating expenses for grid power
+purchases, energy storage operations, and system losses, while maintaining voltage stability
+and power quality. The objective function includes terms for power exchange with the
+upper-level grid, system losses, and device operating costs, managed under a power flow
+balance constraint. The optimization process, involving SOPs, SVGs, CBs, and ES systems,
+uses an iterative approach where decisions made in the user layer feed into the IDN’s cost
+minimization, ensuring that power supply meets demand. The IDN’s model is structured as
+a least squares optimization, aiming to balance deviations from optimal power flow paths.
+This coordinated, iterative optimization, facilitated by RPA, effectively aligns the economic
+objectives of users with the stability and operational efficiency of the IDN, achieving robust
+energy management across the smart grid.
+The RPA process for the user dispatching model is designed to maximize the user’s
+net economic benefit by considering revenue from selling electricity, costs from buying
+electricity, and operational costs associated with the PV and ES systems.
+For both the user and the distribution network, RPA automates the maximization or
+minimization of objective functions (economic benefits for the user and operational costs
+for the IDN).
+User objective (lower-layer model):
+Maximize Juser = ∑
+T
+t=1 ∑
+T
+t=1
+h
+λs(t) · Psell(t) −λb(t) · Pbuy(t) −Ctotal(t)
+i
+(9)
+where Ctotal(t) includes the cost of operating renewable energy resources and energy
+storage systems.
+
+Atmosphere 2024, 15, 1429
+8 of 24
+IDN Objective (upper-layer model):
+Minimize JSDN = ∑
+T
+t=1[λp(t) · Pgrid(t) + CES(t) + Closs(t) + Cop(t)]
+(10)
+where J is the total economic benefit over the time horizon T, λs (t) is the selling price of
+electricity at time t, Psell (t) is the power sold to the grid at time t, λb (t) is the buying price
+of electricity at time t, and Pbuy (t) is the power purchased from the grid at time t;
+Ctotal (t) is the total cost function, which includes the costs associated with operating
+the PV and ES systems:
+Ctotal(t) = (αPV + βPV) · Psolar(t) + λb(t) · PES_in(t) · 1
+ηch
++ (αES + βES) · PES_out(t)
+(11)
+where αPV and βPV are the maintenance and degradation costs per unit of PV power
+generated, Psolar (t) is the power generated by the PV system at time t, ηch is the charging
+efficiency of the ES system, and αES and βES are the maintenance and degradation costs
+per unit of power discharged from the ES system.
+The RPA transformation for the Intelligent Distribution Network (IDN) dispatching
+model automates the coordination of resources across the network. This includes central-
+ized control of grid assets such as capacitor banks (CBs), static var generators (SVG), and
+centralized energy storage. RPA automates the process of balancing demand and supply
+while ensuring voltage stability and power quality across the network.
+IDN objective (upper-layer model):
+Minimize CIDN = ∑
+T
+t=1
+h
+λp(t) · Pgrid(t) + CES(t) + Closs(t) + Cop(t)
+i
+(12)
+where λp (t) is the cost of purchasing power from the upper-level grid, Pgrid (t) is the power
+imported from the upper-level grid, CES (t) is the cost of operating centralized energy
+storage, Closs (t) is the system losses, and Cop (t) is the operating cost of devices such as CBs
+and SVGs.
+The RPA automates power flow balance for the IDN:
+Pgrid(t) + PES_out(t) + ∑
+N
+i=1 PDG_i(t) = Pload(t) + PES_in(t) + Ploss(t)
+(13)
+where Pgrid (t) represents the power exchanged between the IDN and the transmission
+network, PES_out (t) and PES_in represent the charging and discharging of the centralized ESS,
+and PDG_i (t) represents the power from distributed generation units within the network.
+RPA applies optimization algorithms such as quadratic programming to solve the
+dispatching problems. These algorithms ensure that the objectives are met under the given
+constraints. The iterative optimization can be expressed as follows:
+•
+Lower-layer model (user):
+Minimize f user(x) = 1
+2xTQx + cTx
+subject to Ax ≤b
+(14)
+where x represents decision variables (such as power flows, charging/discharging rates,
+etc.), and Q, c, A, and b represent matrices/vectors defining the problem structure.
+Since the objective function is a quadratic form with a positive semi-definite matrix Q,
+this formulation ensures convexity. This convex nature guarantees that the solution, when
+it exists, will be globally optimal, making the lower-layer model an efficient QP problem.
+•
+Upper-layer model (SDN):
+Minimize f SDN(y) = ∥Pgrid −Pdemand ∥2
+(15)
+where y represents the decision variables for the IDN model, and the cost function mini-
+mizes deviations from the optimal power flow.
+
+Atmosphere 2024, 15, 1429
+9 of 24
+Since this function minimizes the squared deviation from optimal power balance, it
+is convex and, more specifically, a linear programming (LP) problem due to the linear
+relationship between supply and demand.
+The iterative optimization method ensures that both the user and IDN objectives align
+by iteratively solving these convex optimization problems. The convexity of each layer
+(user’s QP and IDN’s LP) ensures computational efficiency and convergence to a globally
+optimal solution.
+The solving process for both the user and IDN dispatching models involves an it-
+erative optimization technique that seeks to find a solution that satisfies the objectives
+and constraints of both models, as shown in Figure 2. Since the two systems are inter-
+connected, the process must account for the boundary exchange of power between the
+user and the IDN. In this model, Equations (9) and (14) in the lower-layer (user) model
+and Equations (10) and (15) in the upper-layer (IDN) model are interconnected as they
+collectively work toward optimizing energy usage and minimizing costs within the Intelli-
+gent Distribution Network (IDN). Each pair serves a distinct but complementary purpose
+in terms of achieving economic efficiency and reducing carbon emissions, with the it-
+erative optimization ensuring alignment between individual user benefits and overall
+network stability. In essence, Equation (9) defines the target economic objectives for the
+user, while Equation (14) provides the means to mathematically optimize the decisions
+needed to reach those objectives within the practical constraints of the energy system. In
+addition, Equation (10) defines the network’s economic and operational objectives, while
+Equation (15) provides the mathematical optimization framework required to achieve these
+objectives by balancing supply and demand across the network.
+Figure 2. Iterative solution process for distributed dispatching models in the user and IDN systems.
+
+Atmosphere 2024, 15, 1429
+10 of 24
+The solution process involves several steps:
+Step 1: Initialize all variables, including SOC(t), Psolar(t), Pwind(t), and forecasts
+for Pload(t).
+Step 2: The RPA system solves the user dispatching model based on the objective of
+maximizing user benefit by following Equation (10).
+Step 3: The IDN dispatching model is solved by the RPA system to minimize opera-
+tional costs in Equation (12).
+Step 4: The RPA system iterates through different dispatch strategies to minimize costs
+and ensure system stability.
+Step 5: The power exchanged on the tie-line between the user and the IDN serves as
+boundary information in Equation (7).
+Step 6: The RPA checks for convergence. If the dispatching models for both the user
+and the IDN converge (i.e., the power balance and all constraints are satisfied), the system
+proceeds to the next time step. If not, the process is repeated.
+Step 7: The entire process is repeated for each time step t = 1, 2, . . ., T, ensuring that
+both the user and the IDN models are solved iteratively and optimally.
+4. Result and Discussion
+4.1. Simulation Parameters
+This detailed configuration of the IEEE 32-bus system, with its combination of SOPs,
+DG, ES, SVG, and CBs, creates a robust simulation environment that accurately reflects
+the challenges and dynamics of modern smart grid management, enabling a thorough
+evaluation of optimization and dispatching strategies in a real-world-like scenario, as
+shown in Figure 3. Key parameters include SOP power exchange limits, control settings,
+and voltage regulation ranges to balance power and maintain stability. DG units are
+characterized by variable generation capacities (0.5 to 2 MW) and intermittency factors that
+represent renewable variability, while ES systems have defined state-of-charge (SOC) limits
+(20% to 90%), charging/discharging efficiencies (85% to 95%), and degradation rates for
+realistic energy storage modeling. SVGs provide reactive power support within ±0.5 MVAr
+to stabilize voltage, with fast response times required to adjust to load fluctuations, and
+CBs offer fault isolation with rated interrupting capacities in kiloamperes (kA) to enhance
+network protection.
+Figure 3. The configuration of the IEEE 32-bus testing system for smart grid simulation.
+Figure 4 presents the typical daily power variations for two distinct seasons, namely
+summer and winter, showcasing the differences in both load demand and photovoltaic
+(PV) power generation. In Figure 4a, the demand load profiles for summer and winter are
+plotted over a 24 h period. The graph demonstrates that the summer load profile remains
+relatively stable during the early hours of the day, with a slight increase starting at 6 AM
+and reaching its peak between 12 PM and 8 PM. In contrast, the winter load profile shows
+
+Atmosphere 2024, 15, 1429
+11 of 24
+a more pronounced increase in the early hours of the morning, reaching a higher peak
+compared to summer, and then maintaining a steady level throughout the afternoon before
+gradually declining in the evening. Figure 4b depicts the PV output for both seasons. In
+winter, the PV output begins earlier, i.e., around 8 AM, and reaches its maximum output
+between 12 PM and 1 PM, before tapering off towards the evening. During summer, the
+PV output begins slightly later, i.e., around 9 AM, but the peak output is sustained for a
+longer period between 11 AM and 4 PM, showcasing the higher potential for solar energy
+generation during the summer months.
+Figure 4. Typical daily power variations for two seasons: (a) load demand profiles; (b) PV power
+generation.
+This comparison highlights the seasonal variation in both load demand and PV power
+generation, emphasizing the need for adaptive strategies in smart grid optimization to
+effectively manage the fluctuations in both supply and demand across different seasons.
+Figure 5 provides a detailed breakdown of electricity tariffs per unit (TPU) over a
+24 h period, focusing on the differences between selling and purchasing electricity. The
+TPU selling rates, which refer to the price at which electricity can be sold back to the
+grid, generally fluctuate throughout the day, with significant increases in the late morning
+and early afternoon. Specifically, the highest selling tariffs are observed between 11 AM
+and 1 PM, making these hours optimal for selling electricity generated by distributed
+generation units or other sources of excess power. Outside of these peak hours, the
+selling tariffs gradually decrease, reaching their lowest points during late-evening and
+early-morning hours.
+Figure 5. Electricity tariffs per unit (TPU) for selling and purchasing over a 24-h period.
+4.2. Evaluation of the Pre-Scheduled Dispatching Strategy
+(1)
+Preliminary Dispatching Plans for Users
+Figure 6 provides an overview of the initial dispatching plans for Distributed Genera-
+tion (DG) units at four different buses: Bus 5, Bus 9, Bus 15, and Bus 31. Key parameters
+
+Atmosphere 2024, 15, 1429
+12 of 24
+illustrated include purchasing power, selling power, photovoltaic (PV) power generation,
+and the states of charge (SOCs) of energy storage systems over a 24 h period. In Figure 6a
+for Bus 5, PV power generation begins to increase in the morning, reaching its peak at
+around 12 PM with approximately 5500 kW, leading to a significant rise in SOC, which
+reaches nearly 100% capacity by midday. During non-PV hours, particularly in the early
+morning (1–5 AM) and late evening (8–10 PM), purchasing power is at its highest, reaching
+levels close to 5000 kW, while selling power remains minimal throughout the day, indicating
+local consumption or storage of the generated energy. In Figure 6b at Bus 9, a similar trend
+is observed. PV generation peaks around noon with a maximum output of approximately
+3800 kW, which contributes to a high SOC nearing 90% during the middle of the day. This
+stored energy reduces the need for purchasing power from the grid, particularly during
+peak PV hours, keeping the purchasing power demand relatively low during the afternoon.
+The selling power is minimal, indicating that most of the energy generated is used locally
+or stored for later use. In Figure 6c representing Bus 15, the dispatching pattern mirrors
+those of the other buses, with PV generation peaking at around midday at approximately
+4200 kW. The SOC steadily rises, reaching a peak around midday. Purchasing power re-
+mains steady during non-PV hours, with peaks occurring in the early morning and late
+evening. Similar to the other buses, the selling power at Bus 15 is low, indicating that
+the DG output is primarily used for local demand or stored. Finally, Figure 6d for Bus 31
+displays trends consistent with the previous buses. PV generation reaches its maximum of
+around 3500 kW at around midday, which leads to a substantial increase in SOC. Purchas-
+ing power is higher during non-PV periods, particularly in the early hours (1–5 AM) and
+later in the evening (8–10 PM), reaching up to 4000 kW. Selling power remains consistently
+low, suggesting that the generated energy is utilized locally or stored.
+Figure 6. Initial dispatch plans for Distributed Generation (DG) units at (a) Bus 5, (b) Bus 9, (c) Bus 15,
+and (d) Bus 31.
+To ensure operational resilience, a minimum SOC threshold of 40% is maintained
+across all buses, particularly to prevent deep discharges that could impact battery longevity
+and reliability. This constraint is especially relevant during non-PV hours, such as in the
+early morning and late evening when grid power is purchased to maintain SOC at or
+above 40%. By enforcing this SOC limit, the system reduces the need for discharging
+below safe levels, resulting in a more sustainable and resilient battery operation. This 40%
+SOC threshold also limits selling power during low-SOC periods, prioritizing storage and
+local consumption over grid export to maintain a stable reserve of energy. This approach
+
+Atmosphere 2024, 15, 1429
+13 of 24
+enhances the stability of energy storage systems across all buses, aligning the dispatching
+strategy with practical and sustainable operational requirements.
+(2)
+Impact of PV Consumption
+Figure 7 illustrates the impact of PV consumption on the voltage profiles across all
+buses in the Intelligent Distribution Network (IDN), highlighting how distributed gener-
+ation (DG) from PV systems affects grid stability throughout the day. As PV generation
+increases during daylight hours, particularly around midday, the voltage levels rise signifi-
+cantly, reaching values above 1.2 P.U. at certain buses. This not only reflects the ability of PV
+systems to enhance local voltage levels but also underscores the importance of maintaining
+voltage within safe operational limits to prevent overvoltage scenarios. Figure 7 shows
+a noticeable fluctuation in voltage throughout the day, with lower values during early
+morning and late evening when PV generation is minimal and higher values during peak
+generation hours.
+Figure 7. Voltage profiles across all buses with distributed generation (DG) operation.
+(3)
+User Dispatching Scheme with Consideration of BIE
+Figure 8 illustrates the final dispatching strategy for distributed generation (DG) units
+at four buses—Bus 5, Bus 9, Bus 15, and Bus 31—incorporating the Benefit of Integrated
+Energy (BIE) into the Intelligent Distribution Network (IDN). In Figure 8a for Bus 5,
+energy storage exhibits a significant increase in the state of charge (SOC) at midday as PV
+generation peaks at around 3500 kW, efficiently utilizing the surplus solar energy. The
+SOC reaches approximately 90% at midday, reducing the necessity to purchase power from
+the grid, which is seen at lower values (around 500 kW) during these hours. Minimal
+energy, approximately 200 kW, is sold back to the grid, as most of the generated energy is
+either stored or used locally. In Figure 8b at Bus 9, a similar energy management pattern
+is observed, with the SOC increasing significantly during midday. PV generation peaks
+at approximately 2200 kW, boosting the SOC to nearly 85%, enabling the storage system
+to absorb excess energy. This decreases the demand for purchasing power from the grid
+to below 300 kW. Selling power remains minimal, i.e., around 150 kW, indicating that
+generated energy is primarily stored or consumed on-site. Figure 8c, representing Bus 15,
+displays a more dynamic profile with two SOC peaks: one in the morning at around
+8 AM, corresponding to a PV generation of 1200 kW, and another at around 2 PM, with
+a PV output reaching approximately 1500 kW. During these periods, the SOC rises to
+around 70%. Purchasing power from the grid remains steady, with slight increases during
+early-morning and late-evening hours when PV generation is low. Selling power also
+shows a slight increase, reaching around 200 kW in the afternoon, indicating that some
+excess energy is exported back to the grid. In Figure 8d for Bus 31, the energy storage
+system reaches its highest SOC of nearly 100% at around midday, corresponding to peak
+PV generation of about 2000 kW. The grid purchasing power is highest during the early
+
+Atmosphere 2024, 15, 1429
+14 of 24
+morning and late evening (up to 1500 kW), when solar generation is minimal. Selling
+power stays low, averaging around 100 kW throughout the day, highlighting a focus on
+local energy consumption and storage.
+ 
+(a) 
+(b) 
+ 
+(c) 
+(d) 
+Figure 8. Final dispatching strategy for distributed generation (DG) units at (a) Bus 5, (b) Bus 9,
+(c) Bus 15, and (d) Bus 31, incorporating the Benefit of Integrated Energy (BIE).
+Overall, Figure 8 demonstrates the effectiveness of the BIE strategy at optimizing DG
+and ES operations. It reduces grid dependency during peak solar hours by storing energy
+when PV generation is high and using stored energy during low-generation periods. This
+approach not only ensures efficient energy utilization but also minimizes energy purchases
+from the grid while maintaining local energy stability across the network.
+(4)
+IDN Dispatching Strategy with Modified BIE Considerations
+Figure 9 presents the voltage profile across all buses in the Intelligent Distribution Net-
+work (IDN) while considering the dispatching strategy with modified Benefit of Integrated
+Energy (BIE) adjustments. The voltage levels at each bus are shown over time, where the
+modified BIE has been designed to optimize energy consumption, generation, and storage
+while ensuring that safety and operational constraints are met. The figure shows a relatively
+stable voltage profile, with minor variations across the buses throughout the day. Most of
+the voltage values remain near the nominal level of 1.0 P.U., indicating that the dispatching
+strategy successfully maintains voltage stability while integrating distributed generation
+(DG) and PV power systems. The slight dips and peaks in the voltage profile across various
+buses represent the dynamic adjustments made to account for power generation from
+distributed sources and the load variations over time. The voltage levels slightly exceed
+1.02 P.U. at certain times, while at others, they drop just below 1.0 P.U., reflecting the effects
+of real-time energy management strategies and demand response actions based on the
+modified BIE. The network remains well within safe operating limits, ensuring reliable grid
+performance even as energy demand and generation fluctuate.
+Figure 10 illustrates the power exchange dynamics and the corresponding bus volt-
+age throughout a 24 h period in the Intelligent Distribution Network (IDN). The figure
+provides a clear depiction of how purchasing and selling power from the grid impacts
+the voltage at the root node over the course of the day. In the first few hours, purchasing
+power remains relatively high, corresponding to lower voltage levels, indicating a period
+of grid dependency when local distributed generation (such as PV) is not active. As the
+
+Atmosphere 2024, 15, 1429
+15 of 24
+day progresses, purchasing power gradually decreases, coinciding with a rise in selling
+power, particularly around midday. During this time, the voltage stabilizes around the
+nominal value, reflecting the effect of efficient energy management and exchange strate-
+gies. The relationship between power exchanges—both purchasing and selling—and the
+voltage profile highlights the IDN’s ability to balance energy demand and generation while
+maintaining voltage stability across the network.
+Figure 9. Voltage profiles across buses with a dispatch strategy incorporating the modified Benefit of
+Integrated Energy (BIE).
+Figure 10. Power exchange dynamics and root node voltage profile in the Intelligent Distribution
+Network (IDN).
+Figure 11 demonstrates the influence of key equipment, including Circuit Breakers
+(CB-1 and CB-2), the static var generator (SVG), and energy storage (ES), on the manage-
+ment of reactive power in the Intelligent Distribution Network (IDN) over a 24-h period.
+The circuit breakers (CB-1 and CB-2) operate consistently, ensuring network protection and
+stability by isolating sections of the grid when necessary. The SVG plays a pivotal role in
+dynamically regulating reactive power, adjusting its output to maintain voltage stability
+and improve power quality, especially during periods of fluctuating load or generation.
+Energy storage (ES) systems contribute significantly by managing both active and reactive
+power, providing reactive power support during critical times, particularly when demand
+peaks or generation from distributed sources varies. Together, these components work in
+tandem to ensure that reactive power levels are effectively controlled, maintaining voltage
+stability and ensuring the overall reliability of the grid.
+Figure 12 illustrates the impact of Soft Open Points (SOPs) on power flow across
+different buses in the Intelligent Distribution Network (IDN) over a 24 h period. The
+
+Atmosphere 2024, 15, 1429
+16 of 24
+graph shows the activities of SOP-1, SOP-2, SOP-3, and SOP-5, highlighting their roles
+in balancing power between buses by either absorbing or supplying energy based on
+network demand and generation conditions. During early hours, SOP-1 and SOP-2 are
+primarily absorbing power, as reflected by the negative values, helping to alleviate grid
+congestion during periods of off-peak demand. As the day progresses, the need for SOP
+intervention decreases due to higher local generation, especially from distributed sources
+like photovoltaic systems. In the late afternoon and evening, all SOPs, particularly SOP-2,
+shift to supplying power, helping to meet increased demand as local generation declines.
+The dynamic behavior of these SOPs demonstrates their critical role in enhancing grid
+flexibility, maintaining voltage stability, and optimizing power flow by redistributing
+energy between buses during both high-generation and high-demand periods.
+Figure 11. Impacts of circuit breakers, static var generator (SVG), and energy storage (ES) on reactive
+power management in the IDN.
+Figure 12. Impact of Soft Open Points (SOPs) on power flow across buses in the Intelligent Distribution
+Network (IDN).
+Figure 13 demonstrates the impact of Compensation Ratio (CR) optimization on the
+load power at Bus 23 and Bus 6 over a 24 h period. The figure compares the original
+load power profiles with those optimized using CR strategies. For Bus 23, the original
+load shows a gradual increase in demand during the day, peaking in the afternoon. After
+
+Atmosphere 2024, 15, 1429
+17 of 24
+optimization, the bus can handle higher demand more efficiently, resulting in a more
+pronounced and smoother peak, reflecting improved resource utilization. For Bus 6, which
+has lower overall demand, the optimization leads to a slight increase in load power during
+peak hours, helping to better distribute the load and reduce system stress. In both buses,
+the optimized CR strategy enhances the system’s ability to manage fluctuating demand,
+leading to a more balanced and stable load profile across the network.
+Figure 13. Impact of Compensation Ratio (CR) optimization on load power at Bus 23 and Bus 6.
+4.3. Sensitivity Analysis
+(1)
+Impact of the DG output on ES dispatching schemes
+Figure 14 presents a comparison of energy storage (ES) dispatching strategies across
+two seasons—summer and winter—at Bus 5, Bus 9, Bus 15, and Bus 31, illustrating the
+variations in the states of charge (SOCs) of the energy storage systems throughout the day
+in response to seasonal changes and distributed generation (DG) output. In Figure 14a for
+Bus 5, the SOC during summer rises sharply starting at around 6 AM, reaching a peak of
+nearly 90% at 12 PM due to high solar generation. It then gradually discharges through the
+afternoon and drops to around 10% by the late evening. In contrast, during winter, the SOC
+rises earlier, reaching a maximum of approximately 70% by 9 AM, and discharges more
+conservatively throughout the day, reflecting the lower solar output and reduced storage
+replenishment capacity. In Figure 14b at Bus 9, the SOC in summer begins to increase at
+around 8 AM, peaking at approximately 85% by midday and holding relatively high levels
+until around 6 PM, before gradually discharging. During winter, the SOC peaks earlier and
+reaches around 75% by 10 AM, then follows a conservative usage pattern with significant
+depletion by early evening, reflecting limited solar input. Figure 14c, representing Bus 15,
+shows that in summer, the SOC increases steadily starting at around 9 AM, peaking at
+around 80% by 1 PM, and then discharges gradually until it reaches approximately 15% by
+10 PM. In winter, the SOC has two distinct peaks: one at around 8 AM, reaching nearly 70%,
+and another at 4 PM, reaching 60%, indicating the use of a more adaptive storage utilization
+strategy to account for lower solar availability. Finally, Figure 14d for Bus 31 demonstrates
+a summer SOC pattern that starts increasing at 7 AM, reaching close to 90% by midday,
+and discharges throughout the afternoon and evening. In winter, the SOC shows a peak at
+around 8 AM, reaching 90%, and another peak at 5 PM, reaching 70%, followed by a steady
+discharge during the evening.
+Across all buses, the summer season shows a prolonged charging period and higher
+SOC levels due to greater solar generation, with peak SOC values typically being between
+80% and 90%. In contrast, the winter season exhibits earlier SOC peaks, generally between
+60% and 75%, and a more conservative discharge pattern to align with limited solar genera-
+tion. This seasonal comparison highlights the importance of adaptive ES management to
+optimize energy usage across varying environmental conditions.
+
+Atmosphere 2024, 15, 1429
+18 of 24
+ 
+ 
+(a) 
+(b) 
+ 
+ 
+(c) 
+(d) 
+Figure 14. Comparison of energy storage (ES) dispatching strategies across summer and winter
+seasons at (a) Bus 5, (b) Bus 9, (c) Bus 15, and (d) Bus 31, highlighting seasonal variations in state-of-
+charge (SOC) and distributed generation (DG) responses.
+(2)
+The impact of SOP on the operation of the IDN
+Figure 15 compares the impact of Compensation Ratio (CR) on the states of charge
+(SOCs) of energy storage systems at Bus 6 and Bus 23, with and without the use of Soft
+Open Points (SOPs). For Bus 6, the SOC is noticeably higher and more stable when SOP is
+implemented. The SOC remains elevated during peak demand hours, reflecting improved
+energy storage utilization and better power flow management. Without the SOP, the SOC
+is lower and more erratic, suggesting that the system struggles to efficiently balance power
+loads, resulting in diminished energy storage during critical times. Similarly, for Bus 23,
+the presence of SOP leads to a higher SOC, particularly during midday, when the energy
+storage system benefits from optimized power exchange facilitated by the SOP. This ensures
+that Bus 23 can maintain higher storage levels during periods of high solar generation.
+Without SOP, the SOC remains lower and less efficient, indicating suboptimal energy
+storage and power management. In summary, the inclusion of SOPs plays a crucial role
+in enhancing the operational efficiency of the IDN by enabling better power flow control,
+load balancing, and energy storage utilization. This results in higher SOC levels during
+peak periods, improved grid stability, and more efficient energy management across the
+network. Figure 15 underscores the importance of SOPs for optimizing the performances
+of IDNs and ensuring reliable operation, especially under fluctuating load conditions.
+Table 1 provides a detailed comparison of the operational performance of the Intel-
+ligent Distribution Network (IDN) under three distinct scenarios: (1) without Soft Open
+Points (SOPs) and Robotic Process Automation (RPA), (2) with SOP but without RPA, and
+(3) with both SOP and RPA. This table evaluates essential performance metrics, capturing
+the impact of SOP and RPA on the network’s efficiency and stability. The metrics include
+active and reactive power losses, voltage deviation, state-of-charge (SOC) utilization, dis-
+tributed generation (DG) consumption, power exchange on tie-lines, convergence behavior,
+and overall grid efficiency. In terms of active power loss, the baseline scenario without
+SOP and RPA shows a loss of 150 kW. Implementing SOP reduces this to 120 kW, while
+the combined use of SOP and RPA further reduces losses to 100 kW, resulting in a total
+improvement of 33%. Similarly, reactive power loss is initially 200 kVAR, which decreases
+to 150 kVAR with SOP alone and further to 120 kVAR when both SOP and RPA are used,
+
+Atmosphere 2024, 15, 1429
+19 of 24
+yielding a 40% reduction overall. Voltage deviation also sees a substantial improvement,
+decreasing from 0.05 P.U. in the baseline scenario to 0.03 P.U. with SOP and ultimately
+reaching 0.02 P.U. when both SOP and RPA are employed, representing a 60% reduction
+in voltage fluctuations and enhancing voltage stability. The utilization of SOC within the
+energy storage system improves significantly across scenarios. In the baseline case, SOC
+utilization is 70%, which rises to 80% with SOP and reaches 85% with the addition of RPA,
+resulting in a 21% improvement. DG consumption also benefits from these enhancements;
+it increases from 800 kWh in the baseline to 900 kWh with SOP and reaches 1000 kWh
+when both SOP and RPA are in place, indicating a 25% increase in the efficient use of
+distributed generation. The power exchange on tie-lines between network segments sees
+a 30% improvement, rising from 500 kW without SOP and RPA to 650 kW when both
+are implemented. This increase in power exchange reflects a more balanced and efficient
+distribution of energy across the network. In terms of computational efficiency, the number
+of iterations required for convergence drops from eight in the baseline scenario to five with
+SOP and further down to just three with both SOP and RPA, achieving a 62.5% improve-
+ment. Similarly, the convergence time decreases from 20 min to 15 min with SOP and then
+to 10 min when RPA is added, resulting in a 50% reduction in the time required for the
+network to reach stability.
+Figure 15. Comparison of Compensation Ratio’s (CR) impact on state of charge (SOC) with and
+without Soft Open Points (SOP) at Bus 6 and Bus 23.
+Table 1. Comparative impacts of SOP and RPA on IDN operational efficiency.
+Metric
+Without SOP
+and RPA
+With SOP,
+Without RPA
+With SOP
+and RPA
+Improvement (%)
+Active Power Loss (kW)
+150
+120
+100
+33%
+Reactive Power Loss (kVAR)
+200
+150
+120
+40%
+Voltage Deviation (P.U.)
+0.05
+0.03
+0.02
+60%
+SOC Utilization (%)
+70
+80
+85
+21%
+DG Consumption (kWh)
+800
+900
+1000
+25%
+Power Exchange on Tie-Lines (kW)
+500
+600
+650
+30%
+Number of Iterations for Convergence
+8
+5
+3
+62.5%
+Convergence Time (minutes)
+20
+15
+10
+50%
+Grid Efficiency Improvement (%)
+Baseline
++25%
++35%
+35%
+Finally, grid efficiency improves substantially with these technological enhancements.
+The baseline grid efficiency serves as a reference point, with SOP alone contributing a 25%
+improvement and the combination of SOP and RPA achieving a 35% increase in overall grid
+performance. This comprehensive comparison highlights the significant operational gains
+achieved from incorporating SOP and RPA into the IDN dispatching process, showcasing
+
+Atmosphere 2024, 15, 1429
+20 of 24
+reductions in power losses, enhanced SOC utilization, improved DG consumption, more
+efficient power exchange, and faster convergence, all of which contribute to a more resilient
+and efficient smart grid.
+(3)
+The impacts of CRs on DG consumption
+Table 2 provides an in-depth analysis of the impact of varying Compensation Ratio
+(CR) levels on distributed generation (DG) consumption and key grid performance metrics
+across specific buses in the Intelligent Distribution Network (IDN). This table assesses
+DG consumption at four critical buses—Bus 5, Bus 9, Bus 15 and Bus 31—across CR
+levels ranging from 0% (baseline) to 100%, and it highlights the improvements in total
+DG consumption, active and reactive power losses, voltage deviation, and overall grid
+efficiency as the CR increases. As the CR increases, DG consumption shows a consistent
+upward trend across all buses. For instance, at Bus 5, DG consumption rises from 500 kWh
+at baseline (0% CR) to 850 kWh at 100% CR, marking a 70% increase. Similarly, Bus 9
+sees an improvement from 550 kWh to 900 kWh (a 64% increase), while Bus 15 and Bus 31
+experience 50% and 67% increases in DG consumption, respectively. Overall, total DG
+consumption across all buses increases from 2100 kWh at baseline to 3400 kWh at 100% CR,
+achieving a substantial 62% improvement. This increase in DG utilization reflects the more
+effective use of renewable resources and reduced dependency on external power sources.
+Active power losses decrease as the CR increases, showcasing enhanced efficiency in energy
+distribution. Starting at 120 kW without any CR, active power losses drop to 110 kW at
+25% CR, 100 kW at 50% CR, 95 kW at 75% CR, and 90 kW at 100% CR. This progression
+indicates a total reduction of 25% in active power losses at the highest CR level. Similarly,
+reactive power losses follow a downward trend, decreasing from 180 kVAR at baseline to
+160 kVAR at 25% CR and further decreasing to 120 kVAR at 100% CR, yielding an overall
+33% reduction. These reductions in power losses underscore improved energy efficiency
+and minimized energy wastage in the grid. The voltage deviation metric also exhibits
+significant improvement as the CR level increases, reducing from 0.05 P.U. at baseline to
+0.04 P.U. at 25% CR, reaching as low as 0.02 P.U. at 100% CR. This 60% reduction in voltage
+deviation enhances voltage stability across the grid, which is crucial for maintaining reliable
+and consistent power quality within the IDN. Lastly, the overall grid efficiency shows a
+notable increase with rising CR levels. Starting from the baseline with no compensation,
+grid efficiency improves by 10% at 25% CR, 20% at 50% CR, 30% at 75% CR, and a maximum
+of 35% at 100% CR. This boost in grid efficiency reflects the combined effects of increased
+DG utilization, reduced power losses, and improved voltage stability, all contributing to a
+more resilient and efficient power distribution network. The analysis in Table 2 underscores
+the benefits of increasing the CR within the IDN. Higher CR levels lead to a substantial
+increase in DG consumption, lower active and reactive power losses, improved voltage
+stability, and enhanced overall grid efficiency, demonstrating the value of CR optimization
+in modern smart grid management.
+Table 2. Impact of Compensation Ratio (CR) on distributed generation (DG) consumption and
+grid performance.
+Metric
+CR = 0% (Baseline)
+CR = 25%
+CR = 50%
+CR = 75%
+CR = 100%
+Improvement (%)
+DG Consumption
+(kWh)—Bus 5
+500
+600
+700
+800
+850
+70%
+DG Consumption
+(kWh)—Bus 9
+550
+650
+750
+800
+900
+64%
+DG Consumption
+(kWh)—Bus 15
+600
+700
+800
+850
+900
+50%
+DG Consumption
+(kWh)—Bus 31
+450
+550
+650
+700
+750
+67%
+
+Atmosphere 2024, 15, 1429
+21 of 24
+Table 2. Cont.
+Metric
+CR = 0% (Baseline)
+CR = 25%
+CR = 50%
+CR = 75%
+CR = 100%
+Improvement (%)
+Total DG
+Consumption (kWh)
+2100
+2500
+2900
+3150
+3400
+62%
+Active Power
+Loss (kW)
+120
+110
+100
+95
+90
+25%
+Reactive Power
+Loss (kVAR)
+180
+160
+140
+130
+120
+33%
+Voltage
+Deviation (P.U.)
+0.05
+0.04
+0.03
+0.03
+0.02
+60%
+Grid Efficiency
+Improvement (%)
+Baseline
++10%
++20%
++30%
++35%
+35%
+(4)
+Envi-technoeconomic analysis
+The validation of the proposed energy dispatching model on the IEEE 33-bus test
+system demonstrates its potential to significantly enhance the performances of Intelligent
+Distribution Networks (IDNs). The envi-technoeconomic analysis evaluates the signifi-
+cant improvements in environmental, technical, and economic performance achieved by
+integrating the SOP (Smart Optimization Protocol) and RPA (Robotic Process Automation)
+into the proposed energy dispatching model for Intelligent Distribution Networks (IDNs)
+as shown in Table 3. By analyzing the metrics outlined in the table, we can quantify the
+substantial benefits brought about by the combination of these technologies. The table
+provides a clear comparison of the system’s performance under three different scenarios:
+without SOP and RPA, with SOP but without RPA, and with both SOP and RPA. The im-
+provements across these dimensions reflect a comprehensive enhancement of the system’s
+overall efficiency, sustainability, and cost-effectiveness.
+Table 3. Envi-Technoeconomic analysis for the IEEE 33-bus test system.
+Metric
+Without SOP
+and RPA
+With SOP,
+Without RPA
+With SOP
+and RPA
+Improvement (%)
+Carbon Emissions Reduction (kg CO2)
+Baseline
+10,000 kg
+25,000 kg
+150%
+Energy Efficiency Improvement (%)
+Baseline
+10%
+20%
+100%
+Grid Stability Improvement (%)
+Baseline
+15%
+30%
+100%
+SOC Utilization (%)
+70%
+80%
+85%
+21%
+Renewable Energy Consumption (%)
+60%
+75%
+80%
+33%
+Energy Storage Utilization (%)
+50%
+65%
+75%
+50%
+Grid Efficiency Improvement (%)
+Baseline
+25%
+35%
+35%
+Environmental Impact—Carbon Emissions Reduction: The carbon emissions reduction
+achieved is one of the most noticeable benefits. In the baseline scenario (without SOP and
+RPA), carbon emissions are at their highest, as the system relies heavily on fossil fuel-based
+grid power. However, the introduction of SOP alone leads to a 10,000 kg CO2 reduction.
+The combined approach of SOP and RPA reduces emissions by an impressive 25,000 kg—a
+150% improvement over the baseline. This significant reduction is primarily due to the
+better management of renewable energy sources (such as PV systems) and the enhanced
+optimization of energy storage, reducing the need for fossil fuel-based backup power.
+Technical Performance—Energy Efficiency and Grid Stability: In terms of technical
+performance, the integration of SOP and RPA leads to a remarkable improvement in energy
+efficiency. While the baseline system operates without optimization, the introduction of
+
+Atmosphere 2024, 15, 1429
+22 of 24
+SOP improves efficiency by 10% by better managing energy flows and increasing renewable
+energy usage. The combined SOP and RPA approach results in a 20% improvement in
+energy efficiency, representing a 100% improvement over the baseline. This is a direct
+outcome of enhanced energy storage management and the more effective integration of
+distributed generation resources. Another critical aspect of technical performance is grid
+stability. Without any optimization (the baseline), the system experiences considerable
+fluctuations in voltage and power quality. SOP alone improves grid stability by 15%,
+helping to balance supply and demand more effectively. The full integration of both
+SOP and RPA improves stability by 30%, reducing voltage deviation and ensuring the
+smoother, more reliable operation of the grid. This enhancement in grid stability is vital for
+integrating larger amounts of intermittent renewable energy without compromising the
+grid’s reliability.
+Grid Efficiency Improvement: The final aspect of the analysis is the improvement in
+grid efficiency. Initially, without SOP and RPA, the system operates at baseline efficiency.
+The introduction of SOP improves grid efficiency by 25%, enhancing the overall energy man-
+agement and distribution. When both SOP and RPA are applied, grid efficiency improves
+by 35%, representing a 35% increase in overall system performance. This improvement is
+crucial for ensuring that renewable energy is used as efficiently as possible, reducing the
+need for additional energy imports from the grid and minimizing carbon emissions.
+5. Conclusions
+This paper proposes an optimal dispatching method for Intelligent Distribution Net-
+works (IDNs) that integrates source–network–storage–load (SNSL) flexible resources, specif-
+ically designed to enhance renewable energy consumption and support carbon emission
+reduction efforts. The framework is structured into two layers: the lower layer optimizes
+dispatch for distributed generation (DG) users, while the upper layer manages the overall
+IDN, using tie-line power as boundary information to improve coordination. This approach
+not only maximizes renewable DG output but also enhances grid stability and efficiency,
+directly contributing to a transition towards a low-carbon energy future.
+The key findings from this research include the following:
+•
+The effective use of tie-line power as boundary information to optimize active and
+reactive power coordination across the IDN, enhancing the integration of renewable
+energy sources;
+•
+The integration of flexible resources, particularly Soft Open Points (SOPs), significantly
+increased DG consumption and reduced power losses, demonstrating its effectiveness
+in redistributing power flows and reducing emissions.
+Future research directions that align with this Special Issue include exploring the
+dynamic and real-time integration of renewable energy fluctuations and load demand
+variations through adaptive rolling optimization algorithms. Additionally, incorporat-
+ing advanced forecasting models, such as machine learning algorithms, can further en-
+hance the accuracy of DG output and load demand predictions, leading to more efficient
+dispatching decisions.
+Author Contributions: Methodology, J.Y.; Validation, Z.L.; Formal analysis, J.G.; Investigation, B.C.
+and W.W.; Writing—original draft, B.L. All authors have read and agreed to the published version of
+the manuscript.
+Funding: This research received no external funding.
+Institutional Review Board Statement: Not applicable.
+Informed Consent Statement: Not applicable.
+Data Availability Statement: The original contributions presented in the study are included in the
+article, further inquiries can be directed to the corresponding author.
+
+Atmosphere 2024, 15, 1429
+23 of 24
+Conflicts of Interest: Jiuyu Guo, Bin Chen, Zeke Li and Wei Wu are employees of State Grid Fujian
+Electric Power Co., Ltd. Bijing Liu is an employee of Nanrui Group Co., Ltd. (State Grid Electric
+Power Research Institute Co., Ltd.). Junjie Yang is affiliated with the Pingtan Research Institute of
+Xiamen University. This research was conducted independently, and none of the companies had roles
+in the design of the study; in the collection, analysis, or interpretation of data; in the writing of the
+manuscript; or in the decision to publish the article. The paper reflects the views of the scientists and
+not the companies.
+References
+1.
+Sun, B.; Li, Y.; Zeng, Y.; Li, C.; Shi, J.; Ma, X. Distribution transformer cluster flexible dispatching method based on discrete
+monkey algorithm. Energy Rep. 2021, 7, 1930–1942. [CrossRef]
+2.
+Al-Ismail, F.S.; Alam, M.S.; Shafiullah, M.; Hossain, M.I.; Rahman, S.M. Impacts of Renewable Energy Generation on Greenhouse
+Gas Emissions in Saudi Arabia: A Comprehensive Review. Sustainability 2023, 15, 5069. [CrossRef]
+3.
+Jun, L.; Yefu, C.; Chao, D.; Lin, J.; Lyu, J. Distributionally robust optimal reactive power dispatch with wasserstein distance in
+active distribution network. Mod. Power Syst. Clean Energy 2020, 8, 426–436.
+4.
+Yang, L.; Bo, F.; Bin, W.; Sun, S. Joint planning of distributed generations and energy storage in active distribution networks: A
+Bi-level programming approach. Energy 2022, 245, 123226.
+5.
+Ge, L.J.; Liu, H.; Yan, J.; Zhu, X.; Zhang, S.; Li, Y. Optimal integrated energy system planning with DG uncertainty affine model
+and carbon emissions charges. IEEE Trans. Sustain. Energy 2022, 13, 905–918. [CrossRef]
+6.
+Falih, N.; Supangkat, S.H.; Lubis, F.F. Robotic Process Automation in Smart System Platform: A Review. In Proceedings of the
+2022 International Conference on ICT for Smart Society (ICISS), Bandung, Indonesia, 10–11 August 2022; pp. 1–5.
+7.
+Vajgel, B.; Correa, P.L.P.; De Sousa, T.T.; Quille, R.V.E.; Bedoya, J.A.R.; De Almeida, G.M.; Filgueiras, L.V.L.; Demuner, V.R.S.;
+Mollica, D. Development of Intelligent Robotic Process Automation: A Utility Case Study in Brazil. IEEE Access 2021, 9,
+71222–71235. [CrossRef]
+8.
+Fathollahi, A.; Gheisarnejad, M.; Boudjadar, J.; Homayounzadeh, M.; Khooban, M.-H. Optimal design of wireless charging
+electric buses-based machine learning: A case study of Nguyen-Dupuis network. IEEE Trans. Veh. Technol. 2023, 72, 8449–8458.
+[CrossRef]
+9.
+Fathollahi, A.; Derakhshandeh, S.Y.; Ghiasian, A.; Khooban, M.H. Utilization of dynamic wireless power transfer technology in
+multi-depot, multi-product delivery supply chain. Sustain. Energy Grids Netw. 2022, 32, 100836. [CrossRef]
+10.
+Bing, S.; Yunfei, L.; Yuan, Z.; Chen, J.; Shi, J. Optimization planning method of distributed generation based on steady-state
+security region of distribution network. Energy Rep. 2022, 8, 4209–4222.
+11.
+Chen, D.; Yang, Y.; Yang, X.; Wang, Z.; Wu, W. Distributed optimization scheduling method for microgrid cluster based on
+distributed Newton method. Autom. Electr. Power Syst. 2017, 41, 156–162.
+12.
+Jian, C.; Junzhi, R.; Ziliang, L.; Zhang, W.; Zhou, Y.; Zhang, Y. Distributed multi-scenario optimal sizing of integrated electricity
+and gas system based on ADMM. Energy Syst. 2020, 117, 105675.
+13.
+Kunming, W.; Qiang, L.; Ziyu, C.; Lin, J.; Yi, Y.; Chen, M. Distributed optimization method with weighted gradients for economic
+dispatch problem of multi-microgrid systems. Energy 2021, 222, 119898.
+14.
+Zihan, G.; Haiyu, L.; Linwei, C. Optimized voltage-led customer load active service using genetic algorithm in distribution
+networks. IEEE Access 2022, 10, 22844–22853.
+15.
+Tomin, N.; Shakirov, V.; Kurbatsky, V.; Muzychuk, R.; Popova, E.; Sidorov, D.; Kozlov, A.; Yang, D. A multi-criteria approach to
+designing and managing a renewable energy community. Renew. Energy 2022, 199, 1153–1175. [CrossRef]
+16.
+Rui, Y.; Xiaonan, L. Voltage unbalance compensation in distribution feeders using soft open points. J. Mod. Power Syst. Clean
+Energy 2022, 10, 1000–1008.
+17.
+Lin, X.; Tao, N.; Tianen, H.; Jin, H.; Wu, W. A stochastic economic dispatch method considering a voltage-sensitive load as a
+reserve. Electr. Power Syst. Res. 2022, 205, 107724.
+18.
+Wu, Q.; Han, B.; Shahidehpour, M.; Qi, C.; Li, G.; Wang, K. Extreme bifurcation interval with deep PV penetration considering
+correlated net bus load forecast errors. IEEE Trans. Sustain. Energy 2020, 11, 2063–2076. [CrossRef]
+19.
+Wang, S.X.; Liu, Q.; Ji, X.Q. A fast sensitivity method for determining line loss and node voltages in active distribution network.
+IEEE Trans. Power Syst. 2018, 33, 1148–1150. [CrossRef]
+20.
+Xu, Y.; Zhang, J. A two-layer two-stage dispatching strategy for active distribution network with micro-grid considering multiple
+interactions. Electr. Power Syst. Res. 2020, 187, 106504. [CrossRef]
+21.
+Jian, J.; Li, P.; Yu, H.; Ji, H.; Ji, J.; Song, G.; Yan, J.; Wu, J.; Wang, C. Multi-stage supply restoration of active distribution networks
+with SOP integration. Sustain. Energy, Grids Netw. 2022, 29, 100562. [CrossRef]
+22.
+Muhammad, N.; Ahmad, A.; Huanyu, Z.; Chu, Z.; Hafiz, M.J.N.; Muhammad, S.B.; Muhammad, S.B.; Padmanaban, S. Optimized
+economic operation of energy storage integration using improved gravitational search algorithm and dual stage optimization.
+J. Energy Storage 2022, 50, 104591.
+23.
+Ma, W.-J.; Wang, J.; Vijay, G.; Chen, C. Distributed energy management for networked microgrids using online ADMM with
+regret. IEEE Trans. Smart Grid 2018, 9, 847–856. [CrossRef]
+
+Atmosphere 2024, 15, 1429
+24 of 24
+24.
+Li, X.; Ma, R.; Gan, W.; Yan, S. Optimal dispatch for battery energy storage station in distribution network considering voltage
+distribution improvement and peak load shifting. J. Mod. Power Syst. Clean Energy 2022, 10, 131–139. [CrossRef]
+25.
+Li, X.; Zeng, Y.; Lu, Z. Decomposition and coordination calculation of economic dispatch for active distribution network with
+multi-microgrids. Int. J. Electr. Power Energy Syst. 2022, 135, 107617. [CrossRef]
+26.
+Yuan, H.; Ye, H.; Chen, Y.; Deng, W. Research on the optimal configuration of photovoltaic and energy storage in rural microgrid.
+Energy Rep. 2022, 8, 1285–1293. [CrossRef]
+27.
+Wang, Z.; He, Y. Two-stage optimal demand response with battery energy storage systems. IET Gener. Transm. Distrib. 2016, 10,
+1286–1293. [CrossRef]
+28.
+Yendluri, D.K.; Ponnala, J.; Thatikonda, R.; Kempanna, M.; Tatikonda, R.; Bhuvanesh, A. Impact of Robotic Process Automation on
+Enterprise Resource Planning Systems. In Proceedings of the 2023 International Conference on the Confluence of Advancements
+in Robotics, Vision and Interdisciplinary Technology Management (IC-RVITM), Bangalore, India, 28–29 November 2023; pp. 1–6.
+29.
+Yendluri, D.K.; Thatikonda, R.; Thatikonda, R.; Ponnala, J.; Kempanna, M.; Bhuvanesh, A. Risk Management in Robotic Process
+Automation. In Proceedings of the 2024 IEEE International Conference on Interdisciplinary Approaches in Technology and
+Management for Social Innovation (IATMSI), Gwalior, India, 14–16 March 2024; pp. 1–6.
+30.
+Al-Slais, Y.; Ali, M. Robotic Process Automation and Intelligent Automation Security Challenges: A Review. In Proceedings of
+the 2023 International Conference on Cyber Management and Engineering (CyMaEn), Bangkok, Thailand, 26–27 January 2023;
+pp. 71–77.
+31.
+Yikui, L.; Jie, L.; Lei, W. Coordinated optimal network reconfiguration and voltage regulator/DER control for unbalanced
+distribution systems. IEEE Trans. Smart Grid 2019, 10, 2912–2922.
+32.
+Faiz, M.M.U.; Patil, N. Savita. Automated Robotic Processes that Learn on Their Own. In Proceedings of the 2023 Interna-
+tional Conference on Power Energy, Environment & Intelligent Control (PEEIC), Greater Noida, India, 19–23 December 2023;
+pp. 940–944.
+33.
+Ma, Y.-W.; Lin, D.-P.; Chen, S.-J.; Chu, H.-Y.; Chen, J.-L. System Design and Development for Robotic Process Automation. In
+Proceedings of the 2019 IEEE International Conference on Smart Cloud (SmartCloud), Tokyo, Japan, 10–12 December 2019;
+pp. 187–189.
+34.
+Nielsen, I.E.; Piyatilake, A.; Thibbotuwawa, A.; Silva, M.M.D.; Bocewicz, G.; Banaszak, Z.A. Benefits Realization of Robotic
+Process Automation (RPA) Initiatives in Supply Chains. IEEE Access 2023, 11, 37623–37636. [CrossRef]
+35.
+Sharma, S.; Kataria, A.; Sandhu, J.K. Applications, Tools and Technologies of Robotic Process Automation in Various Industries.
+In Proceedings of the 2022 International Conference on Decision Aid Sciences and Applications (DASA), Chiangrai, Thailand,
+23–25 March 2022; pp. 1067–1072.
+36.
+Lo, W.; Yang, C.-M.; Zhang, Q.; Li, M. Increased Productivity and Reduced Waste with Robotic Process Automation and
+Generative AI-Powered IoE Services. J. Web Eng. 2024, 23, 53–87. [CrossRef]
+37.
+Sisodiya, M.; Prabhu, S.; Ashok, P. The Transformative Power of Robotic Process Automation: Redefining Business in Industry
+4.0. In Proceedings of the 2024 14th International Conference on Cloud Computing, Data Science & Engineering (Confluence),
+Noida, India, 18–19 January 2024; pp. 498–503.
+38.
+Raveendhra, D.; Poojitha, R.; Narasimharaju, B.L.; Domyshev, A.; Dreglea, A.; Dao, M.H.; Pathak, M.; Liu, F.; Sidorov, D. Part
+II: State-of-the-Art Technologies of Solar-Powered DC Microgrid with Hybrid Energy Storage Systems: Converter Topologies.
+Energies 2023, 16, 6194. [CrossRef]
+39.
+Alam, M.S.; Al-Ismail, F.S.; Abido, M.A. Power management and state of charge restoration of direct current microgrid with
+improved voltage-shifting controller. J. Energy Storage 2021, 44 Pt A, 103253. [CrossRef]
+Disclaimer/Publisher’s Note: The statements, opinions and data contained in all publications are solely those of the individual
+author(s) and contributor(s) and not of MDPI and/or the editor(s). MDPI and/or the editor(s) disclaim responsibility for any injury to
+people or property resulting from any ideas, methods, instructions or products referred to in the content.

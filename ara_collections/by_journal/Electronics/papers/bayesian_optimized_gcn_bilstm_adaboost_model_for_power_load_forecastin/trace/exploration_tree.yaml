@@ -1,0 +1,98 @@
+tree:
+  - id: N01
+    type: question
+    support_level: explicit
+    source_refs: ["§1 Introduction", "§1 three enumerated limitations"]
+    title: "How to forecast power load accurately AND robustly during abrupt load changes?"
+    description: >
+      Central question. Single deep models lose accuracy on long sequences and degrade at load
+      mutations; they lack adaptive base-learner weighting and uncertainty quantification.
+    children:
+      - id: N02
+        type: decision
+        support_level: explicit
+        source_refs: ["§2.1 Model Framework", "Figure 1"]
+        title: "Use a GCN-BiLSTM base learner, ensembled by modified AdaBoost, with a Bayesian (MC-Dropout) step"
+        description: >
+          Compose spatial (GCN) + temporal (BiLSTM) extraction as the weak learner; boost 10 copies;
+          refine learner weights by MC-Dropout uncertainty.
+        children:
+          - id: N03
+            type: decision
+            support_level: explicit
+            source_refs: ["§2.2 GCN Method", "§4.1", "Figure 2", "Table 2"]
+            title: "Build the GCN adjacency from a Spearman |rho|>=0.8 threshold"
+            description: >
+              Features are non-normal/non-linear, so rank correlation is chosen; edge iff |rho|>=0.8.
+            children:
+              - id: N04
+                type: experiment
+                support_level: explicit
+                source_refs: ["Table 2", "§4.1"]
+                title: "Graph-construction comparison (one week)"
+                description: "Spearman vs KNN vs learned graphs vs mutual information."
+                evidence: ["C03"]
+              - id: N05
+                type: dead_end
+                support_level: explicit
+                source_refs: ["Table 2", "§4.1", "§5(4)"]
+                title: "KNN / learned-graph / mutual-information adjacencies rejected"
+                description: >
+                  KNN introduces spurious edges from raw similarity; learned graphs need much data and
+                  overfit; mutual information is sensitive to distribution/sample size. All worse than
+                  Spearman on one-week MAE/MAPE/RMSE.
+                evidence: ["C03"]
+          - id: N06
+            type: decision
+            support_level: explicit
+            source_refs: ["§2.4 AdaBoost Algorithm", "Eqs 11-16"]
+            title: "Modify AdaBoost: only up-weight samples with error > 0.3; deep base learner"
+            description: >
+              Deviates from classic AdaBoost (which re-weights all misclassified samples) to focus on
+              hard/mutation samples and avoid noise amplification. Threshold stated as tunable.
+            children:
+              - id: N07
+                type: experiment
+                support_level: explicit
+                source_refs: ["Table 4", "Figure 11", "Figure 12"]
+                title: "Stagewise ablation + robustness at turning points"
+                description: "BiLSTM -> GCN-BiLSTM -> GCN-BiLSTM-Adaboost -> proposed, day & week."
+                evidence: ["C01", "C02", "C04"]
+          - id: N08
+            type: decision
+            support_level: explicit
+            source_refs: ["§2.5 Bayesian Method", "Eqs 17-19"]
+            title: "Realize the Bayesian step as Monte Carlo Dropout uncertainty weighting"
+            description: >
+              100 dropout passes per learner -> variance; attenuate weight W'_m = W_m/(1+uncertainty);
+              also yields a 95% predictive interval.
+            children:
+              - id: N09
+                type: experiment
+                support_level: explicit
+                source_refs: ["Figure 12", "§4.4"]
+                title: "Uncertainty quantification + runtime"
+                description: "95% CI band over one week; full run 5 min 56 s."
+                evidence: ["C05"]
+      - id: N10
+        type: experiment
+        support_level: explicit
+        source_refs: ["Figures 7-10", "§4.3"]
+        title: "Accuracy vs single-model baselines"
+        description: "LSTM, GRU, CNN-LSTM, GCN-LSTM, CNN-BiLSTM on one-day and one-week horizons."
+        evidence: ["C01"]
+      - id: N11
+        type: dead_end
+        support_level: inferred
+        title: "AdaBoost error threshold (0.3), K=10, and 100 MC samples never swept"
+        description: >
+          The paper fixes tau=0.3, K=10, T=100 and explicitly says tau must be tuned per application,
+          but reports no sensitivity study; the optimum/sensitivity of these knobs is untested.
+      - id: N12
+        type: dead_end
+        support_level: inferred
+        title: "Promised MCMC-based Bayesian hyperparameter optimization not implemented"
+        description: >
+          Intro contribution (3) claims MCMC-based probabilistic hyperparameter tuning; the Method
+          implements only MC-Dropout uncertainty. No MCMC search space/procedure is reported — an
+          unrealized/loosely-worded claim (see solution/algorithm.md scope note).

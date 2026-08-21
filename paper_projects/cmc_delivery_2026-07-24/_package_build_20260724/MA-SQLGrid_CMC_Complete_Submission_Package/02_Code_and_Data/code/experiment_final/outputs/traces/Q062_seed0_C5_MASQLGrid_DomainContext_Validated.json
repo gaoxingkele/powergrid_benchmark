@@ -1,0 +1,82 @@
+{
+  "prompt": "You are generating candidate SQLite SQL for CHESS-style MA-SQLGrid.\n\nReturn 3 distinct read-only SQLite SELECT queries as a numbered list. Do not include explanation.\nDo not use INSERT, UPDATE, DELETE, DROP, PRAGMA, or multiple statements.\nUse only the selected context, normalization hints, and inferred output-form hints below. Candidate queries should differ in plausible joins/projections while respecting the inferred projection count and relevant literal predicates.\n\nCondition: C5_MASQLGrid_DomainContext_Validated\n\nSQLite selected context:\nTables and selected columns:\n- asset_types(asset_type_id) -- equipment type catalog such as Transformer, Breaker, Line, Relay, Substation, Capacitor\n- assets(asset_id, asset_type_id, location_id) -- individual grid assets with names, type, location, install date, status, and MW capacity\n- maintenance_logs(log_id, work_order_id, technician_id) -- maintenance actions, timestamps, notes, and parts cost\n- sensor_readings(reading_id, asset_id, alarm_flag) -- time-series sensor readings for assets with sensor type, value, unit, and alarm flag\n- technicians(technician_id, technician_name, active) -- maintenance technicians, specialties, home regions, and active flag\n- work_orders(work_order_id, asset_id, assigned_technician_id, priority, status) -- maintenance work orders with priority, status, schedule, completion date, and fault code\nJoin paths:\n- assets.asset_type_id = asset_types.asset_type_id\n- work_orders.asset_id = assets.asset_id\n- work_orders.assigned_technician_id = technicians.technician_id\n- maintenance_logs.work_order_id = work_orders.work_order_id\n- maintenance_logs.technician_id = technicians.technician_id\n- sensor_readings.asset_id = assets.asset_id\nPower-grid domain normalization hints inferred from the question:\n- technicians.active = 1\nAnswer-shape hints inferred from the question text:\n- expected column count: 2\n- row granularity: multi-row\n- deterministic ordering needed: True\n- Use COUNT(*) for count questions.\n- Project work_order_id and status for named assignee questions.\n\nQuestion ID: Q062\nQuestion: How many work orders are assigned to each active technician?\n",
+  "rank_trace": [
+    {
+      "candidate_index": 0,
+      "column_count": 2,
+      "empty_result": false,
+      "exec_error": "",
+      "exec_ok": true,
+      "expected_column_count": 2,
+      "missing_value_hints": [],
+      "order_ok": true,
+      "order_required": true,
+      "ranker_score": 33,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": true,
+      "sql": "SELECT t.technician_name, COUNT(*) AS work_order_count FROM technicians AS t JOIN work_orders AS w ON w.assigned_technician_id = t.technician_id WHERE t.active = 1 GROUP BY t.technician_id, t.technician_name ORDER BY work_order_count DESC, t.technician_name ASC;",
+      "value_hint_count": 1,
+      "value_hits": 1
+    },
+    {
+      "candidate_index": 1,
+      "column_count": 2,
+      "empty_result": false,
+      "exec_error": "",
+      "exec_ok": true,
+      "expected_column_count": 2,
+      "missing_value_hints": [],
+      "order_ok": true,
+      "order_required": true,
+      "ranker_score": 32,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": true,
+      "sql": "SELECT t.technician_name, COUNT(w.work_order_id) AS work_order_count FROM technicians AS t LEFT JOIN work_orders AS w ON w.assigned_technician_id = t.technician_id WHERE t.active = 1 GROUP BY t.technician_id, t.technician_name ORDER BY work_order_count DESC, t.technician_name ASC;",
+      "value_hint_count": 1,
+      "value_hits": 1
+    },
+    {
+      "candidate_index": 2,
+      "column_count": 2,
+      "empty_result": false,
+      "exec_error": "",
+      "exec_ok": true,
+      "expected_column_count": 2,
+      "missing_value_hints": [],
+      "order_ok": true,
+      "order_required": true,
+      "ranker_score": 31,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": true,
+      "sql": "SELECT t.technician_name, COUNT(*) AS work_order_count FROM work_orders AS w JOIN technicians AS t ON t.technician_id = w.assigned_technician_id AND t.active = 1 GROUP BY t.technician_id, t.technician_name ORDER BY work_order_count DESC, t.technician_name ASC;",
+      "value_hint_count": 1,
+      "value_hits": 1
+    },
+    {
+      "candidate_index": 3,
+      "column_count": 0,
+      "empty_result": false,
+      "exec_error": "incomplete input",
+      "exec_ok": false,
+      "expected_column_count": 2,
+      "missing_value_hints": [
+        "technicians.active = 1"
+      ],
+      "order_ok": false,
+      "order_required": true,
+      "ranker_score": -18,
+      "safe": true,
+      "safety_error": "",
+      "shape_ok": false,
+      "sql": "SELECT;",
+      "value_hint_count": 1,
+      "value_hits": 0
+    }
+  ],
+  "raw_response": "1. ```sql\nSELECT\n  t.technician_name,\n  COUNT(*) AS work_order_count\nFROM technicians AS t\nJOIN work_orders AS w\n  ON w.assigned_technician_id = t.technician_id\nWHERE t.active = 1\nGROUP BY t.technician_id, t.technician_name\nORDER BY work_order_count DESC, t.technician_name ASC;\n```\n\n2. ```sql\nSELECT\n  t.technician_name,\n  COUNT(w.work_order_id) AS work_order_count\nFROM technicians AS t\nLEFT JOIN work_orders AS w\n  ON w.assigned_technician_id = t.technician_id\nWHERE t.active = 1\nGROUP BY t.technician_id, t.technician_name\nORDER BY work_order_count DESC, t.technician_name ASC;\n```\n\n3. ```sql\nSELECT\n  t.technician_name,\n  COUNT(*) AS work_order_count\nFROM work_orders AS w\nJOIN technicians AS t\n  ON t.technician_id = w.assigned_technician_id\n AND t.active = 1\nGROUP BY t.technician_id, t.technician_name\nORDER BY work_order_count DESC, t.technician_name ASC;\n```",
+  "repair_raw_response": "",
+  "repaired_sql": ""
+}

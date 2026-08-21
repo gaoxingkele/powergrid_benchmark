@@ -1,0 +1,166 @@
+# Exploration Tree — Research DAG
+# Root nodes = central questions; children = experiments, decisions, dead ends
+
+nodes:
+  - id: Q01
+    label: "Can battery energy storage as virtual power lines defer or replace transmission investments in TGEP?"
+    type: research_question
+    support_level: explicit
+    children: [Q01a, E01, E03]
+
+  - id: Q01a
+    label: "How sensitive is VPL adoption to ESS cost reductions?"
+    type: sub_question
+    support_level: explicit
+    children: [E02, E04]
+
+  - id: Q02
+    label: "Does TSO-DSO flexibility reduce total expansion costs?"
+    type: research_question
+    support_level: explicit
+    children: [E05, D01]
+
+  - id: Q03
+    label: "Can DDDRO with duality-free decomposition handle TGEP uncertainties tractably?"
+    type: research_question
+    support_level: explicit
+    children: [E06, E07, E09]
+
+  - id: Q04
+    label: "What is the combined impact of VPL, VPP, flexibility, and VRE on system economics?"
+    type: research_question
+    support_level: explicit
+    children: [E05, D01, E08]
+
+  - id: D01
+    label: "Model VPPs with reserve market contracting to handle non-dispatchable generation fluctuations"
+    type: design_decision
+    support_level: explicit
+    children: [E05]
+    description: "Decision to model VPPs as aggregated DER groups providing both energy and reserve capacity, with reserve capacity costs as planned costs and dispatched energy as variable costs."
+
+  - id: D02
+    label: "Use 4-stage net demand duration curve instead of full hourly resolution"
+    type: design_decision
+    support_level: explicit
+    children: [E01, E03]
+    description: "Decision to discretize the load duration curve into 4 stages (S1: 0.05 duration, peak; S2: 0.2; S3: 0.2; S4: 0.55, low demand) for computational tractability in long-term planning."
+
+  - id: D03
+    label: "Use linearized AC-OPF with SOC constraint for apparent power"
+    type: design_decision
+    support_level: explicit
+    children: [E01, E03, E05]
+    description: "Decision to use linearized AC power flow instead of full nonlinear AC-OPF, with second-order cone constraint (19) for apparent power limits. Balances accuracy and tractability."
+
+  - id: D04
+    label: "Use CCG decomposition over Benders decomposition"
+    type: design_decision
+    support_level: explicit
+    children: [E09]
+    description: "Decision based on [66,67] demonstrating CCG converges faster than Benders for similar problem classes."
+
+  - id: D05
+    label: "Use ENTSO-E Spain data for both Garver and RTS-GMLC test systems"
+    type: design_decision
+    support_level: explicit
+    children: [E01, E03, E06]
+    description: "Historical data mismatch: Spain data mapped to US test systems. Acceptable for methodology validation."
+
+  - id: D06
+    label: "Model upward and downward flexibility as separate services with cost terms"
+    type: design_decision
+    support_level: explicit
+    children: [E05, E08]
+    description: "Upward flexibility reduces demand/increases DG. Downward flexibility increases demand/reduces DG injection. Both have capacity and energy cost components."
+
+  - id: D07
+    label: "Use perpetuity financial model for investment comparison"
+    type: design_decision
+    support_level: explicit
+    children: [E01, E02, E03, E04, E05]
+    description: "Standardizes investment comparisons across assets with different useful lives by extending to infinity."
+
+  - id: E01
+    label: "Garver 6-Node — VPL impact (S1.1 vs S1.2)"
+    type: experiment
+    support_level: explicit
+    children: []
+    description: "Small system validation. 4 circuits vs 2 circuits + 2 VPL. Cost: 138.2 vs 133.2 M$."
+
+  - id: E02
+    label: "Garver 6-Node — ESS cost sensitivity (S1.2 vs S1.3)"
+    type: experiment
+    support_level: explicit
+    children: []
+    description: "Current ESS costs (2 VPL) vs projected costs (3 VPL). Cost: 133.2 vs 114.45 M$."
+
+  - id: E03
+    label: "IEEE RTS-GMLC — VPL impact (S2.1 vs S2.2)"
+    type: experiment
+    support_level: explicit
+    children: []
+    description: "Medium system validation. 4 circuits vs 2 circuits + 2 VPL. Cost: 526.7 vs 462.6 M$."
+
+  - id: E04
+    label: "IEEE RTS-GMLC — ESS cost sensitivity (S2.2 vs S2.3)"
+    type: experiment
+    support_level: explicit
+    children: []
+    description: "Current costs (2 VPL) vs projected costs (3 VPL). Cost: 462.6 vs 420.2 M$."
+
+  - id: E05
+    label: "IEEE RTS-GMLC — Full model with flexibility (S2.2 vs S2.4)"
+    type: experiment
+    support_level: explicit
+    children: []
+    description: "VPL only (462.6 M$) vs VPL + VRE + DR + flexibility (397.36 M$). 25% DR participation, 30% flexibility."
+
+  - id: E06
+    label: "DDDRO ambiguity set construction and validation"
+    type: experiment
+    support_level: explicit
+    children: []
+    description: "6 data bins from K-means clustering of ENTSO-E data. E-PDF from bin frequencies. Confidence set via L1/L∞ norms."
+
+  - id: E07
+    label: "Duality-free decomposition performance"
+    type: experiment
+    support_level: explicit
+    children: []
+    description: "Transforms bi-level max-min into independent subproblems. No dual computation needed [60,61]."
+
+  - id: E08
+    label: "Line usage, losses, and LMP indicator comparison"
+    type: experiment
+    support_level: explicit
+    children: []
+    description: "Cross-scenario (S2.1-S2.4) comparison of transmission system metrics. Avg line usage: 0.968->1.196. Losses: 450.3->440.5. LMP: 1001.3->66.8."
+
+  - id: E09
+    label: "Computational scalability assessment"
+    type: experiment
+    support_level: explicit
+    children: []
+    description: "RTS-GMLC processing time: ~10 min average, ~30 min max. Apple Studio M1 64 GB."
+
+  - id: DE01
+    label: "Full nonlinear AC-OPF (dead end)"
+    type: dead_end
+    support_level: explicit
+    children: []
+    description: "Full AC-OPF intractable for long-term TGEP with uncertainty. Linearized AC with SOC constraint adopted instead."
+
+  - id: DE02
+    label: "Fully dynamic multi-period investment (dead end)"
+    type: dead_end
+    support_level: inferred
+    children: []
+    description: "Combined with uncertainty and VPL binary variables, fully dynamic multi-period optimization would be computationally prohibitive. Simplified to stages with representative years."
+
+  - id: DE03
+    label: "Real transmission line implementation (dead end)"
+    type: dead_end
+    support_level: explicit
+    children: []
+    description: "Implementation of a real case in a transmission line was not part of the scope of this work. Stated as out of scope in Section 2.3."

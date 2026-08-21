@@ -1,0 +1,165 @@
+# Exploration Tree: Research DAG for the Review Paper
+# Nodes represent research steps/sections; edges represent dependencies.
+
+meta:
+  paper: "Review of Active Distribution Network Planning: Elements in Optimization Models and Generative AI Applications"
+  doi: "10.3390/en19010116"
+  type: review
+
+nodes:
+  - id: intro
+    label: "Introduction"
+    description: "Context, motivation, contributions of the review"
+    depth: 0
+    references: [1, 2, 3, 4, 5]
+
+  - id: passive_vs_active
+    label: "Passive vs Active Networks (Table 1)"
+    description: "Comparison of key characteristics between passive and active distribution networks"
+    depth: 1
+    parents: [intro]
+
+  - id: planning_horizons
+    label: "Planning Horizons (Table 2)"
+    description: "Classification of planning horizons: short-term, long-term, horizon-year"
+    depth: 1
+    parents: [intro]
+    references: [6, 7, 8]
+
+  - id: planning_objectives
+    label: "Planning Objectives (Table 3)"
+    description: "Taxonomy of economic, technical, and environmental objectives"
+    depth: 1
+    parents: [intro]
+    references: [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+
+  - id: decision_variables_traditional
+    label: "Traditional Planning Strategies"
+    description: "Substation upgrade, new substation, feeder upgrade, new feeder, transformer tap adjustment"
+    depth: 2
+    parents: [planning_horizons, planning_objectives]
+    references: [21, 22, 23, 24, 25, 26, 27]
+
+  - id: decision_variables_flexible
+    label: "Flexible Planning Strategies (Table 5)"
+    description: "PV generation, ESS, EVCS/V2G, demand response as flexible sources"
+    depth: 2
+    parents: [planning_horizons, planning_objectives]
+    references: [28, 29, 30]
+
+  - id: planning_constraints
+    label: "Planning Constraints (Table 6)"
+    description: "Technical, non-technical, time and investment, miscellaneous constraints"
+    depth: 1
+    parents: [intro]
+    references: [3, 31, 32, 33, 34, 35, 36, 37, 38, 39]
+
+  - id: planning_variables_types
+    label: "Types of Planning Variables (Table 7)"
+    description: "Binary and continuous variables in OPF planning problems"
+    depth: 2
+    parents: [decision_variables_traditional]
+
+  - id: uncertainty_modeling
+    label: "Uncertainty Modelling Techniques (Table 8)"
+    description: "Probabilistic, possibilistic, hybrid, IGDT, MC, analytical methods"
+    depth: 1
+    parents: [intro]
+    references: [40, 41, 42, 43, 44]
+
+  - id: opf_lp
+    label: "Linear Programming for OPF"
+    description: "LP-based OPF formulations for distribution planning"
+    depth: 2
+    parents: [planning_constraints]
+    references: [45, 46]
+
+  - id: opf_milp
+    label: "Mixed-Integer Linear Programming"
+    description: "MILP for discrete investment decisions and continuous operations"
+    depth: 2
+    parents: [planning_constraints]
+    references: [47, 48, 49]
+
+  - id: opf_minlp
+    label: "Mixed-Integer Nonlinear Programming"
+    description: "MINLP for high-fidelity AC power flow with discrete variables"
+    depth: 2
+    parents: [planning_constraints]
+    references: [50, 51]
+
+  - id: opf_convex
+    label: "Convex Relaxation Methods"
+    description: "SOC relaxations for global optimality in radial networks"
+    depth: 2
+    parents: [planning_constraints]
+    references: [52, 53, 54, 55, 56, 14]
+
+  - id: opf_metaheuristic
+    label: "Metaheuristic Methods"
+    description: "GA, PSO, simulated annealing for complex non-convex problems"
+    depth: 2
+    parents: [planning_constraints]
+    references: [57, 58]
+
+  - id: opf_dynamic_tools
+    label: "Dynamic OPF Planning Models and Tools"
+    description: "FlexPlan.jl, eGo, Pandapower frameworks"
+    depth: 2
+    parents: [opf_lp, opf_milp]
+    references: [59, 60, 61, 62]
+
+  - id: genai_overview
+    label: "Generative AI Models Overview"
+    description: "Introduction to GenAI applications in ADN"
+    depth: 1
+    parents: [intro]
+    references: [63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101]
+
+  - id: genai_gan
+    label: "GAN-based Models"
+    description: "cGAN, WGAN-GP, CycleGAN, StyleGAN for scenario generation"
+    depth: 2
+    parents: [genai_overview]
+    references: [63, 64, 65, 66, 67, 68]
+
+  - id: genai_diffusion
+    label: "Diffusion-based Models"
+    description: "DiffCharge, DiffLoad, ExDiffusion for uncertainty quantification"
+    depth: 2
+    parents: [genai_overview]
+    references: [69, 70, 71, 72, 73]
+
+  - id: genai_vae
+    label: "VAE-based Models"
+    description: "beta-VAE, Conditional VAE for probabilistic forecasting"
+    depth: 2
+    parents: [genai_overview]
+    references: [74, 75, 76, 77]
+
+  - id: genai_flow
+    label: "Flow-based Models"
+    description: "RealNVP, Glow, Normalizing Flow for density estimation"
+    depth: 2
+    parents: [genai_overview]
+    references: [78, 79, 80, 81]
+
+  - id: genai_transformer
+    label: "Transformer-based Models"
+    description: "GPT, LLaMA, eGridGPT, PowerPulse for planning decision support"
+    depth: 2
+    parents: [genai_overview]
+    references: [82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101]
+
+  - id: genai_adn_integration
+    label: "GenAI Integration in ADN Planning"
+    description: "Case studies of GAN-assisted stochastic PV planning and cooperative planning"
+    depth: 3
+    parents: [genai_gan, genai_diffusion, decision_variables_flexible]
+    references: [102, 103]
+
+  - id: conclusions
+    label: "Conclusions and Future Work"
+    description: "Summary, critical challenges, future research directions"
+    depth: 1
+    parents: [opf_dynamic_tools, genai_adn_integration, uncertainty_modeling]

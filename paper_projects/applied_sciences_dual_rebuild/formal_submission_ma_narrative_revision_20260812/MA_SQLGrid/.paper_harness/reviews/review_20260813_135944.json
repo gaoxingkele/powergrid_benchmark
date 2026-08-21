@@ -1,0 +1,223 @@
+{
+  "schema_version": "paper_harness.review.v2",
+  "venue": "mdpi_applied_sciences",
+  "manuscript": "paper_applsci.tex",
+  "manuscript_sha256": "7ef06b58b34cf54be2f35032662f5f8b006a21a2d7e67dfd43f964e8ad602344",
+  "coverage": {
+    "characters_total": 86419,
+    "characters_supplied": 86419,
+    "complete": true,
+    "sections_detected": [
+      "Introduction",
+      "Related Work",
+      "Schema Linking, Context Construction, and Evaluation",
+      "Multi-Role Generation, Validation, and Selection",
+      "Power-Grid Text-to-SQL",
+      "Materials and Methods",
+      "Problem Formulation and System Overview",
+      "Datasets and Evaluation Roles",
+      "Experimental Protocols and Evaluation Boundaries",
+      "Five-Role Multi-Agent Architecture",
+      "Read-Only Validation and Evidence-Aware Adjudication",
+      "Generation Study",
+      "Component, Constructed-State, and Public-Database Studies",
+      "Historical-Pool Selection Study",
+      "Statistical Analysis",
+      "Implementation and Reproducibility",
+      "Generative-AI Assistance and Author Responsibility",
+      "Results",
+      "Overview of Empirical Findings",
+      "Context and Component Effects on SQL Generation",
+      "Factorial Effects and Multiplicity",
+      "Presented Values and Candidate Selection Components",
+      "Constructed-State Stability",
+      "Cross-Database Portability on BIRD",
+      "Validation-Aware Selection in the Historical Candidate Pool",
+      "Reference Matches, Coverage, and Rescue/Harm",
+      "Tie Structure, Order Sensitivity, and the Q039 Case",
+      "Implementation Reliability",
+      "Discussion",
+      "Model-Dependent Use of Context and Values",
+      "Why Validation-Aware Selection Changed the Historical Pool",
+      "Limited Increment from Constructed-State Evidence",
+      "Ties as the Main Ranking Bottleneck",
+      "Engineering Significance",
+      "Limitations and Future Work",
+      "Conclusions"
+    ]
+  },
+  "decision": "major_revision",
+  "primary_story": "MA-SQLGrid separates intent, schema grounding, candidate handling, read-only execution, constructed-state evidence, and deterministic selection into a traceable five-role workflow, but the empirical record supports a retrospective validation-and-selection prototype more strongly than an end-to-end multi-agent power-grid system.",
+  "primary_result": "Within one development-visible synthetic GridDB pool of eight historical candidates for each of 180 questions, the original-order validation selector yielded 100 frozen-reference matches versus 80 for fixed order and 101 with three witnesses, while 130 questions had top-score ties and reversed order yielded 117–118 matches.",
+  "positive_findings": [
+    "The manuscript carefully distinguishes admissibility, executability, frozen-reference equality, constructed-state agreement, and expert semantic validity.",
+    "Negative and null findings remain visible across the abstract, Results, Discussion, Limitations, and Conclusions; the paper does not conceal the zero-of-nine factorial result or the one-match witness increment.",
+    "The historical-pool design retains failed attempts, disallows replacement and hidden retry, seals decisions before direct gold loading, and reports candidate-order sensitivity.",
+    "The statistical analysis identifies the question-level estimand, dependence proxies, multiplicity families, exchangeability assumptions, and the non-population interpretation of composition intervals.",
+    "The BIRD comparison explicitly discloses the unequal call count of execution repair and avoids claiming a universal prompting advantage.",
+    "The tie analysis is scientifically useful: it reveals that coarse reference-independent evidence and stable-order resolution, rather than candidate scarcity, are the principal ranking bottlenecks in this pool.",
+    "The intended beneficiary and operational boundary are named, including the need for authentication, least-privilege views, qualified review, and independent security assessment.",
+    "The generative-AI assistance disclosure is unusually specific about activities, missing backend provenance, local verification, and retained author responsibility."
+  ],
+  "issues": [
+    {
+      "id": "I001",
+      "type": "CONTRIBUTION_EVIDENCE_MISMATCH",
+      "dimension": "experiments",
+      "severity": "major",
+      "location": "Title; Abstract; Introduction contribution list; Five-Role Multi-Agent Architecture; Generation Study; Historical-Pool Selection Study; Conclusions",
+      "manuscript_evidence": "The five-role framework is the branded central contribution, but the generation study explicitly contains no candidate ranking, multi-agent negotiation, or repair; the SQL Synthesizer packages externally produced candidates; and the principal 80/100/101 comparison uses a historical pool with no generation calls. The manuscript itself states that it does not estimate a causal five-role advantage over a call-matched single agent.",
+      "reviewer_inference": "Typed roles, replay tests, and retrospective adjudication establish implementation activity and selector behavior, not end-to-end efficacy of the five-role organization. Applied Sciences does not require SOTA, but a branded applied framework must either be evaluated as an integrated system or be presented explicitly as an implementation and hypothesis-generating architecture.",
+      "required_action": "Choose an evidence-aligned path. Either retitle and rewrite the primary contribution as a traceable validation-and-adjudication architecture whose full five-role efficacy is untested, or add a prospective evaluation on unseen grid questions. For the latter, use the question as the analysis unit; compare the complete workflow with a direct single-agent baseline and staged one-candidate control; match model snapshot, accessible schema, physical calls, candidate count, token budget, retries, and executor; preregister selection, tie, and abstention rules; and estimate paired expert-adjudicated semantic correctness and risk–coverage separately from trace completeness.",
+      "acceptance_test": "Every load-bearing title and contribution term maps to a method actually exercised and a reported endpoint; alternatively, a sealed budget-matched experiment reports all controls, item-level denominators, failures, paired effects, and risk–coverage without reusing development-visible outcomes.",
+      "evidence_boundary": "Without a new experiment, the evidence licenses a five-role software architecture, deterministic replay, and retrospective selector behavior, but not an end-to-end multi-agent performance advantage."
+    },
+    {
+      "id": "I002",
+      "type": "PROXY_TASK_MISMATCH",
+      "dimension": "experiments",
+      "severity": "major",
+      "location": "Datasets and Evaluation Roles; Tables 2, 3, 4, and 8; Q039 analysis; Engineering Significance; Limitations; Conclusions",
+      "manuscript_evidence": "GridDB is synthetic, contains 98 rows, and its 180-item evaluation partition was development-visible. The paper reports no documented independent expert review of its question–SQL semantics. RTS-GMLC and SimBench pairs remain unreviewed machine silver, while BIRD is explicitly non-grid. Q039 demonstrates unresolved status and date-boundary ambiguity despite a frozen-reference match.",
+      "reviewer_inference": "Result equality against a development-visible synthetic reference does not establish that selected SQL captures a grid professional's intended status, time, unit, topology, or projection semantics. Terms such as accuracy, correctness, rescue, and harm can therefore overstate what is presently a frozen-reference endpoint.",
+      "required_action": "Throughout the abstract, tables, figures, Results, Discussion, and Conclusions, rename GridDB endpoints as frozen-reference result matches or reference-match changes and qualify rescue/harm accordingly. Document how questions and reference SQL were created, checked, and ambiguity-tagged. Any broader power-grid semantic-validity claim requires an unseen set sealed before execution and independently adjudicated by qualified power-system and SQL/database reviewers, with explicit handling of disagreements, units, status codes, temporal boundaries, ordering, and tie semantics.",
+      "acceptance_test": "Either all claims are confined to the synthetic frozen evaluator, or the revision supplies a sealed item-level adjudication record and reports the proportion of independently accepted semantic matches, ambiguity rate, reviewer disagreement process, and risk–coverage with the question as analysis unit.",
+      "evidence_boundary": "After claim narrowing alone, the results characterize behavior on a controlled synthetic GridDB case study and non-grid BIRD portability; they do not establish real-grid semantic correctness or operational utility."
+    },
+    {
+      "id": "I003",
+      "type": "OBSERVATIONAL_CAUSAL_OVERCLAIM",
+      "dimension": "soundness",
+      "severity": "major",
+      "location": "Abstract; Overview of Empirical Findings; Reference Matches, Coverage, and Rescue/Harm; Why Validation-Aware Selection Changed the Historical Pool; Conclusions",
+      "manuscript_evidence": "The selector weights and pass thresholds were not established as preceding access to same-item derived outcomes. Top-score ties occur on 130/180 questions, original-order selection chooses Qwen slots on 178/180 questions, and reversing only the tie order changes the result from 101 to 117–118 matches. Nevertheless, the manuscript repeatedly says validation-aware ranking increased or added matches and attributes the change to removal or demotion of weaker candidates.",
+      "reviewer_inference": "The finite-pool count difference is real, but its magnitude is inseparable from an outcome-exposed policy and an arbitrary tie order. The evidence does not identify a general validation mechanism or show that the original registered order is preferable; the reverse-order diagnostic is larger than the one-match witness increment.",
+      "required_action": "Make the historical result explicitly post hoc and original-order-specific wherever 80/100/101 appears. Present the 130/180 tie rate and 117–118 reverse-order result alongside, rather than after, the primary count. Replace causal or quality language such as increased, helped reject weaker candidates, and supports efficacy with yielded under the recorded retrospective rule. A future confirmatory study must freeze weights, tie handling, abstention, candidate-source order, and risk–coverage targets before outcomes on a new pool are examined.",
+      "acceptance_test": "The abstract and conclusion each state in one contiguous passage that the comparison is retrospective, original-order-specific, highly tied, and order-sensitive; no mechanism or prospective-benefit claim remains unless supported by a new preregistered pool.",
+      "evidence_boundary": "The closed historical ledger supports deterministic within-pool selection counts and sensitivity diagnostics, not a causal validation benefit, an optimized selector, or expected performance on new questions."
+    },
+    {
+      "id": "I004",
+      "type": "TRACE_UTILITY_CONFLATION",
+      "dimension": "clarity",
+      "severity": "minor",
+      "location": "Title; Introduction paragraphs describing error localization; Problem Formulation and System Overview; Engineering Significance; Conclusions",
+      "manuscript_evidence": "The system retains typed stage records, digests, execution evidence, and deterministic handoffs. The manuscript additionally states that reviewers or developers can determine or locate where a failure arose, but it reports no human auditing, error-localization, review-time, or decision-quality study.",
+      "reviewer_inference": "Trace production and replay integrity do not by themselves establish that a person can correctly identify semantic failure causes or benefit operationally. The term auditable is defensible only if operationally limited to inspectable trace completeness.",
+      "required_action": "Define auditability narrowly as retained, stage-attributed, replayable evidence and rewrite unmeasured reviewer-benefit statements as design affordances. If human audit benefit is retained as a result, compare trace-assisted review with final-SQL-only review using reviewer–query cases as the analysis unit and report seeded-error localization accuracy, review time, and inter-reviewer agreement.",
+      "acceptance_test": "Every auditability or error-localization statement either names the measured trace-integrity endpoint or cites a reported human-review endpoint with a defined control and analysis unit.",
+      "evidence_boundary": "The current evidence supports trace availability, typed provenance, and deterministic replay, not explanation quality or human auditing effectiveness."
+    },
+    {
+      "id": "I005",
+      "type": "REFERENCE_OR_METADATA_UNVERIFIED",
+      "dimension": "related_work",
+      "severity": "major",
+      "location": "All citation commands and the external bibliography declaration references_verified",
+      "manuscript_evidence": "The supplied TeX contains citation keys and an external bibliography command, but no rendered reference list or BibTeX records were supplied. The manuscript names recent and close approaches, including DKA-SQL, Spider 2.0, MultiSQL, and several 2025–2026 systems.",
+      "reviewer_inference": "Existence, authorship, venue, year, DOI, direct support, recency balance, and self-citation cannot be verified from the supplied evidence. Consequently, the novelty and closest-work positioning remain bibliographically blocked even though their prose structure is reasonable.",
+      "required_action": "Supply the complete rendered bibliography or references_verified.bib, resolve every citation key, verify metadata against primary publication records, and ensure that each method-characterization claim is supported by the cited source. Add an explicit closest-work comparison covering mechanism, data visibility, generation budget, validation evidence, and evaluation scope without cross-dataset performance comparison.",
+      "acceptance_test": "The compiled manuscript has zero unresolved citations; all entries have verified authors, titles, venues, years, and persistent identifiers where available; the recent-literature and self-citation profile is reported; and each row of the positioning table is traceable to a source.",
+      "evidence_boundary": "Until closure, only the internal logic of the related-work narrative can be assessed; bibliographic correctness, recency, and novelty relative to the cited literature remain unverified."
+    },
+    {
+      "id": "I006",
+      "type": "METHOD_IMPLEMENTATION_MISMATCH",
+      "dimension": "reproducibility",
+      "severity": "minor",
+      "location": "Problem Formulation and System Overview; Generation Study; Historical-Pool Selection Study; Statistical Analysis; Table 9",
+      "manuscript_evidence": "The primary endpoint is described as equality with a frozen reference result, but the manuscript does not fully specify duplicate-row handling, NULL and type normalization, numeric comparison, ordering semantics for the main GridDB evaluator, or column-name treatment. Table 9 also names intent-emphasis and validation-equal weight policies without defining their exact weights in the main text.",
+      "reviewer_inference": "These rules can alter Text-to-SQL match counts and sensitivity conclusions. A public repository is helpful, but load-bearing evaluation and policy definitions should be explicit enough to distinguish the scientific method from a particular hidden implementation.",
+      "required_action": "Specify the complete comparison algorithm for GridDB and BIRD, including ordering, duplicates, NULLs, numeric types and tolerances, column order/names, reference-query failures, candidate failures, and result limits. Define every sensitivity weight vector and eligibility threshold numerically, and identify the exact evaluator and selector versions used for each result.",
+      "acceptance_test": "An independent implementation using only the documented rules reproduces the 1440 GridDB cell verdicts and all 180 historical-selector decisions, or the authors provide a machine-readable conformance fixture that yields zero mismatches.",
+      "evidence_boundary": "Before closure, the reported counts are tied to the retained implementation and cannot be assumed invariant to alternative reasonable equality or policy definitions."
+    },
+    {
+      "id": "I007",
+      "type": "AUDIT_NARRATIVE_DOMINANCE",
+      "dimension": "clarity",
+      "severity": "minor",
+      "location": "Datasets and Evaluation Roles through Implementation and Reproducibility; BIRD Results; Historical-Pool Results; Implementation Reliability",
+      "manuscript_evidence": "The main text repeatedly reports release-v3, v5, and FINAL distinctions, SHA-256 verification, excluded incident-call counts, executor chronology, test inventories, ledger sizes, and conformance details, even though the Supplementary Materials are designated for these records.",
+      "reviewer_inference": "Some provenance is scientifically necessary, but repetition of audit history dilutes the problem–method–evidence narrative and makes the architecture appear evaluated primarily through artifact bookkeeping. This is especially costly because the substantive five-role and semantic-validation evidence is already limited.",
+      "required_action": "Move version chronology, hashes, excluded-incident history, detailed executor test cases, and inventory counts to the supplement. Retain in the main text only the control actually used for each result, scientifically material exclusions, and one concise statement establishing immutable provenance.",
+      "acceptance_test": "The main Results remain ordered by the three research questions, each subsection opens with its scientific endpoint, and release/hash/incident details appear only when they change an inference; complete audit records remain available in the supplement.",
+      "evidence_boundary": "This revision changes presentation rather than scientific evidence and should preserve all provenance needed to verify the reported results."
+    },
+    {
+      "id": "I008",
+      "type": "DECLARATION_PLACEHOLDER",
+      "dimension": "ethics",
+      "severity": "minor",
+      "location": "Author affiliations; Funding; Conflicts of Interest",
+      "manuscript_evidence": "All authors list affiliations with NARI Group Corporation and Beijing Kedong Electric Power Control System Co., Ltd.; funding is from State Grid Fujian Electric Power Co., Ltd.; the manuscript states that the funder had no role and declares no conflicts of interest.",
+      "reviewer_inference": "The disclosed organizational relationships may be entirely appropriate, but the manuscript does not explicitly state whether the authors are employees, whether the organizations supplied data or infrastructure, or why these relationships are not competing interests under the journal policy.",
+      "required_action": "Explicitly disclose employment and other material organizational relationships, identify any data, computing, or managerial role of the affiliated and funding entities, and either declare them as competing interests or provide a journal-policy-consistent explanation for the no-conflict statement.",
+      "acceptance_test": "The funding and conflict declarations explicitly account for each affiliated and funding organization and are consistent with the author-contribution, data-availability, and funder-role statements.",
+      "evidence_boundary": "The present record supports a request for declaration clarification, not an inference of misconduct, sponsor interference, or invalid results."
+    }
+  ],
+  "claim_map": [
+    {
+      "claim": "MA-SQLGrid implements five specialized roles with typed, reference-isolated handoffs and a deterministic controller.",
+      "method_support": "The manuscript defines role inputs, outputs, information asymmetry, blackboard sequencing, canonical serialization, and post-sealing gold access.",
+      "experiment_support": "A diagnostic coordination replay and controller regression tests are reported, but the full chain is not evaluated against an end-to-end performance control.",
+      "status": "partial"
+    },
+    {
+      "claim": "Robustness under tested conditions comprises mutation denial, bounded SQLite execution, complete-evidence gating, and deterministic failure handling.",
+      "method_support": "Read-only mode, query_only, authorizer callbacks, extension denial, resource limits, fail-closed eligibility, and a stated trusted-host threat model operationalize this narrow definition.",
+      "experiment_support": "Implementation and adversarial tests are summarized, with later width, function, and byte controls explicitly separated from the executor used for the 80/100/101 results.",
+      "status": "supported"
+    },
+    {
+      "claim": "Schema context, structural hints, and value evidence have model-dependent effects.",
+      "method_support": "The GridDB factorial, component protocols, and BIRD workflows vary the relevant inputs under frozen snapshots.",
+      "experiment_support": "No primary GridDB factorial effect survives the nine-test Holm family; Qwen but not Granite benefits from presented values; and BIRD method ordering differs across backbones.",
+      "status": "supported"
+    },
+    {
+      "claim": "Validation-aware ranking changes frozen-reference matches within the historical candidate pool.",
+      "method_support": "All selectors operate on the same fixed eight-slot pool and precomputed evidence ledger, with decisions sealed before direct reference loading.",
+      "experiment_support": "The recorded original-order rules yield 80, 100, and 101 matches, with 22/2 and 23/2 reference rescues/harms.",
+      "status": "supported"
+    },
+    {
+      "claim": "The historical-pool ranking improvement reflects a stable validation mechanism likely to generalize.",
+      "method_support": "The score uses safety and execution gates followed by weak shape, order, and lexical-value features, but weights were not established as outcome-naive for these items.",
+      "experiment_support": "Top-score ties affect 130/180 questions and reversing only candidate order produces 117–118 rather than 101 matches.",
+      "status": "unsupported"
+    },
+    {
+      "claim": "Constructed-state evidence provides only limited incremental discrimination in the historical pool.",
+      "method_support": "Three disclosed reference-free witnesses test irrelevant-relation, storage/index, and nullable-column transformations.",
+      "experiment_support": "Complete-witness selection differs from validation-only selection only on Q039, adding one frozen-reference match and one invariant selection.",
+      "status": "supported"
+    },
+    {
+      "claim": "The framework provides practical evidence for semantically reliable power-grid Text-to-SQL.",
+      "method_support": "The architecture exposes intent, schema, execution, and state records and includes explicit operational safeguards.",
+      "experiment_support": "GridDB is synthetic and development-visible without documented independent semantic review; BIRD is non-grid; authentic grid resources remain machine silver.",
+      "status": "partial"
+    },
+    {
+      "claim": "The five-role architecture improves endpoint performance relative to a simpler matched workflow.",
+      "method_support": "No causal five-role comparison is defined, and the manuscript explicitly disclaims such an estimand.",
+      "experiment_support": "Generation studies omit multi-agent negotiation, while the main selector result is a no-generation historical replay.",
+      "status": "blocked"
+    },
+    {
+      "claim": "The trace improves human auditing or error localization.",
+      "method_support": "Stage-specific records and digests provide artifacts that could support inspection.",
+      "experiment_support": "No human review, localization-accuracy, review-time, or inter-reviewer study is reported.",
+      "status": "partial"
+    },
+    {
+      "claim": "The literature positioning and cited novelty claims are bibliographically verified.",
+      "method_support": "The prose distinguishes adjacent schema-linking, multi-agent, validation, and grid work.",
+      "experiment_support": "The external bibliography records and rendered reference list were not supplied.",
+      "status": "blocked"
+    }
+  ],
+  "summary": "The manuscript is technically careful, unusually transparent about null results and development visibility, and scientifically useful in exposing tie and order sensitivity. It should not be rejected for lacking SOTA or for finding only a one-match witness increment. Major revision is nevertheless required because the branded five-role power-grid framework is not evaluated end to end, synthetic frozen-reference equality is not expert-validated grid semantics, and the primary historical gain is dominated by outcome-exposed policy and tie order. The strongest defensible paper is presently a reproducible retrospective study of traceable validation and deterministic selection; either narrow the title and claims to that evidence or add a prospective budget-matched, independently adjudicated grid evaluation."
+}

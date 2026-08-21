@@ -1,0 +1,67 @@
+# Exploration Tree: Hybrid Heuristic-Benders for WH-IES Planning
+
+type: root
+label: "Problem: WH-IES investment planning with black-box first-stage costs"
+children:
+
+  - type: question
+    label: "Q1: How to model WH-IES planning under uncertainty?"
+    description: "The planning problem involves wind, electrolyzer, H2 storage, and fuel cell investment decisions under wind/demand/price uncertainty."
+    outcome: "Formulated as two-stage stochastic program: Stage I (investment) + Stage II (operational LP recourse)."
+    children:
+
+      - type: experiment
+        label: "EXP1: Explicit formulation as MINLP"
+        description: "All cost functions are given as analytical expressions. Solvable by Gurobi MINLP."
+        outcome: "Gurobi solves in 36.58s with objective -381,058.9; superior to heuristic methods on explicit problems."
+        evidence: "Table 1, Section 4.2"
+
+      - type: question
+        label: "Q2: What if the H2 tank cost is black-box?"
+        description: "Supplier quotes, compiled simulation, or neural network evaluators cannot be expressed as MILP/MINLP."
+        outcome: "Standard solvers (Gurobi) cannot process this case (Experiment II confirms: 'Direct exact solve unavailable'). Pure heuristics (GSOA+Simulation) are computationally prohibitive (~4.86h)."
+
+        children:
+          - type: decision
+            label: "D1: Choose decomposition approach"
+            description: "Decouple black-box master from explicit linear recourse subproblems."
+            outcome: "GSOA-Benders hybrid: GSOA for derivative-free master search, Benders cuts from LP duals for recourse approximation."
+
+          - type: question
+            label: "Q3: Can Benders cuts work when the master is not exact?"
+            description: "Standard Benders requires exact master solver. Ours uses metaheuristic GSOA."
+            outcome: "Benders cuts remain valid for the convex recourse function. The master's non-convex black-box term means global optimality cannot be certified. Define stability gap instead."
+
+          - type: dead_end
+            label: "DE1: MILP reformulation of black-box cost"
+            description: "Attempt to reformulate sinusoidal + power-law cost as MILP via piecewise linear / SOS2 constraints."
+            outcome: "Infeasible: excessive binary variables for high-frequency sinusoid; mathematically impossible for true black-box evaluators."
+            evidence: "Section 4.3.1"
+
+          - type: experiment
+            label: "EXP2: Benchmark five algorithms on black-box problem"
+            description: "Compare A(Gurobi), B(MILP-Benders), C(GSOA+Simulation), D(SFOA-Benders), E(GSOA-Benders)."
+            outcome: "A,B fail; C times out; D,E converge. GSOA-Benders (35.86s) 1.43x faster than SFOA-Benders (51.15s). Same objective -242,940.18."
+            evidence: "Table 2, Section 4.3"
+
+          - type: pivot
+            label: "P1: From algorithm design to economic interpretation"
+            description: "With a converged solution x*=[1, 0.53, 23.23, 0], analyze the economic meaning."
+            outcome: "Wind farm construction drives revenue (x_WT=1). P2G2P not viable (P_FC=0). H2 tank exploits sinusoidal cost valley (E_H2=23.23 MWh)."
+
+          - type: question
+            label: "Q4: How sensitive is the solution to assumptions?"
+            description: "Reviewers raised concerns about lifetime, scalability, and environmental scope."
+            outcome: "Lifetime sensitivity (Table 3): longer horizon reduces annualized capital cost. Scalability: tested 500-1000 scenarios, parallelization potential acknowledged. CO2 extension preserves cut structure."
+
+          - type: dead_end
+            label: "DE2: Full techno-economic-environmental assessment"
+            description: "CO2 accounting, LCA, LCOE/LCOH2, social externalities, and detailed degradation modeling were considered."
+            outcome: "Excluded from scope. Only economic planning with algorithmic tractability focus. Simple carbon-cost extension proposed but not implemented."
+            evidence: "Section 2.5, Section 4.6.3"
+
+  - type: experiment
+    label: "EXP3: Sensitivity analysis on project lifetime"
+    description: "Examine how annualization factors change with 10yr/20yr/30yr horizons."
+    outcome: "10yr CRF=0.149, 20yr CRF=0.102, 30yr CRF=0.089. Longer horizons favor capital-intensive assets."
+    evidence: "Table 3, Section 4.6.1"

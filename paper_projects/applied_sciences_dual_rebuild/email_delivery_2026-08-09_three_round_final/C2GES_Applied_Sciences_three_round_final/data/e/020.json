@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "frozen_at": "2026-08-05T16:08:56+08:00",
+  "timezone": "Asia/Shanghai",
+  "status": "post-primary exploratory; predictions pre-existed and some individual source modes may previously have been viewed; complete family frozen before package outcome extraction",
+  "protocol_markdown_sha256": "f77083b98c269180bd3cd458211a5948837596f73fef592ca5a8bb463726b247",
+  "seeds": [2026, 2027, 2028, 2029, 2030],
+  "role_protocols": ["label_blind", "predicted", "oracle"],
+  "modes": ["bm25", "full", "lead_k", "lexcue", "no_graph", "no_role", "query_only", "sbert", "tfidf"],
+  "k_values": [1, 3, 5, 10],
+  "primary_editorial_cell": {"role_protocol": "label_blind", "k": 3, "comparator": "full"},
+  "primary_contrasts": ["bm25-full", "lead_k-full", "lexcue-full", "no_graph-full", "no_role-full", "query_only-full", "sbert-full", "tfidf-full"],
+  "multiplicity_families": {
+    "F1_editorial_extraction": {"n_contrasts_per_endpoint": 8, "adjustment": "Holm", "test": "two-sided exact paired document-cluster sign-flip"},
+    "F2_budget_sensitivity": {"n_contrasts_per_endpoint": 27, "adjustment": "Holm", "reference_k": 3},
+    "F3_role_protocol": {"n_contrasts_per_endpoint": 18, "adjustment": "Holm", "reference_role": "label_blind"},
+    "F4_full_grid": {"n_cells": 108, "inference": "descriptive unless explicitly labeled unadjusted"}
+  },
+  "intervals": {"primary": "95% document-cluster bootstrap retaining the complete five-seed bundle per sampled document", "seed_stability": "across-seed min-max or percentile diagnostic", "seed_sign_flip_note": "with n=5, minimum attainable two-sided exact p is 0.0625; diagnostic only"},
+  "runtime_boundary": "existing semantically comparable per-run timing/provenance only; excludes one-time ingestion/indexing unless included by all, external training, and re-analysis; resource diagnostic only",
+  "source_scope": {"w4_seeds": [2027, 2028, 2029, 2030], "reused_w3_seed": 2026, "reruns_allowed": false},
+  "missing_by_design": ["new cross-encoder", "no-floor ablation"]
+}

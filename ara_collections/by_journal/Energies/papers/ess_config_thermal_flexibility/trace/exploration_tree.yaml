@@ -1,0 +1,88 @@
+tree:
+  - id: N01
+    type: question
+    support_level: explicit
+    source_refs: ["Section 1"]
+    title: "How to optimally configure ESS in distribution networks considering demand-side flexibility?"
+    description: "Central research question: traditional ESS configuration neglects demand-side load flexibility, leading to limited economic performance and RE integration. The paper investigates whether incorporating temperature-controlled load flexibility into a multi-objective ESS optimization framework improves both grid economics and RE consumption."
+
+  - id: N02
+    type: question
+    support_level: explicit
+    source_refs: ["Section 1"]
+    title: "Can a hybrid POA-GWO-CSO algorithm outperform component algorithms on this problem?"
+    description: "Existing algorithms (PSO, genetic simulated annealing, standalone POA) either converge prematurely to local optima or are computationally expensive. The paper proposes combining POA exploration with GWO leader guidance and CSO crossover diversity."
+
+  - id: N03
+    type: decision
+    support_level: explicit
+    source_refs: ["Section 3"]
+    title: "Model formulation decisions"
+    description: "First-order ETP model chosen for building thermal dynamics; battery ESS (most mature technology); four-component ESS life-cycle cost model (acquisition, installation, O&M, residual value); SOCR for power flow convexification; 24h horizon with 1h intervals."
+    choice: "Adopt a first-order ETP building thermal model and a four-component ESS life-cycle cost model with SOCR convexification for the power flow."
+    alternatives: ["Higher-order multi-zone building thermal models were deemed unnecessary complexity for the optimization framework", "Simpler single-cost ESS model would miss life-cycle economic dynamics"]
+
+  - id: N04
+    type: decision
+    support_level: explicit
+    source_refs: ["Section 3.2"]
+    title: "Four-component ESS cost model selected"
+    description: "Acquisition (Eq. 10), installation (Eq. 11), O&M (Eq. 12-14), and residual value (Eq. 15-16) are modeled separately to capture the full life-cycle economics of ESS deployment."
+    choice: "Separate four-component cost model to fully capture life-cycle economics."
+    alternatives: ["Simplified single-cost model used in some prior work, which omits installation dynamics and residual value"]
+
+  - id: N05
+    type: decision
+    support_level: explicit
+    source_refs: ["Section 4"]
+    title: "Bi-objective formulation with SOCR convexification"
+    description: "F1 = grid operating costs (purchase + generation + loss + load); F2 = ESS configuration costs (acquisition + installation + O&M - residual). SOCR converts nonconvex power flow into SOCP (Eq. 28-32) for tractability."
+    choice: "Bi-objective minimization with SOCR to convexify the nonconvex power flow constraints."
+    alternatives: ["Single-objective aggregation would lose Pareto trade-off information", "No relaxation would leave the problem in nonconvex form, harder to solve"]
+
+  - id: N06
+    type: experiment
+    support_level: explicit
+    source_refs: ["Section 6.2", "Table 1"]
+    title: "Three-scenario comparative analysis (E01)"
+    description: "Compare S1 (no ESS, no TCL flexibility), S2 (ESS only), and S3 (ESS + TCL flexibility) on annual operating cost, ESS annual net income, and RE consumption rate."
+    result: "S3 achieves lowest operating cost (8,624,186 CNY) and highest ESS net income (324,349 CNY); S2 achieves major savings over S1 (32.05% reduction); both S2 and S3 reach 100% RE consumption vs. 86.7% in S1."
+    evidence: ["C01", "C03"]
+
+  - id: N07
+    type: experiment
+    support_level: explicit
+    source_refs: ["Section 6.2", "Figure 9"]
+    title: "Algorithm convergence comparison (E02)"
+    description: "Compare POA-GWO-CSO (M1) vs. standalone POA (M2), GWO (M3), and POA-GWO without CSO (M4) on scaled fitness value over 500 iterations."
+    result: "M1 achieves significantly higher fitness values than M2, M3, and M4 at all iteration counts, demonstrating faster convergence and more efficient exploration."
+    evidence: ["C02"]
+
+  - id: N08
+    type: experiment
+    support_level: explicit
+    source_refs: ["Section 6.2", "Figures 7-8"]
+    title: "Pre-cooling behavior analysis (E03)"
+    description: "Qualitative comparison of AC power and indoor temperature profiles between Scenario 2 (fixed setpoint) and Scenario 3 (comfort range with TCL flexibility). Shows pre-cooling at 08:00 and 16:00 for peak tariff avoidance."
+    result: "Scenario 3 exhibits pre-cooling at 08:00 and 16:00 with temperature drops at 09:00 and 17:00, reducing peak-tariff AC consumption while maintaining comfort."
+    evidence: ["C04"]
+
+  - id: N09
+    type: pivot
+    support_level: explicit
+    source_refs: ["Section 7"]
+    title: "Future work directions identified"
+    description: "From the current deterministic 3-scenario study, the paper identifies two main extensions: (1) adding power fluctuation smoothing terms and SOC variation penalty terms to the Scenario 2 objective; (2) introducing stochastic and uncertainty modeling of RE sources for more detailed analysis of grid scalability and load evolution."
+    from: "Deterministic three-scenario comparative analysis with fixed TOU tariffs"
+    to: "Stochastic optimization with RE uncertainty modeling and additional objective terms"
+    trigger: "Recognition that deterministic forecasts are optimistic and that concentrated load fluctuations may stress the distribution network"
+
+  - id: N10
+    type: dead_end
+    support_level: inferred
+    source_refs: ["Section 7"]
+    title: "Uncertainty modeling intentionally deferred"
+    description: "The paper acknowledges that stochastic/uncertainty modeling of RE is needed but defers it to future work, meaning the current results under deterministic forecasts are known to be optimistic relative to real-world conditions with forecast errors."
+    hypothesis: "Adding stochastic RE modeling would enable more realistic assessment of ESS value under uncertainty"
+    failure_mode: "The current deterministic formulation cannot capture the impact of forecast errors on ESS scheduling decisions"
+    lesson: "Future work should introduce stochastic and uncertainty modeling of RE sources for more resilient system planning"
