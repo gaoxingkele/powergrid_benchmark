@@ -17,4 +17,4 @@ Run the technical public verification from any working directory:
 python paper_projects/CMC/C2GES/03_Reproducibility/Code/run_public_verification.py
 ```
 
-The technical verifier does not redistribute or regenerate excluded source PDFs or verbatim extracted text. `submission_ready=false` remains correct until the author, rights, expert-annotation, unseen-series, and operational-validation gates are closed.
+The technical verifier does not redistribute or regenerate excluded source PDFs or verbatim extracted text. Under the manuscript's current scope-contracted claims, `submission_ready=false` remains correct until the author metadata/approval and author code-licence/release-approval gates are closed. Independent expert annotation, an untouched external series, and operational-maintenance validation are explicitly classified as claim-upgrade gates: they become mandatory only if the manuscript restores structure-validity, external-generalization, or operational-utility claims. Third-party redistribution permission is not required for the current public package because the restricted source assets are excluded; any broader release requires a new rights review.

@@ -1,6 +1,6 @@
 # C2GES build validation — 2026-08-24 candidate from the 2026-08-23 revision
 
-Status: **PASS (technical)**; `submission_ready=false` because author/external gates remain open.
+Status: **PASS (technical)**; `submission_ready=false` because author metadata/approval and author code-licence/release approval remain open. Expert annotation, untouched external-series evaluation, and operational-maintenance validation are claim-upgrade gates under the current scope-contracted manuscript, not blockers for its conservative claims.
 
 - Public entry point: `python 03_Reproducibility/Code/run_public_verification.py`
 - Python: 3.12.10.

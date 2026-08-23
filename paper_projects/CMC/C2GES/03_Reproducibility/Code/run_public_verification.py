@@ -244,10 +244,11 @@ def manuscript_checks() -> dict[str, object]:
 def external_gates() -> dict[str, str]:
     return {
         "author_metadata_and_approval": "PENDING",
-        "third_party_redistribution_permission": "PENDING",
-        "independent_power_system_expert_annotation": "PENDING",
-        "untouched_external_series_evaluation": "PENDING",
-        "operational_maintenance_record_validation": "PENDING",
+        "author_code_license_and_release_approval": "PENDING",
+        "third_party_redistribution_permission": "NOT_REQUIRED_EXCLUDED_FROM_PUBLIC_RELEASE",
+        "independent_power_system_expert_annotation": "CLAIM_UPGRADE_ONLY_EXPANDED_SCOPE",
+        "untouched_external_series_evaluation": "CLAIM_UPGRADE_ONLY_EXPANDED_SCOPE",
+        "operational_maintenance_record_validation": "CLAIM_UPGRADE_ONLY_EXPANDED_SCOPE",
     }
 
 
