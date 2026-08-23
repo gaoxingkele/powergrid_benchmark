@@ -1,0 +1,25 @@
+# C2GES 当前基准
+
+日期：2026-08-23  
+目标期刊：MDPI *Applied Sciences*  
+科学状态：Major Revision  
+投稿状态：未就绪
+
+## 唯一活动版本
+
+- LaTeX：`../01_Manuscript/LaTeX/paper_applsci.tex`
+- LaTeX SHA-256：`B0B9D03C94710A6F92F4BC48E6FCD0BF45E308E3AF2964A942A9874C9626EE8D`
+- 原始 0823 ZIP：`../90_Archive/01_Source_Packages/C2GES_v2.0_COMPLETE_2026-08-23.zip`
+- ZIP SHA-256：`6FCB0EDC1A5C54163103B35BFE1F47D06504556448CB589A5193F9E1BF9BAA53`
+- 0823 修改意见 SHA-256：`EFBFB53E98F07B5296C5CE1EF42C5F5E499E903B2EDF1837B2621A4CA66CE2EC`
+- 新编译正文 PDF SHA-256：`812B7B66D258EDF74539D0B62C01B61C03252DAED95E6DF5B766723C829DE598`
+- 新编译补充材料 PDF SHA-256：`3E6AE6DB47DD858F9B73F3770603221D3418F4AE2E851017F698CE7CAFAA9751`
+
+## 当前硬阻塞
+
+1. 匹配词数/Token 预算和平衡调参尚未完成。
+2. normalized no-path 及完整组件消融尚未完成。
+3. 报告系列级统计与人工结构有效性评价尚未完成。
+4. 补充材料仍引用不存在的 `transferable/` 路径。
+5. 最终发布清单、环境文件和干净环境验收尚未完成。
+6. 通讯邮箱与最终公开仓库/权利状态待作者核实。

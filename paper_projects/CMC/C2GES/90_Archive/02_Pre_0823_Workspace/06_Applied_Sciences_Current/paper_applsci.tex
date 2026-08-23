@@ -1,0 +1,212 @@
+% MDPI Applied Sciences submission version generated from the latest learnable C2GES source.
+\documentclass[applsci,article,submit,moreauthors]{Definitions/mdpi}
+\firstpage{1}
+\makeatletter
+\setcounter{page}{\@firstpage}
+\makeatother
+\pubvolume{1}
+\issuenum{1}
+\articlenumber{0}
+\pubyear{2026}
+\copyrightyear{2026}
+\datereceived{}
+\daterevised{}
+\dateaccepted{}
+\datepublished{}
+\usepackage{algorithmic}
+\newcommand{\cges}{C\textsuperscript{2}GES}
+\newcommand{\adot}{.}
+
+\Title{Causal-Role-Aware Extractive Evidence Selection for Power Grid Reliability Reports: An Interpretable Learnable Reranker}
+\Author{Bijing Liu $^{1,2}$ and Yong Yang $^{1,2,}$*}
+\AuthorNames{Bijing Liu and Yong Yang}
+\address{$^{1}$ \quad NARI Group Corporation (State Grid Electric Power Research Institute), Nanjing 211106, Jiangsu Province, China; author-email-required@example.com\\
+$^{2}$ \quad Beijing Kedong Electric Power Control System Co., Ltd., Beijing 100080, China; author-email-required@example.com}
+\corres{Correspondence: yangyong1@sgepri.sgcc.com.cn}
+
+\abstract{Power-grid engineers reviewing disturbance and lessons-learned reports need the exact sentences supporting a trigger, impact, or mitigation assessment. This study presents \cges{}, an interpretable evidence reranker that combines frozen query relevance, a learnable role-compatibility head, and local-chain consistency. To avoid circular evaluation on domain cue lexicons, the quantitative study uses a filtered FEVER sentence-selection benchmark with human-annotated evidence: 4000 training, 800 development, and 800 test claim--document instances under SUPPORTS/REFUTES conditioning. At budget $K=3$, \cges{} reaches 0.5066 evidence F1, compared with 0.4837 for TF--IDF, 0.4818 for SBERT, 0.4414 for a lexical role baseline, 0.4937 for the query-only ablation, and 0.4967 without the learned role term. A 2000-resample document-cluster bootstrap confirms the gain over the no-role ablation ($+0.0099$, 95\% CI $[0.0020,0.0177]$, $p=0.012$) and over TF--IDF/SBERT, while the difference from BM25 is not significant. Budget sensitivity shows that the role gain is supported at $K=3$ and $K=5$, but not at $K=1$ or $K=10$. Public NERC excerpts are therefore application cases rather than a gold-label leaderboard. The evidence supports a modest, auditable ranking gain on human-gold data; independent domain-expert annotation is still needed for quantitative NERC validation.}
+\keyword{Evidence retrieval; fact verification; role-conditioned reranking; power grid reliability reports; FEVER; interpretable ranking}
+\featuredapplication{The method supports auditable review of power-grid disturbance and lessons-learned reports by returning sentence identifiers for role-specific engineering questions such as trigger, impact, and mitigation.}
+\begin{document}
+
+\section{Introduction}
+\label{sec:introduction}
+
+Many technical workflows require not only a retrieved answer, but the exact supporting sentences that justify it. Fact verification, query-focused summarization, and post-event report review all benefit from sentence-ID evidence selection because the selected spans remain inspectable and reusable. FEVER established a large-scale human-annotated setting in which claims are linked to Wikipedia evidence sentences \cite{thorne2018fever}. Parallel work in query-focused and extractive summarization shows that conditioning on an explicit information need changes which sentences should be returned \cite{zhong2021qmsum,zhong2020extractive,vig2022exploring}. In power-system reliability analysis, the same requirement appears when engineers inspect disturbance and lessons-learned reports: a trigger, impact, or mitigation question may share topical vocabulary while needing different evidence sentences \cite{xie2022massively,madabhushi2023survey}.
+
+Generic dense retrieval and lexicon heuristics leave a methodological gap. Lexical cue lists are easy to interpret but hard to justify when they are handcrafted on the evaluation domain. Pure dense matching is stronger on average but does not expose an explicit role or claim-type factor that can be ablated. \cges{} addresses this gap with an additive, auditable score
+\begin{equation}
+S(s,q,r)=w_q Q(s,q)+w_r R_\theta(s,q,r)+w_g G(s,D,r),
+\end{equation}
+where $Q$ is frozen query relevance, $R_\theta$ is a learnable role-compatibility head, and $G$ is a light local-chain consistency feature. Mixture weights are constrained with floors so that the role term cannot be driven to zero during training.
+
+This paper makes three contributions:
+\begin{itemize}
+  \item It introduces \cges{} as a role-conditioned evidence reranker with a learnable compatibility head trained under held-out human-gold supervision, retaining an interpretable linear mixture for ablation.
+  \item It evaluates the method on the filtered FEVER evidence-selection benchmark with human-annotated evidence sentence IDs, reporting baselines, ablations, and document-cluster bootstrap tests.
+  \item It illustrates domain transfer on public NERC reliability-report excerpts as qualitative cases, without treating those excerpts as a gold-label leaderboard.
+\end{itemize}
+
+The remainder of the paper is organized as follows. Section 2 reviews related work. Section 3 formalizes the task and FEVER conversion. Section 4 presents the learnable \cges{} model. Section 5 reports experiments and NERC case illustrations. Section 6 concludes.
+
+\section{Related Work}
+\label{sec:related_work}
+
+\subsection{Evidence Selection and Fact Verification}
+FEVER and its follow-on shared tasks treat evidence retrieval as a first-class objective alongside claim labeling \cite{thorne2018fever}. Subsequent reranking and retrieval studies show that sentence-level evidence recovery remains challenging even when claim classification is strong. This paper uses a filtered FEVER evidence-selection release in which each instance provides a document sentence pool and human gold evidence line IDs, converted to the same top-$K$ sentence-ID metric used by extractive evidence systems.
+
+\subsection{Query-Focused and Extractive Ranking}
+Query-focused summarization conditions content selection on an information need \cite{zhong2021qmsum,liu2023rank,sotudeh2024rank}. Extractive methods based on matching, centrality, and rank fusion provide transparent sentence selection \cite{zhong2020extractive,bi2021aredsum,khor2021text}. \cges{} follows the extractive tradition but adds an explicit role or claim-type factor that is learned rather than hand-listed.
+
+\subsection{Graph and Chain Consistency Signals}
+Heterogeneous and multiplex graph summarizers motivate structural sentence interactions \cite{wang2020heterogeneous,jing2021multiplex}. \cges{} does not train a graph neural network; it uses a proximity-smoothed consistency feature as a small auxiliary term so that ablations isolate role learning from local structure.
+
+\subsection{Power-Grid Text Analytics}
+AI methods for grid modeling, reliability, and digital infrastructure motivate domain transfer to NERC-style reports \cite{xie2022massively,srinivasan2023artificial,hamann2024foundation,madabhushi2023survey}. In this paper, NERC text is used for qualitative inspection only; quantitative claims rely on FEVER human-gold evidence.
+
+\section{Materials and Data}
+\label{sec:task_benchmark}
+
+\subsection{Sentence-ID Evidence Selection}
+Let a document be a sentence sequence $D=\{s_1,\ldots,s_n\}$. Given a query $q$ and a discrete role $r$, the system returns a set of at most $K$ sentence IDs $\hat{Y}^{K}$. Evaluation compares $\hat{Y}^{K}$ with a gold evidence set $Y$ by precision, recall, and F1 over sentence IDs. The primary operating point is $K=3$.
+
+\subsection{FEVER Human-Gold Conversion}
+The main benchmark is built from the filtered FEVER evidence-selection dataset. Each instance contains a claim, a SUPPORTS or REFUTES label, a Wikipedia document sentence pool, and human-annotated evidence line IDs. We map SUPPORTS/REFUTES to roles $\{supports,refutes\}$, convert wiki line IDs to sentence IDs $s000,s001,\ldots$, and treat the claim as the role-conditioned question. After conversion, the experimental splits contain 4{,}000 training, 800 development, and 800 test instances. Labels are human gold from FEVER; no model-generated labels are used for training or testing.
+
+\subsection{NERC Case Material}
+Public NERC disturbance and lessons-learned report excerpts are retained only for qualitative case illustrations of how role-conditioned ranking behaves on power-grid technical prose. Those excerpts are not used as a gold-label test set in the reported tables.
+
+\section{Methods}
+\label{sec:method}
+
+\subsection{Interpretable Mixture}
+For each sentence $s_j$, \cges{} computes
+\begin{equation}
+S_j = w_q Q_j + w_r R_j + w_g G_j,
+\end{equation}
+then returns the top-$K$ sentence IDs. Mixture weights $(w_q,w_r,w_g)$ are positive and constrained by floors $(0.35,0.25,0.05)$ before renormalization, which keeps the role term active during learning.
+
+\subsection{Frozen Query Relevance}
+$Q_j$ combines SBERT cosine similarity between sentence and claim embeddings with TF-IDF cosine similarity. Both channels are min-max normalized within the candidate pool and averaged. This keeps the backbone transparent and avoids co-adapting a deep retriever with the role head.
+
+\subsection{Learnable Role Compatibility}
+Let $h_s$ and $h_q$ be frozen MiniLM embeddings and let $e_r$ be a learned role embedding. The role head is an MLP
+\begin{equation}
+R_j=\sigma\!\left(\mathrm{MLP}([h_{s_j};h_q;e_r])\right).
+\end{equation}
+Unlike a manual cue lexicon, $R_\theta$ is trained on held-out FEVER gold evidence with a pairwise ranking loss. A lexicon-cue scorer is retained only as a non-learned baseline.
+
+\subsection{Local-Chain Consistency}
+$G_j$ is a proximity-smoothed salience feature over neighboring sentences. It is intentionally weak; the no-graph ablation isolates whether local structure adds value beyond query and role scores.
+
+\subsection{Training Objective}
+Training maximizes the score margin between gold and non-gold sentences under the full mixture, plus an auxiliary pairwise loss on the role head alone. Development F1 selects the checkpoint. Document instances used for testing are held out from training.
+
+\begin{algorithmic}[1]
+\REQUIRE Sentences $D$, claim $q$, role $r$, budget $K$, trained head/weights
+\FOR{each sentence $s_j \in D$}
+    \STATE Compute $Q_j$, $R_j$, $G_j$
+    \STATE $S_j \leftarrow w_q Q_j + w_r R_j + w_g G_j$
+\ENDFOR
+\STATE Sort by $S_j$ descending
+\RETURN top-$K$ sentence IDs
+\end{algorithmic}
+
+\section{Results}
+\label{sec:experiments}
+
+\subsection{Setup}
+All methods share the same FEVER-converted sentence pools and $K=3$ budget. Baselines are lead-$K$, TF-IDF, BM25, SBERT, and a lexicon-cue role scorer. \cges{} ablations are query-only, no-role, and no-graph. Uncertainty uses document-cluster bootstrap over test instances ($2{,}000$ resamples). The selected mixture on the best development checkpoint is approximately $(0.70,0.25,0.05)$.
+
+\subsection{Main Results}
+Table~\ref{tab:main} reports test evidence F1. Full \cges{} attains 0.5066 F1, ahead of TF-IDF (0.4837), SBERT (0.4818), lead-$K$ (0.4590), and lexicon cues (0.4414). BM25 is close at 0.5030. The learned role head is the main methodological gain: removing it drops F1 to 0.4967, and the 2{,}000-resample bootstrap difference is significant (95\% CI $[0.0020,0.0177]$, $p=0.012$). Gains over TF-IDF, SBERT, query-only, and lexicon cues are also significant. The BM25 comparison is not significant.
+
+\begin{table}[!ht]
+\centering
+\caption{FEVER evidence-selection test results ($K=3$; human-gold evidence; best F1 in bold)}
+\label{tab:main}
+\begin{tabular}{lccc}
+\toprule
+Method & Precision & Recall & F1 \\
+\midrule
+Lead-$K$ & 0.3594 & 0.7754 & 0.4590 \\
+LexCue role & 0.3398 & 0.7577 & 0.4414 \\
+TF-IDF & 0.3740 & 0.8293 & 0.4837 \\
+SBERT & 0.3698 & 0.8291 & 0.4818 \\
+BM25 & 0.3881 & 0.8631 & 0.5030 \\
+\cges{} query-only & 0.3810 & 0.8478 & 0.4937 \\
+\cges{} no-role & 0.3840 & 0.8508 & 0.4967 \\
+\cges{} no-graph & 0.3898 & 0.8636 & 0.5038 \\
+\textbf{\cges{} full} & \textbf{0.3919} & \textbf{0.8680} & \textbf{0.5066} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[!ht]
+\centering
+\caption{Document-cluster bootstrap comparisons of full \cges{} versus selected alternatives on FEVER test}
+\label{tab:bootstrap}
+\begin{tabular}{lccc}
+\toprule
+Comparison & Mean $\Delta$F1 & 95\% CI & $p$ \\
+\midrule
+vs TF-IDF & $+0.0229$ & $[0.0135,0.0327]$ & $<0.001$ \\
+vs SBERT & $+0.0247$ & $[0.0156,0.0344]$ & $<0.001$ \\
+vs query-only & $+0.0130$ & $[0.0051,0.0210]$ & $0.001$ \\
+vs no-role & $+0.0099$ & $[0.0020,0.0177]$ & $0.012$ \\
+vs LexCue & $+0.0651$ & $[0.0522,0.0790]$ & $<0.001$ \\
+vs BM25 & $+0.0036$ & $[-0.0055,0.0126]$ & $0.451$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Role-stratified F1 is 0.5167 on SUPPORTS and 0.4977 on REFUTES, indicating that the learned head helps both claim types rather than a single label.
+
+\subsection{Evidence-Budget Sensitivity}
+Table~\ref{tab:k-sensitivity} varies the returned-sentence budget without retraining. The role-conditioned gain over the no-role ablation is supported at $K=3$ and $K=5$, but its confidence interval crosses zero at $K=1$ and $K=10$. C2GES remains statistically tied with BM25 throughout; BM25 has the higher point estimate at $K=1$. Thus, the learned role contribution is useful over moderate evidence budgets rather than uniformly dominant.
+
+\begin{table}[!ht]
+\centering
+\caption{Evidence-budget sensitivity on the frozen FEVER test split}
+\label{tab:k-sensitivity}
+\begin{tabular}{cccccc}
+\toprule
+$K$ & C2GES F1 & BM25 F1 & No-role F1 & $\Delta$ vs BM25 & $\Delta$ vs no-role \\
+\midrule
+1 & 0.7069 & 0.7173 & 0.6957 & $-0.0109$ & $+0.0115$ \\
+3 & 0.5066 & 0.5030 & 0.4967 & $+0.0034$ & $+0.0097$ \\
+5 & 0.4230 & 0.4222 & 0.4176 & $+0.0007$ & $+0.0053$ \\
+10 & 0.3646 & 0.3638 & 0.3642 & $+0.0008$ & $+0.0005$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+\subsection{Ablations and Interpretation}
+The no-role ablation is the decisive integrity check for the proposed contribution. Because the role head is trained on held-out human gold and remains active under mixture floors, its removal hurts evidence F1 significantly. The graph term contributes a smaller point-estimate gain (full 0.5066 vs no-graph 0.5038). LexCue underperforms because fixed surface cues do not transfer cleanly across Wikipedia domains, which motivates replacing handcrafted dictionaries with a learned role embedding.
+
+\subsection{NERC Qualitative Cases}
+On public NERC solar-PV disturbance and winter-storm report excerpts, role-conditioned ranking tends to surface initiating fault sentences for trigger-like queries and recommendation or restoration language for mitigation-like queries, even when both mention outages or MW impacts. These observations are illustrative only: without an independent human-gold NERC evidence set, we do not report NERC F1 as a primary result.
+
+\section{Discussion}
+The results support a scoped claim: a learnable role-compatibility head inside an interpretable mixture improves FEVER evidence-sentence recovery over query-only and lexicon-role baselines, while remaining competitive with strong lexical retrieval. The method is intentionally lighter than end-to-end neural rerankers; its value is auditability and an isolatable role factor. Absolute F1 remains far from saturation, so denser candidates, cross-encoders, and multi-hop evidence sets remain important future baselines.
+
+\section{Conclusions}
+\label{sec:conclusion}
+
+\cges{} combines frozen query relevance, a learnable role head, and a light chain feature into an auditable evidence-sentence reranker. On human-gold FEVER evidence selection it improves over query-only and lexicon-role baselines, with a significant no-role ablation gap, and stays competitive with BM25. NERC report excerpts demonstrate qualitative domain transfer without serving as gold-label benchmarks.
+
+Limitations include the use of a filtered single-document FEVER setting rather than full open retrieval over the entire Wikipedia dump, a moderate training subset (4{,}000 instances), frozen rather than jointly trained encoders, and the absence of a human-gold power-grid evidence corpus. Future work should add larger FEVER open-retrieval settings, cross-encoder baselines, span-aware metrics, and carefully collected expert evidence labels for reliability reports.
+
+\supplementary{The supplementary material documents FEVER conversion, hyperparameters, split statistics, robustness settings, and additional NERC application cases.}
+\authorcontributions{Conceptualization, L.B. and Y.Y.; methodology, L.B.; software, L.B.; validation, L.B.; formal analysis, L.B.; investigation, L.B.; resources, Y.Y.; data curation, L.B.; writing---original draft preparation, L.B.; writing---review and editing, L.B. and Y.Y.; visualization, L.B.; supervision, Y.Y.; project administration, Y.Y.; funding acquisition, Y.Y. All authors have read and agreed to the published version of the manuscript.}
+\funding{This research was funded by the Science and Technology Project of NARI Group Corporation (State Grid Electric Power Research Institute), grant number [AUTHOR INPUT REQUIRED].}
+\institutionalreview{Not applicable. This study did not involve humans or animals; it uses a public human-annotated benchmark and public technical reports.}
+\informedconsent{Not applicable.}
+\dataavailability{The FEVER conversion scripts, trained checkpoint, and evaluation summary are provided in the project artifact under \path{workspace/fever_benchmark/} and \path{workspace/fever_runs/learnable_role/}. FEVER is publicly available at \url{https://fever.ai/dataset/fever.html}. The NERC documents used for qualitative application cases are publicly available from NERC event-analysis pages. A permanent public repository URL must be inserted before submission.}
+\acknowledgments{During the preparation of this manuscript, the authors used large-language-model-based tools to assist with drafting and editing. The authors reviewed and edited the output and take full responsibility for the content of this publication. No AI-simulated labels are presented as human or domain-expert ground truth in the main quantitative evaluation.}
+\conflictsofinterest{The authors declare no conflicts of interest. The funder had no role in the design of the study; in the collection, analyses, or interpretation of data; in the writing of the manuscript; or in the decision to publish the results.}
+\begin{adjustwidth}{-\extralength}{0cm}
+\reftitle{References}
+\bibliography{references_applsci}
+\PublishersNote{}
+\end{adjustwidth}
+\end{document}

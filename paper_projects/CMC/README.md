@@ -1,34 +1,41 @@
-# CMC Alias Workspace
+# CMC 两篇论文工作区
 
-This directory keeps the historical alias **CMC** for the two manuscripts, while
-their current intended venue is **MDPI Applied Sciences (Basel)**.
+`CMC` 是历史别名。两篇论文当前目标期刊均为 MDPI *Applied Sciences*，当前正文基准统一为 2026-08-23 收到的 LaTeX，不再以旧 Word、旧 PDF 或 2026-08-05 源文件判断版本。
 
-The alias does not mean that the current files already comply with Applied
-Sciences.  CMC/TSP source files are retained as the migration baseline and must
-be converted to the MDPI template before submission.
+## 当前稿入口
 
-## Papers
+| 论文 | 唯一正文源 | 当前编译 PDF | 修订计划 |
+|---|---|---|---|
+| C2GES | `C2GES/01_Manuscript/LaTeX/paper_applsci.tex` | `C2GES/01_Manuscript/PDF/C2GES_Applied_Sciences_2026-08-23.pdf` | `C2GES/02_Revision_and_QA/02_Working_Plan/DETAILED_REVISION_PLAN_2026-08-23.md` |
+| MA-SQLGrid | `MA-SQLGrid/01_Manuscript/LaTeX/paper_applsci.tex` | `MA-SQLGrid/01_Manuscript/PDF/MA-SQLGrid_Applied_Sciences_2026-08-23.pdf` | `MA-SQLGrid/02_Revision_and_QA/02_Working_Plan/DETAILED_REVISION_PLAN_2026-08-23.md` |
 
-- `C2GES/` — *Causal-Role-Aware Extractive Evidence Selection for Power Grid
-  Reliability Reports*
-- `MA-SQLGrid/` — *MA-SQLGrid: A Multi-Stage Context-Grounding Framework for
-  Text-to-SQL over Power Grid Maintenance Databases*
+## 两篇论文的统一结构
 
-## Common layout
+1. `00_Status_and_Index/`：基准版本、哈希、投稿状态和硬阻塞项。
+2. `01_Manuscript/LaTeX/`：唯一活动正文源及编译所需模板、参考文献和图。
+3. `01_Manuscript/PDF/`：仅存由活动 LaTeX 新编译的论文输出 PDF。
+4. `01_Manuscript/Supplementary/`：补充材料源文件或投稿补充文档。
+5. `02_Revision_and_QA/`：0823 修改意见、执行计划、包内 QA 和本次构建日志。
+6. `03_Reproducibility/`：代码、数据、图源及原发布包元数据。
+7. `90_Archive/`：原始 0823 ZIP、0823 前的工作区和历史 Word；不得从这里选投稿稿件。
 
-1. `00_Status_and_Index/` — actual target, alias and conversion checklist.
-2. `01_Current_Manuscript/` — latest PDF, Word, LaTeX ZIP and supplement.
-3. `02_CMC_Alias_LaTeX_Source/` — unpacked historical CMC/TSP source.
-4. `03_Applied_Sciences_Template/` — local MDPI ACS template snapshot.
-5. `04_Code_Data_Archive/` — complete code/data submission archives.
-6. `05_CMC_Submission_and_Review_History/` — old cover letters, audits and reviews.
+## 版本规则
 
-## Safety rule
+- 只修改 `01_Manuscript/LaTeX/paper_applsci.tex`；不要回写 `90_Archive/` 中的历史稿。
+- 每轮正文、表格或图修改后重新编译 PDF，并在 `02_Revision_and_QA/04_Build_Reports/` 记录哈希和 QA。
+- `03_Reproducibility/Package_Metadata/` 中的旧 manifest/hash 只代表收到的 0823 包；目录重组或正文修订后必须重新生成，不能直接作为最终发布证明。
+- 标有 `.pdf.obsolete` 的文件是旧输出的可恢复归档，不是可打开的当前 PDF。
+- 不得编造引用、实验结果、作者信息或权利状态；证据不足处标为“待核实”。
 
-Do not submit `02_CMC_Alias_LaTeX_Source/paper_cmc.tex` directly to MDPI.  It
-uses `tsp.cls`, Vancouver references and CMC-specific declarations.  Create the
-Applied Sciences version from the MDPI template in directory `03` and preserve
-the CMC version as provenance.
+## 构建方式
 
-The bundled MDPI template is the local snapshot dated 2026-06-23.  Re-check the
-current Applied Sciences author instructions before final submission.
+在每篇论文的 `01_Manuscript/LaTeX/` 中运行：
+
+```text
+pdflatex -interaction=nonstopmode -halt-on-error paper_applsci.tex
+bibtex paper_applsci
+pdflatex -interaction=nonstopmode -halt-on-error paper_applsci.tex
+pdflatex -interaction=nonstopmode -halt-on-error paper_applsci.tex
+```
+
+本目录于 2026-08-23 完成统一整理。历史说明保存在 `90_Workspace_History/`。
