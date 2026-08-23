@@ -11,7 +11,7 @@
 - Total: 96 passed, 1 skipped.
 
 The manuscript compiled without undefined citations, undefined references,
-LaTeX errors, or overfull boxes. Visual QA passed on all 25 pages.
+LaTeX errors, or overfull boxes. The 2026-08-24 candidate's visual QA passed on all 27 pages.
 
 ## Runtime-specific BIRD note
 

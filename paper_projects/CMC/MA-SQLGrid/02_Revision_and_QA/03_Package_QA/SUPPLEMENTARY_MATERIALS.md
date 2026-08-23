@@ -45,5 +45,5 @@ must not be packaged as validation of this revision.
 
 The version 3.0 release keeps S5 at manuscript level: `VISUAL_QA_MANIFEST.json`,
 `VISUAL_QA_REPORT.md`, `REVISION_LEDGER.md`, `TEST_REPORT.md`, and
-`RELEASE_MANIFEST.json`. The current PDF has 25 pages, six figures, and eleven
+`RELEASE_MANIFEST.json`. The current PDF has 27 pages, six figures, and twelve
 tables; these counts are discovered from the current build rather than hard-coded.

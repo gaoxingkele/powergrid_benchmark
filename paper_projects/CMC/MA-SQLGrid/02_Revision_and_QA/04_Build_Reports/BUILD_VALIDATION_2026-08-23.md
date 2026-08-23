@@ -1,4 +1,4 @@
-# MA-SQLGrid build validation — 2026-08-23 revision
+# MA-SQLGrid build validation — 2026-08-24 candidate from the 2026-08-23 revision
 
 Status: **PASS (technical)**; `submission_ready=false` because author/external gates remain open.
 
@@ -11,6 +11,6 @@ Status: **PASS (technical)**; `submission_ready=false` because author/external g
 
 Final PDF:
 
-- `01_Manuscript/PDF/MA-SQLGrid_Applied_Sciences_2026-08-23.pdf` — SHA-256 `F2A7F4043601AF878A8168EB29482951E9151C1ED42DFD5991470BE1075D1AC8`.
+- `01_Manuscript/PDF/MA-SQLGrid_Applied_Sciences_2026-08-24.pdf` — SHA-256 `C18338A6E2ECB34627FBC631456B1393D550AC671E6D0D37FAF9DD2F61A6F367`.
 
 MiKTeX printed its local update reminder; it did not affect any build return code or LaTeX correctness check.

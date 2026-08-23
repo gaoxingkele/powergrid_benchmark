@@ -1,8 +1,11 @@
-# MA-SQLGrid Original-Title Rebuild: Coordination Core
+# MA-SQLGrid Historical Original-Title Rebuild: Coordination Core
 
-This directory is an additive, pre-experiment workspace for the manuscript titled
-**“MA-SQLGrid: A Robust Multi-Agent Framework for Text-to-SQL in Power Grid Databases.”**
-It does not modify or supersede any frozen run.
+This directory preserves an additive, pre-experiment workspace created under the
+historical title **“MA-SQLGrid: A Robust Multi-Agent Framework for Text-to-SQL in
+Power Grid Databases.”** The current route-A manuscript is titled **“MA-SQLGrid:
+An Auditable Coordination and Evaluation Framework for Power-Grid Text-to-SQL.”**
+This historical code directory does not modify or supersede any frozen run and
+must not be read as evidence for the retired strong title.
 
 ## Implemented boundary
 
@@ -60,4 +63,3 @@ ledger, coverage statistics and a hash manifest. These artifacts are always
 labelled **retrospective offline coordination diagnostic**. They are not new
 model calls, a new multi-agent generation result, an accuracy estimate or
 evidence of a counterfactual gain.
-

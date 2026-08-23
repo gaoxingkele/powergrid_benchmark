@@ -240,8 +240,8 @@ def external_gates() -> dict[str, str]:
         "corresponding_author_email": "PENDING" if "email to be provided" in tex else "PROVIDED",
         "author_approval_and_contributions": "PENDING",
         "restricted_asset_release_permission": "PENDING",
-        "independent_power_system_and_database_expert_review": "PENDING",
-        "untouched_external_grid_evaluation": "PENDING",
+        "independent_power_system_and_database_expert_review": "CLAIM_UPGRADE_ONLY_ROUTE_B_C",
+        "untouched_external_grid_evaluation": "CLAIM_UPGRADE_ONLY_ROUTE_B_C",
     }
     return gates
 

@@ -1,5 +1,7 @@
 # C2GES Applied Sciences Narrative Revision
 
+> **Historical record (2026-08-12).** Superseded for release status and current page/reference counts by `PLAN_COMPLETION_AUDIT_2026-08-24.md`, `REFERENCE_EXISTENCE_AUDIT_2026-08-24.md`, and `VISUAL_QA_REPORT.md`. Retained only for change provenance.
+
 Date: 2026-08-12
 Base manuscript SHA-256: 971303C53078D370C7084AB20AFF3F25D01E3AA0459E9C67F39C1C3989C61DBC
 

@@ -4,7 +4,7 @@ Status: **AUTHOR COMPLETION REQUIRED**. Bracketed fields must be completed and a
 
 Dear Editors of *Applied Sciences*,
 
-Please consider our manuscript, “MA-SQLGrid: A Robust and Auditable Multi-Agent Framework for Power-Grid Text-to-SQL,” by Liu Bijing, Sun Chenglong, and Yang Yong.
+Please consider our manuscript, “MA-SQLGrid: An Auditable Coordination and Evaluation Framework for Power-Grid Text-to-SQL,” by Liu Bijing, Sun Chenglong, and Yang Yong.
 
 The manuscript presents a five-role, blackboard-based interface for auditable Text-to-SQL coordination and evaluates distinct generation, component, constructed-state, non-grid portability, and frozen candidate-selection questions. Under one reconciled shape-and-denotation evaluator, the historical candidate pool produced 76/180 matches for C000, 99/180 for validation-aware selection, and 100/180 for complete-witness selection, while the best fixed source produced 129/180. Exact order enumeration and duplicate-SQL diagnostics show substantial unresolved tie sensitivity. We therefore position the work as an auditable coordination and diagnostic framework, not as evidence of an end-to-end multi-agent accuracy advantage or broad power-grid semantic validity.
 

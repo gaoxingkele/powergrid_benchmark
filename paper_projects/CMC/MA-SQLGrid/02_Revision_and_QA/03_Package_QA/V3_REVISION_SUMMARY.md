@@ -1,5 +1,7 @@
 # MA-SQLGrid 3.0 Revision Summary
 
+> **Historical intermediate record.** Superseded for title, release status, page/table counts, and author gates by `PLAN_COMPLETION_AUDIT_2026-08-24.md`, `REFERENCE_EXISTENCE_AUDIT_2026-08-24.md`, and `VISUAL_QA_REPORT.md`. Retained only for change provenance.
+
 Version 3.0 is the second content-narrative revision of the Applied Sciences manuscript. It does not define a new experiment generation or alter the retained numerical evidence.
 
 ## Main changes

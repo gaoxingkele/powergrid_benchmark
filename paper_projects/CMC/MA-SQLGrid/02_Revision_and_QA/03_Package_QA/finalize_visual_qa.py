@@ -59,15 +59,15 @@ def main() -> None:
 
     if PROJECT.name == "C2GES":
         pdfs = [
-            PDF_DIR / "C2GES_Applied_Sciences_2026-08-23.pdf",
-            PDF_DIR / "C2GES_Supplementary_2026-08-23.pdf",
+            PDF_DIR / "C2GES_Applied_Sciences_2026-08-24.pdf",
+            PDF_DIR / "C2GES_Supplementary_2026-08-24.pdf",
         ]
         tex_files = [
             LATEX / "paper_applsci.tex",
             PROJECT / "01_Manuscript" / "Supplementary" / "supplementary_materials.tex",
         ]
     else:
-        pdfs = [PDF_DIR / "MA-SQLGrid_Applied_Sciences_2026-08-23.pdf"]
+        pdfs = [PDF_DIR / "MA-SQLGrid_Applied_Sciences_2026-08-24.pdf"]
         tex_files = [LATEX / "paper_applsci.tex"]
 
     records = [inspect_pdf(path) for path in pdfs]
@@ -89,7 +89,7 @@ def main() -> None:
 
     tex_records = [{"path": path.relative_to(PROJECT).as_posix(), "sha256": sha256(path), "bytes": path.stat().st_size} for path in tex_files]
     manifest = {
-        "schema_version": "cmc-0823-final-visual-qa-v1",
+        "schema_version": "cmc-0824-final-visual-qa-v1",
         "paper": PROJECT.name,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "status": "PASS_TECHNICAL_VISUAL_QA",
@@ -114,7 +114,7 @@ def main() -> None:
     }
     MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     lines = [
-        f"# Visual QA Report — {PROJECT.name} 2026-08-23 Revision",
+        f"# Visual QA Report — {PROJECT.name} 2026-08-24 Candidate",
         "",
         "**Status: PASS_TECHNICAL_VISUAL_QA**",
         "",

@@ -1,4 +1,4 @@
-# C2GES build validation — 2026-08-23 revision
+# C2GES build validation — 2026-08-24 candidate from the 2026-08-23 revision
 
 Status: **PASS (technical)**; `submission_ready=false` because author/external gates remain open.
 
@@ -11,7 +11,7 @@ Status: **PASS (technical)**; `submission_ready=false` because author/external g
 
 Final PDFs:
 
-- `01_Manuscript/PDF/C2GES_Applied_Sciences_2026-08-23.pdf` — SHA-256 `590B816F95D1F902E48D44D5140C6295676E0ADA24C56FF63A3E1AFF605B91E1`.
-- `01_Manuscript/PDF/C2GES_Supplementary_2026-08-23.pdf` — SHA-256 `0ADDA6A11B574787E0873B637FD0872DBC38910D6A65AD8092FA41FE5E8F39DB`.
+- `01_Manuscript/PDF/C2GES_Applied_Sciences_2026-08-24.pdf` — SHA-256 `6FCDD4278BFF0EC89F39AE3DBD713A6FB0DE9691F913197BB2D11DB2F7E5C9A9`.
+- `01_Manuscript/PDF/C2GES_Supplementary_2026-08-24.pdf` — SHA-256 `AB2FB14C388F2A28C58892760F70D85E2914E13B1C8CB5EF38332C1A35F037B1`.
 
 MiKTeX printed its local update reminder; it did not affect any build return code or LaTeX correctness check.
