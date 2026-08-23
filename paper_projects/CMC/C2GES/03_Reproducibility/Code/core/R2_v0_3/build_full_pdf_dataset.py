@@ -20,7 +20,15 @@ from pathlib import Path
 from typing import Iterable
 
 
-ROOT = Path(__file__).resolve().parents[5]
+def find_repository_root(start: Path) -> Path:
+    """Find the workspace root without depending on the package nesting depth."""
+    for candidate in (start, *start.parents):
+        if (candidate / ".git").exists():
+            return candidate
+    raise RuntimeError("repository root not found from script location")
+
+
+ROOT = find_repository_root(Path(__file__).resolve().parent)
 SOURCE_ROOT = ROOT / "data/public_datasets/reliability_reports/c2ges_nerc_reports"
 SOURCE_MANIFEST = SOURCE_ROOT / "metadata/c2ges_nerc_report_manifest.json"
 FORBIDDEN_FRAGMENT = "agent_audit_40doc"

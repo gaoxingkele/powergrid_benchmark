@@ -28,7 +28,17 @@ from rouge_score import rouge_scorer
 from sentence_transformers import SentenceTransformer
 
 R2 = Path(__file__).resolve().parent
-REPO_ROOT = Path(__file__).resolve().parents[5]
+
+
+def find_repository_root(start: Path) -> Path:
+    """Find the workspace root without assuming the original archive layout."""
+    for candidate in (start, *start.parents):
+        if (candidate / ".git").exists():
+            return candidate
+    raise RuntimeError("repository root not found from script location")
+
+
+REPO_ROOT = find_repository_root(R2)
 R1 = R2.parent
 if str(R1) not in sys.path:
     sys.path.insert(0, str(R1))

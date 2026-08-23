@@ -1,15 +1,16 @@
-# MA-SQLGrid 构建验证记录
+# MA-SQLGrid build validation — 2026-08-23 revision
 
-- 源文件：`../../01_Manuscript/LaTeX/paper_applsci.tex`
-- 构建链：`pdflatex -> bibtex -> pdflatex -> pdflatex`
-- 退出状态：四步均为 0
-- 输出：`../../01_Manuscript/PDF/MA-SQLGrid_Applied_Sciences_2026-08-23.pdf`
-- 页数与纸型：25 页，A4
-- 文件大小：542,944 bytes
-- SHA-256：`36E81CC6552B24C4EC930146BE93A79D2E3E4E388020671C4279B9BE1627DC5B`
-- LaTeX error：0
-- undefined citation/reference：0
-- overfull box：0
-- underfull box：41（非阻塞排版警告，终稿视觉 QA 时复查）
+Status: **PASS (technical)**; `submission_ready=false` because author/external gates remain open.
 
-MiKTeX 输出了“尚未检查更新”的环境提示，不影响退出码和 PDF 生成。旧论文输出已移出活动目录并集中标为 `.pdf.obsolete`。完整日志保存在本目录。
+- Public entry point: `python 03_Reproducibility/Code/run_public_verification.py`
+- Portable regression tests: framework 21/21; final executor 14/14.
+- Core data checks: 1,440 canonical rows, 25,920 constructed-state rows, 540 historical evaluation rows, 1,620 unified executions, 40,320 orders per selector, 180 normalized unique-SQL rows, and 1,980 automated error-taxonomy method-item rows.
+- Unified results checked: C000 76/180; validation 99/180; complete witness 100/180; Qwen F01 129/180.
+- Clean temporary LaTeX build: 27 pages; 37 citation keys, 6 figures, 12 tables; zero undefined citation/reference, fatal/error, or overfull findings.
+- Technical visual QA: every page rendered and contact sheets inspected; no obvious clipping, overlap, blank/corrupt page, or misplaced figure/table.
+
+Final PDF:
+
+- `01_Manuscript/PDF/MA-SQLGrid_Applied_Sciences_2026-08-23.pdf` — SHA-256 `F2A7F4043601AF878A8168EB29482951E9151C1ED42DFD5991470BE1075D1AC8`.
+
+MiKTeX printed its local update reminder; it did not affect any build return code or LaTeX correctness check.

@@ -93,6 +93,8 @@ class FullPdfBuilderTests(unittest.TestCase):
         self.assertEqual(counts["section_table_fusion"], 1)
 
     def test_reproduced_real_pdf_boundaries_and_page_counts(self) -> None:
+        if not SOURCE_MANIFEST.exists():
+            self.skipTest("restricted source manifest/PDFs are not distributed")
         expected = {
             "nerc_001": (8, "Introduction"),
             "nerc_008": (8, "Chapter 1: Disturbance Analyses"),

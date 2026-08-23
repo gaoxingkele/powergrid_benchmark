@@ -1,37 +1,20 @@
-# MA-SQLGrid 3.0 Complete Applied Sciences Package
+# MA-SQLGrid — 2026-08-23 Revision Package
 
-This is the second content-narrative revision of MA-SQLGrid. Version 3.0 keeps
-the established experiments and numerical results while improving the rigor of
-the research story, terminology, evidence hierarchy, and relationship between
-the main text and supplementary records.
+The current release root is `paper_projects/CMC/MA-SQLGrid/`.
 
-## Package layout
+- `01_Manuscript/LaTeX/`: MDPI source, verified bibliography, six figures, and lineage records.
+- `01_Manuscript/PDF/`: current PDF built from the 0823 LaTeX baseline.
+- `01_Manuscript/Supplementary/`: rights-safe historical protocol/numerical subset.
+- `02_Revision_and_QA/`: incoming review, detailed plan, route decision, evidence ledger, build reports, and author/external gates.
+- `03_Reproducibility/Code/`: framework, executors, analyses, post-review evaluator diagnostics, environment locks, and one public verifier.
+- `03_Reproducibility/Data/`: redistribution-safe derived evidence for GridDB, components, constructed states, the historical pool, and BIRD.
+- `03_Reproducibility/Figures/`: publication outputs and lineage sources.
+- `03_Reproducibility/Package_Metadata/`: rights notice, source map, verifier, release manifest, and checksums.
 
-- `01_PDF/`: validated manuscript PDF.
-- `02_LaTeX/`: MDPI LaTeX source, bibliography, template files, and build assets.
-- `03_Figures/`: six publication figures in editable/vector and preview formats,
-  together with figure lineage scripts and source tables.
-- `04_Code/`: framework, read-only executor, GridDB analyses, component study,
-  constructed-state study, and BIRD protocol code and tests.
-- `05_Data/`: redistribution-safe derived experimental records for the GridDB,
-  component, constructed-state, historical-pool, and BIRD analyses.
-- `06_Supplementary/`: software, protocol, numerical, and rights records.
-- `07_QA/`: revision ledger, test report, visual QA, and release checks.
+Run the portable technical check from any working directory:
 
-## Validated manuscript state
+```text
+python paper_projects/CMC/MA-SQLGrid/03_Reproducibility/Code/run_public_verification.py
+```
 
-- 25 A4 pages, 6 figures, 11 tables.
-- 96 tests passed and 1 test was skipped across the core packaged studies.
-- No undefined citation/reference, LaTeX error, overfull box, clipped page,
-  blank page, or corrupted glyph was found.
-- The principal historical-pool result remains 80/180 -> 100/180 -> 101/180.
-
-## Submission gate
-
-Yang Yong is the corresponding author. His submission email must be entered and
-approved by the authors before upload to the journal. The manuscript deliberately
-contains a visible placeholder rather than attributing another author's address
-to him.
-
-See `DATA_RIGHTS_NOTICE.md`, `AUTHOR_ACTION_REQUIRED.md`, and
-`07_QA/V3_REVISION_SUMMARY.md` before submission.
+The frozen unified evaluator reports C000 `76/180`, validation-only `99/180`, complete witness `100/180`, and best fixed source Qwen F01 `129/180`. The package deliberately reports `submission_ready=false` until the corresponding email, author approvals, rights, external grid evaluation, and expert-review gates are closed.

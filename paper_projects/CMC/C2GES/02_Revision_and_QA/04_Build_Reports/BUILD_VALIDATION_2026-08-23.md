@@ -1,29 +1,17 @@
-# C2GES 构建验证记录
+# C2GES build validation — 2026-08-23 revision
 
-## 正文
+Status: **PASS (technical)**; `submission_ready=false` because author/external gates remain open.
 
-- 源文件：`../../01_Manuscript/LaTeX/paper_applsci.tex`
-- 构建链：`pdflatex -> bibtex -> pdflatex -> pdflatex`
-- 退出状态：四步均为 0
-- 输出：`../../01_Manuscript/PDF/C2GES_Applied_Sciences_2026-08-23.pdf`
-- 页数与纸型：20 页，A4
-- 文件大小：512,863 bytes
-- SHA-256：`812B7B66D258EDF74539D0B62C01B61C03252DAED95E6DF5B766723C829DE598`
-- LaTeX error：0
-- undefined citation/reference：0
-- overfull box：0
-- underfull box：38（非阻塞排版警告，终稿视觉 QA 时复查）
+- Public entry point: `python 03_Reproducibility/Code/run_public_verification.py`
+- Python: 3.12.10.
+- Tests: core 29/29; development 10/10 with 1 restricted-input skip; post-run 10/10 with 2 restricted-input skips.
+- Data checks: 40 sampling-frame rows, 27 included reports, 15 test reports/10 series, 210 output rows, six report and six series contrasts, 210 matched-word rows, 12,924 embedding candidates, 27 layout-audit reports, two normalized-path contrasts, and equal nine-configuration development budgets for three methods.
+- Clean temporary LaTeX build: main 22 pages; supplement 2 pages; zero undefined citation/reference, fatal/error, or overfull findings.
+- Technical visual QA: every page rendered and contact sheets inspected; no obvious clipping, overlap, blank/corrupt page, or misplaced figure/table.
 
-## 补充材料
+Final PDFs:
 
-- 源文件：`../../01_Manuscript/Supplementary/supplementary_materials.tex`
-- 构建链：两次 `pdflatex`
-- 输出：`../../01_Manuscript/PDF/C2GES_Supplementary_2026-08-23.pdf`
-- 页数与纸型：2 页，A4
-- 文件大小：124,098 bytes
-- SHA-256：`3E6AE6DB47DD858F9B73F3770603221D3418F4AE2E851017F698CE7CAFAA9751`
-- LaTeX error、undefined citation/reference、overfull box：均为 0
+- `01_Manuscript/PDF/C2GES_Applied_Sciences_2026-08-23.pdf` — SHA-256 `590B816F95D1F902E48D44D5140C6295676E0ADA24C56FF63A3E1AFF605B91E1`.
+- `01_Manuscript/PDF/C2GES_Supplementary_2026-08-23.pdf` — SHA-256 `0ADDA6A11B574787E0873B637FD0872DBC38910D6A65AD8092FA41FE5E8F39DB`.
 
-## 说明
-
-MiKTeX 输出了“尚未检查更新”的环境提示，不影响退出码和 PDF 生成。旧论文输出已移出活动目录并集中标为 `.pdf.obsolete`。完整日志保存在本目录。
+MiKTeX printed its local update reminder; it did not affect any build return code or LaTeX correctness check.

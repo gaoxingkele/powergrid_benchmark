@@ -114,7 +114,7 @@ def main() -> None:
     manifest = {
         "schema_version": "ma-narrative-six-figure-lineage-v2",
         "paper": "MA_SQLGrid",
-        "release_root": "formal_submission_ma_narrative_revision_20260812",
+        "release_root": "paper_projects/CMC/MA-SQLGrid/01_Manuscript/LaTeX",
         "generated_utc": datetime.now(timezone.utc).isoformat(),
         "all_used_figures_covered": all(item["outputs"] for item in figures),
         "figure_count": len(figures),

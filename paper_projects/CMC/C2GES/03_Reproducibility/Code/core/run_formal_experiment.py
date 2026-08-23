@@ -34,7 +34,15 @@ from c2ges_offline import (
 )
 
 
-ROOT = Path(__file__).resolve().parents[4]
+def find_repository_root(start: Path) -> Path:
+    """Find the workspace root without depending on archive directory depth."""
+    for candidate in (start, *start.parents):
+        if (candidate / ".git").exists():
+            return candidate
+    raise RuntimeError("repository root not found from script location")
+
+
+ROOT = find_repository_root(Path(__file__).resolve().parent)
 EXPECTED_CONDITIONS = (
     "lead",
     "centroid",

@@ -1,14 +1,10 @@
-# Visual QA Report — C2GES
+# Visual QA Report — C2GES 2026-08-23 Revision
 
-**Status: PASS**
+**Status: PASS_TECHNICAL_VISUAL_QA**
 
-- Audited PDF: `paper_applsci.pdf`
-- SHA-256: `CD1B9D0B3684A1BE4C985450A239D2E68607D874AECF7144653344245F8E4F36`
-- Pages: 25
-- Figures used by the manuscript: 6
-- Figure-lineage entries: 6
-- Rendered pages inspected: 25/25
-
-All rendered pages were checked against the hash-bound current PDF. No blank page, page-edge clipping, missing figure, detached caption, or truncated reference block was detected. Dense tables and figure pages were checked at page scale. This report applies only to the PDF hash above and supersedes intermediate C2GES page-count reports.
-
-Visual QA establishes layout integrity only; it does not certify scientific validity, experimental completeness, or language correctness.
+- PDF 01_Manuscript/PDF/C2GES_Applied_Sciences_2026-08-23.pdf: 22 pages, SHA-256 590B816F95D1F902E48D44D5140C6295676E0ADA24C56FF63A3E1AFF605B91E1.
+- PDF 01_Manuscript/PDF/C2GES_Supplementary_2026-08-23.pdf: 2 pages, SHA-256 0ADDA6A11B574787E0873B637FD0872DBC38910D6A65AD8092FA41FE5E8F39DB.
+- Every page rendered; no textless or non-A4 page was detected.
+- Current LaTeX logs contain zero undefined citation/reference, fatal/error, or overfull-box findings.
+- Contact sheets were inspected for obvious clipping, overlap, blank/corrupt pages, and figure/table placement; no technical layout defect was found.
+- This inspection does not replace author approval of scientific content, identities, rights, or final journal metadata.

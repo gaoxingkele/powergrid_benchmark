@@ -12,11 +12,14 @@ numerical evidence, and rights information from the scientific narrative.
 - S5 release verification is stored one directory above in the current Visual
   QA files, revision ledger, and release manifest.
 
-The files in S1--S4 were copied byte-for-byte from
-`paper_projects/applied_sciences_dual_rebuild/MA_SQLGrid/original_title_manuscript/FINAL/`.
-Their SHA-256 values are recorded in `SUPPLEMENT_MANIFEST.json`. The source
-evidence and frozen experiment directories remain unchanged.
+The files in S1--S4 preserve the historical v3 evidence snapshot. Their
+SHA-256 values are recorded in `SUPPLEMENT_MANIFEST.json`. Current post-review
+unified-evaluator, order, role-ablation, and automated error-taxonomy records
+are under `03_Reproducibility/Data/` and supersede the historical row-only
+counts for the current manuscript.
 
 The supplement must not be read as evidence that later executor hardening
-generated the historical-pool 80/100/101 results. That distinction is recorded
-in S1 and S2. Restricted third-party source records are intentionally absent.
+generated the historical row-only 80/100/101 values. Under the current frozen
+shape-and-denotation evaluator the corresponding counts are 76/99/100, and the
+best fixed source is 129/180. Restricted third-party source records are
+intentionally absent.

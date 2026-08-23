@@ -1,20 +1,20 @@
-# C2GES 2.0 — Applied Sciences Complete Package
+# C2GES — 2026-08-23 Revision Package
 
-Title: **C2GES: Structure-Aware Extractive Summarization of Long Power-System Technical Reports with Typed-Path Graphs**
+The current release root is `paper_projects/CMC/C2GES/`.
 
-Version 2.0 denotes the first completed content-narrative revision. It is not a new experimental run or a replacement for the frozen v0.3.1 experiment identity.
+- `01_Manuscript/LaTeX/`: MDPI source, verified bibliography, template assets, and six manuscript figures.
+- `01_Manuscript/PDF/`: current main and supplementary PDFs built from the 0823 LaTeX baseline.
+- `01_Manuscript/Supplementary/`: supplementary LaTeX source.
+- `02_Revision_and_QA/`: incoming review, detailed plan, evidence ledger, claim audit, build reports, and external gates.
+- `03_Reproducibility/Code/`: frozen core, public tests, sensitivity scripts, environment locks, and one public verifier.
+- `03_Reproducibility/Data/`: rights-safe metadata, frozen derived results, and post-review diagnostics.
+- `03_Reproducibility/Figures/`: publication outputs and lineage sources.
+- `03_Reproducibility/Package_Metadata/`: rights notice and current-layout release manifest/checksums.
 
-## Contents
+Run the technical public verification from any working directory:
 
-- `01_PDF`: submission PDF (20 A4 pages, 6 figures).
-- `02_LaTeX`: MDPI LaTeX source, bibliography, class files, and referenced figure PDFs.
-- `03_Figures`: current figures in publication and editable vector formats where available.
-- `04_Code`: formal algorithm snapshot, runner, tests, development-only calibration, sensitivity analysis, and figure-generation scripts.
-- `05_Data`: distributable non-verbatim experimental results and rights-safe metadata.
-- `06_Supplement`: supplementary PDF and LaTeX source.
-- `07_QA`: narrative-revision and visual-QA records.
+```text
+python paper_projects/CMC/C2GES/03_Reproducibility/Code/run_public_verification.py
+```
 
-The revision strengthens the alignment among research questions, method definition, empirical findings, and discussion. Experimental numbers were not changed for narrative convenience.
-
-See `DATA_RIGHTS_NOTICE.md`, `RELEASE_MANIFEST.json`, and `FILE_SHA256SUMS.txt`.
-
+The technical verifier does not redistribute or regenerate excluded source PDFs or verbatim extracted text. `submission_ready=false` remains correct until the author, rights, expert-annotation, unseen-series, and operational-validation gates are closed.

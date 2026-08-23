@@ -75,7 +75,7 @@ def evidence_map() -> None:
             fontweight="bold")
     ax.text(9.925, 4.72, "Read-only execution\nShared blackboard trace\nDeterministic adjudication",
             ha="center", va="center", linespacing=1.35)
-    ax.text(9.925, 3.43, "Historical pool\n80  →  100  →  101",
+    ax.text(9.925, 3.43, "Unified evaluator\n76  ->  99  ->  100",
             ha="center", va="center", fontweight="bold", color="#1F4E79")
     for i in range(len(streams)):
         y = 6.45 - i * 1.35

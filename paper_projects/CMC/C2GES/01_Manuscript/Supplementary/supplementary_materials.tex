@@ -1,7 +1,8 @@
 \documentclass[11pt]{article}
-\usepackage[a4paper,margin=2.2cm]{geometry}
+\usepackage[a4paper,margin=1.8cm]{geometry}
 \usepackage{booktabs,tabularx,array}
 \usepackage[hidelinks]{hyperref}
+\setlength{\emergencystretch}{3em}
 \newcommand{\cges}{C\textsuperscript{2}GES}
 \title{Supplementary Materials for\\
 \cges{}: Structure-Aware Extractive Summarization of Long Power-System Technical Reports with Typed-Path Graphs}
@@ -12,11 +13,11 @@
 
 \section*{Contents and Data Files}
 
-This supplement separates scientific interpretation from implementation records. It contains four tables referenced by the main manuscript. Machine-readable files are provided under \texttt{transferable/}: the non-verbatim sampling frame, aggregate metrics, paired ROUGE-L differences, output-length records, exact sign-flip results, page locators, and the development-only calibration report. Source PDFs and verbatim extracted passages are excluded because third-party redistribution permission has not been established.
+This supplement separates scientific interpretation from implementation records. It contains four tables referenced by the main manuscript. Paths below are relative to the C2GES release root. Machine-readable files are provided under \nolinkurl{03_Reproducibility/Data/}: the non-verbatim sampling frame, aggregate metrics, paired ROUGE-L differences, output-length records, exact sign-flip results, page locators, and the development-only calibration report. Source PDFs and verbatim extracted passages are excluded because third-party redistribution permission has not been established.
 
 \section*{Table S1. Rights-Safe Sampling Frame}
 
-The complete 40-row sampling frame is supplied as the CSV file \texttt{rights\_safe\_report\_metadata.csv} under \texttt{transferable/rights\_safe\_metadata/}.
+The complete 40-row sampling frame is supplied as \nolinkurl{03_Reproducibility/Data/rights_safe_metadata/rights_safe_report_metadata.csv}. Its 23 fields include the report identifier, source locator, split, series identifier, inclusion decision, source-file hash, and redistribution status; it contains no report passages.
 
 \begin{center}
 \begin{tabular}{lr}
@@ -34,7 +35,7 @@ Non-summary candidates & 12,924\\
 
 \section*{Table S2. Output-Length Records}
 
-The complete 14 condition--budget summary is supplied as \texttt{output\_length\_summary.csv}; per-report values are in \texttt{output\_length\_per\_report.csv}. Both files are in the post-run diagnostics subdirectory.
+The complete 14 condition--budget summary is supplied as \nolinkurl{03_Reproducibility/Data/postrun_diagnostics/output_length_summary.csv}; per-report values are in \nolinkurl{03_Reproducibility/Data/postrun_diagnostics/output_length_per_report.csv}.
 
 \begin{center}
 \small
@@ -75,7 +76,9 @@ Aggregate and paired-contrast recomputation & Exact agreement\\
 \end{tabularx}
 \end{center}
 
-Detailed checks are retained with the corresponding code and archived run records. Passing these checks establishes consistency of the reported computation; it does not determine semantic summary quality.
+\begin{sloppypar}
+Aggregate values are available at \nolinkurl{03_Reproducibility/Data/audits/aggregate_metrics.json}; non-verbatim paired differences and page locators are available at \nolinkurl{03_Reproducibility/Data/figure_inputs/paired_rougel_differences_nonverbatim.csv} and \nolinkurl{03_Reproducibility/Data/postrun_diagnostics/selected_page_locator.csv}. Detailed checks are retained with the corresponding code and archived run records. Passing these checks establishes consistency of the reported computation; it does not determine semantic summary quality.
+\end{sloppypar}
 
 \section*{Table S4. Exact Paired Sign-Flip Sensitivity}
 
@@ -99,8 +102,12 @@ $K$ & Baseline & Signs $+/-/0$ & Exact $p$ & Holm-adjusted $p$\\
 
 These post-result values are sensitivity analyses. The main manuscript emphasizes effect sizes, paired distributions, and report-composition intervals.
 
+The complete machine-readable result is \nolinkurl{03_Reproducibility/Data/postrun_sensitivity/exact_signflip_results.csv}; the JSON file in the same directory retains the report-level non-verbatim deltas used in the calculation.
+
 \section*{Exploratory Development-Only Calibration}
 
-The complete chronology, configuration space, leave-one-report-out results, and machine-readable records are described in \texttt{transferable/POST\_UNBLINDING\_DEV\_CALIBRATION\_SUPPLEMENT.md}. A zero path-deletion weight was selected in all 12 development folds; the analysis was not applied to the retained 15-report test set.
+The complete chronology, configuration space, leave-one-report-out results, and machine-readable records are described in \nolinkurl{03_Reproducibility/Data/POST_UNBLINDING_DEV_CALIBRATION_SUPPLEMENT.md}. A zero path-deletion weight was selected in all 12 development folds; the analysis was not applied to the retained 15-report test set.
+
+A separate equal-budget exercise is documented in \nolinkurl{03_Reproducibility/Data/dev_balanced_tuning/}. Semantic-MMR, TextRank, and normalized-path \cges{} each received nine configurations and the same ordered development objective over both extraction budgets. The selected values were 0.9, 0.65, and 0.0, respectively. The decision record states \nolinkurl{test_input_accessed=false}; these configurations are authorized only for a future preregistered external-series comparison and do not alter the retained-test results.
 
 \end{document}

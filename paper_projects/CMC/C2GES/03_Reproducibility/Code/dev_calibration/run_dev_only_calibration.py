@@ -22,6 +22,7 @@ from typing import Iterable, Mapping, Sequence
 
 HERE = Path(__file__).resolve().parent
 R2_ROOT = HERE.parent
+CODE_SNAPSHOT = HERE / "code_snapshot"
 DEV_PATH = R2_ROOT / "diagnostic_build_08" / "nerc_full_pdf_dev_v0_3.jsonl"
 RUN04_DECISION = R2_ROOT / "dev_selection_run04" / "DEV_SELECTION_DECISION.json"
 EXPECTED_DEV_SHA256 = "27CE41D37D8BA7B0BBA9D80072B3A3FAC742CEB4997E30DF0BE40CC5B2DF7F79"
@@ -29,7 +30,7 @@ OUTPUT_DIR = HERE / "artifacts"
 
 # Import only the corrective-method implementation.  Its exact source hashes are
 # recorded in RUN_MANIFEST.json so this run remains bound to a code snapshot.
-sys.path.insert(0, str(R2_ROOT))
+sys.path.insert(0, str(CODE_SNAPSHOT))
 from counterfactual_paths import (  # noqa: E402
     path_counterfactual_sensitivity,
     qualified_typed_paths,
@@ -456,8 +457,8 @@ def run() -> None:
     _write_json(OUTPUT_DIR / "CALIBRATION_DECISION.json", decision)
     completed = datetime.now(timezone.utc).isoformat()
     source_files = [
-        Path(__file__).resolve(), R2_ROOT / "v03_methods.py", R2_ROOT / "counterfactual_paths.py",
-        R2_ROOT.parent / "c2ges_offline.py",
+        Path(__file__).resolve(), CODE_SNAPSHOT / "v03_methods.py", CODE_SNAPSHOT / "counterfactual_paths.py",
+        CODE_SNAPSHOT / "c2ges_offline.py",
     ]
     manifest = {
         "protocol": "C2GES-posthoc-dev-CF-calibration-v1",

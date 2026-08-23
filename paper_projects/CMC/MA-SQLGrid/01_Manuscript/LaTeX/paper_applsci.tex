@@ -20,7 +20,7 @@
 $^{2}$ \quad Beijing Kedong Electric Power Control System Co., Ltd., Beijing 100080, China}
 \corres{Correspondence: Yang Yong; email to be provided by the corresponding author before submission}
 
-\abstract{Power-grid databases encode asset, maintenance, status, temporal, and topological semantics, so executable SQL can still answer the wrong question. We present \masql{}, an auditable five-role architecture that separates intent analysis, schema mapping, candidate normalization, read-only execution validation, and constructed-state evidence through a shared blackboard and deterministic controller. Here, robustness denotes the tested implementation properties of mutation denial, bounded execution, and fail-closed handling of incomplete evidence. The evaluation covers GridDB generation, component, and constructed-state studies; BIRD Mini-Dev experiments across 11 public databases; and a fixed historical pool containing eight candidates for each of 180 GridDB questions. Context and presented-value effects varied with the frozen model snapshot. Within the historical pool, validation-aware ranking increased reference matches from 80/180 to 100/180, while complete three-witness evidence yielded 101/180. Both evidence-aware selectors frequently tied at the highest score and remained sensitive to candidate order, showing that the available evidence often could not distinguish semantically competing candidates. The study provides a reproducible interface for traceable power-grid Text-to-SQL evaluation; it does not establish an end-to-end accuracy advantage from five-role coordination. The historical-pool comparison is descriptive, and broader efficacy requires unseen, expert-reviewed grid queries and budget-matched generation.}
+\abstract{Power-grid databases encode asset, maintenance, status, temporal, and topological semantics, so executable SQL can still answer the wrong question. We present \masql{}, an auditable five-role architecture that separates intent analysis, schema mapping, candidate normalization, read-only execution validation, and constructed-state evidence through a shared blackboard and deterministic controller. Here, robustness denotes the tested implementation properties of mutation denial, bounded execution, and fail-closed handling of incomplete evidence. The evaluation covers GridDB generation, component, and constructed-state studies; BIRD Mini-Dev experiments across 11 public databases; and a fixed historical pool containing eight candidates for each of 180 GridDB questions. Context and presented-value effects varied with the frozen model snapshot. A unified shape-and-denotation evaluator scored the historical C000 policy at 76/180, validation-aware ranking at 99/180, and complete three-witness selection at 100/180; however, the best fixed source, Qwen F01, reached 129/180. Both evidence-aware selectors frequently tied at the highest score and remained sensitive to candidate order, showing that the available evidence often could not distinguish semantically competing candidates. The study provides an auditable interface for traceable power-grid Text-to-SQL evaluation; it does not establish an end-to-end accuracy advantage from five-role coordination or superiority over the best fixed source. The historical-pool comparison is descriptive, and broader efficacy requires unseen, expert-reviewed grid queries and budget-matched generation.}
 \keyword{text-to-SQL; multi-agent systems; power-grid databases; schema grounding; execution validation; constructed-state testing; reproducibility}
 \featuredapplication{\masql{} is a research framework for traceable natural-language access to structured power-grid records. It exposes intent, schema, candidate, execution, and selection evidence so that generated SQL and returned rows can be inspected before consequential use.}
 
@@ -45,7 +45,7 @@ The study addresses three research questions:
 \item How stable are these observations across model snapshots, constructed database states, score ties, and candidate order?
 \end{enumerate}
 
-The paper makes three contributions. First, it defines \masql{}, a five-role framework that integrates intent analysis, schema mapping, candidate normalization, read-only execution validation, and state evidence in a traceable blackboard workflow with explicit boundaries between model-backed and deterministic components. Second, it provides an evaluation design spanning GridDB, BIRD, constructed states, and a fixed historical candidate pool, allowing generation behavior, portability, validation behavior, and candidate selection to be observed separately. Third, it reports that validation-aware ranking increased reference matches from 80 to 100 of 180 questions within the historical pool, with complete witness evidence yielding 101 matches; high tie rates and candidate-order sensitivity identify a remaining semantic-ranking bottleneck.
+The paper makes three contributions. First, it defines \masql{}, a five-role framework that integrates intent analysis, schema mapping, candidate normalization, read-only execution validation, and state evidence in a traceable blackboard workflow with explicit boundaries between model-backed and deterministic components. Second, it provides an evaluation design spanning GridDB, BIRD, constructed states, and a fixed historical candidate pool, allowing generation behavior, portability, validation behavior, and candidate selection to be observed separately. Third, under one shape-and-denotation evaluator, it reports 76 C000, 99 validation-aware, and 100 complete-witness matches in the historical pool, alongside all eight fixed-source results; the best fixed source reached 129, while high tie rates and candidate-order sensitivity identify a remaining semantic-ranking bottleneck.
 
 In this paper, \emph{robustness under tested conditions} refers to mutation denial, bounded read-only execution, complete-evidence gating, deterministic failure handling, and the observed response to candidate-order perturbation. The term \emph{multi-agent} denotes five specialized role interfaces and their coordinated trace; some roles are deterministic, and the controller is not a sixth reasoning agent. The present experiments do not estimate a causal five-role advantage over a call-matched single agent, and the historical-pool analysis remains descriptive. Section~5 interprets the empirical findings within these scope conditions.
 
@@ -57,8 +57,7 @@ Text-to-SQL systems map a natural-language request and database schema to an exe
 
 Schema linking connects question spans to tables, columns, values, and foreign-key relations \cite{wang2020ratsql,lei2020reexamining,liu2022semantic}. Full-schema context protects recall but increases token cost and distraction. Compact context reduces the search space but can omit a bridge table or coded field. Retrieval, graph pathfinding, and bidirectional table--column selection seek a better balance \cite{bozdemir2026schema,liu2025solidsql,hao2025genlink,wang2025linkalign,safdarian2026schemagraphsql,nahid2026bidirectional}. Value examples add another signal because the intended field may be clearer from stored codes than from its name. The GridDB studies in this paper examine these context and value choices as observable components of a larger workflow.
 
-Evaluation also needs more than one notion of match. String comparison can penalize equivalent SQL, while result equality can reward different queries that happen to coincide on one database snapshot. Test-suite accuracy and multiple database states reduce some accidental equivalence, provided that the state transformations preserve the intended relation. \masql{} reports strict execution equality, constructed-state agreement, and bounded metamorphic invariance as distinct endpoints. Together, these endpoints describe execution behavior; expert-reviewed business semantics remain a separate validation layer.
-% TODO: citation needed for the test-suite and multi-state evaluation claims above.
+Evaluation also needs more than one notion of match. String comparison can penalize equivalent SQL, while result equality can reward different queries that happen to coincide on one database snapshot. Distilled test suites evaluate denotation across multiple database states to expose some accidental equivalence \cite{zhong2020semantic}. \masql{} separately reports strict execution equality, constructed-state agreement, and bounded metamorphic invariance. These endpoints describe execution behavior under the stated transformations; expert-reviewed business semantics remain a separate validation layer.
 
 \subsection{Multi-Role Generation, Validation, and Selection}
 
@@ -176,7 +175,7 @@ The \textbf{Query Analyst} produces a structured question-only intent record con
 
 The \textbf{SQL Synthesizer} packages external SQL without model calls, canonicalizes formatting, removes exact duplicates while preserving first occurrence, and assigns stable identifiers. The \textbf{Validation Engine} used by the historical-pool study opens the database with \texttt{mode=ro\&immutable=1}, enables \texttt{query\_only}, disables extensions, and installs an authorizer. It denies writes, DDL, transactions, attachments, pragmas, metadata enumeration, dangerous functions, and reads outside table/column allowlists. Progress and fetch handlers enforce time, opcode, and row limits. Every attempt retains database/SQL hashes, failures, timing, row count, and result hash without hidden retry.
 
-A later executor revision adds function allowlisting, projected-width, raw-cell-byte, and total-result-byte limits. Fourteen tests cover BLOB denial, total-budget and boundary behavior, trace retention, oversized text or results, and wide projections. These controls were not used to produce the historical 80/100/101 counts. Table and column allowlists constrain query scope but do not authenticate users or provide row-level authorization; both executor variants establish tested SQLite mutation denial and scoped execution bounds.
+A later executor revision adds function allowlisting, projected-width, raw-cell-byte, and total-result-byte limits. Fourteen tests cover BLOB denial, total-budget and boundary behavior, trace retention, oversized text or results, and wide projections. These controls postdate the frozen historical candidate and evidence ledgers; they therefore strengthen the implementation boundary without changing those stored artifacts. Table and column allowlists constrain query scope but do not authenticate users or provide row-level authorization; both executor variants establish tested SQLite mutation denial and scoped execution bounds.
 
 The threat model assumes untrusted SQL but a trusted host, SQLite library, configured allowlist, and immutable database. It does not address a compromised process, OS escape, side channels, built-in malicious extensions, or upstream authorization errors. Production use requires process isolation, least-privilege views, authenticated context, logging, and independent security review.
 
@@ -232,8 +231,7 @@ Because each question appears in every prompt cell, cell differences are paired 
 
 Qwen2.5-Coder-7B Q4\_K\_M and Granite-3.3-8B Q4\_K\_M were run at temperature zero with fixed snapshots. Each prompt produced exactly one response. The parser retained the first SQL candidate through the first semicolon; the validator then applied the read-only policy. There was no candidate ranking, multi-agent negotiation, or repair in this experiment.
 
-Strict execution equality is primary. A common-target projected-column indicator is a secondary manipulation check. Paired finite-set contrasts use normalized-SQL clusters as dependence proxies, registered sign-flip tests, composition-sensitivity bootstrap intervals, and Holm correction. The intervals describe sensitivity to the observed corpus composition, not population confidence.
-% TODO: citation needed for the grouped randomization, bootstrap, and Holm procedures.
+Strict execution equality is primary. A common-target projected-column indicator is a secondary manipulation check. Paired finite-set contrasts use normalized-SQL clusters as dependence proxies, registered sign-flip tests, composition-sensitivity bootstrap intervals, and Holm correction \cite{cameron2008bootstrap,canay2017randomization,holm1979simple}. The intervals describe sensitivity to the observed corpus composition, not population confidence.
 
 \subsection{Component, Constructed-State, and Public-Database Studies}
 
@@ -257,11 +255,13 @@ The three query-blind witnesses have distinct SHA-256 values and are built from 
 
 These witnesses test metamorphic relations rather than alternative ground-truth answers. M1 asks whether an irrelevant table changes behavior, M2 whether logically neutral storage changes alter the result, and M3 whether projection is stable when nullable columns are appended. A pass means that the observed result satisfies the registered relation; it does not mean the original query expresses the user's intent. A fail can reveal brittleness, as with wildcard projection, but may also reflect a transformation outside the intended query equivalence class. For this reason, witness outcomes enter eligibility only under the disclosed construction and remain reference-free diagnostics.
 
-Candidate order is a first-class experimental variable because the controller uses stable order for equal scores. Original order places four Qwen slots before four Granite slots and follows the prompt-cell sequence within each backbone. Reverse-order sensitivity changes only this tie breaker after the same evidence has been collected. It is a direct diagnostic of unresolved ranking information, not an alternative model or a new sample. The large change later observed under reversal motivates an abstention or clarification policy for future work.
+Candidate order is a first-class experimental variable because the controller uses stable order for equal scores. Original order places four Qwen slots before four Granite slots and follows the prompt-cell sequence within each backbone. A post-review order audit changes only this tie breaker after the same evidence has been collected and exactly enumerates all $8!=40{,}320$ global slot orders. It is a direct diagnostic of unresolved ranking information, not an alternative model or a new sample. The observed range motivates an abstention or clarification policy for future work.
 
 Each selector used the same 1440 source slots and 5760 attempts, and no failed candidate was replaced or retried. The complete software-test matrix, protocol chronology, manifest hashes, and excluded predecessor records are provided in Supplementary Sections S1--S3.
 
-Descriptive endpoints are strict execution accuracy over all 180 questions, coverage and abstention, complete-three-witness invariance of the selected candidate, and rescue/harm relative to fixed order. The sensitivity matrix crosses three weight policies, invariant-pass thresholds of 1/3, 2/3, and 3/3 while always requiring complete observation, and original versus reversed candidate-order tie breaking. Because same-item outcomes were accessible before the selector design was finalized, this matrix is reported only as descriptive analysis.
+Descriptive endpoints are strict execution accuracy over all 180 questions, coverage and abstention, complete-three-witness invariance of the selected candidate, and rescue/harm relative to C000. The unified-evaluator order audit reports the exact correct-count distribution across all global slot orders. A descriptive risk--coverage curve covers questions whose top-score tie set is no larger than $k$, for $k=1,\ldots,8$, and uses the frozen original order within covered ties. Because same-item outcomes were accessible before these diagnostics were finalized, neither the permutation audit nor the risk--coverage curve is a confirmatory analysis.
+
+A post-review reconciliation freezes evaluator \nolinkurl{MA-SQLGrid-GridDB-T0-shape-denotation-v1} and applies it to all eight fixed slots and the sealed selector choices. Candidate and gold SQL execute under the same bounded read-only T0 snapshot. Correctness requires successful execution, the frozen expected column count, and duplicate-preserving row equality (ordered when specified; floating absolute tolerance $10^{-6}$). Empty--empty rows are compared only after both shape gates pass. SQL canonicalization is used for artifact identity, not correctness. This reconciliation is post-result evidence rather than preregistration.
 
 \subsection{Statistical Analysis}
 
@@ -287,7 +287,7 @@ All executable suggestions were run locally against retained inputs, and every r
 
 \subsection{Overview of Empirical Findings}
 
-The experiments produced three main observations. First, schema context, structural hints, and presented values affected the two model snapshots differently; no single context strategy dominated across every analysis. Second, evidence-aware adjudication changed the selected candidate within the historical pool: reference matches increased from 80/180 under fixed order to 100/180 under validation ranking and 101/180 with complete witness evidence. Third, both evidence-aware selectors produced top-score ties on 130/180 questions and remained sensitive to candidate order. Validation evidence helped reject some weaker candidates, but the available semantic signals often remained too coarse for stable ranking.
+The experiments produced three main observations. First, schema context, structural hints, and presented values affected the two model snapshots differently; no single context strategy dominated across every analysis. Second, under the unified evaluator, historical-pool reference matches were 76/180 for C000, 99/180 for validation ranking, and 100/180 with complete witness evidence, while the fixed Qwen F01 source reached 129/180. Third, both evidence-aware selectors produced top-score ties on 130/180 questions and remained sensitive to candidate order. Validation evidence changed choices relative to C000, but the available signals often remained too coarse for stable ranking and did not outperform the best fixed source.
 
 The results are organized by research question. GridDB and BIRD address context and portability; the historical-pool analysis addresses evidence-aware selection; and the constructed-state, tie, and order analyses address stability. Implementation conformance is summarized after the empirical results and documented fully in the Supplementary Materials.
 
@@ -467,23 +467,32 @@ The deterministic descriptive re-execution retained 5760 candidate--state attemp
 Keeping all 332 failures matters for two reasons. Removing them would overstate the executability of the historical pool, and retaining their slot identities verifies that selectors did not receive replacements or retries. Full question-level coverage means only that another slot was eligible for every question; it does not mean every candidate was valid or that an operational system should always answer.
 
 \begin{table}[htbp]
-\caption{Historical-pool selection over one eight-slot pool per question. All methods use the same precomputed candidate/evidence ledger of 32 attempts per question. Reference match is finite-corpus strict execution equality after the blackboards were sealed.}
+\caption{Unified-evaluator comparison for the historical eight-slot pool. C000 is byte-identical in normalized SQL to Qwen F00 for all 180 questions. Differences, paired question-composition intervals, rescue/harm counts, and exact discordant-sign tests use C000 as baseline; Holm adjustment covers nine unique comparisons. This reconciliation is post-result.}
 \label{tab:offline}
 \centering
-\small
+\scriptsize
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{lrrrrrr}
 \toprule
-Selector & Correct/180 & Accuracy & Covered & Abstained & Invariant & Rescue/harm\\
+Method & Correct/180 & Accuracy & Difference & 95\% comp. interval & Rescue/harm & Holm $p$\\
 \midrule
-Fixed order, shared ledger & 80/180 & 0.4444 & 180 & 0 & 177/180 & 0/0\\
-Validation rank, shared ledger, without witnesses & 100/180 & 0.5556 & 180 & 0 & 179/180 & 22/2\\
-Complete-three-witness selector & 101/180 & 0.5611 & 180 & 0 & 180/180 & 23/2\\
+C000 / Qwen F00 & 76/180 & 0.4222 & 0 & [0, 0] & 0/0 & --\\
+Qwen F01 & 129/180 & 0.7167 & +0.2944 & [+0.2222, +0.3667] & 56/3 & $<0.000001$\\
+Qwen F10 & 78/180 & 0.4333 & +0.0111 & [-0.0111, +0.0333] & 3/1 & 1.000000\\
+Qwen F11 & 108/180 & 0.6000 & +0.1778 & [+0.1000, +0.2556] & 46/14 & 0.000211\\
+Granite F00 & 77/180 & 0.4278 & +0.0056 & [-0.0278, +0.0444] & 6/5 & 1.000000\\
+Granite F01 & 100/180 & 0.5556 & +0.1333 & [+0.0500, +0.2222] & 45/21 & 0.017090\\
+Granite F10 & 74/180 & 0.4111 & -0.0111 & [-0.0500, +0.0278] & 6/8 & 1.000000\\
+Granite F11 & 108/180 & 0.6000 & +0.1778 & [+0.1056, +0.2500] & 42/10 & 0.000054\\
+Validation-only selector & 99/180 & 0.5500 & +0.1278 & [+0.0778, +0.1833] & 25/2 & 0.000040\\
+Complete-witness selector & 100/180 & 0.5556 & +0.1333 & [+0.0778, +0.1889] & 26/2 & 0.000024\\
 \bottomrule
 \end{tabular}}
 \end{table}
 
-Figure~\ref{fig:offline-diagnostics} juxtaposes the two recorded endpoints. Validation-only and complete-witness selection differ by one reference match under the frozen evaluator and one invariant selection. This small incremental change contrasts with their 20--21-match difference from fixed order and focuses interpretation on validation ranking and tie policy, not a broad witness benefit.
+Qwen F00 and historical C000 contain the same 180 SQL artifacts. Their previously reported 76-versus-80 discrepancy came from evaluator policy: the historical row-only comparator treated Q104, Q107, Q110, and Q140 as matches because both results were empty, whereas all four candidate projections had the wrong column count. The unified evaluator applies the frozen shape gate before empty-row equality and reproduces all 1440 canonical fixed-slot verdicts. Under that evaluator, validation-only and complete-witness selection differ by one match and remain 30 and 29 matches below Qwen F01, respectively.
+
+Figure~\ref{fig:offline-diagnostics} juxtaposes reference matches and witness invariance. The one-match selector increment focuses interpretation on validation ranking and tie policy, not a broad witness benefit.
 
 \begin{figure}[htbp]
 \centering
@@ -498,7 +507,7 @@ Most apparent source preference is mechanically induced. When all eight candidat
 
 The numerical supplement reports the complete multiplicity and selected-slot distributions, including all eight-candidate ties.
 
-Validation-only ranking added 20 net reference matches relative to fixed order through 22 rescues and 2 harms. Complete-witness selection changed the chosen candidate on only Q039, yielding one further match (101/180 versus 100/180), one additional rescue, no additional harm, and no coverage or abstention change. Table~\ref{tab:q039} gives the constructed trace for this sole difference.
+Validation-only ranking added 23 net reference matches relative to C000 through 25 rescues and 2 harms. Complete-witness selection changed the chosen candidate on only Q039, yielding one further match (100/180 versus 99/180), one additional rescue, no additional harm, and no coverage or abstention change. Table~\ref{tab:q039} gives the constructed trace for this sole selector difference. Neither selector exceeded the fixed Qwen F01 source at 129/180.
 
 \subsection{Tie Structure, Order Sensitivity, and the Q039 Case}
 
@@ -523,32 +532,61 @@ Reference result & No match & Match & One-question trace\\
 
 M3 added nullable columns to \texttt{work\_orders}; consequently, complete-witness eligibility rejected the wildcard projection and retained the explicit \texttt{work\_order\_id, scheduled\_date} projection. The full SQL strings are supplied in the numerical supplement. Neither query resolves the request's status and date-boundary ambiguity through qualified review, so the extra reference match is interpreted as a projection-stability trace rather than an engineering correctness judgment.
 
-Table~\ref{tab:sensitivity} reports all 18 sensitivity cells. Every original-order cell produced 101/180; reverse order produced 117/180 under default and intent-emphasis weights and 118/180 under validation-equal weights. These more favorable values are outcome-exposed diagnostics, not preferred alternatives. The 16--17-item shift and high tie multiplicity show that the apparent selector behavior is materially order-dependent.
+Table~\ref{tab:sensitivity} replaces the non-comparable historical row-only sensitivity values with an exact audit under the unified evaluator. The audit enumerated all $8!=40{,}320$ global slot orders while preserving each question's frozen evidence scores. Validation-only selection ranged from 95 to 128 matches and complete-witness selection also ranged from 95 to 128; both had a median of 107. The original orders produced 99 and 100 matches, respectively, while the reverse order produced 116 for both selectors. Even the outcome-exposed maximum remained below the fixed Qwen F01 source at 129/180.
 
-Threshold invariance across 1/3, 2/3, and 3/3 occurs because the selected candidates' recorded witness patterns and score ties do not change the final original-order choices under these policies. The reverse-order increase cannot justify changing the frozen policy after observing outcomes. Instead, the 16--17-item shift diagnoses inadequate discriminative evidence and motivates a pre-registered tie or abstention rule for the next pool.
+These permutations are diagnostics, not candidate policies: no order is preferred after outcomes are observed. A second descriptive audit abstained whenever the top-score set was not unique. It covered only 50/180 questions and matched 24 of them (0.4800), so top-tie size alone was not a calibrated confidence signal. The range across global orders and the poor strict-abstention result motivate a pre-registered semantic tie or abstention rule evaluated on an untouched pool.
+
+A transparent post-run hash audit emitted no SQL text and found duplicate normalized SQL in 154/180 pools. Mean validation and complete-witness top sets fell from 5.400 and 5.389 slots to 3.150 and 3.139 unique strings; the mean pool contained 5.322 unique strings. Deduplication reduces apparent multiplicity but does not remove ambiguity. The outcome-aware right-step tie-size AURC values, 0.4826 and 0.4795, are diagnostics rather than calibration results.
 
 \begin{table}[htbp]
-\caption{Complete-witness selector sensitivity summarized across invariant-pass thresholds. Results were identical at 1/3, 2/3, and 3/3 for every weight/order pair; coverage was 180/180 throughout.}
+\caption{Exact global candidate-order sensitivity under the unified shape-and-denotation evaluator. All 40,320 orders are outcome-aware diagnostics; original and reverse are two members of that enumeration.}
 \label{tab:sensitivity}
 \centering
 \small
 \resizebox{\textwidth}{!}{%
-\begin{tabular}{lrrr}
+\begin{tabular}{lrrrrrr}
 \toprule
-Weight policy & Thresholds represented & Original order correct/180 & Reverse order correct/180\\
+Selector & Original & Reverse & Minimum & Median & Mean & Maximum\\
 \midrule
-Default & 1/3, 2/3, 3/3 & 101 (0.5611) & 117 (0.6500)\\
-Intent emphasis & 1/3, 2/3, 3/3 & 101 (0.5611) & 117 (0.6500)\\
-Validation equal & 1/3, 2/3, 3/3 & 101 (0.5611) & 118 (0.6556)\\
+Validation-only & 99 & 116 & 95 & 107 & 109.845 & 128\\
+Complete witness & 100 & 116 & 95 & 107 & 109.929 & 128\\
 \bottomrule
 \end{tabular}}
 \end{table}
 
-The numerical supplement contains all eight GridDB cells, 12 component endpoints, eight 15-state cells, 18 sensitivity cells, the 360-row item-level tie ledger, selected-origin counts, and the Q039 trace. The main-text findings use different questions, candidates, call patterns, and endpoints, so they are not combined into a single framework accuracy. Across these studies, the common diagnostic finding is that context and validation evidence can change observable behavior, while stable semantic selection remains unresolved.
+The post-review utilization audit then traced which role outputs actually enter the historical-pool selector. Query Analyst fields feed aggregation, order, and lexical-match validation features. By contrast, the Schema Cartographer's grounding is posted to the blackboard but is not passed to candidate generation, validation, the critic, or adjudication in this frozen driver. The candidate provider is an adapter for stored SQL and makes no model calls. Table~\ref{tab:role-ablation} therefore reports score-component diagnostics rather than claiming a prospective removal of five independently active agents. Safety and executability gates remain active in every variant.
+
+\begin{table}[htbp]
+\caption{Post-review role-utilization and single-component diagnostics under the unified evaluator. Changes, gains, and losses are relative to the stated parent and use the original candidate order.}
+\label{tab:role-ablation}
+\centering
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llrrrr}
+\toprule
+Selector variant & Parent & Correct/180 & Choices changed & Gains & Losses\\
+\midrule
+Validation original & --- & 99 & 0 & 0 & 0\\
+Without all Query-Analyst-derived score terms & Validation original & 76 & 64 & 2 & 25\\
+Without shape term & Validation original & 99 & 0 & 0 & 0\\
+Without order term & Validation original & 77 & 49 & 1 & 23\\
+Without lexical value-hit term & Validation original & 99 & 14 & 1 & 1\\
+Complete witness original & --- & 100 & 0 & 0 & 0\\
+Without constructed-state gate & Complete witness & 99 & 1 & 0 & 1\\
+Without recorded-only schema grounding & Complete witness & 100 & 0 & 0 & 0\\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+The order feature accounts for most of the observed post-review change in this decomposition: removing it changes 49 validation choices and lowers the match count by 22. Removing lexical value hits changes 14 choices but exchanges one gain for one loss, while removing the shape term changes none. Removing constructed-state eligibility changes only Q039. These same-item, outcome-aware diagnostics localize behavior in the frozen pool; they do not estimate the benefit of an independently implemented role on unseen questions.
+
+An automated evaluator-state taxonomy further separates execution failure, output-shape mismatch, and wrong denotation after both shape gates pass. C000 has 1 execution error, 85 shape mismatches, and 18 wrong denotations among its 104 failures. Validation-only selection has 0, 42, and 39, respectively; complete-witness selection has 0, 41, and 39. The best fixed Qwen F01 source has 5 execution errors, 1 shape mismatch, and 45 wrong denotations. Thus the frozen selector removes many inadmissible or shape-inconsistent candidates but leaves a larger share of its remaining failures beyond the evaluator's shape gate. This automatic taxonomy does not distinguish wrong status meaning, units, time boundaries, topology intent, or professional usefulness; those categories remain subject to independent expert review.
+
+The numerical supplement contains all eight GridDB cells, 12 component endpoints, eight 15-state cells, the exact unified-evaluator order histogram, the descriptive risk--coverage curve, the 360-row item-level tie ledger, selected-origin counts, and the Q039 trace. The main-text findings use different questions, candidates, call patterns, and endpoints, so they are not combined into a single framework accuracy. Across these studies, the common diagnostic finding is that context and validation evidence can change observable behavior, while stable semantic selection remains unresolved.
 
 \subsection{Implementation Reliability}
 
-The five-role controller and executor were tested for typed handoffs, mutation denial, bounded execution, trace completeness, deterministic replay, and fail-closed state coverage. Failed attempts remain in the evidence ledger and cannot be silently replaced. The executor used for the 80/100/101 comparison enforced SQLite read-only mode, \texttt{query\_only}, authorization callbacks, disabled extensions, and time, opcode, and row bounds. A later revision added cell-byte, total-result-byte, width, and function controls; these tests strengthen the implementation boundary but do not reinterpret the historical-pool results. Supplementary Tables S1--S3 provide the complete test inventory and protocol attribution.
+The five-role controller and executor were tested for typed handoffs, mutation denial, bounded execution, trace completeness, deterministic replay, and fail-closed state coverage. Failed attempts remain in the evidence ledger and cannot be silently replaced. The executor used to create the historical candidate and evidence ledgers enforced SQLite read-only mode, \texttt{query\_only}, authorization callbacks, disabled extensions, and time, opcode, and row bounds. A later revision added cell-byte, total-result-byte, width, and function controls; these tests strengthen the implementation boundary but do not reinterpret the frozen ledgers. The unified evaluator subsequently scored the stored fixed and selected SQL under one explicit shape-and-denotation rule. The historical selector ledger contains 3960 blackboard messages and 5760 database attempts (5428 executable and 332 SQLite failures) across 953 distinct SQL hashes; it contains no selector-stage model calls. Recorded local attempt time totals 839 ms, but timer granularity places both the median and 95th percentile at 0 ms, so these values are an audit of the ledger rather than a deployment-latency estimate. Supplementary Tables S1--S3 provide the complete test inventory and protocol attribution.
 
 \section{Discussion}
 
@@ -560,9 +598,11 @@ This dependence motivates separate Query Analyst and Schema Cartographer interfa
 
 \subsection{Why Validation-Aware Selection Changed the Historical Pool}
 
-Validation-aware ranking added 20 net reference matches relative to fixed order through 22 rescues and 2 harms. The change is consistent with a simple mechanism: execution failures, result-shape inconsistency, ordering mismatch, and weak value evidence remove or demote candidates that a source-order rule would otherwise select. Because all selectors used the same precomputed ledger, the comparison isolates selection behavior within this pool rather than differences in candidate generation.
+Validation-aware ranking added 23 net reference matches relative to C000 through 25 rescues and 2 harms. The change is consistent with a simple mechanism: execution failures, result-shape inconsistency, ordering mismatch, and weak value evidence remove or demote candidates that a source-order rule would otherwise select. Because all selectors used the same precomputed ledger, the comparison isolates selection behavior within this pool rather than differences in candidate generation. It did not exceed the fixed Qwen F01 source, which added 53 matches relative to C000 under the same evaluator.
 
-The descriptive result is useful for system design. It shows that execution and trace evidence can change which existing candidate is chosen, and it identifies the questions on which the change helps or harms. A prospective comparison must regenerate candidates under equal call and token budgets, but the present ledger supplies a concrete hypothesis and a reproducible selector interface for that test.
+The descriptive result is useful for system design. It shows that execution and trace evidence can change which existing candidate is chosen, and it identifies the questions on which the change helps or harms. A prospective comparison must regenerate candidates under equal call and token budgets, but the present ledger supplies a concrete hypothesis and an auditable selector interface for that test.
+
+The error decomposition narrows that hypothesis: automatic validation is strongest at rejecting execution and output-shape failures, not at resolving semantically competing denotations. A future selector should therefore be evaluated on whether it reduces wrong-denotation and expert-semantic errors without simply exchanging them for shape conformity.
 
 \subsection{Limited Increment from Constructed-State Evidence}
 
@@ -572,7 +612,7 @@ Q039 illustrates the distinction. The nullable-extension witness rejects a wildc
 
 \subsection{Ties as the Main Ranking Bottleneck}
 
-Both adjudicating selectors tied at the highest score on 130/180 questions, with about 5.4 candidates in the average top-tie set. Reversing candidate order changed the complete-witness result from 101 to 117--118 matches. This sensitivity reveals a bottleneck that aggregate accuracy alone would hide: the evidence can eliminate some inferior candidates but often cannot rank the survivors.
+Both adjudicating selectors tied at the highest score on 130/180 questions, with about 5.4 candidates in the average top-tie set. Under the unified evaluator, exact enumeration of all 40,320 global orders moved both selectors across a 95--128-match range; the complete-witness result changed from 100 to 116 under simple reversal. Strict no-tie abstention covered 50 questions but matched only 24. This sensitivity reveals a bottleneck that aggregate accuracy alone would hide: the evidence can eliminate some inferior candidates but often cannot rank the survivors, and tie multiplicity alone is not a calibrated uncertainty measure.
 
 The next design problem is to obtain reference-free semantic evidence that breaks ties consistently, or to abstain when such evidence is unavailable; generating more candidates alone does not resolve the tie structure. Candidate-order rules, ambiguity margins, clarification requests, and risk--coverage targets should be fixed on development data before an untouched evaluation set is opened. The shared blackboard trace provides the observations needed to study each alternative without changing the upstream generation records.
 
@@ -603,9 +643,9 @@ Figure~\ref{fig:evidence-map} summarizes how the four empirical streams connect 
 
 \section{Conclusions}
 
-\masql{} frames power-grid Text-to-SQL as a traceable five-role multi-agent decision process. The role interfaces separate intent analysis, schema mapping, candidate normalization, read-only execution validation, and constructed-state evidence. A deterministic controller records their handoffs through a shared blackboard trace, selects only eligible candidates, and can abstain when required evidence is incomplete. This architecture provides a reproducible interface for locating errors that would be hidden by a final-SQL-only pipeline.
+\masql{} frames power-grid Text-to-SQL as a traceable five-role multi-agent decision process. The role interfaces separate intent analysis, schema mapping, candidate normalization, read-only execution validation, and constructed-state evidence. A deterministic controller records their handoffs through a shared blackboard trace, selects only eligible candidates, and can abstain when required evidence is incomplete. This architecture provides an auditable interface for locating errors that would be hidden by a final-SQL-only pipeline.
 
-The experiments show that context and value evidence depend on the model and evaluation setting. The clearest selection result arises within the historical pool: fixed order produced 80/180 reference matches, validation-aware ranking produced 100/180, and complete witness evidence produced 101/180. This descriptive 20--21-match difference characterizes selection within the pool, not an architectural treatment effect, and motivates prospective evaluation of validation-aware selection. At the same time, top-score ties on 130/180 questions and substantial candidate-order sensitivity expose an unresolved semantic-ranking problem.
+The experiments show that context and value evidence depend on the model and evaluation setting. Under the unified evaluator, the historical C000 policy produced 76/180 reference matches, validation-aware ranking produced 99/180, and complete witness evidence produced 100/180. These descriptive gains of 23 and 24 characterize selection within the pool, not an architectural treatment effect; neither selector exceeded the fixed Qwen F01 source at 129/180. Top-score ties on 130/180 questions and the exact 95--128 range across global candidate orders expose an unresolved semantic-ranking problem.
 
 MA-SQLGrid provides an auditable research interface for power-grid Text-to-SQL. Claims about broader efficacy or deployment require a call- and budget-matched evaluation on unseen, independently expert-reviewed grid queries, with pre-registered semantic evidence, tie handling, abstention, and risk--coverage analysis.
 

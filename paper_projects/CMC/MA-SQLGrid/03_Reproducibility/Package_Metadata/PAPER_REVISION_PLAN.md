@@ -1,6 +1,8 @@
 # MA-SQLGrid 论文修改与补充实验计划（最新版 LaTeX 基准）
 
-> **版本基准（必须保留）**  
+> **历史计划，已被 2026-08-23 执行计划取代。** 本文件记录统一 evaluator 对账前的评审判断，其中 80/100/101、117/118 和旧去重计数不得作为当前结果引用。当前权威文件为 `02_Revision_and_QA/02_Working_Plan/DETAILED_REVISION_PLAN_2026-08-23.md`、执行台账和 `03_Reproducibility/Data/evaluator_audit/`；当前统一 evaluator 结果为 76/99/100，反向顺序为 116/116，精确顺序范围为 95--128，统一 normalization 下 154/180 个池含重复 SQL。
+
+> **版本基准（必须保留）**
 > 本计划只以 `02_LaTeX/paper_applsci.tex` 为论文正文，基准文件最后修改于 2026-08-22 21:38:51，SHA-256 为 `75431F94E617F6E321994E5BA047BB3C54F10E1A267839E4E3107E44E8BBD866`。`01_PDF/MA_SQLGrid_v3.0_Applied_Sciences.pdf` 生成于 2026-08-12，属于旧版本，不得再用于判断论文正文，只能在以最新 LaTeX 重建后替换。
 
 ## 1. 文档目的与总体判断

@@ -32,6 +32,8 @@ class ExactSignFlipTests(unittest.TestCase):
 
     def test_frozen_ledger_shape_and_expected_values(self):
         pred = HERE.parent / "formal_runs_v0_3_1" / "c2ges_v031_formal_20260808" / "predictions.jsonl"
+        if not pred.exists():
+            self.skipTest("restricted report-level prediction ledger is not distributed")
         ledger = MOD.load_ledger(pred)
         self.assertEqual(len(ledger), 210)
         rows = MOD.compute(ledger)

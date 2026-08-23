@@ -18,11 +18,16 @@ class MetadataTests(unittest.TestCase):
 
     def test_local_inputs_account_for_all_40(self):
         r2 = HERE.parent
-        root = r2.parents[4]
+        root = next((p for p in (HERE, *HERE.parents) if (p / ".git").exists()), None)
+        self.assertIsNotNone(root, "repository root must be discoverable")
+        audit = r2 / "diagnostic_build_08/per_report_extraction_audit.jsonl"
+        rights = r2 / "diagnostic_build_08/rights_ledger.jsonl"
+        if not audit.exists() or not rights.exists():
+            self.skipTest("restricted extraction audit and rights ledger are not distributed")
         rows = MOD.build(
             root / "data/public_datasets/reliability_reports/c2ges_nerc_reports/metadata/c2ges_nerc_report_manifest.json",
-            r2 / "diagnostic_build_08/per_report_extraction_audit.jsonl",
-            r2 / "diagnostic_build_08/rights_ledger.jsonl",
+            audit,
+            rights,
         )
         self.assertEqual(len(rows), 40)
         self.assertEqual(sum(r["inclusion_status"] == "included" for r in rows), 27)
