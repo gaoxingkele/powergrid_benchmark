@@ -226,8 +226,26 @@ def manuscript_checks() -> dict[str, object]:
         "normalized-path",
         "exactly nine configurations",
         "future external-series",
+        "Bijing Liu",
+        "Yong Yang",
+        "yangyong1@sgepri.sgcc.com.cn",
+        "cmc-2026-08-24-v2",
+        "All authors have read and agreed",
+        "ORCID: none declared",
     ]
     missing = [token for token in required_claim_tokens if token not in tex]
+    for placeholder in ("email to be provided", "author-email-required@example.com", "[AUTHOR INPUT REQUIRED]"):
+        if placeholder in tex:
+            missing.append(f"unresolved placeholder: {placeholder}")
+    if "\\orcidauthor" in tex or "\\orcidA" in tex:
+        missing.append("ORCID command must be omitted when all authors declared NONE")
+    abstract_match = re.search(r"\\abstract\{(.*?)\}\s*\\keyword", tex, flags=re.DOTALL)
+    abstract_words = [] if abstract_match is None else re.findall(
+        r"[A-Za-z0-9]+(?:[-'][A-Za-z0-9]+)*",
+        abstract_match.group(1).replace("\\cges{}", "C2GES").replace("\\%", "%"),
+    )
+    if not abstract_words or len(abstract_words) > 200:
+        missing.append(f"abstract word count must be 1--200; observed {len(abstract_words)}")
     if "test_input_accessed=false" not in supplement:
         missing.append("supplement test-input boundary")
     figures = re.findall(r"\\includegraphics(?:\[[^]]*\])?\{([^}]+)\}", tex)
@@ -236,6 +254,7 @@ def manuscript_checks() -> dict[str, object]:
         "status": "PASS" if not missing and not missing_figures else "FAIL",
         "required_claim_tokens": len(required_claim_tokens),
         "figures": len(figures),
+        "abstract_words": len(abstract_words),
         "missing": missing,
         "missing_figures": missing_figures,
     }
@@ -243,8 +262,13 @@ def manuscript_checks() -> dict[str, object]:
 
 def external_gates() -> dict[str, str]:
     return {
-        "author_metadata_and_approval": "PENDING",
-        "author_code_license_and_release_approval": "PENDING",
+        "author_metadata": "PROVIDED_0823_BASELINE_USER_DIRECTED_2026_08_24",
+        "author_orcid": "NONE_DECLARED_ALL_AUTHORS",
+        "corresponding_author_email": "PROVIDED_0823_SOURCE",
+        "author_declarations": "PROVIDED_BY_PRIOR_AUTHOR_DEFAULT_AND_2026_08_24_DIRECTION",
+        "author_code_license": "ALL_RIGHTS_RESERVED_NO_EXPLICIT_LICENSE",
+        "rights_safe_public_release": "AUTHORIZED_GITHUB_SCOPE",
+        "journal_portal_author_attestation": "MANUAL_AT_SUBMISSION_NOT_PACKAGE_GATE",
         "third_party_redistribution_permission": "NOT_REQUIRED_EXCLUDED_FROM_PUBLIC_RELEASE",
         "independent_power_system_expert_annotation": "CLAIM_UPGRADE_ONLY_EXPANDED_SCOPE",
         "untouched_external_series_evaluation": "CLAIM_UPGRADE_ONLY_EXPANDED_SCOPE",

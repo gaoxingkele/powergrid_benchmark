@@ -1,24 +1,31 @@
 # MA-SQLGrid 当前基准
 
-日期：2026-08-23  
-目标期刊：MDPI *Applied Sciences*  
-科学状态：需完成 P0 一致性修订；强主张取决于 P1 实验  
-投稿状态：未就绪
+更新日期：2026-08-24
+
+目标期刊：MDPI *Applied Sciences*
+
+科学路线：路线 A（可审计协调与评价框架）
+
+技术状态：`PASS`；投稿模式验证与最终 PDF 视觉检查均通过
 
 ## 唯一活动版本
 
 - LaTeX：`../01_Manuscript/LaTeX/paper_applsci.tex`
-- LaTeX SHA-256：`75431F94E617F6E321994E5BA047BB3C54F10E1A267839E4E3107E44E8BBD866`
-- 原始 0823 ZIP：`../90_Archive/01_Source_Packages/MA_SQLGrid_v3.0_COMPLETE_FINAL_2026-08-23.zip`
-- ZIP SHA-256：`10DA70E789A46A2C96FF6A184A9F818BA22A032A6F91D6216071BA1C4AEA43A4`
-- 0823 修改意见 SHA-256：`19748C53BE37FA4A2291AB1FF3EB440E2EC30449698D2437B2586BAA3E4CD0D9`
-- 新编译正文 PDF SHA-256：`36E81CC6552B24C4EC930146BE93A79D2E3E4E388020671C4279B9BE1627DC5B`
+- 正文 PDF：`../01_Manuscript/LaTeX/paper_applsci.pdf`
+- 投稿信：`../02_Revision_and_QA/05_Submission_Draft/COVER_LETTER_DRAFT_2026-08-23.md`
+- 投稿元数据记录：`../02_Revision_and_QA/03_Package_QA/AUTHOR_APPROVAL_FORM_2026-08-24.md`
+- 计划冻结标签：`cmc-2026-08-24-v2`
 
-## 当前硬阻塞
+## 已落实的投稿元数据
 
-1. 通讯作者邮箱仍为占位符，作者姓名格式与 ORCID/SuSy 尚待本人确认。
-2. 76/180 与 80/180 的 artifact/evaluator 口径尚未在正文中闭环。
-3. 八个固定来源尚未在同一 evaluator 下形成完整主表。
-4. 两处 citation TODO 尚未消除。
-5. Data Availability、公开仓库版本和权利清单尚未完成对账。
-6. 最终哈希、manifest、干净环境测试和投稿附件尚未冻结。
+- 作者：Bijing Liu；Chenglong Sun；Yong Yang。
+- 三位作者均使用单位 1/2；Yong Yang 为通讯作者。
+- 通讯邮箱：`yangyong1@sgepri.sgcc.com.cn`，来源为 0823 原始稿和一致的历史投稿材料。
+- ORCID：三位作者均为 `NONE`；按 MDPI 模板规则不在 LaTeX 中创建 ORCID 命令。
+- 基金、CRediT、利益冲突及 AI 披露沿用已有作者指示，并与正文声明一致。
+
+## 当前边界
+
+- 当前稿不主张五角色端到端优势、不主张优于最佳固定来源，也不主张广泛电力语义有效性。
+- raw GridDB、BIRD 数据库和其他受限资产不进入公开包；公开代码没有显式开源许可证，按 `All rights reserved` 处理。
+- 通讯作者仍须在 SuSy 中人工确认无一稿多投、全体作者批准、最终 PDF、审稿人字段及其他门户声明。这是投稿动作，不是本地包的技术失败。

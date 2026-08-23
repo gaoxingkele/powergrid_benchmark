@@ -8,7 +8,7 @@ Scope: citation existence and context, claim-to-artifact consistency, common res
 
 ## Verdict
 
-**PASS_WITH_EXTERNAL_GATES.** All 34 active bibliography entries pass identity verification and are cited; all active citation contexts were reviewed and are compatible with the cited work's documented topic or method. The manuscript does not claim that this audit is expert scientific validation, professional plagiarism clearance, third-party permission, or author approval.
+**PASS_WITH_MANUAL_PORTAL_ATTESTATION.** All 34 active bibliography entries pass identity verification and are cited; all active citation contexts were reviewed and are compatible with the cited work's documented topic or method. Author metadata and conservative declarations have been incorporated from the user-directed 0823 baseline and prior author record. This audit is not expert scientific validation, professional plagiarism clearance, or a substitute for the corresponding author's portal attestations.
 
 ## Citation-context coverage
 
@@ -39,15 +39,15 @@ Coverage check: **34/34 unique cited keys; 25/25 citation occurrences; 0 danglin
 | Generalization overclaim | One-organization report corpus and absent untouched-series/expert validation are explicit | PASS; external validation remains open. |
 | Data leakage | Development/test report boundary, source-page locators, and `test_input_accessed=false` for later calibration are recorded | PASS for recorded workflows; restricted source regeneration is not publicly re-executed. |
 | Human/expert validation | No automated or AI-assisted check is relabelled as expert annotation | PASS as a boundary; dual-expert annotation remains open. |
-| Rights and redistribution | Raw NERC PDFs and verbatim derivatives are excluded | PASS for current public package; author code-licence and release approval remain open. Third-party permission is required only before any broader redistribution. |
-| Authorship and declarations | Placeholder email and unconfirmed declarations remain visibly pending | PASS as fail-closed handling; not submission-ready. |
+| Rights and redistribution | Raw NERC PDFs and verbatim derivatives are excluded | PASS for current public package. No explicit open-source licence is granted, so code remains all-rights-reserved; third-party permission is required only before broader redistribution. |
+| Authorship and declarations | Names, affiliations, ORCID `NONE`, correspondence, CRediT, funding, conflict, and AI disclosure are cross-checked against the designated source records | PASS for package metadata; final portal attestations remain the corresponding author's manual responsibility. |
 | Originality/plagiarism | No professional similarity service or publisher database was available | **NOT CERTIFIED**; author/editor similarity screening remains required. |
 
-## Current-scope submission gates
+## Manual actions at journal submission
 
-1. All-author identity, CRediT, funding, conflict, AI-use, licence, and final-PDF approval.
-2. Corresponding-author email.
-3. Author approval of the code licence, current rights-safe public package, Data Availability statement, and restricted-material handling boundary.
+1. The corresponding author reads the frozen final PDF and confirms the portal metadata.
+2. The corresponding author attests no simultaneous submission and final all-author approval in SuSy.
+3. Any requested reviewer-only restricted transfer receives a fresh file-level rights and confidentiality check.
 
 ## Conditional claim-upgrade gates
 

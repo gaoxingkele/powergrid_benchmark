@@ -10,7 +10,7 @@
 
 ## 结论
 
-**本地技术执行完成；当前范围的作者/权利投稿门禁未完成。** 当前版本已完成可由仓库内证据闭合的修订、诊断、引用审计、复现、LaTeX/PDF 和发布冻结工作。作者签核、代码许可证和当前 release 的权利批准不能由自动化系统代替，保持 `PENDING`。独立专家标注、未见外部系列和真实维护效用研究仍未执行，但在现稿已删除对应强主张的前提下属于 `CLAIM_UPGRADE_ONLY_EXPANDED_SCOPE`，不是当前保守路线的投稿硬门禁。因此状态为 `technical_status=PASS`、`submission_ready=false`。
+**本地技术执行及投稿元数据处理完成。** 当前版本已完成仓库内证据可闭合的修订、诊断、引用审计、复现、LaTeX/PDF 和发布冻结工作。用户于 2026-08-24 指定 ORCID 全部为 `NONE`，并授权以 0823 原始稿为基准处理其余字段；姓名、通讯邮箱、声明和 rights-safe 发布边界已据此写入。独立专家标注、未见外部系列和真实维护效用研究仍未执行，但在现稿删除对应强主张后属于 `CLAIM_UPGRADE_ONLY_EXPANDED_SCOPE`。通讯作者在 SuSy 中的最终核对和声明是人工投稿动作，不再作为本地包技术门禁。
 
 ## P0 核对
 
@@ -21,7 +21,7 @@
 | C-P0-03 Table S1 | COMPLETE | 40 行 rights-safe sampling frame 已纳入验证；不含受限原文。 |
 | C-P0-04 环境与入口 | COMPLETE | Python 3.12 公共入口、49 项测试（其中 3 项因受限输入显式跳过）及正文/补充材料干净编译通过。 |
 | C-P0-05 包路径与 manifest | COMPLETE | `Package_Metadata/RELEASE_MANIFEST.json` 与 `FILE_SHA256SUMS.txt` 对当前布局重建；独立 `--check` 为零 missing/unlisted/mismatch。 |
-| C-P0-06 作者与声明 | **OPEN — AUTHOR** | 已建立 `AUTHOR_APPROVAL_FORM_2026-08-24.md`；通讯邮箱、姓名/单位/ORCID、CRediT、基金、冲突、AI 披露、许可证和终稿批准均待作者书面确认。 |
+| C-P0-06 作者与声明 | COMPLETE FOR PACKAGE | 作者、单位、ORCID `NONE`、通讯邮箱、CRediT、基金、冲突和 AI 披露已按指定来源记录；SuSy 最终声明仍由通讯作者人工完成。 |
 | C-P0-07 主张词汇审计 | COMPLETE | `C2GES_CLAIM_EVIDENCE_AUDIT_2026-08-23.md` 与 `INTEGRITY_AUDIT_2026-08-24.md`；未保留无条件 superiority、effectiveness、causality 或完整公开复现主张。 |
 
 ## P1/P2 核对
@@ -44,14 +44,15 @@
 
 - 参考文献从 45 条活动条目清理为 34 条正文实际引用；34/34 通过 DOI、出版社或官方来源身份核验，0 dangling、0 orphan。
 - NERC 指南的引用语境已修正：只支持事件分析报告的制度背景，不再被用作语料清单本身的证据。
-- Data Availability 绑定 `powergrid_benchmark` 冻结标签 `cmc-2026-08-24-v1`；旧 `c2ges` 仓库明确不是本稿 release。
-- 作者批准完成时态被移除；通讯邮箱保留显式占位，不推断个人信息。
+- Data Availability 更新为 `powergrid_benchmark` 冻结标签 `cmc-2026-08-24-v2`；旧 `c2ges` 仓库明确不是本稿 release。
+- 作者姓名恢复为 0823 原稿的 Bijing Liu / Yong Yang，通讯邮箱恢复为一致记录中的 `yangyong1@sgepri.sgcc.com.cn`；ORCID 全部记录为 `NONE` 并在 LaTeX 中省略命令。
+- 按已有作者默认指示恢复 MDPI 标准 all-authors 结句，并把生成式 AI 产品、用途、未知版本和作者责任在 Methods/Acknowledgments 中对齐。
 - 投稿校验器已按主张强度区分硬门禁与升级门禁：当前范围只由作者元数据/批准和作者代码许可证/release 批准阻塞；专家标注、未见系列和维护效用验证仅在恢复相应强主张时阻塞。
 - 0823 PDF 已移入 `90_Archive/04_Pre_20260824_PDF/`；活动目录仅保留 0824 正文和补充材料 PDF。
 - 逐页视觉检查覆盖 22 页正文和 2 页补充材料；零空白页、裁切、重叠、未定义引用和 overfull box。
 
-## 投稿前仍需作者/外部执行
+## 投稿门户人工动作与强主张升级
 
-1. 完成并签署 `AUTHOR_APPROVAL_FORM_2026-08-24.md`。
-2. 明确代码许可证及任何第三方材料的可再分发范围。
-3. 若保持当前保守主张，可在完成作者/权利门后形成投稿候选；若恢复结构有效性、泛化或工程效用主张，必须先完成对应 P1/P2 外部研究并生成新冻结 release。
+1. 通讯作者逐页阅读冻结 PDF，在 SuSy 中核对元数据并完成无一稿多投、全体作者批准等门户声明。
+2. 当前无显式代码许可证，按 `All rights reserved` 处理；任何超出 rights-safe 包的材料转交均需重新核权。
+3. 若恢复结构有效性、泛化或工程效用主张，必须先完成对应 P1/P2 外部研究并生成新冻结 release。

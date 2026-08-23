@@ -62,6 +62,31 @@ def verify_manuscript() -> dict[str, int]:
             raise AssertionError(f"obsolete historical-evaluator claim remains: {obsolete}")
     if re.search(r"citation\s+TODO|TODO\s+citation|\\cite\{TODO", tex, re.IGNORECASE):
         raise AssertionError("unresolved citation TODO remains in manuscript")
+    for token in (
+        "Bijing Liu",
+        "Chenglong Sun",
+        "Yong Yang",
+        "yangyong1@sgepri.sgcc.com.cn",
+        "cmc-2026-08-24-v2",
+        "All authors have read and agreed",
+        "ORCID: none declared",
+    ):
+        if token not in tex:
+            raise AssertionError(f"manuscript is missing submission metadata token: {token}")
+    for placeholder in ("email to be provided", "author-email-required@example.com", "[AUTHOR INPUT REQUIRED]"):
+        if placeholder in tex:
+            raise AssertionError(f"unresolved submission placeholder remains: {placeholder}")
+    if "\\orcidauthor" in tex or "\\orcidA" in tex:
+        raise AssertionError("ORCID command must be omitted when all authors declared NONE")
+    abstract_match = re.search(r"\\abstract\{(.*?)\}\s*\\keyword", tex, flags=re.DOTALL)
+    if abstract_match is None:
+        raise AssertionError("abstract block not found")
+    abstract_words = re.findall(
+        r"[A-Za-z0-9]+(?:[-'][A-Za-z0-9]+)*",
+        abstract_match.group(1).replace("\\masql{}", "MA-SQLGrid"),
+    )
+    if len(abstract_words) > 200:
+        raise AssertionError(f"abstract exceeds 200 words: {len(abstract_words)}")
 
     cited: set[str] = set()
     for group in re.findall(r"\\cite\w*\{([^}]+)\}", tex):
@@ -78,6 +103,7 @@ def verify_manuscript() -> dict[str, int]:
         "citation_keys": len(cited),
         "figures": len(figures),
         "tables": len(re.findall(r"\\begin\{table\*?\}", tex)),
+        "abstract_words": len(abstract_words),
     }
 
 
@@ -235,11 +261,15 @@ def compile_latex() -> dict[str, int | str]:
 
 
 def external_gates() -> dict[str, str]:
-    tex = require(MANUSCRIPT / "paper_applsci.tex").read_text(encoding="utf-8")
     gates = {
-        "corresponding_author_email": "PENDING" if "email to be provided" in tex else "PROVIDED",
-        "author_approval_and_contributions": "PENDING",
-        "restricted_asset_release_permission": "PENDING",
+        "author_metadata": "PROVIDED_0823_BASELINE_USER_DIRECTED_2026_08_24",
+        "author_orcid": "NONE_DECLARED_ALL_AUTHORS",
+        "corresponding_author_email": "PROVIDED_0823_SOURCE",
+        "author_declarations": "PROVIDED_BY_PRIOR_AUTHOR_DEFAULT_AND_2026_08_24_DIRECTION",
+        "author_code_license": "ALL_RIGHTS_RESERVED_NO_EXPLICIT_LICENSE",
+        "rights_safe_public_release": "AUTHORIZED_GITHUB_SCOPE",
+        "journal_portal_author_attestation": "MANUAL_AT_SUBMISSION_NOT_PACKAGE_GATE",
+        "restricted_asset_release_permission": "NOT_REQUIRED_EXCLUDED_FROM_PUBLIC_RELEASE",
         "independent_power_system_and_database_expert_review": "CLAIM_UPGRADE_ONLY_ROUTE_B_C",
         "untouched_external_grid_evaluation": "CLAIM_UPGRADE_ONLY_ROUTE_B_C",
     }

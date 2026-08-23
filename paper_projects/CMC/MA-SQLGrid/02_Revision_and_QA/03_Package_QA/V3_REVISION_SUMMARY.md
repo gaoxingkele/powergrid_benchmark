@@ -17,7 +17,7 @@ Version 3.0 is the second content-narrative revision of the Applied Sciences man
 9. Removed reverse-order endpoint values from the Abstract and Conclusions while retaining the complete sensitivity results in Results and Discussion.
 10. Consolidated the detailed AI-use disclosure in Methods and reduced Acknowledgments to a short responsibility statement.
 11. Simplified the Supplementary Materials and Data Availability statements.
-12. Corrected the correspondence line so that Liu Bijing's address is not presented as Yang Yong's email. Yang Yong's actual submission email remains an explicit author-completion field.
+12. At this historical stage, the correspondence line was left as an author-completion field. This was superseded on 2026-08-24 by the user-directed 0823 baseline: Yong Yang and `yangyong1@sgepri.sgcc.com.cn`.
 
 ## Verification outcome
 
@@ -30,6 +30,9 @@ Version 3.0 is the second content-narrative revision of the Applied Sciences man
 - Numerical token comparison confirmed that the core 80/100/101 result and the underlying historical-pool, component, BIRD, and constructed-state denominators remain present.
 - Core test suites: 96 tests passed and 1 was skipped across the coordination, executor, GridDB, component, and constructed-state code. The BIRD v1.1 runtime-identity test was not re-certified under the current Python 3.12 / SQLite 3.49.1 environment; the paper correctly identifies the formal runtime as Python 3.10.11 / SQLite 3.40.1.
 
-## Remaining human gate
+## Superseding metadata note
 
-Before submission, Yang Yong must provide and approve the correspondence email. No substitute address has been inferred.
+The active manuscript no longer contains an email placeholder. ORCID is `NONE`
+for all authors, and the names/email are recorded in
+`AUTHOR_APPROVAL_FORM_2026-08-24.md`. Final SuSy attestations remain the
+corresponding author's manual responsibility.

@@ -1,9 +1,14 @@
-# Author Action Required
+# Manual Journal-Submission Actions
 
-Before submission, replace the correspondence placeholder in
-`01_Manuscript/LaTeX/paper_applsci.tex` with Yang Yong's approved email address, rebuild the
-PDF, and rerun the visual and release checks. Also confirm author order,
-affiliations, funding number 521300250006, author contributions, conflicts of
-interest, and the availability statement with all authors.
+The local submission package records Bijing Liu, Chenglong Sun, and Yong Yang;
+both affiliations; corresponding author Yong Yang; correspondence email
+`yangyong1@sgepri.sgcc.com.cn`; ORCID `NONE` for all authors; funding number
+521300250006; CRediT roles; conflicts; AI use; and the rights-safe Data
+Availability Statement. These fields derive from the user-directed 0823
+baseline and the prior author instruction record.
 
-No email address was inferred for Yang Yong in version 3.0.
+Before uploading, the corresponding author must read the frozen final PDF,
+confirm all SuSy fields and the cover letter, attest no simultaneous submission
+and all-author approval, and complete real reviewer/conflict fields if the
+portal requires them. Any transfer of restricted assets requires a separate
+file-level rights and confidentiality review.

@@ -1,25 +1,32 @@
 # C2GES 当前基准
 
-日期：2026-08-23  
-目标期刊：MDPI *Applied Sciences*  
-科学状态：Major Revision  
-投稿状态：未就绪
+更新日期：2026-08-24
+
+目标期刊：MDPI *Applied Sciences*
+
+科学路线：范围收缩的技术报告代理与负向组件诊断
+
+技术状态：`PASS`；投稿模式验证与最终 PDF 视觉检查均通过
 
 ## 唯一活动版本
 
 - LaTeX：`../01_Manuscript/LaTeX/paper_applsci.tex`
-- LaTeX SHA-256：`B0B9D03C94710A6F92F4BC48E6FCD0BF45E308E3AF2964A942A9874C9626EE8D`
-- 原始 0823 ZIP：`../90_Archive/01_Source_Packages/C2GES_v2.0_COMPLETE_2026-08-23.zip`
-- ZIP SHA-256：`6FCB0EDC1A5C54163103B35BFE1F47D06504556448CB589A5193F9E1BF9BAA53`
-- 0823 修改意见 SHA-256：`EFBFB53E98F07B5296C5CE1EF42C5F5E499E903B2EDF1837B2621A4CA66CE2EC`
-- 新编译正文 PDF SHA-256：`812B7B66D258EDF74539D0B62C01B61C03252DAED95E6DF5B766723C829DE598`
-- 新编译补充材料 PDF SHA-256：`3E6AE6DB47DD858F9B73F3770603221D3418F4AE2E851017F698CE7CAFAA9751`
+- 正文 PDF：`../01_Manuscript/LaTeX/paper_applsci.pdf`
+- 补充材料：`../01_Manuscript/Supplementary/supplementary_materials.tex`
+- 投稿信：`../02_Revision_and_QA/05_Submission_Draft/COVER_LETTER_DRAFT_2026-08-24.md`
+- 投稿元数据记录：`../02_Revision_and_QA/03_Package_QA/AUTHOR_APPROVAL_FORM_2026-08-24.md`
+- 计划冻结标签：`cmc-2026-08-24-v2`
 
-## 当前硬阻塞
+## 已落实的投稿元数据
 
-1. 匹配词数/Token 预算和平衡调参尚未完成。
-2. normalized no-path 及完整组件消融尚未完成。
-3. 报告系列级统计与人工结构有效性评价尚未完成。
-4. 补充材料仍引用不存在的 `transferable/` 路径。
-5. 最终发布清单、环境文件和干净环境验收尚未完成。
-6. 通讯邮箱与最终公开仓库/权利状态待作者核实。
+- 作者：Bijing Liu；Yong Yang。
+- 两位作者均使用单位 1/2；Yong Yang 为通讯作者。
+- 通讯邮箱：`yangyong1@sgepri.sgcc.com.cn`，来源为 0823 原始稿和一致的历史变更记录。
+- ORCID：两位作者均为 `NONE`；按 MDPI 模板规则不在 LaTeX 中创建 ORCID 命令。
+- 基金、CRediT、利益冲突及 AI 披露沿用已有作者指示，并与正文声明一致。
+
+## 当前边界
+
+- 当前稿不主张路径删除项改善性能，不主张物理因果解释、外部系列泛化或工程任务效用。
+- NERC 原始 PDF 和逐字派生文本不进入公开包；公开代码没有显式开源许可证，按 `All rights reserved` 处理。
+- 通讯作者仍须在 SuSy 中人工确认无一稿多投、全体作者批准、最终 PDF 及门户字段。这是投稿动作，不是本地包的技术失败。

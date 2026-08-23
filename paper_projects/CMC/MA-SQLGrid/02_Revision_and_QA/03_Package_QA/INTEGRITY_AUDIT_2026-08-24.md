@@ -8,7 +8,7 @@ Scope: citation existence and context, claim-to-artifact consistency, common res
 
 ## Verdict
 
-**PASS_WITH_AUTHOR_GATES.** All 37 active bibliography entries pass identity verification and are cited; all active citation contexts were reviewed and are compatible with the cited work's documented topic or method. The conservative route A manuscript is technically coherent, but the audit is not expert scientific validation, professional plagiarism clearance, rights permission, or author approval.
+**PASS_WITH_MANUAL_PORTAL_ATTESTATION.** All 37 active bibliography entries pass identity verification and are cited; all active citation contexts were reviewed and are compatible with the cited work's documented topic or method. Author metadata and conservative declarations have been incorporated from the user-directed 0823 baseline and prior author record. The route A manuscript is technically coherent, but this audit is not expert scientific validation, professional plagiarism clearance, or a substitute for the corresponding author's portal attestations.
 
 ## Citation-context coverage
 
@@ -39,14 +39,15 @@ Coverage check: **37/37 unique cited keys; 21/21 citation occurrences; 0 danglin
 | External generalization | BIRD portability is distinguished from grid-domain semantic validity; RTS-GMLC/SimBench remain future resources | PASS with external-study boundary. |
 | Data leakage | Protocol histories, fixed pools, constructed-state prediction blindness, and runtime identities are recorded | PASS for recorded workflows; independent external reruns remain desirable. |
 | Human/expert validation | AI-assisted review is not relabelled as power-system/database expert adjudication | PASS as a boundary; external expert review remains open. |
-| Rights and redistribution | Raw GridDB/BIRD databases and restricted source-dependent assets are excluded | PASS for current public package; author licence choice and any restricted-access permission remain open. |
-| Authorship and declarations | Corresponding email and all-author approval remain explicit placeholders/gates | PASS as fail-closed handling; not submission-ready. |
+| Rights and redistribution | Raw GridDB/BIRD databases and restricted source-dependent assets are excluded | PASS for current public package. No explicit open-source licence is granted, so code remains all-rights-reserved; restricted-access transfer still requires file-level permission. |
+| Authorship and declarations | Names, affiliations, ORCID `NONE`, correspondence, CRediT, funding, conflict, and AI disclosure are cross-checked against the designated source records | PASS for package metadata; final portal attestations remain the corresponding author's manual responsibility. |
 | Originality/plagiarism | No professional similarity service or publisher database was available | **NOT CERTIFIED**; author/editor similarity screening remains required. |
 
-## Open gates
+## Manual actions at journal submission
 
-1. All-author identity, ORCID, CRediT, funding, conflict, AI-use, licence, cover-letter, and final-PDF approval.
-2. Yang Yong's corresponding-author email.
-3. Confirmation that public derived evidence does not expose restricted GridDB/BIRD content and that any reviewer-only transfer is licensed.
-4. Independent power-system and database expert review before restoring semantic-validity language.
-5. Untouched external grid evaluation and budget-matched prospective end-to-end study only if the authors choose route B/C and want stronger efficacy claims.
+1. The corresponding author reads the frozen final PDF and confirms the portal metadata and cover letter.
+2. The corresponding author attests no simultaneous submission and final all-author approval in SuSy.
+3. Suggested/opposed reviewer fields are completed only if required and only with real conflict checks; the repository does not fabricate names.
+4. Any requested reviewer-only restricted transfer receives a fresh file-level rights and confidentiality check.
+
+Independent expert review, untouched external grid evaluation, and a budget-matched prospective end-to-end study remain claim-upgrade requirements only if the authors later choose route B/C.

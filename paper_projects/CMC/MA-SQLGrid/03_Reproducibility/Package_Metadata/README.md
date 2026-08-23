@@ -17,4 +17,4 @@ Run the portable technical check from any working directory:
 python paper_projects/CMC/MA-SQLGrid/03_Reproducibility/Code/run_public_verification.py
 ```
 
-The frozen unified evaluator reports C000 `76/180`, validation-only `99/180`, complete witness `100/180`, and best fixed source Qwen F01 `129/180`. The package deliberately reports `submission_ready=false` until the corresponding email, author approvals, rights, external grid evaluation, and expert-review gates are closed.
+The frozen unified evaluator reports C000 `76/180`, validation-only `99/180`, complete witness `100/180`, and best fixed source Qwen F01 `129/180`. Author metadata, ORCID `NONE`, correspondence, conservative declarations, rights-safe GitHub release authorization, and the all-rights-reserved licence status are recorded as package-complete inputs. The corresponding author's final SuSy attestations remain manual submission actions. External grid evaluation and expert review are claim-upgrade gates only if stronger route B/C efficacy or semantic-validity claims are restored.

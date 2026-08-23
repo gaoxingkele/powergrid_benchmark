@@ -17,7 +17,10 @@ are carried forward from their archived experimental artifacts. Detailed run
 identity and unsuccessful-run records remain in the supplementary evidence and
 do not define the manuscript's scientific storyline.
 
-## Human completion item
+## 2026-08-24 metadata resolution
 
-Yang Yong is the corresponding author. The corresponding email must be entered
-and approved by the authors before submission; no substitute address was inferred.
+The user directed that ORCID be recorded as `NONE` for all authors and that the
+remaining metadata follow the 0823 original version. The active manuscript now
+uses Bijing Liu, Chenglong Sun, and Yong Yang; Yong Yang is the corresponding
+author at `yangyong1@sgepri.sgcc.com.cn`. The corresponding author must still
+read the frozen PDF and complete the final SuSy attestations at upload.
