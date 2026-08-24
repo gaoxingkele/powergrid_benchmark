@@ -67,7 +67,7 @@ def verify_manuscript() -> dict[str, int]:
         "Chenglong Sun",
         "Yong Yang",
         "yangyong1@sgepri.sgcc.com.cn",
-        "cmc-2026-08-24-v2",
+        "cmc-2026-08-24-v3",
         "All authors have read and agreed",
         "ORCID: none declared",
     ):

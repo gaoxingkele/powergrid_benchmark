@@ -10,8 +10,8 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
 
 
-ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "figures"
+PROJECT = Path(__file__).resolve().parents[3]
+OUT = PROJECT / "03_Reproducibility" / "Figures"
 OUT.mkdir(parents=True, exist_ok=True)
 FIXED_TIME = datetime(2026, 8, 12, tzinfo=timezone.utc)
 
@@ -130,7 +130,7 @@ def main():
     arrow(ax, 3.80, 4.14, 5.25, 4.14)
     arrow(ax, 8.50, 4.14, 9.95, 4.14)
 
-    rounded_box(ax, 0.82, 2.95, 2.72, 0.48, "Strict ablation", ("Set C = 0; no renormalization",), "#F7F0FA", dashed=True)
+    rounded_box(ax, 0.82, 2.95, 2.72, 0.48, "Unrenormalized removal", ("Set C = 0; no renormalization",), "#F7F0FA", dashed=True)
     arrow(ax, 2.18, 3.55, 2.18, 3.43, COLORS["violet"], dashed=True)
     arrow(ax, 3.54, 3.19, 5.25, 3.72, COLORS["violet"], dashed=True, rad=-0.12)
 

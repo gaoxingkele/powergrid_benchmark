@@ -14,7 +14,7 @@ The inferential structural endpoint is deliberately narrow: successful SQLite ex
 
 ## Inference
 
-Twenty-thousand cluster bootstrap draws preserve all rows within each of 70 normalized-gold-SQL template clusters. Inferential p-values use 100,000 Monte Carlo sign flips at that same cluster unit. Holm adjustment is applied separately to exactly three registered eight-test families. Question-level McNemar discordances and p-values are retained only as descriptive sensitivity fields.
+Twenty-thousand cluster bootstrap draws preserve all rows within each of 70 normalized-gold-SQL template clusters. Inferential p-values use 100,000 Monte Carlo sign flips at that same cluster unit. Holm adjustment is applied separately to exactly three documented eight-test families. Question-level McNemar discordances and p-values are retained only as descriptive sensitivity fields.
 
 ## Intervention boundary
 

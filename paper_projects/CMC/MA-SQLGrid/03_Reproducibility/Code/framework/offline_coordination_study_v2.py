@@ -299,7 +299,7 @@ def run(config_path: Path, freeze_dir: Path, run_dir: Path) -> None:
             counterfactuals[candidate.candidate_id] = cf
             board.post(critic.role, "counterfactual_evidence", asdict(cf))
 
-        first = Decision(pools[qid][0].candidate_id, pools[qid][0].sql, "selected", "all equal-budget evidence collected; registered fixed-order control ignores it and chooses frozen slot 0", ())
+        first = Decision(pools[qid][0].candidate_id, pools[qid][0].sql, "selected", "all equal-budget evidence collected; frozen fixed-order control ignores it and chooses frozen slot 0", ())
         validation_only = adjudicator.decide(pools[qid], validations, {})
         full = adjudicator.decide(
             pools[qid], validations, counterfactuals,

@@ -46,7 +46,7 @@
 - 标题按路线 A 收缩为 `An Auditable Coordination and Evaluation Framework for Power-Grid Text-to-SQL`，cover letter 同步。
 - 活动 BibTeX 从 49 条清理为 37 条；修正 `liu2022semantic` 作者姓氏和 Canay DOI `10.3982/ECTA13081`。
 - 37/37 引用通过 DOI、官方 proceedings、出版社或记录化主来源核验；0 dangling、0 orphan；Crossref 错误作者字段用 ACL Anthology 主记录显式覆盖。
-- Data Availability 更新为 `powergrid_benchmark` 冻结标签 `cmc-2026-08-24-v2`；旧 `ma-sqlgrid` 仓库明确不是本稿 release。
+- Data Availability 更新为 `powergrid_benchmark` 冻结标签 `cmc-2026-08-24-v3`；旧 `ma-sqlgrid` 仓库明确不是本稿 release。
 - 作者姓名恢复为 0823 原稿的 Bijing Liu / Chenglong Sun / Yong Yang，通讯邮箱恢复为一致记录中的 `yangyong1@sgepri.sgcc.com.cn`；ORCID 全部记录为 `NONE` 并在 LaTeX 中省略命令。
 - 按已有作者默认指示恢复 MDPI 标准 all-authors 结句，并把生成式 AI 产品、用途、未知版本和作者责任在 Methods/Acknowledgments 中对齐。
 - Rights inventory 中错误写成已完成的 manuscript agreement 改为 `OPEN`。

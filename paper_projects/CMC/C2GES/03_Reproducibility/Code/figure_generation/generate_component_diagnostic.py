@@ -10,8 +10,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "figures"
+PROJECT = Path(__file__).resolve().parents[3]
+OUT = PROJECT / "03_Reproducibility" / "Figures"
 OUT.mkdir(parents=True, exist_ok=True)
 FIXED_TIME = datetime(2026, 8, 12, tzinfo=timezone.utc)
 
@@ -61,7 +61,7 @@ def main():
     axes[2].axhline(0, color="black", linewidth=0.8)
     axes[2].errorbar([0, 1], means, yerr=yerr, fmt="o", color=amber, ecolor=amber, capsize=4)
     axes[2].set_xticks([0, 1], ["K=5", "K=10"])
-    axes[2].set_ylabel("Full - strict ROUGE-L")
+    axes[2].set_ylabel("Full - unrenorm. removal ROUGE-L")
     axes[2].set_title("(c) Endpoint effect")
     axes[2].set_ylim(-0.014, 0.006)
 
@@ -82,7 +82,12 @@ def main():
         "ModDate": FIXED_TIME,
     }
     fig.savefig(OUT / "fig06_component_diagnostic.pdf", metadata=metadata)
-    fig.savefig(OUT / "fig06_component_diagnostic.svg", metadata={"Date": "2026-08-12"})
+    svg_path = OUT / "fig06_component_diagnostic.svg"
+    fig.savefig(svg_path, metadata={"Date": "2026-08-12"})
+    svg_path.write_text(
+        "\n".join(line.rstrip() for line in svg_path.read_text(encoding="utf-8").splitlines()) + "\n",
+        encoding="utf-8",
+    )
     fig.savefig(OUT / "fig06_component_diagnostic.png", dpi=300)
     plt.close(fig)
     print(OUT / "fig06_component_diagnostic.pdf")

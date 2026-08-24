@@ -17,7 +17,7 @@
 $^{2}$ \quad Beijing Kedong Electric Power Control System Co., Ltd., Beijing 100080, China}
 \corres{Correspondence: yangyong1@sgepri.sgcc.com.cn}
 
-\abstract{Evidence about a power-system event is often dispersed across long technical reports, making relevance-only extracts difficult to use as coherent engineering reading aids. We present \cges{}, a deterministic extractive framework combining centroid lexical relevance, lexical text roles, a typed sentence graph, node-deletion path participation, and source-page traceability. Seven conditions were evaluated at five- and ten-unit budgets on 12 development and 15 test reports selected from the North American Electric Reliability Corporation. The strict no-path-deletion variant achieved the highest mean ROUGE-L. Full \cges{} reached ROUGE-L F1 of 0.1060 and 0.1276, about 0.0033 lower at the two budgets. It exceeded Semantic-MMR and TextRank at equal unit budgets but produced extracts 54--63\% longer. Under development-derived 110- and 260-word caps, all six post-run Full-minus-baseline series-cluster intervals crossed zero, and no exact comparison survived Holm adjustment. The path-deletion term changed 9774 of 19,008 candidate scores and 28 of 30 report--budget selections, while development-only calibration selected zero path weight in all 12 leave-one-report-out folds. The results establish an auditable, source-linked implementation with a portable public verification subset, but do not validate the path-deletion term or operational reading benefit. Independent expert evaluation on unseen data remains necessary.}
+\abstract{Evidence about a power-system event is often dispersed across long technical reports, so relevance-only extracts may not form a coherent engineering account. We present \cges{}, a deterministic framework that combines centroid lexical relevance, transparent text roles, a typed sentence graph, node-deletion path participation, and source-page traceability. We evaluated seven conditions at two budgets on 12 development and 15 test reports from the North American Electric Reliability Corporation. The unrenormalized coefficient-removal comparison achieved the highest mean ROUGE-L. Full \cges{} reached ROUGE-L F1 values of 0.1060 and 0.1276 and exceeded Semantic-MMR and TextRank at equal unit budgets, but its extracts were 54--63\% longer. Under development-derived word caps, every Full-minus-baseline series-cluster interval crossed zero, and no exact comparison survived Holm adjustment. The path term changed most selected sequences without improving the predefined endpoint, while development-only calibration selected zero path weight in all 12 folds. The study therefore establishes an auditable, source-linked implementation and a negative result for the current path component. It does not establish a length-controlled advantage or operational reading benefit. Evaluation on unseen reports by qualified experts remains necessary.}
 \keyword{extractive summarization; typed textual proxy graph; structural perturbation; power-grid reports; NERC; auditable evaluation}
 \featuredapplication{\cges{} is designed to support source-linked navigation of long power-system technical reports by selecting passages associated with condition, event, impact, and mitigation roles. It is intended for analyst support: extracted passages remain linked to their original pages, and operational use requires validation on maintenance records and expert review.}
 
@@ -33,9 +33,9 @@ Graph-based summarizers model relationships among sentences through learned grap
 
 The study uses complete public reliability, disturbance, event-analysis, recommendation, and assessment reports from the North American Electric Reliability Corporation (NERC). NERC guidance on the attributes of quality event-analysis reports provides the institutional context for this report family \cite{nerc2015qualityreport}. These reports contain event narratives and corrective lessons but are not utility work orders, inspection records, or field-maintenance narratives. The corpus is therefore treated as a maintenance-oriented technical-report proxy. Twelve reports support development, and 15 reports form the retained test set. All candidates are drawn from report pages outside the official Executive Summary, which is used only as the reference for automatic evaluation.
 
-Three questions organize the evaluation. \textit{RQ1} asks how the seven evaluated conditions compare on the selected NERC corpus at fixed extraction-unit budgets and how differences in output length limit system-level interpretation. \textit{RQ2} asks whether the typed path-deletion term improves ROUGE-L or redundancy relative to the otherwise fixed strict no-path-deletion variant. \textit{Exploratory RQ3} asks how consistently the term changes candidate scores and selected sequences across reports and budgets, and whether development-only coefficient calibration supports a nonzero path-deletion weight.
+Three questions organize the evaluation. \textit{RQ1} asks how the seven evaluated conditions compare on the selected NERC corpus at fixed extraction-unit budgets and how differences in output length limit system-level interpretation. \textit{RQ2} asks whether the typed path-deletion term improves ROUGE-L or redundancy relative to the otherwise fixed unrenormalized coefficient-removal comparison. \textit{Exploratory RQ3} asks how consistently the term changes candidate scores and selected sequences across reports and budgets, and whether development-only coefficient calibration supports a nonzero path-deletion weight.
 
-The primary contribution is a deterministic, role-conditioned typed-path framework for selecting structurally complementary, source-linked evidence from long power-system reports. Its evaluation covers seven conditions at two extraction-unit budgets using complete-PDF candidates, report-level pairing, and explicit output-length diagnostics. The component analysis separates framework behavior from component benefit: Full \cges{} exceeded the external baselines in observed ROUGE-L at equal unit budgets, but the strict no-path-deletion variant was slightly higher and development calibration did not support a nonzero path weight. The current path-deletion integration is therefore a diagnosed design limitation rather than a validated source of performance gain. The empirical conclusions remain limited to the selected technical-report proxy and do not establish performance on operational maintenance records.
+The paper makes three contributions. First, it introduces a deterministic, role-conditioned typed-path framework that selects structurally complementary passages and preserves their source pages. Second, it evaluates seven conditions at two extraction-unit budgets on complete NERC reports, with report-level pairing and explicit output-length diagnostics. Third, it separates system behavior from component benefit. Full \cges{} had higher observed ROUGE-L than the external baselines at equal unit budgets, but it also produced longer outputs. The unrenormalized coefficient-removal comparison was slightly better, and development calibration did not support a positive path weight. The current path integration is therefore a diagnosed design limitation rather than a validated performance mechanism. These findings concern the selected technical-report proxy and do not establish performance on operational maintenance records.
 
 \section{Related Work}
 
@@ -87,7 +87,7 @@ Figure~\ref{fig:algorithm} summarizes the deterministic pipeline. Complete repor
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figures/fig01_algorithm_dual_panel.pdf}
-\caption{Deterministic \cges{} pipeline and path-deletion mechanism. \textbf{(a)} Complete reports pass candidate and reference-separation gates; retained passages receive lexical roles and form a typed textual graph. The five score channels feed an ordered role-group reservation followed by redundancy-aware greedy filling. The strict no-path-deletion variant sets $C$ to zero without renormalizing the remaining coefficients. \textbf{(b)} For candidate node $i$, path-deletion loss removes $i$, recomputes qualified-path utility, and takes $C_i=U(G)-U(G\setminus i)$.}
+\caption{Deterministic \cges{} pipeline and path-deletion mechanism. \textbf{(a)} Complete reports pass candidate and reference-separation gates; retained passages receive lexical roles and form a typed textual graph. The five score channels feed an ordered role-group reservation followed by redundancy-aware greedy filling. The unrenormalized coefficient-removal comparison sets $C$ to zero without renormalizing the remaining coefficients. \textbf{(b)} For candidate node $i$, path-deletion loss removes $i$, recomputes qualified-path utility, and takes $C_i=U(G)-U(G\setminus i)$.}
 \label{fig:algorithm}
 \end{figure}
 
@@ -186,7 +186,7 @@ S_i=0.40Q_i+0.20R_i+0.15G_i+0.15C_i+0.10P_i,
 \end{equation}
 where $Q_i$ is min--max scaled centroid-style lexical relevance, $R_i$ is the maximum unit-scaled role evidence, $G_i$ is min--max scaled weighted-degree salience, $C_i$ is min--max scaled path-deletion loss, and $P_i=1/(1+\operatorname{pos}(i))$ is the unrescaled positional prior for zero-based source position. Path and expansion caps are 250,000 and 2,000,000; reaching either cap terminates the computation rather than returning a partial path score.
 
-The strict no-path-deletion variant changes only the coefficient of $C_i$ from 0.15 to zero. It does not renormalize any remaining coefficient or alter candidates, graph construction, role-group reservation, redundancy penalty, tie rules, or budgets. Consequently, the positive-channel weight decreases from 1.00 to 0.85 while the redundancy coefficient remains 0.50; relative to the remaining positive scale, that penalty is $0.50/0.85=0.5882$, 17.6\% larger than 0.50. The primary contrast therefore estimates coefficient removal under this unrenormalized scoring rule, including relative-scale coupling, rather than a pure information-only contribution of $C_i$. A post-run clean diagnostic divides the strict no-path base score by 0.85, giving unit-sum remaining weights $(0.470588,0.235294,0.176471,0,0.117647)$ while retaining the 0.50 redundancy penalty and every selection rule.
+The unrenormalized coefficient-removal comparison changes only the coefficient of $C_i$ from 0.15 to zero. It does not renormalize any remaining coefficient or alter candidates, graph construction, role-group reservation, redundancy penalty, tie rules, or budgets. Consequently, the positive-channel weight decreases from 1.00 to 0.85 while the redundancy coefficient remains 0.50; relative to the remaining positive scale, that penalty is $0.50/0.85=0.5882$, 17.6\% larger than 0.50. The primary contrast therefore estimates coefficient removal under this unrenormalized scoring rule, including relative-scale coupling, rather than a pure information-only contribution of $C_i$. A post-run clean diagnostic divides the corresponding no-path base score by 0.85, giving unit-sum remaining weights $(0.470588,0.235294,0.176471,0,0.117647)$ while retaining the 0.50 redundancy penalty and every selection rule.
 
 Each score channel has a distinct interpretation. $Q_i$ rewards lexical terms that recur across the report and can therefore favor generic report language. $R_i$ rewards predefined condition, event, impact, and mitigation cues but is vulnerable to cue ambiguity. $G_i$ rewards local connectivity under the typed edge rules, whereas $C_i$ rewards membership in qualified paths and can differ from degree. $P_i$ favors earlier source positions. The scaling rules bound all channels to $[0,1]$ within a report but do not make their meanings interchangeable.
 
@@ -210,13 +210,13 @@ Errors can enter through segmentation, role assignment, edge construction, or fi
 
 \subsection{Development Selection and Comparators}
 
-The 12-report development search evaluated 144 predefined configurations. Its ordered objective maximized mean ROUGE-L F1 at $K=5$, followed by mean ROUGE-1 F1, lower redundancy, and earliest configuration order. Grid index 60 was selected, with mean development ROUGE-L F1 of 0.1195126 and ROUGE-1 F1 of 0.2713870. Full minus the strict no-path-deletion variant was $-0.0056652$ on development.
+The 12-report development search evaluated 144 predefined configurations. Its ordered objective maximized mean ROUGE-L F1 at $K=5$, followed by mean ROUGE-1 F1, lower redundancy, and earliest configuration order. Grid index 60 was selected, with mean development ROUGE-L F1 of 0.1195126 and ROUGE-1 F1 of 0.2713870. Full minus the unrenormalized coefficient-removal comparison was $-0.0056652$ on development.
 
 Seven conditions share the same candidate space: Lead, lexical Centroid, TextRank, Semantic-MMR, Role, the strict graph variant without path deletion, and Full \cges{}. Semantic-MMR uses the local \texttt{sentence-transformers/all-MiniLM-L6-v2} snapshot at revision \texttt{1110a243fdf4706b3f48f1d95db1a4f5529b4d41}, with its WordPiece tokenizer, normalized embeddings, CPU execution, and Sentence-Transformers maximum sequence length of 256 tokens. It greedily maximizes $0.5\cos(e_i,\bar e_D)-0.5\max_{j\in A}\cos(e_i,e_j)$ \cite{reimers2019sentencebert}. Its symmetric coefficient was not optimized on development or test outcomes.
 
-The comparators expose distinct ranking signals. Lead tests position; Centroid tests lexical representativeness; TextRank tests an untyped similarity graph; Semantic-MMR combines dense relevance and diversity; and Role tests lexical discourse evidence without graph structure. The strict variant retains the typed graph while setting the deletion coefficient to zero without renormalization. This comparison includes the scale coupling described in Section~3.5 rather than isolating path information alone.
+The comparators expose distinct ranking signals. Lead tests position; Centroid tests lexical representativeness; TextRank tests an untyped similarity graph; Semantic-MMR combines dense relevance and diversity; and Role tests lexical discourse evidence without graph structure. The unrenormalized coefficient-removal comparison retains the typed graph while setting the deletion coefficient to zero without renormalization. It includes the scale coupling described in Section~3.5 rather than isolating path information alone.
 
-Hyperparameter opportunity was not balanced for the retained-test comparison (Table~\ref{tab:tuning-opportunity}). Full \cges{} inherited a 144-configuration development search, whereas the evaluated Semantic-MMR coefficient was fixed at 0.5 and TextRank used its implementation defaults. This asymmetry is relevant to system-level ranks. RQ1 is therefore interpreted as a descriptive comparison of the reported configurations within this corpus, not as a balanced-tuning comparison of algorithms. The strict variant is the closer comparison for RQ2 because it shares the selected absolute weights, graph, candidates, and selector.
+Hyperparameter opportunity was not balanced for the retained-test comparison (Table~\ref{tab:tuning-opportunity}). Full \cges{} inherited a 144-configuration development search, whereas the evaluated Semantic-MMR coefficient was fixed at 0.5 and TextRank used its implementation defaults. This asymmetry is relevant to system-level ranks. RQ1 is therefore interpreted as a descriptive comparison of the reported configurations within this corpus, not as a balanced-tuning comparison of algorithms. The unrenormalized coefficient-removal comparison is the closer comparator for RQ2 because it shares the selected absolute weights, graph, candidates, and selector.
 
 \begin{table}[H]
 \caption{Tuning opportunity and inferential role. The reported intervals condition on the selected Full configuration and do not include model-selection uncertainty.}
@@ -226,7 +226,7 @@ Hyperparameter opportunity was not balanced for the retained-test comparison (Ta
 Comparison object & Development opportunity & Analytical role\\
 \midrule
 Full \cges{} & 144 predefined configurations & Selected deterministic system; selection uncertainty omitted\\
-Strict no-path-deletion & Same absolute weights, $C=0$ only & Component comparator; redundancy is relatively stronger\\
+Unrenormalized coefficient removal & Same absolute weights, $C=0$ only & Component comparator; redundancy is relatively stronger\\
 Semantic-MMR & Coefficient fixed at 0.5 & Semantic relevance--diversity comparator\\
 TextRank & Implementation defaults & Untyped graph-ranking comparator\\
 \bottomrule
@@ -239,7 +239,7 @@ Sentence-count budgets allow every method to return five or ten complete source 
 
 \subsection{Statistical Analysis}
 
-The primary estimand is the unweighted mean report-level ROUGE-L difference on the retained 15-report test set. Three Full-minus-baseline contrasts were defined at each budget: strict no-path-deletion, Semantic-MMR, and TextRank. Paired percentile composition intervals use 10,000 report-level resamples. For paired deltas $d_1,\ldots,d_{15}$, each resample draws 15 reports with replacement and yields mean $\bar d_b$. The archived analysis also records
+The primary estimand is the unweighted mean report-level ROUGE-L difference on the retained 15-report test set. Three Full-minus-baseline contrasts were defined at each budget: the unrenormalized coefficient-removal comparison, Semantic-MMR, and TextRank. Paired percentile composition intervals use 10,000 report-level resamples. For paired deltas $d_1,\ldots,d_{15}$, each resample draws 15 reports with replacement and yields mean $\bar d_b$. The archived analysis also records
 \begin{equation}
 t_{\mathrm{boot}}=2\min\left\{B^{-1}\sum_{b=1}^{B}\mathbb{1}(\bar d_b\leq0),\;B^{-1}\sum_{b=1}^{B}\mathbb{1}(\bar d_b\geq0)\right\},\quad B=10{,}000.
 \end{equation}
@@ -261,14 +261,14 @@ The OpenAI Codex agent interface assisted with prose drafting and editing, sugge
 
 \subsection{Overview of Empirical Findings}
 
-The results address the three research questions in turn. The strict no-path-deletion variant produced the highest overall ROUGE-L mean. Full \cges{} exceeded the external baselines at both extraction-unit budgets, but its extracts were substantially longer than those of Semantic-MMR and TextRank, which limits the system-level comparison. The path-deletion term changed scores and selected sequences but did not improve the predefined ROUGE-L endpoint, and development-only calibration also favored zero weight. Detailed corpus and execution checks are reported in Supplementary Table~S3.
+The results address the three research questions in turn. The unrenormalized coefficient-removal comparison produced the highest overall ROUGE-L mean. Full \cges{} exceeded the external baselines at both extraction-unit budgets, but its extracts were substantially longer than those of Semantic-MMR and TextRank, which limits the system-level comparison. The path-deletion term changed scores and selected sequences but did not improve the predefined ROUGE-L endpoint, and development-only calibration also favored zero weight. Detailed corpus and execution checks are reported in Supplementary Table~S3.
 
 \subsection{Main Comparison (RQ1)}
 
-Table~\ref{tab:all-results} contains all seven conditions and four recorded metrics at both budgets. Full \cges{} exceeded Semantic-MMR and TextRank on mean ROUGE-L at each equal-unit budget but was below the strict no-path-deletion variant. Because extraction-unit lengths differ materially, these comparisons are not controlled by word or token count. Figure~\ref{fig:aggregate} visualizes the same ROUGE-L means.
+Table~\ref{tab:all-results} contains all seven conditions and four recorded metrics at both budgets. Full \cges{} exceeded Semantic-MMR and TextRank on mean ROUGE-L at each equal-unit budget but was below the unrenormalized coefficient-removal comparison. Because extraction-unit lengths differ materially, these comparisons are not controlled by word or token count. Figure~\ref{fig:aggregate} visualizes the same ROUGE-L means.
 
 \begin{table}[H]
-\caption{Macro-mean results over $n=15$ test reports at equal extraction-unit counts, not equal word counts. Bold marks only the observed maximum ROUGE-L within a budget; underlining marks the minimum redundancy. Neither convention is an inferential conclusion.}
+\caption{Macro-mean results over $n=15$ test reports at equal extraction-unit counts, not equal word counts. ``Unrenorm. removal'' denotes the unrenormalized coefficient-removal comparison. Bold marks only the observed maximum ROUGE-L within a budget; underlining marks the minimum redundancy. Neither convention is an inferential conclusion.}
 \label{tab:all-results}\centering\small
 \begin{tabular}{llrrrr}
 \toprule
@@ -279,7 +279,7 @@ $K$ & Condition & R-1 F1 & R-2 F1 & R-L F1 & Redundancy\\
 5 & TextRank & 0.1508 & 0.0356 & 0.0806 & 0.2560\\
 5 & Semantic-MMR & 0.1783 & 0.0433 & 0.0853 & \underline{0.0237}\\
 5 & Role & 0.1889 & 0.0557 & 0.0934 & 0.0862\\
-5 & Strict variant & 0.2497 & 0.0648 & \textbf{0.1094} & 0.0798\\
+5 & Unrenorm. removal & 0.2497 & 0.0648 & \textbf{0.1094} & 0.0798\\
 5 & Full \cges{} & 0.2359 & 0.0611 & 0.1060 & 0.0745\\
 \midrule
 10 & Lead & 0.2617 & 0.0811 & 0.1158 & 0.0554\\
@@ -287,13 +287,13 @@ $K$ & Condition & R-1 F1 & R-2 F1 & R-L F1 & Redundancy\\
 10 & TextRank & 0.2470 & 0.0615 & 0.1156 & 0.2149\\
 10 & Semantic-MMR & 0.2840 & 0.0728 & 0.1133 & \underline{0.0269}\\
 10 & Role & 0.3132 & 0.0848 & 0.1257 & 0.0550\\
-10 & Strict variant & 0.3471 & 0.0930 & \textbf{0.1310} & 0.0746\\
+10 & Unrenorm. removal & 0.3471 & 0.0930 & \textbf{0.1310} & 0.0746\\
 10 & Full \cges{} & 0.3366 & 0.0874 & 0.1276 & 0.0667\\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:series-cluster} reports the post-result series-cluster sensitivity. Equal-series estimates retained the direction of every report-level contrast. For Full minus the strict variant, the series-equal mean remained negative at both budgets. For the unequal-length comparisons, the Holm-adjusted exact series-level values were 0.011719 for Semantic-MMR and TextRank at $K=5$, but 0.125000 and 0.134766 at $K=10$. Thus the larger-budget lexical contrasts were not supported by this multiplicity-adjusted series-level sensitivity, and none of these comparisons resolves the length mismatch.
+Table~\ref{tab:series-cluster} reports the post-result series-cluster sensitivity. Equal-series estimates retained the direction of every report-level contrast. For Full minus the unrenormalized coefficient-removal comparison, the series-equal mean remained negative at both budgets. For the unequal-length comparisons, the Holm-adjusted exact series-level values were 0.011719 for Semantic-MMR and TextRank at $K=5$, but 0.125000 and 0.134766 at $K=10$. Thus the larger-budget lexical contrasts were not supported by this multiplicity-adjusted series-level sensitivity, and none of these comparisons resolves the length mismatch.
 
 \begin{table}[H]
 \caption{Post-result series-cluster sensitivity for Full-minus-baseline ROUGE-L differences. The 15 reports form 10 frozen series. Intervals are percentile cluster-bootstrap intervals over equal-weighted series; exact values enumerate all 1024 series sign assignments and are Holm-adjusted across six contrasts. This analysis is exploratory.}
@@ -302,10 +302,10 @@ Table~\ref{tab:series-cluster} reports the post-result series-cluster sensitivit
 \toprule
 $K$ & Baseline & Series-equal mean & 95\% cluster interval & Exact $p$ & Holm $p$\\
 \midrule
-5 & Strict variant & -0.005744 & [-0.015986, 0.002230] & 0.316406 & 0.316406\\
+5 & Unrenorm. removal & -0.005744 & [-0.015986, 0.002230] & 0.316406 & 0.316406\\
 5 & Semantic-MMR & 0.021864 & [0.015484, 0.028248] & 0.001953 & 0.011719\\
 5 & TextRank & 0.028557 & [0.019927, 0.038486] & 0.001953 & 0.011719\\
-10 & Strict variant & -0.004773 & [-0.010494, -0.000084] & 0.091797 & 0.183594\\
+10 & Unrenorm. removal & -0.004773 & [-0.010494, -0.000084] & 0.091797 & 0.183594\\
 10 & Semantic-MMR & 0.014205 & [0.003626, 0.023764] & 0.031250 & 0.125000\\
 10 & TextRank & 0.011010 & [0.001883, 0.019764] & 0.044922 & 0.134766\\
 \bottomrule
@@ -320,7 +320,7 @@ $K$ & Baseline & Series-equal mean & 95\% cluster interval & Exact $p$ & Holm $p
 
 Increasing the budget from five to ten units raised mean ROUGE-L for every condition, as expected when more source content is admitted. The ordering differed across methods: Role moved from 0.0934 to 0.1257 and became the strongest non-graph comparator at $K=10$, whereas Centroid was the strongest non-graph comparator at $K=5$. Results at only one extract length would therefore incompletely characterize these systems. The larger budget is not necessarily operationally preferable because brevity, coverage, and omission risk may be valued differently.
 
-The strict variant had the largest observed ROUGE-1, ROUGE-2, and ROUGE-L mean at both budgets. Semantic-MMR had the lowest redundancy, consistent with its explicit diversity objective and shorter outputs. Full \cges{} reduced redundancy relative to the strict variant at both budgets while also reducing all three ROUGE means. The two configurations therefore occupy different observed overlap--redundancy operating points; this result does not show that path deletion improves a joint objective.
+The unrenormalized coefficient-removal comparison had the largest observed ROUGE-1, ROUGE-2, and ROUGE-L mean at both budgets. Semantic-MMR had the lowest redundancy, consistent with its explicit diversity objective and shorter outputs. Full \cges{} reduced redundancy relative to the unrenormalized comparison at both budgets while also reducing all three ROUGE means. The two configurations therefore occupy different observed overlap--redundancy operating points; this result does not show that path deletion improves a joint objective.
 
 \subsection{Output-Length Diagnostic (RQ1)}
 
@@ -329,20 +329,21 @@ A post-selection script counted Unicode whitespace-delimited words and character
 \begin{table}[H]
 \caption{Descriptive output-length diagnostics. ``$>100$'' counts selected-unit instances longer than 100 words; ``Table'' counts units containing the exact case-sensitive string.}
 \label{tab:length-audit}\centering\small
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{llrrrrr}
 \toprule
 $K$ & Condition & Mean words & Mean characters & $>100$ & Table & Maximum words\\
 \midrule
 5 & Full \cges{} & 287.7 & 1843.6 & 12 & 14 & 140\\
-5 & Strict variant & 329.0 & 2099.9 & 15 & 16 & 270\\
+5 & Unrenorm. removal & 329.0 & 2099.9 & 15 & 16 & 270\\
 5 & Semantic-MMR & 184.7 & 1242.1 & 5 & 9 & 138\\
 5 & TextRank & 177.0 & 1125.1 & 1 & 7 & 124\\
 10 & Full \cges{} & 568.9 & 3619.5 & 25 & 26 & 270\\
-10 & Strict variant & 596.9 & 3822.5 & 28 & 26 & 270\\
+10 & Unrenorm. removal & 596.9 & 3822.5 & 28 & 26 & 270\\
 10 & Semantic-MMR & 354.5 & 2361.2 & 7 & 16 & 138\\
 10 & TextRank & 369.0 & 2329.7 & 4 & 18 & 130\\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
 
 Figure~\ref{fig:length} makes the output-length mismatch visible. At $K=5$, Full used 56\% more words than Semantic-MMR and 63\% more than TextRank on average; at $K=10$, the corresponding increases were 61\% and 54\%.
@@ -368,10 +369,10 @@ For the post-run sensitivity, the median word totals of the first five and ten d
 \toprule
 Word cap & Contrast & Equal-series difference & Cluster-bootstrap 95\% interval & Holm $p$\\
 \midrule
-110 & Full $-$ strict no-path & +0.0020 & [$-0.0002$, 0.0041] & 0.796875\\
+110 & Full $-$ unrenorm. removal & +0.0020 & [$-0.0002$, 0.0041] & 0.796875\\
 110 & Full $-$ Semantic-MMR & +0.0019 & [$-0.0034$, 0.0079] & 1.000000\\
 110 & Full $-$ TextRank & $-0.0008$ & [$-0.0066$, 0.0046] & 1.000000\\
-260 & Full $-$ strict no-path & $-0.0015$ & [$-0.0072$, 0.0021] & 1.000000\\
+260 & Full $-$ unrenorm. removal & $-0.0015$ & [$-0.0072$, 0.0021] & 1.000000\\
 260 & Full $-$ Semantic-MMR & +0.0062 & [$-0.0006$, 0.0142] & 0.796875\\
 260 & Full $-$ TextRank & +0.0001 & [$-0.0065$, 0.0059] & 1.000000\\
 \bottomrule
@@ -388,11 +389,11 @@ A post-run tokenizer audit measured all 12,924 development and test candidates w
 
 \subsection{Endpoint Contribution of the Path-Deletion Term (RQ2)}
 
-Table~\ref{tab:contrasts} gives the six predefined contrasts. Full minus the strict no-path-deletion variant was $-0.003332$ at $K=5$ and $-0.003360$ at $K=10$; both report-composition intervals crossed zero. Full had slightly lower redundancy than the strict variant (0.0745 versus 0.0798 at $K=5$ and 0.0667 versus 0.0746 at $K=10$), but redundancy was a descriptive secondary outcome. Under the current integration, the path-deletion term therefore did not improve the predefined lexical-overlap endpoint.
+Table~\ref{tab:contrasts} gives the six predefined contrasts. Full minus the unrenormalized coefficient-removal comparison was $-0.003332$ at $K=5$ and $-0.003360$ at $K=10$; both report-composition intervals crossed zero. Full had slightly lower redundancy than the unrenormalized comparison (0.0745 versus 0.0798 at $K=5$ and 0.0667 versus 0.0746 at $K=10$), but redundancy was a descriptive secondary outcome. Under the current integration, the path-deletion term therefore did not improve the predefined lexical-overlap endpoint.
 
 Full also exceeded Semantic-MMR and TextRank at both equal-unit budgets on this split. These paired differences describe the selected reports but retain the output-length mismatch documented in Section~4.3. No minimum important difference or qualified-reader outcome was specified, so the automatic contrasts do not establish practical benefit for maintenance review.
 
-The post-run clean normalized ablation reproduced every archived Full and historical strict selection before constructing the new comparator. Normalization changed the historical strict selection on 1/15 reports at $K=5$ and 3/15 at $K=10$. Full minus normalized no-path was $-0.00613$ and $-0.00393$ under equal-series weighting; the series-cluster intervals were [$-0.01591$, 0.00166] and [$-0.01006$, 0.00104], and both Holm-adjusted exact values were 0.441406. This same-corpus diagnostic separates path removal from the 0.85 positive-score scale but still supplies no multiplicity-adjusted evidence that the path term improves ROUGE-L.
+The post-run clean normalized ablation reproduced every archived Full and unrenormalized coefficient-removal selection before constructing the new comparator. Normalization changed that selection on 1/15 reports at $K=5$ and 3/15 at $K=10$. Full minus normalized no-path was $-0.00613$ and $-0.00393$ under equal-series weighting; the series-cluster intervals were [$-0.01591$, 0.00166] and [$-0.01006$, 0.00104], and both Holm-adjusted exact values were 0.441406. This same-corpus diagnostic separates path removal from the 0.85 positive-score scale but still supplies no multiplicity-adjusted evidence that the path term improves ROUGE-L.
 
 \begin{table}[H]
 \caption{Predefined Full-minus-baseline Executive-Summary ROUGE-L contrasts paired by test report ($n=15$). Intervals describe sensitivity of the mean paired difference to the composition of the retained reports. The final column is a descriptive bootstrap sign-tail quantity rather than a calibrated hypothesis-test $p$ value.}
@@ -401,17 +402,17 @@ The post-run clean normalized ablation reproduced every archived Full and histor
 \toprule
 $K$ & Baseline & Mean difference & 95\% comp. interval & Unadjusted $t_{boot}$\\
 \midrule
-5 & Strict variant & -0.003332 & [-0.010889, 0.002826] & 0.3544\\
+5 & Unrenorm. removal & -0.003332 & [-0.010889, 0.002826] & 0.3544\\
 5 & Semantic-MMR & 0.020737 & [0.012765, 0.028354] & 0/10,000 tail draws\\
 5 & TextRank & 0.025438 & [0.017542, 0.033722] & 0/10,000 tail draws\\
-10 & Strict variant & -0.003360 & [-0.008306, 0.001040] & 0.1444\\
+10 & Unrenorm. removal & -0.003360 & [-0.008306, 0.001040] & 0.1444\\
 10 & Semantic-MMR & 0.014360 & [0.006082, 0.022215] & 0.0008\\
 10 & TextRank & 0.012029 & [0.004397, 0.019241] & 0.0022\\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Figure~\ref{fig:paired} shows every report-level difference. Full and the strict variant selected different candidate sequences in 28 of 30 report--budget cells, and their base scores differed in all 30. The coefficient rule was therefore active, although activity alone does not indicate a benefit.
+Figure~\ref{fig:paired} shows every report-level difference. Full and the unrenormalized coefficient-removal comparison selected different candidate sequences in 28 of 30 report--budget cells, and their base scores differed in all 30. The coefficient rule was therefore active, although activity alone does not indicate a benefit.
 
 \begin{figure}[H]
 \includegraphics[width=\textwidth]{figures/fig04_paired_differences.pdf}
@@ -419,13 +420,13 @@ Figure~\ref{fig:paired} shows every report-level difference. Full and the strict
 \label{fig:paired}
 \end{figure}
 
-The report-level signs reveal heterogeneity hidden by the means. Against the strict variant, Full was positive and negative on equally many non-tied reports at $K=5$ and negative on more reports at $K=10$. Against Semantic-MMR and TextRank, positive differences predominated, although the length mismatch remains. Report-level and series-level sign-flip sensitivities produced the same directions under their respective sign-exchangeability assumptions, but the multiplicity-adjusted series-level values did not support the $K=10$ baseline contrasts. Full report-level values are in Supplementary Table~S4; the series-level machine-readable analysis is included with the reproducibility files.
+The report-level signs reveal heterogeneity hidden by the means. Against the unrenormalized coefficient-removal comparison, Full was positive and negative on equally many non-tied reports at $K=5$ and negative on more reports at $K=10$. Against Semantic-MMR and TextRank, positive differences predominated, although the length mismatch remains. Report-level and series-level sign-flip sensitivities produced the same directions under their respective sign-exchangeability assumptions, but the multiplicity-adjusted series-level values did not support the $K=10$ baseline contrasts. Full report-level values are in Supplementary Table~S4; the series-level machine-readable analysis is included with the reproducibility files.
 
 \subsection{Component Behavior and Coefficient Support (Exploratory RQ3)}
 
-Across 19,008 Full/strict-variant candidate-score comparisons, 9774 were nonzero, and selected sequences changed in 28 of 30 report--budget cells. The term was therefore numerically active. Its report-level effect was heterogeneous, and the endpoint comparison in Section~4.4 did not show an average ROUGE-L gain.
+Across 19,008 Full/unrenormalized-removal candidate-score comparisons, 9774 were nonzero, and selected sequences changed in 28 of 30 report--budget cells. The term was therefore numerically active. Its report-level effect was heterogeneous, and the endpoint comparison in Section~4.4 did not show an average ROUGE-L gain.
 
-The post-result development-only calibration evaluated 147 semantically deduplicated configurations. A zero path-deletion weight won all 12 leave-one-report-out folds. The best nonzero candidate used weight 0.025, won no fold, and remained below its strict-zero comparison at both budgets. The separate equal-nine development exercise likewise selected normalized path weight 0.0 while selecting Semantic-MMR coefficient 0.9 and TextRank damping 0.65 for a future external-series protocol. Neither exercise was applied to the retained test. Together they make a simple coefficient adjustment an unpromising explanation for the negative ablation, but they cannot replace an untouched comparison. A revised component will likely require different path semantics, role evidence, or score integration.
+The post-result development-only calibration evaluated 147 semantically deduplicated configurations. A zero path-deletion weight won all 12 leave-one-report-out folds. The best nonzero candidate used weight 0.025, won no fold, and remained below its zero-coefficient comparison at both budgets. The separate equal-nine development exercise likewise selected normalized path weight 0.0 while selecting Semantic-MMR coefficient 0.9 and TextRank damping 0.65 for a future external-series protocol. Neither exercise was applied to the retained test. Together they make a simple coefficient adjustment an unpromising explanation for the negative ablation, but they cannot replace an untouched comparison. A revised component will likely require different path semantics, role evidence, or score integration.
 
 Maximum path expansions were 19,638 of the 2,000,000 cap, and qualifying paths were 16,182 of 250,000. The selected reports were therefore processed without approaching the work limits. These observed margins describe the present corpus rather than asymptotic scalability.
 
@@ -437,7 +438,7 @@ All reported selections and aggregate values were reproduced from the archived r
 
 \subsection{Main Findings and System-Level Comparison}
 
-Full \cges{} recovered more Executive-Summary wording than Semantic-MMR and TextRank on the selected test set at equal extraction-unit counts. Full outputs, however, contained 54--63\% more words than these baselines. Equal-unit budgets do not standardize the opportunity to match reference wording, so the primary comparison cannot isolate gains from explicit role coverage or graph structure. The post-run 110/260-word sensitivity produced no Holm-supported Full contrast and therefore does not restore a system-level superiority claim. A prospectively frozen matched-length study on unseen series remains required.
+The system-level result is mixed. At equal extraction-unit counts, Full \cges{} recovered more Executive-Summary wording than Semantic-MMR and TextRank, but its outputs contained 54--63\% more words. Because equal-unit budgets do not equalize the opportunity to match reference wording, this comparison cannot isolate the effects of role coverage or graph structure. The post-run 110/260-word sensitivity produced no Holm-supported Full contrast. A system-level advantage therefore remains unestablished and requires a prospectively frozen, matched-length study on unseen report series.
 
 \subsection{Why the Path-Deletion Term Did Not Improve ROUGE-L}
 
@@ -473,16 +474,16 @@ A license-cleared corpus of maintenance narratives or work orders would provide 
 
 \section{Conclusions}
 
-\cges{} is a deterministic, structure-aware framework for extracting source-linked passages from long power-system technical reports. On the selected 15-report NERC test set, the strict no-path-deletion variant achieved the highest overall means. Full \cges{} achieved ROUGE-L F1 values of 0.1060 and 0.1276 at five and ten units and exceeded Semantic-MMR and TextRank at equal unit counts. Its extracts were longer than those of these baselines, and the post-run matched-word sensitivity yielded no Holm-supported contrast, so the results do not establish a length-controlled advantage.
+\cges{} is a deterministic, structure-aware framework for extracting source-linked passages from long power-system technical reports. Its evaluation yields two clear findings. First, Full \cges{} recovered more Executive-Summary wording than Semantic-MMR and TextRank at equal unit counts, but it produced longer extracts, and the matched-word sensitivity yielded no Holm-supported contrast. The study therefore does not establish a length-controlled system advantage. Second, the unrenormalized coefficient-removal comparison achieved the highest overall means on the selected 15-report NERC test set.
 
-The path-deletion term changed candidate scores and selected sequences but did not improve the predefined ROUGE-L endpoint. The historical strict variant was higher by approximately 0.0033 at both budgets, the post-run scale-preserving no-path diagnostic remained higher in point estimate, and development-only calibration selected zero path weight in all 12 folds. The main outcome is therefore an auditable implementation with a portable public verification subset and a diagnosed negative component result, not evidence that path deletion improves summarization. A redesigned path component must add information beyond explicit role reservation without relying on longer extraction units. The next evaluation should use layout-aware units, matched lengths, unseen maintenance-oriented data, and independent assessment by qualified power-grid personnel.
+The path-deletion term changed candidate scores and selected sequences without improving the predefined ROUGE-L endpoint. The unrenormalized coefficient-removal comparison was higher by approximately 0.0033 at both budgets, the scale-preserving diagnostic had the same point-estimate direction, and development-only calibration selected zero path weight in all 12 folds. The present contribution is therefore an auditable implementation with a portable public verification subset and a negative component diagnosis. Improving the method will require a path signal that adds information beyond explicit role reservation without relying on longer extraction units. The next evaluation should use layout-aware units, matched lengths, unseen maintenance-oriented data, and independent assessment by qualified power-grid personnel.
 
 \supplementary{The supplementary PDF contains Table~S1 (the non-verbatim 40-report sampling frame), Table~S2 (output-length records), Table~S3 (corpus and implementation checks), and Table~S4 (exact paired sign-flip sensitivity), together with the exploratory development-only calibration summary. Machine-readable aggregate metrics, paired differences, report-level length records, series-cluster sensitivity results, matched-word results, clean normalized path ablation, nonverbatim layout-unit diagnostics, MiniLM ranking sensitivities, and selected-ID-to-page locators are included in the accompanying reproducibility files. Source PDFs and verbatim derived text are excluded because third-party redistribution permission has not been established.}
 \authorcontributions{Conceptualization, B.L. and Y.Y.; methodology, B.L.; software, B.L.; validation, B.L.; formal analysis, B.L.; investigation, B.L.; resources, Y.Y.; data curation, B.L.; writing---original draft preparation, B.L.; writing---review and editing, B.L. and Y.Y.; visualization, B.L.; supervision, Y.Y.; project administration, Y.Y.; funding acquisition, Y.Y. All authors have read and agreed to the published version of the manuscript.}
 \funding{This research was funded by the Science and Technology Research Project of State Grid Fujian Electric Power Co., Ltd., grant number 521300250006. The funder had no role in the design of the study; in the collection, analyses, or interpretation of data; in the writing of the manuscript; or in the decision to publish the results.}
 \institutionalreview{Not applicable. This computational study uses published technical reports and does not involve human participants or animals.}
 \informedconsent{Not applicable.}
-\dataavailability{The manuscript-bound, rights-safe technical package can be inspected in the public \nolinkurl{powergrid_benchmark} repository under the frozen tag \nolinkurl{cmc-2026-08-24-v2} via the \href{https://github.com/gaoxingkele/powergrid_benchmark/tree/cmc-2026-08-24-v2/paper_projects/CMC/C2GES}{frozen C2GES package}. It includes metadata, hashes, configurations, the non-verbatim selected-ID-to-page locator, descriptive diagnostic records, code, tests, and audit records. Owing to third-party licensing restrictions, source PDFs and verbatim derived text are not publicly redistributed. Access to restricted materials is subject to the applicable third-party permissions and licenses. The historical \texttt{c2ges} repository is not the manuscript-bound release for this version.}
+\dataavailability{The manuscript-bound, rights-safe technical package can be inspected in the public \nolinkurl{powergrid_benchmark} repository under the frozen tag \nolinkurl{cmc-2026-08-24-v3} via the \href{https://github.com/gaoxingkele/powergrid_benchmark/tree/cmc-2026-08-24-v3/paper_projects/CMC/C2GES}{frozen C2GES package}. It includes metadata, hashes, configurations, the non-verbatim selected-ID-to-page locator, descriptive diagnostic records, code, tests, and audit records. Owing to third-party licensing restrictions, source PDFs and verbatim derived text are not publicly redistributed. Access to restricted materials is subject to the applicable third-party permissions and licenses. The historical \texttt{c2ges} repository is not the manuscript-bound release for this version.}
 \acknowledgments{During preparation of this manuscript, the authors used the OpenAI Codex agent interface for the generative-AI-assisted activities described in Materials and Methods. The project records do not contain the exact backend model identifier or version. The authors reviewed and edited the assisted work and take full responsibility for the content of this publication. Codex was not treated as an author, qualified power-grid expert, human annotator, or adjudicator.}
 \conflictsofinterest{The authors declare no conflicts of interest.}
 

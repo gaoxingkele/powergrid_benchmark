@@ -44,7 +44,7 @@
 
 - 参考文献从 45 条活动条目清理为 34 条正文实际引用；34/34 通过 DOI、出版社或官方来源身份核验，0 dangling、0 orphan。
 - NERC 指南的引用语境已修正：只支持事件分析报告的制度背景，不再被用作语料清单本身的证据。
-- Data Availability 更新为 `powergrid_benchmark` 冻结标签 `cmc-2026-08-24-v2`；旧 `c2ges` 仓库明确不是本稿 release。
+- Data Availability 更新为 `powergrid_benchmark` 冻结标签 `cmc-2026-08-24-v3`；旧 `c2ges` 仓库明确不是本稿 release。
 - 作者姓名恢复为 0823 原稿的 Bijing Liu / Yong Yang，通讯邮箱恢复为一致记录中的 `yangyong1@sgepri.sgcc.com.cn`；ORCID 全部记录为 `NONE` 并在 LaTeX 中省略命令。
 - 按已有作者默认指示恢复 MDPI 标准 all-authors 结句，并把生成式 AI 产品、用途、未知版本和作者责任在 Methods/Acknowledgments 中对齐。
 - 投稿校验器已按主张强度区分硬门禁与升级门禁：当前范围只由作者元数据/批准和作者代码许可证/release 批准阻塞；专家标注、未见系列和维护效用验证仅在恢复相应强主张时阻塞。

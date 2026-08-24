@@ -4,7 +4,7 @@
 
 稿件：`C²GES: Structure-Aware Extractive Summarization of Long Power-System Technical Reports with Typed-Path Graphs`
 
-计划发布标签：`cmc-2026-08-24-v2`
+计划发布标签：`cmc-2026-08-24-v3`
 
 处理依据：用户于 2026-08-24 明确声明所有作者 ORCID 均写 `NONE`，并指示其余投稿信息以 0823 原始版本为基准酌情处理。姓名、单位、通讯作者和邮箱采用 0823 原始 Applied Sciences 稿及其变更日志中的一致记录；基金、CRediT、利益冲突和保守默认声明沿用 2026-08-08 的作者指示记录。本文档记录稿件处理依据，不代替各作者个人签名或投稿门户中的通讯作者声明。
 

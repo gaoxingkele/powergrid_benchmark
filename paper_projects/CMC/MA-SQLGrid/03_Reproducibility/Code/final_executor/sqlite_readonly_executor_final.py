@@ -4,7 +4,7 @@ The lexical :class:`Validator` is only a prefilter.  This module is the actual
 database boundary used only by the post-review FINAL executor tests: it opens a
 frozen snapshot through a read-only URI, enables SQLite ``query_only``, disables
 loadable extensions, installs a deny-by-default mutation/metadata authorizer,
-and terminates work that exceeds the registered opcode, time, result-row,
+and terminates work that exceeds the configured opcode, time, result-row,
 raw-cell-byte, budgeted-result-byte, or output-column limit.  These controls
 were added after, and were not used by, the historical release-v3 descriptive
 re-execution or the Round-2 experiments.  Callers can additionally select an
@@ -284,31 +284,31 @@ class SQLiteReadOnlyExecutor:
             columns = tuple(item[0] for item in (cursor.description or ()))
             if len(columns) > self.max_output_columns:
                 failure_kind = "output_column_limit"
-                error = f"result exceeds registered output-column limit {self.max_output_columns}"
+                error = f"result exceeds configured output-column limit {self.max_output_columns}"
             else:
                 result_bytes_accounted = _result_prefix_size(columns)
                 if result_bytes_accounted > self.max_result_bytes:
                     failure_kind = "result_byte_limit"
-                    error = f"result exceeds registered byte limit {self.max_result_bytes}"
+                    error = f"result exceeds configured byte limit {self.max_result_bytes}"
                 for row in cursor:
                     if failure_kind is not None:
                         break
                     if len(rows) >= self.max_rows:
                         failure_kind = "row_limit"
-                        error = f"result exceeds registered row limit {self.max_rows}"
+                        error = f"result exceeds configured row limit {self.max_rows}"
                         break
                     cell_sizes = [_raw_value_size(value) for value in row]
                     largest_cell_bytes = max([largest_cell_bytes, *cell_sizes])
                     if largest_cell_bytes > self.max_cell_bytes:
                         failure_kind = "cell_byte_limit"
-                        error = f"result contains a cell exceeding registered byte limit {self.max_cell_bytes}"
+                        error = f"result contains a cell exceeding configured byte limit {self.max_cell_bytes}"
                         break
                     row_bytes = _budgeted_row_size(row)
                     added_bytes = row_bytes + (1 if rows else 0)
                     prospective_bytes = result_bytes_accounted + added_bytes
                     if prospective_bytes > self.max_result_bytes:
                         failure_kind = "result_byte_limit"
-                        error = f"result exceeds registered byte limit {self.max_result_bytes}"
+                        error = f"result exceeds configured byte limit {self.max_result_bytes}"
                         result_bytes_accounted = prospective_bytes
                         break
                     result_bytes_accounted = prospective_bytes

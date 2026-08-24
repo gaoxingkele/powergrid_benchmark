@@ -421,7 +421,7 @@ class Adjudicator:
         eligible = [score for score in scores if score.eligible]
         if not eligible:
             rationale = (
-                "no candidate had complete required counterfactual coverage and the registered pass threshold"
+                "no candidate had complete required counterfactual coverage and the frozen pass threshold"
                 if require_counterfactual
                 else "no safe executable candidate"
             )

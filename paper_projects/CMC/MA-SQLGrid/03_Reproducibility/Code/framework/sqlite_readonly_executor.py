@@ -4,7 +4,7 @@ The lexical :class:`Validator` is only a prefilter.  This module is the actual
 database boundary used by the Round-2 offline study: it opens a frozen snapshot
 through a read-only URI, enables SQLite ``query_only``, disables loadable
 extensions, installs a deny-by-default mutation/metadata authorizer, and
-terminates work that exceeds the registered opcode, time, or result-row budget.
+terminates work that exceeds the configured opcode, time, or result-row budget.
 
 Every call returns a structured trace.  When ``trace_path`` is supplied, that
 trace is appended as one JSON line; failures are never retried or overwritten.
@@ -172,7 +172,7 @@ class SQLiteReadOnlyExecutor:
             rows = cursor.fetchmany(self.max_rows + 1)
             if len(rows) > self.max_rows:
                 failure_kind = "row_limit"
-                error = f"result exceeds registered row limit {self.max_rows}"
+                error = f"result exceeds configured row limit {self.max_rows}"
                 rows = rows[: self.max_rows]
         except sqlite3.DatabaseError as exc:
             failure_kind = interruption_reason or ("authorization" if "not authorized" in str(exc).lower() else "sqlite_error")
@@ -218,4 +218,3 @@ class SQLiteReadOnlyExecutor:
             "result_hash": result_hash,
             "trace": asdict(trace),
         }
-

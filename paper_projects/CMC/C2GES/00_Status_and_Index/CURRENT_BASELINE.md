@@ -15,7 +15,7 @@
 - 补充材料：`../01_Manuscript/Supplementary/supplementary_materials.tex`
 - 投稿信：`../02_Revision_and_QA/05_Submission_Draft/COVER_LETTER_DRAFT_2026-08-24.md`
 - 投稿元数据记录：`../02_Revision_and_QA/03_Package_QA/AUTHOR_APPROVAL_FORM_2026-08-24.md`
-- 计划冻结标签：`cmc-2026-08-24-v2`
+- 计划冻结标签：`cmc-2026-08-24-v3`
 
 ## 已落实的投稿元数据
 

@@ -1,4 +1,4 @@
-"""Regenerate all four manuscript figures from packaged, rights-safe sources.
+"""Regenerate three manuscript evidence figures from packaged, rights-safe sources.
 
 The generator is clean-unpack portable: it resolves every input relative to the
 manuscript directory and never reads the parent workspace.  Scientific counts
@@ -23,14 +23,14 @@ import numpy as np
 
 
 HERE = Path(__file__).resolve().parent
-ROOT = HERE.parent
-TRANSFER = ROOT / "supplementary" / "transferable"
+PROJECT = HERE.parents[2]
+DATA = PROJECT / "03_Reproducibility" / "Data"
 INPUTS = {
-    "formal_config": TRANSFER / "formal_protocol" / "formal_config_v0_3_1.json",
-    "rights_inventory": TRANSFER / "rights_safe_metadata" / "rights_safe_report_metadata.json",
-    "aggregate_metrics": TRANSFER / "audits" / "aggregate_metrics.json",
-    "paired_differences": TRANSFER / "figure_inputs" / "paired_rougel_differences_nonverbatim.csv",
-    "manuscript": ROOT / "paper_applsci.tex",
+    "formal_config": DATA / "formal_protocol" / "formal_config_v0_3_1.json",
+    "rights_inventory": DATA / "rights_safe_metadata" / "rights_safe_report_metadata.json",
+    "aggregate_metrics": DATA / "audits" / "aggregate_metrics.json",
+    "paired_differences": DATA / "figure_inputs" / "paired_rougel_differences_nonverbatim.csv",
+    "manuscript": PROJECT / "01_Manuscript" / "LaTeX" / "paper_applsci.tex",
 }
 EXPECTED_IMMUTABLE = {
     "formal_config": "C924035295F837B4F94D18D06DED12EC36135628A44345F1F568F9D5582AF14C",
@@ -38,7 +38,7 @@ EXPECTED_IMMUTABLE = {
     "aggregate_metrics": "DF9D9E4EF21BE0BDEC401C27D732D6A2692980FA8C018B119E41D85EE22149AA",
     "paired_differences": "AAE5F9E565AFB0FE98830673BC62A1A714227B86FCE5AF46DFA0723784FA1303",
 }
-OUT = ROOT / "figures"
+OUT = PROJECT / "03_Reproducibility" / "Figures"
 OUT.mkdir(parents=True, exist_ok=True)
 FIXED_TIME = datetime(2026, 8, 8, tzinfo=timezone.utc)
 
@@ -98,7 +98,7 @@ def architecture() -> None:
         "relevance": f"Centroid Q\nweight {weights['relevance']:.2f}",
         "role": f"Role R\nweight {weights['role']:.2f}",
         "graph": f"Degree G\nweight {weights['graph']:.2f}",
-        "counterfactual": f"Deletion C\nweight {weights['counterfactual']:.2f}\nno-CF: 0",
+        "counterfactual": f"Path deletion C\nweight {weights['counterfactual']:.2f}\nremoval: 0",
         "position": f"Position P\nweight {weights['position']:.2f}",
     }
     fig, ax = plt.subplots(figsize=(7.0, 3.55))
@@ -176,7 +176,7 @@ def dataset_flow() -> None:
 
 def aggregate() -> None:
     order = CONFIG["conditions"]
-    names = ["Lead", "Centroid", "TextRank", "Semantic-MMR", "Role", "Strict variant", "Full C2GES"]
+    names = ["Lead", "Centroid", "TextRank", "Semantic-MMR", "Role", "Unrenorm. removal", "Full C2GES"]
     fig, axes = plt.subplots(1, 2, figsize=(7.0, 3.0), sharey=True)
     x = np.arange(len(order))
     for ax, budget in zip(axes, map(str, CONFIG["selection_budgets"])):
@@ -192,7 +192,7 @@ def aggregate() -> None:
 
 
 def paired() -> None:
-    labels = {"graph_no_cf_strict": "Strict variant", "semantic_mmr": "Semantic-MMR", "textrank": "TextRank"}
+    labels = {"graph_no_cf_strict": "unrenorm. removal", "semantic_mmr": "Semantic-MMR", "textrank": "TextRank"}
     fig, axes = plt.subplots(2, 3, figsize=(7.0, 4.6), sharey=True)
     for row_index, budget in enumerate(CONFIG["selection_budgets"]):
         for column_index, baseline in enumerate(CONFIG["primary_contrasts"]):
@@ -218,7 +218,6 @@ def paired() -> None:
     save(fig, "fig04_paired_differences")
 
 
-architecture()
 dataset_flow()
 aggregate()
 paired()
@@ -226,16 +225,8 @@ paired()
 script_hash = digest(Path(__file__))
 input_hashes = {name: digest(path) for name, path in INPUTS.items()}
 specifications = {
-    "fig01_algorithm": {
-        "manuscript_id": "Figure 2 / label fig:algorithm",
-        "caption_claim_anchor": "Materials and Methods, Typed Path Counterfactual Sensitivity and Scoring and Selection",
-        "input_names": ["formal_config", "manuscript"],
-        "function": "architecture",
-        "supported_claim": "parallel Q/R/G/C/P score channels, registered weights, 2--4-edge paths and strict no-CF switch",
-        "limitation": "conceptual rendering of deterministic text-processing code; not a physical causal graph",
-    },
     "fig02_dataset_flow": {
-        "manuscript_id": "Figure 1 / label fig:data-flow",
+        "manuscript_id": "Figure 2 / label fig:data-flow",
         "caption_claim_anchor": "Materials and Methods, Source PDFs, Inclusion, and Leakage Gates",
         "input_names": ["rights_inventory"],
         "function": "dataset_flow",
@@ -251,7 +242,7 @@ specifications = {
         "limitation": "equal-sentence, not equal-word, budgets; bars omit paired uncertainty",
     },
     "fig04_paired_differences": {
-        "manuscript_id": "Figure 4 / label fig:paired",
+        "manuscript_id": "Figure 5 / label fig:paired",
         "caption_claim_anchor": "Results, Paired Directions and Exact Post-Run Sensitivity",
         "input_names": ["formal_config", "paired_differences"],
         "function": "paired",
@@ -264,14 +255,14 @@ for stem, spec in specifications.items():
     outputs = {}
     for suffix in ("pdf", "png"):
         path = OUT / f"{stem}.{suffix}"
-        outputs[suffix] = {"path": path.relative_to(ROOT).as_posix(), "bytes": path.stat().st_size, "sha256": digest(path)}
+        outputs[suffix] = {"path": path.relative_to(PROJECT).as_posix(), "bytes": path.stat().st_size, "sha256": digest(path)}
     artifacts[stem] = {
         **spec,
         "inputs": [
-            {"name": name, "path": INPUTS[name].relative_to(ROOT).as_posix(), "sha256": input_hashes[name]}
+            {"name": name, "path": INPUTS[name].relative_to(PROJECT).as_posix(), "sha256": input_hashes[name]}
             for name in spec["input_names"]
         ],
-        "script": {"path": Path(__file__).relative_to(ROOT).as_posix(), "function": spec["function"], "sha256": script_hash},
+        "script": {"path": Path(__file__).relative_to(PROJECT).as_posix(), "function": spec["function"], "sha256": script_hash},
         "outputs": outputs,
     }
 lineage = {

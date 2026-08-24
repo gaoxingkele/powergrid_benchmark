@@ -12,7 +12,7 @@ Checked on 2026-08-24 against the current MDPI LaTeX/template guidance, layout g
 - [x] Featured Application, main article structure, numbered figures/tables, references, and supplementary-material statement are present.
 - [x] CRediT Author Contributions, Funding, Institutional Review Board, Informed Consent, Data Availability, Acknowledgments/GenAI disclosure, and Conflicts of Interest statements are present.
 - [x] GenAI product, uses, verification boundary, unavailable exact backend version, and author responsibility are stated consistently in Methods and Acknowledgments.
-- [x] Rights-safe repository URL is bound to planned immutable tag `cmc-2026-08-24-v2`; raw GridDB/BIRD and other restricted assets are excluded.
+- [x] Rights-safe repository URL is bound to planned immutable tag `cmc-2026-08-24-v3`; raw GridDB/BIRD and other restricted assets are excluded.
 - [x] Cover letter is aligned with route A claims and contains no invented reviewer names or placeholders.
 - [x] Submission-mode verifier, 35 tests, LaTeX build, 37-reference audit, checksum manifest, and 27-page visual QA pass.
 

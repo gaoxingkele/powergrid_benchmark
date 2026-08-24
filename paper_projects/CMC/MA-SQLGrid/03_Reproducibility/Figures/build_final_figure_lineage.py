@@ -44,7 +44,7 @@ figures = [
             record("figures/lineage_sources/fig02_build_v2_reanalysis.py"),
         ],
         "generation": "matplotlib output from the canonical v2 offline reanalysis",
-        "caption_claim_boundary": "Displays descriptive GridDB cell point estimates for 180 attempts per cell; it is not a substitute for registered clustered inference or domain-semantic validation.",
+        "caption_claim_boundary": "Displays descriptive GridDB cell point estimates for 180 attempts per cell; it is not a substitute for documented clustered inference or domain-semantic validation.",
     },
     {
         "figure_number": 3,
