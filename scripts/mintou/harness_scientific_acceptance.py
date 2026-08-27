@@ -10,6 +10,7 @@ tests.
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import shutil
 import subprocess
@@ -65,18 +66,20 @@ def run_regression_tests() -> None:
     if not source_root.is_dir():
         fail(f"worktree-local source directory missing: {source_root}")
     env = os.environ.copy()
-    prior_pythonpath = env.get("PYTHONPATH", "")
-    env["PYTHONPATH"] = str(source_root) + (
-        os.pathsep + prior_pythonpath if prior_pythonpath else ""
-    )
+    # Do not inherit an ambient package path: acceptance must exercise the
+    # exact source tree checked out for this candidate.
+    env["PYTHONPATH"] = str(source_root)
 
     import_check = subprocess.run(
         [
             sys.executable,
             "-c",
             (
-                "from pathlib import Path; import powergrid_benchmark; "
-                "print(Path(powergrid_benchmark.__file__).resolve())"
+                "import importlib.util, json; from pathlib import Path; "
+                "spec=importlib.util.find_spec('powergrid_benchmark'); "
+                "print(json.dumps({'origin': None if spec is None else spec.origin, "
+                "'locations': [] if spec is None or spec.submodule_search_locations is None "
+                "else [str(Path(p).resolve()) for p in spec.submodule_search_locations]}))"
             ),
         ],
         cwd=ROOT,
@@ -91,11 +94,21 @@ def run_regression_tests() -> None:
             "worktree-local package import preflight failed:\n"
             + (import_check.stdout + import_check.stderr)[-4000:]
         )
-    imported_path = Path(import_check.stdout.strip()).resolve()
-    if not imported_path.is_relative_to(source_root):
+    try:
+        import_record = json.loads(import_check.stdout.strip())
+    except (json.JSONDecodeError, TypeError) as exc:
+        fail(f"invalid package import preflight record: {exc}")
+    origin = import_record.get("origin")
+    locations = [Path(value).resolve() for value in import_record.get("locations", [])]
+    resolution_paths = locations or ([Path(origin).resolve()] if origin else [])
+    expected_package_root = (source_root / "powergrid_benchmark").resolve()
+    if not resolution_paths:
+        fail("powergrid_benchmark import preflight returned no package location")
+    primary_path = resolution_paths[0]
+    if primary_path != expected_package_root and not primary_path.is_relative_to(expected_package_root):
         fail(
             "powergrid_benchmark resolved outside the active worktree source tree: "
-            f"{imported_path} (expected beneath {source_root})"
+            f"{primary_path} (expected beneath {expected_package_root})"
         )
 
     proc = subprocess.run(
