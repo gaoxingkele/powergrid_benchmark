@@ -10,8 +10,10 @@ tests.
 from __future__ import annotations
 
 import argparse
+import os
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 
@@ -56,12 +58,50 @@ def fail(message: str) -> None:
 
 
 def run_regression_tests() -> None:
-    pytest = shutil.which("pytest")
-    if not pytest:
+    if not shutil.which("pytest"):
         fail("pytest executable not found; cannot run Mintou evidence regression tests")
-    proc = subprocess.run(
-        [pytest, "-q", "tests/test_mintou_experiments.py"],
+
+    source_root = (ROOT / "src").resolve()
+    if not source_root.is_dir():
+        fail(f"worktree-local source directory missing: {source_root}")
+    env = os.environ.copy()
+    prior_pythonpath = env.get("PYTHONPATH", "")
+    env["PYTHONPATH"] = str(source_root) + (
+        os.pathsep + prior_pythonpath if prior_pythonpath else ""
+    )
+
+    import_check = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            (
+                "from pathlib import Path; import powergrid_benchmark; "
+                "print(Path(powergrid_benchmark.__file__).resolve())"
+            ),
+        ],
         cwd=ROOT,
+        env=env,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
+    )
+    if import_check.returncode:
+        fail(
+            "worktree-local package import preflight failed:\n"
+            + (import_check.stdout + import_check.stderr)[-4000:]
+        )
+    imported_path = Path(import_check.stdout.strip()).resolve()
+    if not imported_path.is_relative_to(source_root):
+        fail(
+            "powergrid_benchmark resolved outside the active worktree source tree: "
+            f"{imported_path} (expected beneath {source_root})"
+        )
+
+    proc = subprocess.run(
+        [sys.executable, "-m", "pytest", "-q", "tests/test_mintou_experiments.py"],
+        cwd=ROOT,
+        env=env,
         text=True,
         encoding="utf-8",
         errors="replace",
