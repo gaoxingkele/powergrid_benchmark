@@ -73,7 +73,7 @@ def validate_identity(contract: dict[str, Any]) -> None:
     )
 
 
-def validate_preserved_maps(contract: dict[str, Any]) -> None:
+def validate_preserved_maps(contract: dict[str, Any], *, require_frozen_hashes: bool = True) -> None:
     preserved = contract.get("preserved_evidence_maps", {})
     artifacts = preserved.get("artifacts")
     require(isinstance(artifacts, list) and len(artifacts) == 3, "three preserved evidence-map artifacts required")
@@ -109,7 +109,8 @@ def validate_preserved_maps(contract: dict[str, Any]) -> None:
         require_equal(set(artifact.get("map_roles", [])), expected_roles[relative], f"map roles for {relative}")
         path = PROJECT_ROOT / relative
         require(path.is_file(), f"preserved evidence artifact missing: {relative}")
-        require_equal(sha256(path), artifact.get("sha256"), f"preserved evidence hash for {relative}")
+        if require_frozen_hashes:
+            require_equal(sha256(path), artifact.get("sha256"), f"preserved evidence hash for {relative}")
     require_equal(seen, set(expected_roles), "preserved evidence paths")
 
     manuscript = (PROJECT_ROOT / "manuscript" / "MANUSCRIPT.md").read_text(encoding="utf-8")
@@ -598,10 +599,14 @@ def validate_contract_stage_absence(contract: dict[str, Any]) -> None:
     require_equal(actual_names, allowed_names, "files present in contract namespace")
 
 
-def validate_contract(*, require_contract_stage_absence: bool) -> dict[str, Any]:
+def validate_contract(
+    *,
+    require_contract_stage_absence: bool,
+    require_preserved_map_hashes: bool = True,
+) -> dict[str, Any]:
     contract = load_contract()
     validate_identity(contract)
-    validate_preserved_maps(contract)
+    validate_preserved_maps(contract, require_frozen_hashes=require_preserved_map_hashes)
     validate_scope(contract)
     validate_grid_and_temporal(contract)
     validate_architectures_and_budget(contract)
@@ -819,11 +824,27 @@ def validate_execution(contract: dict[str, Any]) -> dict[str, Any]:
     return manifest
 
 
+def validate_statistics_stage() -> dict[str, Any]:
+    try:
+        from derive_statistics import check_statistics_artifacts
+    except (ImportError, OSError) as exc:
+        fail(f"cannot load Stage-3 statistics validator: {exc}")
+    try:
+        return check_statistics_artifacts()
+    except SystemExit as exc:
+        fail(str(exc))
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--phase", choices=("contract", "experiments"), default="contract")
+    parser.add_argument("--phase", choices=("contract", "experiments", "statistics"), default="contract")
     args = parser.parse_args(argv)
-    contract = validate_contract(require_contract_stage_absence=args.phase == "contract")
+    contract = validate_contract(
+        require_contract_stage_absence=args.phase == "contract",
+        # Stage 3 is explicitly allowed to supersede the pre-v2 evidence map.
+        # The normative contract and sealed Stage-2 inputs remain immutable.
+        require_preserved_map_hashes=args.phase != "statistics",
+    )
     if args.phase == "experiments":
         manifest = validate_execution(contract)
         print(
@@ -831,6 +852,15 @@ def main(argv: list[str] | None = None) -> int:
             f"{contract['run_namespace']}: execution valid; rows={manifest['row_counts']['run_results']}; "
             f"trajectories={manifest['row_counts']['trajectory_ledger']}; "
             f"contract_sha256={sha256(CONTRACT_PATH)}; phase=experiments"
+        )
+        return 0
+    if args.phase == "statistics":
+        summary = validate_statistics_stage()
+        print(
+            "OK "
+            f"{contract['run_namespace']}: statistics valid; paired={summary['paired_rows']}; "
+            f"moving_block={summary['moving_block_rows']}; paper_tables={summary['paper_tables']}; "
+            f"provenance={summary['provenance_schema']}; phase=statistics"
         )
         return 0
     print(
