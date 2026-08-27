@@ -8,6 +8,7 @@ import csv
 import hashlib
 import json
 import math
+import re
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +17,9 @@ HERE = Path(__file__).resolve().parent
 PROJECT_ROOT = HERE.parents[1]
 CONTRACT_PATH = HERE / "upgrade_contract.json"
 PROSE_PATH = HERE / "PROSPECTIVE_CONTRACT.md"
+CITATION_REPORT_PATH = PROJECT_ROOT / "P1_CITATION_VERIFICATION_V2.md"
+LITERATURE_GAP_PATH = PROJECT_ROOT / "P1_LITERATURE_GAP_V2.md"
+MANUSCRIPT_PATH = PROJECT_ROOT / "manuscript" / "MANUSCRIPT.md"
 
 
 def fail(message: str) -> None:
@@ -835,15 +839,178 @@ def validate_statistics_stage() -> dict[str, Any]:
         fail(str(exc))
 
 
+def validate_references_stage() -> dict[str, int]:
+    """Validate the fail-closed citation and nearest-neighbor audit."""
+
+    for path in (CITATION_REPORT_PATH, LITERATURE_GAP_PATH, MANUSCRIPT_PATH):
+        require(path.is_file(), f"references-stage artifact missing: {path.relative_to(PROJECT_ROOT)}")
+    try:
+        citation = CITATION_REPORT_PATH.read_text(encoding="utf-8", errors="strict")
+        gap = LITERATURE_GAP_PATH.read_text(encoding="utf-8", errors="strict")
+        manuscript = MANUSCRIPT_PATH.read_text(encoding="utf-8", errors="strict")
+    except (OSError, UnicodeError) as exc:
+        fail(f"cannot read references-stage artifact: {exc}")
+
+    audit_lines = re.findall(r"^\|\s*\[(\d+)\]\s*\|(.+)$", citation, flags=re.MULTILINE)
+    require_equal(len(audit_lines), 30, "citation-audit row count")
+    require_equal({int(number) for number, _ in audit_lines}, set(range(1, 31)), "citation-audit reference IDs")
+    for number, body in audit_lines:
+        require("IDENTITY-VERIFIED" in body, f"reference [{number}] lacks identity status")
+        require("RW0/C" in body, f"reference [{number}] lacks correction status")
+        require(any(token in body for token in ("FULL", "PARTIAL")), f"reference [{number}] lacks support level")
+
+    manuscript_dois = {
+        match.rstrip(".,")
+        for match in re.findall(r"doi:\s*(10\.\d{4,9}/\S+)", manuscript, flags=re.IGNORECASE)
+    }
+    audit_dois = {
+        match.lower()
+        for _, body in audit_lines
+        for match in re.findall(r"`(10\.\d{4,9}/[^`]+)`", body.split("|", 1)[0], flags=re.IGNORECASE)
+    }
+    require_equal(len(manuscript_dois), 30, "manuscript DOI count")
+    require_equal({value.lower() for value in manuscript_dois}, audit_dois, "audited manuscript DOI set")
+
+    citation_tokens = (
+        "1,762 files",
+        "1,238 files",
+        "85fab064661f740a096f12b7e82df0e4455ccba54e26e875aeabf96ef1c18fdc",
+        "150383007faca4c61b58953875863868a972d84904eb897e1cc6d8e983badd79",
+        "2a57e02daf24ae5ca0ac890cf65cca5f5dcc1124ec5f90d06ad44f107c0c73f7",
+        "4fc6574ef453d644fcba8d82be3bb8874816394ccdd86f9861d234a7b4824929",
+        "007e61d9e960bcaa29f7132707c1af23306c97213f0ef86a3bfaf290b73f32ea",
+        "5908282d0c137859cefa5bdd77472662e9969e67e5805623543b2a459b767396",
+        "9054a62c1e9b25b46ea044e981f8ff89c68d2f706aebb5db8cfcdc72392f4e01",
+        "Crossref / Retraction Watch",
+        "https://gitlab.com/crossref/retraction-watch-data",
+        "2026-08-26",
+        "d624b4ae1f19a47b6cbcb0f8d548f7048e4f3d71",
+        "2962f61f31cfa29efd644cb8b8b60f59456cff225af8bf909dc0be611632a9d9",
+        "10.1016/j.ijforecast.2021.01.013",
+        "UNSUPPORTED COMPOUND CLAIM",
+        "No manuscript file was changed in this stage",
+    )
+    for token in citation_tokens:
+        require(token in citation, f"citation report missing required token: {token}")
+
+    mandatory_dois = (
+        "10.1016/j.enconman.2021.114892",
+        "10.1109/ACCESS.2026.3686958",
+        "10.11159/ehst23.120",
+        "10.1016/j.segan.2026.102496",
+        "10.1109/ICASSP49660.2025.10889933",
+        "10.1016/j.egyai.2026.100855",
+        "10.3390/forecast8020032",
+        "10.52202/085713-4860",
+    )
+    for doi in mandatory_dois:
+        require(doi.lower() in gap.lower(), f"mandatory nearest comparator absent: {doi}")
+        matching_rows = [line for line in gap.splitlines() if line.startswith("| NN-") and doi.lower() in line.lower()]
+        require_equal(len(matching_rows), 1, f"nearest-neighbor matrix row for {doi}")
+        require_equal(matching_rows[0].count("|"), 13, f"nearest-neighbor matrix dimensions for {doi}")
+        require("RW0/C0" in matching_rows[0], f"mandatory DOI lacks correction status: {doi}")
+
+    matrix_dimensions = (
+        "Target",
+        "Data visibility",
+        "Forecast horizon",
+        "Retrieval mechanism",
+        "Uncertainty output",
+        "Baseline breadth",
+        "Statistics",
+        "Release / provenance",
+        "Correction status",
+        "Direct / adjacent",
+        "Support basis",
+    )
+    matrix_header = next((line for line in gap.splitlines() if line.startswith("| ID / record |")), "")
+    for dimension in matrix_dimensions:
+        require(dimension in matrix_header, f"nearest-neighbor matrix dimension absent: {dimension}")
+
+    required_gap_tokens = (
+        "https://proceedings.mlr.press/v267/han25d.html",
+        "conference-to-journal lineage",
+        "PRIMARY-FULL",
+        "PRIMARY-ABSTRACT",
+        "AUTHOR-FULL",
+        "LOCAL-FULL",
+        "OFFICIAL-REPO",
+        "UNVERIFIED",
+        "VERIFIED-DIRECT",
+        "VERIFIED-ADJACENT",
+        "bounded protocol/evidence advance over the explicitly verified corpus",
+        "not proof of global novelty",
+        "global first",
+        "exhaustive SOTA",
+        "cross-paper superiority",
+        "No manuscript file was changed in this stage",
+        "API responses",
+        "publisher files",
+        "extracted text",
+        "caches",
+        "temporary directories",
+    )
+    for token in required_gap_tokens:
+        require(token in gap, f"literature-gap report missing required token: {token}")
+
+    local_inventory = {
+        "ieee_access_2023_federated_load_forecasting.pdf": (
+            "10.1109/ACCESS.2023.3262171",
+            "76bd3403ef95b3c1176fd9fb6e2801db079ab88be9efe0ed8af99ee5707718b6",
+        ),
+        "ieee_access_2023_vmd_pyraformer_adan.pdf": (
+            "10.1109/ACCESS.2023.3273596",
+            "1d0f96081ce9a6ff09783883eddfff26138db1826493b82c0466b26e107a8945",
+        ),
+        "ieee_access_2024_de_ihho_bilstm.pdf": (
+            "10.1109/ACCESS.2024.3437247",
+            "0e43fa69b58683db740640d3f4efe52da6bffb882d15108a99de8761507f5060",
+        ),
+        "ieee_access_2024_enhanced_dnn_distribution.pdf": (
+            "10.1109/ACCESS.2024.3432647",
+            "b02e33f9916fbf9f5850b416e8e49295ee50574735ffd4483b8ab0ee5d3ef04f",
+        ),
+        "ieee_access_2024_feature_extraction_combination.pdf": (
+            "10.1109/ACCESS.2024.3384246",
+            "03241b3797adbc1ffae1145ebdb70db578416f7d7d0ae8c46676723701de4cbf",
+        ),
+        "ieee_access_2024_sade_elm_cawoa_svm.pdf": (
+            "10.1109/ACCESS.2024.3377097",
+            "9a7efe82b64a042985511ab4de2479fbfdae98ebb21c51c0cdf58b627a169f75",
+        ),
+        "ieee_access_2024_timesnet_crossformer_lstm.pdf": (
+            "10.1109/ACCESS.2024.3383912",
+            "9054a62c1e9b25b46ea044e981f8ff89c68d2f706aebb5db8cfcdc72392f4e01",
+        ),
+    }
+    for filename, (doi, digest) in local_inventory.items():
+        rows = [line for line in gap.splitlines() if line.startswith("| `ieee_access_") and filename in line]
+        require_equal(len(rows), 1, f"local IEEE Access inventory row for {filename}")
+        require(doi.lower() in rows[0].lower(), f"local inventory DOI missing for {filename}")
+        require(digest in rows[0], f"local inventory hash missing for {filename}")
+        require("RW0/C0" in rows[0], f"local inventory correction status missing for {filename}")
+
+    prohibited_assertions = (
+        r"\bwe are the first\b",
+        r"\bfirst-ever\b",
+        r"\boutperforms all\b",
+        r"\bglobally novel\b",
+    )
+    for pattern in prohibited_assertions:
+        require(re.search(pattern, gap, flags=re.IGNORECASE) is None, f"unbounded assertion present: {pattern}")
+
+    return {"citation_rows": len(audit_lines), "nearest_rows": len(re.findall(r"^\| NN-", gap, flags=re.MULTILINE)), "local_pdfs": len(local_inventory)}
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--phase", choices=("contract", "experiments", "statistics"), default="contract")
+    parser.add_argument("--phase", choices=("contract", "experiments", "statistics", "references"), default="contract")
     args = parser.parse_args(argv)
     contract = validate_contract(
         require_contract_stage_absence=args.phase == "contract",
         # Stage 3 is explicitly allowed to supersede the pre-v2 evidence map.
         # The normative contract and sealed Stage-2 inputs remain immutable.
-        require_preserved_map_hashes=args.phase != "statistics",
+        require_preserved_map_hashes=args.phase not in {"statistics", "references"},
     )
     if args.phase == "experiments":
         manifest = validate_execution(contract)
@@ -861,6 +1028,14 @@ def main(argv: list[str] | None = None) -> int:
             f"{contract['run_namespace']}: statistics valid; paired={summary['paired_rows']}; "
             f"moving_block={summary['moving_block_rows']}; paper_tables={summary['paper_tables']}; "
             f"provenance={summary['provenance_schema']}; phase=statistics"
+        )
+        return 0
+    if args.phase == "references":
+        summary = validate_references_stage()
+        print(
+            "OK "
+            f"{contract['run_namespace']}: references valid; citations={summary['citation_rows']}; "
+            f"nearest={summary['nearest_rows']}; local_pdfs={summary['local_pdfs']}; phase=references"
         )
         return 0
     print(
