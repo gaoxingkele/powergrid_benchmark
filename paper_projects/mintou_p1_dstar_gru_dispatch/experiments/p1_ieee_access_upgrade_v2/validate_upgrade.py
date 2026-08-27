@@ -20,6 +20,10 @@ PROSE_PATH = HERE / "PROSPECTIVE_CONTRACT.md"
 CITATION_REPORT_PATH = PROJECT_ROOT / "P1_CITATION_VERIFICATION_V2.md"
 LITERATURE_GAP_PATH = PROJECT_ROOT / "P1_LITERATURE_GAP_V2.md"
 MANUSCRIPT_PATH = PROJECT_ROOT / "manuscript" / "MANUSCRIPT.md"
+PAPER_TEX_PATH = PROJECT_ROOT / "manuscript" / "journal_submission" / "paper.tex"
+PAPER_PDF_PATH = PAPER_TEX_PATH.with_suffix(".pdf")
+FIGURE_DIR = PROJECT_ROOT / "manuscript" / "figures"
+FIGURE_MANIFEST_PATH = FIGURE_DIR / "artifact_manifest.json"
 
 
 def fail(message: str) -> None:
@@ -859,17 +863,23 @@ def validate_references_stage() -> dict[str, int]:
         require("RW0/C" in body, f"reference [{number}] lacks correction status")
         require(any(token in body for token in ("FULL", "PARTIAL")), f"reference [{number}] lacks support level")
 
-    manuscript_dois = {
+    manuscript_reference_rows = {
+        int(number): body
+        for number, body in re.findall(r"^\[(\d+)\]\s+(.+)$", manuscript, flags=re.MULTILINE)
+    }
+    audited_manuscript_dois = {
         match.rstrip(".,")
-        for match in re.findall(r"doi:\s*(10\.\d{4,9}/\S+)", manuscript, flags=re.IGNORECASE)
+        for number, body in manuscript_reference_rows.items()
+        if number <= 30
+        for match in re.findall(r"doi:\s*(10\.\d{4,9}/\S+)", body, flags=re.IGNORECASE)
     }
     audit_dois = {
         match.lower()
         for _, body in audit_lines
         for match in re.findall(r"`(10\.\d{4,9}/[^`]+)`", body.split("|", 1)[0], flags=re.IGNORECASE)
     }
-    require_equal(len(manuscript_dois), 30, "manuscript DOI count")
-    require_equal({value.lower() for value in manuscript_dois}, audit_dois, "audited manuscript DOI set")
+    require_equal(len(audited_manuscript_dois), 30, "audited manuscript DOI count")
+    require_equal({value.lower() for value in audited_manuscript_dois}, audit_dois, "audited manuscript DOI set")
 
     citation_tokens = (
         "1,762 files",
@@ -1002,15 +1012,196 @@ def validate_references_stage() -> dict[str, int]:
     return {"citation_rows": len(audit_lines), "nearest_rows": len(re.findall(r"^\| NN-", gap, flags=re.MULTILINE)), "local_pdfs": len(local_inventory)}
 
 
+def validate_manuscript_stage() -> dict[str, int]:
+    """Validate the Stage-5 narrative, artifact, citation, and PDF boundary."""
+
+    required_paths = (
+        MANUSCRIPT_PATH,
+        PROJECT_ROOT / "manuscript" / "DEEP_REVISION_EVIDENCE.md",
+        PROJECT_ROOT / "manuscript" / "TABLE_TO_CONFIG_MANIFEST.md",
+        FIGURE_DIR / "make_figures.py",
+        FIGURE_MANIFEST_PATH,
+        PAPER_TEX_PATH,
+        PAPER_PDF_PATH,
+    )
+    for path in required_paths:
+        require(path.is_file(), f"manuscript-stage artifact missing: {path.relative_to(PROJECT_ROOT)}")
+
+    manuscript = MANUSCRIPT_PATH.read_text(encoding="utf-8", errors="strict")
+    tex = PAPER_TEX_PATH.read_text(encoding="utf-8", errors="strict")
+    evidence = (PROJECT_ROOT / "manuscript" / "DEEP_REVISION_EVIDENCE.md").read_text(encoding="utf-8", errors="strict")
+    table_map = (PROJECT_ROOT / "manuscript" / "TABLE_TO_CONFIG_MANIFEST.md").read_text(encoding="utf-8", errors="strict")
+    try:
+        figure_manifest = json.loads(FIGURE_MANIFEST_PATH.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        fail(f"cannot parse paper-facing figure manifest: {exc}")
+
+    narrative_tokens = (
+        "# A Reproducible Retrospective Curtailment-Risk Benchmark",
+        "**RQ1:**",
+        "**RQ2:**",
+        "**RQ3:**",
+        "The contributions follow those questions:",
+        "Gap-to-contribution-to-result map",
+        "bounded protocol/evidence advance over the explicitly verified corpus",
+        "Persistence nevertheless has lower MAE",
+        "no general learned-space advantage is supported",
+        "Onset-targeted analysis is inapplicable",
+        "conditional descriptive sensitivities",
+        "not operational forecasts",
+        "AUTHOR INPUT REQUIRED",
+        "## IX. Conclusion",
+    )
+    for token in narrative_tokens:
+        require(token in manuscript, f"manuscript narrative token missing: {token}")
+
+    numeric_tokens = (
+        "2310",
+        "240 training trajectories",
+        "0.00690794",
+        "0.00777391",
+        "0.02054651",
+        "0.02076857",
+        "-0.00498575",
+        "-0.00026812",
+        "+0.00126543",
+        "-0.00004826",
+        "0.01171875",
+        "0.36328125",
+        "[-0.00032314, +0.00305015]",
+        "[-0.00008188, +0.00309993]",
+    )
+    for token in numeric_tokens:
+        require(token in manuscript, f"paper-facing evidence value missing: {token}")
+
+    body_before_references = manuscript.split("## References", 1)[0]
+    unsupported_repairs = (
+        "Three-North wind curtailment",
+        "economically optimal marginal curtailment",
+        "Euclidean similar days",
+        "retrieve–reuse–revise–retain",
+        "reinforce a relevant evaluation requirement",
+        "raw-feature k-NN or randomized-space control would be required",
+    )
+    for phrase in unsupported_repairs:
+        require(phrase.lower() not in body_before_references.lower(), f"Stage-4 unsupported proposition remains: {phrase}")
+    prohibited_claims = (
+        r"\bwe are the first\b",
+        r"\bfirst-ever\b",
+        r"\boutperforms all\b",
+        r"\bglobally novel\b",
+        r"\boperational deployment\b",
+        r"\bobserved-curtailment accuracy\b",
+    )
+    for pattern in prohibited_claims:
+        require(re.search(pattern, body_before_references, flags=re.IGNORECASE) is None, f"unlicensed manuscript claim present: {pattern}")
+
+    references = {
+        int(number): body
+        for number, body in re.findall(r"^\[(\d+)\]\s+(.+)$", manuscript, flags=re.MULTILINE)
+    }
+    require_equal(set(references), set(range(1, 39)), "manuscript reference numbering")
+    citation_rows = re.findall(r"^\|\s*\[(\d+)\]\s*\|(.+)$", CITATION_REPORT_PATH.read_text(encoding="utf-8"), flags=re.MULTILINE)
+    audited_dois = {
+        int(number): re.search(r"`(10\.\d{4,9}/[^`]+)`", body, flags=re.IGNORECASE).group(1).lower()
+        for number, body in citation_rows
+    }
+    for number, doi in audited_dois.items():
+        require(doi in references[number].lower(), f"audited DOI missing or renumbered at reference [{number}]")
+    nearest_dois = (
+        "10.1016/j.enconman.2021.114892",
+        "10.1016/j.segan.2026.102496",
+        "10.1109/access.2026.3686958",
+        "10.1109/icassp49660.2025.10889933",
+        "10.1016/j.egyai.2026.100855",
+        "10.3390/forecast8020032",
+        "10.52202/085713-4860",
+    )
+    for doi in nearest_dois:
+        require(doi in manuscript.lower(), f"Stage-4 nearest DOI absent from manuscript: {doi}")
+    require("https://proceedings.mlr.press/v267/han25d.html" in manuscript, "RAFT primary record absent from manuscript")
+
+    required_headings = (
+        "Title-to-Evidence Map",
+        "Primary Estimand and Analysis Unit",
+        "Comparison Budget and Data Visibility",
+        "Negative and Null Results",
+        "Shared Assets and Independent Contribution",
+        "New or Rerun Experiments",
+        "Unresolved Human Blockers",
+    )
+    for heading in required_headings:
+        require(heading in evidence, f"revision-evidence heading missing: {heading}")
+    require("Stage-5 manuscript binding" in evidence, "revision evidence was not advanced to Stage 5")
+    require("Paper-facing figure bindings" in table_map, "figure-to-evidence bindings missing")
+    require("pre-v2 result family" not in table_map, "stale version-scope handoff remains")
+
+    require_equal(figure_manifest.get("schema"), "p1_manuscript_figure_manifest", "figure manifest schema")
+    require_equal(figure_manifest.get("schema_version"), 2, "figure manifest schema version")
+    require_equal(figure_manifest.get("source_run_namespace"), "p1_ieee_access_upgrade_v2", "figure source namespace")
+    require("p1_s3_fair_v1" not in json.dumps(figure_manifest), "legacy v1 source leaked into figure manifest")
+    expected_stems = {
+        "fig_benchmark_overview",
+        "fig_architecture",
+        "fig_primary_effects",
+        "fig_cap_profile",
+    }
+    require_equal(set(figure_manifest.get("paper_facing_stems", [])), expected_stems, "paper-facing figure stems")
+    generated = figure_manifest.get("generated_figures", [])
+    require_equal(len(generated), 8, "generated PNG/PDF figure count")
+    for record in generated:
+        path = FIGURE_DIR / record["file"]
+        require(path.is_file(), f"generated figure missing: {record['file']}")
+        require_equal(path.stat().st_size, int(record["bytes"]), f"generated figure bytes {record['file']}")
+        require_equal(sha256(path), record["sha256"], f"generated figure hash {record['file']}")
+    for stem in expected_stems:
+        require(f"figures/{stem}.png" in manuscript, f"paper-facing image not cited: {stem}")
+        require(f"figures/{stem}.png" in tex, f"paper-facing image absent from TeX: {stem}")
+    require_equal(len(re.findall(r"^\*\*Table\s+\d+\.\*\*", manuscript, flags=re.MULTILINE)), 6, "Markdown table caption count")
+    require_equal(len(re.findall(r"^\*\*Fig\.\s+\d+\.\*\*", manuscript, flags=re.MULTILINE)), 4, "Markdown figure caption count")
+    require_equal(len(re.findall(r"\\caption\{", tex)), 10, "TeX float caption count")
+    require_equal(len(re.findall(r"\\bibitem\{ref\d+\}", tex)), 38, "TeX bibliography count")
+    tex_tokens = tex.replace(r"\_", "_")
+    require("p1_s3_fair_v1" not in tex_tokens, "legacy v1 namespace remains in exact TeX source")
+    require("p1_ieee_access_upgrade_v2" in tex_tokens, "v2 namespace absent from exact TeX source")
+
+    require(PAPER_PDF_PATH.stat().st_size >= 100_000, "paper PDF is implausibly small")
+    require(PAPER_PDF_PATH.stat().st_mtime_ns >= PAPER_TEX_PATH.stat().st_mtime_ns, "paper PDF predates exact TeX source")
+    try:
+        from pypdf import PdfReader
+
+        reader = PdfReader(str(PAPER_PDF_PATH))
+        page_count = len(reader.pages)
+        require(0 < page_count < 20, f"pre-biography page target failed: {page_count} pages")
+        extracted = "\n".join((page.extract_text() or "") for page in reader.pages)
+    except (ImportError, OSError, ValueError) as exc:
+        fail(f"cannot inspect exact paper PDF: {exc}")
+    for token in ("Persistence", "GRU", "2310", "AUTHOR INPUT REQUIRED"):
+        require(token.lower() in extracted.lower(), f"built PDF text missing required token: {token}")
+    require("p1_s3_fair_v1" not in extracted, "legacy v1 namespace remains in built PDF")
+    log_path = PAPER_TEX_PATH.with_suffix(".log")
+    if log_path.is_file():
+        log = log_path.read_text(encoding="utf-8", errors="replace")
+        require("There were undefined references" not in log, "LaTeX reports undefined references")
+        require("Citation `" not in log or "undefined" not in log, "LaTeX reports an undefined citation")
+
+    return {
+        "references": len(references),
+        "figures": len(expected_stems),
+        "tables": 6,
+        "pages": page_count,
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--phase", choices=("contract", "experiments", "statistics", "references"), default="contract")
+    parser.add_argument("--phase", choices=("contract", "experiments", "statistics", "references", "manuscript"), default="contract")
     args = parser.parse_args(argv)
     contract = validate_contract(
         require_contract_stage_absence=args.phase == "contract",
         # Stage 3 is explicitly allowed to supersede the pre-v2 evidence map.
         # The normative contract and sealed Stage-2 inputs remain immutable.
-        require_preserved_map_hashes=args.phase not in {"statistics", "references"},
+        require_preserved_map_hashes=args.phase not in {"statistics", "references", "manuscript"},
     )
     if args.phase == "experiments":
         manifest = validate_execution(contract)
@@ -1036,6 +1227,15 @@ def main(argv: list[str] | None = None) -> int:
             "OK "
             f"{contract['run_namespace']}: references valid; citations={summary['citation_rows']}; "
             f"nearest={summary['nearest_rows']}; local_pdfs={summary['local_pdfs']}; phase=references"
+        )
+        return 0
+    if args.phase == "manuscript":
+        summary = validate_manuscript_stage()
+        print(
+            "OK "
+            f"{contract['run_namespace']}: manuscript valid; references={summary['references']}; "
+            f"figures={summary['figures']}; tables={summary['tables']}; pages={summary['pages']}; "
+            "phase=manuscript"
         )
         return 0
     print(

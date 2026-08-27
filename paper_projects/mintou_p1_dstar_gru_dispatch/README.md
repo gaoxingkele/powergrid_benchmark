@@ -18,7 +18,7 @@
 | `manuscript/DEEP_REVISION_EVIDENCE.md` | 标题、估计量、比较预算、负结果与未解决人工占位符的证据契约 |
 | `manuscript/P1_S5_THREE_ROUND_CLOSURE.md` | 顺序逻辑、方法统计与理论创新对抗审查的闭环记录及未验证项 |
 | `manuscript/SUPPLEMENTARY_METHODS_AND_AUDIT.md` | 运行环境、版本历史、复现核查与详尽审计记录 |
-| `experiments/p1_s3_fair_v1/run_manifest.json` | 当前正文结果的冻结运行清单与输出哈希 |
+| `experiments/p1_ieee_access_upgrade_v2/run_manifest.json` | 当前正文结果的冻结运行清单与 9 个密封输出哈希 |
 
 
 ## Round 2 评审产出 (2026-07-14)

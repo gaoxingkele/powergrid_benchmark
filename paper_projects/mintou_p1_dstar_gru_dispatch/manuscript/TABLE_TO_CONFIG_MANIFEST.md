@@ -1,13 +1,12 @@
 # Table-to-Config Manifest
 
-## Stage-3 v2 binding
+## Stage-5 v2 binding
 
-The Stage-3 paper-facing statistics tables are derived only from the accepted,
+The paper-facing statistics tables and figures derive only from the accepted,
 protocol-valid `p1_ieee_access_upgrade_v2` execution manifest. The derivation
 does not mix values from `p1_s3_fair_v1`, legacy v5/v6 runs, historical
-ablations, or an additional experiment. The existing manuscript tables,
-figures, TeX, and PDFs remain the pre-v2 record until a later results-narrative
-stage integrates these replacements.
+ablations, or an additional experiment. Stage 5 integrates these replacements
+into `MANUSCRIPT.md` and the exact IEEE Access source.
 
 | Item | Binding |
 |---|---|
@@ -38,6 +37,20 @@ stage integrates these replacements.
 All five table hashes and byte counts are recorded in
 `statistics_provenance.json`. `validate_upgrade.py --phase statistics` rebuilds
 the expected bytes in memory and fails if a table is missing, stale, or altered.
+
+## Paper-facing figure bindings
+
+`figures/make_figures.py` verifies every execution-manifest output and every
+Stage-3 paper-table hash before rendering. `figures/artifact_manifest.json`
+records the generator, source manifests, validated inputs, and hashes for the
+PNG/PDF pairs consumed by or delivered with the paper.
+
+| Figure | Direct paper-table/contract binding | Scientific role |
+|---|---|---|
+| `fig_benchmark_overview` | `upgrade_contract.json`; repeated support fields in sealed `run_results.csv` | temporal gate, analysis-unit counts, and zero pre-test onset support |
+| `fig_architecture` | normative retrieval/control catalog in `upgrade_contract.json` | separates target, fitted paths, attribution controls, external references, and privileged audit |
+| `fig_primary_effects` | `v2_paired_seed_effects.csv` | three primary contrasts at each lag with seed-conditional intervals and Holm values |
+| `fig_cap_profile` | `v2_cross_cap_descriptive.csv` | same-sequence selected-minus-Persistence ordering across caps |
 
 ## Frozen statistical families
 
@@ -75,10 +88,8 @@ committed blob fails closed.
 
 ## Version-scope handoff
 
-The current manuscript narrative and generated figures still describe the
-pre-v2 result family. They must not be presented as already updated by this
-stage. Before publication, the later narrative stage must use the wording
-router and replace stale statements that raw/randomized attribution controls,
-architecture heads, seed intervals, or moving-block sensitivity were absent.
-No title, contribution, method, result, discussion, or conclusion claim may be
-broadened beyond the table routes above.
+The current manuscript narrative and generated figures use the v2 result
+family and the Stage-4 citation boundary. The legacy v1 figures and tables may
+remain as historical supplementary records but are not cited or copied into
+the paper-facing artifact manifest. No title, contribution, method, result,
+discussion, or conclusion claim may be broadened beyond the routes above.
