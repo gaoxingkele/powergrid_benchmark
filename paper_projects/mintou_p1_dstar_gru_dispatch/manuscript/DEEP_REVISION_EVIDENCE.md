@@ -1,181 +1,180 @@
 # Title-to-Evidence Map
 
-## Binding paper story
+## Stage-3 binding
 
-The title is **A Reproducible Retrospective Curtailment-Risk Benchmark and Fair
-Evaluation of GRU Learned-Space Retrieval on RTS-GMLC**.
+The current title is **A Reproducible Retrospective Curtailment-Risk Benchmark
+and Fair Evaluation of GRU Learned-Space Retrieval on RTS-GMLC**. The title
+names the evaluated method; it does not assert that learned-space retrieval is
+uniformly superior. All new numerical statements in this matrix are bound to
+the completed, protocol-valid `p1_ieee_access_upgrade_v2` execution accepted at
+Stage 2 and independently rederived at Stage 3.
 
-| Title/contribution term | Evidence-supported meaning | Boundary that must travel with the claim |
+| Title/contribution term | Evidence-supported meaning | Boundary that travels with the claim |
 |---|---|---|
-| Reproducible | The completed manifest hashes the configuration, script, four source files, and six outputs. A separate execution reproduced all 510 non-timing fields and the four scientific derived tables byte-for-byte. | This is computational reproduction on the same GPU and source files, not external-investigator or cross-hardware replication. |
-| Retrospective | A 48-row query ending at benchmark index $s$ predicts the proxy at delivery row $s+h$, $h\in\{1,24\}$. | Issue timestamps, as-of mappings, and source vintages are absent; no operational day-ahead claim is licensed. |
-| Curtailment-risk | A fixed SNSP-type acceptance rule converts load, wind, and PV into a method-independent rate. | The label is a proxy, not observed curtailment, operator action, OPF/UC output, or economic outcome. |
-| Benchmark | Common target, phase gate, lags, metrics, baselines, controls, and statistics are executable and manifest-bound. | One RTS-GMLC system and the first 8760 of 8784 source rows identify every result; recorded delivery keys end on December 30, so this is not a complete calendar year. |
-| Fair evaluation | Fit, selection, calibration, and test target sets are disjoint. A horizon offset ensures each downstream query endpoint reaches its phase boundary; the preceding 47 historical rows may remain in the earlier phase. GRU retrieval controls share the head-selected checkpoint within each objective. | The fair run covers a mechanism subset, not the full historical 14-method roster or joint checkpoint/weight optimization. |
-| GRU learned-space retrieval | The same forecasting-trained GRU encoder maps query and fit-bank windows; $k=8$ retrieved targets are combined with the head by selected or fixed weights. | No contrastive/Siamese loss, digital twin, live synchronization, or deployment is implemented. |
+| Reproducible | The sealed manifest hashes the contract, executed script, source files, and nine outputs. Stage 3 independently reproduced all 30 paired rows and all 36 moving-block rows before writing paper tables. | This is deterministic rederivation from the accepted execution, not a new experiment, independent replication, or cross-hardware reproduction. |
+| Retrospective | A 48-row query ending at benchmark index $s$ predicts the proxy at delivery row $s+h$, for $h\in\{1,24\}$. | Issue timestamps, as-of mappings, release identifiers, and vintages are absent; no operational forecast or dispatch claim is licensed. |
+| Curtailment-risk | A fixed SNSP-type rule maps load, wind, and PV to a method-independent proxy rate. | The target is not observed curtailment, an operator action, OPF/UC output, or an economic outcome. |
+| Benchmark | The task, temporal gate, comparison budget, failures, metrics, inference, and sensitivities are prospectively frozen and executable. | One RTS-GMLC system and the first 8760 of 8784 rows identify every result; the sequence ends December 30 and is not a complete calendar year. |
+| Fair evaluation | Fit, selection, calibration, and test target sets are disjoint; four architecture heads use the same 20-epoch/checkpoint budget; retrieval controls share the head-selected GRU checkpoint. | Architectures are not parameter-count matched. The result is conditional on the specified budget and single sequence. |
+| GRU learned-space retrieval | Learned k=8 retrieval is compared with matched head, raw-feature kNN, and randomized-encoder retrieval. | At 1 h it has lower MAE than both named attribution controls after within-family Holm adjustment. At 24 h it is worse than raw-feature retrieval and unresolved versus randomized retrieval; no general learned-space advantage is licensed. |
 
-## Aligned contributions
-
-1. The benchmark contribution is a method-independent retrospective proxy task
-   with an explicit information boundary and a privileged target-hour visibility
-   audit.
-2. The method contribution is a head-first, checkpoint-matched comparison of
-   retrieval-only, equal-blend, and head-only predictions under two selection
-   objectives.
-3. The result contribution is conditional: retrieval lowers MAE relative to the
-   matched head at both lags, Persistence remains lower-MAE at the primary cap,
-   onset-targeted selection is inapplicable, and cap crossings are descriptive.
+The bounded benchmark contribution does not require a favorable method result.
+The method contribution is contrast- and horizon-specific. The clear-advance
+claim remains unverified until the separately required Stage-4 literature
+positioning is completed.
 
 # Primary Estimand and Analysis Unit
 
-The primary estimand is the mean paired within-seed treatment-minus-control
-difference at cap 0.70, conditional on the fixed 8760-row RTS-GMLC sequence,
-temporal gate, feature/metric definitions, checkpoint budget, retrieval bank,
-selection objective, and lag. For each objective and seed, the GRU-head
-checkpoint is selected first; the head-weight grid and all retrieval controls
-then share that checkpoint. Six frozen GRU contrasts per lag compare selected
-retrieval, fixed 0.5 blending, and the matched head for MAE or onset F1.
+The primary estimand is the cap-0.70 mean paired within-seed
+treatment-minus-control difference, conditional on the ten frozen seeds, fixed
+8760-row sequence, temporal gate, cap, horizon, selection objective, metric,
+model budget, retrieval bank, and contrast. The analysis unit is one paired
+method-seed run. The 2627 test targets at 1 h and 2604 at 24 h are reused across
+seeds and are not independent replicates.
 
-The analysis unit is one paired method-seed run. Ten common training seeds are
-available. The 2627 (1 h) and 2604 (24 h) test delivery targets, including 57
-and 172 onset rows, are reused across seeds and are not treated as independent
-replicates. Seed uncertainty covers training randomness only, not hours, onset
-blocks, years, systems, policies, vintages, operators, or deployments.
+Three families are frozen separately within each horizon:
 
-The primary test is the two-sided exact sign-flip test. Holm adjustment is
-applied over the frozen six-contrast family separately within each lag.
-Deterministic methods and cross-cap comparisons have no seed-based p-value.
-The test's inferential interpretation assumes sign-exchangeability of paired
-differences under the no-effect null; the common algorithmic seeds are not
-randomized experimental assignments.
-The mean paired difference is the scale-specific effect estimate. No confidence
-interval over seeds or resampling interval over hours, onset blocks, years, or
-systems is available; the exact p-values and win/tie counts describe only the
-ten frozen training seeds.
+| Family | Objective / metric | Contrasts per horizon | Interpretation |
+|---|---|---:|---|
+| `primary_mae_mechanism_attribution` | MAE / continuous MAE | 6 | Primary mechanism and learned-space attribution |
+| `architecture_head_mae` | MAE / continuous MAE | 3 | Named head-to-head comparisons only; no overall architecture winner |
+| `onset_f1_diagnostic` | onset F1 / onset F1 | 6 | Diagnostic because pre-test onset support is absent |
+
+For every contrast, the paper table reports the mean and median paired
+difference, sample SD, paired standardized mean difference $d_z$ when variance
+is nonzero, win/tie/loss counts, the two-sided exact sign-flip p-value over all
+$2^{10}=1024$ sign assignments, and Holm adjustment within the frozen family
+and horizon. The sign-flip interpretation assumes sign-exchangeability under a
+no-effect null; the common algorithmic seeds are not randomized experimental
+assignments.
+
+The predeclared 95% seed interval is
+
+$$
+\bar d \pm 2.2621571627409915\,s_d/\sqrt{10}.
+$$
+
+It describes training-seed variability conditional on this sequence and
+protocol. It is not uncertainty over hours, blocks, events, years, systems,
+policies, vintages, operators, or deployments.
+
+The supplementary moving-block analysis uses the chronological series of the
+mean across the ten seeds of paired hourly absolute-loss differences. It uses
+ordinary overlapping, non-circular blocks of 24 and 168 rows, 5000 PCG64
+replicates, and the four frozen RNG seeds. Its percentile intervals are a
+conditional, descriptive dependence sensitivity on the single observed test
+sequence. They do not enter Holm decisions, do not override the seed-paired
+analysis, and are not confidence intervals across years or systems.
 
 # Comparison Budget and Data Visibility
 
-## Fair temporal gate
-
-| Phase | Delivery-target rule | Permitted use | 1 h / 24 h targets |
-|---|---|---|---:|
-| Fit | before row 4380 | normalization, model fitting, Ridge coefficients, retrieval bank | 4332 / 4309 |
-| Selection | `4380+h` through 5255 | Ridge penalty, GRU checkpoint, head weight | 875 / 852 |
-| Calibration | `5256+h` through 6131 | detection threshold only | 875 / 852 |
-| Test | at or after `6132+h` | scoring only | 2627 / 2604 |
-
-The source loader retains delivery calendar keys. It does not retain forecast
-issue time, an as-of mapping, release identifier, or revision/vintage field.
-The horizon offsets ensure that a downstream target's query endpoint has reached
-the downstream phase boundary. They do not require all 48 historical rows in a
-query window to lie in that phase; earlier-phase history within the window is
-permitted. The gate prevents artifact building from using downstream delivery
-phases, but it cannot establish an operational issue-time gate.
-
-## Frozen comparison budget
-
-| Item | Budget | Scope |
+| Item | Frozen Stage-2 execution | Stage-3 interpretation |
 |---|---|---|
-| Data | First 8760 aligned rows of 8784-row hashed RTS-GMLC load/wind/PV files plus static branch data | One system and one truncated sequence; manifest delivery keys end on December 30 |
-| Lags/caps | 1 h and 24 h; cap 0.70 primary; 0.60/0.80 sensitivity | Cross-cap values are descriptive |
-| GRU | hidden 48, 20 epochs, checkpoints 5/10/15/20, ten common seeds | Training randomness only |
-| Retrieval | fit-only bank, $k=8$, selected grid plus fixed head weights 0/0.5/1 | GRU-head checkpoint selected first and shared across controls within objective; no joint checkpoint/weight optimization |
-| Baselines | Persistence, Seasonal-24h, objective-selected Ridge | Deterministic descriptive references |
-| Privileged control | Target-hour direct policy transform | Construction/visibility audit, not a forecast |
-| Inference | Six paired GRU contrasts per lag | Exact sign flip plus within-lag Holm |
+| Source | First 8760 of 8784 aligned, hashed RTS-GMLC load/wind/PV rows plus static branch data | One truncated sequence and one system |
+| Grid | Caps 0.60/0.70/0.80; 1 h/24 h; MAE/onset-F1 objectives; ten seeds | Cap 0.70 is primary; other caps and cross-cap findings are descriptive |
+| Temporal gate | Fit, selection, calibration, and test delivery targets with horizon-length embargoes | Delivery-row retrospective lags; not an issue-time gate |
+| Training | GRU, LSTM, DLinear, and TCN; 240 total trajectories; common 20-epoch/checkpoint budget | Architectures are not parameter-count matched |
+| Retrieval | learned, raw, and randomized spaces; k=4/8/16/32; k=8 primary | k=4/16/32 are descriptive and never selected from test outcomes |
+| Seeded rows | 2280 | Every expected key completed; no seed replacement or imputation |
+| Deterministic rows | Persistence, Seasonal-24h, Ridge, privileged direct transform | Descriptive references; privileged transform is not rank eligible |
+| Total rows | 2310 completed, 0 failed | Effect direction is not a protocol-validity gate |
+
+The source loader has delivery calendar keys but lacks issue times, as-of
+mappings, release identifiers, and vintage fields. The privileged target-hour
+transform is a construction/visibility audit and is never a forecaster.
+Persistence, Seasonal-24h, and Ridge receive no seed-based p-value. Cross-cap
+and k-sensitivity comparisons reuse the same sequence and remain descriptive.
 
 # Negative and Null Results
 
-1. **Persistence remains lower-MAE at the primary cap.** Its MAE is 0.00690794
-   versus 0.00777391 for selected GRU-LSR at 1 h and 0.02054651 versus
-   0.02076857 at 24 h. These deterministic comparisons are descriptive.
-2. **MAE selection chooses retrieval only.** Head weight is zero in all ten
-   seeds at both lags. The result supports the retrieval estimator relative to
-   the matched head, not a beneficial head/retrieval mixture.
-3. **Every selection and calibration phase has zero positive onsets** at both
-   lags and all three caps. Onset-targeted checkpoint/blend selection and
-   threshold calibration use declared fallbacks.
-4. **Selected onset GRU-LSR equals the head.** The paired difference is zero in
-   all ten cap-0.70 pairs at both lags, with Holm p=1. This is inapplicability
-   evidence, not proof of no retrieval effect.
-5. **The fixed-blend onset result is horizon-specific.** Fixed 0.5 improves 1 h
-   onset F1 over the head by 0.02441871 in all pairs (Holm p=0.01171875), but
-   the 24 h mean difference is 0.00163439 with five wins/five losses (Holm p=1).
-   Both remain diagnostics under the unsupported onset arm.
-6. **The privileged direct transform has subunit onset F1 despite zero MAE.**
-   Onset F1 is 0.3333 at 1 h and 0.7527 at 24 h because the predicted-positive
-   rule does not encode the onset target's quiet-state prerequisite. This is a
-   metric-definition limitation.
-7. **Cap ordering is unstable.** Selected GRU-LSR is descriptively lower-MAE
-   than Persistence only at cap 0.60/1 h and cap 0.80/24 h; Persistence is lower
-   in the other four cells. These are same-series crossings, not generalization.
-8. **The fair subset cannot identify a full-roster winner.** It does not rerun
-   MLP, LSTM, DLinear, TCN, raw-feature kNN, SmallBank, encoder, or topology
-   ablations under the fair gate.
-9. No result covers another complete year or system, observed curtailment, forecast vintages,
-   OPF/UC feasibility, probabilistic forecasts, operators, deployment, or
-   economic outcomes.
-10. **The learned representation is not causally isolated.** Raw-feature kNN,
-    randomized-encoder retrieval, alternative distances, and $k$ sensitivity
-    were not rerun under the fair gate. The paired result supports the
-    implemented retrieval path relative to its matched head, not a causal
-    advantage of learned geometry over generic neighbor averaging.
+1. **Persistence remains the lower-MAE primary-cap reference.** Selected
+   learned retrieval minus Persistence is +0.000865971 at 1 h and +0.000222061
+   at 24 h. These comparisons are descriptive because Persistence has one
+   deterministic row.
+2. **Learned-space attribution is horizon dependent.** At 1 h, learned k=8
+   retrieval is favorable versus raw and randomized retrieval, with paired
+   mean differences -0.00498575 and -0.000268116 and Holm p=0.01171875 for
+   both. At 24 h it is adverse versus raw retrieval (+0.00126543,
+   Holm p=0.01171875) and has a small favorable but Holm-unresolved mean versus
+   randomized retrieval (-0.0000482585, Holm p=0.36328125). A general learned-
+   space advantage is therefore not supported.
+3. **Architecture results are method specific.** At 1 h, the GRU head is
+   adverse versus LSTM and TCN and favorable versus DLinear after the separate
+   three-contrast Holm adjustment. At 24 h, GRU is favorable versus DLinear;
+   its adverse mean differences versus LSTM and TCN are not Holm-resolved. No
+   overall architecture winner is licensed.
+4. **Onset-targeted selection remains inapplicable.** Every cap/horizon cell
+   has zero positive onsets in both selection and calibration. All onset-family
+   exact and Holm results are diagnostics and cannot cure that absent support.
+   The selected onset condition equals the head at both primary-cap horizons,
+   with ten ties and Holm p=1; this fallback identity is not proof of no onset
+   effect.
+5. **Non-significance is not converted to a supported null.** For example, the
+   24 h learned-versus-randomized MAE contrast and GRU-versus-LSTM/TCN head
+   contrasts retain their observed directions, intervals, and adjusted
+   p-values without a no-effect conclusion.
+6. **Moving-block results are conditional/descriptive.** In particular, the
+   24 h learned-versus-raw block intervals include zero at both block lengths,
+   even though the seed-paired family is adverse after Holm adjustment. This
+   sensitivity neither cancels nor replaces the paired-seed result; the two
+   analyses condition on different axes of variation.
+7. **Cap ordering crosses.** Selected learned retrieval is descriptively
+   lower-MAE than Persistence only at cap 0.60/1 h and cap 0.80/24 h;
+   Persistence is lower in the other four cells. These are same-sequence
+   crossings, not evidence of transport across policies, years, or systems.
+8. No result supports observed-curtailment accuracy, probabilistic calibration,
+   operator usefulness, network feasibility, deployment safety, economic
+   benefit, another system, or another complete year.
 
 # Shared Assets and Independent Contribution
 
-- RTS-GMLC is an external public substrate. Public input data do not imply that
-  this manuscript's code/evidence package is publicly released.
-- `p1_s3_fair_v1` is the sole source for main scientific tables, figures, and
-  inferences. Legacy v5/v6 archives remain supplementary historical evidence.
-- `manuscript/figures/make_figures.py` verifies the fair manifest outputs before
-  deriving tables and figures; `figures/artifact_manifest.json` records the
-  resulting hashes.
-- The supported independent contribution is the retrospective proxy/onset
-  benchmark plus a matched within-pipeline retrieval evaluation. No independent
-  authorship, external reproduction, deployment, or companion-paper fact is
-  inferred.
-- The literature positioning is bounded to the cited corpus. No systematic
-  review, exhaustive state-of-the-art exclusion, or external domain-expert
-  validation was executed; those checks remain **UNVERIFIED** and the manuscript
-  makes no SOTA or expert-review claim.
-- Live official IEEE Access author guidance was checked on 2026-08-13 for the
-  required template/source-PDF match, AI-text disclosure, submitting-author
-  ORCID, and all-author biographies. Whether the local template bundle is the
-  latest publisher bundle remains **UNVERIFIED** until the submitting authors
-  download and compare the current official package.
-- Metadata/content spot checks support references [4], [5], [6], [9], and [13].
-  A complete content-level audit of all 30 references was not available in this
-  closure and remains **UNVERIFIED**; no unchecked reference is promoted into a
-  stronger novelty or causal claim.
-- No companion paper is named by the project acceptance contract. Authors must
-  disclose any shared code, text, figures, or evidence rather than relying on
-  repository inference.
+- RTS-GMLC is an external public substrate. The source-file hashes identify the
+  evaluated bytes but do not establish a release/vintage identifier or public
+  release of this manuscript's evidence package.
+- `p1_ieee_access_upgrade_v2/run_manifest.json` and its nine sealed outputs are
+  the sole numerical source for the Stage-3 paper tables. Older v1, legacy, and
+  independent-rerun records retain their historical scopes and are not mixed
+  into these tables.
+- `derive_statistics.py` verifies every sealed output hash, independently
+  recomputes paired and moving-block results, and applies the claim router.
+  `statistics_provenance.json` records the derivation and table hashes.
+- The execution-manifest runner hash
+  `d4f0e14dd010e4f429e2d61771d781b169a673b73156dac5236113f0e3f34e28`
+  exactly matches the committed Git blob and the canonical-LF working content.
+  The Windows checkout is separately recorded as CRLF with raw hash
+  `da2e1f1ec024d2493e776a1b63b23bfee99b05971752a1ec59f74a2a4dabb225`;
+  this line-ending rendering is not a scientific source mismatch.
+- The existing manuscript narrative, figures, TeX, and PDFs remain the frozen
+  pre-v2 record in this statistics stage. They must not be represented as
+  already incorporating these v2 tables. A later evidence-validated narrative
+  stage must remove stale claims that the attribution controls, architecture
+  heads, seed intervals, or block sensitivity were absent.
+- Stage-4 literature positioning remains required before an IEEE Access clear-
+  advance statement. No systematic-review, exhaustive-SOTA, or external-domain-
+  expert claim is licensed here.
+- No authorship, affiliation, funding, contribution, conflict, or companion-
+  paper fact is inferred from repository history.
 
 # New or Rerun Experiments
 
-The append-only fair namespace completed with 510 rows on 2026-08-13. It
-executed:
+No experiment was newly run or rerun in Stage 3. The accepted Stage-2 execution
+already contained 2310 completed result rows, 240 training trajectories, 30
+paired-effect rows, 36 moving-block rows, 258 cap/k aggregate rows, and a sealed
+primary-cap prediction archive.
 
-1. A symmetric fit/selection/calibration/test target gate with horizon-offset
-   query endpoints; earlier-phase history inside the 48-row window is allowed.
-2. MAE- and onset-F1-targeted arms using head-first checkpoint selection and
-   subsequent head-weight selection.
-3. Retrieval-only, equal-blend, head-only, and selected-head-weight controls
-   sharing the selected checkpoint within objective.
-4. Ten common GRU seeds and paired exact sign-flip inference at cap 0.70.
-5. Persistence, Seasonal-24h, objective-selected Ridge, and the privileged
-   target-hour direct transform.
-6. Method-level reruns at caps 0.60 and 0.80 on the same fixed 8760-row sequence.
+Stage 3 performed deterministic rederivation only:
 
-A separate execution rerun used the same frozen script/config/source hashes and
-seeds. All non-timing fields in all 510 rows matched, and the four scientific
-derived tables were byte-identical. Different raw CSV hashes are retained
-because wall-clock timing differs. This changes the status from "no rerun" to
-"scientific outputs reproduced by a separate execution," but not to external
-independent replication.
-
-Runtime, environment versions, primary/rerun hashes, incident logs, and legacy
-version chronology are retained in `SUPPLEMENTARY_METHODS_AND_AUDIT.md`.
+1. verified the accepted manifest, normative contract, and all nine sealed
+   output hashes;
+2. independently recomputed all paired effects, exact sign-flip p-values,
+   within-family/horizon Holm values, and predeclared seed intervals;
+3. independently recomputed the 36 frozen moving-block cells from paired hourly
+   loss differences and the sealed prediction archive;
+4. generated five paper-facing CSV tables for paired inference, moving-block
+   sensitivity, deterministic references, cross-cap findings, and wording
+   routing; and
+5. recorded committed-blob, canonical-LF, and CRLF checkout provenance without
+   reclassifying line-ending conversion as a scientific mismatch.
 
 # Unresolved Human Blockers
 
@@ -190,19 +189,19 @@ version chronology are retained in `SUPPLEMENTARY_METHODS_AND_AUDIT.md`.
 - **AUTHOR INPUT REQUIRED:** IEEE Access biography and photograph for every
   author.
 - **AUTHOR INPUT REQUIRED:** public repository URL and/or archival DOI before
-  claiming the package is publicly released.
+  claiming that the evidence package is publicly released.
 - **AUTHOR INPUT REQUIRED:** exact RTS-GMLC release/vintage beyond the hashed
-  files, and an issue-to-delivery archive if operational language is desired.
+  files, and an issue-to-delivery archive if operational wording is desired.
 - **AUTHOR INPUT REQUIRED:** disclose any shared code, text, figures, data
   preparation, or evidence tables with another manuscript.
-- **AUTHOR INPUT REQUIRED:** run or commission the final similarity/plagiarism
-  screen and external domain-expert review if the authors require those checks;
-  both are currently **UNVERIFIED**.
+- **AUTHOR INPUT REQUIRED:** run or commission a final similarity/plagiarism
+  screen and external domain-expert review if required; both remain unverified.
 
-Scientific blockers that wording cannot resolve are absent issue/vintage
-metadata, absent observed-curtailment labels, zero positive onset support in
-all fair selection/calibration phases, absent full-roster fair rerun, the
-truncated single-sequence design, absent cross-system/complete-year units, and
-absent physical/user/deployment validation.
-Changing temporal boundaries after seeing test outcomes to obtain positive
-onsets or a favorable result is not permitted.
+Scientific limitations that wording cannot resolve are the proxy rather than
+observed-curtailment target, missing issue/vintage metadata, zero positive
+onsets in all selection/calibration cells, one truncated system sequence,
+absence of cross-system/complete-year units, and absence of physical, operator,
+deployment, safety, and economic validation. The block analysis does not create
+those missing units. Changing the protocol, temporal boundaries, families,
+block lengths, RNG seeds, or wording gates after seeing the results is not
+permitted.

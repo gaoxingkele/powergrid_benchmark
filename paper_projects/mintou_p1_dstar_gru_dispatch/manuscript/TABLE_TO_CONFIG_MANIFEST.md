@@ -1,89 +1,84 @@
 # Table-to-Config Manifest
 
-This manifest binds the paper's scientific tables and figures to the completed
-fair run at `../experiments/p1_s3_fair_v1/run_manifest.json`. The main
-manuscript does not mix the legacy v5/v6 leaderboard with the fair-run result
-family. Runtime, environment, hashes, legacy version history, and incident
-details are retained in `SUPPLEMENTARY_METHODS_AND_AUDIT.md`.
+## Stage-3 v2 binding
 
-## Governing evidence
+The Stage-3 paper-facing statistics tables are derived only from the accepted,
+protocol-valid `p1_ieee_access_upgrade_v2` execution manifest. The derivation
+does not mix values from `p1_s3_fair_v1`, legacy v5/v6 runs, historical
+ablations, or an additional experiment. The existing manuscript tables,
+figures, TeX, and PDFs remain the pre-v2 record until a later results-narrative
+stage integrates these replacements.
 
 | Item | Binding |
 |---|---|
-| Run namespace | `p1_s3_fair_v1` |
-| Completed result rows | 510 |
-| Primary cap | 0.70 |
-| Source sequence | First 8760 of 8784 aligned rows; manifest delivery keys end on December 30 |
-| Sensitivity caps | 0.60 and 0.80, descriptive on the same fixed 8760-row sequence |
-| Retrospective lags | 1 h and 24 h |
-| Seeded unit | Paired GRU method-seed run; ten common seeds |
-| Primary test | Two-sided exact paired sign-flip test |
-| Multiplicity | Holm over six frozen GRU contrasts separately within each lag |
-| Information boundary | Delivery-row data; forecast issue time and source vintage unavailable; horizon offsets gate query endpoints, not all 48 rows in a window |
-| Selection order | GRU-head checkpoint first, then head-weight grid; matched controls share the head-selected checkpoint |
-| Independent execution check | All 510 non-timing fields identical; four scientific derived tables byte-identical |
+| Accepted source commit | `cffe8fdb80a022978cc3715bd1fb014647bd1617` |
+| Run namespace | `p1_ieee_access_upgrade_v2` |
+| Source manifest | `../experiments/p1_ieee_access_upgrade_v2/run_manifest.json` |
+| Normative contract | `../experiments/p1_ieee_access_upgrade_v2/upgrade_contract.json` |
+| Derivation/check | `../experiments/p1_ieee_access_upgrade_v2/derive_statistics.py` |
+| Provenance record | `../experiments/p1_ieee_access_upgrade_v2/statistics_provenance.json` |
+| Completed result rows | 2310 |
+| Training trajectories | 240 |
+| Primary cap / k | 0.70 / 8 |
+| Common seeds | 11, 23, 47, 59, 71, 83, 97, 109, 127, 139 |
+| Paired inference | 30 contrasts; exact two-sided sign flip; Holm within each frozen family and horizon |
+| Seed interval | Predeclared 95% t interval with critical value 2.2621571627409915; seed-conditional only |
+| Moving-block sensitivity | 36 cells; block lengths 24/168; 5000 PCG64 replicates; conditional/descriptive only |
 
-The run manifest validates the exact configuration, script, four RTS-GMLC
-input files, and six output files. `manuscript/figures/make_figures.py` repeats
-the output hash/byte checks before regenerating figures or derived tables.
+## Paper-facing table bindings
 
-## Information-time contract
-
-| Phase | Executed rule | Allowed use | Main-text binding |
+| Candidate paper table | Direct sealed source | Derivation | Mandatory scope |
 |---|---|---|---|
-| Fit | Targets below delivery row 4380 | Feature normalization, Ridge coefficients, GRU parameters, retrieval bank | Sections III-B and V-A |
-| Selection | Targets from `4380+h` to 5255 | Ridge penalty; GRU-head checkpoint first, then selected head weight | Sections III-B/C and IV |
-| Calibration | Targets from `5256+h` to 6131 | Detection threshold only | Sections III-B/C |
-| Test | Targets at or after `6132+h` | Scoring only | Sections V-B and VI |
+| `derived_tables/v2_paired_seed_effects.csv` | `results/run_results.csv`; checked against `results/paired_effects.csv` | Independently derives all ten-pair differences, effect summaries, 1024-assignment exact tests, within-family/horizon Holm adjustments, and seed intervals | Cap 0.70; training-seed conditional; onset family diagnostic when pre-test support is absent |
+| `derived_tables/v2_moving_block_sensitivity.csv` | `results/test_predictions_primary_mae.npz`; checked against `results/moving_block_supplement.csv` | Paired hourly absolute-loss differences, averaged across ten seeds, then ordinary overlapping non-circular moving-block resampling | Conditional descriptive sensitivity on one observed sequence; excluded from Holm; not uncertainty across years/systems |
+| `derived_tables/v2_deterministic_references.csv` | `results/run_results.csv` | Selects the ten cap-0.70 Persistence, Seasonal-24h, objective-specific Ridge, and privileged-control rows | Deterministic descriptive references; no seed-based p-value; privileged control is not a forecaster |
+| `derived_tables/v2_cross_cap_descriptive.csv` | `results/run_results.csv` | Computes six selected-learned mean/SD versus Persistence readouts | Same-sequence descriptive comparison; no cross-cap inference |
+| `derived_tables/v2_claim_wording_router.csv` | Frozen claim gates plus the four numerical tables above | Applies learned-space, method-specific, null/adverse, Persistence, and onset-inapplicable routes | Cannot broaden a contrast, promote non-significance to no effect, or cure absent onset support |
 
-The source files expose calendar delivery rows but not forecast issue
-timestamps, an as-of mapping, release identifiers, or data-vintage fields.
-Every result is therefore a retrospective delivery-row lag result. The
-horizon offsets ensure that each downstream query endpoint has reached its
-phase boundary; earlier-phase history within the 48-row input window is
-permitted by the executed code.
+All five table hashes and byte counts are recorded in
+`statistics_provenance.json`. `validate_upgrade.py --phase statistics` rebuilds
+the expected bytes in memory and fails if a table is missing, stale, or altered.
 
-## Manuscript table bindings
+## Frozen statistical families
 
-| Manuscript table | Values | Direct source | Scope note |
-|---|---|---|---|
-| Table 1: phase/onset counts | Horizon-specific fit, selection, calibration, test, and onset counts | `derived_tables/fair_onset_support.csv`, derived from `results/run_results.csv` | Delivery-target counts; not independent inferential units |
-| Table 2: fair conditions | GRU selected/fixed blends, deterministic baselines, privileged control | `experiments/p1_s3_fair_v1/config.json` and `results/run_results.csv` | Fair subset only; not the legacy 14-method roster |
-| Table 3: hyperparameters/statistics | Frozen data split, GRU, head-first selection order, retrieval, objective, and test settings | `experiments/p1_s3_fair_v1/config.json` plus executable order in `run_fair_experiments.py` | Runtime/environment omitted from main text |
-| Table 4: primary-cap MAE | Mean/SD, head weight, seed count | `derived_tables/fair_primary_cap_summary.csv`, derived from `results/leaderboard.csv` | Deterministic rows are descriptive and have no seed p-value |
-| Table 5: onset diagnostics | Six paired onset-F1 contrasts | `derived_tables/fair_paired_contrasts.csv` / `results/paired_primary.csv` | Qualified by zero selection/calibration onsets |
-| Table 6: cap sensitivity | Selected GRU-LSR and Persistence MAE in six cap-by-lag cells | `derived_tables/fair_cap_selected_vs_persistence.csv` / `results/cap_sensitivity.csv` | Same fixed sequence; no cross-cap inference |
+| Family | Metric / direction | Contrasts per horizon | Holm partition |
+|---|---|---:|---|
+| `primary_mae_mechanism_attribution` | MAE / lower is favorable | 6 | This family and horizon only |
+| `architecture_head_mae` | MAE / lower is favorable | 3 | This family and horizon only |
+| `onset_f1_diagnostic` | onset F1 / higher is favorable | 6 | This family and horizon only; diagnostic under absent support |
 
-## Figure bindings
+Caps, objectives, horizons, and families are never pooled for adjustment.
+Deterministic references, cross-cap comparisons, and k=4/16/32 sensitivity do
+not receive seed-based inference.
 
-| Figure | Scientific content | Source fields |
+## Wording-router outcomes
+
+| Route | Gate | Paper-facing consequence |
 |---|---|---|
-| Fig. 1: fair temporal gate and onset support | Frozen phase proportions and positive-onset counts by cap/lag/phase | `config.json` partitions; `run_results.csv` count fields |
-| Fig. 2: evaluation architecture | Fit-only encoder/bank, selected/fixed blends, separated selection/calibration/test, privileged control | `config.json`; `run_manifest.json` evidence boundary |
-| Fig. 3: primary-cap MAE | Direct control, deterministic references, selected/fixed GRU controls | `leaderboard.csv`, cap 0.70 and MAE-selection rows |
-| Fig. 4: paired mechanism contrasts | Mean treatment-minus-control differences and within-lag Holm p-values | `paired_primary.csv` |
-| Fig. 5: cap sensitivity | Selected GRU-LSR minus Persistence MAE | `cap_sensitivity.csv` |
+| learned-space | Both named k=8 controls and paired contrasts must be complete; wording follows both observed directions and adjusted results | Favorable against both controls at 1 h; no learned-space advantage at 24 h because the raw contrast is adverse and the randomized contrast is Holm-unresolved |
+| method-specific | Exact condition, control, cap, horizon, metric, and family are named | Favorable results do not license an overall architecture or forecasting winner |
+| null/adverse | Adverse directions and Holm-unresolved results remain valid outcomes | Report the adverse result or unresolved contrast; do not call the protocol invalid or infer no effect from non-significance |
+| Persistence | One deterministic row per cap/horizon | Report orderings descriptively without a seed-based p-value or general dominance claim |
+| onset-inapplicable | Positive onset support is absent in both selection and calibration | All onset-family values remain diagnostics; exact/Holm values cannot license an onset-benefit claim |
 
-Every displayed figure has PNG, PDF, and SVG-wrapper forms. Their generated
-hashes and the validated input hashes are recorded in
-`manuscript/figures/artifact_manifest.json`.
+## Executable provenance boundary
 
-## Negative and null-result bindings
+The execution manifest records runner SHA-256
+`d4f0e14dd010e4f429e2d61771d781b169a673b73156dac5236113f0e3f34e28`.
+That hash exactly matches the committed Git blob and the canonical-LF working
+content. The Windows checkout renders the same content with CRLF and therefore
+has raw SHA-256
+`da2e1f1ec024d2493e776a1b63b23bfee99b05971752a1ec59f74a2a4dabb225`.
+Both representations are recorded; the CRLF rendering is not classified as a
+scientific source mismatch. A mismatch between the manifest hash and the
+committed blob fails closed.
 
-| Finding | Evidence | Required qualification |
-|---|---|---|
-| Persistence is lower-MAE than selected GRU-LSR at cap 0.70 at both lags | `leaderboard.csv` | Descriptive deterministic comparison; no seed p-value |
-| Selected MAE condition uses head weight zero for every seed | `run_results.csv` | Supports retrieval-only, not blend synergy |
-| Selection and calibration have zero positive onsets at every cap/lag | `run_results.csv` | Onset-targeted selection and calibration are inapplicable |
-| Selected onset condition equals the head | `paired_primary.csv`: difference 0, ten ties, Holm p=1 | Inapplicability evidence, not proof of no onset effect |
-| Fixed 0.5 onset-F1 effect is positive at 1 h and null at 24 h | `paired_primary.csv` | Diagnostic under the unsupported onset arm |
-| Direct transform has zero continuous error but onset F1 below one | `policy_transform_audit.csv` and `leaderboard.csv` | Metric-definition limitation; direct condition is privileged |
-| Cap ordering crosses in two of six cells | `fair_cap_selected_vs_persistence.csv` | Same-sequence descriptive sensitivity only |
-| Learned-space causality is unidentified | Fair run lacks raw-feature k-NN, randomized-encoder retrieval, alternative-distance, and $k$-sensitivity controls | Supports the implemented retrieval path versus its head, not a causal advantage of learned geometry |
+## Version-scope handoff
 
-## Legacy evidence boundary
-
-The legacy v5/v6 archives retain historical full-roster results, including
-methods not rerun under the fair temporal gate. They remain useful for audit
-history but do not support current main-text result, ranking, or inferential
-claims. Their hashes and chronology are recorded only in the supplement.
+The current manuscript narrative and generated figures still describe the
+pre-v2 result family. They must not be presented as already updated by this
+stage. Before publication, the later narrative stage must use the wording
+router and replace stale statements that raw/randomized attribution controls,
+architecture heads, seed intervals, or moving-block sensitivity were absent.
+No title, contribution, method, result, discussion, or conclusion claim may be
+broadened beyond the table routes above.
