@@ -1,13 +1,14 @@
 # Title-to-Evidence Map
 
-## Stage-3 binding
+## Stage-5 manuscript binding
 
 The current title is **A Reproducible Retrospective Curtailment-Risk Benchmark
 and Fair Evaluation of GRU Learned-Space Retrieval on RTS-GMLC**. The title
 names the evaluated method; it does not assert that learned-space retrieval is
-uniformly superior. All new numerical statements in this matrix are bound to
+uniformly superior. All numerical statements in the manuscript are bound to
 the completed, protocol-valid `p1_ieee_access_upgrade_v2` execution accepted at
-Stage 2 and independently rederived at Stage 3.
+Stage 2 and independently rederived at Stage 3. Literature positioning is
+bounded by the accepted Stage-4 citation and nearest-neighbor reports.
 
 | Title/contribution term | Evidence-supported meaning | Boundary that travels with the claim |
 |---|---|---|
@@ -19,9 +20,10 @@ Stage 2 and independently rederived at Stage 3.
 | GRU learned-space retrieval | Learned k=8 retrieval is compared with matched head, raw-feature kNN, and randomized-encoder retrieval. | At 1 h it has lower MAE than both named attribution controls after within-family Holm adjustment. At 24 h it is worse than raw-feature retrieval and unresolved versus randomized retrieval; no general learned-space advantage is licensed. |
 
 The bounded benchmark contribution does not require a favorable method result.
-The method contribution is contrast- and horizon-specific. The clear-advance
-claim remains unverified until the separately required Stage-4 literature
-positioning is completed.
+The method contribution is contrast- and horizon-specific. Stage 4 supports a
+bounded protocol/evidence advance over the explicitly verified corpus; it does
+not support a global first, exhaustive state-of-the-art coverage, cross-paper
+superiority, or an external-expert claim.
 
 # Primary Estimand and Analysis Unit
 
@@ -68,7 +70,7 @@ analysis, and are not confidence intervals across years or systems.
 
 # Comparison Budget and Data Visibility
 
-| Item | Frozen Stage-2 execution | Stage-3 interpretation |
+| Item | Frozen Stage-2 execution | Stage-5 manuscript interpretation |
 |---|---|---|
 | Source | First 8760 of 8784 aligned, hashed RTS-GMLC load/wind/PV rows plus static branch data | One truncated sequence and one system |
 | Grid | Caps 0.60/0.70/0.80; 1 h/24 h; MAE/onset-F1 objectives; ten seeds | Cap 0.70 is primary; other caps and cross-cap findings are descriptive |
@@ -144,23 +146,25 @@ and k-sensitivity comparisons reuse the same sequence and remain descriptive.
   The Windows checkout is separately recorded as CRLF with raw hash
   `da2e1f1ec024d2493e776a1b63b23bfee99b05971752a1ec59f74a2a4dabb225`;
   this line-ending rendering is not a scientific source mismatch.
-- The existing manuscript narrative, figures, TeX, and PDFs remain the frozen
-  pre-v2 record in this statistics stage. They must not be represented as
-  already incorporating these v2 tables. A later evidence-validated narrative
-  stage must remove stale claims that the attribution controls, architecture
-  heads, seed intervals, or block sensitivity were absent.
-- Stage-4 literature positioning remains required before an IEEE Access clear-
-  advance statement. No systematic-review, exhaustive-SOTA, or external-domain-
-  expert claim is licensed here.
+- `MANUSCRIPT.md`, the IEEE Access source, and the paper-facing figures now use
+  the v2 tables and wording router. The figure generator fails closed on all
+  nine sealed execution outputs and the five Stage-3 paper-table hashes; it
+  does not read the legacy v1 tables.
+- The accepted Stage-4 reports verify the original 30 citation identities,
+  repair proposition boundaries, and delimit the nearest direct and adjacent
+  records. The manuscript cites those records only within their inspected
+  targets, horizons, visibility, and protocol scopes. No systematic-review,
+  exhaustive-SOTA, global-first, cross-paper-superiority, or external-domain-
+  expert claim is licensed.
 - No authorship, affiliation, funding, contribution, conflict, or companion-
   paper fact is inferred from repository history.
 
 # New or Rerun Experiments
 
-No experiment was newly run or rerun in Stage 3. The accepted Stage-2 execution
-already contained 2310 completed result rows, 240 training trajectories, 30
-paired-effect rows, 36 moving-block rows, 258 cap/k aggregate rows, and a sealed
-primary-cap prediction archive.
+No experiment was newly run or rerun in Stages 3--5. The accepted Stage-2
+execution already contained 2310 completed result rows, 240 training
+trajectories, 30 paired-effect rows, 36 moving-block rows, 258 cap/k aggregate
+rows, and a sealed primary-cap prediction archive.
 
 Stage 3 performed deterministic rederivation only:
 
@@ -175,6 +179,11 @@ Stage 3 performed deterministic rederivation only:
    routing; and
 5. recorded committed-blob, canonical-LF, and CRLF checkout provenance without
    reclassifying line-ending conversion as a scientific mismatch.
+
+Stage 4 performed citation and nearest-neighbor verification without changing
+the experiment. Stage 5 rebuilt the narrative, TeX, tables, and figures from
+the accepted boundaries; figure rendering and PDF compilation are artifact
+generation, not new scientific runs.
 
 # Unresolved Human Blockers
 

@@ -63,13 +63,14 @@ positive system claim.
 
 ### Major finding resolved
 
-The fair controls identify the implemented retrieval prediction path relative
-to its matched GRU head. They do not identify a causal advantage of learned
-geometry: raw-feature k-NN, randomized-encoder retrieval, alternative distances,
-and $k$ sensitivity were not rerun under the fair gate. The contribution is now
-framed as an auditable retrospective benchmark and matched mechanism evaluation,
-not a new GRU architecture, representation-learning theory, SOTA method, or
-general system result.
+The v2 controls identify the implemented retrieval prediction path relative to
+its matched GRU head and compare learned $k=8$ retrieval with raw-feature and
+randomized-encoder retrieval. Learned-space attribution is favorable at 1 h but
+not licensed at 24 h, where raw retrieval is better and the randomized contrast
+is unresolved. Alternative distances remain unevaluated, and $k=4/16/32$
+remains descriptive. The contribution is an auditable retrospective benchmark
+and matched use case, not a new GRU architecture, representation-learning
+theory, SOTA method, or general system result.
 
 ## External Checks and Verification Status
 
@@ -88,13 +89,9 @@ general system result.
   latest publisher download; the submitting authors must compare the final
   source with the current official template package.
 - **UNVERIFIED:** exact RTS-GMLC release/tag beyond the frozen file hashes.
-- **UNVERIFIED IN THIS ISOLATED WORKTREE:** a fresh journal PDF after the
-  scientific corrections. The official conversion helper refreshed
-  `body.generated.md`, `body.generated.tex`, `paper.tex`, and the copied figure
-  directory, then stopped because no `pdflatex` executable is available
-  (`WinError 2`). The existing 11-page PDF is structurally readable, but it
-  predates the refreshed TeX and still contains superseded “system-year”
-  wording; it is not treated as the current submission artifact.
+- The Stage-5 build record and manuscript-phase validator, rather than this
+  historical closure note, are authoritative for the current TeX/PDF identity,
+  page count, and visual-inspection status.
 
 No unavailable check is treated as passed, and no external reviewer or expert
 label is attributed to this closure.
@@ -106,8 +103,9 @@ label is attributed to this closure.
 - Selection and calibration contain zero positive onsets at all executed caps
   and lags.
 - Only one system and one truncated 8760-row sequence are evaluated.
-- The fair run does not contain the full historical method roster or the
-  learned-space attribution controls listed above.
+- The v2 run contains four direct-head architectures and learned/raw/randomized
+  retrieval controls, but it does not reproduce the full historical roster or
+  evaluate alternative retrieval distances.
 - No OPF/UC feasibility, probabilistic, economic, operator, user, deployment,
   or cross-hardware/external-investigator validation is available.
 
