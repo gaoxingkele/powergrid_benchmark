@@ -1,14 +1,10 @@
 #!/usr/bin/env python3
-"""Fail-closed validator for the prospective p1 IEEE Access v2 contract.
-
-The contract phase deliberately validates only configuration, prose, preserved
-evidence-map hashes, and absence of execution artifacts. It never opens a v2
-result or run manifest.
-"""
+"""Fail-closed validator for the P1 IEEE Access v2 contract and execution."""
 
 from __future__ import annotations
 
 import argparse
+import csv
 import hashlib
 import json
 import math
@@ -602,7 +598,7 @@ def validate_contract_stage_absence(contract: dict[str, Any]) -> None:
     require_equal(actual_names, allowed_names, "files present in contract namespace")
 
 
-def validate_contract() -> dict[str, Any]:
+def validate_contract(*, require_contract_stage_absence: bool) -> dict[str, Any]:
     contract = load_contract()
     validate_identity(contract)
     validate_preserved_maps(contract)
@@ -615,15 +611,228 @@ def validate_contract() -> dict[str, Any]:
     validate_moving_block(contract, contrast_ids)
     validate_claim_gates(contract)
     validate_prose()
-    validate_contract_stage_absence(contract)
+    if require_contract_stage_absence:
+        validate_contract_stage_absence(contract)
     return contract
+
+
+def load_csv(path: Path) -> list[dict[str, str]]:
+    require(path.is_file(), f"execution table missing: {path.relative_to(PROJECT_ROOT)}")
+    try:
+        with path.open(encoding="utf-8", errors="strict", newline="") as handle:
+            rows = list(csv.DictReader(handle))
+    except (OSError, UnicodeError, csv.Error) as exc:
+        fail(f"cannot read execution table {path.name}: {exc}")
+    require(rows, f"execution table is empty: {path.name}")
+    return rows
+
+
+def finite_field(row: dict[str, str], field: str, label: str) -> float:
+    value = row.get(field, "")
+    require(value != "", f"{label} has null {field}")
+    try:
+        number = float(value)
+    except ValueError:
+        fail(f"{label} has invalid {field}: {value!r}")
+    require(math.isfinite(number), f"{label} has nonfinite {field}")
+    return number
+
+
+def validate_execution(contract: dict[str, Any]) -> dict[str, Any]:
+    future = contract["future_artifact_contract"]
+    for relative in future["contract_stage_files"] + future["later_execution_files"]:
+        require((PROJECT_ROOT / relative).is_file(), f"required execution artifact missing: {relative}")
+    required_extras = (
+        HERE / "results" / "trajectory_ledger.csv",
+        HERE / "results" / "completeness_ledger.csv",
+        HERE / "results" / "failure_ledger.csv",
+        HERE / "results" / "test_predictions_primary_mae.npz",
+        HERE / "logs" / "run.log",
+    )
+    for path in required_extras:
+        require(path.is_file(), f"required audit artifact missing: {path.relative_to(PROJECT_ROOT)}")
+    require(not (HERE / "results" / "run_results.partial.csv").exists(), "partial result table remains after sealing")
+    require(not (HERE / "results" / "trajectory_ledger.partial.csv").exists(), "partial trajectory table remains after sealing")
+
+    manifest_path = HERE / "run_manifest.json"
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        fail(f"cannot parse execution manifest: {exc}")
+    require_equal(manifest.get("schema"), "p1_ieee_access_upgrade_execution_manifest", "execution manifest schema")
+    require_equal(manifest.get("schema_version"), 1, "execution manifest schema version")
+    require_equal(manifest.get("run_namespace"), contract["run_namespace"], "execution namespace")
+    require_equal(manifest.get("approved_stage"), "p1v4_s2_fair_baselines_attribution", "execution stage")
+    require_equal(manifest.get("status"), "completed", "execution manifest status")
+    require(manifest.get("protocol_valid") is True, "manifest protocol_valid must be true")
+    require_equal(manifest.get("contract", {}).get("sha256"), sha256(CONTRACT_PATH), "manifest contract hash")
+    runner = HERE / "run_upgrade.py"
+    require_equal(manifest.get("script", {}).get("sha256"), sha256(runner), "manifest runner hash")
+    require_equal(
+        manifest.get("parameter_counts"),
+        {"GRU": 8257, "LSTM": 10993, "DLinear": 106, "TCN": 28273, "randomized_GRU_encoder": 8208},
+        "parameter counts",
+    )
+    environment = manifest.get("environment", {})
+    for field in ("python", "platform", "numpy", "torch", "device", "cudnn_deterministic", "cudnn_benchmark"):
+        require(field in environment, f"environment field missing: {field}")
+    require(environment.get("cudnn_deterministic") is True, "cuDNN deterministic flag not recorded")
+    require(environment.get("cudnn_benchmark") is False, "cuDNN benchmark must be false")
+    source_profile = manifest.get("source_profile", {})
+    for name, source in contract["scope"]["source_files"].items():
+        observed = source_profile.get("source_files", {}).get(name, {})
+        require_equal(observed.get("sha256"), source["sha256"], f"executed source hash {name}")
+        require(int(observed.get("bytes", 0)) > 0, f"executed source size missing: {name}")
+    require_equal(source_profile.get("first_delivery_key"), [2020, 1, 1, 1], "first executed delivery key")
+    require_equal(source_profile.get("last_delivery_key"), [2020, 12, 30, 24], "last executed delivery key")
+
+    output_index = manifest.get("outputs", {})
+    result_files = sorted(path for path in (HERE / "results").iterdir() if path.is_file())
+    require_equal(set(output_index), {path.name for path in result_files}, "manifest output index")
+    for path in result_files:
+        require_equal(output_index[path.name].get("sha256"), sha256(path), f"output hash {path.name}")
+        require_equal(output_index[path.name].get("bytes"), path.stat().st_size, f"output size {path.name}")
+
+    rows = load_csv(HERE / "results" / "run_results.csv")
+    required_columns = set(contract["row_contract"]["required_execution_columns"])
+    require(required_columns.issubset(rows[0]), "run_results is missing required execution columns")
+    require_equal(len(rows), 2310, "run_results row count")
+    allowed_statuses = set(contract["failure_handling"]["allowed_execution_statuses"])
+    require(all(row["execution_status"] in allowed_statuses for row in rows), "unknown execution status in run_results")
+    require(all(row["execution_status"] == "completed" for row in rows), "one or more evidence rows failed")
+    require(all(row.get("failure_code", "") == "" for row in rows), "completed row contains a failure code")
+    require(all(row.get("sanitized_exception_class", "") == "" for row in rows), "completed row contains an exception class")
+
+    catalog = {item["id"] for item in contract["seeded_condition_catalog"]}
+    seeds = [str(value) for value in contract["experimental_grid"]["common_seeds"]]
+    expected: set[tuple[str, str, str, str, str, str]] = set()
+    for cap in contract["experimental_grid"]["caps"]:
+        cap_text = f"{float(cap):.2f}"
+        for horizon in contract["experimental_grid"]["horizons_hours"]:
+            for condition in contract["row_contract"]["objective_free_deterministic_ids"]:
+                expected.add((contract["run_namespace"], cap_text, str(horizon), "not_applicable", condition, "deterministic"))
+            for objective in contract["experimental_grid"]["selection_objectives"]:
+                expected.add((contract["run_namespace"], cap_text, str(horizon), objective, "Ridge", "deterministic"))
+                for seed_index in range(10):
+                    for condition in catalog:
+                        expected.add((contract["run_namespace"], cap_text, str(horizon), objective, condition, str(seed_index)))
+    observed = [
+        (
+            row["run_namespace"],
+            row["cap"],
+            row["horizon_hours"],
+            row["selection_objective"],
+            row["condition_id"],
+            row["seed_index"],
+        )
+        for row in rows
+    ]
+    require_equal(len(set(observed)), len(observed), "unique result keys")
+    require_equal(set(observed), expected, "complete expected result-key set")
+    for cap in ("0.60", "0.70", "0.80"):
+        for horizon in ("1", "24"):
+            require_equal(sum(row["cap"] == cap and row["horizon_hours"] == horizon for row in rows), 385, f"rows cap={cap} h={horizon}")
+    for row in rows:
+        label = f"{row['cap']}/h{row['horizon_hours']}/{row['selection_objective']}/{row['condition_id']}/{row['seed_index']}"
+        for metric in ("curtailment_mae", "curtailment_rmse", "onset_f1"):
+            finite_field(row, metric, label)
+        for field in ("n_fit", "n_selection", "n_calibration", "n_test", "n_onsets_selection", "n_onsets_calibration", "n_onsets_test"):
+            require(row[field] != "" and int(row[field]) >= 0, f"{label} missing count {field}")
+        if row["seed_index"] != "deterministic":
+            require_equal(row["seed"], seeds[int(row["seed_index"])], f"common seed for {label}")
+
+    direct = [row for row in rows if row["condition_id"] == "DirectPolicyTransform-Privileged"]
+    require_equal(len(direct), 6, "privileged audit rows")
+    require(all(finite_field(row, "curtailment_mae", "privileged audit") == 0.0 for row in direct), "privileged audit continuous error is nonzero")
+    require(all(row["rank_eligible"].lower() == "false" for row in direct), "privileged audit was admitted to forecast rank")
+    for cap in ("0.60", "0.70", "0.80"):
+        persistence = next(row for row in rows if row["cap"] == cap and row["horizon_hours"] == "24" and row["condition_id"] == "Persistence")
+        seasonal = next(row for row in rows if row["cap"] == cap and row["horizon_hours"] == "24" and row["condition_id"] == "Seasonal-24h")
+        for metric in ("curtailment_mae", "curtailment_rmse", "onset_f1"):
+            require_equal(persistence[metric], seasonal[metric], f"24 h seasonal identity {cap} {metric}")
+
+    allowed_epochs = {"5", "10", "15", "20"}
+    head_or_learned = [row for row in rows if row["architecture"] in {"GRU", "LSTM", "DLinear", "TCN"}]
+    require(all(row["checkpoint_epoch"] in allowed_epochs for row in head_or_learned), "invalid or absent frozen checkpoint selection")
+    selected = [row for row in rows if row["condition_id"] == "gru_learned_k8_selected_blend"]
+    allowed_alphas = {str(float(value)) for value in contract["selection_and_scoring"]["blend_alpha_grid_order"]}
+    require(all(row["alpha_head"] in allowed_alphas for row in selected), "selected alpha is outside frozen grid")
+    ridge = [row for row in rows if row["condition_id"] == "Ridge"]
+    allowed_penalties = {float(value) for value in contract["baselines_and_controls"]["Ridge"]["penalties_order"]}
+    require(all(float(row["ridge_lambda"]) in allowed_penalties for row in ridge), "Ridge penalty outside frozen grid")
+
+    trajectories = load_csv(HERE / "results" / "trajectory_ledger.csv")
+    require_equal(len(trajectories), 240, "training trajectory count")
+    require(all(row["execution_status"] == "completed" for row in trajectories), "training trajectory failure recorded")
+    trajectory_keys = {
+        (row["cap"], row["horizon_hours"], row["architecture"], row["seed_index"])
+        for row in trajectories
+    }
+    require_equal(len(trajectory_keys), 240, "unique trajectory keys")
+    require(all(row["epochs"] == "20" and row["batch_size"] == "256" and row["checkpoint_epochs"] == "5|10|15|20" for row in trajectories), "trajectory budget changed")
+    require(all(finite_field(row, "training_runtime_s", "trajectory") > 0 for row in trajectories), "trajectory runtime missing")
+
+    paired = load_csv(HERE / "results" / "paired_effects.csv")
+    require_equal(len(paired), 30, "paired-effect row count")
+    require(all(row["execution_status"] == "completed" and row["n_pairs"] == "10" for row in paired), "paired effect is incomplete")
+    require(all(row["p_exact_sign_flip"] != "" and row["p_holm_within_family_horizon"] != "" for row in paired), "paired exact/Holm result missing")
+    expected_contrasts = {
+        (family["family_id"], str(horizon), contrast["id"])
+        for family in contract["statistics"]["families"]
+        for horizon in contract["experimental_grid"]["horizons_hours"]
+        for contrast in family["contrasts"]
+    }
+    require_equal({(row["family_id"], row["horizon_hours"], row["contrast_id"]) for row in paired}, expected_contrasts, "paired contrast grid")
+
+    moving = load_csv(HERE / "results" / "moving_block_supplement.csv")
+    require_equal(len(moving), 36, "moving-block row count")
+    require(all(row["execution_status"] == "completed" and row["repetitions"] == "5000" for row in moving), "moving-block cell incomplete")
+    expected_moving = {
+        (str(horizon), contrast, str(length))
+        for horizon in contract["experimental_grid"]["horizons_hours"]
+        for contrast in contract["supplementary_moving_block_analysis"]["scope"]["contrasts"]
+        for length in (24, 168)
+    }
+    require_equal({(row["horizon_hours"], row["contrast_id"], row["block_length"]) for row in moving}, expected_moving, "moving-block grid")
+
+    aggregate = load_csv(HERE / "results" / "cap_k_sensitivity.csv")
+    require_equal(len(aggregate), 258, "condition aggregate row count")
+    require(all(row["aggregation_status"] == "complete" for row in aggregate), "incomplete cap/k aggregate")
+    ledger = load_csv(HERE / "results" / "completeness_ledger.csv")
+    require_equal(len(ledger), 2310, "completeness-ledger row count")
+    require(all(row["observed_count"] == "1" and row["ledger_status"] == "complete" for row in ledger), "completeness ledger is not closed")
+    failures = load_csv(HERE / "results" / "failure_ledger.csv")
+    require_equal(len(failures), 1, "failure-ledger summary rows")
+    require_equal(failures[0]["execution_status"], "no_failures_recorded", "failure-ledger status")
+
+    protocol_path = HERE / "results" / "protocol_validity.json"
+    try:
+        protocol = json.loads(protocol_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        fail(f"cannot parse protocol validity record: {exc}")
+    require(protocol.get("protocol_valid") is True, "protocol-validity gate is false")
+    require(protocol.get("effect_direction_is_not_validity_gate") is True, "effect direction was used as a validity gate")
+    require(all(protocol.get("checks", {}).values()), "one or more protocol validity checks failed")
+    require(protocol.get("privileged_control_ranked_as_forecaster") is False, "privileged audit rank boundary changed")
+    require_equal(protocol.get("completeness", {}).get("completed_rows"), 2310, "protocol completed-row count")
+    require(int(protocol.get("effect_direction_counts", {}).get("adverse", 0)) >= 0, "invalid adverse-result ledger")
+    return manifest
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--phase", choices=("contract",), default="contract")
+    parser.add_argument("--phase", choices=("contract", "experiments"), default="contract")
     args = parser.parse_args(argv)
-    contract = validate_contract()
+    contract = validate_contract(require_contract_stage_absence=args.phase == "contract")
+    if args.phase == "experiments":
+        manifest = validate_execution(contract)
+        print(
+            "OK "
+            f"{contract['run_namespace']}: execution valid; rows={manifest['row_counts']['run_results']}; "
+            f"trajectories={manifest['row_counts']['trajectory_ledger']}; "
+            f"contract_sha256={sha256(CONTRACT_PATH)}; phase=experiments"
+        )
+        return 0
     print(
         "OK "
         f"{contract['run_namespace']}: prospective contract valid; "
