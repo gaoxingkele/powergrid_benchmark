@@ -187,18 +187,32 @@ generation, not new scientific runs.
 
 # Unresolved Human Blockers
 
-- **AUTHOR INPUT REQUIRED:** final author list and public ORCIDs.
-- **AUTHOR INPUT REQUIRED:** complete affiliations and corresponding-author
-  name/e-mail.
+- **AUTHOR INPUT REQUIRED:** every author name and the final author order.
+- **AUTHOR INPUT REQUIRED:** every complete affiliation and the mapping from
+  each author to those affiliations.
+- **AUTHOR INPUT REQUIRED:** corresponding-author identity, e-mail address, and
+  full correspondence address.
+- **AUTHOR INPUT REQUIRED:** the submitting IEEE account's valid ORCID. The
+  manuscript must render `ORCID(s): NONE`; that rendering does not satisfy the
+  separate submission-account ORCID requirement.
 - **AUTHOR INPUT REQUIRED:** funder/grant information or an explicit
   no-external-funding statement.
-- **AUTHOR INPUT REQUIRED:** CRediT contribution statement; contributions may
-  not be inferred from repository history.
-- **AUTHOR INPUT REQUIRED:** conflicts-of-interest and generative-AI disclosure.
-- **AUTHOR INPUT REQUIRED:** IEEE Access biography and photograph for every
-  author.
+- **AUTHOR INPUT REQUIRED:** one or more confirmed CRediT roles for every
+  author; contributions may not be inferred from repository history.
+- **AUTHOR INPUT REQUIRED:** final conflict-of-interest declaration.
+- **AUTHOR INPUT REQUIRED:** final acknowledgment.
+- **AUTHOR INPUT REQUIRED:** final venue-compliant AI-use confirmation. The
+  preparation record is evidence of assistance, not author confirmation of the
+  submitted disclosure.
+- **AUTHOR INPUT REQUIRED:** confirmed venue-specific ethics wording so the
+  existing placeholder can be removed.
+- **AUTHOR INPUT REQUIRED:** IEEE Access biography and non-sample photograph
+  for every author.
+- **AUTHOR INPUT REQUIRED:** the APC choice.
 - **AUTHOR INPUT REQUIRED:** public repository URL and/or archival DOI before
   claiming that the evidence package is publicly released.
+- **AUTHOR INPUT REQUIRED:** explicit concurrent-submission and prior-
+  submission declarations, including disclosure of any related manuscript.
 - **AUTHOR INPUT REQUIRED:** exact RTS-GMLC release/vintage beyond the hashed
   files, and an issue-to-delivery archive if operational wording is desired.
 - **AUTHOR INPUT REQUIRED:** disclose any shared code, text, figures, data
