@@ -1,0 +1,984 @@
+{
+  "schema": "p1_ieee_access_upgrade_contract",
+  "schema_version": 1,
+  "run_namespace": "p1_ieee_access_upgrade_v2",
+  "status": "prospectively_frozen_before_v2_execution",
+  "contract_phase": {
+    "approved_stage": "p1v4_s1_upgrade_contract",
+    "results_visibility": "v2_results_must_not_exist_or_be_inspected_in_this_stage",
+    "allowed_outputs": [
+      "PROSPECTIVE_CONTRACT.md",
+      "upgrade_contract.json",
+      "validate_upgrade.py"
+    ]
+  },
+  "preserved_evidence_maps": {
+    "policy": "The current v1 title, abstract, contribution, research-question, figure, table, discussion, conclusion, negative-result, null-result, onset-inapplicable, proxy, single-sequence, and non-operational maps remain the pre-v2 evidence record. They are not prospective v2 outcomes.",
+    "artifacts": [
+      {
+        "path": "manuscript/MANUSCRIPT.md",
+        "sha256": "27dcf8d0317fbc601069f1c578548615a781f8b249b249e6fb4637147650517d",
+        "map_roles": [
+          "title",
+          "abstract",
+          "contributions",
+          "research_questions",
+          "discussion",
+          "conclusion"
+        ]
+      },
+      {
+        "path": "manuscript/TABLE_TO_CONFIG_MANIFEST.md",
+        "sha256": "302beec658a15a7abeb1227723aaf59c02fce844092aafbaf05ae4a333ca5247",
+        "map_roles": [
+          "figures",
+          "tables",
+          "negative_and_null_results"
+        ]
+      },
+      {
+        "path": "manuscript/DEEP_REVISION_EVIDENCE.md",
+        "sha256": "3a5643b3f4f542fcefe3cc767903775cd6382ff1c871cfea09f66118729cb969",
+        "map_roles": [
+          "title_to_evidence",
+          "estimand",
+          "comparison_budget",
+          "negative_and_null_results",
+          "human_blockers"
+        ]
+      }
+    ],
+    "legacy_results_rule": "All numerical statements currently in the preserved maps remain scoped to p1_s3_fair_v1 until a later results-narrative stage validates and explicitly replaces them from v2 artifacts.",
+    "human_metadata_rule": "Do not add, remove, resolve, or infer any author, affiliation, corresponding-author, funding, CRediT, conflict, ORCID, biography, photograph, or disclosure metadata in this stage."
+  },
+  "scope": {
+    "task": "RTS-GMLC delivery-row retrospective lag prediction of a fixed curtailment-risk proxy",
+    "source_sequence": {
+      "evaluated_rows": 8760,
+      "source_rows": 8784,
+      "first_delivery_key": "2020-01-01 period 1",
+      "last_delivery_key": "2020-12-30 period 24",
+      "complete_calendar_year": false,
+      "systems": 1,
+      "sequences": 1
+    },
+    "source_files": {
+      "load": {
+        "relative_path": "timeseries_data_files/Load/DAY_AHEAD_regional_Load.csv",
+        "sha256": "6efb6e3e06f7f1cee0d59eaf33768e06c33c737beb875676433850d8659943ee"
+      },
+      "wind": {
+        "relative_path": "timeseries_data_files/WIND/DAY_AHEAD_wind.csv",
+        "sha256": "b933f810511ce3d2128c490e4b230defcdc3c15ed4db0838c6fd4c62640e2208"
+      },
+      "pv": {
+        "relative_path": "timeseries_data_files/PV/DAY_AHEAD_pv.csv",
+        "sha256": "bfede6e558df5ea0f244b6326940a4ee0b95138643aa8a062897c67134c9c185"
+      },
+      "branch": {
+        "relative_path": "SourceData/branch.csv",
+        "sha256": "2f8f80f6f95ca46c2997646d56892436b50d7fb81163b680d06767bc3c1b179f"
+      }
+    },
+    "information_boundary": {
+      "delivery_calendar_keys_available": true,
+      "forecast_issue_timestamps_available": false,
+      "as_of_mapping_available": false,
+      "release_identifier_available": false,
+      "data_vintage_available": false,
+      "licensed_wording": "retrospective delivery-row lags",
+      "unlicensed_wording": [
+        "operational forecast",
+        "day-ahead deployment",
+        "dispatch recommendation",
+        "digital twin",
+        "operator validation"
+      ]
+    },
+    "target": {
+      "renewable_availability": "r_t = wind_t + pv_t",
+      "accepted_amount": "u_t = min(r_t, cap * load_t)",
+      "proxy_rate": "y_t = max(0, r_t - u_t) / max(1, r_t)",
+      "method_independent": true,
+      "observed_curtailment": false,
+      "operator_action": false,
+      "opf_or_unit_commitment_output": false,
+      "economic_outcome": false
+    },
+    "features": {
+      "window_rows": 48,
+      "count": 7,
+      "ordered_names": [
+        "load",
+        "wind",
+        "pv",
+        "nonnegative_net_load",
+        "net_load_ramp",
+        "renewable_share",
+        "engineered_branch_informed_stress"
+      ],
+      "normalization": "per-feature mean and population standard deviation from source feature rows 0:4380 only; standard deviations below 1e-9 are replaced by 1",
+      "stress_feature_boundary": "engineered from static branch aggregates and delivery-row dynamics; not a power-flow, contingency, or feasibility calculation"
+    }
+  },
+  "experimental_grid": {
+    "caps": [
+      0.6,
+      0.7,
+      0.8
+    ],
+    "cap_execution_order": [
+      0.7,
+      0.6,
+      0.8
+    ],
+    "primary_cap": 0.7,
+    "cross_cap_interpretation": "descriptive only on the same fixed sequence; no cross-cap p-values, pooling, model selection, or generalization claim",
+    "horizons_hours": [
+      1,
+      24
+    ],
+    "selection_objectives": [
+      "mae",
+      "onset_f1"
+    ],
+    "common_seeds": [
+      11,
+      23,
+      47,
+      59,
+      71,
+      83,
+      97,
+      109,
+      127,
+      139
+    ],
+    "seed_interpretation": "common algorithmic initialization and minibatch-order seeds; not randomized experimental assignments"
+  },
+  "temporal_protocol": {
+    "indexing": "zero-based delivery-row indices with half-open intervals",
+    "total_rows": 8760,
+    "query_window_rows": 48,
+    "phase_boundaries": {
+      "fit_end_exclusive": 4380,
+      "selection_end_exclusive": 5256,
+      "calibration_end_exclusive": 6132,
+      "test_end_exclusive": 8760
+    },
+    "rules": {
+      "query_endpoint": "s = t - h",
+      "fit_targets": "47 + h <= t < 4380",
+      "selection_targets": "4380 + h <= t < 5256",
+      "calibration_targets": "5256 + h <= t < 6132",
+      "test_targets": "6132 + h <= t < 8760",
+      "embargoes": "exclude t in [4380,4380+h), [5256,5256+h), and [6132,6132+h)",
+      "window_history": "all 48 rows end at s; earlier-phase history inside a downstream-phase window is permitted"
+    },
+    "per_horizon": {
+      "1": {
+        "first_target_inclusive": 48,
+        "fit": [
+          48,
+          4380
+        ],
+        "selection": [
+          4381,
+          5256
+        ],
+        "calibration": [
+          5257,
+          6132
+        ],
+        "test": [
+          6133,
+          8760
+        ],
+        "embargo_target_ranges": [
+          [
+            4380,
+            4381
+          ],
+          [
+            5256,
+            5257
+          ],
+          [
+            6132,
+            6133
+          ]
+        ],
+        "counts": {
+          "fit": 4332,
+          "selection": 875,
+          "calibration": 875,
+          "test": 2627,
+          "embargoed": 3,
+          "all_constructed_targets": 8712
+        }
+      },
+      "24": {
+        "first_target_inclusive": 71,
+        "fit": [
+          71,
+          4380
+        ],
+        "selection": [
+          4404,
+          5256
+        ],
+        "calibration": [
+          5280,
+          6132
+        ],
+        "test": [
+          6156,
+          8760
+        ],
+        "embargo_target_ranges": [
+          [
+            4380,
+            4404
+          ],
+          [
+            5256,
+            5280
+          ],
+          [
+            6132,
+            6156
+          ]
+        ],
+        "counts": {
+          "fit": 4309,
+          "selection": 852,
+          "calibration": 852,
+          "test": 2604,
+          "embargoed": 72,
+          "all_constructed_targets": 8689
+        }
+      }
+    },
+    "allowed_uses": {
+      "fit": [
+        "normalization",
+        "model parameters",
+        "Ridge coefficients",
+        "fit-only retrieval bank"
+      ],
+      "selection": [
+        "Ridge penalty",
+        "direct-head checkpoint",
+        "learned-space blend weight"
+      ],
+      "calibration": [
+        "detection threshold only"
+      ],
+      "test": [
+        "single final scoring pass only"
+      ]
+    }
+  },
+  "architectures": {
+    "common_input_shape": [
+      48,
+      7
+    ],
+    "GRU": {
+      "layers": 1,
+      "hidden_size": 48,
+      "bidirectional": false,
+      "dropout": 0.0,
+      "embedding": "last-time-step GRU output, dimension 48",
+      "head": "Linear(48, 1)"
+    },
+    "LSTM": {
+      "layers": 1,
+      "hidden_size": 48,
+      "bidirectional": false,
+      "dropout": 0.0,
+      "representation": "last-time-step LSTM output, dimension 48",
+      "head": "Linear(48, 1)"
+    },
+    "DLinear": {
+      "moving_average_kernel": 25,
+      "padding": "endpoint replication, 12 rows on each side",
+      "decomposition": "trend is centered moving average; seasonal is input minus trend",
+      "temporal_maps": "two shared Linear(48, 1) maps, one for trend and one for seasonal, applied featurewise",
+      "head": "sum trend and seasonal feature forecasts, then Linear(7, 1)",
+      "dropout": 0.0
+    },
+    "TCN": {
+      "input_projection": "Conv1d(7, 48, kernel_size=1)",
+      "channels": [
+        48,
+        48
+      ],
+      "residual_blocks": 2,
+      "convolutions_per_block": 2,
+      "kernel_size": 3,
+      "dilations": [
+        1,
+        2
+      ],
+      "causality": "left padding only; trim to 48 time steps",
+      "activation": "ReLU after each convolution",
+      "dropout": 0.0,
+      "head": "Linear(48, 1) from final time step"
+    },
+    "comparison_boundary": "Architectures are not parameter-count matched. Any architecture-superiority statement must name one prespecified paired contrast, horizon, metric, cap, and multiplicity-adjusted family."
+  },
+  "common_training_budget": {
+    "fit_partition_only": true,
+    "loss": "mean squared error",
+    "dtype": "float32",
+    "epochs": 20,
+    "checkpoint_epochs": [
+      5,
+      10,
+      15,
+      20
+    ],
+    "batch_size": 256,
+    "optimizer": "manual eager-mode Adam",
+    "learning_rate": 0.001,
+    "beta1": 0.9,
+    "beta2": 0.999,
+    "epsilon": 1e-08,
+    "weight_decay": 0.0,
+    "gradient_clipping": null,
+    "initialization": "PyTorch default module initialization after setting the common seed",
+    "minibatch_order": "one torch.randperm per epoch from a CPU torch.Generator initialized with the common seed",
+    "training_trajectories": 240,
+    "training_trajectory_formula": "3 caps * 2 horizons * 4 architectures * 10 seeds",
+    "no_extra_budget": "No architecture receives additional epochs, checkpoints, seeds, restarts, early-stopping patience, or result-triggered tuning."
+  },
+  "selection_and_scoring": {
+    "checkpoint_selection": "separately for each architecture, cap, horizon, objective, and seed, select the direct-head checkpoint on selection rows",
+    "head_first_rule": "For learned GRU retrieval, select the GRU direct-head checkpoint first; freeze it for learned embeddings, blend selection, and all learned-space matched controls.",
+    "blend_alpha_grid_order": [
+      1.0,
+      0.8,
+      0.6,
+      0.5,
+      0.4,
+      0.2,
+      0.0
+    ],
+    "selection_predictions": "unclipped direct or blended predictions, matching the frozen v1 executable order",
+    "reported_prediction_clip": [
+      0.0,
+      1.0
+    ],
+    "tie_tolerance": 1e-15,
+    "tie_breaks": {
+      "checkpoint": "first in [5, 10, 15, 20]",
+      "blend_alpha": "first in [1.0, 0.8, 0.6, 0.5, 0.4, 0.2, 0.0]",
+      "Ridge_penalty": "first in [1e-6, 1e-4, 1e-3, 1e-2, 1e-1, 1, 10]",
+      "detection_threshold": "lowest unique threshold in ascending order",
+      "neighbors": "lowest fit target index"
+    },
+    "test_visibility": "No test metric, per-target test loss, bootstrap summary, plot, or ranking may affect checkpoint, alpha, k, penalty, threshold, architecture, seed, retry, or claim-family selection."
+  },
+  "baselines_and_controls": {
+    "Ridge": {
+      "role": "deterministic trained baseline",
+      "input": "flattened normalized 48-by-7 window",
+      "intercept": false,
+      "penalties_order": [
+        1e-06,
+        0.0001,
+        0.001,
+        0.01,
+        0.1,
+        1.0,
+        10.0
+      ],
+      "coefficients": "fit rows only",
+      "penalty_selection": "selection rows separately for MAE and onset-F1 objectives",
+      "inference_role": "descriptive deterministic reference; no seed-based p-value"
+    },
+    "Persistence": {
+      "role": "deterministic naive baseline",
+      "prediction": "y_(t-h), the proxy at the query endpoint",
+      "inference_role": "descriptive reference; no seed-based p-value"
+    },
+    "Seasonal-24h": {
+      "role": "deterministic seasonal naive baseline",
+      "prediction": "y_(t-24)",
+      "horizon_24_note": "identical to Persistence at h=24 and retained as an explicit identity check",
+      "inference_role": "descriptive reference; no seed-based p-value"
+    },
+    "DirectPolicyTransform-Privileged": {
+      "role": "privileged construction and visibility audit",
+      "prediction": "apply the proxy equation to target-hour load, wind, and PV",
+      "rank_as_forecaster": false,
+      "expected_continuous_error": 0.0,
+      "boundary": "not a lag forecast and not operational evidence"
+    }
+  },
+  "retrieval": {
+    "bank_partition": "fit targets only",
+    "distance": "Euclidean",
+    "neighbor_weighting": "unweighted mean of fit-bank target values",
+    "k_values": [
+      4,
+      8,
+      16,
+      32
+    ],
+    "primary_k": 8,
+    "k_selection": "k is never selected from test results; k=8 is primary and k=4/16/32 are descriptive sensitivity conditions",
+    "spaces": {
+      "learned": {
+        "name": "forecasting-trained GRU embedding",
+        "construction": "dimension-48 last-time-step embedding from the head-selected GRU checkpoint",
+        "normalization": "none beyond fit-only input-feature standardization"
+      },
+      "raw": {
+        "name": "raw-feature kNN attribution control",
+        "construction": "flatten the fit-only standardized 48-by-7 input window to dimension 336",
+        "normalization": "none beyond fit-only input-feature standardization"
+      },
+      "randomized": {
+        "name": "randomized-encoder retrieval attribution control",
+        "construction": "dimension-48 last-time-step output of an untrained one-layer GRU initialized with the same common seed and PyTorch defaults",
+        "training_updates": 0,
+        "normalization": "none beyond fit-only input-feature standardization"
+      }
+    },
+    "learned_space_attribution_gate": "The phrase learned-space advantage or an equivalent attribution claim is licensed only for the prespecified learned-versus-raw and learned-versus-randomized k=8 paired contrasts when both controls have complete valid rows. A learned-versus-head contrast alone is insufficient.",
+    "alternative_distance_scope": "No alternative distance is evaluated; no distance-superiority claim is licensed."
+  },
+  "onset_protocol": {
+    "definition": "onset_t(h) iff y_t >= 0.02 and y_(t-h) < 0.02",
+    "selection_objective": "maximize onset F1 on selection rows using an objective-local threshold grid",
+    "calibration_quantiles": 40,
+    "quantile_probability_start": 0.5,
+    "quantile_probability_end": 0.999,
+    "zero_positive_fallback_threshold": 0.02,
+    "zero_positive_status": "fallback_no_positive_onsets",
+    "onset_inapplicable_rule": "If selection or calibration has zero positive onsets, retain complete audit rows and diagnostic test metrics but mark onset_targeted_claim_valid=false. This is scientific inapplicability, not execution failure and not proof of no effect.",
+    "known_pre_v2_boundary": "The preserved v1 evidence reports zero selection and calibration onsets for every cap and horizon. The v2 contract must not erase or relabel that boundary."
+  },
+  "metrics": {
+    "primary": "test mean absolute error of the continuous proxy",
+    "secondary": [
+      "test root mean squared error",
+      "event F1",
+      "event precision",
+      "event recall",
+      "onset F1",
+      "onset precision",
+      "onset recall",
+      "onset MAE",
+      "stress-subset MAE"
+    ],
+    "event_threshold": "max(0.02, median of positive fit targets) when at least 20 positive fit targets exist; otherwise 0.02",
+    "analysis_units": {
+      "primary": "paired method-seed run",
+      "moving_block_supplement": "chronological test-target loss-difference series averaged across the ten paired seeds",
+      "not_independent_replicates": "test hours, onsets, and caps"
+    }
+  },
+  "seeded_condition_catalog": [
+    {
+      "id": "gru_head",
+      "role": "architecture_head",
+      "architecture": "GRU"
+    },
+    {
+      "id": "lstm_head",
+      "role": "architecture_head",
+      "architecture": "LSTM"
+    },
+    {
+      "id": "dlinear_head",
+      "role": "architecture_head",
+      "architecture": "DLinear"
+    },
+    {
+      "id": "tcn_head",
+      "role": "architecture_head",
+      "architecture": "TCN"
+    },
+    {
+      "id": "gru_learned_k4_retrieval",
+      "role": "retrieval_only",
+      "space": "learned",
+      "k": 4,
+      "alpha_head": 0.0
+    },
+    {
+      "id": "gru_learned_k8_retrieval",
+      "role": "retrieval_only",
+      "space": "learned",
+      "k": 8,
+      "alpha_head": 0.0
+    },
+    {
+      "id": "gru_learned_k16_retrieval",
+      "role": "retrieval_only",
+      "space": "learned",
+      "k": 16,
+      "alpha_head": 0.0
+    },
+    {
+      "id": "gru_learned_k32_retrieval",
+      "role": "retrieval_only",
+      "space": "learned",
+      "k": 32,
+      "alpha_head": 0.0
+    },
+    {
+      "id": "raw_k4_retrieval",
+      "role": "attribution_control",
+      "space": "raw",
+      "k": 4,
+      "alpha_head": 0.0
+    },
+    {
+      "id": "raw_k8_retrieval",
+      "role": "attribution_control",
+      "space": "raw",
+      "k": 8,
+      "alpha_head": 0.0
+    },
+    {
+      "id": "raw_k16_retrieval",
+      "role": "attribution_control",
+      "space": "raw",
+      "k": 16,
+      "alpha_head": 0.0
+    },
+    {
+      "id": "raw_k32_retrieval",
+      "role": "attribution_control",
+      "space": "raw",
+      "k": 32,
+      "alpha_head": 0.0
+    },
+    {
+      "id": "gru_randomized_k4_retrieval",
+      "role": "attribution_control",
+      "space": "randomized",
+      "k": 4,
+      "alpha_head": 0.0
+    },
+    {
+      "id": "gru_randomized_k8_retrieval",
+      "role": "attribution_control",
+      "space": "randomized",
+      "k": 8,
+      "alpha_head": 0.0
+    },
+    {
+      "id": "gru_randomized_k16_retrieval",
+      "role": "attribution_control",
+      "space": "randomized",
+      "k": 16,
+      "alpha_head": 0.0
+    },
+    {
+      "id": "gru_randomized_k32_retrieval",
+      "role": "attribution_control",
+      "space": "randomized",
+      "k": 32,
+      "alpha_head": 0.0
+    },
+    {
+      "id": "gru_learned_k8_selected_blend",
+      "role": "selected_blend",
+      "space": "learned",
+      "k": 8,
+      "alpha_head": "selected_from_frozen_grid"
+    },
+    {
+      "id": "gru_learned_k8_fixed_0_5",
+      "role": "mechanism_control",
+      "space": "learned",
+      "k": 8,
+      "alpha_head": 0.5
+    },
+    {
+      "id": "gru_learned_k8_fixed_1",
+      "role": "mechanism_control",
+      "space": "learned",
+      "k": 8,
+      "alpha_head": 1.0
+    }
+  ],
+  "row_contract": {
+    "unique_key": [
+      "run_namespace",
+      "cap",
+      "horizon_hours",
+      "selection_objective",
+      "condition_id",
+      "seed_index"
+    ],
+    "seeded_conditions_per_objective_seed_task": 19,
+    "seeded_rows": 2280,
+    "seeded_rows_formula": "3 caps * 2 horizons * 2 objectives * 10 seeds * 19 conditions",
+    "objective_free_deterministic_conditions_per_task": 3,
+    "objective_free_deterministic_rows": 18,
+    "objective_free_deterministic_ids": [
+      "DirectPolicyTransform-Privileged",
+      "Persistence",
+      "Seasonal-24h"
+    ],
+    "objective_specific_ridge_rows": 12,
+    "objective_specific_ridge_formula": "3 caps * 2 horizons * 2 objectives",
+    "total_rows": 2310,
+    "primary_cap_rows": 770,
+    "sensitivity_cap_rows": 1540,
+    "per_cap_horizon_rows": 385,
+    "required_execution_columns": [
+      "run_namespace",
+      "cap",
+      "horizon_hours",
+      "selection_objective",
+      "condition_id",
+      "method_role",
+      "architecture",
+      "retrieval_space",
+      "k_neighbors",
+      "alpha_head",
+      "checkpoint_epoch",
+      "ridge_lambda",
+      "seed_index",
+      "seed",
+      "execution_status",
+      "scientific_support_status",
+      "failure_code",
+      "curtailment_mae",
+      "curtailment_rmse",
+      "onset_f1",
+      "n_fit",
+      "n_selection",
+      "n_calibration",
+      "n_test",
+      "n_onsets_selection",
+      "n_onsets_calibration",
+      "n_onsets_test"
+    ],
+    "completeness_rule": "Emit exactly one row for every expected key, including failed conditions. Do not drop, replace, or silently impute a failed row."
+  },
+  "failure_handling": {
+    "allowed_execution_statuses": [
+      "completed",
+      "failed_exception",
+      "failed_nonfinite",
+      "failed_resource",
+      "failed_integrity"
+    ],
+    "completed_row_requirements": "all required metrics finite except a metric whose denominator/support is explicitly absent and accompanied by a named scientific_support_status",
+    "failed_row_requirements": "retain the expected key, set scientific metrics to null, record a controlled failure_code and sanitized exception class, and propagate the failure to every dependent row",
+    "seed_replacement": false,
+    "architecture_substitution": false,
+    "metric_imputation": false,
+    "result_triggered_retry": false,
+    "batch_size_fallback": false,
+    "tuning_after_failure": false,
+    "protocol_complete_gate": "all 2310 expected rows exist and every row required by a declared evidence table or statistical contrast has execution_status=completed",
+    "effect_direction_separation": "A completed valid row may be favorable, null, mixed, or adverse. Effect direction never changes execution_status and never by itself changes protocol validity.",
+    "onset_separation": "fallback_no_positive_onsets and onset_targeted_claim_valid=false are scientific-support states, not execution failures."
+  },
+  "statistics": {
+    "primary_cap": 0.7,
+    "primary_k": 8,
+    "paired_unit": "common-seed condition pair",
+    "complete_pairs_required": 10,
+    "effect_sizes": {
+      "difference": "treatment metric minus control metric within each common seed",
+      "reported": [
+        "mean paired difference",
+        "median paired difference",
+        "sample standard deviation of paired differences",
+        "paired standardized mean difference dz",
+        "wins",
+        "ties",
+        "losses"
+      ],
+      "dz": "mean(d) / sample_sd(d); report null with zero_variance flag when sample_sd(d)=0",
+      "tie_tolerance": 1e-15
+    },
+    "exact_sign_flip": {
+      "sidedness": "two-sided",
+      "statistic": "absolute mean paired difference",
+      "enumeration": "all 2^10 sign assignments, retaining zero differences",
+      "p_value": "count(|mean(sign*d)| >= |mean(d)| - 1e-15) / 1024",
+      "continuity_or_plus_one_correction": false,
+      "assumption": "paired differences are sign-exchangeable across the frozen algorithmic seeds under the no-effect null"
+    },
+    "seed_conditional_interval": {
+      "label": "95% seed-conditional t interval for the mean paired difference",
+      "formula": "mean(d) +/- t_(0.975,9) * sample_sd(d) / sqrt(10)",
+      "critical_value": 2.2621571627409915,
+      "confidence_level": 0.95,
+      "scope": "training-seed variability conditional on the ten frozen seeds, sequence, cap, horizon, protocol, and contrast; not uncertainty over hours, blocks, years, systems, policies, vintages, operators, or deployments",
+      "zero_variance": "report the point interval [mean(d), mean(d)] with a zero_variance flag"
+    },
+    "holm": {
+      "method": "Holm step-down adjustment",
+      "ordering": "ascending unadjusted exact p-value, tie-broken by frozen contrast order",
+      "formula": "adjusted ordered p_i = cumulative max through i of min(1, (m-i+1)*p_i)",
+      "family_partition": "separately for each family_id and horizon at cap 0.70; never pool horizons, families, objectives, or caps",
+      "alpha": 0.05
+    },
+    "families": [
+      {
+        "family_id": "primary_mae_mechanism_attribution",
+        "selection_objective": "mae",
+        "metric": "curtailment_mae",
+        "better_direction": "lower",
+        "interpretation": "primary paired mechanism and learned-space attribution family",
+        "contrasts": [
+          {
+            "id": "selected_learned_vs_gru_head",
+            "treatment": "gru_learned_k8_selected_blend",
+            "control": "gru_learned_k8_fixed_1"
+          },
+          {
+            "id": "learned_retrieval_vs_gru_head",
+            "treatment": "gru_learned_k8_retrieval",
+            "control": "gru_learned_k8_fixed_1"
+          },
+          {
+            "id": "fixed_half_vs_gru_head",
+            "treatment": "gru_learned_k8_fixed_0_5",
+            "control": "gru_learned_k8_fixed_1"
+          },
+          {
+            "id": "learned_retrieval_vs_fixed_half",
+            "treatment": "gru_learned_k8_retrieval",
+            "control": "gru_learned_k8_fixed_0_5"
+          },
+          {
+            "id": "learned_retrieval_vs_raw",
+            "treatment": "gru_learned_k8_retrieval",
+            "control": "raw_k8_retrieval"
+          },
+          {
+            "id": "learned_retrieval_vs_randomized",
+            "treatment": "gru_learned_k8_retrieval",
+            "control": "gru_randomized_k8_retrieval"
+          }
+        ]
+      },
+      {
+        "family_id": "architecture_head_mae",
+        "selection_objective": "mae",
+        "metric": "curtailment_mae",
+        "better_direction": "lower",
+        "interpretation": "contrast-specific direct-head architecture comparisons; no omnibus winner and no benchmark gate",
+        "contrasts": [
+          {
+            "id": "gru_head_vs_lstm_head",
+            "treatment": "gru_head",
+            "control": "lstm_head"
+          },
+          {
+            "id": "gru_head_vs_dlinear_head",
+            "treatment": "gru_head",
+            "control": "dlinear_head"
+          },
+          {
+            "id": "gru_head_vs_tcn_head",
+            "treatment": "gru_head",
+            "control": "tcn_head"
+          }
+        ]
+      },
+      {
+        "family_id": "onset_f1_diagnostic",
+        "selection_objective": "onset_f1",
+        "metric": "onset_f1",
+        "better_direction": "higher",
+        "interpretation": "diagnostic family only when pre-test onset support is absent; exact tests do not cure inapplicability",
+        "contrasts": [
+          {
+            "id": "selected_learned_vs_gru_head_onset",
+            "treatment": "gru_learned_k8_selected_blend",
+            "control": "gru_learned_k8_fixed_1"
+          },
+          {
+            "id": "learned_retrieval_vs_gru_head_onset",
+            "treatment": "gru_learned_k8_retrieval",
+            "control": "gru_learned_k8_fixed_1"
+          },
+          {
+            "id": "fixed_half_vs_gru_head_onset",
+            "treatment": "gru_learned_k8_fixed_0_5",
+            "control": "gru_learned_k8_fixed_1"
+          },
+          {
+            "id": "learned_retrieval_vs_fixed_half_onset",
+            "treatment": "gru_learned_k8_retrieval",
+            "control": "gru_learned_k8_fixed_0_5"
+          },
+          {
+            "id": "learned_retrieval_vs_raw_onset",
+            "treatment": "gru_learned_k8_retrieval",
+            "control": "raw_k8_retrieval"
+          },
+          {
+            "id": "learned_retrieval_vs_randomized_onset",
+            "treatment": "gru_learned_k8_retrieval",
+            "control": "gru_randomized_k8_retrieval"
+          }
+        ]
+      }
+    ],
+    "descriptive_only": [
+      "all cross-cap comparisons",
+      "all k=4/16/32 sensitivity comparisons",
+      "all comparisons with Persistence, Seasonal-24h, Ridge, or DirectPolicyTransform-Privileged",
+      "all onset-family readouts when selection or calibration onset support is absent"
+    ]
+  },
+  "supplementary_moving_block_analysis": {
+    "status": "required supplementary descriptive analysis",
+    "scope": {
+      "cap": 0.7,
+      "selection_objective": "mae",
+      "contrasts": [
+        "selected_learned_vs_gru_head",
+        "learned_retrieval_vs_gru_head",
+        "fixed_half_vs_gru_head",
+        "learned_retrieval_vs_fixed_half",
+        "learned_retrieval_vs_raw",
+        "learned_retrieval_vs_randomized",
+        "gru_head_vs_lstm_head",
+        "gru_head_vs_dlinear_head",
+        "gru_head_vs_tcn_head"
+      ]
+    },
+    "loss_series": "For target t and paired seed s, d_(s,t)=abs(y_t-clipped_prediction_treatment_(s,t))-abs(y_t-clipped_prediction_control_(s,t)); the chronological series resampled is d_t=mean over the ten common seeds of d_(s,t).",
+    "test_series_lengths": {
+      "1": 2627,
+      "24": 2604
+    },
+    "bootstrap": {
+      "type": "ordinary overlapping moving-block bootstrap without circular wrap",
+      "block_lengths": [
+        24,
+        168
+      ],
+      "repetitions": 5000,
+      "construction": "form all n-L+1 overlapping consecutive blocks; sample ceil(n/L) block starts with replacement; concatenate in sampled order; truncate to n; record the resampled mean",
+      "rng": "NumPy Generator(PCG64)",
+      "reset_for_each_contrast": true,
+      "common_resamples_across_contrasts": true,
+      "rng_seeds": {
+        "h1_block24": 610024,
+        "h1_block168": 610168,
+        "h24_block24": 624024,
+        "h24_block168": 624168
+      },
+      "interval": "2.5th and 97.5th percentiles using quantile method=linear",
+      "point_estimate": "arithmetic mean of the unresampled d_t series"
+    },
+    "interpretation": "Report both block lengths as a dependence-aware descriptive sensitivity on the single observed test sequence. Do not call the intervals confidence intervals over years or systems, do not use them for Holm decisions, and do not let them override the seed-paired primary analysis.",
+    "incomplete_rule": "If any required per-target prediction or any of the ten paired seeds is absent, mark the affected moving-block cell incomplete; do not impute or shorten the contrast list."
+  },
+  "validity_and_interpretation": {
+    "protocol_validity": {
+      "requires": [
+        "source hashes and sequence identity match",
+        "temporal and visibility gates match",
+        "all frozen candidates and seeds are attempted",
+        "all 2310 expected rows are emitted",
+        "all evidence-bearing rows complete without leakage or substitution",
+        "paired, interval, Holm, and moving-block outputs follow this contract",
+        "manifest hashes every executable, input identity record, and output"
+      ],
+      "does_not_require": [
+        "positive effect",
+        "statistical significance",
+        "GRU superiority",
+        "retrieval superiority",
+        "learned-space superiority",
+        "beating Persistence",
+        "stable cross-cap ordering",
+        "applicable onset selection"
+      ]
+    },
+    "effect_direction": "favorable, null, mixed, and adverse are scientific outcomes and must be reported without changing the protocol-validity decision",
+    "bounded_benchmark_contribution": "A complete valid null, mixed, or adverse result still supports the bounded contribution of an auditable single-sequence retrospective benchmark and its failure-aware comparison protocol. It does not support a favorable method claim.",
+    "negative_and_null_preservation": "All nulls, adverse comparisons, ties, onset inapplicability, naive-baseline wins, and descriptive cap crossings must appear in result, discussion, and conclusion maps with their scope qualifiers.",
+    "scope_boundaries": [
+      "proxy rather than observed curtailment",
+      "retrospective delivery-row lags rather than operational forecasts",
+      "one truncated 8760-row sequence rather than a complete year",
+      "one RTS-GMLC system rather than cross-system evidence",
+      "training-seed uncertainty rather than hour/year/system uncertainty",
+      "no OPF/UC, operator, deployment, safety, or economic validation",
+      "combined ablations support joint conclusions only",
+      "proxy and historical studies retain their scope qualifiers"
+    ]
+  },
+  "claim_gates": {
+    "benchmark_contribution": {
+      "claim": "auditable retrospective benchmark with a prospectively frozen, failure-aware comparison protocol",
+      "gate": "complete protocol-valid v2 evidence",
+      "favorable_model_comparisons_required": false
+    },
+    "learned_space_attribution": {
+      "required_named_controls": [
+        "raw-feature kNN attribution control",
+        "randomized-encoder retrieval attribution control"
+      ],
+      "required_contrasts": [
+        "learned_retrieval_vs_raw",
+        "learned_retrieval_vs_randomized"
+      ],
+      "gate": "both controls and both prespecified k=8 paired contrasts are complete and valid; wording follows the observed directions and adjusted family",
+      "head_only_comparison_sufficient": false
+    },
+    "architecture_superiority": {
+      "gate": "name the exact architecture-head contrast, cap 0.70, horizon, MAE metric, seed-conditional scope, effect direction, and within-family Holm result",
+      "overall_winner_wording": false,
+      "benchmark_gate": false
+    },
+    "onset_benefit": {
+      "gate": "positive onset support in both selection and calibration plus complete valid objective-matched rows",
+      "fallback_diagnostics_sufficient": false
+    },
+    "ieee_access_clear_advance": {
+      "requires": [
+        "complete protocol-valid v2 evidence",
+        "Stage-4 verified literature positioning of the auditable benchmark"
+      ],
+      "does_not_require": [
+        "every model comparison favorable",
+        "GRU best at both horizons",
+        "retrieval beating every baseline",
+        "significance in every family"
+      ],
+      "failed_literature_positioning_rule": "If Stage-4 literature positioning is not verified, clear-advance remains unverified even when the experiment is complete.",
+      "failed_effect_rule": "A valid null or adverse method result narrows the method claim but is not a protocol failure and does not erase the bounded benchmark contribution."
+    },
+    "global_novelty": {
+      "systematic_review_or_exhaustive_sota_claim": false,
+      "external_domain_expert_validation_claim": false
+    }
+  },
+  "future_artifact_contract": {
+    "contract_stage_files": [
+      "experiments/p1_ieee_access_upgrade_v2/PROSPECTIVE_CONTRACT.md",
+      "experiments/p1_ieee_access_upgrade_v2/upgrade_contract.json",
+      "experiments/p1_ieee_access_upgrade_v2/validate_upgrade.py"
+    ],
+    "later_execution_files": [
+      "experiments/p1_ieee_access_upgrade_v2/run_upgrade.py",
+      "experiments/p1_ieee_access_upgrade_v2/run_manifest.json",
+      "experiments/p1_ieee_access_upgrade_v2/results/run_results.csv",
+      "experiments/p1_ieee_access_upgrade_v2/results/paired_effects.csv",
+      "experiments/p1_ieee_access_upgrade_v2/results/cap_k_sensitivity.csv",
+      "experiments/p1_ieee_access_upgrade_v2/results/moving_block_supplement.csv",
+      "experiments/p1_ieee_access_upgrade_v2/results/protocol_validity.json"
+    ],
+    "contract_stage_absence_rule": "No later execution file or results directory may be created during p1v4_s1_upgrade_contract."
+  }
+}
