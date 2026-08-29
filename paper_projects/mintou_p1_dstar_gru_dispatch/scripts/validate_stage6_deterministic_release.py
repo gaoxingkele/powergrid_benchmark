@@ -35,7 +35,8 @@ def require(condition: bool, message: str) -> None:
 
 
 def sha256(path: Path) -> str:
-    require(path.is_file(), f"required file is missing: {path.relative_to(ROOT)}")
+    display = path.relative_to(ROOT) if path.is_relative_to(ROOT) else path
+    require(path.is_file(), f"required file is missing: {display}")
     digest = hashlib.sha256()
     with path.open("rb") as handle:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
