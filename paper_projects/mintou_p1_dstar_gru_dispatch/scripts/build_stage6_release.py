@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import shutil
 from pathlib import Path
 
@@ -15,6 +16,8 @@ RELEASE_ROOT = ROOT / "release_package"
 PAYLOAD = RELEASE_ROOT / "manuscript"
 MANIFEST = RELEASE_ROOT / "PACKAGE_MANIFEST.json"
 SOURCE_DATE_EPOCH = "1787867025"
+EXPECTED_PDF_SHA256 = "bb61e0b1b20a3e9192bc05c640eb8c8895b0b0c24d8f2255c56fd4c4ff983c5c"
+EXPECTED_TEX_SHA256 = "c68a3c0eb813d56fca2eaaed03b13bef378499db7a97e75ee3a4d5ef0f3e58f8"
 EXCLUDED_EXPLICITLY = {"body.generated.md", "paper_narrative_revision.pdf"}
 EXCLUDED_SUFFIXES = {
     ".aux",
@@ -44,6 +47,21 @@ def excluded(path: Path) -> bool:
 def main() -> int:
     if not SOURCE.is_dir():
         raise SystemExit("journal-submission source directory is missing")
+    expected_environment = {
+        "SOURCE_DATE_EPOCH": SOURCE_DATE_EPOCH,
+        "FORCE_SOURCE_DATE": "1",
+        "TZ": "UTC",
+    }
+    actual_environment = {key: os.environ.get(key) for key in expected_environment}
+    if actual_environment != expected_environment:
+        raise SystemExit(
+            f"deterministic build environment mismatch: expected {expected_environment}, "
+            f"observed {actual_environment}"
+        )
+    if sha256(SOURCE / "paper.pdf") != EXPECTED_PDF_SHA256:
+        raise SystemExit("journal PDF is not the inspected default-PATH deterministic build")
+    if sha256(SOURCE / "paper.tex") != EXPECTED_TEX_SHA256:
+        raise SystemExit("journal TeX is not the frozen deterministic source")
     source_files = sorted((path for path in SOURCE.rglob("*") if path.is_file() and not excluded(path)), key=lambda p: p.relative_to(SOURCE).as_posix())
     if len(source_files) != 87:
         raise SystemExit(f"fail-closed: compact payload must contain exactly 87 files, observed {len(source_files)}")
@@ -53,6 +71,8 @@ def main() -> int:
     if resolved_root not in resolved_payload.parents:
         raise SystemExit("refusing to rebuild payload outside the worktree")
     if PAYLOAD.exists():
+        if PAYLOAD.is_symlink() or getattr(PAYLOAD, "is_junction", lambda: False)():
+            raise SystemExit("refusing to replace a symlink or junction payload")
         shutil.rmtree(PAYLOAD)
     PAYLOAD.mkdir(parents=True)
 
@@ -75,7 +95,12 @@ def main() -> int:
         "schema": "p1_stage6_compact_release_manifest",
         "schema_version": 1,
         "source_date_epoch": SOURCE_DATE_EPOCH,
-        "force_source_date": SOURCE_DATE_EPOCH,
+        "force_source_date": "1",
+        "timezone": "UTC",
+        "build_command": ["pdflatex", "-interaction=nonstopmode", "-halt-on-error", "paper.tex"],
+        "build_passes": 3,
+        "expected_pdf_sha256": EXPECTED_PDF_SHA256,
+        "expected_tex_sha256": EXPECTED_TEX_SHA256,
         "payload_file_count": len(entries),
         "explicit_human_placeholders_retained": True,
         "built_in_pdf_integrity": "deferred because required human placeholders remain",

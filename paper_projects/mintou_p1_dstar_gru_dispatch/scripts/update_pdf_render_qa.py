@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -18,6 +19,7 @@ PACKAGE_PDF = ROOT / "release_package" / "manuscript" / "paper.pdf"
 RENDER_DIR = ROOT / "manuscript" / "rendered_pages"
 QA_PATH = ROOT / "manuscript" / "PDF_RENDER_QA.json"
 SOURCE_DATE_EPOCH = "1787867025"
+EXPECTED_PDF_SHA256 = "bb61e0b1b20a3e9192bc05c640eb8c8895b0b0c24d8f2255c56fd4c4ff983c5c"
 
 
 def sha256(path: Path) -> str:
@@ -56,7 +58,20 @@ def main() -> int:
     args = parser.parse_args()
     if not PDF.is_file() or not PACKAGE_PDF.is_file():
         raise SystemExit("paper PDF or package PDF is missing")
+    expected_environment = {
+        "SOURCE_DATE_EPOCH": SOURCE_DATE_EPOCH,
+        "FORCE_SOURCE_DATE": "1",
+        "TZ": "UTC",
+    }
+    actual_environment = {key: os.environ.get(key) for key in expected_environment}
+    if actual_environment != expected_environment:
+        raise SystemExit(
+            f"deterministic build environment mismatch: expected {expected_environment}, "
+            f"observed {actual_environment}"
+        )
     current_hash = sha256(PDF)
+    if current_hash != EXPECTED_PDF_SHA256:
+        raise SystemExit("current PDF is not the visually inspected deterministic build")
     if current_hash != sha256(PACKAGE_PDF):
         raise SystemExit("paper and package PDFs are not byte-identical")
     if current_hash.lower() not in {args.compile_hash_a.lower()} or args.compile_hash_a.lower() != args.compile_hash_b.lower():
@@ -100,7 +115,8 @@ def main() -> int:
         "schema": "p1_stage6_pdf_render_qa",
         "schema_version": 1,
         "source_date_epoch": SOURCE_DATE_EPOCH,
-        "force_source_date": SOURCE_DATE_EPOCH,
+        "force_source_date": "1",
+        "timezone": "UTC",
         "pdf_path": PDF.relative_to(ROOT).as_posix(),
         "package_pdf_path": PACKAGE_PDF.relative_to(ROOT).as_posix(),
         "pdf_sha256": current_hash,
@@ -116,7 +132,13 @@ def main() -> int:
             "compile_hash_b": args.compile_hash_b.lower(),
             "repeated_compiles_byte_identical": args.compile_hash_a.lower() == args.compile_hash_b.lower(),
         },
-        "inspection_mode": "manual visual review of current rendered pages" if args.confirm_visual_review else "pending manual visual review",
+        "inspection_mode": (
+            "manual visual review bound to exact PDF SHA-256 on 2026-08-29"
+            if args.confirm_visual_review
+            else "pending manual visual review"
+        ),
+        "inspection_basis_pdf_sha256": EXPECTED_PDF_SHA256 if args.confirm_visual_review else None,
+        "inspected_by": "Codex independent nine-page visual QA" if args.confirm_visual_review else None,
         "inspection_status": "PASS" if args.confirm_visual_review else "PENDING",
         "inspected_pages": list(range(1, 10)) if args.confirm_visual_review else [],
         "renders": render_rows,
