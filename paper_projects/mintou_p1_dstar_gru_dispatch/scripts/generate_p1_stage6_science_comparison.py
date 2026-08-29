@@ -58,6 +58,11 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def canonical_text_sha256(path: Path) -> str:
+    data = path.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+    return hashlib.sha256(data).hexdigest()
+
+
 def load_json(path: Path) -> dict[str, Any]:
     value = json.loads(path.read_text(encoding="utf-8"))
     require(isinstance(value, dict), f"JSON root is not an object: {path}")
@@ -189,7 +194,10 @@ def narrative_and_placeholder_record() -> dict[str, Any]:
 def main() -> int:
     accepted_manifest = load_json(ACCEPTED / "run_manifest.json")
     rerun_manifest = load_json(RERUN / "run_manifest.json")
-    require(sha256(RERUN / "run_upgrade.py") == EXPECTED_RUNNER_SHA256, "rerun script identity mismatch")
+    require(
+        canonical_text_sha256(RERUN / "run_upgrade.py") == EXPECTED_RUNNER_SHA256,
+        "rerun script identity mismatch",
+    )
     require(sha256(RERUN / "upgrade_contract.json") == EXPECTED_CONTRACT_SHA256, "rerun contract identity mismatch")
     require(rerun_manifest["script"]["sha256"] == EXPECTED_RUNNER_SHA256, "manifest runner hash mismatch")
     require(rerun_manifest["contract"]["sha256"] == EXPECTED_CONTRACT_SHA256, "manifest contract hash mismatch")

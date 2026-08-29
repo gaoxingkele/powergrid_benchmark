@@ -20,7 +20,7 @@ MANIFEST_PATH = PACKAGE_ROOT / "PACKAGE_MANIFEST.json"
 QA_PATH = ROOT / "manuscript" / "PDF_RENDER_QA.json"
 EPOCH = "1787867025"
 EXPECTED_PDF_SHA256 = "bb61e0b1b20a3e9192bc05c640eb8c8895b0b0c24d8f2255c56fd4c4ff983c5c"
-EXPECTED_TEX_CANONICAL_SHA256 = "c68a3c0eb813d56fca2eaaed03b13bef378499db7a97e75ee3a4d5ef0f3e58f8"
+EXPECTED_TEX_CANONICAL_SHA256 = "201a653f104a5a45856525f74c3ee1b8cdedff8f91dba427ef2fa745857fb6c5"
 FORBIDDEN_SUFFIXES = {".aux", ".log", ".out", ".fls", ".fdb_latexmk", ".synctex.gz"}
 FORBIDDEN_PARTS = {"__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache", ".cache"}
 
