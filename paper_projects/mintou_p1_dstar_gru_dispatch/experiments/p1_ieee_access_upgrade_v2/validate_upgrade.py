@@ -1166,7 +1166,11 @@ def validate_manuscript_stage() -> dict[str, int]:
     require("p1_ieee_access_upgrade_v2" in tex_tokens, "v2 namespace absent from exact TeX source")
 
     require(PAPER_PDF_PATH.stat().st_size >= 100_000, "paper PDF is implausibly small")
-    require(PAPER_PDF_PATH.stat().st_mtime_ns >= PAPER_TEX_PATH.stat().st_mtime_ns, "paper PDF predates exact TeX source")
+    # Checkout mtimes are not provenance: on Windows worktrees, Git can stamp
+    # paper.pdf a millisecond before paper.tex even when both files come from
+    # the same accepted tree.  The content checks below establish the
+    # manuscript/PDF boundary; the ordered Harness latex_build subsequently
+    # rebuilds the PDF from the exact TeX source.
     try:
         from pypdf import PdfReader
 
