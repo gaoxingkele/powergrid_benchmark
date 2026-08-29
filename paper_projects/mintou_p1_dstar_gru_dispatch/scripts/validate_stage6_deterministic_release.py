@@ -20,7 +20,7 @@ MANIFEST_PATH = PACKAGE_ROOT / "PACKAGE_MANIFEST.json"
 QA_PATH = ROOT / "manuscript" / "PDF_RENDER_QA.json"
 EPOCH = "1787867025"
 EXPECTED_PDF_SHA256 = "bb61e0b1b20a3e9192bc05c640eb8c8895b0b0c24d8f2255c56fd4c4ff983c5c"
-EXPECTED_TEX_SHA256 = "c68a3c0eb813d56fca2eaaed03b13bef378499db7a97e75ee3a4d5ef0f3e58f8"
+EXPECTED_TEX_CANONICAL_SHA256 = "c68a3c0eb813d56fca2eaaed03b13bef378499db7a97e75ee3a4d5ef0f3e58f8"
 FORBIDDEN_SUFFIXES = {".aux", ".log", ".out", ".fls", ".fdb_latexmk", ".synctex.gz"}
 FORBIDDEN_PARTS = {"__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache", ".cache"}
 
@@ -41,6 +41,11 @@ def sha256(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def canonical_text_sha256(path: Path) -> str:
+    data = path.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+    return hashlib.sha256(data).hexdigest()
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -122,7 +127,10 @@ def main() -> int:
     require(pdf_hash == EXPECTED_PDF_SHA256, "journal PDF is not the expected deterministic build")
     require(pdf_hash == sha256(package_pdf), "journal and package PDF bytes differ")
     tex_hash = sha256(journal_tex)
-    require(tex_hash == EXPECTED_TEX_SHA256, "journal TeX is not the frozen deterministic source")
+    require(
+        canonical_text_sha256(journal_tex) == EXPECTED_TEX_CANONICAL_SHA256,
+        "journal TeX is not the frozen deterministic source",
+    )
     require(tex_hash == sha256(package_tex), "journal and package TeX bytes differ")
 
     manifest = load_json(MANIFEST_PATH)
@@ -137,7 +145,10 @@ def main() -> int:
     )
     require(manifest.get("build_passes") == 3, "package build-pass count changed")
     require(manifest.get("expected_pdf_sha256") == EXPECTED_PDF_SHA256, "manifest expected PDF hash changed")
-    require(manifest.get("expected_tex_sha256") == EXPECTED_TEX_SHA256, "manifest expected TeX hash changed")
+    require(
+        manifest.get("expected_tex_canonical_sha256") == EXPECTED_TEX_CANONICAL_SHA256,
+        "manifest expected canonical TeX hash changed",
+    )
     require(manifest.get("payload_file_count") == 87, "release payload is not the compact 87-file style")
     require(manifest.get("explicit_human_placeholders_retained") is True, "package human-placeholder gate changed")
     require("deferred" in manifest.get("built_in_pdf_integrity", ""), "built-in pdf_integrity was not explicitly deferred")

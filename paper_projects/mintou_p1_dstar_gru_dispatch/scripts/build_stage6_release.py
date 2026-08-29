@@ -17,7 +17,7 @@ PAYLOAD = RELEASE_ROOT / "manuscript"
 MANIFEST = RELEASE_ROOT / "PACKAGE_MANIFEST.json"
 SOURCE_DATE_EPOCH = "1787867025"
 EXPECTED_PDF_SHA256 = "bb61e0b1b20a3e9192bc05c640eb8c8895b0b0c24d8f2255c56fd4c4ff983c5c"
-EXPECTED_TEX_SHA256 = "c68a3c0eb813d56fca2eaaed03b13bef378499db7a97e75ee3a4d5ef0f3e58f8"
+EXPECTED_TEX_CANONICAL_SHA256 = "c68a3c0eb813d56fca2eaaed03b13bef378499db7a97e75ee3a4d5ef0f3e58f8"
 EXCLUDED_EXPLICITLY = {"body.generated.md", "paper_narrative_revision.pdf"}
 EXCLUDED_SUFFIXES = {
     ".aux",
@@ -35,6 +35,11 @@ def sha256(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def canonical_text_sha256(path: Path) -> str:
+    data = path.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+    return hashlib.sha256(data).hexdigest()
 
 
 def excluded(path: Path) -> bool:
@@ -60,7 +65,7 @@ def main() -> int:
         )
     if sha256(SOURCE / "paper.pdf") != EXPECTED_PDF_SHA256:
         raise SystemExit("journal PDF is not the inspected default-PATH deterministic build")
-    if sha256(SOURCE / "paper.tex") != EXPECTED_TEX_SHA256:
+    if canonical_text_sha256(SOURCE / "paper.tex") != EXPECTED_TEX_CANONICAL_SHA256:
         raise SystemExit("journal TeX is not the frozen deterministic source")
     source_files = sorted((path for path in SOURCE.rglob("*") if path.is_file() and not excluded(path)), key=lambda p: p.relative_to(SOURCE).as_posix())
     if len(source_files) != 87:
@@ -100,7 +105,7 @@ def main() -> int:
         "build_command": ["pdflatex", "-interaction=nonstopmode", "-halt-on-error", "paper.tex"],
         "build_passes": 3,
         "expected_pdf_sha256": EXPECTED_PDF_SHA256,
-        "expected_tex_sha256": EXPECTED_TEX_SHA256,
+        "expected_tex_canonical_sha256": EXPECTED_TEX_CANONICAL_SHA256,
         "payload_file_count": len(entries),
         "explicit_human_placeholders_retained": True,
         "built_in_pdf_integrity": "deferred because required human placeholders remain",
