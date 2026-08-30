@@ -21,8 +21,8 @@ ROOT = Path(__file__).resolve().parents[1]
 METADATA_PATH = ROOT / "manuscript" / "STAGE7_HUMAN_METADATA.json"
 MARKDOWN_PATH = ROOT / "manuscript" / "MANUSCRIPT.md"
 JOURNAL_TEX_PATH = ROOT / "manuscript" / "journal_submission" / "paper.tex"
-PACKAGE_TEX_PATH = ROOT / "release_package" / "manuscript" / "paper.tex"
-PACKAGE_MANIFEST_PATH = ROOT / "release_package" / "PACKAGE_MANIFEST.json"
+PACKAGE_TEX_PATH = ROOT / "release_package_stage7" / "manuscript" / "paper.tex"
+PACKAGE_MANIFEST_PATH = ROOT / "release_package_stage7" / "PACKAGE_MANIFEST.json"
 EVIDENCE_PATH = ROOT / "manuscript" / "DEEP_REVISION_EVIDENCE.md"
 
 REQUIRED_EVIDENCE_HEADINGS = (
@@ -229,7 +229,7 @@ def validate_photographs(
             gate.failures.append(f"authors[{index}]: photograph must be under manuscript/journal_submission")
             continue
         if require_package:
-            package_photo = ROOT / "release_package" / "manuscript" / journal_relative
+            package_photo = ROOT / "release_package_stage7" / "manuscript" / journal_relative
             gate.require(package_photo.is_file(), f"authors[{index}]: release-package photograph is missing")
             if package_photo.is_file():
                 gate.require(sha256(package_photo) == digest, f"authors[{index}]: source/package photograph hashes differ")
@@ -264,6 +264,10 @@ def validate_orcid(gate: Gate, metadata: dict[str, Any]) -> None:
         return
     gate.require(account.get("confirmed") is True, "ORCID: submitting-account ORCID is not human-confirmed")
     gate.require(valid_orcid(account.get("value")), "ORCID: submitting-account ORCID is missing or checksum-invalid")
+    gate.require(
+        account.get("profile_public_and_populated") is True,
+        "ORCID: submitting-account profile is not confirmed public and populated",
+    )
 
 
 def validate_remaining_declarations(gate: Gate, metadata: dict[str, Any]) -> None:
@@ -284,14 +288,22 @@ def validate_remaining_declarations(gate: Gate, metadata: dict[str, Any]) -> Non
         gate.require(nonempty(apc.get("choice")), "APC choice: final choice is missing")
 
     artifact = metadata.get("public_artifact")
-    gate.require(isinstance(artifact, dict), "public repository/DOI: metadata section is missing")
+    gate.require(isinstance(artifact, dict), "data/code availability: metadata section is missing")
     if isinstance(artifact, dict):
-        gate.require(artifact.get("confirmed") is True, "public repository/DOI: human confirmation is missing")
+        gate.require(artifact.get("confirmed") is True, "data/code availability: human confirmation is missing")
+        mode = artifact.get("availability_mode")
+        gate.require(
+            mode in {"public", "submission_supplement", "not_public"},
+            "data/code availability: choose public, submission_supplement, or not_public",
+        )
         url = artifact.get("repository_url")
         doi = artifact.get("archival_doi")
         valid_url = nonempty(url) and str(url).strip().lower().startswith("https://")
         valid_doi = nonempty(doi) and DOI_PATTERN.fullmatch(str(doi).strip()) is not None
-        gate.require(valid_url or valid_doi, "public repository/DOI: a public HTTPS URL or archival DOI is missing")
+        if mode == "public":
+            gate.require(valid_url or valid_doi, "public availability: a public HTTPS URL or archival DOI is missing")
+        gate.require(nonempty(artifact.get("statement")), "data/code availability: final statement is missing")
+        gate.require(nonempty(artifact.get("tex_statement")), "data/code availability: final TeX rendering is missing")
 
     submission = metadata.get("concurrent_and_prior_submission")
     gate.require(isinstance(submission, dict), "concurrent/prior-submission declaration: metadata section is missing")
@@ -408,6 +420,21 @@ def validate_rendered_files(
 
     artifact = metadata.get("public_artifact")
     if isinstance(artifact, dict):
+        if nonempty(artifact.get("statement")):
+            gate.require(
+                artifact["statement"].strip() in markdown,
+                "data/code availability statement is absent from Markdown manuscript",
+            )
+        if nonempty(artifact.get("tex_statement")):
+            gate.require(
+                artifact["tex_statement"].strip() in journal_tex,
+                "data/code availability statement is absent from journal TeX",
+            )
+            if require_package:
+                gate.require(
+                    artifact["tex_statement"].strip() in package_tex,
+                    "data/code availability statement is absent from release-package TeX",
+                )
         for field in ("repository_url", "archival_doi"):
             value = artifact.get(field)
             if nonempty(value):

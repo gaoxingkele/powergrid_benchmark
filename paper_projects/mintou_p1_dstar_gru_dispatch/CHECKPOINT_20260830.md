@@ -87,24 +87,39 @@ Stage 7 files:
 - `scripts/validate_p1_stage7_human_metadata.py` — 54-condition validator
 - `manuscript/DEEP_REVISION_EVIDENCE.md` — unresolved-human-fact ledger
 
-## Current checkpoint save — Stage 7 finalizer preparation
+## Current checkpoint save — Stage 7 finalizer implemented, success path pending
 
-The user requested a checkpoint before the Stage 7 final release engineering was completed. Preserve the following exact state on resume:
+The Stage 7 final release engineering is now implemented. Preserve the following exact state on resume:
 
 - `scripts/validate_p1_stage7_human_metadata.py` now supports `--phase prebuild|release`.
 - `prebuild` validates the human ledger plus the authoritative Markdown and journal TeX, but does not require a release package that cannot exist yet.
 - `release` remains backward-compatible as the default and additionally validates the packaged TeX, author photographs, and release manifest.
 - This removes the circular dependency `release package required before release package can be built` without weakening the terminal release gate.
-- Failure-path activation on 2026-08-30 passed: `prebuild` exited 1 with 46 unresolved conditions and `release` exited 1 with 54 unresolved conditions.
+- Failure-path activation on 2026-08-30 passed: the current official-policy-aligned `prebuild` gate exited 1 with 49 unresolved conditions and the independent Stage 7 `release` path exited 1 with 52 unresolved conditions.
 - No manuscript, PDF, release payload, manifest, scientific result, or human metadata value was changed by this preparation.
 - The repository contains many unrelated modified/untracked paths. Only P1-scoped files may be staged or committed during recovery.
 
-The following planned Stage 7 scripts have **not** yet been implemented:
+Implemented Stage 7 entry points:
 
-1. `verify_stage7_reproducible_build.py` — prebuild gate, three deterministic LaTeX passes, dynamic build identity.
-2. `build_stage7_release.py` — metadata-bound, dynamic-hash final package and manifest.
-3. `update_stage7_pdf_render_qa.py` — all-page render record requiring explicit visual-review confirmation.
-4. `validate_stage7_release.py` — independent terminal validation of metadata, package, manifest, PDF/TeX identity, page renders, and placeholders.
+1. `scripts/verify_stage7_reproducible_build.py` — prebuild gate, isolated three-pass LaTeX compilation, unresolved-reference check, dynamic build identity, and atomic publication of the proved PDF.
+2. `scripts/build_stage7_release.py` — metadata-bound, dynamic-hash final package and manifest at `release_package_stage7`, leaving the accepted Stage 6 package untouched.
+3. `scripts/update_stage7_pdf_render_qa.py` — dynamic all-page render record requiring an explicit inspector and timezone-aware inspection time before it can record PASS.
+4. `scripts/validate_stage7_release.py` — read-only terminal validation of metadata, package completeness, manifest/source identity, independent package recompilation, PDF/TeX identity, placeholders, and independent page renders.
+5. `scripts/build_stage7_submission_bundle.py` — terminal-gated complete ZIP containing the final submission package, code, frozen experiment outputs, derived tables/figure sources, audits, four exact RTS-GMLC input files, and the full data-use notice; ZIP must remain under 40 MB.
+6. `scripts/_stage7_release_common.py` — shared fail-closed paths, hashes, environment, placeholder, render, and safe-publication primitives.
+
+Machine-readable activation evidence:
+
+- `manuscript/STAGE7_FINALIZER_FAILURE_PATH_EVIDENCE.json`
+- Accepted Stage 6 payload tree SHA-256: `60fb88f675b67dc41814738f4ffff10e55b5498c94bb55250b9c39f9e0d0c26e` over 88 files including its manifest.
+- All five Stage 7 write/terminal entry points exited 1 before writes; Stage 6 PDF, manifest, QA, and payload remained unchanged.
+- No `release_package_stage7`, `STAGE7_BUILD_IDENTITY.json`, or `STAGE7_PDF_RENDER_QA.json` was created.
+
+HarnessBank evidence:
+
+- `STAGE7_HARNESSBANK_GATE_CARD.md`
+- Validity, activation, and mutation-beacon gates pass.
+- Paired significance, train delta, and held-out delta are not established; the repair remains project-local and is not admitted to the global bank.
 
 Required execution order after the human facts are supplied:
 
@@ -116,10 +131,10 @@ prebuild metadata gate
   -> independent all-page render/visual QA
   -> terminal release validator
   -> new Paper Harness recovery plan/stage
-  -> final upload ZIP
+  -> terminal-gated complete upload ZIP
 ```
 
-All new builders must fail before mutating current accepted artifacts while metadata is incomplete. Never overwrite the accepted Stage 6 identity merely to make Stage 7 pass.
+The builders are proved to fail before mutating current accepted artifacts while metadata is incomplete. Never overwrite the accepted Stage 6 identity merely to make Stage 7 pass.
 
 ## Latest user interaction
 
@@ -142,7 +157,7 @@ At minimum obtain explicit values for:
 1. Final author names and order.
 2. Complete English affiliations and author-to-affiliation mapping.
 3. Corresponding author, e-mail, and postal address.
-4. Submitting IEEE account ORCID, or an explicit statement that it is not yet registered.
+4. Submitting IEEE account ORCID, with explicit confirmation that its profile is public and populated; if not registered, registration is a real submission blocker.
 5. Funding statement or confirmed no-external-funding statement.
 6. CRediT roles for every author.
 7. Conflict-of-interest declaration.
@@ -150,7 +165,7 @@ At minimum obtain explicit values for:
 9. Ethics wording/approval applicability.
 10. Biography and non-sample photograph for every author.
 11. APC decision.
-12. Public repository URL and/or archival DOI.
+12. Explicit data/code availability mode: public URL/DOI, submission supplementary material, or a truthful non-public statement.
 13. Concurrent-submission and prior-submission yes/no declarations.
 14. RTS-GMLC release/vintage if known, plus any shared-material relationship with other manuscripts.
 15. Final confirmer name and timezone-aware confirmation date.
@@ -166,13 +181,27 @@ At minimum obtain explicit values for:
    python -B scripts/validate_p1_stage7_human_metadata.py --phase release
    ```
 
-4. Implement and failure-test the four Stage 7 finalizer scripts listed above. Record pre/post hashes to prove that incomplete metadata causes no accepted-artifact mutation.
-5. Add a project-local HarnessBank gate card for the circular-release-dependency repair; do not admit it globally without held-out evidence.
-6. Ask only for missing factual values. Do not treat a bare `确认` as field-level confirmation.
-7. Populate `STAGE7_HUMAN_METADATA.json`, but keep `human_confirmation.confirmed=false` until every field has been echoed back and explicitly approved.
-8. Replace placeholders consistently in `manuscript/MANUSCRIPT.md` and `manuscript/journal_submission/paper.tex`; copy real photos into the journal source. Keep scientific claims/results unchanged.
-9. Run the finalizer chain in the exact order documented above.
-10. Create and approve a new Harness recovery plan (for example `plan_v13`) because `plan_v12/s7` is already `BLOCKED`.
+4. Do not reimplement the finalizer. Review `STAGE7_FINALIZER_FAILURE_PATH_EVIDENCE.json` and `STAGE7_HARNESSBANK_GATE_CARD.md` first.
+5. Ask only for missing factual values. Do not treat a bare `确认` as field-level confirmation.
+6. Populate `STAGE7_HUMAN_METADATA.json`, but keep `human_confirmation.confirmed=false` until every field has been echoed back and explicitly approved.
+7. Replace placeholders consistently in `manuscript/MANUSCRIPT.md` and `manuscript/journal_submission/paper.tex`; copy real photos into the journal source. Keep scientific claims/results unchanged.
+8. Set the deterministic environment and run the finalizer chain:
+
+   ```powershell
+   $env:SOURCE_DATE_EPOCH='1787867025'
+   $env:FORCE_SOURCE_DATE='1'
+   $env:TZ='UTC'
+   python -B scripts/verify_stage7_reproducible_build.py
+   python -B scripts/build_stage7_release.py
+   python -B scripts/update_stage7_pdf_render_qa.py
+   # Inspect every rendered page independently before recording PASS.
+   python -B scripts/update_stage7_pdf_render_qa.py --confirm-visual-review --inspected-by '<real inspector>' --inspected-at-utc '<timezone-aware timestamp>'
+   python -B scripts/validate_stage7_release.py
+   python -B scripts/build_stage7_submission_bundle.py
+   ```
+
+9. Create and approve a new Harness recovery plan (for example `plan_v13`) because `plan_v12/s7` is already `BLOCKED`.
+10. Run the complete scientific, citation, artifact, hygiene, LaTeX, and PDF gates from scratch; do not treat the finalizer alone as IEEE Access acceptance evidence.
 11. Build the final upload ZIP only after all Stage 7 and Harness gates pass.
 12. Commit only P1-scoped changes, push `powergrid_benchmark/main`, and report the final commit and artifact hashes.
 

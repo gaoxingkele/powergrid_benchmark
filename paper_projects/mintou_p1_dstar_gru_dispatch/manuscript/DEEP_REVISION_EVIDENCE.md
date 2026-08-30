@@ -209,8 +209,9 @@ generation, not new scientific runs.
 - **AUTHOR INPUT REQUIRED:** IEEE Access biography and non-sample photograph
   for every author.
 - **AUTHOR INPUT REQUIRED:** the APC choice.
-- **AUTHOR INPUT REQUIRED:** public repository URL and/or archival DOI before
-  claiming that the evidence package is publicly released.
+- **AUTHOR INPUT REQUIRED:** choose public repository/archive, submission
+  supplementary material, or a truthful non-public availability statement. A
+  URL/DOI is required only if the manuscript claims a public release.
 - **AUTHOR INPUT REQUIRED:** explicit concurrent-submission and prior-
   submission declarations, including disclosure of any related manuscript.
 - **AUTHOR INPUT REQUIRED:** exact RTS-GMLC release/vintage beyond the hashed
