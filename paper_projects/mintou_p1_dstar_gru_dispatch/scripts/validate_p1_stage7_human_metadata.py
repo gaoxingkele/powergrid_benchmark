@@ -8,6 +8,7 @@ every fact.  Repository history, sample IEEE assets, and the manuscript's
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import re
@@ -202,7 +203,12 @@ def validate_affiliations(gate: Gate, metadata: dict[str, Any], authors: list[di
     return affiliation_ids
 
 
-def validate_photographs(gate: Gate, authors: list[dict[str, Any]]) -> None:
+def validate_photographs(
+    gate: Gate,
+    authors: list[dict[str, Any]],
+    *,
+    require_package: bool,
+) -> None:
     for index, author in enumerate(authors, start=1):
         if not isinstance(author, dict) or not nonempty(author.get("photograph_path")):
             continue
@@ -222,10 +228,11 @@ def validate_photographs(gate: Gate, authors: list[dict[str, Any]]) -> None:
         except ValueError:
             gate.failures.append(f"authors[{index}]: photograph must be under manuscript/journal_submission")
             continue
-        package_photo = ROOT / "release_package" / "manuscript" / journal_relative
-        gate.require(package_photo.is_file(), f"authors[{index}]: release-package photograph is missing")
-        if package_photo.is_file():
-            gate.require(sha256(package_photo) == digest, f"authors[{index}]: source/package photograph hashes differ")
+        if require_package:
+            package_photo = ROOT / "release_package" / "manuscript" / journal_relative
+            gate.require(package_photo.is_file(), f"authors[{index}]: release-package photograph is missing")
+            if package_photo.is_file():
+                gate.require(sha256(package_photo) == digest, f"authors[{index}]: source/package photograph hashes differ")
 
 
 def validate_correspondence(gate: Gate, metadata: dict[str, Any], author_ids: set[str]) -> None:
@@ -306,8 +313,16 @@ def validate_global_confirmation(gate: Gate, metadata: dict[str, Any]) -> None:
     gate.require(metadata.get("gate_status") == "ready_for_submission_checks", "gate status is not ready_for_submission_checks")
 
 
-def validate_rendered_files(gate: Gate, metadata: dict[str, Any], authors: list[dict[str, Any]]) -> None:
-    required_files = (MARKDOWN_PATH, JOURNAL_TEX_PATH, PACKAGE_TEX_PATH)
+def validate_rendered_files(
+    gate: Gate,
+    metadata: dict[str, Any],
+    authors: list[dict[str, Any]],
+    *,
+    require_package: bool,
+) -> None:
+    required_files = [MARKDOWN_PATH, JOURNAL_TEX_PATH]
+    if require_package:
+        required_files.append(PACKAGE_TEX_PATH)
     texts: dict[Path, str] = {}
     for path in required_files:
         gate.require(path.is_file(), f"required manuscript file is missing: {path.relative_to(ROOT)}")
@@ -321,9 +336,12 @@ def validate_rendered_files(gate: Gate, metadata: dict[str, Any], authors: list[
     journal_tex = texts.get(JOURNAL_TEX_PATH, "")
     package_tex = texts.get(PACKAGE_TEX_PATH, "")
     gate.require(re.search(r"^\*\*ORCID\(s\):\*\* NONE\s*$", markdown, re.MULTILINE) is not None, "Markdown must render ORCID(s): NONE")
-    for label, text in (("journal TeX", journal_tex), ("release-package TeX", package_tex)):
+    tex_outputs = [("journal TeX", journal_tex)]
+    if require_package:
+        tex_outputs.append(("release-package TeX", package_tex))
+    for label, text in tex_outputs:
         gate.require("ORCID(s): NONE" in text, f"{label} must render ORCID(s): NONE")
-    if JOURNAL_TEX_PATH.is_file() and PACKAGE_TEX_PATH.is_file():
+    if require_package and JOURNAL_TEX_PATH.is_file() and PACKAGE_TEX_PATH.is_file():
         gate.require(JOURNAL_TEX_PATH.read_bytes() == PACKAGE_TEX_PATH.read_bytes(), "journal and release-package TeX bytes differ")
 
     for index, author in enumerate(authors, start=1):
@@ -333,14 +351,16 @@ def validate_rendered_files(gate: Gate, metadata: dict[str, Any], authors: list[
         gate.require(name in markdown, f"authors[{index}]: name is absent from Markdown manuscript")
         if nonempty(author.get("tex_name")):
             gate.require(author["tex_name"].strip() in journal_tex, f"authors[{index}]: name is absent from journal TeX")
-            gate.require(author["tex_name"].strip() in package_tex, f"authors[{index}]: name is absent from release-package TeX")
+            if require_package:
+                gate.require(author["tex_name"].strip() in package_tex, f"authors[{index}]: name is absent from release-package TeX")
         biography = author.get("biography")
         tex_biography = author.get("tex_biography")
         if nonempty(biography):
             gate.require(biography.strip() in markdown, f"authors[{index}]: biography is absent from Markdown manuscript")
         if nonempty(tex_biography):
             gate.require(tex_biography.strip() in journal_tex, f"authors[{index}]: biography is absent from journal TeX")
-            gate.require(tex_biography.strip() in package_tex, f"authors[{index}]: biography is absent from release-package TeX")
+            if require_package:
+                gate.require(tex_biography.strip() in package_tex, f"authors[{index}]: biography is absent from release-package TeX")
 
     affiliations = metadata.get("affiliations")
     if isinstance(affiliations, list):
@@ -353,7 +373,8 @@ def validate_rendered_files(gate: Gate, metadata: dict[str, Any], authors: list[
                 gate.require(address.strip() in markdown, f"affiliations[{index}]: address is absent from Markdown manuscript")
             if nonempty(tex_address):
                 gate.require(tex_address.strip() in journal_tex, f"affiliations[{index}]: address is absent from journal TeX")
-                gate.require(tex_address.strip() in package_tex, f"affiliations[{index}]: address is absent from release-package TeX")
+                if require_package:
+                    gate.require(tex_address.strip() in package_tex, f"affiliations[{index}]: address is absent from release-package TeX")
 
     correspondence = metadata.get("correspondence")
     if isinstance(correspondence, dict):
@@ -366,7 +387,8 @@ def validate_rendered_files(gate: Gate, metadata: dict[str, Any], authors: list[
             gate.require(postal_address.strip() in markdown, "correspondence address is absent from Markdown manuscript")
         if nonempty(tex_text):
             gate.require(tex_text.strip() in journal_tex, "correspondence text is absent from journal TeX")
-            gate.require(tex_text.strip() in package_tex, "correspondence text is absent from release-package TeX")
+            if require_package:
+                gate.require(tex_text.strip() in package_tex, "correspondence text is absent from release-package TeX")
 
     for key, label in (
         ("funding", "funding statement"),
@@ -381,7 +403,8 @@ def validate_rendered_files(gate: Gate, metadata: dict[str, Any], authors: list[
             gate.require(section["statement"].strip() in markdown, f"{label} is absent from Markdown manuscript")
         if isinstance(section, dict) and nonempty(section.get("tex_statement")):
             gate.require(section["tex_statement"].strip() in journal_tex, f"{label} is absent from journal TeX")
-            gate.require(section["tex_statement"].strip() in package_tex, f"{label} is absent from release-package TeX")
+            if require_package:
+                gate.require(section["tex_statement"].strip() in package_tex, f"{label} is absent from release-package TeX")
 
     artifact = metadata.get("public_artifact")
     if isinstance(artifact, dict):
@@ -390,7 +413,8 @@ def validate_rendered_files(gate: Gate, metadata: dict[str, Any], authors: list[
             if nonempty(value):
                 gate.require(value.strip() in markdown, f"public artifact {field} is absent from Markdown manuscript")
                 gate.require(value.strip() in journal_tex, f"public artifact {field} is absent from journal TeX")
-                gate.require(value.strip() in package_tex, f"public artifact {field} is absent from release-package TeX")
+                if require_package:
+                    gate.require(value.strip() in package_tex, f"public artifact {field} is absent from release-package TeX")
 
 
 def validate_release_manifest(gate: Gate) -> None:
@@ -403,6 +427,10 @@ def validate_release_manifest(gate: Gate) -> None:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--phase", choices=("prebuild", "release"), default="release")
+    args = parser.parse_args()
+    require_package = args.phase == "release"
     gate = Gate()
     metadata = load_json(gate, METADATA_PATH)
     validate_evidence_contract(gate)
@@ -411,20 +439,21 @@ def main() -> int:
         gate.require(metadata.get("schema_version") == 1, "metadata schema version is invalid")
         author_ids, authors = validate_authors(gate, metadata)
         validate_affiliations(gate, metadata, authors)
-        validate_photographs(gate, authors)
+        validate_photographs(gate, authors, require_package=require_package)
         validate_correspondence(gate, metadata, author_ids)
         validate_orcid(gate, metadata)
         validate_remaining_declarations(gate, metadata)
         validate_global_confirmation(gate, metadata)
-        validate_rendered_files(gate, metadata, authors)
-    validate_release_manifest(gate)
+        validate_rendered_files(gate, metadata, authors, require_package=require_package)
+    if require_package:
+        validate_release_manifest(gate)
 
     if gate.failures:
         print("STAGE7 HUMAN METADATA BLOCKED")
         for index, failure in enumerate(gate.failures, start=1):
             print(f"{index:02d}. {failure}")
         return 1
-    print("STAGE7 HUMAN METADATA PASS")
+    print(f"STAGE7 HUMAN METADATA PASS phase={args.phase}")
     return 0
 
 

@@ -9,9 +9,9 @@ Finish the IEEE Access submission version of P1 (`mintou_p1_dstar_gru_dispatch`)
 - Repository: `D:/aicoding/powergrid_benchmark`
 - Project: `paper_projects/mintou_p1_dstar_gru_dispatch`
 - Branch: `main`
-- Latest P1 checkpoint parent: `c7f8963c`
-- `origin/main` was synchronized with `c7f8963c` before this checkpoint.
-- The P1 subtree was clean before this checkpoint was created.
+- Checkpoint base before the current save: `718119ae` (`docs(p1): add Stage 7 recovery checkpoint`).
+- `main` and `origin/main` were both at `718119ae` before the current save.
+- After restoring, treat the commit containing this file as the authoritative P1 checkpoint.
 - The overall repository contains unrelated user/agent work. Do not reset, restore, stage, commit, or overwrite changes outside the P1 subtree.
 
 Relevant accepted commits:
@@ -21,6 +21,7 @@ Relevant accepted commits:
 - `d9020ff3` — refresh the 87-file manifest after LF normalization
 - `777ae102` — add the fail-closed Stage 7 metadata ledger and validator
 - `c7f8963c` — add the Chinese human-input form
+- `718119ae` — add the first Stage 7 recovery checkpoint
 
 Paper Harness library repair:
 
@@ -86,6 +87,40 @@ Stage 7 files:
 - `scripts/validate_p1_stage7_human_metadata.py` — 54-condition validator
 - `manuscript/DEEP_REVISION_EVIDENCE.md` — unresolved-human-fact ledger
 
+## Current checkpoint save — Stage 7 finalizer preparation
+
+The user requested a checkpoint before the Stage 7 final release engineering was completed. Preserve the following exact state on resume:
+
+- `scripts/validate_p1_stage7_human_metadata.py` now supports `--phase prebuild|release`.
+- `prebuild` validates the human ledger plus the authoritative Markdown and journal TeX, but does not require a release package that cannot exist yet.
+- `release` remains backward-compatible as the default and additionally validates the packaged TeX, author photographs, and release manifest.
+- This removes the circular dependency `release package required before release package can be built` without weakening the terminal release gate.
+- Failure-path activation on 2026-08-30 passed: `prebuild` exited 1 with 46 unresolved conditions and `release` exited 1 with 54 unresolved conditions.
+- No manuscript, PDF, release payload, manifest, scientific result, or human metadata value was changed by this preparation.
+- The repository contains many unrelated modified/untracked paths. Only P1-scoped files may be staged or committed during recovery.
+
+The following planned Stage 7 scripts have **not** yet been implemented:
+
+1. `verify_stage7_reproducible_build.py` — prebuild gate, three deterministic LaTeX passes, dynamic build identity.
+2. `build_stage7_release.py` — metadata-bound, dynamic-hash final package and manifest.
+3. `update_stage7_pdf_render_qa.py` — all-page render record requiring explicit visual-review confirmation.
+4. `validate_stage7_release.py` — independent terminal validation of metadata, package, manifest, PDF/TeX identity, page renders, and placeholders.
+
+Required execution order after the human facts are supplied:
+
+```text
+prebuild metadata gate
+  -> render confirmed metadata into Markdown/TeX and add real photos
+  -> three-pass deterministic LaTeX build + build identity
+  -> Stage 7 release package + dynamic manifest
+  -> independent all-page render/visual QA
+  -> terminal release validator
+  -> new Paper Harness recovery plan/stage
+  -> final upload ZIP
+```
+
+All new builders must fail before mutating current accepted artifacts while metadata is incomplete. Never overwrite the accepted Stage 6 identity merely to make Stage 7 pass.
+
 ## Latest user interaction
 
 The user replied `确认` after receiving the form. This confirms continuation, but it does not provide values for blank factual fields. A repository/history audit found that P1's earliest manuscript already contained author placeholders; there is no P1 original author list to inherit.
@@ -123,14 +158,23 @@ At minimum obtain explicit values for:
 ## Resume procedure
 
 1. Read this checkpoint and `manuscript/STAGE7_HUMAN_INPUT_FORM_ZH.md`.
-2. Ask only for missing factual values. Do not treat a bare `确认` as field-level confirmation.
-3. Populate `STAGE7_HUMAN_METADATA.json`, but keep `human_confirmation.confirmed=false` until every field has been echoed back and explicitly approved.
-4. Replace placeholders consistently in `manuscript/MANUSCRIPT.md` and `manuscript/journal_submission/paper.tex`; copy real photos into the journal source. Keep scientific claims/results unchanged.
-5. Add or adapt a Stage 7 release builder. The Stage 6 builder/validator intentionally requires retained placeholders and the frozen placeholder-PDF hash, so it must not be reused unchanged for the final human-complete PDF.
-6. Create and approve a new Harness recovery plan (for example `plan_v13`) because `plan_v12/s7` is already `BLOCKED`.
-7. Run: no placeholders, declarations, Stage 7 custom validator, narrative structure, artifact consistency, manuscript hygiene, deterministic LaTeX build, final release manifest, PDF integrity, and independent page rendering/visual QA.
-8. Build the final upload ZIP only after all Stage 7 gates pass.
-9. Commit only P1-scoped changes, push `powergrid_benchmark/main`, and report the final commit and artifact hashes.
+2. Inspect `git status --short` and isolate P1 from all unrelated worktree changes.
+3. Re-run both metadata phases; both are expected to block until the human fields are complete:
+
+   ```powershell
+   python -B scripts/validate_p1_stage7_human_metadata.py --phase prebuild
+   python -B scripts/validate_p1_stage7_human_metadata.py --phase release
+   ```
+
+4. Implement and failure-test the four Stage 7 finalizer scripts listed above. Record pre/post hashes to prove that incomplete metadata causes no accepted-artifact mutation.
+5. Add a project-local HarnessBank gate card for the circular-release-dependency repair; do not admit it globally without held-out evidence.
+6. Ask only for missing factual values. Do not treat a bare `确认` as field-level confirmation.
+7. Populate `STAGE7_HUMAN_METADATA.json`, but keep `human_confirmation.confirmed=false` until every field has been echoed back and explicitly approved.
+8. Replace placeholders consistently in `manuscript/MANUSCRIPT.md` and `manuscript/journal_submission/paper.tex`; copy real photos into the journal source. Keep scientific claims/results unchanged.
+9. Run the finalizer chain in the exact order documented above.
+10. Create and approve a new Harness recovery plan (for example `plan_v13`) because `plan_v12/s7` is already `BLOCKED`.
+11. Build the final upload ZIP only after all Stage 7 and Harness gates pass.
+12. Commit only P1-scoped changes, push `powergrid_benchmark/main`, and report the final commit and artifact hashes.
 
 ## Temporary audit worktrees
 
