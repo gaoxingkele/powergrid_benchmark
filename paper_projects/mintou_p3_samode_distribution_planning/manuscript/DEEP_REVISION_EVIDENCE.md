@@ -4,16 +4,16 @@
 
 ## Title-to-Evidence Map
 
-**Aligned title:** *CARS-MODE: Constraint-Aware Repair and Strategy-Pool Multi-Objective Differential Evolution on a SimBench-Derived Mixed-Voltage Portfolio Proxy*
+**Locked title:** *Power Distribution Network Planning Strategy Optimization based on Self-Adaption Multi-objective Differential Evolution Algorithm*
+
+The title is retained verbatim as an approved identity constraint. It does not enlarge the evidence: the current study remains a SimBench-derived portfolio-proxy optimizer study, not action-aligned expansion planning or a demonstration that self-adaptation caused an improvement.
 
 | Title element | Evidence | Claim boundary |
 |---|---|---|
-| CARS-MODE | `MANUSCRIPT.md`, Section 4, and the read-only planning implementation define the binary multi-objective DE, joint adaptive controller, deterministic budget repair, and crowding selection. | Names the implemented optimizer only. |
-| Constraint-aware repair and strategy pool | FixedDE, NoRepair, and NoDiversity controls plus the exact 2940-run rerun. | FixedDE changes parameter and strategy adaptation jointly; no adaptive subcomponent is identified. |
-| SimBench-derived | Public SimBench statistics generate the proxy inputs. | Objectives are analytic indices, not AC power-flow objectives. |
-| Mixed-voltage portfolio proxy | EHV--LV source subnets produce action portfolios; the archived AC layer separately maps three seed-0 compositions to four MV networks. | The optimizer does not select action-aligned buses, lines, or construction projects. |
+| Power Distribution Network Planning Strategy Optimization | `MANUSCRIPT.md`, the immutable P3 S3 archive, and the P3 S4 narrative manifest document optimization of SimBench-derived candidate-action portfolios under the stated proxy objectives. | "Planning" and "strategy optimization" refer to the portfolio proxy. They do not establish action-aligned siting, monetary calibration, AC-feasible final plans, or deployment evidence. |
+| Self-Adaption Multi-objective Differential Evolution Algorithm | Section 4 and the read-only planning implementation define binary multi-objective DE, a joint adaptive controller, deterministic budget repair, and crowding selection; FixedDE, NoRepair, and NoDiversity are the available controls. | FixedDE disables parameter and strategy adaptation jointly. The present evidence neither identifies either adaptive subcomponent nor supports the causal wording that self-adaptation improves performance. |
 
-The title deliberately names the proxy as the experimental object. The supported contribution is a reproducible constrained-search and diagnostic workflow with a demonstrated normalization limitation, not consistent optimizer or electrical superiority.
+The supported contribution is a reproducible constrained-search and diagnostic workflow with a demonstrated normalization limitation, not consistent optimizer or electrical superiority. This evidence boundary governs interpretation of the locked title.
 
 ## Primary Estimand and Analysis Unit
 

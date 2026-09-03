@@ -8,7 +8,7 @@
 
 **Authors:** Zhang Linyao (张林垚), Zheng Jieyun (郑洁云), Zhang Zhanghuang (张章煌), Ni Shiyuan (倪识远), Wu Guilian (吴桂联)
 **Affiliations:** Economic and Technological Research Institute of State Grid Fujian Electric Power Co., Ltd., Fuzhou 350000, Fujian, China
-**Correspondence:** zjy_0701@163.com (J. Zheng)
+**Correspondence:** zjy_0701@163.com (Zheng Jieyun)
 
 ---
 
