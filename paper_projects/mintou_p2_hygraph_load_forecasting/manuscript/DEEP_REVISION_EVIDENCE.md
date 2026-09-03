@@ -119,7 +119,7 @@ The deterministic artifact generator verifies the accepted manifest and its reco
 
 - **AUTHOR INPUT REQUIRED -- CRediT:** assign verified contributor roles to Zheng Jieyun, Zhang Linyao, Zhang Zhanghuang, Chen Zhuolin, and Shi Ying, and obtain approval from every author. No roles were inferred.
 - **AUTHOR INPUT REQUIRED -- funding:** provide the verified funder, grant number, and APC funder, or an author-confirmed no-external-funding statement. No funding status was inferred.
-- **Author metadata confirmation:** the order is locked as Zheng Jieyun, Zhang Linyao, Zhang Zhanghuang, Chen Zhuolin, and Shi Ying, with Zheng Jieyun first and corresponding. Verify spelling, the single printed affiliation, the correspondence address, and rendered non-Latin names against author-approved records; do not alter the locked order while doing so.
+- **Author metadata:** the author spellings and order, common affiliation, Zheng Jieyun's first- and corresponding-author roles, correspondence address, and rendered Chinese names are confirmed by the author-provided record and locked. CRediT roles and final approval by every author remain separate human gates.
 - **Persistent archive:** no verified repository URL or DOI is present. Deposit and verify the final evidence package before making a persistent-public-archive claim.
 - **Independent rerun:** a separate immutable rerun is required before changing the new namespace from `UNVERIFIED` to `VERIFIED`.
 - **Bibliography and novelty:** the full bibliography, claim-to-source alignment, systematic novelty search, similarity screening, and external domain-expert review were not available in this isolated stage and remain `UNVERIFIED`.
