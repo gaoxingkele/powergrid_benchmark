@@ -2,6 +2,13 @@
 
 Status vocabulary: `SUPPORTED_CURRENT`, `SUPPORTED_WITH_SCOPE`, `UNRESOLVED`, `NOT_SUPPORTED`, `FUTURE_HYPOTHESIS`.
 
+## Locked identity and method boundary
+
+- **Title:** `Graph Convolutional Network based on Hyperbolic Space for Power Load Forecasting` (exact and unchanged).
+- **Author order:** Zheng Jieyun, Zhang Linyao, Zhang Zhanghuang, Chen Zhuolin, Shi Ying (exact and unchanged).
+- **First and corresponding author:** Zheng Jieyun.
+- **Current-model status:** CSA-LoadNet is the existing baseline. It is neither a GCN nor an HGCN and does not by itself support the method claim in the locked title.
+
 | ID | Claim under review | Status at Wave 0 | Current evidence | Allowed wording now | Prohibited wording / next gate |
 |---|---|---|---|---|---|
 | P4-C01 | The existing experiment evaluates 24-step point forecasts over eight quarterly rolling blocks and five seeds. | SUPPORTED_CURRENT | `experiments/p2_s3_identifiable_v1/config.json`; frozen outputs and manuscript | State the implemented evaluation design after leakage checks. | Do not treat time points as independent statistical replicates. |

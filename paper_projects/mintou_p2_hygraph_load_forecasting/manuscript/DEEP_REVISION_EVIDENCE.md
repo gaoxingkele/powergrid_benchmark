@@ -4,17 +4,22 @@ This document is the evidence contract for the current manuscript. It distinguis
 
 ## Title-to-Evidence Map
 
-The current title is **“Cross-Series Context for 24-Step-Ahead Point Forecasting of Multi-Region Power Load: A Matched Rolling-Origin Component Evaluation.”** “Step” means a processed OPSD position, not necessarily one elapsed UTC hour after complete-row filtering.
+The locked title is **“Graph Convolutional Network based on Hyperbolic Space for Power Load Forecasting.”** It is the immutable P4 identity, not a statement that the current implementation already satisfies the title-method claim. The current CSA-LoadNet is a baseline: it is neither a graph convolutional network (GCN) nor a hyperbolic graph convolutional network (HGCN). It uses dense cross-series attention with Poincaré-distance weighting and has no accepted adjacency-based graph convolution or hyperbolic graph message passing. No GCN or HGCN result exists in this stage.
 
-| Title or contribution element | Direct evidence | Licensed statement | Excluded statement |
+The authoritative P4-C01--P4-C08 statuses and wording boundaries are registered in `checkpoints/2026-09-03_mdpi_wave0/CLAIM_EVIDENCE_REGISTER.md` and bound here to the manuscript contract:
+
+| Claim ID | Bound status | Direct evidence and licensed scope | Excluded statement or next gate |
 |---|---|---|---|
-| Cross-series context | `experiments/p2_s3_identifiable_v1/config.json`, driver, model audit, and run rows define learned Poincaré, uniform-neighbor, Euclidean, fixed-scale, and target-self contexts with a common 48-dimensional context slot. | Cross-series content and weight form are controlled components. | Cross-series aggregation improves forecasting error. |
-| 24-step-ahead point forecasting | The frozen horizon is 24 processed positions and each sample predicts one scalar target per series. The new run retains target UTC dates and records 43 discarded source rows before the 35,000-row cap. | Results concern scalar lead-24 prediction on the retained-row sequence. | A 24-value next-day trajectory or an uninterrupted 24-elapsed-hour lead at every sample. |
-| Matched control | `results/model_audit.csv` records 29,815 parameters, a 100--64--1 head, 48-dimensional context, and the executed distance path for the proposed, target-self, and uniform-context arms. The frozen run uses common seeds, origins, optimizer, batches, epochs, and training exposure. | The proposed-versus-target-self and proposed-versus-uniform comparisons remove the historical smaller-head defect. | Identical wall-clock timing or full capacity matching to the historical external architecture roster. |
-| Rolling-origin component evaluation | Eight frozen quarterly block anchors and five common seeds yield 240 method--block--seed rows. Each block contains 672 consecutive forecast origins. Seeds are averaged within block before exact paired inference. | The quarterly evaluation block is the outer analysis unit for the new component claims. | Treating forecast targets, countries, days, seeds, or blocks from the same record as independent weather-year or system replications. |
-| Component-level result | Table 5 and `paired_comparisons.csv` preserve the matched aggregation null, weighting-form nulls, adverse fixed-scale trend, and confounded independent-encoder result. | The fixed-split aggregation attribution is not confirmed under the rolling-origin estimand. | Upgrading a null to equivalence, claiming a best weighting form, or attributing the independent-encoder gap to sharing alone. |
+| P4-C01 | `SUPPORTED_CURRENT` | `experiments/p2_s3_identifiable_v1/config.json` and accepted outputs support scalar lead-24 forecasts over eight quarterly blocks and five common seeds, with seeds averaged within block. | Forecast positions, targets, countries, days, or seeds are not independent temporal replicates. |
+| P4-C02 | `NOT_SUPPORTED` | The current implementation is the CSA/attention baseline, not a GCN. | A genuine adjacency-based Euclidean GCN must be implemented before describing the method as a graph convolutional network. |
+| P4-C03 | `NOT_SUPPORTED` | Poincaré distance supplies attention weights; full hyperbolic mapping, convolution, and graph message passing are absent. | CSA-Poincaré must not be renamed or described as an HGCN. |
+| P4-C04 | `UNRESOLVED` | The matched Poincaré-weighted CSA contrast is unresolved (MAPE 0.036640 versus 0.036894; Holm-adjusted p = 0.984). | No improvement, superiority, or equivalence claim is licensed. |
+| P4-C05 | `NOT_SUPPORTED` | DLinear has lower error in the separately scoped exact-hierarchy comparison and remains a mandatory strong baseline. | The current approach must not be said to beat strong non-graph baselines. |
+| P4-C06 | `FUTURE_HYPOTHESIS` | No accepted graph-data mapping has been frozen. | Graph provenance, node/edge, time-split, and leakage audits are required before a graph can be described as meaningful or leakage-free. |
+| P4-C07 | `FUTURE_HYPOTHESIS` | No HGCN experiment or result exists. | A genuine HGCN and Euclidean GCN sanity baseline are required before testing or reporting an HGCN forecasting benefit. |
+| P4-C08 | `SUPPORTED_WITH_SCOPE` | The target-route review and Electronics template support only a plausible scope route for a rebuilt graph-learning study. | Journal scope fit is not an acceptance-probability claim. |
 
-The manuscript story is therefore a bounded component evaluation, not a superiority paper. The abstract, contributions, methods, results, discussion, limitations, and conclusion all give the matched rolling-origin family authority over the aggregation-existence claim. Fixed-split OPSD, SimBench, and Ausgrid results remain context and boundary evidence.
+The current manuscript evidence is therefore a bounded CSA baseline component evaluation, not evidence for the GCN/HGCN method named in the locked title and not a superiority paper. Until the title-method gate passes, the abstract, contributions, methods, results, discussion, limitations, and conclusion must keep that boundary explicit and give the matched rolling-origin family authority over the aggregation-existence claim. Fixed-split OPSD, SimBench, and Ausgrid results remain context and boundary evidence.
 
 ## Primary Estimand and Analysis Unit
 
@@ -112,13 +117,13 @@ The deterministic artifact generator verifies the accepted manifest and its reco
 
 ## Unresolved Human Blockers
 
-- **AUTHOR INPUT REQUIRED -- CRediT:** assign verified contributor roles to Jieyun Zheng, Linyao Zhang, Zhanghuang Zhang, Zhuolin Chen, and Ying Shi, and obtain approval from every author. No roles were inferred.
+- **AUTHOR INPUT REQUIRED -- CRediT:** assign verified contributor roles to Zheng Jieyun, Zhang Linyao, Zhang Zhanghuang, Chen Zhuolin, and Shi Ying, and obtain approval from every author. No roles were inferred.
 - **AUTHOR INPUT REQUIRED -- funding:** provide the verified funder, grant number, and APC funder, or an author-confirmed no-external-funding statement. No funding status was inferred.
-- **Author metadata confirmation:** verify author spelling and order, the single printed affiliation, correspondence details, and rendered non-Latin names against author-approved records.
+- **Author metadata confirmation:** the order is locked as Zheng Jieyun, Zhang Linyao, Zhang Zhanghuang, Chen Zhuolin, and Shi Ying, with Zheng Jieyun first and corresponding. Verify spelling, the single printed affiliation, the correspondence address, and rendered non-Latin names against author-approved records; do not alter the locked order while doing so.
 - **Persistent archive:** no verified repository URL or DOI is present. Deposit and verify the final evidence package before making a persistent-public-archive claim.
 - **Independent rerun:** a separate immutable rerun is required before changing the new namespace from `UNVERIFIED` to `VERIFIED`.
 - **Bibliography and novelty:** the full bibliography, claim-to-source alignment, systematic novelty search, similarity screening, and external domain-expert review were not available in this isolated stage and remain `UNVERIFIED`.
-- **Current PDF:** source regeneration requires the journal build helper, but a usable `pdflatex` executable was not available in the inspected environment. Until a fresh build succeeds, the existing PDFs remain stale and are not evidence of current manuscript content.
+- **Current PDF:** source regeneration reached the journal build helper, but the discovered MiKTeX installation required first-run setup and exited before producing a current PDF. Until a fresh build succeeds, the existing PDFs remain stale and are not evidence of current manuscript content.
 - **Current quantitative-figure rebuild:** the retained P2 S4 tables and result figures match the checkout-normalized hashes recorded for unchanged scientific inputs, but the S5 generator invocation could not load Pillow's `_imaging` extension under the only available Python 3.14 runtime. A fresh S5 rebuild remains environment-blocked and is not claimed.
 - **Final author approval:** acknowledgments, conflicts, AI-use disclosure, data-availability wording, and responsibility language require human confirmation.
 
