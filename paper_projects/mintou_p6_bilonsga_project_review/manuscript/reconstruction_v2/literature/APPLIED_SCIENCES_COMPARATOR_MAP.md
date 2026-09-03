@@ -2,7 +2,7 @@
 
 ## Audit boundary
 
-This map uses the 33-item frozen manuscript bibliography and the worktree's recorded 2026-07-17 Crossref re-verification (`manuscript/WAVE1_CHANGELOG.md`). The isolated executor could not reach Crossref or AnySearch, but the independent candidate review on 2026-09-03 re-queried all DOI-bearing records through the Crossref API and found no title, year, or author mismatch. No new search lead is promoted to a citation. Bibliographic verification and sentence support are separated in `REFERENCE_VERIFICATION.csv` and `LITERATURE_EVIDENCE_MATRIX.csv`; metadata agreement alone is not treated as full-text sentence support.
+This map uses the 33-item frozen manuscript bibliography plus ref34, added during independent candidate review. The worktree records a 2026-07-17 Crossref re-verification for the original set (`manuscript/WAVE1_CHANGELOG.md`). The isolated executor could not reach Crossref or AnySearch, but the independent candidate review on 2026-09-03 re-queried all DOI-bearing records through the Crossref API and found no title, year, or author mismatch. Ref34 was additionally checked against an institutional publication record. Bibliographic verification and sentence support are separated in `REFERENCE_VERIFICATION.csv` and `LITERATURE_EVIDENCE_MATRIX.csv`; metadata agreement alone is not treated as full-text sentence support.
 
 ## Target-journal neighbors
 
@@ -22,7 +22,7 @@ The target-journal set supports topical fit in planning, investment valuation, a
 |---|---|---|---|
 | Non-dominated sorting and canonical MOEAs | ref1, ref22, ref24; ref23 as decomposition comparator | Pareto-based evolutionary comparison, NSGA-II, NSGA-III, and MOEA/D are established method lineages | No source establishes BiLo-NSGA superiority |
 | Knapsack and portfolio selection | ref2--ref9, ref31, ref32 | Multi-objective knapsack, portfolio selection, dependencies, and constrained memetic search are relevant neighboring problem classes | No exhaustive claim that these literatures lack atomic substitution |
-| Neighborhood and local search | ref2, ref20, ref21, ref25, ref31, ref32 | Genetic local search, Pareto-archived search, memetic search, and Pareto local search are legitimate comparators | A verified variable-neighborhood-search citation was not recovered in this environment |
+| Neighborhood and local search | ref2, ref20, ref21, ref25, ref31, ref32, ref34 | Genetic local search, Pareto-archived search, memetic search, Pareto local search, and a VNS simheuristic for uncertain project portfolios are legitimate neighboring methods | Ref34 is not a matched multi-objective grid benchmark and does not establish atomic substitution |
 | Power-grid planning and investment | ref8, ref10--ref13, ref18, ref19, ref26--ref30 | Risk--benefit investment, reliability valuation, storage, transmission, distribution, and grid-planning studies establish application adjacency | They do not provide expert labels, calibrated costs, load-flow validation, or evidence for the paper's run summaries |
 | Matched-compute evaluation | local protocol and matched archive | The paper may describe its exact 3200-unit budget and separate 0.20-s deadline as its own disclosed design | No external source was verified here for a field-wide matched-compute standard |
 
@@ -40,4 +40,4 @@ In this paper, **atomic substitution** is a single evaluated proposal: one selec
 
 ## Unfilled search cells
 
-Variable-neighborhood search and external matched-compute methodology remain unfilled cells because live discovery failed and the local corpus contained no verified source suitable for import. This limitation is recorded rather than repaired with title-only or remembered citations.
+External matched-compute methodology remains an unfilled cell. The VNS cell is now populated by ref34 after independent DOI and institutional-record verification, but its uncertainty model and objective structure differ from this paper. No matched-performance implication is drawn.
