@@ -1,7 +1,7 @@
 # 闽投新四篇：第 1 阶段批量验收包
 
-日期：2026-09-03  
-状态：`AWAITING_HUMAN_ACCEPTANCE`  
+日期：2026-09-03
+状态：`AWAITING_HUMAN_ACCEPTANCE`
 范围：Paper Harness v2 的题目、作者、期刊路线与科学主张合同；不等同于完整论文投稿签核。
 
 ## 1. 已批准的执行计划
