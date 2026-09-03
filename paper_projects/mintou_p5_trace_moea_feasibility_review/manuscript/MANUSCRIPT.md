@@ -29,7 +29,7 @@ Because genuine utility review records with feasibility labels are confidential,
 
 The paper makes three evidence-bounded contributions:
 
-1. **A constrained portfolio-search architecture.** TRACE-MOEA combines a constrained non-dominated sorting kernel with adaptive preference elitism and deterministic budget repair. The title names these implemented mechanisms; it does not imply that the preference layer has a resolved independent effect.
+1. **A constrained portfolio-search architecture.** TRACE-MOEA combines a constrained non-dominated sorting kernel with adaptive preference elitism and deterministic budget repair. The title's term “Hybrid Multi-objective Evolution” refers to this implemented combination; it does not imply that the combination or any component is superior, or that the preference layer has a resolved independent effect.
 
 2. **Run-level event co-occurrence summaries separated from optimization.** Each main-run row reports total event count and final-front candidate co-occurrence coverage for in-memory repair-drop and preference-best-response payloads. These fields are quarantined from objectives and selection. They measure event production and set overlap only; the current evidence package retains neither payload order nor stable project identifiers, replacement flags, or evicted portfolios.
 

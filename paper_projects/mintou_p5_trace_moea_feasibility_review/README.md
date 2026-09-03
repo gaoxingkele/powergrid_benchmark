@@ -2,11 +2,16 @@
 
 ## 论文
 
-- **标题**: TRACE-MOEA: Constrained Power-Grid Portfolio Search with Adaptive Preference Elitism, Budget Repair, and Run-Level Event Co-Occurrence Summaries
+- **锁定标题**: Investment Effectiveness Optimization Strategy based on Hybrid Multi-objective Evolution
 - **算法**: TRACE-MOEA（约束非支配排序核心 + 自适应偏好精英保留 + 确定性预算修复 + 运行级事件共现汇总）
 - **任务**: 公开代理基准上的硬预算电网投资组合搜索与运行级事件记录
 - **目标期刊**: MDPI Energies
 - **当前状态**: `public_rts_simbench_nerc_project_review_v3_direct_family_controls`；相对 NSGA-II 的汇总平均 HV 差为 +0.89%，偏好消融的独立效应未解决
+
+本 README 只提供工作目录导航。论文身份、证据根和措辞权限以
+`checkpoints/2026-09-03_mdpi_wave0/BASELINE_MANIFEST.md` 与
+`checkpoints/2026-09-03_mdpi_wave0/CLAIM_EVIDENCE_REGISTER.md` 为准；
+`manuscript/submission_preview/` 中保留的旧标题预览不具有身份或主张授权效力。
 
 ## 本文件夹用途
 
