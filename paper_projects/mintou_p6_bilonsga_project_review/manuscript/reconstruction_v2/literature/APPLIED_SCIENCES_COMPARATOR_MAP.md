@@ -2,7 +2,7 @@
 
 ## Audit boundary
 
-This map uses the 33-item frozen manuscript bibliography and the worktree's recorded 2026-07-17 Crossref re-verification (`manuscript/WAVE1_CHANGELOG.md`). Live Crossref and AnySearch access was unavailable on 2026-09-03, so no new search lead is promoted to a citation. Bibliographic verification and sentence support are separated in `REFERENCE_VERIFICATION.csv` and `LITERATURE_EVIDENCE_MATRIX.csv`.
+This map uses the 33-item frozen manuscript bibliography and the worktree's recorded 2026-07-17 Crossref re-verification (`manuscript/WAVE1_CHANGELOG.md`). The isolated executor could not reach Crossref or AnySearch, but the independent candidate review on 2026-09-03 re-queried all DOI-bearing records through the Crossref API and found no title, year, or author mismatch. No new search lead is promoted to a citation. Bibliographic verification and sentence support are separated in `REFERENCE_VERIFICATION.csv` and `LITERATURE_EVIDENCE_MATRIX.csv`; metadata agreement alone is not treated as full-text sentence support.
 
 ## Target-journal neighbors
 
