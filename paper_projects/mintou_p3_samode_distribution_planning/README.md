@@ -2,7 +2,7 @@
 
 ## 论文信息
 
-- **论文标题**: CARS-MODE: Constraint-Aware Repair and Strategy-Pool Multi-Objective Differential Evolution on a SimBench-Derived Mixed-Voltage Portfolio Proxy
+- **论文标题**: Power Distribution Network Planning Strategy Optimization based on Self-Adaption Multi-objective Differential Evolution Algorithm
 - **算法**: CARS-MODE (Constraint-Aware Repair and Strategy-adaptive Multi-Objective Differential Evolution) — 约束感知修复 + 策略自适应多目标差分进化
 - **任务**: SimBench 衍生的混合电压等级配电规划组合代理上的多目标优化；不是动作对齐的配电网扩展研究
 - **目标期刊**: MDPI Energies（首选）；MDPI Applied Sciences（备选）；本目录同时评估 IEEE Access 的可行性
