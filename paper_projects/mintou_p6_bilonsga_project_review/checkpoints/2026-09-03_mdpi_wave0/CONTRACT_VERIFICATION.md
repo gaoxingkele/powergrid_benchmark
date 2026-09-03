@@ -1,12 +1,13 @@
 # P2 Locked-Identity Contract Verification
 
-**Stage:** `p2_v2_s01_locked_identity_contract`  
+**Stage:** `p2_v2_s01_locked_identity_contract`
+
 **Scope:** title, author order, active journal route, P2-C01--P2-C08 evidence bindings, and the protected primary NSGA-II comparison. No experiment was added, rerun, removed, or retuned in this stage.
 
 ## Verified contract
 
 - The controlling title is exactly `Multi-objective Evolution Algorithm based on Non-Dominated Sorting and Bidirectional Local Search for Investment Effectiveness Strategy Optimization` in the manuscript master and Applied Sciences LaTeX source.
-- The controlling author order is Yubin Lin, Jingbo Zhang, Xiaoyu Huang, Dishan Yang, and Jiyu Li. Affiliation, correspondence, funding, and CRediT confirmation remain separate human gates.
+- The controlling author order is Yubin Lin, Jingbo Zhang, Xiaoyu Huang, Dishan Yang, and Jiyu Li. Yubin Lin is the confirmed first and corresponding author, and the common affiliation is the Economic and Technological Research Institute of State Grid Fujian Electric Power Co., Ltd. Funding, CRediT roles, and final approval by every author remain separate human gates.
 - Applied Sciences is the sole active route. The journal source retains the `applsci` document-class option.
 - `CLAIM_EVIDENCE_REGISTER.md` contains one evidence-bounded row for each of P2-C01 through P2-C08.
 - Direct parsing of `matched_summary.csv` and `matched_inference.csv` confirms eight negative BiLo-NSGA scenario mean differences against NSGA-II, zero Holm-significant wins, and four Holm-significant losses in the primary matched-evaluation family.

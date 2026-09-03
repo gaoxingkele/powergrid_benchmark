@@ -61,7 +61,7 @@
 
 # Unresolved Human Blockers
 
-- The confirmed author order is locked for this stage: Yubin Lin, Jingbo Zhang, Xiaoyu Huang, Dishan Yang, and Jiyu Li. **AUTHOR INPUT REQUIRED:** confirm affiliations and correspondence details, assign CRediT roles, and obtain the required approvals; this stage does not infer roles from author order.
+- The author order, common affiliation, and Yubin Lin's first- and corresponding-author roles are confirmed and locked. **AUTHOR INPUT REQUIRED:** assign CRediT roles and obtain final approval from every author; this stage does not infer contribution roles from author order.
 - **AUTHOR INPUT REQUIRED:** provide the verified funder and grant number or confirm the no-external-funding statement; also confirm any APC funder.
 - **AUTHOR INPUT REQUIRED:** approve a persistent repository URL/DOI and the redistribution terms for the public inputs and stage-local evidence package.
 - Confirm with both paper teams that the P5/P6 shared-asset disclosure, textual independence, simultaneous-submission policy, and companion bibliographic status are accurate. The complete companion submission was not available in this isolated worktree, so no automated full-text overlap clearance is claimed.

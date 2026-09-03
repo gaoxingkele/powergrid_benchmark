@@ -3,7 +3,7 @@
 ## Locked identity and route
 
 - **Title:** `Multi-objective Evolution Algorithm based on Non-Dominated Sorting and Bidirectional Local Search for Investment Effectiveness Strategy Optimization`. This exact string is controlling and appears in `manuscript/MANUSCRIPT.md` and `manuscript/journal_submission/paper.tex`.
-- **Author order:** Yubin Lin; Jingbo Zhang; Xiaoyu Huang; Dishan Yang; Jiyu Li. The order is controlling and appears in `manuscript/MANUSCRIPT.md`, `manuscript/journal_submission/paper.tex`, and `BASELINE_MANIFEST.md`. No affiliation, funding, or CRediT inference follows from this order.
+- **Authorship and affiliation:** Yubin Lin (first and corresponding author); Jingbo Zhang; Xiaoyu Huang; Dishan Yang; Jiyu Li. The order, Yubin Lin's corresponding-author role, and the common affiliation with the Economic and Technological Research Institute of State Grid Fujian Electric Power Co., Ltd. are controlling and appear in the author-owned manuscript sources; the order and corresponding-author role also appear in `BASELINE_MANIFEST.md`. No funding or CRediT inference follows from author order.
 - **Active route:** Applied Sciences (MDPI), implemented by the `applsci` document-class option in `manuscript/journal_submission/paper.tex` and recorded in `BASELINE_MANIFEST.md`. Other journal discussions are historical or inactive alternatives, not active routes.
 - **Protected result:** under the primary matched-evaluation family, none of the eight BiLo-NSGA–NSGA-II scenario contrasts is a Holm-significant BiLo-NSGA win and four are Holm-significant BiLo-NSGA losses. This result is preserved regardless of later task-family outcomes.
 
