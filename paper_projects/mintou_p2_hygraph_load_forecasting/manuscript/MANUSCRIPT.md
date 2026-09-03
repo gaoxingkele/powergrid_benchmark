@@ -9,16 +9,16 @@
      Figures live in ./figures/ as regenerated PNG, PDF, and SVG artifacts.
      AUTHOR INPUT REQUIRED markers must be resolved before submission. -->
 
-# Cross-Series Context for 24-Step-Ahead Point Forecasting of Multi-Region Power Load: A Matched Rolling-Origin Component Evaluation
+# Graph Convolutional Network based on Hyperbolic Space for Power Load Forecasting
 
-**Authors:** Jieyun Zheng (郑洁云), Linyao Zhang (张林垚), Zhanghuang Zhang (张章煌), Zhuolin Chen (陈卓琳), Ying Shi (施莹)
+**Authors:** Zheng Jieyun (郑洁云), Zhang Linyao (张林垚), Zhang Zhanghuang (张章煌), Chen Zhuolin (陈卓琳), Shi Ying (施莹)
 **Affiliations:** Economic and Technological Research Institute of State Grid Fujian Electric Power Co., Ltd., Fuzhou 350000, Fujian, China
 **Correspondence:** zjy_0701@163.com (J. Zheng)
 **Metadata status:** [AUTHOR INPUT REQUIRED: verify author spelling and order, affiliation, correspondence details, and rendered non-Latin names against author-approved records.]
 
 ## Abstract
 
-Cross-correlated regional load series motivate graph and attention mechanisms, but fixed-split accuracy tables can confound cross-series information with head capacity and temporal selection. CSA-LoadNet combines a shared temporal encoder, cross-series attention, and a compact prediction head for scalar 24-position-ahead multi-region load forecasting. On one fixed split, ten-seed means favored the full model over MLP and a smaller-head TemporalOnly ablation; that seed variation is conditional on the selected split. The matched OPSD evaluation uses eight quarterly rolling-origin blocks and five common seeds, averaging seeds within block before inference. The proposed arm reaches mean block-level MAPE 0.03664 and WAPE 0.03678, versus 0.03689 and 0.03711 for a target-only matched-context control; neither difference separates (MAPE Holm p = 0.984; WAPE raw p = 0.227). Comparisons with uniform cross-series, Euclidean-distance, and fixed-scale controls also remain unresolved after primary-family correction. A parameter-matched independent-encoder arm is worse, but its narrower per-series hidden layers and lower encoder arithmetic prevent attribution to sharing alone. On the separately scoped exact Ausgrid hierarchy, DLinear retains lower error than CSA-LoadNet under common OLS reconciliation. Thus the fixed-split aggregation attribution is not confirmed under the matched rolling-origin estimand, and no tested weighting form is established as superior.
+Cross-correlated regional load series motivate graph and attention mechanisms, but fixed-split accuracy tables can confound cross-series information with head capacity and temporal selection. CSA-LoadNet combines a shared temporal encoder, cross-series attention, and a compact prediction head for scalar 24-position-ahead multi-region load forecasting. On one fixed split, ten-seed means favored the full model over MLP and a smaller-head TemporalOnly ablation; this variation is split-conditional. The matched OPSD evaluation uses eight quarterly rolling-origin blocks and five common seeds, averaging seeds within block before inference. The proposed arm reaches mean block-level MAPE 0.03664 and WAPE 0.03678, versus 0.03689 and 0.03711 for a target-only matched-context control; neither difference separates (MAPE Holm p = 0.984; WAPE raw p = 0.227). Comparisons with uniform cross-series, Euclidean-distance, and fixed-scale controls also remain unresolved after primary-family correction. A parameter-matched independent-encoder arm is worse, but its narrower per-series hidden layers and lower encoder arithmetic prevent attribution to sharing alone. On the separately scoped exact Ausgrid hierarchy, DLinear retains lower error than CSA-LoadNet under common OLS reconciliation. Thus the fixed-split aggregation attribution is not confirmed under the matched rolling-origin estimand, and no tested weighting form is established as superior.
 
 **Keywords:** 24-step-ahead point forecasting; multi-region load; cross-series attention; matched controls; rolling-origin evaluation; negative results; open power system data
 
@@ -536,7 +536,7 @@ The form of the aggregation weights is likewise unsupported as a differentiator.
 
 ## Author Contributions
 
-[AUTHOR INPUT REQUIRED: assign verified CRediT roles to Jieyun Zheng, Linyao Zhang, Zhanghuang Zhang, Zhuolin Chen, and Ying Shi; obtain every author's approval; and insert the author-approved responsibility statement.]
+[AUTHOR INPUT REQUIRED: assign verified CRediT roles to Zheng Jieyun, Zhang Linyao, Zhang Zhanghuang, Chen Zhuolin, and Shi Ying; obtain every author's approval; and insert the author-approved responsibility statement.]
 
 ## Funding
 

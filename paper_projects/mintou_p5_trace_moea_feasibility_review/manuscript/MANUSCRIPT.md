@@ -3,7 +3,7 @@
      Figures 2--8 are regenerated through the supplementary artifact manifest.
      All AUTHOR INPUT REQUIRED markers below must be completed before submission. -->
 
-# TRACE-MOEA: Constrained Power-Grid Portfolio Search with Adaptive Preference Elitism, Budget Repair, and Run-Level Event Co-Occurrence Summaries
+# Investment Effectiveness Optimization Strategy based on Hybrid Multi-objective Evolution
 
 **Authors:** Yubin Lin (林宇彬), Jiyu Li (李继宇), Xiaofei Ruan (阮筱菲), Xiaoyu Huang (黄晓予), Dishan Yang (杨迪珊)
 **Affiliations:** Economic and Technological Research Institute of State Grid Fujian Electric Power Co., Ltd., Fuzhou 350000, Fujian, China
@@ -768,7 +768,7 @@ The authors declare no conflicts of interest.
 
 27. Raji, I.D.; Smart, A.; White, R.N.; Mitchell, M.; Gebru, T.; Hutchinson, B.; Smith-Loud, J.; Theron, D.; Barnes, P. Closing the AI accountability gap: defining an end-to-end framework for internal algorithmic auditing. In *Proceedings of the 2020 Conference on Fairness, Accountability, and Transparency (FAT* '20)*, Barcelona, Spain, 27–30 January 2020; pp. 33–44. https://doi.org/10.1145/3351095.3372873
 
-28. Lin, Y.; Zhang, J.; Huang, X.; Yang, D.; Li, J. BiLo-NSGA: Project-Level Local Search for Budget-Constrained Power-Grid Portfolio Optimization. Unpublished manuscript, 2026; available to editors and reviewers on request.
+28. Lin, Y.; Zhang, J.; Huang, X.; Yang, D.; Li, J. BiLo-NSGA: Budget-Aware Project-Level Local Moves with Run-Level Accepted-Move Summaries for Power-Grid Portfolio Optimization. Unpublished manuscript, 2026; available to editors and reviewers on request.
 
 29. Liang, Y.; Liu, H.; Zhou, H.; Meng, Z.; Liu, J.; Zhou, M. Multi-Stage Coordinated Planning for Transmission and Energy Storage Considering Large-Scale Renewable Energy Integration. *Applied Sciences* **2024**, *14*(15), 6486. https://doi.org/10.3390/app14156486
 

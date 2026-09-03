@@ -4,9 +4,9 @@
        papers/mintou/mintou_p3_samode_distribution_planning/evidence/
      Figures: ./figures/ (300 dpi PNG). -->
 
-# CARS-MODE: Constraint-Aware Repair and Strategy-Pool Multi-Objective Differential Evolution on a SimBench-Derived Mixed-Voltage Portfolio Proxy
+# Power Distribution Network Planning Strategy Optimization based on Self-Adaption Multi-objective Differential Evolution Algorithm
 
-**Authors:** Linyao Zhang (张林垚), Jieyun Zheng (郑洁云), Zhanghuang Zhang (张章煌), Shiyuan Ni (倪识远), Guilian Wu (吴桂联)
+**Authors:** Zhang Linyao (张林垚), Zheng Jieyun (郑洁云), Zhang Zhanghuang (张章煌), Ni Shiyuan (倪识远), Wu Guilian (吴桂联)
 **Affiliations:** Economic and Technological Research Institute of State Grid Fujian Electric Power Co., Ltd., Fuzhou 350000, Fujian, China
 **Correspondence:** zjy_0701@163.com (J. Zheng)
 
@@ -671,7 +671,7 @@ The archived pandapower layer is an illustrative composition diagnostic: one run
 
 ## Author Contributions
 
-[AUTHOR INPUT REQUIRED: assign the CRediT roles to Linyao Zhang, Jieyun Zheng, Zhanghuang Zhang, Shiyuan Ni, and Guilian Wu, and obtain approval from every author.] All authors have read and agreed to the published version of the manuscript.
+[AUTHOR INPUT REQUIRED: assign the CRediT roles to Zhang Linyao, Zheng Jieyun, Zhang Zhanghuang, Ni Shiyuan, and Wu Guilian, and obtain approval from every author.] All authors have read and agreed to the published version of the manuscript.
 
 ## Funding
 
