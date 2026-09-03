@@ -1,10 +1,11 @@
 # Title-to-Evidence Map
 
-- **Aligned title:** *BiLo-NSGA: Budget-Aware Project-Level Local Moves with Accepted-Move Logging for Power-Grid Portfolio Optimization*.
-- **Budget-aware project-level local moves** maps to affordable forward insertion, atomic delete--insert substitution, deterministic feasibility recovery, and constraint non-dominated environmental selection. The new evidence of record is `experiments/p6_s3_matched_effort/runs/primary_v1/`.
-- **Accepted-move logging** remains bounded to in-memory `forward_insert`, `backward_substitute`, and `repair_drop` production in the legacy implementation. Released legacy rows contain counts and final-front/event pool-position co-occurrence, not ordered payloads, states, lineage, replay, or a recommendation path.
+- **Locked title:** *Multi-objective Evolution Algorithm based on Non-Dominated Sorting and Bidirectional Local Search for Investment Effectiveness Strategy Optimization*.
+- **Multi-objective evolution based on non-dominated sorting** maps to the four-objective formulation and the stage-local constrained sorting and selection implementation disclosed in `manuscript/MANUSCRIPT.md`, `experiments/p6_s3_matched_effort/config.json`, and `experiments/p6_s3_matched_effort/run_experiments.py`.
+- **Bidirectional local search** maps to the inspected forward-insertion pass and paired delete--insert proposal pass in `run_experiments.py::local_improve`. This is an implementation statement, not evidence that bidirectionality improves accuracy; the component attribution remains unresolved.
+- **Investment effectiveness strategy optimization** is bounded to proxy portfolio-quality/effectiveness screening on the registered 120-candidate benchmark. No calibrated economic, electrical, expert, or deployment effectiveness is established.
 - The title does not claim superiority. Under the primary matched-evaluation protocol, BiLo-NSGA is below the disclosed stage-local NSGA-II in all eight scenario means and has four Holm-significant losses. It is above the bounded Pareto Local Search in all eight scenarios.
-- The method name **BiLo-NSGA** is a proper label. Neither the title nor the contribution list expands it into a bidirectional-gain, dependency-synergy, audit, or field-use claim.
+- The confirmed author order is Yubin Lin, Jingbo Zhang, Xiaoyu Huang, Dishan Yang, and Jiyu Li; the active route is Applied Sciences. Neither identity choice supplies scientific evidence or expands the contribution into a bidirectional-gain, dependency-synergy, audit, or field-use claim.
 
 # Primary Estimand and Analysis Unit
 
@@ -60,7 +61,7 @@
 
 # Unresolved Human Blockers
 
-- **AUTHOR INPUT REQUIRED:** confirm the author list, affiliations, correspondence details, and CRediT roles with every author. This stage does not infer roles from author order.
+- The author order, common affiliation, and Yubin Lin's first- and corresponding-author roles are confirmed and locked. **AUTHOR INPUT REQUIRED:** assign CRediT roles and obtain final approval from every author; this stage does not infer contribution roles from author order.
 - **AUTHOR INPUT REQUIRED:** provide the verified funder and grant number or confirm the no-external-funding statement; also confirm any APC funder.
 - **AUTHOR INPUT REQUIRED:** approve a persistent repository URL/DOI and the redistribution terms for the public inputs and stage-local evidence package.
 - Confirm with both paper teams that the P5/P6 shared-asset disclosure, textual independence, simultaneous-submission policy, and companion bibliographic status are accurate. The complete companion submission was not available in this isolated worktree, so no automated full-text overlap clearance is claimed.
