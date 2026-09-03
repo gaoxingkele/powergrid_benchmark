@@ -1,7 +1,9 @@
 # P3 Claim–Evidence Register
 
 **Contract status:** `LOCKED_IDENTITY / CURRENT_EVIDENCE_BOUNDARIES`
+
 **Locked title:** `Power Distribution Network Planning Strategy Optimization based on Self-Adaption Multi-objective Differential Evolution Algorithm`
+
 **Locked authors:** Zhang Linyao (first), Zheng Jieyun (corresponding), Zhang Zhanghuang, Ni Shiyuan, Wu Guilian
 
 Status vocabulary: `SUPPORTED_CURRENT`, `SUPPORTED_WITH_SCOPE`, `UNRESOLVED`, `NOT_SUPPORTED`, `FUTURE_HYPOTHESIS`.
