@@ -1,7 +1,7 @@
 # Stage 2 Batch Acceptance Packet
 
-Date: 2026-09-04  
-Scope: verified literature maps for the four locked-title manuscripts  
+Date: 2026-09-04
+Scope: verified literature maps for the four locked-title manuscripts
 Decision requested: accept or reject each Stage-2 candidate branch
 
 ## Candidate heads
