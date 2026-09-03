@@ -4,13 +4,14 @@ The authoritative literature review for this paper is **Section 2 of the manuscr
 (`mintou_p2_hygraph_load_forecasting/manuscript/MANUSCRIPT.md`), organized in three threads:
 
 1. **Deep architectures for short-term and 24-hour-ahead load forecasting** (Section 2.1)
-2. **Cross-series and graph-structured load forecasting** (Section 2.2) — including the gap this paper fills: no prior work tests whether its particular cross-series weighting beats trivial equal-weight averaging under an identical protocol with seed-level significance testing
+2. **Cross-series and graph-structured load forecasting** (Section 2.2) — including the scoped comparison need: testing selected weighting against informative equal averaging under this paper's frozen protocol, without an absence or priority claim
 3. **Simple baselines and honest evaluation** (Section 2.3)
 
 An extended standalone version of the review, with full citation context and the gap
 statement, is at `mintou_p2_hygraph_load_forecasting/manuscript/related_work.md`.
-All references are Crossref-verified (DOIs confirmed 2026-07-16); the manuscript's
-reference list uses MDPI numbered style in order of first appearance.
+The 30 inherited references and three newly cited sources have item-level metadata
+and sentence-support records in `manuscript/reconstruction_v2/literature/`; the
+manuscript reference list uses MDPI numbered style in order of first appearance.
 
 ## Target-journal comparator papers (positioning set)
 
