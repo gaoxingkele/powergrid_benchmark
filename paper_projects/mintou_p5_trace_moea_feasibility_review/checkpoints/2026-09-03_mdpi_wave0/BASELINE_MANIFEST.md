@@ -6,6 +6,36 @@
 **Locked title:** `Investment Effectiveness Optimization Strategy based on Hybrid Multi-objective Evolution`  
 **Authors:** Yubin Lin (first and corresponding), Jiyu Li, Xiaofei Ruan, Xiaoyu Huang, Dishan Yang  
 
+## Locked identity and authority
+
+- The title above is exact, including capitalization, hyphenation, and the word
+  `based`; no alternate TRACE-MOEA title is authorized for the canonical
+  manuscript or Energies submission source.
+- The confirmed author order is exactly Yubin Lin, Jiyu Li, Xiaofei Ruan,
+  Xiaoyu Huang, Dishan Yang. This stage neither adds/removes an author nor
+  assigns CRediT roles, affiliations, funding, or approval on an author's behalf.
+- `manuscript/MANUSCRIPT.md` is the canonical narrative source and
+  `manuscript/journal_submission/paper.tex` is the canonical Energies submission
+  source. If identity or claim strength differs elsewhere, these files must be
+  reconciled to this manifest and `CLAIM_EVIDENCE_REGISTER.md`; the conflicting
+  file does not acquire authority by being newer or rendered.
+
+## Canonical, legacy, and read-only roots
+
+| Root class | Repository-relative root | Authority and mutation rule |
+|---|---|---|
+| Canonical project root | `paper_projects/mintou_p5_trace_moea_feasibility_review/` | The only writable reconstruction-v2 project. Stage artifacts, manuscript revisions, and future registered evidence belong here. |
+| Canonical future experiment root | `paper_projects/mintou_p5_trace_moea_feasibility_review/experiments/p5_s4_energies_investment_validation_v1/` | Reserved for the approved validation pipeline. At this stage it is a `NO_RESULTS` scaffold and supplies no outcome evidence. |
+| Legacy ARA evidence root | `papers/mintou/mintou_p5_trace_moea_feasibility_review/` | Historical source, configuration, run, table, and logic evidence. Read-only: cite with scope, but do not overwrite, relabel, or silently promote it. |
+| Shared implementation root | `src/powergrid_benchmark/` | Repository-level implementation used by the legacy runs. Read-only in this isolated stage; inspecting it does not authorize cross-project edits or convert code behavior into outcome evidence. |
+| Read-only predecessor root | `paper_projects/mintou_p5_trace_moea_feasibility_review/experiments/p5_s3_matched_sensitivity/` | Preserved matched-output, normalization, sensitivity, failure, and reproduction record. Read-only: new work must not alter or replace any file under this root. |
+| Legacy presentation root | `paper_projects/mintou_p5_trace_moea_feasibility_review/manuscript/submission_preview/` | Superseded preview only. Read-only and non-authoritative for title, authorship, scientific wording, or release status. |
+
+The Wave-0 checkpoint files record the boundary between these roots. They do
+not turn a legacy proxy result into new validation, and the canonical future
+experiment root becomes evidentiary only after later protocol, pilot, formal-run,
+and statistical gates are satisfied.
+
 ## Repository state
 
 - Repository branch: `main`
