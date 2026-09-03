@@ -2,6 +2,8 @@
 
 `LITERATURE_EVIDENCE_MATRIX.csv` binds each retained source to the exact manuscript paragraph and sentence it supports. `REFERENCE_VERIFICATION.csv` supplies the corresponding DOI or authoritative record and the source-level evidence location (metadata record, abstract, methods, or conclusions). Read together, those two files are the claim-to-source locator.
 
+An independent candidate review on 2026-09-03 re-queried every DOI-bearing entry through the Crossref API and found no title, year, or author mismatch. That batch result verifies bibliographic identity only. It does not independently certify every full-text interpretation; the matrix therefore retains narrow claim language and the evidence locator used during the source-level audit.
+
 ## Corrections made
 
 - Former `ref28`, an unpublished companion manuscript without a public identifier or independently verifiable record in this worktree, was removed from the bibliography. Companion-study statements remain explicitly internal shared-assets declarations and are not external literature evidence.
