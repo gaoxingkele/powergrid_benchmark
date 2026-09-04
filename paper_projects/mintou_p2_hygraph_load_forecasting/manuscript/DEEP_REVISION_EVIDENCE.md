@@ -99,6 +99,8 @@ Public OPSD, SimBench, and Ausgrid datasets remain provider-owned sources. Stand
 
 ## New or Rerun Experiments
 
+The Stage-3 P4 graph/model implementation contract is now executable under `experiments/p2_s4_electronics_hgcn_load_v1/`. It freezes source-bound node and target semantics, explicit hierarchy provenance, training-prefix-only OPSD correlation construction, a matched Euclidean GCN, and a Poincare-ball HGCN with explicit curvature, origin maps, adjacency aggregation, and numerical safeguards. Its verification script uses synthetic tensors only. This is an implementation invariant check, not a pilot, rerun, or forecasting experiment; it creates no metric or method-performance evidence, and the manuscript's no-GCN/HGCN-result boundary remains in force. Ausgrid leaf identities and region memberships remain blocked until copied from a verified source/data manifest rather than inferred.
+
 One rolling-origin experiment namespace was executed once:
 
 - namespace: `experiments/p2_s3_identifiable_v1/`;

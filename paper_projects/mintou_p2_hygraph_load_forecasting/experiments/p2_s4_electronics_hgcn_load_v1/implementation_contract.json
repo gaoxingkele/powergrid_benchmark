@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0",
+  "stage": "p4_v2_s03_graph_data_model_implementation_contract",
+  "status": "IMPLEMENTATION_CONTRACT_FROZEN_NO_RESULTS",
+  "locked_title": "Graph Convolutional Network based on Hyperbolic Space for Power Load Forecasting",
+  "forecast_semantics": {
+    "input": "per-node load history ending at processed origin t",
+    "window_positions": 168,
+    "target": "one scalar load value for every frozen node at processed position t+24",
+    "horizon_positions": 24,
+    "elapsed_time_caveat": "A processed-position lead is not silently relabelled as elapsed hours when source rows are absent.",
+    "normalization": "fit per node from training-prefix values only and reuse unchanged for validation and test"
+  },
+  "node_contracts": {
+    "ausgrid_hierarchy": {
+      "count": 17,
+      "semantics": "12 source-manifest customer leaves, four deterministic source-manifest regional sums, and one system sum",
+      "identity_rule": "leaf IDs, leaf selection, and four region memberships must be copied from and hashed with the frozen source data manifest; the implementation must not infer or fabricate them",
+      "target_rule": "leaf targets are observed loads; region and system targets are deterministic sums of their registered descendants at the same target position",
+      "edge_rule": "the 16 undirected child-parent links come only from the registered 12-leaf/4-region/system hierarchy; self-loops are added only inside convolution normalization",
+      "scope": "an accounting hierarchy, not a claimed electrical feeder topology"
+    },
+    "opsd_dense": {
+      "count": 6,
+      "ordered_nodes": ["DE", "FR", "IT", "ES", "NL", "PL"],
+      "source_columns": ["DE_load_actual_entsoe_transparency", "FR_load_actual_entsoe_transparency", "IT_load_actual_entsoe_transparency", "ES_load_actual_entsoe_transparency", "NL_load_actual_entsoe_transparency", "PL_load_actual_entsoe_transparency"],
+      "target_rule": "the selected country's observed load at processed position t+24",
+      "edge_rule": "undirected edge iff absolute Pearson correlation is at least 0.7 on at least 168 pairwise-finite rows strictly before the split's training cutoff",
+      "scope": "a training-window functional graph, not physical transmission topology"
+    }
+  },
+  "visibility_contract": {
+    "graph_fit_interval": "[0, train_stop_exclusive)",
+    "forbidden_inputs": ["validation values", "test values", "future missingness", "future labels", "model errors or outcomes"],
+    "per_outer_split_rebuild": true,
+    "persisted_provenance": ["graph_kind", "ordered_node_ids", "train_start", "train_stop_exclusive", "source_rule", "source_manifest_sha256", "training_values_sha256_when_value_derived", "threshold", "min_overlap", "self_loop_policy", "adjacency_sha256"]
+  },
+  "matched_identification_pair": {
+    "models": ["EuclideanGCNForecaster", "HyperbolicGCNForecaster"],
+    "shared": ["ordered nodes", "adjacency", "168-96-48 temporal encoder", "100-64-1 prediction head", "calendar features", "layer count", "hidden width", "optimizer and tuning budget"],
+    "only_intended_difference": "Euclidean versus Poincare-ball graph convolution",
+    "maximum_parameter_difference_fraction": 0.1
+  },
+  "hyperbolic_specification": {
+    "manifold": "Poincare ball",
+    "sectional_curvature": "-c for c>0",
+    "curvature_modes": {"fixed_1": "c=1", "learnable": "c=softplus(raw_c)+1e-4"},
+    "layer": "log_0^c -> shared linear transform -> normalized-adjacency aggregation -> ReLU in tangent space -> exp_0^c",
+    "readout": "log_0^c followed by the prediction head shared with Euclidean GCN",
+    "safeguards": ["positive curvature floor", "tangent-norm clipping", "ball-radius projection", "atanh-domain clipping", "finite-state failure"]
+  },
+  "mandatory_predecessors": {
+    "CSA-LoadNet": "retain the accepted p2_s3_identifiable_v1 matched null and do not rename it HGCN",
+    "DLinear": "retain as a mandatory strong non-graph comparator and preserve its adverse exact-hierarchy result"
+  },
+  "result_policy": "This stage validates implementation invariants only. It supplies no forecast metric, superiority claim, pilot evidence, or formal result."
+}
