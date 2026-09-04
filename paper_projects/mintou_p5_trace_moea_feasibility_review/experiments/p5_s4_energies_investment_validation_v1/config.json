@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0",
+  "experiment_id": "p1_v2_s04_trace_moea_confirmatory_v1",
+  "project": "mintou_p5_trace_moea_feasibility_review",
+  "locked_title": "Investment Effectiveness Optimization Strategy based on Hybrid Multi-objective Evolution",
+  "status": "FROZEN",
+  "frozen_at": "2026-09-05T00:00:00+08:00",
+  "evidence_status": "NOT_EXECUTED_NO_RESULTS",
+  "datasets": ["p5_proxy_pool_120_from_rts_gmlc_simbench_nerc_metadata"],
+  "task_families": {
+    "tuning_only": ["benchmark_portfolio_optimization", "distribution_project_review", "reliability_driven_review", "renewable_accommodation_review"],
+    "confirmatory_only": ["budget_ranking_stability", "preference_aware_support", "traceability_evaluation"],
+    "descriptive_not_rerun": ["NERC_rule_consistency", "MISO_MTEP16_outcomes"]
+  },
+  "hybrid_arms": [
+    {"id": "Full_TRACE", "nds_search": true, "deterministic_repair": true, "preference_guided_retention": true},
+    {"id": "NoPreferenceRanking", "nds_search": true, "deterministic_repair": true, "preference_guided_retention": false},
+    {"id": "NoFeasibilityRepair", "nds_search": true, "deterministic_repair": false, "preference_guided_retention": true},
+    {"id": "NSGA2Only", "nds_search": true, "deterministic_repair": false, "preference_guided_retention": false}
+  ],
+  "baselines": ["NSGA-II", "R-NSGA-II", "MOEA/D", "AHP-TOPSIS", "Weighted Sum", "Greedy BCR"],
+  "stochastic_methods": ["Full_TRACE", "NoPreferenceRanking", "NoFeasibilityRepair", "NSGA2Only", "NSGA-II", "R-NSGA-II", "MOEA/D"],
+  "deterministic_references": ["AHP-TOPSIS", "Weighted Sum", "Greedy BCR"],
+  "seeds": [910003, 910019, 910031, 910043, 910057, 910069, 910081, 910099, 910121, 910127, 910141, 910153, 910169, 910181, 910193, 910211, 910229, 910243, 910249, 910273, 910279, 910307, 910313, 910331, 910357, 910361, 910369, 910391, 910399, 910411],
+  "tuning": {
+    "seeds": [810007, 810019, 810031, 810049, 810053, 810071, 810079, 810091, 810109, 810121],
+    "selection_metric": "median primary analytic-bound HV across all development cells",
+    "tie_break": "lexicographically smallest configuration_id",
+    "configurations_per_method": 4,
+    "grids": {
+      "Full_TRACE": ["K4_cadence5", "K4_cadence10", "K8_cadence5", "K8_cadence10"],
+      "NSGA-II": ["sbx20_pm15", "sbx20_pm20", "sbx30_pm15", "sbx30_pm20"],
+      "R-NSGA-II": ["balanced_eps001", "balanced_eps005", "scenario_eps001", "scenario_eps005"],
+      "MOEA/D": ["simplex_T4", "simplex_T8", "revised_T4", "revised_T8"]
+    },
+    "ablation_rule": "inherit selected Full_TRACE configuration and change only the named component switch",
+    "visibility": "all tuning rows and selection decision are released",
+    "disjointness": "no tuning scenario or seed occurs in formal confirmatory evaluation"
+  },
+  "budgets": {
+    "nominal_B_synthetic_units": 1160,
+    "budget_scan_multipliers": [0.75, 0.88, 1.0, 1.25],
+    "objective_calls_per_stochastic_run": 3200,
+    "wall_time_seconds_per_stochastic_run": 1800,
+    "wall_time_seconds_per_deterministic_run": 120,
+    "tuning_runs": 640,
+    "tuning_objective_calls": 2048000,
+    "formal_unique_stochastic_runs": 900,
+    "formal_objective_calls": 2880000,
+    "early_stopping": false
+  },
+  "primary_outcomes": [{"id": "analytic_hv_ref1p1", "definition": "five-dimensional feasible-front hypervolume under frozen conservative analytic bounds, without clipping", "reference_point": [1.1, 1.1, 1.1, 1.1, 1.1]}],
+  "secondary_outcomes": ["legacy_clipped_empirical_hv_ref1p1", "analytic_hv_ref1p2", "common_reference_igd_plus", "feasible_front_proportion", "budget_utilization", "synthetic_cost_index", "portfolio_cardinality", "risk_proxy", "event_position_cooccurrence"],
+  "hv_bounds": {
+    "scope": "fixed method-independent per confirmatory scenario",
+    "construction": "nominal and 0.88-B conservative analytic bounds copied from the preserved Stage-3 artifact; 0.75-B and 1.25-B scan rows use the same definition and change only the cost upper bound to B; no method output is used",
+    "source_artifact": "../p5_s3_matched_sensitivity/runs/primary_v4/normalization/bounds.csv",
+    "source_artifact_sha256": "04816ce714fd96e4e176d782525c82003ce69098dcf49451029e5cd5a35baf7f",
+    "stage4_bounds_sha256": "8895fdb7e45b5490d3998893f66a06e8a9e405431d3ccace5490fc707ce9e373",
+    "method_output_visibility": false,
+    "clipping": false,
+    "required_artifact": "bounds.csv",
+    "execution_gate": "every formal row and the future run manifest must match stage4_bounds_sha256"
+  },
+  "comparison_family": {
+    "members": "Full_TRACE versus each of six stochastic opponents within each of three confirmatory scenarios",
+    "count": 18,
+    "test": "two-sided paired sign test",
+    "analysis_unit": "paired method-scenario-seed run",
+    "effect": "rank-biserial plus paired median difference",
+    "confidence_interval": "5000-resample paired bootstrap"
+  },
+  "multiplicity": {"method": "Holm", "familywise_alpha": 0.05, "scope": "all 18 primary comparisons in one family"},
+  "failure_policy": {
+    "pre_objective_infrastructure_failure": "one documented rerun with identical cell and environment",
+    "algorithm_or_budget_or_timeout_failure": "retain failed row; no replacement seed and no imputation",
+    "cell_stop_rule": "if failures exceed 5 percent in any stochastic method-scenario cell, report incomplete and perform no confirmatory inference"
+  },
+  "negative_result_policy": "report all null, adverse, failed, and normalization-sensitive findings; no subset, secondary-outcome, alternate-bound, or budget-scan rescue of a failed primary claim",
+  "pilot": {"namespace": "pilot", "paper_use": false, "may_select_configuration": false},
+  "formal": {"namespace": "formal", "result_visibility_before_freeze": false, "legacy_rows_allowed": false},
+  "output_schema": {
+    "required_run_fields": ["experiment_id", "phase", "method", "configuration_id", "scenario", "seed", "budget_multiplier", "objective_call_limit", "objective_calls_executed", "wall_time_seconds", "status", "failure_class", "primary_hv", "front_size", "feasible_front_proportion", "budget_utilization", "synthetic_cost_index", "portfolio_cardinality", "risk_proxy", "event_count", "event_position_cooccurrence", "config_sha256", "data_manifest_sha256", "environment_sha256", "bounds_sha256"]
+  }
+}

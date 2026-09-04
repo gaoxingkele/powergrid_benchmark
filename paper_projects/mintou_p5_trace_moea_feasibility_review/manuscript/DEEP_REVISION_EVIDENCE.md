@@ -23,6 +23,14 @@ review dataset is present.
 
 ## Primary Estimand and Analysis Unit
 
+The prospective Stage-4 protocol is now frozen at
+`experiments/p5_s4_energies_investment_validation_v1/config.json`; it has not
+been executed and contributes no result. Its primary estimand is the paired
+difference in analytic-bound feasible-front HV between Full TRACE and each
+stochastic opponent within each of three confirmatory-only scenarios. One
+method--scenario--seed run is the analysis unit. Thirty fixed seeds are shared
+across methods, and all 18 Full-TRACE comparisons form one Holm family.
+
 The main optimization estimand is the difference in standard feasible-front
 hypervolume between TRACE-MOEA and a named comparator within a named review
 scenario under the fixed configuration. The analysis unit for a stochastic
@@ -63,6 +71,17 @@ whether or not population replacement was needed, 320 is not an injection,
 replacement, or eviction count.
 
 ## Comparison Budget and Data Visibility
+
+For the unexecuted Stage-4 protocol, every stochastic run is capped at exactly
+3,200 objective calls and 1,800 seconds. Four tunable methods each receive four
+configurations over the same four development-only scenarios and ten paired
+development seeds. The three confirmatory scenarios and thirty confirmatory
+seeds do not overlap tuning. Seven stochastic methods produce 630 main cells;
+the four-level three-method budget scan reuses its 90 nominal-budget cells and
+adds 270, for 900 unique formal runs and 2,880,000 planned objective calls.
+Deterministic references are executed once per scenario and remain descriptive.
+Numeric analytic bounds must be computed from frozen data and objective
+definitions, without method outputs, and hashed before execution.
 
 TRACE-MOEA, NSGA-II, and R-NSGA-II use the disclosed population size of 40,
 40 generation labels, and 30 seeds per method-scenario. MOEA/D instead uses 35
@@ -135,6 +154,13 @@ deployment claims.
 
 ## Negative and Null Results
 
+The Stage-4 negative-result rule is frozen prospectively: all null, adverse,
+failed, timeout, and normalization-sensitive findings must be retained. A
+failed primary comparison cannot be rescued by selecting a scenario subset,
+secondary outcome, alternative bound, or budget level. Direct component
+controls alone support component claims; `NSGA2Only` remains a joint-removal
+control. This policy does not alter or supersede the historical findings below.
+
 - Removing preference adaptation changes pooled hypervolume from 0.174247 to
   0.173956, a 0.17% difference. No preference-ablation contrast survives the
   second Holm correction across seven scenarios; the smallest reported
@@ -201,6 +227,17 @@ unchanged. Shared-project regression tests are part of the stage acceptance
 check.
 
 ## New or Rerun Experiments
+
+Stage 4 adds a frozen protocol only. As recorded in
+`experiments/p5_s4_energies_investment_validation_v1/planned_vs_executed.json`,
+zero pilot, tuning, or formal runs have been executed and no numerical result
+has been created. The method-independent numeric bounds are frozen by copying
+the analytic rows from the preserved Stage-3 artifact and recording its hash;
+they are not a Stage-4 result. Execution remains blocked because source and
+candidate hashes and source-specific licence evidence are absent, and the
+planned environment has not passed a pilot. Every future run row and manifest
+must match the frozen Stage-4 bound-file hash. These
+blockers must not be reworded as completed data acquisition or validation.
 
 The frozen stage design is `experiments/p5_s3_matched_sensitivity/config.json`.
 The final run is `runs/primary_v4/`, and `runs/reproduction_v1/` is an
