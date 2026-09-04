@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "experiment_id": "p4_v2_s04_hgcn_graph_geometry_forecasting_v1",
+  "project": "mintou_p2_hygraph_load_forecasting",
+  "locked_title": "Graph Convolutional Network based on Hyperbolic Space for Power Load Forecasting",
+  "status": "FROZEN",
+  "frozen_at": "2026-09-05T00:00:00+08:00",
+  "evidence_status": "NOT_EXECUTED_NO_RESULTS",
+  "datasets": ["ausgrid_hierarchy_17", "opsd_six_country_functional_graph"],
+  "forecast": {
+    "window_positions": 168,
+    "horizon_positions": [24],
+    "test_origins_per_block": 672,
+    "training_origin_stride": 3,
+    "test_origin_stride": 1,
+    "training_target_rule": "target position must be strictly before the block anchor",
+    "validation": "last 15 percent of eligible training origins by time; checkpoint selection only",
+    "position_caveat": "window and lead are processed positions, not guaranteed elapsed hours"
+  },
+  "rolling_origins": {
+    "ausgrid_hierarchy_17": {
+      "timestamp_semantics": "source-derived naive hourly labels; no timezone asserted",
+      "development": ["2010-10-01T00:00", "2011-01-01T00:00", "2011-04-01T00:00"],
+      "formal": ["2011-07-01T00:00", "2011-10-01T00:00", "2012-01-01T00:00", "2012-04-01T00:00", "2012-07-01T00:00", "2012-10-01T00:00", "2013-01-01T00:00", "2013-04-01T00:00"],
+      "materialization_gate": "all exact labels and full 672-origin blocks must exist in the hashed processed file or execution stops"
+    },
+    "opsd_six_country_functional_graph": {
+      "timestamp_semantics": "UTC source timestamp retained after complete-case filtering",
+      "development": ["2016-04-01T00:00:00Z", "2016-07-01T00:00:00Z", "2016-10-01T00:00:00Z"],
+      "formal": ["2017-01-01T00:00:00Z", "2017-04-01T00:00:00Z", "2017-07-01T00:00:00Z", "2017-10-01T00:00:00Z", "2018-01-01T00:00:00Z", "2018-04-01T00:00:00Z", "2018-07-01T00:00:00Z", "2018-10-01T00:00:00Z"],
+      "materialization_gate": "each anchor must resolve to the inherited processed-row index and a full 672-origin block or execution stops"
+    }
+  },
+  "normalization": {
+    "rule": "per node sample mean and sample standard deviation from finite load values strictly before each outer block anchor",
+    "reuse": "freeze within block and reuse unchanged for internal validation and test",
+    "failure": "zero or non-finite standard deviation fails the cell",
+    "target_inverse_transform": true
+  },
+  "covariates": {
+    "included": ["sin(2*pi*target_position/24)", "cos(2*pi*target_position/24)", "sin(2*pi*floor(target_position/24)/7)", "cos(2*pi*floor(target_position/24)/7)"],
+    "semantics": "sequence-phase features computed only from processed target position",
+    "excluded": ["weather", "holiday", "localized civil time", "daylight-saving indicator", "price", "future observed load"]
+  },
+  "graph_provenance": {
+    "real_graphs": {"ausgrid_hierarchy_17": "frozen accounting hierarchy", "opsd_six_country_functional_graph": "absolute Pearson correlation >= 0.7 with >=168 pairwise-finite training-prefix rows, rebuilt per outer split"},
+    "identity": "zero off-diagonal adjacency; self-loops enter only in convolution normalization",
+    "random": "uniform deterministic undirected edge sampling with graph_seed=20260905 and the real graph edge count; Ausgrid control must be a connected tree",
+    "forbidden_inputs": ["validation values", "test values", "future missingness", "future labels", "model errors or outcomes"],
+    "required_fields": ["graph_kind", "ordered_node_ids", "train_start", "train_stop_exclusive", "source_rule", "source_manifest_sha256", "training_values_sha256_when_value_derived", "threshold", "min_overlap", "graph_seed", "self_loop_policy", "edge_list", "adjacency_sha256"]
+  },
+  "baselines": ["Persistence", "DLinear", "CSA-LoadNet", "EuclideanGCN-Real"],
+  "models": ["Persistence", "DLinear", "CSA-LoadNet", "EuclideanGCN-Real", "HGCN-Fixed1-Real", "HGCN-Learnable-Real", "EuclideanGCN-Identity", "HGCN-Fixed1-Identity", "EuclideanGCN-Random", "HGCN-Fixed1-Random"],
+  "ablation_contract": {
+    "geometry_only": "HGCN-Fixed1-Real minus EuclideanGCN-Real; same real graph and matched architecture/training",
+    "graph_only": ["HGCN-Fixed1-Real minus HGCN-Fixed1-Identity", "HGCN-Fixed1-Real minus HGCN-Fixed1-Random"],
+    "interaction": "(HGCN-Fixed1-Real - EuclideanGCN-Real) - (HGCN-Fixed1-Identity - EuclideanGCN-Identity)",
+    "inheritance": "identity and random arms inherit the selected hyperparameters of their same-geometry real-graph arm and are not retuned"
+  },
+  "matched_graph_models": {
+    "shared": ["ordered nodes", "adjacency within a graph cell", "168-96-48 temporal encoder", "four sequence-phase covariates", "100-64-1 prediction head", "graph-layer count", "graph hidden width", "optimizer", "batch size", "epochs", "tuning budget", "paired seeds"],
+    "only_intended_geometry_difference": "Euclidean versus Poincare-ball graph convolution",
+    "fixed_curvature": 1.0,
+    "learned_curvature": "softplus(raw_c)+1e-4",
+    "maximum_parameter_difference_fraction": 0.1
+  },
+  "seeds": [11, 23, 47, 59, 71],
+  "tuning": {
+    "seeds": [101, 211, 307],
+    "development_blocks_per_dataset": 3,
+    "configurations_per_trainable_family": 8,
+    "trainable_families": ["DLinear", "CSA-LoadNet", "EuclideanGCN-Real", "HGCN-Fixed1-Real", "HGCN-Learnable-Real"],
+    "selection_metric": "median development-block WAPE after averaging three seeds within each block",
+    "tie_break": "lexicographically smallest configuration_id",
+    "visibility": "release every tuning row and the deterministic selection ledger",
+    "disjointness": "no development block or tuning seed occurs in formal evaluation",
+    "grids": {
+      "DLinear": {"decomposition_kernel": [25, 49], "learning_rate": [0.001, 0.0003], "weight_decay": [0.0, 0.0001]},
+      "CSA-LoadNet": {"dropout": [0.0, 0.1], "learning_rate": [0.001, 0.0003], "weight_decay": [0.0, 0.0001]},
+      "EuclideanGCN-Real": {"graph_layers": [1, 2], "graph_hidden_width": [32, 64], "learning_rate": [0.001, 0.0003]},
+      "HGCN-Fixed1-Real": {"graph_layers": [1, 2], "graph_hidden_width": [32, 64], "learning_rate": [0.001, 0.0003]},
+      "HGCN-Learnable-Real": {"graph_layers": [1, 2], "graph_hidden_width": [32, 64], "learning_rate": [0.001, 0.0003]}
+    },
+    "planned_runs": 720
+  },
+  "training_budget": {
+    "epochs": 20,
+    "batch_size": 2048,
+    "optimizer": "Adam beta1=0.9 beta2=0.999 epsilon=1e-8",
+    "loss": "mean squared error on normalized node targets",
+    "checkpoint": "lowest internal-validation MSE over all 20 completed epochs",
+    "early_termination": false,
+    "formal_trainable_runs": 720,
+    "formal_deterministic_block_outputs": 16,
+    "resource_gate": "pilot records wall time and peak memory; author resource acceptance is required before formal execution"
+  },
+  "primary_outcomes": [
+    {"id": "ausgrid_level_equal_wape", "definition": "mean of leaf-pooled, region-pooled, and root WAPE within a block"},
+    {"id": "opsd_pooled_wape", "definition": "WAPE pooled over six nodes and all forecasts within a block"}
+  ],
+  "secondary_outcomes": ["MAE", "RMSE", "MAPE", "sMAPE", "mean_signed_error", "parameter_count", "training_seconds", "inference_seconds_per_672_origin_block", "peak_host_memory_bytes", "peak_cuda_memory_bytes_when_applicable", "nonfinite_loss_count", "nonfinite_gradient_count", "nonfinite_state_count", "projection_count", "tangent_clip_count", "curvature_min", "curvature_max", "failed_cell_count"],
+  "calibration": {"applicability": "NOT_APPLICABLE_POINT_FORECASTS_ONLY", "forbidden_claim": "mean signed error is descriptive bias, not probabilistic calibration"},
+  "comparison_family": {
+    "count": 14,
+    "scope": "seven frozen WAPE contrasts in each of Ausgrid and OPSD, corrected together",
+    "within_dataset_members": ["HGCN-Fixed1-Real vs EuclideanGCN-Real", "HGCN-Fixed1-Real vs HGCN-Fixed1-Identity", "HGCN-Fixed1-Real vs HGCN-Fixed1-Random", "HGCN-Fixed1-Real vs DLinear", "HGCN-Fixed1-Real vs Persistence", "HGCN-Fixed1-Real vs CSA-LoadNet", "real-versus-identity geometry difference-in-differences"],
+    "test": "two-sided exact paired sign-flip test over eight block differences",
+    "analysis_unit": "rolling-origin block after averaging five paired seeds within trainable method-block cells; persistence has one deterministic block value",
+    "effect": "mean paired WAPE difference; negative favors the first named method",
+    "confidence_interval": "pointwise 95 percent percentile bootstrap over blocks with 20000 resamples",
+    "analysis_seed": 20260905,
+    "equivalence_margin": null
+  },
+  "multiplicity": {"method": "Holm", "familywise_alpha": 0.05, "scope": "all 14 primary WAPE contrasts as one family"},
+  "failure_policy": {
+    "pre_execution_infrastructure_failure": "one documented rerun with identical cell and environment before data/model execution",
+    "algorithm_numerical_timeout_or_resource_failure": "retain failed row; no replacement seed and no imputation",
+    "paired_inference": "a missing member makes the primary contrast incomplete; no favorable complete-case test",
+    "silent_retry": false
+  },
+  "negative_result_policy": "report every null, adverse, failed, unstable, and resource-limited outcome; no dataset/seed subset, secondary metric, learned-curvature variant, or historical result may rescue a failed primary claim",
+  "pilot": {"namespace": "pilot", "paper_use": false, "may_select_configuration": false, "seeds": [401, 409], "scope": "one Ausgrid development block for code, leakage, schema, numerical, memory, and runtime checks only; pilot seeds are disjoint from tuning and formal seeds"},
+  "formal": {"namespace": "formal", "result_visibility_before_freeze": false, "legacy_rows_allowed": false, "development_rows_allowed": false, "pilot_rows_allowed": false},
+  "output_schema": {
+    "required_run_fields": ["experiment_id", "phase", "dataset", "condition", "method", "graph_kind", "curvature_mode", "configuration_id", "rolling_origin", "rolling_origin_processed_index", "seed", "epochs_planned", "epochs_completed", "status", "failure_class", "wape", "mae", "rmse", "mape", "smape", "mean_signed_error", "parameter_count", "training_seconds", "inference_seconds", "peak_host_memory_bytes", "peak_cuda_memory_bytes", "nonfinite_loss_count", "nonfinite_gradient_count", "nonfinite_state_count", "projection_count", "tangent_clip_count", "curvature_min", "curvature_max", "config_sha256", "data_manifest_sha256", "environment_sha256", "graph_provenance_sha256"]
+  }
+}
