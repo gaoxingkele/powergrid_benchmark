@@ -1,8 +1,8 @@
 # Related Work — mintou_p5 (TRACE-MOEA, target: MDPI Energies)
 
 Working literature file for the Related Work section of the TRACE-MOEA manuscript.
-Every DOI below was resolved against the Crossref REST API on 2026-07-16
-(scratchpad `refs_p5.json` holds the raw metadata); no reference is cited from memory alone.
+The current item-level audit, claim bindings, search record, and comparator decisions are in
+`reconstruction_v2/literature/`; that record supersedes the unavailable historical scratchpad.
 Phrasing is written independently of the sibling p6 (BiLo-NSGA) manuscript to keep the
 two texts CrossCheck-safe; only unavoidable classic references overlap.
 
@@ -15,7 +15,7 @@ exhaustive absence.
 
 ---
 
-## Thread A — Power grid investment portfolio optimization and feasibility-review MCDM
+## Unresolved problem A — From network planning to auditable project-queue selection
 
 **Scope of the thread.** How utilities decide which grid investments to fund: expansion-planning
 optimization, portfolio-level project selection, and the multi-criteria scoring tradition that
@@ -49,7 +49,7 @@ inspectable intermediate decisions.
 
 ---
 
-## Thread B — Preference- and reference-point-guided MOEAs and decision support
+## Unresolved problem B — Preference guidance under hard constraints
 
 **Scope of the thread.** Multi-objective evolutionary algorithms that inject decision-maker
 preference structure into the search: reference points, preference relations, reference vectors,
@@ -87,7 +87,7 @@ that this combination establishes isolated component novelty or a decision archi
 
 ---
 
-## Thread C — Traceability, explainable optimization, and audit trails
+## Unresolved problem C — Run summaries are not decision provenance
 
 **Scope of the thread.** Making algorithmic decisions inspectable: XAI foundations, explainability
 for optimization/metaheuristics, provenance models, and algorithmic audit practice.
