@@ -58,21 +58,21 @@ Three threads frame this study: the deep-architecture lineage of short-term load
 
 ### 2.1. Deep Architectures for Short-Term and 24-Hour-Ahead Load Forecasting
 
-Recurrent networks were among the first deep models to displace classical load forecasters. Building on the LSTM cell [9], Kong et al. demonstrate short-term forecasting at the residential scale [10]. DeepAR extends shared training to large panels of related series [11], an idea reflected in CSA-LoadNet's shared encoder. Temporal convolutional networks offer a lower-cost alternative [12], while the Temporal Fusion Transformer [13] and Informer [14] extend attention-based forecasting.
+Recurrent networks are an established deep-learning line in load forecasting. Building on the LSTM cell [9], Kong et al. demonstrate short-term forecasting at the residential scale [10]. DeepAR extends shared training to large panels of related series [11], an idea reflected in CSA-LoadNet's shared encoder. The cited energy-series comparison evaluates temporal convolutional networks against recurrent alternatives [12], while the Temporal Fusion Transformer [13] and Informer [14] extend attention-based forecasting.
 
-Applied load forecasting increasingly uses hybrid models, including LSTM–CNN fusion [15], BiLSTM–Transformer combinations [16], decomposition pipelines [17], and LSTM–XGBoost ensembles [18]. Evidence for the added component, however, is commonly limited to one accuracy table. Multi-seed distributions and component-level tests remain uncommon.
+The cited recent applied-load papers use hybrid models, including LSTM–CNN fusion [15], BiLSTM–Transformer combinations [16], decomposition pipelines [17], and LSTM–XGBoost ensembles [18]. In this four-paper sample, component evidence is primarily reported through accuracy comparisons and ablations; it does not establish how common multi-seed, component-level, multiplicity-corrected inference is across the full field.
 
 ### 2.2. Cross-Series and Graph-Structured Load Forecasting
 
-A second thread exploits correlation among regional or nodal series. LSTNet models dependence through joint convolutional–recurrent channels [19]. Graph formulations emerged in traffic forecasting [20], and MTGNN learns adjacency end to end [21]. Power-load examples include LoadSeer [4], GCN–BiLSTM–Adaboost [1], spatio-temporal graph transformers [2], and GCN–Transformer integration [3]. A parallel literature treats multiple series as a hierarchy requiring reconciliation [22,23], with Ausgrid as a common testbed [24].
+A second thread exploits correlation among regional or nodal series. LSTNet models dependence through joint convolutional–recurrent channels [19]. Graph formulations emerged in traffic forecasting [20], and MTGNN learns adjacency end to end [21]. Power-load examples include LoadSeer [4], GCN–BiLSTM–Adaboost [1], spatio-temporal graph transformers [2], and GCN–Transformer integration [3]. A parallel literature treats multiple series as a hierarchy requiring reconciliation [22,23]. The Ausgrid source provides residential customer load and rooftop-PV data that can be aggregated into an evaluation hierarchy [24]; the dataset paper itself does not establish that this constructed hierarchy is a standard testbed.
 
-These graph-based studies propose increasingly elaborate weighting mechanisms. Their comparisons rarely test the selected weighting against equal averaging under an identical seeded protocol. Consequently, the contribution of aggregation can be conflated with that of its parameterization.
+The four cited graph-based load studies use different graph constructions and weighting mechanisms [1–4]. Their reported comparisons do not, as a group, supply the exact matched question studied here: selected weighting versus informative equal averaging under one seeded protocol. A learnable-adjacency appliance study includes fixed-graph controls [31], and a smart-meter STGNN benchmark reports gains at residential but not aggregate level [32]; these nearby designs prevent any claim that such controls or null findings are absent from the field. The bounded motivation is therefore to test the specific weighting and aggregation choices under this paper's frozen protocol, not to claim the first such test.
 
 ### 2.3. Simple Baselines and Honest Evaluation
 
-The third thread concerns evaluation discipline. Sound out-of-sample practice was codified early [25], and temporal leakage from naive cross-validation is well documented [26]. Common metrics also have known failure modes; MAPE becomes unstable near zero loads [27], directly motivating the SimBench and Ausgrid choices. Diebold–Mariano testing [28] made statistical comparison a standard forecasting question. The M competitions [6,7], DLinear [5], and later best-practice guides [8] further emphasize strong simple baselines.
+The third thread concerns evaluation discipline. Sound out-of-sample practice was codified early [25]. Cross-validation for time-series predictors requires assumptions and split designs appropriate to temporal dependence; ordinary random-fold practice is not automatically valid [26]. Common metrics also have known failure modes; MAPE becomes unstable near zero loads [27], directly motivating the SimBench and Ausgrid choices. Diebold–Mariano testing [28] made statistical comparison a standard forecasting question. The M competitions [6,7], DLinear [5], and later best-practice guides [8] further emphasize strong simple baselines.
 
-This evaluation literature mainly operates at whole-model granularity. The present study extends it to individual forecaster components, using multiplicity-corrected tests to determine which component claims survive. Section 6.3 applies that logic to the aggregation weight forms.
+The cited evaluation papers primarily compare complete forecasting methods, while the present study applies the same caution to selected forecaster components. Recent benchmark work also emphasizes broader method coverage and consistent pipelines [33], so this targeted map is not evidence of methodological novelty. Section 6.3 applies multiplicity-corrected tests to the aggregation weight forms in the frozen comparison family.
 
 ---
 
@@ -571,8 +571,8 @@ All datasets used in this study are public: the Open Power System Data 60 min pa
 ## References
 
 <!-- MDPI numbered style, ordered by first appearance in the text.
-     A prior internal record reports Crossref DOI checks on 2026-07-16.
-     This S5 closure did not independently reverify the full bibliography or claim-to-source alignment. -->
+     The 30 inherited entries and three newly cited sources have item-level
+     metadata and context records in reconstruction_v2/literature (2026-09-03). -->
 
 1. Li, J.; Li, J.; Li, J.; Zhang, G. Bayesian-Optimized GCN-BiLSTM-Adaboost Model for Power-Load Forecasting. *Electronics* **2025**, *14*(16), 3332. https://doi.org/10.3390/electronics14163332
 2. Zhou, H.; Ai, Q.; Li, R. Short-Term Multi-Energy Load Forecasting Method Based on Transformer Spatio-Temporal Graph Neural Network. *Energies* **2025**, *18*(17), 4466. https://doi.org/10.3390/en18174466
@@ -604,3 +604,6 @@ All datasets used in this study are public: the Open Power System Data 60 min pa
 28. Diebold, F.X.; Mariano, R.S. Comparing Predictive Accuracy. *Journal of Business & Economic Statistics* **1995**, *13*(3), 253–263. https://doi.org/10.1080/07350015.1995.10524599
 29. Wiese, F.; Schlecht, I.; Bunke, W.-D.; Gerbaulet, C.; Hirth, L.; Jahn, M.; Kunz, F.; Lorenz, C.; Mühlenpfordt, J.; Reimann, J.; Schill, W.-P. Open Power System Data — Frictionless data for electricity system modelling. *Applied Energy* **2019**, *236*, 401–409. https://doi.org/10.1016/j.apenergy.2018.11.097
 30. Meinecke, S.; Sarajlić, D.; Drauz, S.R.; Klettke, A.; Lauven, L.-P.; Rehtanz, C.; Moser, A.; Braun, M. SimBench—A Benchmark Dataset of Electric Power Systems to Compare Innovative Solutions Based on Power Flow Analysis. *Energies* **2020**, *13*(12), 3290. https://doi.org/10.3390/en13123290
+31. Li, D.; Xia, J.; Li, J.; Xiao, C.; Stankovic, V.; Stankovic, L.; Shi, Q. A Temporal–Spatial Graph Network With a Learnable Adjacency Matrix for Appliance-Level Electricity Consumption Prediction. *IEEE Transactions on Artificial Intelligence* **2025**, *6*(4), 989–1002. https://doi.org/10.1109/TAI.2024.3507734
+32. Nguyen, Q.V.; Delgado Fernandez, J.; Potenciano Menci, S. Spatiotemporal Graph Neural Networks for Short-Term Load Forecasting: Does a Graph Inferred from Smart Meter Data Help? In *Proceedings of IEEE PowerTech 2025*, Kiel, Germany, 29 June–3 July 2025. https://doi.org/10.1109/PowerTech59965.2025.11180479
+33. Qiu, X.; Hu, J.; Zhou, L.; Wu, X.; Du, J.; Zhang, B.; Guo, C.; Zhou, A.; Jensen, C.S.; Sheng, Z.; Yang, B. TFB: Towards Comprehensive and Fair Benchmarking of Time Series Forecasting Methods. *Proceedings of the VLDB Endowment* **2024**, *17*(9), 2363–2377. https://doi.org/10.14778/3665844.3665863
