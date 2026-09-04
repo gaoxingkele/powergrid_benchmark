@@ -119,6 +119,20 @@ source family involved in proxy construction, and the MTEP16 check has
 portfolio dependence and label-imbalance limitations. Both remain descriptive
 external-consistency checks.
 
+The Stage-3 usability review is recorded in
+`manuscript/reconstruction_v2/METHOD_DATA_IMPLEMENTATION_CONTRACT.md` and
+`method_implementation_contract.json`. Candidate-level cost calibration is
+**NO-GO** because this worktree contains neither a source-specific
+licence/redistribution record nor an auditable candidate-to-record and
+currency/base-year mapping. AC/OPF validation is **NO-GO** because a selected
+archetype proxy does not identify the bus, branch, generator, topology,
+dispatch, or control action required to modify a network case; a stage-local
+licence manifest is also absent. Existing NERC/MTEP16 records are
+**GO-DESCRIPTIVE-ONLY**: official records may be cited and derived summaries
+retained, but source-file redistribution is not established here and the
+analyses cannot support return, above-chance, causal, external-validity, or
+deployment claims.
+
 ## Negative and Null Results
 
 - Removing preference adaptation changes pooled hypervolume from 0.174247 to

@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0",
+  "stage": "p1_v2_s03_method_data_implementation_contract",
+  "status": "EVIDENCE_BOUND_CONTRACT",
+  "locked_title": "Investment Effectiveness Optimization Strategy based on Hybrid Multi-objective Evolution",
+  "scope": "Retrospective specification of the preserved P5 implementation; this file is not a new experiment or a replacement for the archived run configuration.",
+  "decision_variable": {
+    "type": "binary_portfolio",
+    "definition": "x_j=1 selects candidate position j from the scenario-local pool",
+    "identity_limit": "event payloads use zero-based pool-local positions, not stable candidate identifiers"
+  },
+  "objectives": [
+    {"index": 1, "name": "cost", "sense": "min", "formula": "sum(k_j*x_j)", "unit": "synthetic_cost_unit"},
+    {"index": 2, "name": "negative_reliability", "sense": "min", "formula": "-sum(r_j*x_j)", "unit": "proxy_index"},
+    {"index": 3, "name": "negative_renewable", "sense": "min", "formula": "-sum(g_j*x_j)", "unit": "proxy_index"},
+    {"index": 4, "name": "portfolio_risk", "sense": "min", "formula": "mean_selected(rho_j), or 1 for an empty portfolio", "unit": "proxy_index"},
+    {"index": 5, "name": "negative_quality", "sense": "min", "formula": "-mean_selected(q_j), or 0 for an empty portfolio", "unit": "proxy_index"}
+  ],
+  "quality_definition": "q_j is the equal-share mean of the compliance and evidence proxy indices in the registered formulation",
+  "budget": {
+    "constraint": "sum(k_j*x_j) <= B",
+    "nominal_B": 1160,
+    "unit": "synthetic_cost_unit",
+    "scenario_exception": "budget_ranking_stability uses 0.88 times nominal_B",
+    "violation": "max(0,(sum(k_j*x_j)-B)/B)",
+    "violation_unit": "dimensionless"
+  },
+  "repair": {
+    "enabled_full_method": true,
+    "score": "(r_j+g_j+load_support_j+q_j)/max(k_j,1)",
+    "input_normalization": "none",
+    "iteration": "drop one selected item with minimum score until budget violation is zero",
+    "tie": "selected positions are enumerated ascending; first argmin drops the smallest pool-local position",
+    "event": "append one repair_drop payload for each executed drop",
+    "interpretation": "deterministic proxy heuristic, not a unit-invariant benefit-cost or return estimator"
+  },
+  "normalization": {
+    "preference_selection": {
+      "scope": "generation-local parent-offspring union",
+      "formula": "(f_q-min_R(f_q))/max(max_R(f_q)-min_R(f_q),1e-9)",
+      "clipping": false
+    },
+    "reported_evaluation": {
+      "scope": "fixed method-independent per-scenario bounds",
+      "bounds": "empty portfolio, all singleton portfolios, and 2048 seeded random feasible portfolios, then 5 percent span padding",
+      "formula": "clip((f_q-l_q)/(u_q-l_q),0,1)",
+      "reference_point": [1.1, 1.1, 1.1, 1.1, 1.1],
+      "metric": "five-dimensional standard feasible-front hypervolume"
+    },
+    "non_equivalence": "generation-local preference normalization is not the fixed reported-evaluation normalization"
+  },
+  "preference": {
+    "count": 8,
+    "penalty_lambda": 10,
+    "initialization": "one mapped scenario vector plus seven Dirichlet(1,...,1) vectors",
+    "scenario_mapping": "normalize(cost,reliability,renewable,risk,compliance+evidence); load-support is not an objective coordinate",
+    "best_response": "first argmin of weighted generation-local normalized objectives plus penalty_lambda times budget violation",
+    "replacement": "if the best-response union row is absent, replace one seeded-uniform selected slot",
+    "replacement_tie_or_priority": "later preference vectors may evict rows restored for earlier vectors",
+    "update_cadence_generations": 5,
+    "perturbation": "componentwise absolute value after Normal(0,0.1^2 I), followed by L1 renormalization",
+    "reselection": "seed one of 2K candidate weights uniformly, then greedily maximize response-set minimum distance",
+    "reselection_tie": "first candidate returned by argmax",
+    "limitations": "random initial candidate and retained-vector indices were not exported"
+  },
+  "environmental_selection": {
+    "population": 40,
+    "generations": 40,
+    "union_rows": 80,
+    "rule": "constraint-dominated non-dominated sorting followed by descending crowding-distance truncation",
+    "crowding_tie": "no authored secondary criterion; executed NumPy ordering applies",
+    "search_deduplication": false,
+    "output_deduplication": "lexicographic deduplication of feasible returned rows before final non-dominated front evaluation"
+  },
+  "evaluation_accounting": {
+    "archived_equalities": "TRACE-MOEA, NSGA-II, and R-NSGA-II share nominal population 40 and 40 generation labels; MOEA/D uses 35 directions",
+    "n_eval_archived": false,
+    "claim_boundary": "equal objective-function-call budgets are not claimed; deterministic methods have no stochastic evaluation-budget equivalence",
+    "analysis_unit": "one seeded method-scenario run for stochastic methods; one unique method-scenario output for deterministic rules"
+  },
+  "event_records": {
+    "in_memory_types": {
+      "repair_drop": ["gen", "event", "item"],
+      "preference_elite": ["gen", "event", "pref", "items"]
+    },
+    "full_method_count": "D + K*T = repair_drops + 8*40",
+    "released_fields": ["trace_event_count", "decision_coverage", "local_move_count"],
+    "decision_coverage": "|U_event_positions intersect U_final_front_positions|/max(1,|U_final_front_positions|)",
+    "local_move_count": "number of repair drops for P5",
+    "quarantine": "no event field enters an objective, constraint, repair score, preference score, selection rule, or reported hypervolume",
+    "not_recorded": ["ordered payload list", "stable candidate identifiers", "actual replacement flag", "evicted row", "parentage", "population snapshots", "retained-weight indices"],
+    "claim_boundary": "counts and whole-run pool-position co-occurrence only; no chronology, lineage, replay, causation, auditability, or human-review value"
+  },
+  "objective_hiding_controls": "NoReliabilityFeatures, NoRenewableFeatures, and NoScheduleRisk jointly change objective visibility and first-vector parameterization; they are combined controls only.",
+  "validation_usability": {
+    "traceable_cost": {
+      "decision": "NO_GO",
+      "legal": "No source-specific license or redistribution record for a candidate-level cost corpus is present in this worktree.",
+      "technical": "No auditable candidate-to-record mapping or currency/base-year transformation exists; current k_j values remain synthetic units.",
+      "allowed_claim": "proxy cost and budget only",
+      "prohibited_claim": "actual return, audited cost effectiveness, currency-valued benefit, or calibrated investment economics"
+    },
+    "ac_or_opf": {
+      "decision": "NO_GO",
+      "legal": "Source URLs alone do not establish redistribution permission for a derived validation package; no stage-local license manifest is present.",
+      "technical": "Portfolio bits select archetype proxies and do not specify bus, branch, generator, topology, dispatch, or control actions needed to modify and solve a network case.",
+      "allowed_claim": "budget-feasible proxy portfolio",
+      "prohibited_claim": "AC-feasible, OPF-feasible, N-1 secure, or electrically validated portfolio"
+    },
+    "external_public_records": {
+      "decision": "GO_DESCRIPTIVE_ONLY",
+      "legal": "Official URLs and metadata may be cited; this worktree does not establish permission to redistribute source PDFs or portal extracts, so only derived summaries and provenance links are in scope.",
+      "technical": "Existing NERC and MTEP16 analyses have source reuse, label imbalance, and portfolio-dependence limits and no confirmatory randomization family.",
+      "allowed_claim": "descriptive external consistency under the stated checks",
+      "prohibited_claim": "actual return, above-chance portfolio performance, external validity, causal effectiveness, or deployment evidence"
+    }
+  }
+}
