@@ -23,9 +23,11 @@ review dataset is present.
 
 ## Primary Estimand and Analysis Unit
 
-The prospective Stage-4 protocol is now frozen at
-`experiments/p5_s4_energies_investment_validation_v1/config.json`; it has not
-been executed and contributes no result. Its primary estimand is the paired
+The prospective Stage-4 protocol is frozen at
+`experiments/p5_s4_energies_investment_validation_v1/config.json`. A separate
+three-paired-seed activation pilot has been executed with `paper_use: false`;
+it contributes no manuscript result and cannot select a configuration. The
+formal primary estimand remains the paired
 difference in analytic-bound feasible-front HV between Full TRACE and each
 stochastic opponent within each of three confirmatory-only scenarios. One
 method--scenario--seed run is the analysis unit. Thirty fixed seeds are shared
@@ -72,7 +74,7 @@ replacement, or eviction count.
 
 ## Comparison Budget and Data Visibility
 
-For the unexecuted Stage-4 protocol, every stochastic run is capped at exactly
+For the formally unexecuted Stage-4 protocol, every stochastic run is capped at exactly
 3,200 objective calls and 1,800 seconds. Four tunable methods each receive four
 configurations over the same four development-only scenarios and ten paired
 development seeds. The three confirmatory scenarios and thirty confirmatory
@@ -228,16 +230,22 @@ check.
 
 ## New or Rerun Experiments
 
-Stage 4 adds a frozen protocol only. As recorded in
+Stage 5 activates only a quarantined feasibility pilot. As recorded in
 `experiments/p5_s4_energies_investment_validation_v1/planned_vs_executed.json`,
-zero pilot, tuning, or formal runs have been executed and no numerical result
-has been created. The method-independent numeric bounds are frozen by copying
-the analytic rows from the preserved Stage-3 artifact and recording its hash;
-they are not a Stage-4 result. Execution remains blocked because source and
-candidate hashes and source-specific licence evidence are absent, and the
-planned environment has not passed a pilot. Every future run row and manifest
-must match the frozen Stage-4 bound-file hash. These
-blockers must not be reworded as completed data acquisition or validation.
+Full TRACE and NSGA-II were run on one declared scenario with three paired,
+pilot-only seeds, producing six distinct diagnostic rows plus same-seed replay
+executions. The pilot verified 3,200 evaluated candidate vectors per method,
+budget-feasible synthetic-cost calculations, metric direction, schema binding,
+and exact replay of selected-front hashes and HV. Its primary values are not
+summarized or used in the paper, and `paper_use` remains false.
+
+The method-independent numeric bounds remain the copied analytic rows from the
+preserved Stage-3 artifact rather than a Stage-5 result. Formal execution has
+not started. It remains blocked because the resolved NumPy and SciPy versions
+differ from the frozen environment and permission to redistribute the local
+NERC metadata index is not established. Every future formal row and manifest
+must match the frozen Stage-4 bound-file hash. These blockers must not be
+reworded as completed formal validation.
 
 The frozen stage design is `experiments/p5_s3_matched_sensitivity/config.json`.
 The final run is `runs/primary_v4/`, and `runs/reproduction_v1/` is an
@@ -299,3 +307,10 @@ those studies is part of this stage.
 - Expert labels, a human trace-utility study, calibrated utility costs, and
   AC/OPF checks remain scientific blockers for stronger deployment, review-
   effectiveness, economic, or electrical-feasibility claims.
+- **AUTHOR/LEGAL INPUT REQUIRED:** decide whether the pilot-local NERC report
+  metadata index may be redistributed in the intended release package. Website
+  access alone was not treated as a licence, and no NERC PDF/report text was
+  copied.
+- **RUNTIME INPUT REQUIRED:** recreate the frozen NumPy 1.26.4 and SciPy 1.12.0
+  environment. The pilot resolved NumPy 2.4.6 and SciPy 1.18.0 and therefore
+  stopped before tuning or formal execution.

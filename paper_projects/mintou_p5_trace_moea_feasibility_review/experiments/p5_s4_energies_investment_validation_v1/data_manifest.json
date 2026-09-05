@@ -1,19 +1,56 @@
 {
-  "schema_version": "1.0",
-  "status": "FROZEN_REQUIREMENTS_DATA_NOT_MATERIALIZED",
+  "schema_version": "1.1",
+  "status": "PILOT_MATERIALIZED_FORMAL_RELEASE_BLOCKED",
   "candidate_dataset": {
     "id": "p5_proxy_pool_120_from_rts_gmlc_simbench_nerc_metadata",
     "expected_rows": 120,
-    "path": null,
-    "sha256": null,
-    "licence_status": "NOT_VERIFIED_IN_THIS_WORKTREE",
-    "execution_gate": "BLOCKED until path, SHA-256, construction-code hash, and source-specific licence evidence are recorded"
+    "path": "pilot/candidate_pool.csv",
+    "sha256": "abb472d362b4d47e157df4c0e3b45500e347b6daae3dc6b5e505ec7332747f65",
+    "construction_code_path": "pilot/runtime/core_snapshot.py",
+    "construction_code_sha256": "4e26f06a6d6d35b73c62550672f3dd545572ea1a79f0dac7b13d0b15982b49ac",
+    "scope": "pilot-local snapshot only; paper_use false"
   },
   "sources": [
-    {"id": "RTS-GMLC", "role": "zone aggregates for proxy candidate construction", "official_url": "https://github.com/GridMod/RTS-GMLC", "local_path": null, "sha256": null, "licence_status": "NOT_VERIFIED_IN_THIS_WORKTREE", "redistribution": "NOT_AUTHORIZED_BY_THIS_MANIFEST"},
-    {"id": "SimBench", "role": "network summaries for proxy candidate construction", "official_url": "https://simbench.de", "local_path": null, "sha256": null, "licence_status": "NOT_VERIFIED_IN_THIS_WORKTREE", "redistribution": "NOT_AUTHORIZED_BY_THIS_MANIFEST"},
-    {"id": "NERC_public_report_metadata", "role": "metadata-only proxy attribute adjustment", "official_url": "https://www.nerc.com", "local_path": null, "sha256": null, "licence_status": "NOT_VERIFIED_IN_THIS_WORKTREE", "redistribution": "SOURCE_PDFS_NOT_AUTHORIZED_BY_THIS_MANIFEST"}
+    {
+      "id": "RTS-GMLC",
+      "role": "zone aggregates for proxy candidate construction",
+      "official_url": "https://github.com/GridMod/RTS-GMLC",
+      "local_path": "pilot/inputs/rts",
+      "manifest_path": "pilot/input_manifest.json",
+      "licence_evidence": "pilot/inputs/rts/LICENSE_AND_NOTICE.md",
+      "licence_status": "VERIFIED_FOR_SNAPSHOT_WITH_NOTICE_AND_ATTRIBUTION"
+    },
+    {
+      "id": "SimBench",
+      "role": "network summaries for proxy candidate construction",
+      "official_url": "https://simbench.de",
+      "local_path": "pilot/inputs/simbench",
+      "manifest_path": "pilot/input_manifest.json",
+      "licence_evidence": "pilot/inputs/simbench/LICENSE",
+      "licence_status": "ODBL_1_0_DATABASE_DBCL_1_0_CONTENTS"
+    },
+    {
+      "id": "NERC_public_report_metadata",
+      "role": "metadata-only proxy attribute adjustment",
+      "official_url": "https://www.nerc.com/our-work/reports",
+      "local_path": "pilot/inputs/nerc/metadata/c2ges_nerc_report_manifest.csv",
+      "sha256": "214ed240c52b98cf61322e435c700c47ecc18713a32dbb7fd7af6e24d2cba59a",
+      "licence_status": "LOCAL_METADATA_PILOT_USE_ONLY_REDISTRIBUTION_NOT_ESTABLISHED",
+      "redistribution": "BLOCKED_PENDING_HUMAN_LEGAL_REVIEW; no NERC PDF or report text is copied"
+    }
   ],
-  "excluded_from_confirmatory_execution": [{"id": "MISO_MTEP16", "reason": "existing analysis is descriptive only; portfolio dependence, label imbalance, and no confirmatory randomization family"}],
-  "claim_limits": ["synthetic cost units only", "no actual-return claim", "no AC/OPF or electrical-feasibility claim", "no expert-label or deployment claim"]
+  "excluded_from_confirmatory_execution": [
+    {
+      "id": "MISO_MTEP16",
+      "reason": "existing analysis is descriptive only; portfolio dependence, label imbalance, and no confirmatory randomization family"
+    }
+  ],
+  "claim_limits": [
+    "pilot outputs are paper_use false",
+    "synthetic cost units only",
+    "no actual-return claim",
+    "no AC/OPF or electrical-feasibility claim",
+    "no expert-label or deployment claim"
+  ],
+  "formal_gate": "BLOCKED until the frozen package environment is recreated and NERC metadata redistribution is resolved for the intended release package"
 }

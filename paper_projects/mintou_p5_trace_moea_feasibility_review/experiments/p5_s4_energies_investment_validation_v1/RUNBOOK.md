@@ -1,17 +1,18 @@
 # P1 s04 Frozen Runbook
 
-**State:** protocol only; no command below has been executed as a scientific run.
+**State:** non-paper pilot completed; tuning and formal execution have not
+started, and the pilot is not a scientific manuscript result.
 
-1. Materialize the three permitted source inputs without modifying the legacy
-   experiment. Verify source-specific licences, record exact local paths and
-   SHA-256 hashes in `data_manifest.json`, and generate the 120-row proxy pool
-   with a hashed construction program. Stop if any required provenance or
-   licence field remains unresolved.
-2. Create the exact environment in `environment.json`. Record the resolved lock
-   and its hash. Run a non-paper pilot that checks deterministic replay,
-   objective-call counting, seed propagation, output schema, and wall-time
-   enforcement. Pilot rows stay under `pilot/` and never enter tuning or formal
-   outputs.
+1. The three permitted source inputs were snapshotted without modifying the
+   legacy experiment. Exact pilot-local paths and SHA-256 hashes are recorded,
+   and the 120-row proxy pool was generated with a hashed construction program.
+   NERC metadata redistribution remains unresolved, so release/formal work is
+   stopped pending human/legal review.
+2. The non-paper pilot checked deterministic replay, objective-call counting,
+   seed propagation, output schema, budget calculations, metric orientation,
+   and wall-time measurement. Pilot rows stay under `pilot/` and never enter
+   tuning or formal outputs. The resolved NumPy/SciPy versions do not match the
+   frozen environment, so recreate that environment before proceeding.
 3. Verify the Stage-4 `bounds.csv` against the recorded Stage-3 source-artifact
    hash. These conservative analytic bounds were derived without method
    outputs. Hash the Stage-4 subset and bind that hash into every later row.
@@ -31,6 +32,7 @@
    secondary, null, adverse, and failed result before revising manuscript prose.
    Update `planned_vs_executed.json` and a run manifest with artifact hashes.
 
-Formal execution is blocked while `data_manifest.json` has missing hashes or
-unverified licences, while the `bounds.csv` hash is unbound, or while the
-planned runtime has not passed the pilot gate.
+Formal execution remains blocked by the frozen-environment mismatch and the
+unresolved NERC metadata redistribution decision. The candidate/source hashes,
+objective-call equality, deterministic replay, and `bounds.csv` binding passed
+the pilot mechanics gate; this does not convert pilot metrics into evidence.

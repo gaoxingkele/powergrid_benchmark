@@ -2,7 +2,7 @@
 
 **Stage:** `p1_v2_s04_frozen_experiment_protocol`
 
-**Status:** `FROZEN / NOT_EXECUTED / NO_RESULTS`
+**Status:** `FROZEN / PILOT_COMPLETED / FORMAL_NOT_EXECUTED / FORMAL_NO_RESULTS`
 
 **Frozen on:** 2026-09-05 (Asia/Shanghai)
 
@@ -10,19 +10,22 @@
 
 **Protected predecessor:** `../p5_s3_matched_sensitivity/` is read-only.
 
-This protocol is prospective. It records planned comparisons and cannot be
-cited as an experiment result. Pilot outputs, if any, belong under `pilot/` and
-are excluded from tuning, confirmatory analysis, and manuscript result tables.
+This confirmatory protocol remains prospective and cannot be cited as an
+experiment result. The Stage-5 activation outputs under `pilot/` use three
+pilot-only paired seeds and remain excluded from tuning, confirmatory analysis,
+and manuscript result tables (`paper_use: false`).
 
 ## Data, Licence, and Task-Family Freeze
 
 The only optimization data permitted are a freshly materialized copy of the
 existing 120-candidate P5 proxy pool, deterministically constructed from the
-documented RTS-GMLC, SimBench, and NERC-metadata inputs. The source files and
-candidate table are not present in this isolated worktree. Their licences and
-redistribution permissions have not been verified here; formal execution must
-stop until the data manifest is completed with immutable file hashes and
-source-specific licence evidence. Synthetic costs remain synthetic units.
+documented RTS-GMLC, SimBench, and NERC-metadata inputs. The minimal consumed
+source tables, candidate table, builder snapshot, and available licence notices
+are now hashed inside the pilot namespace. RTS-GMLC and SimBench licence
+evidence accompanies the snapshot. NERC report PDFs/text are not copied, and
+permission to redistribute the metadata index is not established; formal
+release remains blocked pending a human/legal decision. Synthetic costs remain
+synthetic units.
 
 Candidate-level cost calibration and AC/OPF validation are `NO_GO`. The
 portfolio bits do not map to auditable cost records or to buses, branches,
@@ -150,9 +153,11 @@ expert-review accuracy, causal effectiveness, or deployment claims.
 
 ## Execution Gate
 
-`planned_vs_executed.json` is intentionally `NOT_EXECUTED`. Before a pilot or
-formal run, complete the data hashes/licence fields, verify and hash
-`bounds.csv`, verify the exact runtime from `environment.json`, and implement an
-objective-call counter. Any change after this freeze requires a dated amendment
-that states whether outcomes had become visible; outcome-informed amendments
+`planned_vs_executed.json` records the completed non-paper pilot and zero tuning
+or formal runs. The pilot bound an objective-call counter, the candidate/source
+hashes, and the normalized-LF `bounds.csv` hash. It also found that the resolved
+NumPy and SciPy versions differ from `environment.json`; formal execution must
+stop until the exact runtime is recreated. The NERC metadata release decision
+also remains open. Any change after this freeze requires a dated amendment that
+states whether formal outcomes had become visible; outcome-informed amendments
 invalidate confirmatory status.
