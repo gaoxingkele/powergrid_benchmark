@@ -436,7 +436,7 @@ def main() -> int:
     if figures["status"] != "PASS":
         failures.append("figure_lineage_checks")
     versions = {}
-    for package in ("networkx", "numpy", "rouge-score", "sentence-transformers", "torch"):
+    for package in ("networkx", "numpy", "psutil", "rouge-score", "sentence-transformers", "torch", "transformers"):
         try:
             versions[package] = importlib.metadata.version(package)
         except importlib.metadata.PackageNotFoundError:

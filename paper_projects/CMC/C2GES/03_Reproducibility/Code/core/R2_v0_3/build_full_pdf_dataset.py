@@ -11,6 +11,7 @@ import argparse
 import csv
 import hashlib
 import json
+import os
 import re
 import subprocess
 from collections import Counter
@@ -22,8 +23,17 @@ from typing import Iterable
 
 def find_repository_root(start: Path) -> Path:
     """Find the workspace root without depending on the package nesting depth."""
+    configured = os.environ.get("C2GES_WORKSPACE_ROOT")
+    if configured:
+        root = Path(configured).resolve()
+        if not root.is_dir():
+            raise RuntimeError(f"C2GES_WORKSPACE_ROOT is not a directory: {root}")
+        return root
     for candidate in (start, *start.parents):
         if (candidate / ".git").exists():
+            return candidate
+    for candidate in (start, *start.parents):
+        if (candidate / "C2GES_RELEASE_MARKER.json").is_file():
             return candidate
     raise RuntimeError("repository root not found from script location")
 

@@ -16,6 +16,7 @@ import hashlib
 import itertools
 import json
 import math
+import os
 import random
 import re
 import statistics
@@ -40,10 +41,19 @@ def find_project_root(start: Path) -> Path:
 
 
 def find_workspace_root(start: Path) -> Path:
+    configured = os.environ.get("C2GES_WORKSPACE_ROOT")
+    if configured:
+        root = Path(configured).resolve()
+        if not root.is_dir():
+            raise RuntimeError(f"C2GES_WORKSPACE_ROOT is not a directory: {root}")
+        return root
     for candidate in (start, *start.parents):
         if (candidate / ".git").exists():
             return candidate
-    raise RuntimeError("workspace root not found; set a portable dataset path before use")
+    # Import-time utilities and public tests remain portable in an extracted
+    # release. Development execution with repo-relative private data must set
+    # C2GES_WORKSPACE_ROOT explicitly when no Git workspace is available.
+    return start
 
 
 PROJECT = find_project_root(HERE)

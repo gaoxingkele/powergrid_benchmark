@@ -61,3 +61,20 @@ clean external-report bodies until a builder version passes.
 The public CSV contains hashes and locators only. Source PDFs and private candidate
 text remain outside the release package. Completed reviewer files must use coded
 reviewer identifiers and must not include copied report text.
+
+## Deterministic finalization
+
+After the two independent files and the separate adjudication file are complete,
+generate the authorization-bound summary without report text:
+
+```text
+python 03_Reproducibility/Code/prospective_v1/finalize_layout_audit.py \
+  --reviewer-a <reviewer-a.csv> --reviewer-b <reviewer-b.csv> \
+  --adjudicated <adjudicated.csv> --output <layout_candidate_audit_summary.json> \
+  --reviewer-a-id <coded-A> --reviewer-b-id <coded-B>
+```
+
+The utility refuses missing labels, duplicate/mismatched samples, identical
+reviewer identifiers, and an existing output. It reports pre-adjudication raw
+agreement and nominal Cohen's kappa, applies the frozen 0.90/0.05 gates, and
+hash-binds all three input files. AI must not populate any reviewer field.

@@ -19,7 +19,9 @@ class MetadataTests(unittest.TestCase):
     def test_local_inputs_account_for_all_40(self):
         r2 = HERE.parent
         root = next((p for p in (HERE, *HERE.parents) if (p / ".git").exists()), None)
-        self.assertIsNotNone(root, "repository root must be discoverable")
+        if root is None:
+            root = next((p for p in (HERE, *HERE.parents) if (p / "C2GES_RELEASE_MARKER.json").is_file()), None)
+        self.assertIsNotNone(root, "workspace or portable C2GES root must be discoverable")
         audit = r2 / "diagnostic_build_08/per_report_extraction_audit.jsonl"
         rights = r2 / "diagnostic_build_08/rights_ledger.jsonl"
         if not audit.exists() or not rights.exists():

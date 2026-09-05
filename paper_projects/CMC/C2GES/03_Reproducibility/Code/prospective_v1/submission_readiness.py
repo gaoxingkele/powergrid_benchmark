@@ -27,6 +27,7 @@ PENDING_WORDS = re.compile(r"\b(?:pending|tbd|to be completed|not frozen)\b", re
 E1_FILES = (
     "rights_safe_external_metadata.csv",
     "layout_candidate_audit.csv",
+    "layout_candidate_audit_summary.json",
     "balanced_tuning_grid.csv",
     "TUNING_DECISION.json",
     "external_item_metrics.csv",
@@ -181,9 +182,12 @@ def check_e1(root: Path, findings: list[Finding]) -> None:
             expected, relative = match.groups()
             artifact = directory / relative
             try:
-                artifact.resolve().relative_to(directory.resolve())
+                scoped = artifact.resolve().relative_to(directory.parent.resolve())
             except ValueError:
-                findings.append(Finding("E1_OUTPUT_CHECKSUM_ESCAPE", "checksum path escapes the E1 directory", f"{rel}/OUTPUT_SHA256SUMS.txt"))
+                findings.append(Finding("E1_OUTPUT_CHECKSUM_ESCAPE", "checksum path escapes the E1/E3 result root", f"{rel}/OUTPUT_SHA256SUMS.txt"))
+                continue
+            if not scoped.parts or scoped.parts[0] not in {"prospective_external_v1", "component_factorial_v1"}:
+                findings.append(Finding("E1_OUTPUT_CHECKSUM_SCOPE", "checksum path is outside the E1/E3 result directories", f"{rel}/OUTPUT_SHA256SUMS.txt"))
                 continue
             if not artifact.is_file() or sha256(artifact) != expected.upper():
                 findings.append(Finding("E1_OUTPUT_CHECKSUM_MISMATCH", "formal output is missing or does not match its checksum", f"{rel}/{relative}"))
