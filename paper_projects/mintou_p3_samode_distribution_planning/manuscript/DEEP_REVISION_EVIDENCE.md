@@ -63,6 +63,19 @@ The independent P3 contribution is the implementation and audit of the constrain
 
 ## New or Rerun Experiments
 
+Stage P3 S04 freezes a prospective 2-by-2 mechanism and AC-validation protocol;
+it runs no optimizer or power-flow experiment and adds no numerical result. The
+four arms are Fixed-Fixed, AdaptiveParam-FixedStrategy,
+FixedParam-AdaptiveStrategy, and Full-SAMODE, with GDE3, NSDE, and NSGA-II as
+direct controls. The protocol uses 30 paired confirmatory seeds, a ceiling of
+4,800 raw objective rows per method--seed--configuration cell, analytic-
+normalized HV at method-independent reference 1.05 as primary, and IGD+ and
+seed-level engineering feasibility as secondary outcomes. Holm correction,
+explicit failure rows, intention-to-run penalties, and retention of null and
+negative results are frozen before execution. The protocol is `FROZEN` but its
+execution gate is `BLOCKED`; this design artifact is not evidence that any arm
+or control performs better.
+
 The upstream P3 S3 stage reran all 2940 optimizer rows using the declared source-derived seeds. All archived sampled-bound hypervolumes match at eight decimals; the maximum absolute serialized difference is 0. The rerun preserves 68,248 returned front points and exports a deterministic normalized-sum compromise for every optimizer seed.
 
 That upstream stage added deterministic evaluations of those fronts:
@@ -85,4 +98,9 @@ The present Stage-3 action/method contract also runs no optimizer or AC experime
 - Confirm the corresponding-author supplementary package and final public archive/DOI before publication. No repository URL or DOI is invented here.
 - **ACTION REGISTRY REQUIRED:** legacy `subnet::kind` variables do not uniquely name a validation-network bus, line, transformer, or switch and do not provide evidenced physical increments. The action-aligned gate is `NO-GO`; exact element bindings and provenance must be supplied rather than inferred from case-specific stress rankings.
 - **ENGINEERING POLICY REQUIRED:** freeze storage dispatch/reactive-power behavior, DER power factor, the N-1 branch, and a transformer-loading criterion (or justified not-applicability) before an AC pilot.
+- **PROTOCOL EXECUTION INPUTS REQUIRED:** verify the exact identifiers, versions,
+  licenses, and hashes for the four archived SimBench MV network classes; supply
+  the complete one-to-one action registry with physical increments and cost
+  provenance; and pin the pandapower runtime. Until then, both pilot and formal execution remain
+  blocked and `planned_vs_executed.json` must remain at zero executed runs.
 - Multi-seed AC power flow with hierarchical uncertainty, monetary calibration, a second benchmark family, **evaluated** parameter-only and strategy-only controls, and additional multi-objective DE implementations remain future work, not current evidence.
