@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import importlib.metadata
 import json
 import platform
@@ -18,7 +19,18 @@ from pathlib import Path
 
 
 HERE = Path(__file__).resolve().parent
-PROJECT = HERE.parents[1]
+
+
+def discover_project_root(start: Path) -> Path:
+    """Locate a portable C2GES release without relying on a Git checkout."""
+    for candidate in (start, *start.parents):
+        marker = candidate / "C2GES_RELEASE_MARKER.json"
+        if marker.is_file() and (candidate / "01_Manuscript").is_dir() and (candidate / "03_Reproducibility").is_dir():
+            return candidate
+    raise RuntimeError("C2GES release marker not found above verification script")
+
+
+PROJECT = discover_project_root(HERE)
 DATA = PROJECT / "03_Reproducibility" / "Data"
 MANUSCRIPT = PROJECT / "01_Manuscript"
 DEFAULT_REPORT = PROJECT / "02_Revision_and_QA" / "04_Build_Reports" / "C2GES_PUBLIC_VERIFICATION.json"
@@ -120,6 +132,74 @@ def require(path: Path) -> Path:
     return path
 
 
+def sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest().upper()
+
+
+def figure_lineage_checks() -> dict[str, object]:
+    registry_path = require(PROJECT / "03_Reproducibility" / "Figures" / "FIGURE_LINEAGE.json")
+    registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    issues: list[str] = []
+    if registry.get("schema") != "c2ges-figure-lineage-v3":
+        issues.append(f"unexpected schema: {registry.get('schema')}")
+    if registry.get("status") != "PASS":
+        issues.append(f"registry status is {registry.get('status')}")
+    artifacts = registry.get("artifacts", {})
+    if registry.get("artifact_count") != 6 or len(artifacts) != 6:
+        issues.append(f"expected six artifacts; recorded {registry.get('artifact_count')} / {len(artifacts)}")
+
+    checked = 0
+    manuscript_matches = 0
+    project_root = PROJECT.resolve()
+    for artifact_id, artifact in artifacts.items():
+        records = list(artifact.get("inputs", []))
+        script = artifact.get("script")
+        if script:
+            records.append(script)
+        records.extend(artifact.get("outputs", {}).values())
+        for record in records:
+            relative = record.get("path")
+            expected = record.get("sha256")
+            if not relative or not expected:
+                issues.append(f"{artifact_id}: incomplete lineage record")
+                continue
+            target = (PROJECT / relative).resolve()
+            if not target.is_relative_to(project_root):
+                issues.append(f"{artifact_id}: path escapes release root: {relative}")
+                continue
+            if not target.is_file():
+                issues.append(f"{artifact_id}: missing {relative}")
+                continue
+            checked += 1
+            observed = sha256(target)
+            if observed != expected:
+                issues.append(f"{artifact_id}: hash mismatch {relative}")
+
+        pdf_record = artifact.get("outputs", {}).get("pdf")
+        if pdf_record:
+            source_pdf = PROJECT / pdf_record["path"]
+            manuscript_pdf = MANUSCRIPT / "LaTeX" / "figures" / source_pdf.name
+            if not manuscript_pdf.is_file():
+                issues.append(f"{artifact_id}: manuscript copy missing: {manuscript_pdf.name}")
+            elif sha256(source_pdf) != sha256(manuscript_pdf):
+                issues.append(f"{artifact_id}: manuscript/reproducibility PDF mismatch")
+            else:
+                manuscript_matches += 1
+
+    return {
+        "status": "PASS" if not issues else "FAIL",
+        "schema": registry.get("schema"),
+        "artifacts": len(artifacts),
+        "hash_records_checked": checked,
+        "manuscript_pdf_matches": manuscript_matches,
+        "issues": issues,
+    }
+
+
 def data_checks() -> dict[str, object]:
     metadata_path = require(DATA / "rights_safe_metadata" / "rights_safe_report_metadata.csv")
     with metadata_path.open(newline="", encoding="utf-8-sig") as stream:
@@ -139,6 +219,13 @@ def data_checks() -> dict[str, object]:
     layout = json.loads(require(DATA / "postrun_layout_audit" / "pymupdf_blocks_v1" / "layout_unit_audit.json").read_text(encoding="utf-8"))
     clean = json.loads(require(DATA / "postrun_clean_ablation" / "normalized_v1" / "clean_ablation_results.json").read_text(encoding="utf-8"))
     balanced = json.loads(require(DATA / "dev_balanced_tuning" / "equal9_v1" / "BALANCED_TUNING_DECISION.json").read_text(encoding="utf-8"))
+    layout_pilot_dir = DATA / "prospective_external_v1" / "layout_dev_pilot_v2"
+    human_validation_dir = DATA / "human_structure_validation_v1"
+    layout_pilot = json.loads(require(layout_pilot_dir / "LAYOUT_DEV_PILOT_MANIFEST.json").read_text(encoding="utf-8"))
+    with require(layout_pilot_dir / "layout_candidate_audit.csv").open(newline="", encoding="utf-8-sig") as stream:
+        layout_pilot_rows = list(csv.DictReader(stream))
+    with require(layout_pilot_dir / "layout_boundary_sample_blank.csv").open(newline="", encoding="utf-8-sig") as stream:
+        layout_sample_rows = list(csv.DictReader(stream))
     required = [
         DATA / "rights_safe_metadata" / "rights_safe_report_metadata.json",
         DATA / "postrun_diagnostics" / "output_length_summary.csv",
@@ -153,6 +240,16 @@ def data_checks() -> dict[str, object]:
         DATA / "postrun_embedding_ranking" / "C2GES_EMBEDDING_RANKING_PROTOCOL_2026-08-23.md",
         DATA / "postrun_clean_ablation" / "C2GES_CLEAN_PATH_ABLATION_PROTOCOL_2026-08-23.md",
         DATA / "dev_balanced_tuning" / "C2GES_BALANCED_TUNING_PROTOCOL_2026-08-23.md",
+        DATA / "prospective_external_v1" / "LAYOUT_BOUNDARY_AUDIT_PROTOCOL.md",
+        layout_pilot_dir / "LAYOUT_DEV_PILOT_REPORT.md",
+        human_validation_dir / "ANNOTATION_PROTOCOL.md",
+        human_validation_dir / "ANNOTATOR_QUALIFICATIONS.md",
+        human_validation_dir / "ETHICS_OR_EXEMPTION_RECORD.md",
+        human_validation_dir / "HUMAN_VALIDATION_EXECUTION.md",
+        human_validation_dir / "annotation_schema.json",
+        human_validation_dir / "annotation_form_blank.csv",
+        human_validation_dir / "SAMPLING_MANIFEST_TEMPLATE.csv",
+        human_validation_dir / "adjudication_log_template.csv",
     ]
     for path in required:
         require(path)
@@ -176,6 +273,9 @@ def data_checks() -> dict[str, object]:
         "clean_ablation_contrasts": len(clean["contrasts"]),
         "balanced_methods": len(balanced["selected"]),
         "balanced_configurations_per_method": balanced["configuration_budget_per_method"],
+        "layout_pilot_reports": len(layout_pilot_rows),
+        "layout_pilot_candidates": layout_pilot["total_candidates"],
+        "layout_pilot_sample_rows": len(layout_sample_rows),
         "machine_readable_files_checked": len(required) + 3,
     }
     expected = {
@@ -197,6 +297,9 @@ def data_checks() -> dict[str, object]:
         "clean_ablation_contrasts": 2,
         "balanced_methods": 3,
         "balanced_configurations_per_method": 9,
+        "layout_pilot_reports": 12,
+        "layout_pilot_candidates": 3782,
+        "layout_pilot_sample_rows": 244,
     }
     mismatches = {key: {"expected": value, "observed": observed[key]}
                   for key, value in expected.items() if observed[key] != value}
@@ -213,6 +316,27 @@ def data_checks() -> dict[str, object]:
         mismatches["balanced_tuning_test_boundary"] = {"expected": False, "observed": balanced["test_input_accessed"]}
     if any(row["evaluated_configurations_for_method"] != 9 for row in balanced["selected"].values()):
         mismatches["balanced_tuning_equal_budget"] = {"expected": "9 each", "observed": balanced["selected"]}
+    forbidden_public_fields = {"text", "reference", "summary", "title", "url", "source_url"}
+    layout_public_fields = ({key.lower() for row in layout_pilot_rows for key in row}
+                            | {key.lower() for row in layout_sample_rows for key in row})
+    if forbidden_public_fields & layout_public_fields:
+        mismatches["layout_pilot_public_schema"] = {
+            "expected": "no verbatim-capable fields",
+            "observed": sorted(forbidden_public_fields & layout_public_fields),
+        }
+    if layout_pilot.get("external_test_accessed") is not False or layout_pilot.get("confirmatory_claims_allowed") is not False:
+        mismatches["layout_pilot_evidence_boundary"] = {"expected": [False, False], "observed": [layout_pilot.get("external_test_accessed"), layout_pilot.get("confirmatory_claims_allowed")]}
+    with (human_validation_dir / "annotation_form_blank.csv").open(newline="", encoding="utf-8-sig") as stream:
+        annotation_reader = csv.DictReader(stream)
+        annotation_fields = annotation_reader.fieldnames or []
+        annotation_rows = list(annotation_reader)
+    blinded_forbidden = {"system_condition", "automated_role_label", "confidence_stratum", "selection_agreement"}
+    leaked = blinded_forbidden & set(annotation_fields)
+    if leaked or annotation_rows:
+        mismatches["human_annotation_blank_blinding"] = {
+            "expected": "no condition/prediction fields and no label rows",
+            "observed": {"leaked_fields": sorted(leaked), "rows": len(annotation_rows)},
+        }
     return {"status": "PASS" if not mismatches else "FAIL", "observed": observed, "mismatches": mismatches}
 
 
@@ -229,7 +353,7 @@ def manuscript_checks() -> dict[str, object]:
         "Bijing Liu",
         "Yong Yang",
         "yangyong1@sgepri.sgcc.com.cn",
-        "cmc-2026-08-24-v3",
+        "c2ges-2026-09-06-protocol-ready-v1",
         "All authors have read and agreed",
         "ORCID: none declared",
     ]
@@ -270,8 +394,9 @@ def external_gates() -> dict[str, str]:
         "rights_safe_public_release": "AUTHORIZED_GITHUB_SCOPE",
         "journal_portal_author_attestation": "MANUAL_AT_SUBMISSION_NOT_PACKAGE_GATE",
         "third_party_redistribution_permission": "NOT_REQUIRED_EXCLUDED_FROM_PUBLIC_RELEASE",
-        "independent_power_system_expert_annotation": "CLAIM_UPGRADE_ONLY_EXPANDED_SCOPE",
-        "untouched_external_series_evaluation": "CLAIM_UPGRADE_ONLY_EXPANDED_SCOPE",
+        "independent_power_system_expert_annotation": "PENDING",
+        "untouched_external_series_evaluation": "PENDING",
+        "controlled_component_factorial": "PENDING",
         "operational_maintenance_record_validation": "CLAIM_UPGRADE_ONLY_EXPANDED_SCOPE",
     }
 
@@ -280,7 +405,8 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--skip-latex", action="store_true", help="run only code and data checks")
     parser.add_argument("--submission", action="store_true", help="fail unless all author/external gates are closed")
-    parser.add_argument("--report", type=Path, default=DEFAULT_REPORT)
+    parser.add_argument("--report", type=Path, default=None, help="explicit report path; omitted writes only to the system temporary directory")
+    parser.add_argument("--check", action="store_true", help="run non-mutating checks and do not write a report")
     args = parser.parse_args()
 
     if sys.version_info[:2] != (3, 12):
@@ -290,6 +416,8 @@ def main() -> int:
         run("core_tests", [sys.executable, "-m", "unittest", "discover", "-s", ".", "-p", "test_*.py", "-v"], HERE / "core" / "R2_v0_3"),
         run("development_tests", [sys.executable, "-m", "unittest", "-v", "test_dev_only_calibration"], HERE / "dev_calibration"),
         run("postrun_tests", [sys.executable, "-m", "unittest", "-v", "test_exact_signflip_sensitivity", "test_rights_safe_metadata", "test_series_cluster_sensitivity"], HERE / "postrun_sensitivity"),
+        run("prospective_tests", [sys.executable, "-m", "unittest", "discover", "-s", ".", "-p", "test_*.py", "-v"], HERE / "prospective_v1"),
+        run("development_pilot_integrity", [sys.executable, "validate_run.py", "run_2"], HERE / "prospective_v1"),
     ]
     if not args.skip_latex:
         checks.extend([
@@ -299,11 +427,14 @@ def main() -> int:
 
     data = data_checks()
     manuscript = manuscript_checks()
+    figures = figure_lineage_checks()
     failures = [item["label"] for item in checks if item["returncode"] != 0]
     if data["status"] != "PASS":
         failures.append("data_checks")
     if manuscript["status"] != "PASS":
         failures.append("manuscript_checks")
+    if figures["status"] != "PASS":
+        failures.append("figure_lineage_checks")
     versions = {}
     for package in ("networkx", "numpy", "rouge-score", "sentence-transformers", "torch"):
         try:
@@ -331,12 +462,21 @@ def main() -> int:
         ],
         "data": data,
         "manuscript": manuscript,
+        "figure_lineage": figures,
         "commands": checks,
     }
-    report_path = args.report if args.report.is_absolute() else (Path.cwd() / args.report)
-    report_path.parent.mkdir(parents=True, exist_ok=True)
-    report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(json.dumps({"status": report["status"], "report": str(report_path), "failures": failures}, ensure_ascii=False))
+    if args.check:
+        report_path = None
+    elif args.report is not None:
+        report_path = args.report if args.report.is_absolute() else (Path.cwd() / args.report)
+    else:
+        stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        report_path = Path(tempfile.gettempdir()) / f"C2GES_PUBLIC_VERIFICATION_{stamp}.json"
+
+    if report_path is not None:
+        report_path.parent.mkdir(parents=True, exist_ok=True)
+        report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    print(json.dumps({"status": report["status"], "report": None if report_path is None else str(report_path), "non_mutating": args.check, "failures": failures}, ensure_ascii=False))
     return 0 if report["status"] == "PASS" else (2 if report["status"] == "PENDING_EXTERNAL_GATES" else 1)
 
 

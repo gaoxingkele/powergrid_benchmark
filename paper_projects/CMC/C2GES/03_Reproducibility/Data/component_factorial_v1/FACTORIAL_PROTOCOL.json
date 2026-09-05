@@ -1,0 +1,46 @@
+{
+  "schema": "c2ges-component-factorial-v1",
+  "protocol_status": "DRAFT_NOT_FROZEN",
+  "created_on": "2026-09-05",
+  "depends_on": "../prospective_external_v1/EXTERNAL_PROTOCOL_FREEZE.json",
+  "execution_allowed": false,
+  "controlled_variables": [
+    "candidate set",
+    "series split",
+    "word budget",
+    "random seed",
+    "evaluation script",
+    "tie breaking"
+  ],
+  "weight_rule": "Renormalize positive component weights to sum to one within every clean condition; retain the redundancy penalty on the same positive-score scale.",
+  "families": {
+    "incremental_chain": ["AB-0", "AB-1", "AB-2", "AB-3", "AB-4", "AB-5", "AB-6"],
+    "reservation_path_factorial": ["RP-00", "RP-10", "RP-01", "RP-11"],
+    "graph_type": ["G-U", "G-T"]
+  },
+  "primary_controlled_path_contrast": "AB-5 minus AB-6",
+  "factorial_effects": ["reservation main effect", "path main effect", "reservation-by-path interaction"],
+  "required_metrics": [
+    "ROUGE-L F1",
+    "redundancy",
+    "role coverage",
+    "typed-edge coverage",
+    "actual words",
+    "budget utilization",
+    "selection Jaccard",
+    "runtime seconds",
+    "peak memory MB",
+    "failure rate"
+  ],
+  "statistical_unit": "report_series_id",
+  "historical_unrenormalized_strict_role": "supplementary historical diagnostic only",
+  "required_outputs": [
+    "factorial_item_metrics.csv",
+    "factorial_series_effects.csv",
+    "factorial_interactions.json",
+    "factorial_selection_jaccard.csv",
+    "factorial_human_metrics.csv",
+    "factorial_runtime_resources.csv",
+    "FACTORIAL_REPORT.md"
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "schema": "c2ges-prospective-external-v1",
+  "protocol_status": "DRAFT_NOT_FROZEN",
+  "created_on": "2026-09-05",
+  "target_venue": "MDPI Applied Sciences",
+  "external_test_accessed": false,
+  "execution_allowed": false,
+  "pre_freeze_access_log": "PRE_FREEZE_ACCESS_LOG.md",
+  "pre_freeze_exposed_candidates_must_be_excluded": true,
+  "blocking_fields": [
+    "rights-cleared external report inventory and SHA-256 hashes",
+    "series-level development/test allocation",
+    "layout candidate validity audit",
+    "modern baseline tuning decision after layout audit",
+    "final tuning grids and immutable code revision"
+  ],
+  "analysis_unit": "report_series_id",
+  "minimum_external_series": 8,
+  "recommended_external_series": 12,
+  "recommended_total_reports": 20,
+  "candidate_builder": {
+    "status": "TO_BE_PROMOTED_FROM_AUDITED_PYMUPDF_BLOCK_RULE",
+    "unit_types": ["body", "heading", "list_item", "table_unit", "caption", "footnote"],
+    "exclude_repeated_headers_footers": true,
+    "table_body_fusion_forbidden": true,
+    "candidate_validity_threshold": 0.90,
+    "table_body_fusion_error_threshold": 0.05
+  },
+  "budgets_words": [110, 260],
+  "auxiliary_unit_budgets": [5, 10],
+  "budget_rule": "select complete units from the full ranking; skip units exceeding remaining words; never truncate a unit",
+  "mean_length_tolerance_fraction": 0.05,
+  "comparators": [
+    "Lead",
+    "Centroid",
+    "TextRank",
+    "Semantic-MMR",
+    "Role-only",
+    "normalized no-path C2GES",
+    "Full C2GES",
+    "PacSum-MiniLM clean-room (identity verified; tuning pending layout audit)"
+  ],
+  "tuning": {
+    "series_disjoint": true,
+    "equal_configuration_budget": true,
+    "recommended_configurations_per_tunable_method": 9,
+    "objective_covers_both_word_budgets": true,
+    "decision_file": "TUNING_DECISION.json"
+  },
+  "primary_endpoint": "equal-series mean paired ROUGE-L F1",
+  "secondary_endpoints": ["ROUGE-1 F1", "ROUGE-2 F1", "redundancy", "actual_words", "budget_utilization"],
+  "diagnostics": ["role_coverage", "typed_edge_coverage", "selection_jaccard", "layout_unit_mix", "runtime_seconds", "peak_memory_mb", "failure_rate"],
+  "inference": {
+    "cluster": "report_series_id",
+    "interval": "95% series-cluster bootstrap",
+    "exact_test": "series sign-flip when series count permits",
+    "multiplicity": "Holm within predeclared families",
+    "sensitivity": "leave-one-series-out"
+  },
+  "confirmation_rule": [
+    "positive paired mean",
+    "95% cluster interval lower bound above zero",
+    "Holm-adjusted exact p below 0.05",
+    "mean output length within tolerance",
+    "leave-one-series-out direction stable"
+  ],
+  "note": "Populate every blocking field, exclude every candidate listed in PRE_FREEZE_ACCESS_LOG.md, hash this file, set protocol_status=FROZEN and execution_allowed=true before any clean external-test document is opened or scored."
+}

@@ -12,7 +12,7 @@ Checked on 2026-08-24 against the current MDPI LaTeX/template guidance, layout g
 - [x] Featured Application, main article structure, numbered figures/tables, references, and supplementary-material statement are present.
 - [x] CRediT Author Contributions, Funding, Institutional Review Board, Informed Consent, Data Availability, Acknowledgments/GenAI disclosure, and Conflicts of Interest statements are present.
 - [x] GenAI product, uses, verification boundary, unavailable exact backend version, and author responsibility are stated consistently in Methods and Acknowledgments.
-- [x] Rights-safe repository URL is bound to planned immutable tag `cmc-2026-08-24-v3`; restricted source PDFs and verbatim derivatives are excluded.
+- [x] The 2026-09-06 protocol-ready package is bound to immutable tag `c2ges-2026-09-06-protocol-ready-v1`; restricted source PDFs and verbatim derivatives are excluded. A new submission-final tag remains mandatory after E1--E3 backfill.
 - [x] Cover letter is aligned with the current conservative claims and contains no reviewer names or other invented fields.
 - [x] Submission-mode verifier, 49 tests with three documented restricted-input skips, LaTeX build, references, checksum manifest, and 22+2-page visual QA pass.
 

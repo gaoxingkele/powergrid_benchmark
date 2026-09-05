@@ -222,55 +222,10 @@ dataset_flow()
 aggregate()
 paired()
 
-script_hash = digest(Path(__file__))
-input_hashes = {name: digest(path) for name, path in INPUTS.items()}
-specifications = {
-    "fig02_dataset_flow": {
-        "manuscript_id": "Figure 2 / label fig:data-flow",
-        "caption_claim_anchor": "Materials and Methods, Source PDFs, Inclusion, and Leakage Gates",
-        "input_names": ["rights_inventory"],
-        "function": "dataset_flow",
-        "supported_claim": "40 to 27 to 12/15 sampling flow, 3,200 pages and 12,924 candidates",
-        "limitation": "rights-safe metadata only; source prose and PDFs are excluded",
-    },
-    "fig03_aggregate_rougel": {
-        "manuscript_id": "Figure 3 / label fig:aggregate",
-        "caption_claim_anchor": "Results, Aggregate Test Results",
-        "input_names": ["formal_config", "aggregate_metrics"],
-        "function": "aggregate",
-        "supported_claim": "descriptive macro-mean ROUGE-L for seven conditions at K=5 and K=10",
-        "limitation": "equal-sentence, not equal-word, budgets; bars omit paired uncertainty",
-    },
-    "fig04_paired_differences": {
-        "manuscript_id": "Figure 5 / label fig:paired",
-        "caption_claim_anchor": "Results, Paired Directions and Exact Post-Run Sensitivity",
-        "input_names": ["formal_config", "paired_differences"],
-        "function": "paired",
-        "supported_claim": "all 90 rights-safe paired differences and six sign-count labels",
-        "limitation": "non-verbatim report indices replace titles; inferential assumptions remain as stated in the manuscript",
-    },
-}
-artifacts = {}
-for stem, spec in specifications.items():
-    outputs = {}
-    for suffix in ("pdf", "png"):
-        path = OUT / f"{stem}.{suffix}"
-        outputs[suffix] = {"path": path.relative_to(PROJECT).as_posix(), "bytes": path.stat().st_size, "sha256": digest(path)}
-    artifacts[stem] = {
-        **spec,
-        "inputs": [
-            {"name": name, "path": INPUTS[name].relative_to(PROJECT).as_posix(), "sha256": input_hashes[name]}
-            for name in spec["input_names"]
-        ],
-        "script": {"path": Path(__file__).relative_to(PROJECT).as_posix(), "function": spec["function"], "sha256": script_hash},
-        "outputs": outputs,
-    }
-lineage = {
-    "schema": "c2ges-figure-lineage-v2",
-    "status": "PASS",
-    "clean_unpack_portable": True,
-    "workspace_parent_access": False,
-    "artifacts": artifacts,
-}
-(OUT / "FIGURE_LINEAGE.json").write_text(json.dumps(lineage, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-print(json.dumps({"status": "PASS", "figures": len(artifacts), "script_sha256": script_hash}, indent=2))
+# A separate registry builder covers all six manuscript figures.  Keeping the
+# registry step centralized prevents this three-figure generator from silently
+# replacing the complete lineage record with a partial one.
+from build_figure_lineage import main as build_complete_lineage
+
+build_complete_lineage()
+print(json.dumps({"status": "PASS", "regenerated_figures": 3, "lineage_scope": "all_six"}, indent=2))

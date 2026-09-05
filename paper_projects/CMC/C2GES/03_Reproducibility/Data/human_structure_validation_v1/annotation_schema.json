@@ -1,0 +1,53 @@
+{
+  "schema": "c2ges-human-structure-validation-v1",
+  "tasks": {
+    "unit": {
+      "fields": ["unit_validity"],
+      "labels": {
+        "unit_validity": ["standalone", "needs_adjacent_context", "fused_or_malformed", "header_footer_table_contamination", "cannot_judge"]
+      }
+    },
+    "role": {
+      "fields": ["role_label"],
+      "labels": {
+        "role_label": ["root_cause", "trigger_event", "propagation_response", "impact", "mitigation", "none_other", "ambiguous_multiple", "cannot_judge"]
+      }
+    },
+    "edge": {
+      "fields": ["edge_supported", "edge_direction_correct", "lexical_only_false_relation", "context_sufficient"],
+      "labels": {
+        "edge_supported": ["yes", "no", "cannot_judge"],
+        "edge_direction_correct": ["yes", "no", "cannot_judge"],
+        "lexical_only_false_relation": ["yes", "no", "cannot_judge"],
+        "context_sufficient": ["yes", "no", "cannot_judge"]
+      }
+    },
+    "path": {
+      "fields": ["path_validity", "path_adds_beyond_reservation"],
+      "labels": {
+        "path_validity": ["coherent", "partially_coherent", "unsupported", "directionally_inconsistent", "cannot_judge"],
+        "path_adds_beyond_reservation": ["yes", "no", "cannot_judge"]
+      }
+    },
+    "summary": {
+      "fields": ["source_faithful", "critical_omission", "page_locator_correct"],
+      "labels": {
+        "source_faithful": ["yes", "no", "cannot_judge"],
+        "critical_omission": ["yes", "no", "cannot_judge"],
+        "page_locator_correct": ["yes", "no", "cannot_judge"]
+      }
+    }
+  },
+  "sampling_targets": {"unit": 200, "role": 200, "edge": 150, "path": 80, "summary": 30},
+  "thresholds": {
+    "role_macro_f1": 0.70,
+    "role_kappa": 0.60,
+    "edge_support_kappa": 0.60,
+    "edge_direction_kappa": 0.60,
+    "supported_edge_precision": 0.70,
+    "coherent_or_partial_path_rate": 0.70,
+    "page_locator_accuracy": 1.00,
+    "source_faithfulness_rate": 0.90
+  },
+  "notes_policy": "non-verbatim notes only; do not paste report text"
+}

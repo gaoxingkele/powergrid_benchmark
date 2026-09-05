@@ -1,0 +1,42 @@
+C2GES prospective_v1 experiment notes
+
+Purpose:
+- Implement the complete AB-0--AB-6 chain.
+- Implement the RP-00/RP-10/RP-01/RP-11 reservation-by-path factorial.
+- Implement the G-U/G-T graph-type comparison.
+- Enforce 110/260-word budgets over the full candidate ranking without truncation.
+- Emit series-level bootstrap intervals, exact sign-flip tests, Holm corrections, effect sizes, resource diagnostics, selected IDs, and two figures.
+
+Run 1 is the first development-only implementation pilot. Run 2 supersedes it
+for implementation diagnostics because G-U was changed to use the same lexical
+overlap function as G-T; this removes a tokenization confound. Neither run is E1
+or confirmatory E3. Neither accesses an external test set, and neither may be
+cited as evidence of generalization or manuscript superiority.
+
+Command:
+  py -3.12 experiment.py --out_dir=run_1
+
+Plot command:
+  py -3.12 plot.py --run_dir=run_1
+
+Corrected pilot and non-mutating validation:
+  py -3.12 experiment.py --out_dir=run_2
+  py -3.12 validate_run.py run_2
+  py -3.12 plot.py --run_dir=run_2
+
+Run 2 status:
+- 12 development reports in 6 series; 13 conditions at 110 and 260 words.
+- 312/312 rows passed; no output exceeded its word budget.
+- AB-5=RP-11, AB-6=RP-10, and AB-6=G-T held at selection level.
+- All reported pilot intervals and tests remain exploratory and must not be
+  copied into the manuscript's confirmatory Results section.
+
+Layout candidate-builder pilot:
+- `layout_dev_pilot_v1` exposed an ordering issue: extracted table rows were
+  emitted before every prose block on the same page.
+- `layout_dev_pilot_v2` fixes page-local source ordering and adds risk-enriched
+  sampling for possible fragments, repaired boundaries, and >256-token units.
+- V2 generated 3,782 candidates and 244 non-verbatim audit rows from the 12
+  existing development reports. Its integrity validator passed.
+- Human boundary labels remain pending, so this does not satisfy the >=0.90
+  candidate-validity or <=0.05 table/body-fusion gates.
