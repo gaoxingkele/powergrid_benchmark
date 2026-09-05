@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "status": "PLANNED_RUNTIME_NOT_PILOT_VERIFIED",
+  "protocol_authoring_snapshot": {
+    "operating_system": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.10",
+    "torch": "2.13.0+cpu",
+    "numpy": "2.4.6",
+    "cuda_available": false,
+    "scientific_run": false
+  },
+  "required_behavior": {
+    "device": "one device class for all methods within a timed comparison; record exact CPU/GPU model",
+    "randomness": "seed Python, NumPy, Torch CPU, and every available accelerator from the cell seed; graph control uses only graph_seed 20260905",
+    "determinism": "request deterministic Torch algorithms, set cuDNN deterministic true and benchmark false when applicable, and record any unsupported operation",
+    "precision": "float32 training and inference for every learned arm; float64 only for metric accumulation and statistical analysis",
+    "timing": "synchronize the accelerator immediately before and after timed regions; exclude data download and one-time preprocessing",
+    "memory": "record peak process host memory and peak allocated accelerator memory when applicable",
+    "threading": "record CPU logical/physical counts and Torch intra/inter-op thread counts",
+    "no_silent_substitution": true
+  },
+  "lock_gate": "before pilot, write exact interpreter, package lock, hardware, driver, deterministic settings, and hashes to the pilot manifest; formal execution must reuse that verified lock",
+  "known_limit": "the authoring snapshot is CPU-only and has not run the proposed pilot; it is not formal runtime evidence"
+}

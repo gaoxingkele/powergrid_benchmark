@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0",
+  "status": "FROZEN_IDENTITIES_EXECUTION_BLOCKED_ON_SOURCE_AND_LICENCE_VERIFICATION",
+  "redistribution": "NOT_AUTHORIZED_BY_THIS_MANIFEST",
+  "datasets": [
+    {
+      "id": "opsd_six_country_functional_graph",
+      "provider": "Open Power System Data",
+      "source_artifact": "time_series_60min_singleindex.csv",
+      "local_path": null,
+      "bytes": 130339665,
+      "sha256": "6a7f2bc571314cbf9c321cc03437691cd4be95c3a6f075e60ff99e8035c704c8",
+      "hash_evidence": "../p2_s3_identifiable_v1/run_manifest.json",
+      "licence_status": "NOT_VERIFIED_IN_THIS_WORKTREE",
+      "licence_evidence_path": null,
+      "execution_gate": "materialize the exact hashed file and record source-specific licence terms before pilot or formal use",
+      "ordered_node_ids": ["DE", "FR", "IT", "ES", "NL", "PL"],
+      "source_columns": ["DE_load_actual_entsoe_transparency", "FR_load_actual_entsoe_transparency", "IT_load_actual_entsoe_transparency", "ES_load_actual_entsoe_transparency", "NL_load_actual_entsoe_transparency", "PL_load_actual_entsoe_transparency"],
+      "timestamp_column": "utc_timestamp",
+      "parsing": "retain a row only when all six selected values are nonempty finite floats; no interpolation or imputation; stop at 35000 retained rows",
+      "known_inherited_profile": {"rows_scanned_before_stop": 35043, "retained_rows": 35000, "discarded_rows_before_stop": 43, "first_timestamp": "2015-01-01T01:00:00Z", "last_timestamp": "2018-12-31T01:00:00Z"},
+      "targets": "observed load for each ordered node at processed position t+24",
+      "real_edge_map": "per-split undirected absolute-Pearson functional graph; threshold 0.7; minimum pairwise-finite overlap 168; training prefix only",
+      "scope": "functional association, not physical transmission topology"
+    },
+    {
+      "id": "ausgrid_hierarchy_17",
+      "provider": "Ausgrid",
+      "source_artifacts": ["three annual solar-home half-hourly data files"],
+      "local_paths": [],
+      "sha256": [],
+      "licence_status": "NOT_VERIFIED_IN_THIS_WORKTREE",
+      "licence_evidence_path": null,
+      "execution_gate": "record all raw file paths, byte sizes, SHA-256 hashes, source-specific licence terms, and processed-file hash before pilot or formal use",
+      "row_filter": "GC rows only; malformed or short daily rows are rejected; rejected rows and dates must be logged",
+      "hourly_aggregation": "sum adjacent half-hour cells; the inherited parser treated an empty half-hour cell as zero and that rule is frozen but must be counted",
+      "timestamp_semantics": "24 naive YYYY-MM-DDTHH:00 labels per parsed date; no timezone or daylight-saving claim",
+      "ordered_node_ids": ["customer_134", "customer_104", "customer_255", "customer_141", "customer_228", "customer_147", "customer_55", "customer_131", "customer_21", "customer_82", "customer_58", "customer_109", "region1", "region2", "region3", "region4", "system_total"],
+      "leaf_source_ids": [134, 104, 255, 141, 228, 147, 55, 131, 21, 82, 58, 109],
+      "region_membership": {"region1": [82, 147, 255], "region2": [228, 109, 131], "region3": [134, 141, 55], "region4": [21, 58, 104]},
+      "parent_map": {"customer_134": "region3", "customer_104": "region4", "customer_255": "region1", "customer_141": "region3", "customer_228": "region2", "customer_147": "region1", "customer_55": "region3", "customer_131": "region2", "customer_21": "region4", "customer_82": "region1", "customer_58": "region4", "customer_109": "region2", "region1": "system_total", "region2": "system_total", "region3": "system_total", "region4": "system_total"},
+      "targets": "leaf observed load and contemporaneous deterministic region/system sums at processed position t+24",
+      "selection_provenance": "leaf IDs and postcode-sorted groups are copied from the existing manuscript; historical full-record availability and energy informed leaf selection",
+      "selection_limitation": "not a train-only leaf-selection design; frozen before this new experiment but not evidence of physical feeder topology",
+      "scope": "constructed accounting hierarchy only"
+    }
+  ],
+  "implementation_bindings": {
+    "implementation_contract.json": "72758671f8ede989f907b45942f606a2ae5d1ad3a4a443b9e5f8d1cba8ff548d",
+    "graph_data.py": "2a97feed9cfa0f11cf0e2ba4b64897a22040d4ff8fcc3fa6dfda110a00e05dcc",
+    "models.py": "1aa962c2e2e348cc0ad80ce4028b103ab754acf239d89f504e5b12a029749b43",
+    "verify_implementation.py": "a2157fa018dc1f1c54ac3000a6165fc67d3c3bea8066af54ddfac823738bc09e"
+  },
+  "required_materialization_record": ["source local path", "source bytes", "source SHA-256", "licence text or authoritative locator", "processed artifact path", "processed artifact SHA-256", "ordered node map digest", "row rejection and empty-cell counts", "resolved anchor-to-position map"],
+  "claim_limits": ["provider-owned public data; no ownership claim", "no redistribution permission inferred", "Ausgrid hierarchy is not feeder topology", "OPSD correlation graph is not transmission topology", "no deployment or generalization claim"]
+}
