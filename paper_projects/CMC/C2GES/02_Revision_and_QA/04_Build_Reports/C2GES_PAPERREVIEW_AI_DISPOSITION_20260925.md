@@ -2,13 +2,11 @@
 
 评审来源：paperreview.ai（Stanford Agentic Reviewer），提交件为 15 页 A3 并排评审副本（覆盖正文 p1–30，省略参考文献页），Token `sjA3oxGSe0bRDX3iam9A5ab4pqL7YlynFmNWozfo3FM`。提交与副本说明见 `../../PAPERREVIEW_AI_SUBMISSION_20260925.md`。
 
-处置对象版本（本轮修订后）：
+处置对象版本（2026-09-26 探索性补充轮之后；09-25 修订轮的哈希见 `../../00_Status_and_Index/CURRENT_BASELINE.md` 历史节）：
 
-- 正文 `01_Manuscript/LaTeX/paper_information.tex` SHA-256 `53dba9d2de3511787337307466c365dedcb84abc07075df01499fbad72aea0bc`
-- PDF `936d16af7837cc5ec6ec7baa1f447f2757f54d537c9cdf8bedcc9c5f64756762`，34 页，6 图 15 表 46 参考文献，摘要 200 词
-- 公共验证 route `diagnostic` PASS，0 failures（2026-09-25T15:24Z）
-- 展示审计：0 未引用浮动体 / 0 孤儿图 / 0 Overfull
-- 发布清单 568 文件 PASS
+- 正文 `01_Manuscript/LaTeX/paper_information.tex` SHA-256 `dd70896031989ae889b82444c906562751a4a5c590d8bc1a3aad7cfd36e8198e`
+- PDF `19e9c1477fcb823b2f82aa83f0de396b67f1467fa38289e2ad5d0a5f865af92f`，34 页，6 图 15 表 46 参考文献，摘要 200 词；补充 PDF 7 页，Table S1–S13
+- 公共验证 route `diagnostic` PASS，0 failures；发布清单 580 文件 PASS
 
 处置分级：**FIXED**（本轮改稿）/ **ALREADY**（稿内已有，评审未看到）/ **FUTURE**（属 E1–E5 确认性路线，不动当前诊断边界）/ **DECLINED**（含理由）。
 
@@ -43,16 +41,16 @@
 
 | Q | 内容 | 处置 |
 |---|---|---|
-| Q1 | 路径改选但变差的逐案例错误分类 | FUTURE-可加速：可从已打包选择数据做描述性分析；不改变当前声称 |
+| Q1 | 路径改选但变差的逐案例错误分类 | **FIXED-探索性**（2026-09-26）：Table S11 + `descriptive_addenda_v1/`；改动单元 92–98% 边相连、80–100% 触及逆时序边、窗口外阻断对数十至数百；描述性，无因果分摊 |
 | Q2 | 24/48 窗口、硬时序约束消融 | ALREADY 一半：路径**长度** 3/4/5 已扫（相邻 Spearman 0.979–1.000，`dev_calibration/artifacts/`）；**窗口本身从未扫描**（`max_distance=12` 硬编码），§5.6 已承诺修订前先冻结 |
 | Q3 | 词典扩展 / 否定检测 / 弱监督角色分类器 | ALREADY（§5.6 已列 E2 条件备选）；改动词典会脱离冻结系统，不属本轮 |
 | Q4 | 冗余系数 −0.50 从未校准 | **FIXED-文本**：§2.1 新增 MemSum 对照并声明固定罚出于确定性/可审计；§5.6 E1 显式纳入"开发集选定冗余系数 + 对称调参预算"。网格扫描本身属 E1 |
 | Q5 | 确定性 typed edges + R-GCN/GAT 混合 | FUTURE：GraphLSS 对比已在 §2.2；学习化混合属确认性路线 |
-| Q6 | 逐角色覆盖/收益（如 mitigation 精确率） | FUTURE-可加速：可用现有线索在参考句上描述性计算 |
+| Q6 | 逐角色覆盖/收益（如 mitigation 精确率） | **FIXED-探索性**（2026-09-26）：Table S12；句级 ROUGE-L 匹配几乎不触发（已在表注声明），改用 token 级对齐；参考侧角色稀疏（root cause 0/7）为结构性空缺 |
 | Q7 | 完全冻结、系列不相交、对称调参、预选提交 | ALREADY：即 E1 定义；比较器参数已预选（§4.10） |
 | Q8 | Sem-nCG / 实体事件覆盖 / NERC 属性清单 | **FIXED-文本**：§5.6 指标句加入 redundancy-aware Sem-nCG（**正确编号**，见引用核验）；NERC 属性清单留 E2/E4 |
 | Q9 | 为何保留删除效用；两段式 tiebreaker | ALREADY 一半：§3.11 赢家诅咒解释 + freeze_rule；**FIXED-文本**：两段式（保留负责覆盖 + 路径仅作 tiebreaker）写入 §5.6 候选重设计 |
-| Q10 | 分段审计长块分布 / 是否改变排序 | ALREADY 一半：§4.9 审计（27 PDF、505 表格区域、零页级失败）+ Limitations 声明未用于重跑；长块分布表可从 artifacts 补，排序问题明确不答 |
+| Q10 | 分段审计长块分布 / 是否改变排序 | **FIXED-探索性**（2026-09-26）：Table S13；长块分布 + 非逐字实例已报；排序是否改变明确不答（审计未用于重跑，Limitations 边界保持） |
 
 ## 四、总体建议 (i)–(iv) 映射
 

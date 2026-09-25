@@ -1,8 +1,29 @@
 # C2GES 当前基准
 
-更新日期：2026-09-25
+更新日期：2026-09-26
 
-## Information 版（2026-09-25 修订，当前）
+## Information 版（2026-09-26 探索性补充，当前）
+
+在 09-25 评审处置轮之上，补入 Q1/Q6/Q10 三个探索性描述分析（补充材料 Table S11–S13 + 随包数据 `03_Reproducibility/Data/descriptive_addenda_v1/`）。不动任何实验数值与声称边界；无新推断检验、无新 Holm 校正。
+
+- 正文：`../01_Manuscript/LaTeX/paper_information.tex` SHA-256 `dd70896031989ae889b82444c906562751a4a5c590d8bc1a3aad7cfd36e8198e`
+- 主稿 PDF：`../01_Manuscript/LaTeX/paper_information.pdf` SHA-256 `19e9c1477fcb823b2f82aa83f0de396b67f1467fa38289e2ad5d0a5f865af92f`；**34 页**（正文终于 p30），6 图 15 表 46 参考文献，摘要 200 词，0 错误 / 0 Overfull / 0 未定义引用
+- 补充 PDF：SHA-256 `518e563bfa2539bc568a2012f3d8067d59fd231d543bc1303202d01bcb7a48b4`，**7 页**，Table S1–S13 + Figure S4
+- 投稿 ZIP：`79d4ab0dc8168f4bf2b56a91cce952e4b393c571450bfc68d8d5a7f2ae602f87`；评审 ZIP：`153813c52e1dd08ea30fb234a9f7c204ff410505d4f3f06ab900e1d6d1756549`；补充 ZIP：`6f592cf5df133b44a2483311ce7ddd52e9738c863c929eb355ae53dcb9f2aa36`；均 `fresh_extract: PASS`（评审包 docx 已从当前 tex 重建）
+- 公共验证 route `diagnostic` **PASS** 0 failures；展示审计 `problems: none`（6 图 15 表）；发布清单 **580 文件** `--check` PASS
+- 分析代码：`03_Reproducibility/Code/descriptive_addenda_v1/`（5/5 单测通过；无随机性；输入哈希记入 `ADDENDA_MANIFEST.json`）
+
+### 本轮改动
+
+| 项 | 内容 |
+|---|---|
+| Q1 → Table S11 | 路径改选单元的错误剖面：改动单元 92–98% 与类型化边相连；相连者 80–100% 触及至少一条逆时序边（设计属性，非错误计数）；12 位窗口外每改动单元有数十至数百条角色相容对被阻断——长程依赖"按设计未测"而非"被证据否定" |
+| Q6 → Table S12 | 逐角色 token 对齐（同 cue 词典、双侧标注、弃权一致）：角色层效应集中在 propagation/impact/mitigation；Full 在 propagation 精确率两预算领先但 mitigation 精确率 @110 与覆盖率落后 no-path——路径项不系统性提升对齐 |
+| Q10 → Table S13 | 旧切分长单元逐条件计数（Full@K10：25 个 >100 词单元、26 个表标记单元）+ 块保留审计分布（27 报告 14,290 单元，仅 39 个 >100 词，最差 522 词）+ 非逐字实例（270 词单元含 21 个参考内容 token；162 词单元含 40 个）；排序是否改变明确不答 |
+| 方法记录 | 句级 ROUGE-L 匹配在开发中先试过、几乎从不触发（执行摘要句长且措辞不同），故 Q6 采用 token 级对齐——已在表注与 README 声明 |
+| 主文本 | §4.3 末增 S11/S12 指引句；§4.8 长单元段末增 S13 指引句；`\supplementary` 声明 S1–S10→S1–S13；Data Availability 增列 `descriptive_addenda_v1/` |
+
+## Information 版（2026-09-25 修订，历史）
 
 paperreview.ai 评审处置轮（D1–D3 缺陷修复 + 评审响应写作）后的版本。逐条处置记录：`../02_Revision_and_QA/04_Build_Reports/C2GES_PAPERREVIEW_AI_DISPOSITION_20260925.md`。
 
