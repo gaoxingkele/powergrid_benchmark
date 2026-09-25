@@ -11,13 +11,36 @@ from pathlib import Path
 
 
 METADATA = Path(__file__).resolve().parent
-PROJECT = METADATA.parents[1]
+MARKER_NAME = "C2GES_RELEASE_MARKER.json"
+
+
+def project_root(start: Path) -> Path:
+    """Locate the release root by its marker.
+
+    Walking up to the marker rather than taking a fixed parent keeps this working
+    after the project is reached through a directory junction, where resolve()
+    renames the root and a name-based test would pick the wrong verification file.
+    """
+    for candidate in (start, *start.parents):
+        if (candidate / MARKER_NAME).is_file():
+            return candidate
+    raise RuntimeError(f"no {MARKER_NAME} above {start}")
+
+
+PROJECT = project_root(METADATA)
+PROJECT_NAME = json.loads((PROJECT / MARKER_NAME).read_text(encoding="utf-8-sig")).get("project", PROJECT.name)
 CHECKSUMS = METADATA / "FILE_SHA256SUMS.txt"
 MANIFEST = METADATA / "RELEASE_MANIFEST.json"
 SCOPES = ("01_Manuscript", "02_Revision_and_QA", "03_Reproducibility")
 EXCLUDED_SUFFIXES = {".aux", ".bbl", ".blg", ".log", ".out", ".pyc"}
 EXCLUDED_NAMES = {"FILE_SHA256SUMS.txt", "RELEASE_MANIFEST.json"}
-EXCLUDED_PARTS = {"__pycache__", "visual_qa"}
+EXCLUDED_PARTS = {
+    "__pycache__", "visual_qa", "source_pdfs_private", "derived_private",
+    # Working copies that are not release content: a dated template backup, the
+    # unpacked MDPI template, and the assets extracted for the Word rendering.
+    "Definitions_20260623_backup", "_mdpi_template_acs", "_docx_assets",
+}
+EXCLUDED_FILE_SUFFIXES = ("_mdpi_template_acs.zip",)
 BINARY_SUFFIXES = {".pdf", ".png", ".jpg", ".jpeg", ".zip", ".docx", ".eps"}
 
 
@@ -37,6 +60,8 @@ def included_files() -> list[Path]:
                 continue
             relative = path.relative_to(PROJECT)
             if path.name in EXCLUDED_NAMES or path.suffix.lower() in EXCLUDED_SUFFIXES:
+                continue
+            if path.name.endswith(EXCLUDED_FILE_SUFFIXES):
                 continue
             if any(part in EXCLUDED_PARTS for part in relative.parts):
                 continue
@@ -86,18 +111,21 @@ def check() -> dict[str, object]:
     return result
 
 
-def generate() -> None:
+def generate(route: str = "diagnostic") -> None:
     files = included_files()
     lines = [f"{sha256(PROJECT / relative)}  {relative.as_posix()}" for relative in files]
     CHECKSUMS.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    verification_name = "C2GES_PUBLIC_VERIFICATION.json" if PROJECT.name == "C2GES" else "MA_SQLGRID_PUBLIC_VERIFICATION.json"
+    if PROJECT_NAME == "C2GES" and route == "diagnostic":
+        verification_name = "C2GES_DIAGNOSTIC_PUBLIC_VERIFICATION.json"
+    else:
+        verification_name = "C2GES_PUBLIC_VERIFICATION.json" if PROJECT_NAME == "C2GES" else "MA_SQLGRID_PUBLIC_VERIFICATION.json"
     verification_path = PROJECT / "02_Revision_and_QA" / "04_Build_Reports" / verification_name
     verification = json.loads(verification_path.read_text(encoding="utf-8"))
     gates = verification.get("external_gates", {})
     manifest = {
         "schema_version": "cmc-current-layout-release-v1",
         "paper": PROJECT.name,
-        "release_baseline": "2026-08-23 revision",
+        "release_baseline": "2026-09-12 diagnostic submission v2" if route == "diagnostic" else "2026-08-23 revision",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "release_scopes": list(SCOPES),
         "file_count": len(files),
@@ -128,12 +156,13 @@ def generate() -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
+    parser.add_argument("--route", choices=("confirmatory", "diagnostic"), default="diagnostic")
     args = parser.parse_args()
     if args.check:
         result = check()
         print(json.dumps(result, ensure_ascii=False, sort_keys=True))
         raise SystemExit(0 if result["status"] == "PASS" else 1)
-    generate()
+    generate(args.route)
 
 
 if __name__ == "__main__":
