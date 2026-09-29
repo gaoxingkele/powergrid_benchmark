@@ -1,0 +1,336 @@
+{
+  "schema": "gendata-c2ges-gate-ledger-v1",
+  "protocol": "synthetic_c2ges_gendata_v1",
+  "protocol_sha256": "daf7c9695cbd0add235613c92a84ef6f6663b7aa60cad98696a87f25429a19c8",
+  "synthetic": true,
+  "confirmatory_claims_allowed": false,
+  "gates": [
+    {
+      "gate": "S1",
+      "threshold": "4 系列 × 每系列恰 2 篇（协议父代要求 4×2；试点按计划放宽系列数并在 detail 声明）",
+      "measured": {
+        "synthetic_series_01": 2,
+        "synthetic_series_03": 2,
+        "synthetic_series_04": 2,
+        "synthetic_series_11": 2
+      },
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "gate": "S2",
+      "threshold": "reference 与 reference_unit_ids 拼接逐字相等（恒等）",
+      "measured": "8/8 篇逐字相等",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "gate": "S3",
+      "threshold": "因果 causal_predecessors 无环（三色 DFS；允许叙述≠因果序）",
+      "measured": "8/8 篇无环",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "gate": "S4",
+      "threshold": "语义核 18–26 句/篇；句长窗 10–28 词",
+      "measured": "8/8 篇合规",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "gate": "S5",
+      "threshold": "五角色各 2–6 次且非均分；每角色恰 1 条 priority=2",
+      "measured": "8 篇中 0 处违规",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "gate": "S6",
+      "threshold": "每篇五核心角色各 ≥1（恒等）",
+      "measured": "8/8 篇覆盖",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "gate": "S7",
+      "threshold": "设施名 Synthetic 前缀；禁词（词边界）零命中",
+      "measured": "禁词命中 0；非 Synthetic 设施 0",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "gate": "S8",
+      "threshold": "干扰种子 24–36 条互异、10–24 词量级",
+      "measured": "8 篇中 0 处违规",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "gate": "D1",
+      "threshold": "候选条数归一化 W1 ≤ 0.75",
+      "measured": 0.208,
+      "pass": true,
+      "detail": "KS=0.167（只报告）"
+    },
+    {
+      "gate": "D2",
+      "threshold": "页数归一化 W1 ≤ 0.75",
+      "measured": 0.1311,
+      "pass": true,
+      "detail": "KS=0.125（只报告）"
+    },
+    {
+      "gate": "D3",
+      "threshold": "版面比例 max |Δπ| ≤ 0.03",
+      "measured": 0.0002,
+      "pass": true,
+      "detail": "body=0.0001; caption=0.0002; footnote=0.0001; heading=0.0002; list_item=0.0002; table_unit=0.0000"
+    },
+    {
+      "gate": "D4",
+      "threshold": "集合内精确重复率 ≤ 0.2（目标 ≤0.01）",
+      "measured": 0.0,
+      "pass": true,
+      "detail": "n=2726"
+    },
+    {
+      "gate": "D5",
+      "threshold": "单元词长归一化 W1 ≤ 0.25",
+      "measured": 0.1745,
+      "pass": true,
+      "detail": "长单元率 0.0235 vs 锚点 0.0158（±50% 容差带 [0.0079, 0.0237]，只报告）；锚点 IQR=16.0"
+    },
+    {
+      "gate": "D7",
+      "threshold": "单篇核心句落前四分位比例 ≤ 0.25（每篇）",
+      "measured": {
+        "synthetic_s01_r01": 0.2222,
+        "synthetic_s01_r02": 0.1154,
+        "synthetic_s03_r01": 0.1111,
+        "synthetic_s03_r02": 0.2381,
+        "synthetic_s04_r01": 0.1111,
+        "synthetic_s04_r02": 0.1,
+        "synthetic_s11_r01": 0.1579,
+        "synthetic_s11_r02": 0.0
+      },
+      "pass": true,
+      "detail": "逐篇最大值 0.2381"
+    },
+    {
+      "gate": "D8",
+      "threshold": "单单元 max Jaccard ≤ 0.15；≥0.10 命中占比 ≤ 0.02",
+      "measured": {
+        "max_jaccard": 0.0625,
+        "hit_share": 0.0
+      },
+      "pass": true,
+      "detail": "top5: [('synthetic_s01_r02:u00243', 0.0625), ('synthetic_s01_r02:u00600', 0.0392), ('synthetic_s01_r01:u00001', 0.0), ('synthetic_s01_r01:u00002', 0.0), ('synthetic_s01_r01:u00003', 0.0)]"
+    },
+    {
+      "gate": "D9",
+      "threshold": "干扰句模板族 ≥ 6 族；单族占比 ≤ 0.4（每篇）",
+      "measured": {
+        "synthetic_s01_r01": {
+          "families": 415,
+          "max_share": 0.0048
+        },
+        "synthetic_s01_r02": {
+          "families": 675,
+          "max_share": 0.0044
+        },
+        "synthetic_s03_r01": {
+          "families": 247,
+          "max_share": 0.0275
+        },
+        "synthetic_s03_r02": {
+          "families": 364,
+          "max_share": 0.0027
+        },
+        "synthetic_s04_r01": {
+          "families": 190,
+          "max_share": 0.0053
+        },
+        "synthetic_s04_r02": {
+          "families": 305,
+          "max_share": 0.013
+        },
+        "synthetic_s11_r01": {
+          "families": 150,
+          "max_share": 0.0132
+        },
+        "synthetic_s11_r02": {
+          "families": 202,
+          "max_share": 0.005
+        }
+      },
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "gate": "E1b",
+      "threshold": "逐篇自洽 AUROC ≥ 0.8",
+      "measured": {
+        "synthetic_s01_r01": 0.9153,
+        "synthetic_s01_r02": 0.9292,
+        "synthetic_s03_r01": 0.8753,
+        "synthetic_s03_r02": 0.9071,
+        "synthetic_s04_r01": 0.9449,
+        "synthetic_s04_r02": 0.9032,
+        "synthetic_s11_r01": 0.9173,
+        "synthetic_s11_r02": 0.8769
+      },
+      "pass": true,
+      "detail": "逐篇最小值 0.8753"
+    },
+    {
+      "gate": "E2",
+      "threshold": "distinct-2 ≥ 0.526（= 锚点中位 0.6574 × 0.8）",
+      "measured": {
+        "per_doc": {
+          "synthetic_s01_r01": 0.5779,
+          "synthetic_s01_r02": 0.5449,
+          "synthetic_s03_r01": 0.6362,
+          "synthetic_s03_r02": 0.5352,
+          "synthetic_s04_r01": 0.6248,
+          "synthetic_s04_r02": 0.5691,
+          "synthetic_s11_r01": 0.6557,
+          "synthetic_s11_r02": 0.5834
+        },
+        "median": 0.5806
+      },
+      "pass": true,
+      "detail": "逐篇中位 0.58065"
+    },
+    {
+      "gate": "E3",
+      "threshold": "词汇重合度 ≥ 0.55",
+      "measured": {
+        "overlap": 0.6273,
+        "syn_vocab": 4108
+      },
+      "pass": true,
+      "detail": "|∩|=2577 / |syn|=4108"
+    }
+  ],
+  "all_gates_pass": true,
+  "report_only": {
+    "reference_words": {
+      "per_doc": {
+        "synthetic_s01_r01": 123,
+        "synthetic_s01_r02": 115,
+        "synthetic_s03_r01": 120,
+        "synthetic_s03_r02": 122,
+        "synthetic_s04_r01": 123,
+        "synthetic_s04_r02": 130,
+        "synthetic_s11_r01": 127,
+        "synthetic_s11_r02": 126
+      },
+      "note": "合成任务锁定 110–180，与真实 ES 不可比；只报告"
+    },
+    "dag_depth_branching": {
+      "synthetic_s01_r01": {
+        "depth": 4,
+        "out_degree_max": 4,
+        "out_degree_mean": 1.1111111111111112
+      },
+      "synthetic_s01_r02": {
+        "depth": 4,
+        "out_degree_max": 4,
+        "out_degree_mean": 0.8461538461538461
+      },
+      "synthetic_s03_r01": {
+        "depth": 3,
+        "out_degree_max": 6,
+        "out_degree_mean": 1.1666666666666667
+      },
+      "synthetic_s03_r02": {
+        "depth": 3,
+        "out_degree_max": 6,
+        "out_degree_mean": 0.8571428571428571
+      },
+      "synthetic_s04_r01": {
+        "depth": 5,
+        "out_degree_max": 5,
+        "out_degree_mean": 1.0
+      },
+      "synthetic_s04_r02": {
+        "depth": 5,
+        "out_degree_max": 5,
+        "out_degree_mean": 0.65
+      },
+      "synthetic_s11_r01": {
+        "depth": 6,
+        "out_degree_max": 5,
+        "out_degree_mean": 1.1578947368421053
+      },
+      "synthetic_s11_r02": {
+        "depth": 6,
+        "out_degree_max": 5,
+        "out_degree_mean": 1.0909090909090908
+      }
+    },
+    "core_position_quantiles": {
+      "q0": 0.023,
+      "q25": 0.3438,
+      "q50": 0.5267,
+      "q75": 0.7967,
+      "q100": 0.99
+    },
+    "within_report_exact_duplicate_rate": {
+      "synthetic_s01_r01": 0.0,
+      "synthetic_s01_r02": 0.0,
+      "synthetic_s03_r01": 0.0,
+      "synthetic_s03_r02": 0.0,
+      "synthetic_s04_r01": 0.0,
+      "synthetic_s04_r02": 0.0,
+      "synthetic_s11_r01": 0.0,
+      "synthetic_s11_r02": 0.0
+    },
+    "unit_wordlen_histogram_former_D6": {
+      "0-10": 223,
+      "10-20": 484,
+      "20-30": 997,
+      "30-40": 598,
+      "40-60": 277,
+      "60-100": 83,
+      "100-inf": 64
+    },
+    "ks_reference_words_vs_anchor": 1.0,
+    "d1_d2_diagnostics": {
+      "ks_candidate_count": 0.16666666666666663,
+      "ks_page_count": 0.125,
+      "synthetic_candidate_count": [
+        435,
+        703,
+        273,
+        385,
+        208,
+        328,
+        170,
+        224
+      ],
+      "synthetic_page_count": [
+        35,
+        66,
+        41,
+        46,
+        30,
+        36,
+        15,
+        22
+      ]
+    },
+    "E1_descriptive": {
+      "auroc_synthetic_vs_real_dev": 0.998,
+      "loro_reference_band": [
+        0.9292,
+        0.948
+      ],
+      "n_synthetic_units": 2726,
+      "n_real_dev_units": 3420,
+      "note": "描述性指标，不设门；AUROC 落在/高于 LORO 带不构成等价性证据"
+    }
+  },
+  "interpretation_boundary": "通过仅表示所列可观测分布对齐；不是语义真实性或外部效度证据。"
+}

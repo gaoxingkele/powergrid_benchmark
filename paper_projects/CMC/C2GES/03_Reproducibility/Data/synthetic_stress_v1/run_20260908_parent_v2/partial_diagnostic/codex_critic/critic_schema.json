@@ -1,0 +1,78 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "verdict",
+    "scores",
+    "major_pathologies",
+    "mutation_amendment",
+    "limitations"
+  ],
+  "properties": {
+    "verdict": {
+      "type": "string",
+      "enum": [
+        "accept_for_synthetic_stress_only",
+        "revise",
+        "reject"
+      ]
+    },
+    "scores": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "causal_coherence",
+        "internal_numeric_consistency",
+        "lexical_diversity",
+        "domain_plausibility",
+        "template_artifact_control"
+      ],
+      "properties": {
+        "causal_coherence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "internal_numeric_consistency": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "lexical_diversity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "domain_plausibility": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "template_artifact_control": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        }
+      }
+    },
+    "major_pathologies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 8
+    },
+    "mutation_amendment": {
+      "type": "string",
+      "maxLength": 1200
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "maxItems": 8
+    }
+  }
+}

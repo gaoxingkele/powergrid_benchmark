@@ -1,8 +1,166 @@
 # C2GES 当前基准
 
-更新日期：2026-09-26
+更新日期：2026-09-29
 
-## Information 版（2026-09-26 探索性补充，当前）
+## 2026-09-29 独立核查轮（对 09-27/28 并行扩展的复核，当前）
+
+对 09-27 扩展轮（24 报告延伸、arm 层分离、GovReport 迁移、界限层、合成 parent/held-out）做了独立核查：摘要/结论中 100/970/160 三处文档数与 `govreport_transfer_v1` 三个 bounds JSON 逐一相符（n=100 上限全负、n=970 上限全负、n=160 在 +0.005 界内）；24 报告四个对比（−0.006908、10 负 1 正 13 平、exact 0.444、Holm 0.678；TextRank exact 0.130/Holm 0.390）与 `external_prospective_v2_expanded.json` 一致；arm 层数字（−0.03510、18/22、p 0.00387、Holm 0.0774、+0.01079）与 `external_arms_v3.json` 一致；界限 +0.0047/+0.0059 在 `equivalence_bounds_v1.json` 在账。
+
+核查修掉两处缺陷：①补充材料 Contents 误写 "nineteen tables"（实为 20 表 2 图）；②§3.11 边界句 "None of these sensitivities is a fresh confirmatory test." 在改写中被误删，已恢复。
+
+- 正文 tex：`d425441f7b6b83a370f3d61ba928d8beee4fed1689ee644a3dac0022c2b41f28`
+- 主稿 PDF：`9a31e0e4ca4e63a027b4615374dbbd17855654b4f6e86926ed55f24742b1a2e2`；34 页，6 图 14 表 46 参考文献，0 错误 / 0 Overfull / 0 未定义引用
+- 补充 PDF：`e42488ea3d3ba989637950e53b44c2fa163100441da3b0e6a044731fb539a103`；12 页，S1–S20 + Figure S4–S5
+- 作者审阅 Word：`d9e69ee5db397261392e0068b989ee4fbfe91c0085f3976fc0ef5728229fdda1`
+- 投稿 ZIP `96eade217e2c380aad1fd4296689cf21e055c772160c7a1c41de6ce01645ae81`；评审 ZIP `daf329e9861c20a342d3b89477a0cfdea53265770d11c372dfc29f0ae15e7c16`；补充 ZIP `20f1d12b99f296fb7e3289feeab659ffec349ca83ed023b147f82b963528c428`；均 `fresh_extract: PASS`
+- 公共验证 route `diagnostic` **PASS** 0 failures；展示审计 `problems: none`；发布清单 **670 文件** PASS
+
+## Information 版（2026-09-28 L5 合成层升级：冻结 parent/held-out 夹具，历史）
+
+把 GenData 侧新产出的 parent-v3r1 + heldout-v2r3 两套合成压力夹具正式纳入论文，作为 L5 层的升级（替换旧的单套 8 篇 v8）。**仅动合成层**，所有真实语料数字、E1/E2/E3 三道证据门与"合成不进确认链"的边界语句原样保留。
+
+- 正文：`../01_Manuscript/LaTeX/paper_information.tex` SHA-256 `13e7a3517d8e858b34dc70acc97e947fc3d2bbadf53288595f0180a96d92e2be`
+- 主稿 PDF：SHA-256 `6ded248d6f5983fba488a8cb3127cfb2d07bcccd7310d9e4deb6777dbaaf3a1f`；**34 页**，6 图 **14 表**（合成小表移入补充材料 S20）46 参考文献，摘要 197 词，0 错误 / 0 Overfull / 0 未定义引用
+- 补充 PDF：SHA-256 `e76cde2369663568c7ec5bc859c20248006c036afe73c6162dcb94fba5549881`；**12 页**，Table **S1–S20** + Figure S4–S5
+- 作者审阅 Word：SHA-256 `d9b89fd5a5706a6735492463b10738177ec498f71e2d2fb86878a4d0e6416811`（12 图 / 14 表）
+- 投稿 ZIP `ad87442b500a16339ae192dbc3c21f1419c53c1c455dbd43bc707a360f7d1281`（20 文件）；评审 ZIP `558f3b93b7d175a3049d7eb49dafc70696d7a6670fc4e02a765b8a124a9c3252`（24 文件）；补充 ZIP `bee2d5b1aa21cb6e5c672fa8421cf1abb7227eaf91c35258be126f4aca29c4da`（4 文件）；均 `fresh_extract: PASS`
+- 公共验证 route `diagnostic` **PASS** 0 failures（新增 `gendata_synthetic_checks()`，共 11 个检查组）；发布清单 **670 文件** `--check` PASS
+
+### L5 升级内容（只动合成层）
+
+- 夹具：`03_Reproducibility/Data/synthetic_stress_v1/run_20260927_gendata_parent_v3r1/` 与 `run_20260927_gendata_heldout_v2r3/`（各 8 篇 4 系列；主题互斥、生成器族 A↔B 交换；冻结协议 `PROTOCOL_synthetic_c2ges_gendata_v1.md` sha256 daf7c969、19 门全过、双评审 accept）+ 数据集卡片与冻结记录。
+- 组件析因（论文自己的评估器，不调参）：Full−no_path 宏均值 parent +0.0103/+0.0098、heldout −0.0003/+0.0043（Holm 全 1.0）；系列等权 path_main parent +0.0147/+0.0178、heldout −0.0007/+0.0032；G-T−G-U 两集为正（Holm 0.25）。**核心主张保持：两集中均无校正后非零路径对比**。
+- 正文 §4.9 重写为冻结 parent/held-out 设计并指向 S20；L5 证据行更新为 16 篇 8 系列；合成小表移入补充材料（保持 34 页且不丢表）；Data Availability 增列新夹具与协议/卡片。
+- 单元测试 `test_heldout_synthetic_v8` 更新为"新夹具 CSV ↔ 补充材料 S20 逐位一致"。
+
+### 边界（未改变）
+
+合成夹具仍标记 `SYNTHETIC_STRESS_NONCONFIRMATORY / confirmatory_claims_allowed=false`，**不进 E1/E2/E3 确认性证据链**，不替代未见系列、真人标注或伦理决定；AUROC(syn-vs-real)=0.998 仅作描述性记录（文档身份而非真实性）。
+
+### 2026-09-29 增补（按用户边界清单）
+
+- 把 GenData 侧用户版 `README.md` 与 `STAGING_CONTAMINATION_REPORT.md` 一并带入发布目录（`synthetic_stress_v1/`），发布资产现含：README / DATASET_CARD / PROTOCOL / FREEZE_RECORD / 污染报告 + 两个跑次目录；公共验证断言 README 在位。
+- 补充材料 Table S20 的注记补上三条诚实边界：**可见接缝纹理、极易区分的文档身份（AUROC 0.998）、每套仅 8 篇不支持统计推断**；并写明"parent 线看过中间门结果做过生成器调优（阈值未动）、held-out 线才是独立检验"。
+
+## Information 版（2026-09-26 跨域迁移 L7 + 定稿，历史）
+
+计划 v2 的 **G2 证据性试点已完成**：在 GovReport 上用冻结臂集合做跨域迁移检验（n=100 分层样本，跑分前冻结协议）。这是全文目前效力最强的一条证据，已按"边界层"写入正文与补充材料。
+
+- 正文：`../01_Manuscript/LaTeX/paper_information.tex` SHA-256 `ff670d8d692bafaf3d937058c7a7cd113cef957d69b9a43b46658eaa30c1de21`
+- 主稿 PDF：SHA-256 `4df8fb6e1692c88468bc903b3e0902ce92b98e6093817d405dfea97d94c7b8b1`；**34 页**（正文 p31 止、缩写表 p32、参考文献 p33–34），6 图 15 表 46 参考文献，摘要 **197 词**（含跨域界值句），0 错误 / 0 Overfull / 0 未定义引用
+- 补充 PDF：SHA-256 `da89fc4943a8fb294990b68a1b6ee5a85dc0c81f1c3e3368b34ed74d104c0cdf`；**11 页**，Table **S1–S19**（S18 = 冻结试点 + 全量 970 + 能源子集 160；S19 = 参考类型敏感性）+ Figure S4–S5
+- 作者审阅 Word：SHA-256 `0323618853fce58dfdddfd7cc03602f936e8790f281d648ef261bfc1bf7cb9a5`
+- 投稿 ZIP `3b10170913fe8d1e67e2d8b154949df3f13a0c737977f160ed5ff630d4d0c189`（20 文件）；评审 ZIP `d19ef280abfa16087c237d2ac0f248e958dca13c6ef4c3b07233fa976f7c39ea`（24 文件）；补充 ZIP `1d611cfacb7afd4cf0f056dfc79e197b85b492cfd84f867f99227a643855e7f6`（4 文件）；均 `fresh_extract: PASS`
+- 公共验证 route `diagnostic` **PASS** 0 failures，含 `govreport_transfer_checks()` 与 `reference_type_checks()`（10 个检查组）；发布清单 **639 文件** `--check` PASS
+
+### G2 结果（100 份 GovReport test 文档，冻结协议）
+
+| 对比 | 110 词 | 260 词 | K=5 | K=10 |
+|---|---|---|---|---|
+| **路径层 Full − no_path** | −0.00305（24/15/61） | −0.00259（37/25/38） | **−0.00515（39/13/48，Holm 0.0017）** | −0.00277（30/21/49） |
+| 单侧 95% 上界 | **−0.00105** | **−0.00071** | **−0.00295** | **−0.00100** |
+| 角色层 AB2 − AB0 | **−0.02124（Holm 0.0002）** | −0.02043（Holm 0.0002） | −0.00070 | −0.00977（Holm 0.084） |
+| TextRank − no_path | +0.02149（Holm 0.0002） | +0.02728（Holm 0.0002） | +0.00053 | +0.01186（Holm 0.033） |
+
+**全量敏感性（冻结分层全取，970/973 篇，12 分片并行）**：
+
+| 对比 | 110 词 | 260 词 | K=5 | K=10 |
+|---|---|---|---|---|
+| 路径层 Full − no_path | −0.00208（233/156/581） | −0.00165（330/224/416） | −0.00318（316/166/488） | −0.00197（306/197/467） |
+| 单侧 95% 上界 | **−0.00132** | **−0.00083** | **−0.00236** | **−0.00135** |
+| 角色层 AB2 − AB0 | −0.01934 | −0.02202 | −0.00304 | −0.01342 |
+
+全量下路径层四个预算**全部 Holm 显著**（0.0002–0.0040），上界最坏 −0.0008；角色层四预算也全为负。这使"路径项无正增益"从单层结论变成**跨域、大样本、人类参考下的稳定界**。
+
+**能源主题子集（同一协议，160 篇）**：按冻结关键词表（energy / grid / transmission / power plant / electricity / renewable / nuclear …，正文命中 ≥3 个）选出，路径层四预算均值 −0.00091 / −0.00155 / −0.00181 / −0.00247，正号占非平 41%/42%/36%/34%，单侧 95% 上界最坏 **+0.00082**（满足 +0.005 边际），K=10 通过 Holm（0.0174）；角色层在等词预算显著为负（Holm 0.0002）。这层最接近本文目标域，结论与全量一致。
+
+### G3 参考类型敏感性（400 篇，人类抽取式参考）
+
+冻结协议 `Data/reference_type_v1/PROTOCOL_reference_type_v1.md`；参考换成 CNN/DailyMail 人类撰写的 highlight 要点（大量逐字取自原文），其余设置不变：
+
+| 对比 | 110 词 | 260 词 | K=5 | K=10 |
+|---|---|---|---|---|
+| 路径层 Full − no_path | +0.00047（14/10/376） | −0.00027（18/14/368） | −0.00000（4/4/392） | +0.00000（1/4/395） |
+| 单侧 95% 上界 | +0.00158 | +0.00016 | +0.00016 | +0.00004 |
+| 角色层 AB2 − AB0 | −0.00920（Holm 0.0012） | −0.00184 | −0.00649（Holm 0.0071） | −0.00128 |
+
+判定：**H3 成立**（四预算上界 ≤ +0.0016，远在 +0.005 内）；路径项在此参考下**惰性**而非有害——92–99% 的文档选择完全相同（等句数预算下 98–99%）。Lead 位置基线在四个预算全部显著领先（Holm ≤0.0002），符合新闻导语特性。结论：**路径层的"零"不是"用抽象式参考去比抽取式输出"造成的假象**。诚实边界：新闻语料 + 短文档（中位 23 个候选单元）+ 域内词表覆盖仅 0.116，故只作参考类型敏感性，不作域内证据。
+
+- **H2 成立**（四预算均值全为负、正号占比 ≤41%）；**H3 更强成立**：单侧上界四个预算**全部小于 0**，即"路径项为正"被排除，不只是"没检出"；K=5 通过 Holm（0.0017）。
+- **H1 再次不成立且方向相反**：角色条件化在等词预算显著**有害**（−0.021），与"电力域线索词表跨域错配"一致（平均角色覆盖 0.246）。
+- **基线排序再次翻转**：TextRank 在等词预算显著领先（+0.021/+0.027），在 K=5 归零。
+- 诚实边界（已写入正文与协议）：线索词表是域内词表、参考是人类抽象式摘要 → 该层只"限定风险"，不支撑机制。
+
+### 产物与协议
+
+- 协议（跑分前冻结）：`../03_Reproducibility/Data/govreport_transfer_v1/PROTOCOL_govreport_transfer_v1.md`
+- 结果：`.../govreport_transfer_v1.json`（100 文档 × 7 臂 × 4 预算，2,800 行）、`.../govreport_transfer_bounds_v1.json`（界值与留一法）
+- 代码：`../03_Reproducibility/Code/govreport_transfer_v1/`（抓取 / 运行 / 界值分析）
+- 语料：`../05_External_Prospective_20260922/govreport/govreport_test_full.jsonl`（973 行，**发布范围外**；CC BY 4.0 但按既有边界不随包分发）
+- 论文位置：证据层表新增 **L7**；正文 §4.3 末段为界值化指针；补充材料 **Table S18**
+
+### 篇幅
+
+34 页（同刊对照实测区间 16–33 页，超 1 页）。为控制在 34 页内，本轮删去五处与相邻表注/方法段重复的告诫句，并把迁移细节压到补充材料，正文只保留界值结论与指针。
+
+### 同轮附带完成（G4/G6）
+
+- **G4 人工标注方案（可执行 + 预算）**：`../03_Reproducibility/Data/human_structure_validation_v1/E2_COSTED_EXECUTION_PLAN_20260926.md` —— 比例区间半宽的样本量算术（p=0.7 时 w=0.10 需 81 单元、w=0.05 需 323）、两档方案（Tier A 120 单元 / Tier B 320 单元 + 100 结构项）、工时模型（Tier A ≈40 人时、Tier B ≈102 人时）、费用行（费率留空待作者填）、六周日历与三道门禁；红线：LLM 与作者不得充当独立标注者、伦理决定前不得招募。
+- **G6 方法下沉 mylib**：`D:/aicoding/mylib/Codex-Academic-Research/tools/paired_diagnostic_stats.py`（纯标准库，零质量/符号翻转/单侧上界/留一法/功效天花板，`--self-test` 复现本文 −0.006908、10/1/13）；`digests/powergrid-diagnostic-eval-2026-09.md`（五个统计陷阱、把零结果写成界、分层证据表、预注册、发布边界工程、长度纪律、投稿前清单）；`playbooks.md` 新增 **J 节**（诊断/负结果评测路由）；`README.md` 入口表登记两项。
+- **摘要升级**：197 词（≤200），结尾改为"跨域政府报告上单侧上界在每个预算都低于零 + 无类型基线在等词预算胜出"。
+
+## Information 版（2026-09-26 G1 界值 + 评审增量 + 边界修复，历史）
+
+计划的 G1（零新数据、把"不显著"改写成"上界"）已执行，并顺带修掉两处发布边界/打包缺陷。
+
+- 正文：`../01_Manuscript/LaTeX/paper_information.tex` SHA-256 `94953407d738aeedb49526d24f0af934e630688587ed4faf43c24e0e5933de36`
+- 主稿 PDF：SHA-256 `d5e7fde7a46839891d82c3e685b68313d839cbb097dfdec4f92ff4f9b853c9a7`；**34 页**（正文终于 p31，缩写表 p32，参考文献 p33–34），6 图 15 表 46 参考文献，摘要 192 词，0 错误 / 0 Overfull / 0 未定义引用
+- 补充 PDF：SHA-256 `ada3399954fb785ec45858be34dca17070f21823c907bb502ed255586585a972`；**10 页**，Table **S1–S17** + Figure **S4–S5**
+- 作者审阅 Word：SHA-256 `e5eff6b0f2379bea6f41865b15bbce5bcda74862e2af6e422fe9f0f190c3bfed`
+- 投稿 ZIP `7394182a370cf5fe030e3db80e489cb0046eb1c593084c3211beb7e45ac8364d`（20 文件）；评审 ZIP `9341d5f5ff8afcf2042dc0ac715a0b603353c242ff585e835ccdc28a07b68cb0`（24 文件）；补充 ZIP `400638a58217ef92ea7b89e96ea7796e9aff33867c7018f55e9d86af3640a67a`（**4 文件**，含新增 Figure S5）；三者 `fresh_extract: PASS`
+- 公共验证 route `diagnostic` **PASS** 0 failures；新增检查组 `release_boundary_and_addenda_checks()`；发布清单 **612 文件** `--check` PASS
+
+### 本轮科学改动（G1：把负结果写成界）
+
+- 路径层界：四个预算的单侧 95% bootstrap 上界 ≤ **+0.0047**（110 词 +0.0006、260 词 +0.0021），留一法最坏 **+0.0059** → 正文写明"路径项增益超过 +0.005 ROUGE-L 被排除"（明确标注 post hoc）。
+- 机制证据：等词预算下角色臂到 260 词都落后、400 词才追平；等句数预算下领先且每单元多装约 1.5×（对 AB-0）/3×（对 TextRank）词数。
+- 分族描述：260 词路径差由两篇频偏报告主导（−0.0799），电网事故 −0.0028、市场耦合 +0.0036、NERC −0.0031（Table S15）。
+- 新增数据产物：`Data/equivalence_bounds_v1/`（含留一法包络）、`Data/budget_curve_v1/`（Figure S5 源数据）、`Data/external_prospective_v1/external_arms_curve_v4.json`（1,512 行）、`Data/descriptive_addenda_v2/`（S14/S15/S16 源数据 + 清单）
+- 新增代码：`Code/equivalence_bounds_v1/`、`Code/budget_curve_figure_v1/`、`Code/descriptive_addenda_v2/`（生成器直接产出补充材料表格，数字不可能与数据漂移）
+
+### 本轮修复的两处缺陷
+
+1. **逐字文本越界（既有问题）**：`Data/rsi_path_v1/run/SEALED_CHOICES.jsonl` 含 `selected_text`/`reference_text` 逐字第三方原文且原在发布范围内。已生成权利安全版 `SEALED_CHOICES_rights_safe.jsonl`（同 id/预算/长度/分数，90 行），并在 `generate_release_manifest.py` 中把逐字件排除；公共验证新增"任何已发布数据记录不得含 ≥300 字符、≥40 词的连续散文"断言。
+2. **补充包漏图**：`package_information.py` 原先硬编码只打包 Figure S4，新增的 S5 会被漏掉。已改为打包 `Supplementary/figures/*.pdf`，并新增断言"tex 中每个 `\includegraphics` 目标必须在压缩包内"（正文包同样适用）。
+
+### 篇幅
+
+33 → 34 页（同刊对照实测区间 16–33 页）。为控制篇幅已删两处与各自表注/方法段重复的告诫句，并把新段落压到 7 行；正文止于 p31，多出的一页是参考文献尾部。
+
+## Information 版（2026-09-26 臂级判定 + 重打包，历史）
+
+在"外部语料 19 → 24 + 臂级决策实验"之上完成的构建与打包轮。本文件此前记录的"docx/三包/公共验证未重算"待办**已关闭**。
+
+- 正文：`../01_Manuscript/LaTeX/paper_information.tex` SHA-256 `73095b4cf67b9b0255f6890f5215987e5123b4183534dc16dabcea48ef6e1b7c`
+- 主稿 PDF：`../01_Manuscript/LaTeX/paper_information.pdf` SHA-256 `4f6f5b039e04ab6220d44d35d5511e2226cb84a4d19149f35d9d9dcdf14b9490`；**33 页**，6 图 15 表 **46** 参考文献，摘要 **192 词**，0 错误 / 0 Overfull / 0 未定义引用
+- 补充 PDF：SHA-256 `3006759792adb90f2da4b531d5014a5924ef45de83f6a356369d4a75875377ef`，**7 页**，Table **S1–S13** + Figure S4
+- 作者审阅 Word：`../01_Manuscript/LaTeX/paper_information.docx` SHA-256 `15c8c8f1351e14e4d079a8bbc5ce6a5c339c6bd21ac32542c8e363e1cad19477`（由当前 tex 重建，12 内嵌图 / 15 表）
+- 投稿 ZIP：`5de1c1332b6e77e61b7de80161fec0c49597096d46aee7bfd291f820f3c913b0`（20 文件）；评审 ZIP：`2a68ae967005fe80b177992db8e572db1923a20beb219ca1dd17e5ba51fc259b`（24 文件）；补充 ZIP：`33f35073ced5e390dcff905bb38eb6f9359f9289d33d0702ab17547dd0db925b`（3 文件）；三者均 `fresh_extract: PASS`
+- 公共验证 route `diagnostic` **PASS**，0 failures；`external_prospective_checks()` 新增 6 条臂级断言（`arms_documents_and_families`、`role_layer_reverses_under_equal_word_budget`、`role_layer_only_positive_under_equal_unit_budget`、`path_layer_stable_across_all_budgets`、`baseline_ordering_flips_with_budget_type`、`arm_numbers_bound_to_manuscript`），把正文里的 −0.03510 / 18 of 22 / 0.0039 / 0.0774 / +0.01079 绑定到 `external_arms_v3.json`
+- 发布清单：`../03_Reproducibility/Package_Metadata/RELEASE_MANIFEST.json` **591 文件**，`--check` PASS（0 缺失 / 0 未列入 / 0 哈希不符）；`submission_ready: true`，`technical_verification` 指向本轮验证报告
+- 展示审计（`manuscript_display_audit.py`）：6 图 15 表、33 页、0 Overfull / 0 错误 / 0 未定义引用，末页余量 14.3 pt，`problems: none`
+- 本轮论文改动（仅两处，均为收紧表述）：① §5.1 角色层句改为"seven-series pilot 中有 +0.0186，但等词预算外部语料下没有"；② 外部敏感性段追加臂级一段（角色层为长度产物、路径层四预算均 ≤0），附 18/22 与 +0.01079 的原始读数
+
+### 本轮新增的分析产物（发布范围外，wiki）
+
+- `../04_Wiki/C2GES_DATASET_QUALITY_AND_STATISTICS_20260926.md`：新增 **§7.5 逐篇影响分析（留一法）** 与 **§9 收口**（三问答案、资产结论、发布边界）
+- `../04_Wiki/C2GES_NEXT_EXPERIMENT_PLAN_v2_20260926.md`：替代 v1 的取数主线（结论：继续扩同类语料不划算，改为"等价上界 + 公开基准换功效 + 语料资产化"）
+
+### §7.5 的核心读数（留一法，`Full − no_path @ word:260`）
+
+全样本均值 −0.006908 中 **−0.00634（92%）来自同一篇文档**（2012 频偏报告，−0.15218）；删掉它均值变为 −0.00059。但三组样本的**符号方向（10/11、9/10、10/10 为负）与单侧 95% 上界（+0.0021 / +0.0040 / −0.0017）都不变**——均值不可靠、上界可用，这是下一阶段把主判据换成等价上界的直接依据。
+
+## Information 版（2026-09-26 探索性补充，历史）
 
 在 09-25 评审处置轮之上，补入 Q1/Q6/Q10 三个探索性描述分析（补充材料 Table S11–S13 + 随包数据 `03_Reproducibility/Data/descriptive_addenda_v1/`）。不动任何实验数值与声称边界；无新推断检验、无新 Holm 校正。
 
@@ -52,15 +210,21 @@ paperreview.ai 评审处置轮（D1–D3 缺陷修复 + 评审响应写作）后
 
 外部前瞻评测（ENTSO-E + NERC 新语料，n=19）入稿后的版本。
 
-- 正文：`../01_Manuscript/LaTeX/paper_information.tex` SHA-256 `fefc28015e9754bec5efc87fca10c082720a951f250224df38676a814db87361`
-- 主稿 PDF：`../01_Manuscript/LaTeX/paper_information.pdf` SHA-256 `01e41bf20d0a2d6d43117854a4d62da1e2d5087315b37d03788546544b61cd3e`；**33 页**，6 图 15 表 44 参考文献，摘要 **200 词**，0 错误 / 0 Overfull / 0 未定义引用
-- 投稿 ZIP：`../C2GES_Information_20260922_submission.zip`（20 文件，`fc2504f6b66ef6e957f5829d2d4e5ba6abed110add318120c615a693babd7c4f`，`fresh_extract: PASS`）
-- 评审 ZIP：`../C2GES_Information_20260922_review.zip`（24 文件，`bd965d03365942c07efd0bf165776244b6221cf9e367bad117c93aa68f08ab75`）
-- 补充 ZIP：`../C2GES_Information_20260922_supplementary.zip`（3 文件，`8cb652a66f9a12a7e16f6003948e321dd68e041395cf2867a00b5ab2bcf08120`；补充 PDF 6 页，新增 **Table S10**）
+- 正文：`../01_Manuscript/LaTeX/paper_information.tex` SHA-256 `6f38ddd63e31ab3eee6f501962700fd6259a852e4c3ce5b9c2858c56e8e1e6c5`
+- 主稿 PDF：`../01_Manuscript/LaTeX/paper_information.pdf` SHA-256 `6c1947ab950071389f41ed8bf5f34b85a53753a3082797e25828f3c2cadec2d4`；**33 页**，6 图 15 表 44 参考文献，摘要 **192 词**，0 错误 / 0 Overfull / 0 未定义引用
+- 投稿 ZIP：`../C2GES_Information_20260922_submission.zip`（20 文件，`dc5b2640dd0d2c21775a5ae33be84ebbdbf7c132ac520d7f332450c46e7d6242`，`fresh_extract: PASS`）
+- 评审 ZIP：`../C2GES_Information_20260922_review.zip`（24 文件，`b7c71a094858bc33234a3f7b14c9a0d885c87f954668a902c97f90c75814fb06`）
+- 补充 ZIP：`../C2GES_Information_20260922_supplementary.zip`（3 文件，`7d23b9eda6221430a4486f35665d96dd98ae5395c6ad5f25643cb92787355654`；补充 PDF 6 页，新增 **Table S10**）
 - 公共验证：`../02_Revision_and_QA/04_Build_Reports/C2GES_DIAGNOSTIC_PUBLIC_VERIFICATION.json` —— route `diagnostic`，**PASS**，0 failures（新增 `external_prospective_checks()`）
-- 发布清单：`RELEASE_MANIFEST.json` **567 文件**，`--check` PASS
+- 发布清单：`RELEASE_MANIFEST.json` **588 文件**，`--check` PASS
 
 ### 外部 AI 评审提交（2026-09-25）
+
+### 数据集质量与统计特征 wiki（2026-09-26）
+
+`../04_Wiki/C2GES_DATASET_QUALITY_AND_STATISTICS_20260926.md` —— 六层数据集的质量画像、六个统计特征（零膨胀、效应量与噪声同阶、重尾、方向随预算翻转、符号一致性、跨语料不可比），以及"为什么后续增补数据都没超过第一个"的五条原因（最重要的是：第一个赢在**等单元数下的信息预算不对等**，C²GES 多得 56–63% 正文；而后续改为等词预算后优势消失）。另含**功效天花板**计算：7 系列在 Holm 校正下即使 7/7 符号一致也过不了 0.05（k=4 时最小 adjusted p=0.0625），因此该层"不显著"不能读作"无效应"。
+
+同目录另有增补数据资产盘点（§6：通用性/价值排序）与 **下一步实验增补计划** `../04_Wiki/C2GES_NEXT_EXPERIMENT_PLAN_20260926.md`：目标把外部语料扩到**电网事故族 ≥12、市场耦合族 ≥12**，用单一定义参考 + 一致词预算（110/260）重跑，预先声明 H1（角色层符号一致率 ≥65%）与 H2（路径层 ≤0），并强制报告**功效上限与零质量**；含取数通道（Wayback CDX + blob 直连）、入选门禁、协议 v2 设计、六阶段工作量与"不做清单"。
 
 已把当前投稿版 PDF（33 页，pdf `01e41bf2…`）提交到 paperreview.ai（Stanford Agentic Reviewer），提交邮箱 `iamafan@126.com`，页面回显 "✓ Submission Successful!"。
 
@@ -227,3 +391,14 @@ paperreview.ai 评审处置轮（D1–D3 缺陷修复 + 评审响应写作）后
 3. 在招募或数据采集前取得机构伦理批准或正式豁免决定。
 
 合成数据、既有已访问报告和 LLM 标签只能用于压力测试或方法开发，不能关闭以上三道证据门。
+
+### 增补计划执行状态（2026-09-26）
+
+按 `../04_Wiki/C2GES_NEXT_EXPERIMENT_PLAN_20260926.md` 执行 P0–P1：CDX 深扫 21 个机构/主机（ENTSO-E 五个路径、NERC 根前缀、UK NESO/NGESO、ERCOT、AESO、北欧 TSO 等），新增下载 **30 份 PDF**；协议门禁后外部语料由 19 → **24 份**（grid 7 / market 9 / NERC 6 / 频偏 2）。
+
+1. **方向稳定、均值检验脆弱**：路径层 260 词由 7 负 0 正（Holm 0.0469）变为 **10 负 1 正**（均值 −0.006908），但随机符号翻转 p 升到 0.444（Holm 0.678）——一份大正差文档支配均值；TextRank 也从 Holm 0.0324 降到 p=0.130。
+2. **论文处置**：主结果保持预注册的 19 份；24 份作为**敏感性**写入 §4 外部小节与补充材料 Table S10；摘要删除 "after correction" 以便不再暗示稳健显著。
+3. **臂级实验（P2 主体）已完成**：`run_external_arms_v3.py` 在冻结的 24 份语料上跑 7 臂 × 4 预算（`03_Reproducibility/Data/external_prospective_v1/external_arms_v3.json`）。判定：**H1（角色层可复现增益）不成立** —— 等词 110 下 AB2−AB0 = −0.03510（18 负 / 4 正 / 2 平，p = 0.0039，Holm 0.0774），等句数下才转正（+0.00626 / +0.01079，均不显著）；**H2（路径层无信息）成立** —— 四种预算下 Full−no_path 均值 ∈ [−0.00691, +0.00099]，bootstrap 单侧 95% 上界 ≤ +0.0047。结论：角色层的"增益"是**输出长度**的产物，路径层的"零"最稳健。
+4. **产物**：`03_Reproducibility/Data/external_prospective_v1/{external_arms_v3.json, run_external_arms_v3.py, external_prospective_v2_expanded.json, run_external_prospective_v2.py, convert_to_markdown.py, fetch_with_snapshot_fallback.py}`。
+5. **已完成（同日收尾）**：docx、三个 ZIP、公共验证报告与发布清单均已按新 tex/PDF 重算，臂级断言已加入公共验证矩阵——见本文件顶部当前构建节。
+6. **仍失败的下载**：CE 2021 主报告、NESO Odessa / 2019-08-09、ERCOT 2021、NERC 1989 Quebec、北欧统计 2011 等 8 份（快照缺失或 500）。下一阶段计划见 `../04_Wiki/C2GES_NEXT_EXPERIMENT_PLAN_v2_20260926.md`。

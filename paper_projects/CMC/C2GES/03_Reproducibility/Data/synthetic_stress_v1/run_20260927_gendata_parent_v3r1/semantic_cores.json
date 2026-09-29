@@ -1,0 +1,2995 @@
+[
+  {
+    "doc_id": "synthetic_s09_r01",
+    "report_series_id": "synthetic_series_09",
+    "theme": "battery dispatch conflict during peak shaving",
+    "regime": "ambiguous",
+    "title": "Synthetic Peak Dispatch Conflict at Synthetic Meridian Storage Yard",
+    "core_units": [
+      {
+        "text": "At 17:42:06 the Synthetic Meridian dispatch controller commanded 18.4 MW discharge while the feeder relay saw 12.1 MW reverse flow.",
+        "role": "trigger_event",
+        "causal_predecessors": [],
+        "summary_priority": 2
+      },
+      {
+        "text": "A stale state estimator snapshot from 17:38:11 held the Synthetic Meridian bus voltage at 1.021 per unit instead of the measured 0.968.",
+        "role": "root_cause",
+        "causal_predecessors": [],
+        "summary_priority": 2
+      },
+      {
+        "text": "Because the estimator lagged, the dispatch optimizer treated 9.7 MW of headroom as available when only 4.3 MW remained.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          1
+        ],
+        "summary_priority": 2
+      },
+      {
+        "text": "The Synthetic Meridian point of common coupling then absorbed 6.8 MW above its 15.0 MW export limit for 214 seconds.",
+        "role": "impact",
+        "causal_predecessors": [
+          0,
+          2
+        ],
+        "summary_priority": 2
+      },
+      {
+        "text": "Operators curtailed the Synthetic Meridian battery string to 5.2 MW and refreshed the estimator from the independent phasor channel.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          3
+        ],
+        "summary_priority": 2
+      },
+      {
+        "text": "At 17:43:19 the Synthetic Meridian supervisory layer issued a second discharge order of 16.9 MW before the first curtailment propagated.",
+        "role": "trigger_event",
+        "causal_predecessors": [
+          0
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "The independent phasor measurement channel reported 0.968 per unit at 17:41:58, contradicting the state estimator by 0.053 per unit.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          1
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "Synthetic Meridian feeder protection did not operate because 6.8 MW excess export stayed below the 22.5 MW trip threshold.",
+        "role": "impact",
+        "causal_predecessors": [
+          3
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "Engineers added a 45-second estimator freshness gate that blocks dispatch whenever the snapshot exceeds 30 seconds old.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          1,
+          2
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "A scheduled capacitor bank insertion at 17:39:44 raised the local voltage by 0.014 per unit, but the estimator ignored it.",
+        "role": "trigger_event",
+        "causal_predecessors": [],
+        "summary_priority": 1
+      },
+      {
+        "text": "The Synthetic Meridian energy management system lacked a cross-check between the state estimator and the independent phasor channel.",
+        "role": "root_cause",
+        "causal_predecessors": [],
+        "summary_priority": 1
+      },
+      {
+        "text": "Reverse flow through the Synthetic Meridian transformer reached 12.1 MW, exceeding the 10.0 MW continuous rating by 2.1 MW.",
+        "role": "impact",
+        "causal_predecessors": [
+          3,
+          5
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "Operators reduced the Synthetic Meridian charge schedule by 3.8 MW for the following 40 minutes to restore margin.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          3,
+          11
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "At 17:44:02 the Synthetic Meridian controller finally accepted the curtailment after the freshness gate was manually enabled.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          4,
+          8
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "The Synthetic Meridian battery management system reported state of charge at 61.4 percent, well above the 20 percent discharge floor.",
+        "role": "trigger_event",
+        "causal_predecessors": [],
+        "summary_priority": 0
+      },
+      {
+        "text": "A communication delay of 2.7 seconds between the Synthetic Meridian controller and the estimator worsened the stale snapshot.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          1
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "The Synthetic Meridian transformer oil temperature rose to 78.3 degrees Celsius, still below the 95 degree alarm setpoint.",
+        "role": "impact",
+        "causal_predecessors": [
+          11
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "Planners retuned the Synthetic Meridian voltage setpoint from 1.021 to 0.985 per unit after the event review.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          2,
+          8
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "A lightning strike 14 kilometers away at 17:37:50 caused no measurable disturbance at Synthetic Meridian.",
+        "role": "trigger_event",
+        "causal_predecessors": [],
+        "summary_priority": 0
+      },
+      {
+        "text": "The Synthetic Meridian revenue meter recorded 14.6 MWh of export during the 214-second excursion, 1.9 MWh above schedule.",
+        "role": "impact",
+        "causal_predecessors": [
+          3
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "Synthetic Meridian operators verified that the independent phasor channel and the revenue meter agreed within 0.4 percent.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          6,
+          19
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "The Synthetic Meridian dispatch optimizer was not the primary cause because its input snapshot was already stale before optimization.",
+        "role": "root_cause",
+        "causal_predecessors": [],
+        "summary_priority": 0
+      },
+      {
+        "text": "A firmware update to the Synthetic Meridian gateway at 17:35:22 introduced the 2.7-second communication delay.",
+        "role": "trigger_event",
+        "causal_predecessors": [],
+        "summary_priority": 0
+      },
+      {
+        "text": "The Synthetic Meridian protection scheme remained armed throughout and logged no pickup or trip operations.",
+        "role": "impact",
+        "causal_predecessors": [
+          7
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "Operators scheduled a 90-minute validation window to compare estimator and phasor outputs across 12 dispatch cycles.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          8,
+          20
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "The Synthetic Meridian capacitor bank insertion was a contributing condition but not the primary cause of the dispatch conflict.",
+        "role": "root_cause",
+        "causal_predecessors": [],
+        "summary_priority": 0
+      }
+    ],
+    "distractor_seeds": [
+      "Synthetic Meridian technicians calibrate voltage transducers quarterly using a portable reference divider traceable to an internal laboratory standard.",
+      "Feeder loading profiles at Synthetic Meridian shift gradually as commercial customers cycle refrigeration and lighting across the afternoon.",
+      "Battery string cooling loops at Synthetic Meridian maintain cell temperatures within four degrees Celsius of the ambient reading.",
+      "Synthetic Meridian communication gateways buffer telemetry packets for 120 milliseconds before forwarding them to the supervisory layer.",
+      "Protection coordination studies at Synthetic Meridian examine overlapping zones between feeder relays and transformer differential elements.",
+      "Synthetic Meridian historians archive one-minute averages of active power reactive power and voltage for thirty-six months.",
+      "Seasonal demand at Synthetic Meridian peaks near 18.2 MW during summer weekdays when irrigation pumps start together.",
+      "Synthetic Meridian inverter efficiency curves show a two percent decline when ambient temperature exceeds thirty-eight degrees Celsius.",
+      "Maintenance crews at Synthetic Meridian inspect battery module terminals for corrosion every eighteen months during scheduled outages.",
+      "Synthetic Meridian SCADA displays refresh every four seconds unless an operator selects a high-resolution trend view.",
+      "Transformer tap changers at Synthetic Meridian move in 1.25 percent steps to regulate the low-side voltage within a deadband.",
+      "Synthetic Meridian weather stations record irradiance wind speed and module temperature at five-minute intervals.",
+      "Grid code compliance testing at Synthetic Meridian verifies reactive capability across the full active power range.",
+      "Synthetic Meridian battery racks use liquid cooling plates between modules to limit temperature gradients during fast charge.",
+      "Feeder reconfiguration at Synthetic Meridian follows a switching order approved by the operations planning group each morning.",
+      "Synthetic Meridian power quality monitors capture harmonic spectra up to the fiftieth order for later engineering review.",
+      "Energy arbitrage schedules at Synthetic Meridian depend on day-ahead prices published at fourteen hundred hours.",
+      "Synthetic Meridian transformer fans stage on at sixty-five degrees Celsius and off at fifty-five degrees Celsius.",
+      "Battery cell balancing at Synthetic Meridian runs during idle periods to equalize state of charge across parallel strings.",
+      "Synthetic Meridian relay test sets inject secondary currents to verify pickup and timing across the full characteristic curve.",
+      "Distribution automation at Synthetic Meridian can sectionalize a faulted feeder in under ninety seconds after detection.",
+      "Synthetic Meridian capacitor banks switch in five-step increments to keep the power factor above 0.97 lagging.",
+      "Meteorological forecasts at Synthetic Meridian update every six hours and feed the next-day dispatch optimization.",
+      "Synthetic Meridian battery modules degrade about two percent of rated capacity per thousand full equivalent cycles.",
+      "Protection engineers at Synthetic Meridian review event reports monthly to identify recurring miscoordination patterns.",
+      "Synthetic Meridian grounding transformers limit zero-sequence current during single-phase faults on the collector feeder.",
+      "Supervisory control at Synthetic Meridian enforces a two-person rule for switching operations above 12 kV.",
+      "Synthetic Meridian revenue meters undergo accuracy testing every two years against a laboratory reference standard.",
+      "Battery thermal runaway sensors at Synthetic Meridian trigger local alarms at sixty degrees Celsius cell temperature.",
+      "Synthetic Meridian load forecasts blend historical demand with weather inputs using a gradient-boosted regression model.",
+      "Feeder voltage regulators at Synthetic Meridian adjust tap position based on line drop compensation settings.",
+      "Synthetic Meridian cybersecurity logs capture every remote command with timestamp user identity and command payload.",
+      "Battery inverter reactive power at Synthetic Meridian follows a volt-var curve with a deadband of plus or minus one percent.",
+      "Synthetic Meridian outage management systems estimate restoration times from crew availability and switching complexity.",
+      "Ambient temperature at Synthetic Meridian averages twenty-nine degrees Celsius during the peak shaving season.",
+      "Synthetic Meridian engineering standards require a four-to-one safety margin between normal loading and protection pickup."
+    ],
+    "distractor_frames": [
+      "At {time} the {facility} recorded a {topic} reading of {value} {unit}, which the {topic2} log later confirmed during review.",
+      "When {seq} arrived, operators at {facility} compared the {topic} trend against the {topic2} baseline before adjusting {item}.",
+      "The {topic} channel at {facility} drifted by {value} {unit} over {seq} intervals, prompting a recalibration of {topic2} equipment.",
+      "Because {topic} exceeded {value} {unit} at {time}, the {facility} team deferred {topic2} work until the next {seq} window.",
+      "Although {topic2} remained stable, the {topic} measurement at {facility} changed by {value} {unit} across {seq} consecutive samples.",
+      "During {seq}, the {facility} operator noted that {topic} and {topic2} disagreed by {value} {unit} on the same {item}.",
+      "If {topic} falls below {value} {unit}, the {facility} procedure requires a {topic2} check before any {item} adjustment.",
+      "The {facility} crew logged {topic} at {value} {unit} during {seq}, then verified the {topic2} reading against a second {item}.",
+      "After {time}, {topic} at {facility} stabilized near {value} {unit}, allowing the {topic2} team to resume routine {item} checks.",
+      "Whenever {topic2} changes by more than {value} {unit}, the {facility} supervisor reviews the {topic} record for {seq} anomalies.",
+      "At {time} the {facility} reported {topic} of {value} {unit}, but the {topic2} archive showed a different {item} profile.",
+      "Because {seq} overlapped with a {topic} peak of {value} {unit}, the {facility} postponed {topic2} maintenance on {item}.",
+      "The {topic} sensor at {facility} produced {value} {unit} at {time}, while the {topic2} channel indicated a separate {item} condition.",
+      "Unless {topic} stays within {value} {unit}, the {facility} will escalate the {topic2} review to the next {seq} meeting.",
+      "Operators at {facility} observed {topic} reaching {value} {unit} during {seq}, then cross-checked the {topic2} record for {item} consistency.",
+      "Since {topic2} had not changed for {seq}, the {facility} treated the {topic} shift of {value} {unit} as a transient {item} artifact.",
+      "The {facility} log shows {topic} at {value} {unit} near {time}, followed by a {topic2} adjustment that affected {item} timing.",
+      "While {topic} remained below {value} {unit}, the {facility} continued {topic2} monitoring through {seq} without interrupting {item} service.",
+      "At {time} the {facility} compared {topic} against {topic2}, finding a {value} {unit} discrepancy that required {item} verification.",
+      "Because the {topic2} baseline was {value} {unit}, the {facility} flagged the {topic} excursion during {seq} for further {item} analysis.",
+      "The {facility} engineer reviewed {topic} data from {seq}, noting that {topic2} had drifted by {value} {unit} since {time}.",
+      "If {topic2} exceeds {value} {unit}, the {facility} will isolate the affected {item} and recheck {topic} after {seq}.",
+      "During {seq} the {facility} recorded {topic} at {value} {unit}, which aligned with the {topic2} forecast for that {item}.",
+      "Although the {facility} expected {topic} near {value} {unit}, the {topic2} reading at {time} suggested a different {item} state.",
+      "The {topic} audit at {facility} covered {seq} samples and found {topic2} variation of {value} {unit} around the {item} setpoint.",
+      "After {time} the {facility} adjusted {topic2} by {value} {unit}, then confirmed that {topic} remained stable through {seq}.",
+      "When {topic} and {topic2} diverged by {value} {unit}, the {facility} paused {item} operations until {seq} completed.",
+      "The {facility} uses {topic} thresholds of {value} {unit} to decide whether {topic2} requires attention during {seq}.",
+      "Because {topic2} was unavailable for {seq}, the {facility} relied on {topic} estimates of {value} {unit} for {item} planning.",
+      "At {time} the {facility} observed {topic} at {value} {unit}, a level consistent with {topic2} behavior during previous {seq} periods.",
+      "While reviewing {topic2} records from {seq}, the {facility} noticed {topic} had shifted by {value} {unit} near {time}.",
+      "The {facility} procedure ties {topic} alarms at {value} {unit} to a {topic2} review within {seq} minutes of {time}.",
+      "Since {topic} stayed under {value} {unit}, the {facility} allowed {topic2} testing to proceed through {seq} without {item} delays.",
+      "At {time} the {facility} documented {topic} at {value} {unit} and {topic2} at a slightly different level, prompting {item} inspection.",
+      "Because {seq} included a {topic2} milestone, the {facility} checked {topic} against {value} {unit} before releasing {item}.",
+      "The {facility} trend for {topic} crossed {value} {unit} during {seq}, so the {topic2} group scheduled an {item} review.",
+      "During {time}, the {facility} recorded a {topic} deviation, yet operators initially attributed the shift to routine {topic2} cycling.",
+      "By {time}, {seq} consecutive intervals had elapsed, and the {channel} still showed unresolved {topic} behavior across the {facility}.",
+      "Following the {seq} adjustment, {value} {unit} of {topic} remained unaccounted for; the {channel} log offered no clear explanation.",
+      "Although {topic} had stabilized earlier, the {facility} noted renewed {topic2} activity at {time}, prompting a second review of {channel} entries.",
+      "At {time}, a brief {topic} excursion coincided with {value} {unit} of unscheduled {topic2} movement along the {channel}.",
+      "The {facility} had scheduled {topic} maintenance for {time}; however, {seq} overlapping {topic2} events forced a partial rescheduling.",
+      "When {channel} data were compared across {seq} windows, {value} {unit} of {topic} divergence appeared near {time}, puzzling the review team.",
+      "Earlier {topic} assumptions did not hold, so the {facility} re-examined {seq} records spanning {time} and the adjacent {channel}.",
+      "A gradual rise in {topic} began near {time}; by the {seq} interval, {value} {unit} of {topic2} had accumulated without a matching entry.",
+      "Because {topic2} had been flagged at {time}, the {facility} delayed its {topic} assessment until {seq} additional {channel} samples arrived.",
+      "The {channel} showed intermittent {topic} at {time}, while {value} {unit} of {topic2} lingered beyond the expected {seq} horizon.",
+      "After {seq} quiet intervals, {topic} resumed at {time}; the {facility} then compared {value} {unit} of {topic2} against prior {channel} trends.",
+      "No single {topic} trigger stood out at {time}, though {seq} separate {channel} anomalies each carried {value} {unit} of {topic2} significance.",
+      "Between {time} and the next {seq} checkpoint, {topic} fluctuated, leaving {value} {unit} of {topic2} unexplained at the {facility}.",
+      "The {facility} logged {topic} at {time}; subsequently, {seq} {channel} readings suggested {value} {unit} of {topic2} had shifted unexpectedly.",
+      "While {topic2} remained within tolerance, the {channel} captured {topic} drift at {time}, equal to {value} {unit} over {seq} intervals.",
+      "A review of {seq} {channel} snapshots near {time} revealed {topic} inconsistency, with {value} {unit} of {topic2} unverified at the {facility}.",
+      "Once {topic} was isolated at {time}, the {facility} traced {seq} related {channel} events, each involving {value} {unit} of {topic2}.",
+      "The {channel} indicated {topic} recovery by {time}; nonetheless, {seq} residual {topic2} readings near {value} {unit} kept the {facility} engaged."
+    ],
+    "core_slot_map": {
+      "u00050": {
+        "core_index": 0,
+        "role": "trigger_event",
+        "slot": 49
+      },
+      "u00060": {
+        "core_index": 1,
+        "role": "root_cause",
+        "slot": 59
+      },
+      "u00095": {
+        "core_index": 2,
+        "role": "propagation_or_response",
+        "slot": 94
+      },
+      "u00117": {
+        "core_index": 3,
+        "role": "impact",
+        "slot": 116
+      },
+      "u00166": {
+        "core_index": 4,
+        "role": "mitigation",
+        "slot": 165
+      },
+      "u00168": {
+        "core_index": 5,
+        "role": "trigger_event",
+        "slot": 167
+      },
+      "u00170": {
+        "core_index": 6,
+        "role": "propagation_or_response",
+        "slot": 169
+      },
+      "u00176": {
+        "core_index": 7,
+        "role": "impact",
+        "slot": 175
+      },
+      "u00190": {
+        "core_index": 8,
+        "role": "mitigation",
+        "slot": 189
+      },
+      "u00203": {
+        "core_index": 9,
+        "role": "trigger_event",
+        "slot": 202
+      },
+      "u00206": {
+        "core_index": 10,
+        "role": "root_cause",
+        "slot": 205
+      },
+      "u00210": {
+        "core_index": 11,
+        "role": "impact",
+        "slot": 209
+      },
+      "u00233": {
+        "core_index": 12,
+        "role": "mitigation",
+        "slot": 232
+      },
+      "u00240": {
+        "core_index": 13,
+        "role": "propagation_or_response",
+        "slot": 239
+      },
+      "u00241": {
+        "core_index": 14,
+        "role": "trigger_event",
+        "slot": 240
+      },
+      "u00271": {
+        "core_index": 15,
+        "role": "propagation_or_response",
+        "slot": 270
+      },
+      "u00304": {
+        "core_index": 16,
+        "role": "impact",
+        "slot": 303
+      },
+      "u00315": {
+        "core_index": 17,
+        "role": "mitigation",
+        "slot": 314
+      },
+      "u00316": {
+        "core_index": 18,
+        "role": "trigger_event",
+        "slot": 315
+      },
+      "u00317": {
+        "core_index": 19,
+        "role": "impact",
+        "slot": 316
+      },
+      "u00338": {
+        "core_index": 20,
+        "role": "propagation_or_response",
+        "slot": 337
+      },
+      "u00350": {
+        "core_index": 21,
+        "role": "root_cause",
+        "slot": 349
+      },
+      "u00355": {
+        "core_index": 22,
+        "role": "trigger_event",
+        "slot": 354
+      },
+      "u00357": {
+        "core_index": 23,
+        "role": "impact",
+        "slot": 356
+      },
+      "u00373": {
+        "core_index": 24,
+        "role": "mitigation",
+        "slot": 372
+      },
+      "u00404": {
+        "core_index": 25,
+        "role": "root_cause",
+        "slot": 403
+      },
+      "sanitized_facility_rewrites": 0
+    }
+  },
+  {
+    "doc_id": "synthetic_s09_r02",
+    "report_series_id": "synthetic_series_09",
+    "theme": "battery dispatch conflict during peak shaving",
+    "regime": "ambiguous",
+    "title": "Synthetic Series 09 Report 2: Battery Dispatch Conflict During Peak Shaving",
+    "core_units": [
+      {
+        "text": "Synthetic station dispatched battery at 14:03:12 to shave 850 kW peak load.",
+        "role": "trigger_event",
+        "causal_predecessors": [],
+        "summary_priority": 1
+      },
+      {
+        "text": "Battery inverter output reached 1,250 A while grid frequency held 59.8 Hz.",
+        "role": "trigger_event",
+        "causal_predecessors": [
+          0
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "Peak shaver controller issued dispatch command at 14:04:05 without checking state of charge.",
+        "role": "trigger_event",
+        "causal_predecessors": [
+          0
+        ],
+        "summary_priority": 2
+      },
+      {
+        "text": "Battery state of charge read 31.5% on the independent channel at dispatch time.",
+        "role": "trigger_event",
+        "causal_predecessors": [
+          2
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "Dispatch conflict arose because shaver and frequency regulator both demanded battery output.",
+        "role": "root_cause",
+        "causal_predecessors": [
+          2,
+          3
+        ],
+        "summary_priority": 2
+      },
+      {
+        "text": "Frequency regulator held setpoint 59.9 Hz but shaver demanded 850 kW discharge.",
+        "role": "root_cause",
+        "causal_predecessors": [
+          4
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "Battery management system did not arbitrate between the two dispatch sources.",
+        "role": "root_cause",
+        "causal_predecessors": [
+          4
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "State of charge dropped below 25% threshold at 14:06:42 during conflict.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          4,
+          5
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "Inverter overcurrent protection tripped at 1,380 A after 42 seconds of conflict.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          7
+        ],
+        "summary_priority": 2
+      },
+      {
+        "text": "Grid frequency fell to 59.4 Hz when battery output ceased at 14:07:24.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          8
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "Shaver controller logged dispatch failure at 14:07:31 but did not issue corrective command.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          9
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "Peak load of 1,420 kW returned to grid after battery trip at 14:07:24.",
+        "role": "impact",
+        "causal_predecessors": [
+          9
+        ],
+        "summary_priority": 2
+      },
+      {
+        "text": "Energy deficit calculated as 18.5 kWh over the 42 second conflict window.",
+        "role": "impact",
+        "causal_predecessors": [
+          11
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "Battery cell voltage sagged to 3.2 V during overcurrent condition at 14:07:10.",
+        "role": "impact",
+        "causal_predecessors": [
+          8
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "Grid operator observed frequency dip but attributed it to load variation.",
+        "role": "impact",
+        "causal_predecessors": [
+          11
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "Maintenance crew reset inverter breaker at 14:12:05 after verifying 1,100 A rating.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          11
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "Shaver controller firmware updated to check state of charge before dispatch at 15:30:00.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          15
+        ],
+        "summary_priority": 2
+      },
+      {
+        "text": "Battery management system configured to arbitrate dispatch sources at 16:15:00.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          16
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "Frequency regulator setpoint adjusted to 59.85 Hz to reduce demand on battery.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          17
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "Peak shaver test run at 17:00:00 confirmed 800 kW dispatch without conflict.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          17,
+          18
+        ],
+        "summary_priority": 0
+      }
+    ],
+    "distractor_seeds": [
+      "Synthetic plant installed inverter with 1,200 A continuous rating at 11 kV bus.",
+      "Battery string comprised 48 cells with 3.6 V nominal voltage per cell.",
+      "Grid transformer rated 2,500 kVA with 6.5% impedance at 13.8 kV side.",
+      "Peak shaver controller used 16 bit register for dispatch power setpoint.",
+      "Frequency regulator sampled grid signal at 4 kHz with 12 bit resolution.",
+      "Battery management system polled cell voltage every 500 ms via serial link.",
+      "Inverter breaker had 1,500 A interrupting capacity at 11 kV system voltage.",
+      "State of charge estimator used extended Kalman filter with 0.02 process noise.",
+      "Grid frequency measured at 59.95 Hz during morning load ramp from 06:00 to 09:00.",
+      "Battery thermal sensor logged 34.2°C ambient at 14:00 before dispatch event.",
+      "Shaver controller stored 7 days of dispatch logs in 512 MB flash memory.",
+      "Frequency regulator held 59.9 Hz setpoint with 0.05 Hz deadband for 3 hours.",
+      "Inverter output current measured 1,150 A during evening peak from 18:00 to 21:00.",
+      "Battery cell impedance increased 0.8% after 200 charge cycles at 0.5 C rate.",
+      "Grid load profile showed 1,350 kW base load with 400 kW seasonal variation.",
+      "Peak shaver dispatch window configured for 14:00 to 16:00 daily operation.",
+      "Battery management system updated firmware to version 4.2.1 at 02:00 maintenance.",
+      "Frequency regulator used 8 bit ADC for grid voltage sampling at 2 kHz rate.",
+      "Inverter cooling fan ran at 2,400 RPM during 1,200 A continuous output period.",
+      "State of charge reading varied 2.1% between independent channel and controller.",
+      "Grid transformer oil temperature logged 58°C at 15:00 during summer peak load.",
+      "Battery string voltage measured 172.8 V at 3.6 V per cell nominal rating.",
+      "Shaver controller issued 850 kW dispatch command with 50 ms response latency.",
+      "Frequency regulator deadband widened to 0.1 Hz during morning load ramp period.",
+      "Inverter protection relay set 1,350 A overcurrent threshold with 30 second delay.",
+      "Battery thermal management activated at 38°C cell temperature with 2°C hysteresis.",
+      "Grid frequency dipped to 59.7 Hz at 08:30 during industrial load pickup event.",
+      "Peak shaver controller logged 12 dispatch events with 95% success rate this month.",
+      "Battery management system flagged 3 cells with 4.2% impedance drift at 03:00.",
+      "Frequency regulator setpoint changed from 59.9 Hz to 59.85 Hz at 11:00 daily.",
+      "Inverter output power factor held 0.98 lagging during 1,100 A continuous operation.",
+      "State of charge estimator reset at 04:00 with 0.01 measurement noise variance.",
+      "Grid load increased 120 kW at 13:30 due to commercial building HVAC startup.",
+      "Battery cell voltage uniformity maintained within 1.5% across 48 cell string.",
+      "Peak shaver test protocol required 800 kW dispatch for 10 minutes without trip.",
+      "Frequency regulator response time measured 120 ms from 59.8 Hz to 59.9 Hz setpoint."
+    ],
+    "distractor_frames": [
+      "During {time}, the {facility} logged {value} {unit} on {channel}; {topic} peaked, triggering {topic2} across {seq} dispatches.",
+      "By {time}, {facility} had shifted {value} {unit} via {channel}; {topic} conflicted with {topic2}, demanding {seq} review.",
+      "From {time} onward, {facility} recorded {value} {unit} in {channel}; {topic} clashed with {topic2}, forcing {seq} intervention.",
+      "Until {time}, {facility} maintained {value} {unit} on {channel}; {topic} diverged from {topic2}, prompting {seq} reassessment.",
+      "Before {time}, {facility} sustained {value} {unit} through {channel}; {topic} opposed {topic2}, requiring {seq} calibration.",
+      "After {time}, {facility} captured {value} {unit} in {channel}; {topic} engaged {topic2}, initiating {seq} negotiation.",
+      "Across {time}, {facility} tracked {value} {unit} via {channel}; {topic} mirrored {topic2}, exposing {seq} inconsistency.",
+      "Within {time}, {facility} measured {value} {unit} on {channel}; {topic} overlapped {topic2}, revealing {seq} redundancy.",
+      "Outside {time}, {facility} noted {value} {unit} in {channel}; {topic} separated from {topic2}, marking {seq} boundary.",
+      "Alongside {time}, {facility} observed {value} {unit} via {channel}; {topic} aligned with {topic2}, confirming {seq} stability.",
+      "Near {time}, {facility} registered {value} {unit} on {channel}; {topic} intersected {topic2}, highlighting {seq} overlap.",
+      "Far from {time}, {facility} identified {value} {unit} in {channel}; {topic} departed from {topic2}, flagging {seq} drift.",
+      "Close to {time}, {facility} detected {value} {unit} via {channel}; {topic} approached {topic2}, suggesting {seq} convergence.",
+      "Past {time}, {facility} documented {value} {unit} on {channel}; {topic} receded from {topic2}, indicating {seq} lag.",
+      "Present at {time}, {facility} archived {value} {unit} in {channel}; {topic} matched {topic2}, validating {seq} alignment.",
+      "Absent from {time}, {facility} omitted {value} {unit} via {channel}; {topic} missed {topic2}, exposing {seq} gap.",
+      "Reaching {time}, {facility} attained {value} {unit} on {channel}; {topic} touched {topic2}, activating {seq} response.",
+      "Escaping {time}, {facility} bypassed {value} {unit} in {channel}; {topic} avoided {topic2}, suspending {seq} action.",
+      "Entering {time}, {facility} initiated {value} {unit} via {channel}; {topic} commenced {topic2}, launching {seq} sequence.",
+      "Exiting {time}, {facility} concluded {value} {unit} on {channel}; {topic} ended {topic2}, closing {seq} episode.",
+      "Spanning {time}, {facility} covered {value} {unit} in {channel}; {topic} encompassed {topic2}, unifying {seq} scope.",
+      "Fragmenting {time}, {facility} split {value} {unit} via {channel}; {topic} divided {topic2}, dispersing {seq} load.",
+      "Consolidating {time}, {facility} merged {value} {unit} on {channel}; {topic} joined {topic2}, pooling {seq} resources.",
+      "Accelerating {time}, {facility} rushed {value} {unit} in {channel}; {topic} hastened {topic2}, compressing {seq} interval.",
+      "Decelerating {time}, {facility} slowed {value} {unit} via {channel}; {topic} delayed {topic2}, extending {seq} window.",
+      "Fluctuating {time}, {facility} wavered {value} {unit} on {channel}; {topic} oscillated {topic2}, destabilizing {seq} rhythm.",
+      "Stabilizing {time}, {facility} settled {value} {unit} in {channel}; {topic} steadied {topic2}, restoring {seq} equilibrium.",
+      "Amplifying {time}, {facility} boosted {value} {unit} via {channel}; {topic} magnified {topic2}, intensifying {seq} effect.",
+      "Dampening {time}, {facility} reduced {value} {unit} on {channel}; {topic} attenuated {topic2}, softening {seq} impact.",
+      "Inverting {time}, {facility} reversed {value} {unit} in {channel}; {topic} flipped {topic2}, negating {seq} direction.",
+      "Normalizing {time}, {facility} corrected {value} {unit} via {channel}; {topic} rectified {topic2}, resetting {seq} baseline.",
+      "Escalating {time}, {facility} heightened {value} {unit} on {channel}; {topic} intensified {topic2}, aggravating {seq} strain.",
+      "De-escalating {time}, {facility} lowered {value} {unit} in {channel}; {topic} mitigated {topic2}, relieving {seq} pressure.",
+      "Partitioning {time}, {facility} sectioned {value} {unit} via {channel}; {topic} compartmentalized {topic2}, isolating {seq} zone.",
+      "Integrating {time}, {facility} synthesized {value} {unit} on {channel}; {topic} combined {topic2}, harmonizing {seq} flow.",
+      "Disrupting {time}, {facility} interrupted {value} {unit} in {channel}; {topic} severed {topic2}, halting {seq} transmission.",
+      "Restoring {time}, {facility} reinstated {value} {unit} via {channel}; {topic} reconnected {topic2}, resuming {seq} delivery.",
+      "Modulating {time}, {facility} tuned {value} {unit} on {channel}; {topic} adjusted {topic2}, fine-tuning {seq} output.",
+      "Calibrating {time}, {facility} aligned {value} {unit} in {channel}; {topic} synchronized {topic2}, balancing {seq} input.",
+      "Verifying {time}, {facility} confirmed {value} {unit} via {channel}; {topic} validated {topic2}, certifying {seq} accuracy.",
+      "During {time}, {facility} logged {seq} entries on {channel}; the {topic} flag triggered a review of {item} status.",
+      "At {time}, {seq} records on {channel} showed {topic2} drift; {facility} staff confirmed {item} behavior matched {value} {unit}.",
+      "The {topic} mismatch at {facility} appeared in {seq} samples on {channel}; {time} marked the start of {item} degradation.",
+      "By {time}, {seq} readings on {channel} revealed {topic2} instability; {facility} operators noted {item} output fell below {value} {unit}.",
+      "Within {time}, {facility} captured {seq} traces on {channel}; the {topic} pattern suggested {item} capacity was constrained to {value} {unit}.",
+      "At {time}, {seq} logs on {channel} displayed {topic} variance; {facility} technicians verified {item} response aligned with {value} {unit}.",
+      "The {seq} entries on {channel} during {time} exposed {topic2} lag; {facility} control room flagged {item} for immediate {value} {unit} inspection.",
+      "By {time}, {seq} signals on {channel} indicated {topic} fluctuation; {facility} personnel recorded {item} performance at {value} {unit}.",
+      "During {time}, {seq} captures on {channel} showed {topic2} deviation; {facility} engineers traced {item} behavior to a {value} {unit} threshold.",
+      "At {time}, {seq} outputs on {channel} revealed {topic} inconsistency; {facility} operators confirmed {item} state matched {value} {unit} expectations.",
+      "The {topic} conflict at {facility} surfaced in {seq} frames on {channel}; {time} indicated {item} dispatch was limited to {value} {unit}.",
+      "By {time}, {seq} traces on {channel} displayed {topic2} scatter; {facility} staff documented {item} yield at {value} {unit} for the {time} window.",
+      "During {time}, {seq} samples on {channel} exposed {topic} instability; {facility} technicians noted {item} response stayed within {value} {unit}.",
+      "At {time}, {seq} records on {channel} showed {topic2} drift; {facility} operators verified {item} output held near {value} {unit} throughout {time}.",
+      "The {seq} logs on {channel} during {time} revealed {topic} lag; {facility} control room confirmed {item} performance at {value} {unit}.",
+      "By {time}, {seq} signals on {channel} indicated {topic2} fluctuation; {facility} engineers recorded {item} state at {value} {unit} for review.",
+      "During {time}, {seq} captures on {channel} displayed {topic} variance; {facility} personnel flagged {item} for {value} {unit} calibration.",
+      "At {time}, {seq} outputs on {channel} showed {topic2} deviation; {facility} operators traced {item} behavior to {value} {unit} constraints.",
+      "The {topic} mismatch in {seq} frames on {channel} at {time} prompted {facility} staff to check {item} at {value} {unit}.",
+      "By {time}, {seq} traces on {channel} exposed {topic2} scatter; {facility} technicians confirmed {item} response within {value} {unit} bounds.",
+      "During {time}, {seq} samples on {channel} revealed {topic} instability; {facility} engineers noted {item} dispatch capped at {value} {unit}.",
+      "At {time}, {seq} records on {channel} indicated {topic2} drift; {facility} operators verified {item} yield near {value} {unit} in {time}.",
+      "The {seq} entries on {channel} during {time} displayed {topic} lag; {facility} control room logged {item} at {value} {unit} for {time}.",
+      "By {time}, {seq} signals on {channel} showed {topic2} fluctuation; {facility} staff recorded {item} state at {value} {unit} pending {time} review.",
+      "During {time}, {seq} captures on {channel} exposed {topic} variance; {facility} technicians flagged {item} for {value} {unit} adjustment at {time}.",
+      "At {time}, {seq} outputs on {channel} revealed {topic2} deviation; {facility} operators confirmed {item} response at {value} {unit} during {time}.",
+      "The {topic} conflict across {seq} frames on {channel} at {time} led {facility} engineers to verify {item} at {value} {unit}.",
+      "By {time}, {seq} traces on {channel} indicated {topic2} scatter; {facility} personnel documented {item} yield at {value} {unit} for {time}.",
+      "During {time}, {seq} samples on {channel} displayed {topic} instability; {facility} staff noted {item} dispatch at {value} {unit} in {time}.",
+      "At {time}, {seq} records on {channel} showed {topic2} drift; {facility} control room verified {item} state at {value} {unit} throughout {time}.",
+      "The {seq} logs on {channel} during {time} exposed {topic} lag; {facility} operators recorded {item} performance at {value} {unit} for {time}.",
+      "By {time}, {seq} signals on {channel} revealed {topic2} fluctuation; {facility} engineers confirmed {item} response within {value} {unit} at {time}.",
+      "During {time}, {seq} captures on {channel} indicated {topic} variance; {facility} technicians flagged {item} for {value} {unit} review in {time}.",
+      "At {time}, {seq} outputs on {channel} displayed {topic2} deviation; {facility} staff verified {item} yield at {value} {unit} during {time}.",
+      "The {topic} mismatch in {seq} frames on {channel} at {time} prompted {facility} operators to check {item} at {value} {unit} for {time}.",
+      "By {time}, {seq} traces on {channel} exposed {topic2} scatter; {facility} control room logged {item} state at {value} {unit} pending {time} analysis.",
+      "During {time}, {seq} samples on {channel} showed {topic} instability; {facility} engineers noted {item} dispatch at {value} {unit} in {time}.",
+      "At {time}, {seq} records on {channel} indicated {topic2} drift; {facility} operators confirmed {item} response at {value} {unit} throughout {time}.",
+      "The {seq} entries on {channel} during {time} revealed {topic} lag; {facility} staff recorded {item} performance at {value} {unit} for {time} review."
+    ],
+    "core_slot_map": {
+      "u00009": {
+        "core_index": 0,
+        "role": "trigger_event",
+        "slot": 8
+      },
+      "u00071": {
+        "core_index": 1,
+        "role": "trigger_event",
+        "slot": 70
+      },
+      "u00078": {
+        "core_index": 2,
+        "role": "trigger_event",
+        "slot": 77
+      },
+      "u00118": {
+        "core_index": 3,
+        "role": "trigger_event",
+        "slot": 117
+      },
+      "u00124": {
+        "core_index": 4,
+        "role": "root_cause",
+        "slot": 123
+      },
+      "u00187": {
+        "core_index": 5,
+        "role": "root_cause",
+        "slot": 186
+      },
+      "u00215": {
+        "core_index": 6,
+        "role": "root_cause",
+        "slot": 214
+      },
+      "u00268": {
+        "core_index": 7,
+        "role": "propagation_or_response",
+        "slot": 267
+      },
+      "u00278": {
+        "core_index": 8,
+        "role": "propagation_or_response",
+        "slot": 277
+      },
+      "u00302": {
+        "core_index": 9,
+        "role": "propagation_or_response",
+        "slot": 301
+      },
+      "u00310": {
+        "core_index": 10,
+        "role": "propagation_or_response",
+        "slot": 309
+      },
+      "u00343": {
+        "core_index": 11,
+        "role": "impact",
+        "slot": 342
+      },
+      "u00374": {
+        "core_index": 12,
+        "role": "impact",
+        "slot": 373
+      },
+      "u00397": {
+        "core_index": 13,
+        "role": "impact",
+        "slot": 396
+      },
+      "u00495": {
+        "core_index": 14,
+        "role": "impact",
+        "slot": 494
+      },
+      "u00498": {
+        "core_index": 15,
+        "role": "mitigation",
+        "slot": 497
+      },
+      "u00594": {
+        "core_index": 16,
+        "role": "mitigation",
+        "slot": 593
+      },
+      "u00613": {
+        "core_index": 17,
+        "role": "mitigation",
+        "slot": 612
+      },
+      "u00627": {
+        "core_index": 18,
+        "role": "mitigation",
+        "slot": 626
+      },
+      "u00658": {
+        "core_index": 19,
+        "role": "mitigation",
+        "slot": 657
+      },
+      "sanitized_facility_rewrites": 0
+    }
+  },
+  {
+    "doc_id": "synthetic_s05_r01",
+    "report_series_id": "synthetic_series_05",
+    "theme": "substation auxiliary-power loss after a fictional cable fault",
+    "regime": "paraphrased",
+    "title": "Synthetic Substation Auxiliary Supply Disruption Following Synthetic Feeder Cable Failure",
+    "core_units": [
+      {
+        "text": "At 02:14:07 the Synthetic Northgate substation auxiliary transformer de-energized when its upstream synthetic cable faulted.",
+        "role": "trigger_event",
+        "causal_predecessors": [],
+        "summary_priority": 2
+      },
+      {
+        "text": "A 0.4 kV auxiliary bus at Synthetic Northgate lost voltage within 0.8 seconds of the cable fault at 02:14:07.",
+        "role": "trigger_event",
+        "causal_predecessors": [
+          0
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "Battery-backed lighting and protection relays remained energized, but ventilation and charger loads dropped offline immediately.",
+        "role": "trigger_event",
+        "causal_predecessors": [
+          1
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "The synthetic 11 kV feeder cable from Synthetic Eastloop to Northgate failed from moisture-driven insulation degradation after 14 years of service.",
+        "role": "root_cause",
+        "causal_predecessors": [],
+        "summary_priority": 2
+      },
+      {
+        "text": "Thermal aging combined with a damaged outer sheath allowed water ingress into the synthetic cable's insulation layer.",
+        "role": "root_cause",
+        "causal_predecessors": [
+          3
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "The synthetic cable's insulation resistance had declined to 0.9 megohms, well below the 100 megohm commissioning baseline.",
+        "role": "root_cause",
+        "causal_predecessors": [
+          4
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "A separate 11 kV overhead line was not the cause; it remained energized and carried 42 amperes throughout the event.",
+        "role": "root_cause",
+        "causal_predecessors": [],
+        "summary_priority": 0
+      },
+      {
+        "text": "Upstream overcurrent protection at Synthetic Eastloop tripped at 02:14:07.3, isolating the faulted cable within 300 milliseconds.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          0,
+          3
+        ],
+        "summary_priority": 2
+      },
+      {
+        "text": "The auxiliary transformer's low-voltage breaker opened on undervoltage at 02:14:08, preventing backfeed from the battery system.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          7
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "Operators at Synthetic Control Center received alarms at 02:14:09 and initiated the synthetic restoration procedure by 02:16:30.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          8
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "A portable 250 kVA synthetic generator was connected to the auxiliary bus at 03:05:00 to restore essential loads.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          9
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "The synthetic cable fault caused a 0.4 kV bus outage affecting 18 auxiliary circuits for 51 minutes.",
+        "role": "impact",
+        "causal_predecessors": [
+          1,
+          7
+        ],
+        "summary_priority": 2
+      },
+      {
+        "text": "Ventilation fans stopped for 51 minutes, allowing the synthetic battery room temperature to rise from 22 to 31 degrees Celsius.",
+        "role": "impact",
+        "causal_predecessors": [
+          11
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "Station battery voltage dropped from 125 to 118 volts DC over 51 minutes due to continued relay and lighting loads.",
+        "role": "impact",
+        "causal_predecessors": [
+          11
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "No protection misoperation occurred, and the synthetic transmission line remained in service with normal flows.",
+        "role": "impact",
+        "causal_predecessors": [
+          7
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "The damaged synthetic cable section was replaced between 04:20:00 and 09:45:00, restoring normal auxiliary supply.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          3,
+          10
+        ],
+        "summary_priority": 2
+      },
+      {
+        "text": "Insulation resistance testing after repair measured 1,200 megohms, confirming the synthetic cable replacement was successful.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          15
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "A synthetic partial-discharge survey of the remaining cable sections was scheduled to detect similar degradation.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          15
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "The synthetic auxiliary transformer was returned to service at 09:50:00 after verifying correct phase rotation and voltage.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          15
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "Synthetic Northgate's battery charger was upgraded to a 30 ampere unit to reduce recharge time after future outages.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          11
+        ],
+        "summary_priority": 0
+      }
+    ],
+    "distractor_seeds": [
+      "Synthetic capacitor bank switching at Substation Synthetic Ridge produces transient overvoltages that stress nearby insulation.",
+      "Synthetic transformer oil sampling intervals are typically set by dissolved gas analysis history and load cycling.",
+      "Synthetic relay coordination studies examine time-current curves for feeders, transformers, and bus differential zones.",
+      "Synthetic SCADA telemetry latency can mask fast transient events occurring within a single power frequency cycle.",
+      "Synthetic grounding grid resistance measurements are performed seasonally to verify safe step and touch potentials.",
+      "Synthetic battery string equalization charges are scheduled monthly to correct cell voltage imbalances.",
+      "Synthetic cable pulling tensions must be limited to avoid damaging conductor strands and semiconducting screens.",
+      "Synthetic busbar differential protection uses core balance current transformers to detect internal faults.",
+      "Synthetic voltage regulators on distribution feeders adjust tap positions based on measured secondary voltage.",
+      "Synthetic surge arresters divert lightning currents to ground, limiting insulation stress on nearby equipment.",
+      "Synthetic generator excitation systems regulate terminal voltage by controlling field current through slip rings.",
+      "Synthetic motor starting studies evaluate voltage dip duration and acceleration torque for large induction machines.",
+      "Synthetic harmonic filters reduce distortion caused by variable frequency drives and rectifier loads.",
+      "Synthetic transformer cooling classes determine fan and pump staging based on top-oil and winding temperatures.",
+      "Synthetic feeder reclose schemes attempt restoration after temporary faults but lock out on persistent conditions.",
+      "Synthetic phasor measurement units report voltage and current angles at rates up to sixty samples per second.",
+      "Synthetic arc flash studies calculate incident energy based on bolted fault current and protective device clearing time.",
+      "Synthetic capacitor voltage transformers provide measurement signals for protection and metering at high voltage.",
+      "Synthetic cable joints require controlled humidity during assembly to prevent void formation in the insulation.",
+      "Synthetic transformer tap changers adjust turns ratio to compensate for primary voltage variations.",
+      "Synthetic station service transformers supply lighting, heating, and motor loads independent of the main power path.",
+      "Synthetic ground fault detection on ungrounded systems uses zero-sequence voltage monitoring at the bus.",
+      "Synthetic protective relay test sets inject secondary currents to verify pickup and timing characteristics.",
+      "Synthetic transmission line thermal ratings depend on ambient temperature, wind speed, and solar heating.",
+      "Synthetic breaker failure protection initiates backup tripping when a primary device fails to interrupt current.",
+      "Synthetic power factor correction capacitors reduce reactive power demand and line losses on distribution circuits.",
+      "Synthetic transformer inrush current can cause differential relay misoperation without second harmonic blocking.",
+      "Synthetic cable thermal ratings account for soil thermal resistivity, burial depth, and duct bank configuration.",
+      "Synthetic substation automation systems use IEC 61850 for peer-to-peer messaging between intelligent devices.",
+      "Synthetic voltage sag events can disrupt adjustable speed drives and contactor-held motor starters.",
+      "Synthetic current transformer saturation during faults can delay or prevent sensitive overcurrent protection operation.",
+      "Synthetic transformer noise levels increase with core flux density and load current magnitude.",
+      "Synthetic distribution automation schemes use fault passage indicators to locate faults on branched feeders.",
+      "Synthetic battery impedance testing detects weak cells before capacity falls below acceptable limits.",
+      "Synthetic cable fault locating uses time domain reflectometry to estimate distance to the fault point.",
+      "Synthetic substation physical security includes fence line monitoring and door access logging for equipment rooms."
+    ],
+    "distractor_frames": [
+      "At {time}, the {facility} recorded a {topic} reading of {value} {unit} during routine {topic2} verification.",
+      "The {facility} operator noted that {topic} remained stable while {topic2} drifted by {value} {unit} over {seq} intervals.",
+      "When {topic} exceeded {value} {unit}, the {facility} team initiated {topic2} checks before the next scheduled {time} review.",
+      "A {topic} measurement of {value} {unit} at {time} prompted {seq} additional {topic2} inspections at the {facility}.",
+      "During {topic} commissioning, the {facility} adjusted {topic2} settings by {value} {unit} to meet design margins.",
+      "The {topic} log from {time} showed {value} {unit}, which the {facility} correlated with {topic2} trends over {seq} days.",
+      "If {topic} falls below {value} {unit}, the {facility} procedure requires {topic2} verification within {seq} hours.",
+      "Although {topic} appeared normal at {value} {unit}, the {facility} still performed {topic2} testing during the {time} window.",
+      "The {facility} compared {topic} readings against {topic2} baselines, finding a {value} {unit} deviation at {time}.",
+      "For {topic} analysis, the {facility} collected {seq} samples and measured {topic2} at {value} {unit} per {item}.",
+      "At {time}, {topic} data from the {facility} indicated {value} {unit}, triggering a {topic2} review by {seq} engineers.",
+      "The {facility} specification limits {topic} to {value} {unit}, and {topic2} checks are performed every {seq} months.",
+      "When {topic2} was unavailable, the {facility} relied on {topic} readings of {value} {unit} at {time} for {seq} hours.",
+      "A {topic} discrepancy of {value} {unit} at the {facility} led to {topic2} recalibration during the {time} shift.",
+      "The {facility} uses {topic} monitoring to detect {topic2} changes exceeding {value} {unit} between {seq} inspections.",
+      "During the {time} assessment, {topic} measured {value} {unit}, while {topic2} remained within {seq} percent of baseline.",
+      "The {facility} documented {topic} at {value} {unit} and scheduled {topic2} maintenance for {seq} weeks later.",
+      "If {topic2} drifts by more than {value} {unit}, the {facility} repeats {topic} testing at {time} before energization.",
+      "At {time}, the {facility} observed {topic} at {value} {unit}, which was {seq} times the {topic2} alarm threshold.",
+      "The {facility} trended {topic} over {seq} months and found {topic2} varied by {value} {unit} at {time}.",
+      "A {topic} value of {value} {unit} at the {facility} required {topic2} investigation across {seq} adjacent zones.",
+      "The {facility} calibrated {topic} instruments to {value} {unit} accuracy before conducting {topic2} tests at {time}.",
+      "When {topic} data was missing for {seq} intervals, the {facility} substituted {topic2} estimates of {value} {unit}.",
+      "The {facility} reported {topic} at {value} {unit} during {time}, prompting {seq} follow-up {topic2} measurements.",
+      "For {topic2} verification, the {facility} applied {value} {unit} and recorded {topic} response at {time}.",
+      "The {facility} found {topic} at {value} {unit} after {seq} hours, while {topic2} stayed near nominal.",
+      "At {time}, {topic2} at the {facility} changed by {value} {unit}, affecting {topic} readings for {seq} minutes.",
+      "The {facility} maintains {topic} records for {seq} years, including {topic2} values within {value} {unit} of nominal.",
+      "A {topic} survey at the {facility} measured {value} {unit}, and {topic2} results were logged at {time}.",
+      "The {facility} adjusted {topic2} by {value} {unit} after {topic} monitoring showed {seq} consecutive deviations.",
+      "During {time} rounds, the {facility} noted {topic} at {value} {unit} and {topic2} at {seq} percent capacity.",
+      "The {facility} compared {topic} against {topic2} specifications, finding {value} {unit} difference at {time}.",
+      "When {topic} reached {value} {unit}, the {facility} performed {topic2} checks across {seq} feeder sections.",
+      "The {facility} recorded {topic2} at {value} {unit} during {time}, while {topic} remained within {seq} percent of target.",
+      "At {time}, {topic} analysis at the {facility} revealed {value} {unit}, requiring {topic2} review for {seq} circuits."
+    ],
+    "core_slot_map": {
+      "u00018": {
+        "core_index": 0,
+        "role": "trigger_event",
+        "slot": 17
+      },
+      "u00073": {
+        "core_index": 1,
+        "role": "trigger_event",
+        "slot": 72
+      },
+      "u00075": {
+        "core_index": 2,
+        "role": "trigger_event",
+        "slot": 74
+      },
+      "u00106": {
+        "core_index": 3,
+        "role": "root_cause",
+        "slot": 105
+      },
+      "u00108": {
+        "core_index": 4,
+        "role": "root_cause",
+        "slot": 107
+      },
+      "u00137": {
+        "core_index": 5,
+        "role": "root_cause",
+        "slot": 136
+      },
+      "u00139": {
+        "core_index": 6,
+        "role": "root_cause",
+        "slot": 138
+      },
+      "u00149": {
+        "core_index": 7,
+        "role": "propagation_or_response",
+        "slot": 148
+      },
+      "u00154": {
+        "core_index": 8,
+        "role": "propagation_or_response",
+        "slot": 153
+      },
+      "u00162": {
+        "core_index": 9,
+        "role": "propagation_or_response",
+        "slot": 161
+      },
+      "u00178": {
+        "core_index": 10,
+        "role": "propagation_or_response",
+        "slot": 177
+      },
+      "u00188": {
+        "core_index": 11,
+        "role": "impact",
+        "slot": 187
+      },
+      "u00189": {
+        "core_index": 12,
+        "role": "impact",
+        "slot": 188
+      },
+      "u00210": {
+        "core_index": 13,
+        "role": "impact",
+        "slot": 209
+      },
+      "u00213": {
+        "core_index": 14,
+        "role": "impact",
+        "slot": 212
+      },
+      "u00220": {
+        "core_index": 15,
+        "role": "mitigation",
+        "slot": 219
+      },
+      "u00243": {
+        "core_index": 16,
+        "role": "mitigation",
+        "slot": 242
+      },
+      "u00245": {
+        "core_index": 17,
+        "role": "mitigation",
+        "slot": 244
+      },
+      "u00266": {
+        "core_index": 18,
+        "role": "mitigation",
+        "slot": 265
+      },
+      "u00268": {
+        "core_index": 19,
+        "role": "mitigation",
+        "slot": 267
+      },
+      "sanitized_facility_rewrites": 0
+    }
+  },
+  {
+    "doc_id": "synthetic_s05_r02",
+    "report_series_id": "synthetic_series_05",
+    "theme": "substation auxiliary-power loss after a fictional cable fault",
+    "regime": "paraphrased",
+    "title": "Synthetic substation auxiliary-power loss traced to a single cable fault",
+    "core_units": [
+      {
+        "text": "At 06:12:08 the 11 kV feeder relay on Synthetic Bay 2 detected 412 A and initiated a trip command.",
+        "role": "trigger_event",
+        "causal_predecessors": [],
+        "summary_priority": 2
+      },
+      {
+        "text": "The trip command opened the 11 kV circuit breaker in 38 ms, removing 11.4 MVA from the Synthetic Bay 2 bus.",
+        "role": "trigger_event",
+        "causal_predecessors": [
+          0
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "A single-phase cable fault on the 11 kV Synthetic Bay 2 feeder initiated the protection sequence at 06:12:08.",
+        "role": "root_cause",
+        "causal_predecessors": [],
+        "summary_priority": 2
+      },
+      {
+        "text": "The cable fault produced 412 A on phase A, exceeding the 350 A relay threshold by 62 A.",
+        "role": "root_cause",
+        "causal_predecessors": [
+          2
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "A prior insulation degradation on the 11 kV Synthetic Bay 2 cable reduced the fault inception voltage to 1.8 kV.",
+        "role": "root_cause",
+        "causal_predecessors": [
+          2
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "The loss of 11.4 MVA on Synthetic Bay 2 shifted 4.2 MVA to the 11 kV Synthetic Bay 1 bus.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          1
+        ],
+        "summary_priority": 2
+      },
+      {
+        "text": "The 11 kV Synthetic Bay 1 bus voltage dropped from 11.0 kV to 10.3 kV after the load transfer.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          5
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "The 4.2 MVA load transfer on Synthetic Bay 1 activated the 10.5 kV undervoltage relay at 06:12:11.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          5
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "The undervoltage relay on Synthetic Bay 1 issued a 38 ms alarm but did not trip the 11 kV circuit breaker.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          7
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "The auxiliary power transformer on Synthetic Bay 2 lost 1.2 MVA of input power at 06:12:08.",
+        "role": "impact",
+        "causal_predecessors": [
+          1
+        ],
+        "summary_priority": 2
+      },
+      {
+        "text": "The 1.2 MVA auxiliary power loss on Synthetic Bay 2 caused the 480 V switchboard to drop to 210 V.",
+        "role": "impact",
+        "causal_predecessors": [
+          9
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "The 210 V switchboard voltage on Synthetic Bay 2 de-energized the 11 kV circuit breaker control circuit.",
+        "role": "impact",
+        "causal_predecessors": [
+          10
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "The de-energized control circuit on Synthetic Bay 2 prevented the 11 kV circuit breaker from re-closing at 06:12:14.",
+        "role": "impact",
+        "causal_predecessors": [
+          11
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "The 1.2 MVA auxiliary power loss on Synthetic Bay 2 reduced the 480 V switchboard current from 1,667 A to 790 A.",
+        "role": "impact",
+        "causal_predecessors": [
+          9
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "Operators on Synthetic Bay 2 initiated a manual transfer of 1.2 MVA to the 11 kV Synthetic Bay 1 auxiliary bus at 06:13:02.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          9
+        ],
+        "summary_priority": 2
+      },
+      {
+        "text": "The manual transfer of 1.2 MVA to Synthetic Bay 1 restored the 480 V switchboard on Synthetic Bay 2 to 460 V.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          14
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "The 460 V switchboard restoration on Synthetic Bay 2 re-energized the 11 kV circuit breaker control circuit at 06:13:05.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          15
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "The re-energized control circuit on Synthetic Bay 2 allowed the 11 kV circuit breaker to re-close at 06:13:08.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          16
+        ],
+        "summary_priority": 0
+      }
+    ],
+    "distractor_seeds": [
+      "The 11 kV feeder relay on Synthetic Bay 2 is calibrated to detect phase currents above 350 A.",
+      "The 11 kV circuit breaker on Synthetic Bay 2 has a rated interrupting capacity of 50 kA.",
+      "The 480 V switchboard on Synthetic Bay 2 supplies 1.2 MVA of auxiliary power to the substation.",
+      "The 11 kV Synthetic Bay 1 bus operates at a nominal voltage of 11.0 kV under normal conditions.",
+      "The 480 V switchboard on Synthetic Bay 2 includes a 1,667 A main circuit breaker.",
+      "The 11 kV feeder on Synthetic Bay 2 is protected by a 350 A overcurrent relay.",
+      "The 11 kV circuit breaker on Synthetic Bay 2 opens in 38 ms under standard trip conditions.",
+      "The 480 V switchboard on Synthetic Bay 2 drops to 210 V when the auxiliary power transformer loses input.",
+      "The 11 kV Synthetic Bay 1 bus can accept 4.2 MVA of load transfer from Synthetic Bay 2.",
+      "The 10.5 kV undervoltage relay on Synthetic Bay 1 activates when bus voltage falls below 10.5 kV.",
+      "The 11 kV circuit breaker on Synthetic Bay 2 has a control circuit rated for 480 V.",
+      "The 480 V switchboard on Synthetic Bay 2 de-energizes the circuit breaker control circuit below 250 V.",
+      "The 11 kV feeder on Synthetic Bay 2 carries 11.4 MVA under full load conditions.",
+      "The 480 V switchboard on Synthetic Bay 2 supplies the 11 kV circuit breaker control power.",
+      "The 11 kV Synthetic Bay 1 bus voltage drops to 10.3 kV after a 4.2 MVA load transfer.",
+      "The 10.5 kV undervoltage relay on Synthetic Bay 1 issues a 38 ms alarm without tripping.",
+      "The 11 kV circuit breaker on Synthetic Bay 2 cannot re-close if the control circuit is de-energized.",
+      "The 480 V switchboard on Synthetic Bay 2 restores to 460 V after a 1.2 MVA manual transfer.",
+      "The 11 kV circuit breaker on Synthetic Bay 2 re-closes 3 s after control circuit re-energization.",
+      "The 11 kV feeder on Synthetic Bay 2 has a 1.8 kV fault inception voltage under degraded insulation.",
+      "The 480 V switchboard on Synthetic Bay 2 reduces current from 1,667 A to 790 A after a 1.2 MVA loss.",
+      "The 11 kV Synthetic Bay 1 auxiliary bus accepts 1.2 MVA of transferred load from Synthetic Bay 2.",
+      "The 11 kV circuit breaker on Synthetic Bay 2 requires 480 V control power to operate.",
+      "The 480 V switchboard on Synthetic Bay 2 includes a 790 A auxiliary circuit breaker.",
+      "The 11 kV feeder on Synthetic Bay 2 is rated for 11.4 MVA continuous operation.",
+      "The 10.5 kV undervoltage relay on Synthetic Bay 1 has a 38 ms alarm delay.",
+      "The 11 kV circuit breaker on Synthetic Bay 2 has a 38 ms trip-to-open time.",
+      "The 480 V switchboard on Synthetic Bay 2 supplies 1.2 MVA to the 11 kV control circuits.",
+      "The 11 kV Synthetic Bay 1 bus operates at 11.0 kV under nominal load conditions.",
+      "The 480 V switchboard on Synthetic Bay 2 includes a 210 V undervoltage trip threshold.",
+      "The 11 kV feeder on Synthetic Bay 2 has a 412 A fault current under single-phase conditions.",
+      "The 480 V switchboard on Synthetic Bay 2 restores to 460 V after a 1.2 MVA transfer to Synthetic Bay 1.",
+      "The 11 kV circuit breaker on Synthetic Bay 2 re-closes 3 s after control power restoration.",
+      "The 10.5 kV undervoltage relay on Synthetic Bay 1 activates at 10.3 kV bus voltage.",
+      "The 480 V switchboard on Synthetic Bay 2 includes a 1,667 A main breaker and 790 A auxiliary breaker.",
+      "The 11 kV Synthetic Bay 1 bus accepts 4.2 MVA of load without exceeding the 10.5 kV undervoltage threshold."
+    ],
+    "distractor_frames": [
+      "During {time}, the {facility} logged a {value} drop in {unit} for {topic}, and {channel} showed {seq} entries.",
+      "At {time}, {facility} reported {topic2} instability; {channel} captured {value} readings in {unit}.",
+      "The {facility} experienced {topic} fluctuation at {time}, while {channel} tracked {value} {unit} changes.",
+      "In {time}, {facility} noted {topic2} degradation; {channel} recorded {value} {unit} shifts for {seq} cycles.",
+      "At {time}, {facility} detected {topic} variance; {channel} stored {value} {unit} data points.",
+      "The {facility} showed {topic2} drift during {time}, and {channel} logged {value} {unit} offsets.",
+      "In {time}, {facility} flagged {topic} anomaly; {channel} archived {value} {unit} measurements.",
+      "At {time}, {facility} observed {topic2} ripple; {channel} captured {value} {unit} traces.",
+      "The {facility} registered {topic} swing at {time}, while {channel} kept {value} {unit} records.",
+      "In {time}, {facility} identified {topic2} chatter; {channel} preserved {value} {unit} snapshots.",
+      "At {time}, {facility} witnessed {topic} surge; {channel} held {value} {unit} logs.",
+      "The {facility} marked {topic2} dip during {time}, and {channel} retained {value} {unit} notes.",
+      "In {time}, {facility} tracked {topic} wobble; {channel} saved {value} {unit} files.",
+      "At {time}, {facility} monitored {topic2} bounce; {channel} stored {value} {unit} entries.",
+      "The {facility} charted {topic} pulse at {time}, while {channel} maintained {value} {unit} data.",
+      "In {time}, {facility} plotted {topic2} spike; {channel} kept {value} {unit} archives.",
+      "At {time}, {facility} scanned {topic} tremor; {channel} preserved {value} {unit} outputs.",
+      "The {facility} indexed {topic2} thump during {time}, and {channel} retained {value} {unit} prints.",
+      "In {time}, {facility} catalogued {topic} rumble; {channel} stored {value} {unit} marks.",
+      "At {time}, {facility} audited {topic2} clatter; {channel} held {value} {unit} stamps.",
+      "The {facility} verified {topic} knock at {time}, while {channel} kept {value} {unit} tokens.",
+      "In {time}, {facility} confirmed {topic2} tap; {channel} preserved {value} {unit} glyphs.",
+      "At {time}, {facility} validated {topic} thud; {channel} saved {value} {unit} tags.",
+      "The {facility} cross-checked {topic2} pop during {time}, and {channel} retained {value} {unit} labels.",
+      "In {time}, {facility} reconciled {topic} click; {channel} stored {value} {unit} codes.",
+      "At {time}, {facility} matched {topic2} beep; {channel} held {value} {unit} keys.",
+      "The {facility} aligned {topic} hum at {time}, while {channel} kept {value} {unit} refs.",
+      "In {time}, {facility} synchronized {topic2} drone; {channel} preserved {value} {unit} cites.",
+      "At {time}, {facility} calibrated {topic} murmur; {channel} saved {value} {unit} marks.",
+      "The {facility} tuned {topic2} whisper during {time}, and {channel} retained {value} {unit} notes.",
+      "In {time}, {facility} adjusted {topic} murk; {channel} stored {value} {unit} prints.",
+      "At {time}, {facility} fine-tuned {topic2} haze; {channel} held {value} {unit} stamps.",
+      "The {facility} refined {topic} fog at {time}, while {channel} kept {value} {unit} tokens.",
+      "In {time}, {facility} polished {topic2} mist; {channel} preserved {value} {unit} glyphs.",
+      "At {time}, {facility} sharpened {topic} gloom; {channel} saved {value} {unit} tags.",
+      "The {facility} brightened {topic2} shadow during {time}, and {channel} retained {value} {unit} labels.",
+      "In {time}, {facility} clarified {topic} dimness; {channel} stored {value} {unit} codes.",
+      "At {time}, {facility} illuminated {topic2} murkiness; {channel} held {value} {unit} keys.",
+      "The {facility} dispersed {topic} darkness at {time}, while {channel} kept {value} {unit} refs.",
+      "In {time}, {facility} resolved {topic2} obscurity; {channel} preserved {value} {unit} cites.",
+      "When {time} elapsed, the {facility} logged {seq} entries; {channel} reported {topic} drift at {value} {unit} levels.",
+      "Following {seq}, {channel} transmitted {topic} status to {facility}; {time} marked {value} {unit} variance in {item}.",
+      "During {time}, {seq} pulses arrived at {channel}; {facility} noted {topic2} shift of {value} {unit} in {item}.",
+      "After {seq} completed, {facility} archived {topic} readings; {channel} flagged {value} {unit} anomaly at {time}.",
+      "By {time}, {seq} cycles finished; {channel} pushed {topic2} data to {facility}, showing {value} {unit} deviation.",
+      "With {seq} underway, {channel} sampled {topic} values; {facility} recorded {value} {unit} change during {time}.",
+      "Once {time} passed, {seq} iterations closed; {facility} summarized {topic2} behavior, {channel} citing {value} {unit}.",
+      "Per {seq}, {channel} gathered {topic} metrics; {facility} logged {value} {unit} swing in {item} at {time}.",
+      "As {time} approached, {seq} steps ended; {facility} compiled {topic2} results, {channel} noting {value} {unit} spread."
+    ],
+    "core_slot_map": {
+      "u00128": {
+        "core_index": 0,
+        "role": "trigger_event",
+        "slot": 127
+      },
+      "u00144": {
+        "core_index": 1,
+        "role": "trigger_event",
+        "slot": 143
+      },
+      "u00145": {
+        "core_index": 2,
+        "role": "root_cause",
+        "slot": 144
+      },
+      "u00164": {
+        "core_index": 3,
+        "role": "root_cause",
+        "slot": 163
+      },
+      "u00169": {
+        "core_index": 4,
+        "role": "root_cause",
+        "slot": 168
+      },
+      "u00184": {
+        "core_index": 5,
+        "role": "propagation_or_response",
+        "slot": 183
+      },
+      "u00229": {
+        "core_index": 6,
+        "role": "propagation_or_response",
+        "slot": 228
+      },
+      "u00241": {
+        "core_index": 7,
+        "role": "propagation_or_response",
+        "slot": 240
+      },
+      "u00247": {
+        "core_index": 8,
+        "role": "propagation_or_response",
+        "slot": 246
+      },
+      "u00270": {
+        "core_index": 9,
+        "role": "impact",
+        "slot": 269
+      },
+      "u00282": {
+        "core_index": 10,
+        "role": "impact",
+        "slot": 281
+      },
+      "u00284": {
+        "core_index": 11,
+        "role": "impact",
+        "slot": 283
+      },
+      "u00289": {
+        "core_index": 12,
+        "role": "impact",
+        "slot": 288
+      },
+      "u00346": {
+        "core_index": 13,
+        "role": "impact",
+        "slot": 345
+      },
+      "u00348": {
+        "core_index": 14,
+        "role": "mitigation",
+        "slot": 347
+      },
+      "u00368": {
+        "core_index": 15,
+        "role": "mitigation",
+        "slot": 367
+      },
+      "u00376": {
+        "core_index": 16,
+        "role": "mitigation",
+        "slot": 375
+      },
+      "u00377": {
+        "core_index": 17,
+        "role": "mitigation",
+        "slot": 376
+      },
+      "sanitized_facility_rewrites": 0
+    }
+  },
+  {
+    "doc_id": "synthetic_s12_r01",
+    "report_series_id": "synthetic_series_12",
+    "theme": "maintenance-tag mismatch during bus transfer",
+    "regime": "ambiguous",
+    "title": "Synthetic Meridian Transfer Tag Discrepancy Incident 20260926",
+    "core_units": [
+      {
+        "text": "At 14:03:12 the Synthetic Meridian bus transfer sequence initiated under nominal 11kV busbar conditions with all tie breakers closed.",
+        "role": "trigger_event",
+        "causal_predecessors": [],
+        "summary_priority": 1
+      },
+      {
+        "text": "Operators observed a maintenance-tag mismatch on the Synthetic Northgate feeder relay panel during the scheduled bus transfer window.",
+        "role": "trigger_event",
+        "causal_predecessors": [],
+        "summary_priority": 2
+      },
+      {
+        "text": "The transfer controller at Synthetic Meridian issued a close command to the tie breaker at 14:03:18 without verifying tag clearance status.",
+        "role": "trigger_event",
+        "causal_predecessors": [
+          0
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "A stale maintenance tag from a prior outage remained logged in the Synthetic Meridian tag register, conflicting with the active transfer permit.",
+        "role": "root_cause",
+        "causal_predecessors": [],
+        "summary_priority": 2
+      },
+      {
+        "text": "The tag register synchronization between Synthetic Northgate and Synthetic Meridian had not been reconciled since the 20260919 maintenance window.",
+        "role": "root_cause",
+        "causal_predecessors": [
+          3
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "The transfer controller logic treated the stale tag as cleared because the tag expiry field defaulted to zero on register reload.",
+        "role": "root_cause",
+        "causal_predecessors": [
+          3,
+          4
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "Bus voltage at Synthetic Meridian measured 10.8kV on the independent metering channel, below the 11.2kV transfer enable threshold.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          2
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "The tie breaker closed at 14:03:21, paralleling Synthetic Northgate and Synthetic Meridian sources for 4.7 seconds.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          2,
+          6
+        ],
+        "summary_priority": 2
+      },
+      {
+        "text": "Circulating current reached 1,036.8A between the two sources, exceeding the 850A alarm threshold on the Synthetic Meridian transformer.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          7
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "The directional overcurrent element at Synthetic Meridian tripped the tie breaker after 2.3 seconds of sustained reverse flow.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          8
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "Approximately 3.2MW of load on Synthetic Northgate was interrupted for 47 seconds before restoration via the alternate feed.",
+        "role": "impact",
+        "causal_predecessors": [
+          9
+        ],
+        "summary_priority": 2
+      },
+      {
+        "text": "Transformer T2 at Synthetic Meridian recorded a 12 percent increase in winding temperature during the 4.7 second parallel interval.",
+        "role": "impact",
+        "causal_predecessors": [
+          7
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "No equipment damage occurred; the thermal excursion remained within the 65 degree Celsius continuous rating with margin.",
+        "role": "impact",
+        "causal_predecessors": [
+          11
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "The tag register discrepancy was not the cause of the voltage sag; the sag originated from a separate capacitor bank switching event.",
+        "role": "impact",
+        "causal_predecessors": [
+          6
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "Operators implemented a manual tag reconciliation procedure at 14:15:00 requiring dual verification before any transfer command.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          3,
+          4
+        ],
+        "summary_priority": 2
+      },
+      {
+        "text": "The transfer controller firmware was updated to reject close commands when any tag register entry lacks a valid clearance timestamp.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          5
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "A weekly automated audit of tag register synchronization between Synthetic Northgate and Synthetic Meridian was scheduled.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          4
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "The voltage transfer enable threshold was raised from 11.2kV to 11.4kV to reduce parallel operation likelihood.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          6
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "Post-incident review confirmed the stale tag entry was created during a 20260919 breaker maintenance activity at Synthetic Northgate.",
+        "role": "root_cause",
+        "causal_predecessors": [],
+        "summary_priority": 0
+      },
+      {
+        "text": "The 47 second interruption duration was calculated from the trip timestamp 14:03:23 to the restoration timestamp 14:04:10.",
+        "role": "impact",
+        "causal_predecessors": [
+          10
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "The circulating current of 1,036.8A was measured by the independent current transformer on the Synthetic Meridian tie circuit.",
+        "role": "trigger_event",
+        "causal_predecessors": [
+          8
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "The transfer controller indicated a healthy status throughout the event because its tag validation logic was bypassed.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          5
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "The directional overcurrent element pickup was set at 900A with a 2.0 second time delay, consistent with observed trip timing.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          9
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "A negated non-cause: the capacitor bank switching at Synthetic Meridian did not contribute to the tag register discrepancy.",
+        "role": "root_cause",
+        "causal_predecessors": [],
+        "summary_priority": 0
+      },
+      {
+        "text": "The 850A alarm threshold was exceeded by 186.8A, representing a 22 percent margin exceedance during the parallel interval.",
+        "role": "impact",
+        "causal_predecessors": [
+          8
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "The mitigation firmware update was validated by replaying the 20260926 event sequence in the Synthetic Meridian test environment.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          15
+        ],
+        "summary_priority": 0
+      }
+    ],
+    "distractor_seeds": [
+      "Synthetic busbar differential protection typically uses a slope characteristic to restrain external fault currents while maintaining sensitivity.",
+      "Transformer tap changers adjust turns ratio to regulate secondary voltage within plus or minus eight percent of nominal.",
+      "Synthetic capacitor banks provide reactive power compensation and are switched based on voltage or time-of-day schedules.",
+      "Protective relay coordination studies determine time-current curves that ensure downstream devices operate before upstream devices.",
+      "Synthetic generator excitation systems maintain terminal voltage by controlling field current through automatic voltage regulators.",
+      "Power system state estimation uses redundant measurements to detect and identify bad data from telemetry channels.",
+      "Synthetic transmission line thermal ratings depend on ambient temperature, wind speed, and solar irradiance conditions.",
+      "Distance relays measure impedance to detect faults and must be coordinated with communication-assisted schemes for remote clearing.",
+      "Synthetic substation automation systems use IEC 61850 protocols for peer-to-peer communication between intelligent electronic devices.",
+      "Load flow analysis calculates steady-state voltages and power flows for specified generation and demand conditions.",
+      "Synthetic battery energy storage systems provide frequency regulation by injecting or absorbing real power within milliseconds.",
+      "Circuit breaker failure protection initiates backup tripping when a primary breaker fails to interrupt fault current.",
+      "Synthetic wind turbine generators use power electronic converters to interface variable-speed operation with the grid.",
+      "Automatic reclosing schemes restore transmission lines after transient faults but are blocked for permanent faults.",
+      "Synthetic synchronous condensers provide inertia and short-circuit strength to weak grid areas with high renewable penetration.",
+      "Phasor measurement units sample voltage and current waveforms at rates synchronized to GPS clocks for wide-area monitoring.",
+      "Synthetic HVDC links decouple asynchronous grids and control power flow independently of phase angle differences.",
+      "Underfrequency load shedding schemes trip feeders in stages to arrest declining system frequency after generation loss.",
+      "Synthetic static var compensators adjust reactive output continuously to regulate voltage at critical buses.",
+      "Current transformer saturation can cause relay misoperation during high-magnitude faults with DC offset components.",
+      "Synthetic microgrid controllers manage islanded operation by balancing generation and load within defined frequency limits.",
+      "Power transformers use oil-immersed cooling systems with radiators and fans to dissipate heat during high loading.",
+      "Synthetic fault current limiters reduce prospective short-circuit currents to protect aging switchgear from excessive duty.",
+      "Voltage regulators on distribution feeders adjust tap positions based on line drop compensation and load estimates.",
+      "Synthetic energy management systems optimize generation dispatch considering fuel costs and emission constraints.",
+      "Surge arresters protect substation equipment from lightning and switching overvoltages by clamping voltage peaks.",
+      "Synthetic demand response programs curtail industrial loads during peak periods through automated control signals.",
+      "Bus transfer schemes must consider motor load inertia and residual voltage to avoid damaging reclosure transients.",
+      "Synthetic power quality monitors record harmonic distortion and voltage sags to identify disturbance sources.",
+      "Overcurrent relays with inverse time characteristics coordinate with fuses and reclosers on distribution circuits.",
+      "Synthetic grid-forming inverters establish voltage and frequency references for islanded operation without synchronous machines.",
+      "Substation grounding grids limit step and touch potentials during fault conditions to protect personnel.",
+      "Synthetic dynamic line rating systems use weather sensors to increase transmission capacity during favorable conditions.",
+      "Power system stabilizers add damping torque to generator excitation to suppress low-frequency oscillations.",
+      "Synthetic smart meters collect interval data for billing and outage detection across distribution networks.",
+      "Neutral grounding resistors limit ground fault current on medium-voltage systems to reduce arc flash hazard."
+    ],
+    "distractor_frames": [
+      "At {time}, the {facility} recorded a {value} {unit} deviation on {channel}, which prompted operators to review {topic} procedures.",
+      "During {time}, {seq} sequential events on {channel} indicated that {topic} required adjustment before {topic2} could proceed.",
+      "The {facility} team observed that {topic} varied by {value} {unit} across {channel}, suggesting a need to recalibrate {topic2} settings.",
+      "When {seq} measurements on {channel} exceeded {value} {unit}, the {facility} initiated a review of {topic} and {topic2} interactions.",
+      "At {time}, operators at {facility} noted {value} {unit} on {channel}; this triggered an assessment of {topic} alignment with {topic2} requirements.",
+      "Following {seq} consecutive readings above {value} {unit}, the {facility} adjusted {topic} parameters to better align with {topic2} expectations.",
+      "The {channel} channel reported {value} {unit} at {time}, leading {facility} staff to examine {topic} and its relationship to {topic2}.",
+      "Because {topic} drifted by {value} {unit} over {seq} intervals, the {facility} scheduled maintenance on {channel} to restore {topic2} performance.",
+      "At {time}, a {value} {unit} discrepancy between {channel} and {topic} measurements prompted the {facility} to verify {topic2} calibration.",
+      "Operators reviewed {seq} historical records from {channel} showing {value} {unit} excursions, which informed {facility} decisions about {topic} and {topic2}.",
+      "The {facility} detected {value} {unit} on {channel} during {time}; this finding led to a broader evaluation of {topic} and {topic2} coordination.",
+      "When {topic} exceeded {value} {unit} for {seq} consecutive samples, the {facility} implemented temporary measures affecting {channel} and {topic2}.",
+      "At {time}, the {channel} indicated {value} {unit}, so {facility} personnel reviewed {topic} documentation before adjusting {topic2} setpoints.",
+      "After {seq} hours of {value} {unit} operation, the {facility} observed {topic} changes that required coordination with {topic2} across {channel}.",
+      "The {facility} compared {value} {unit} readings from {channel} against {topic} baselines, revealing inconsistencies in {topic2} assumptions.",
+      "During {time}, {channel} logged {value} {unit} variations that the {facility} attributed to {topic} rather than {topic2} factors.",
+      "At {time}, {seq} alarms on {channel} prompted {facility} operators to investigate {topic} interactions with {topic2} under {value} {unit} conditions.",
+      "The {facility} recorded {value} {unit} on {channel} at {time}, which supported a decision to revise {topic} procedures affecting {topic2}.",
+      "When {topic} measurements on {channel} reached {value} {unit}, the {facility} delayed {topic2} activities until {seq} verification steps were completed.",
+      "At {time}, {facility} staff noted {value} {unit} on {channel} and initiated a review of {topic} and {topic2} documentation.",
+      "Following {seq} observations of {value} {unit} on {channel}, the {facility} updated {topic} guidelines to better support {topic2} objectives.",
+      "The {channel} at {facility} showed {value} {unit} during {time}, leading to a reassessment of {topic} and {topic2} priorities.",
+      "At {time}, operators compared {value} {unit} from {channel} with {topic} targets, identifying gaps in {topic2} coverage.",
+      "When {seq} sequential {channel} readings exceeded {value} {unit}, the {facility} adjusted {topic} settings to improve {topic2} reliability.",
+      "The {facility} investigated {value} {unit} anomalies on {channel} at {time}, focusing on {topic} and {topic2} interfaces.",
+      "During {time}, {channel} recorded {value} {unit}, which the {facility} used to refine {topic} and {topic2} maintenance intervals."
+    ],
+    "core_slot_map": {
+      "u00022": {
+        "core_index": 0,
+        "role": "trigger_event",
+        "slot": 21
+      },
+      "u00028": {
+        "core_index": 1,
+        "role": "trigger_event",
+        "slot": 27
+      },
+      "u00032": {
+        "core_index": 2,
+        "role": "trigger_event",
+        "slot": 31
+      },
+      "u00056": {
+        "core_index": 3,
+        "role": "root_cause",
+        "slot": 55
+      },
+      "u00062": {
+        "core_index": 4,
+        "role": "root_cause",
+        "slot": 61
+      },
+      "u00073": {
+        "core_index": 5,
+        "role": "root_cause",
+        "slot": 72
+      },
+      "u00074": {
+        "core_index": 6,
+        "role": "propagation_or_response",
+        "slot": 73
+      },
+      "u00087": {
+        "core_index": 7,
+        "role": "propagation_or_response",
+        "slot": 86
+      },
+      "u00091": {
+        "core_index": 8,
+        "role": "propagation_or_response",
+        "slot": 90
+      },
+      "u00104": {
+        "core_index": 9,
+        "role": "propagation_or_response",
+        "slot": 103
+      },
+      "u00105": {
+        "core_index": 10,
+        "role": "impact",
+        "slot": 104
+      },
+      "u00108": {
+        "core_index": 11,
+        "role": "impact",
+        "slot": 107
+      },
+      "u00109": {
+        "core_index": 12,
+        "role": "impact",
+        "slot": 108
+      },
+      "u00110": {
+        "core_index": 13,
+        "role": "impact",
+        "slot": 109
+      },
+      "u00112": {
+        "core_index": 14,
+        "role": "mitigation",
+        "slot": 111
+      },
+      "u00124": {
+        "core_index": 15,
+        "role": "mitigation",
+        "slot": 123
+      },
+      "u00125": {
+        "core_index": 16,
+        "role": "mitigation",
+        "slot": 124
+      },
+      "u00127": {
+        "core_index": 17,
+        "role": "mitigation",
+        "slot": 126
+      },
+      "u00161": {
+        "core_index": 18,
+        "role": "root_cause",
+        "slot": 160
+      },
+      "u00174": {
+        "core_index": 19,
+        "role": "impact",
+        "slot": 173
+      },
+      "u00183": {
+        "core_index": 20,
+        "role": "trigger_event",
+        "slot": 182
+      },
+      "u00188": {
+        "core_index": 21,
+        "role": "propagation_or_response",
+        "slot": 187
+      },
+      "u00194": {
+        "core_index": 22,
+        "role": "propagation_or_response",
+        "slot": 193
+      },
+      "u00203": {
+        "core_index": 23,
+        "role": "root_cause",
+        "slot": 202
+      },
+      "u00207": {
+        "core_index": 24,
+        "role": "impact",
+        "slot": 206
+      },
+      "u00208": {
+        "core_index": 25,
+        "role": "mitigation",
+        "slot": 207
+      },
+      "sanitized_facility_rewrites": 0
+    }
+  },
+  {
+    "doc_id": "synthetic_s12_r02",
+    "report_series_id": "synthetic_series_12",
+    "theme": "maintenance-tag mismatch during bus transfer",
+    "regime": "ambiguous",
+    "title": "Synthetic bus transfer maintenance-tag mismatch traced to 1,150 A differential",
+    "core_units": [
+      {
+        "text": "At 04:12:03 the Synthetic 34 kV bus transfer initiated a 2,300 A load shift.",
+        "role": "trigger_event",
+        "causal_predecessors": [],
+        "summary_priority": 2
+      },
+      {
+        "text": "A stale maintenance tag on breaker B-7 masked a 1,150 A differential reading.",
+        "role": "trigger_event",
+        "causal_predecessors": [
+          0
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "The transfer sequence advanced to stage 2 at 04:13:18 without operator confirmation.",
+        "role": "trigger_event",
+        "causal_predecessors": [
+          0
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "Breaker B-7 carried a 4,200 A rating but its maintenance tag listed 2,100 A.",
+        "role": "root_cause",
+        "causal_predecessors": [
+          1
+        ],
+        "summary_priority": 2
+      },
+      {
+        "text": "The tag mismatch originated from a 20250814 maintenance work order closure error.",
+        "role": "root_cause",
+        "causal_predecessors": [
+          3
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "No secondary verification channel existed to cross-check the B-7 tag value.",
+        "role": "root_cause",
+        "causal_predecessors": [
+          3
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "The 1,150 A differential triggered a 12 ms delay in the protection relay.",
+        "role": "root_cause",
+        "causal_predecessors": [
+          3
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "Bus section S-2 absorbed the 2,300 A transfer current at 04:13:22.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          0,
+          2
+        ],
+        "summary_priority": 2
+      },
+      {
+        "text": "Relay R-4 logged a 0.8 pu voltage sag lasting 340 ms on S-2.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          7
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "The 12 ms relay delay allowed 2,300 A to persist for 48 ms total.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          7,
+          6
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "Section S-3 saw a 1,850 A current rise at 04:13:41 following S-2 loading.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          7
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "The 340 ms voltage sag reduced S-2 load by 12 percent to 4,100 A.",
+        "role": "impact",
+        "causal_predecessors": [
+          8
+        ],
+        "summary_priority": 2
+      },
+      {
+        "text": "Motor M-9 on S-2 stalled during the 0.8 pu sag for 210 ms.",
+        "role": "impact",
+        "causal_predecessors": [
+          8
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "The 48 ms overcurrent exposure added 3.2 MJ to B-7's thermal budget.",
+        "role": "impact",
+        "causal_predecessors": [
+          9
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "S-3 load shed 850 A automatically at 04:14:02 due to the 1,850 A rise.",
+        "role": "impact",
+        "causal_predecessors": [
+          10
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "Operator O-2 reset breaker B-7 at 04:15:30 after clearing the stale tag.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          3,
+          12
+        ],
+        "summary_priority": 2
+      },
+      {
+        "text": "A 2,100 A tag was replaced with the correct 4,200 A value on B-7.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          15
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "The 20250814 work order was re-verified and closed with a 4,200 A annotation.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          4,
+          16
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "A 48 h monitoring window was set on B-7 for 1,150 A differential checks.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          15
+        ],
+        "summary_priority": 0
+      }
+    ],
+    "distractor_seeds": [
+      "Synthetic 34 kV bus S-1 carries a 6,200 A steady-state load with 0.95 pf.",
+      "Breaker B-3 on S-1 has a 5,000 A continuous rating and 25 kA interrupting capacity.",
+      "Relay R-1 monitors S-1 with a 0.05 pu voltage threshold and 20 ms pickup.",
+      "The Synthetic substation houses 12 single-phase 34 kV instrument transformers rated 120 V.",
+      "Bus S-2 normal load is 4,800 A at 0.92 pf during peak afternoon hours.",
+      "Motor M-5 on S-2 draws 1,200 A starting current for 1.8 s at 0.75 pf.",
+      "Transformer T-2 steps down 34 kV to 13.8 kV with a 8,000 kVA rating.",
+      "The 13.8 kV distribution feeder F-4 carries 2,400 A with 4.2 percent impedance.",
+      "Breaker B-9 on F-4 has a 3,000 A rating and 20 kA symmetrical interrupting.",
+      "Relay R-7 on F-4 uses a 1.2 pu overcurrent setting with 80 ms delay.",
+      "Synthetic capacitor bank C-2 provides 1,500 kvar at 0.88 pf on S-2.",
+      "The 34 kV cable C-7 has 480 A continuous rating and 0.12 ohm/km resistance.",
+      "Bus S-3 operates at 4,100 A normal load with 0.94 pf during evening peak.",
+      "Motor M-11 on S-3 draws 950 A running current at 0.89 pf continuously.",
+      "Transformer T-5 steps 34 kV to 4.16 kV with 3,200 kVA and 5.8 percent Z.",
+      "The 4.16 kV feeder F-9 carries 1,100 A with 6.1 percent total impedance.",
+      "Breaker B-12 on F-9 has 1,500 A continuous rating and 12 kA interrupting.",
+      "Relay R-11 on F-9 uses 1.0 pu overcurrent with 60 ms time dial setting.",
+      "Synthetic 34 kV bus S-4 normal load is 3,600 A at 0.91 pf.",
+      "The 34 kV breaker B-15 has 4,000 A rating and 25 kA symmetrical interrupting.",
+      "Relay R-14 on S-4 monitors 0.04 pu voltage with 15 ms instantaneous pickup.",
+      "Synthetic instrument transformer IT-8 is rated 34 kV primary 120 V secondary 15 VA.",
+      "The 13.8 kV cable C-12 has 320 A continuous rating and 0.18 ohm/km impedance.",
+      "Bus S-5 carries 2,900 A at 0.93 pf with 8.4 percent total feeder impedance.",
+      "Motor M-14 on S-5 draws 680 A at 0.87 pf for continuous pumping duty.",
+      "Transformer T-9 steps 34 kV to 13.8 kV with 5,600 kVA and 4.9 percent Z.",
+      "The 13.8 kV feeder F-16 carries 1,600 A with 5.3 percent impedance.",
+      "Breaker B-18 on F-16 has 2,000 A rating and 16 kA symmetrical interrupting.",
+      "Relay R-18 on F-16 uses 1.1 pu overcurrent with 70 ms time delay.",
+      "Synthetic 34 kV bus S-6 normal load is 3,100 A at 0.90 pf.",
+      "The 34 kV cable C-20 has 380 A continuous rating and 0.15 ohm/km resistance.",
+      "Motor M-17 on S-6 draws 540 A at 0.85 pf for continuous ventilation.",
+      "Transformer T-12 steps 34 kV to 4.16 kV with 2,400 kVA and 6.2 percent Z.",
+      "The 4.16 kV feeder F-22 carries 820 A with 7.0 percent total impedance.",
+      "Breaker B-21 on F-22 has 1,000 A rating and 10 kA symmetrical interrupting.",
+      "Relay R-21 on F-22 uses 0.9 pu overcurrent with 50 ms time dial."
+    ],
+    "distractor_frames": [
+      "During {time}, the {seq} {channel} {facility} {topic} showed a {value} {unit} drift, indicating {topic2} lag, requiring {item} review.",
+      "Between {time} and {seq}, {channel} {facility} {topic} logged {value} {unit} variance, while {topic2} held steady, prompting {item} audit.",
+      "From {time}, {seq} {channel} {facility} {topic} exhibited {value} {unit} offset, and {topic2} responded slowly, necessitating {item} check.",
+      "Under {time}, {seq} {channel} {facility} {topic} produced {value} {unit} fluctuation, whereas {topic2} remained constant, triggering {item} scan.",
+      "Throughout {time}, {seq} {channel} {facility} {topic} displayed {value} {unit} deviation, but {topic2} stayed aligned, causing {item} flag.",
+      "Within {time}, {seq} {channel} {facility} {topic} generated {value} {unit} ripple, although {topic2} kept pace, leading to {item} trace.",
+      "Along {time}, {seq} {channel} {facility} {topic} revealed {value} {unit} shift, yet {topic2} preserved balance, demanding {item} probe.",
+      "Across {time}, {seq} {channel} {facility} {topic} manifested {value} {unit} wobble, despite {topic2} maintaining sync, forcing {item} sweep.",
+      "Per {time}, {seq} {channel} {facility} {topic} recorded {value} {unit} dip, while {topic2} continued normally, invoking {item} pass.",
+      "Given {time}, {seq} {channel} {facility} {topic} captured {value} {unit} surge, even as {topic2} persisted calmly, enacting {item} run.",
+      "Since {time}, {seq} {channel} {facility} {topic} observed {value} {unit} spike, though {topic2} endured quietly, activating {item} loop.",
+      "Owing to {time}, {seq} {channel} {facility} {topic} detected {value} {unit} jump, notwithstanding {topic2} surviving smoothly, initiating {item} cycle.",
+      "Because of {time}, {seq} {channel} {facility} {topic} registered {value} {unit} blip, in spite of {topic2} thriving steadily, commencing {item} orbit.",
+      "Due to {time}, {seq} {channel} {facility} {topic} noted {value} {unit} flicker, regardless of {topic2} flourishing peacefully, launching {item} round.",
+      "Stemming from {time}, {seq} {channel} {facility} {topic} traced {value} {unit} tremor, irrespective of {topic2} prospering serenely, unleashing {item} spin.",
+      "Arising from {time}, {seq} {channel} {facility} {topic} mapped {value} {unit} vibration, independent of {topic2} excelling gracefully, releasing {item} turn.",
+      "Emerging from {time}, {seq} {channel} {facility} {topic} charted {value} {unit} oscillation, separate from {topic2} dominating elegantly, deploying {item} arc.",
+      "Rising from {time}, {seq} {channel} {facility} {topic} plotted {value} {unit} pulsation, apart from {topic2} commanding stylishly, executing {item} chord.",
+      "Surging from {time}, {seq} {channel} {facility} {topic} sketched {value} {unit} throbbing, distant from {topic2} ruling magnificently, performing {item} note.",
+      "Escalating from {time}, {seq} {channel} {facility} {topic} outlined {value} {unit} quivering, remote from {topic2} governing resplendently, presenting {item} tone.",
+      "Intensifying from {time}, {seq} {channel} {facility} {topic} described {value} {unit} shiver, far from {topic2} directing brilliantly, exhibiting {item} pitch.",
+      "Amplifying from {time}, {seq} {channel} {facility} {topic} narrated {value} {unit} jolt, beyond {topic2} steering splendidly, showcasing {item} sound.",
+      "Heightening from {time}, {seq} {channel} {facility} {topic} recounted {value} {unit} thud, past {topic2} piloting gorgeously, revealing {item} hum.",
+      "Boosting from {time}, {seq} {channel} {facility} {topic} detailed {value} {unit} knock, over {topic2} navigating lavishly, exposing {item} drone.",
+      "Expanding from {time}, {seq} {channel} {facility} {topic} expounded {value} {unit} bang, above {topic2} maneuvering opulently, uncovering {item} buzz.",
+      "Widening from {time}, {seq} {channel} {facility} {topic} elaborated {value} {unit} crash, overhead {topic2} handling sumptuously, discovering {item} rattle.",
+      "Stretching from {time}, {seq} {channel} {facility} {topic} extended {value} {unit} thump, aloft {topic2} operating luxuriously, finding {item} clatter.",
+      "Lengthening from {time}, {seq} {channel} {facility} {topic} prolonged {value} {unit} slam, elevated {topic2} functioning richly, locating {item} din.",
+      "Enlarging from {time}, {seq} {channel} {facility} {topic} lengthened {value} {unit} whack, raised {topic2} working abundantly, isolating {item} racket.",
+      "Multiplying from {time}, {seq} {channel} {facility} {topic} multiplied {value} {unit} smack, lifted {topic2} performing copiously, segregating {item} clamor.",
+      "Accumulating from {time}, {seq} {channel} {facility} {topic} gathered {value} {unit} clack, hoisted {topic2} delivering plentifully, partitioning {item} uproar.",
+      "Collecting from {time}, {seq} {channel} {facility} {topic} amassed {value} {unit} clank, elevated {topic2} producing bountifully, sectioning {item} din.",
+      "Aggregating from {time}, {seq} {channel} {facility} {topic} consolidated {value} {unit} clang, raised {topic2} creating generously, subdividing {item} hubbub.",
+      "Compiling from {time}, {seq} {channel} {facility} {topic} assembled {value} {unit} rattle, lifted {topic2} forming lavishly, fragmenting {item} din.",
+      "Consolidating from {time}, {seq} {channel} {facility} {topic} unified {value} {unit} jingle, hoisted {topic2} shaping sumptuously, shattering {item} clamor.",
+      "Synthesizing from {time}, {seq} {channel} {facility} {topic} blended {value} {unit} chime, elevated {topic2} molding magnificently, demolishing {item} racket.",
+      "Integrating from {time}, {seq} {channel} {facility} {topic} fused {value} {unit} tinkle, raised {topic2} sculpting resplendently, annihilating {item} din.",
+      "Merging from {time}, {seq} {channel} {facility} {topic} combined {value} {unit} jingle, lifted {topic2} carving gorgeously, obliterating {item} clamor.",
+      "Unifying from {time}, {seq} {channel} {facility} {topic} harmonized {value} {unit} chime, hoisted {topic2} etching splendidly, extinguishing {item} racket.",
+      "Aligning from {time}, {seq} {channel} {facility} {topic} synchronized {value} {unit} tinkle, elevated {topic2} engraving lavishly, quelling {item} din.",
+      "During {time}, the {facility} logged {seq} for {channel}, flagging {topic} against {item} with a {value} {unit} offset."
+    ],
+    "core_slot_map": {
+      "u00042": {
+        "core_index": 0,
+        "role": "trigger_event",
+        "slot": 41
+      },
+      "u00047": {
+        "core_index": 1,
+        "role": "trigger_event",
+        "slot": 46
+      },
+      "u00065": {
+        "core_index": 2,
+        "role": "trigger_event",
+        "slot": 64
+      },
+      "u00089": {
+        "core_index": 3,
+        "role": "root_cause",
+        "slot": 88
+      },
+      "u00095": {
+        "core_index": 4,
+        "role": "root_cause",
+        "slot": 94
+      },
+      "u00106": {
+        "core_index": 5,
+        "role": "root_cause",
+        "slot": 105
+      },
+      "u00125": {
+        "core_index": 6,
+        "role": "root_cause",
+        "slot": 124
+      },
+      "u00135": {
+        "core_index": 7,
+        "role": "propagation_or_response",
+        "slot": 134
+      },
+      "u00148": {
+        "core_index": 8,
+        "role": "propagation_or_response",
+        "slot": 147
+      },
+      "u00150": {
+        "core_index": 9,
+        "role": "propagation_or_response",
+        "slot": 149
+      },
+      "u00166": {
+        "core_index": 10,
+        "role": "propagation_or_response",
+        "slot": 165
+      },
+      "u00175": {
+        "core_index": 11,
+        "role": "impact",
+        "slot": 174
+      },
+      "u00212": {
+        "core_index": 12,
+        "role": "impact",
+        "slot": 211
+      },
+      "u00223": {
+        "core_index": 13,
+        "role": "impact",
+        "slot": 222
+      },
+      "u00230": {
+        "core_index": 14,
+        "role": "impact",
+        "slot": 229
+      },
+      "u00234": {
+        "core_index": 15,
+        "role": "mitigation",
+        "slot": 233
+      },
+      "u00249": {
+        "core_index": 16,
+        "role": "mitigation",
+        "slot": 248
+      },
+      "u00267": {
+        "core_index": 17,
+        "role": "mitigation",
+        "slot": 266
+      },
+      "u00321": {
+        "core_index": 18,
+        "role": "mitigation",
+        "slot": 320
+      },
+      "sanitized_facility_rewrites": 0
+    }
+  },
+  {
+    "doc_id": "synthetic_s08_r01",
+    "report_series_id": "synthetic_series_08",
+    "theme": "reactive-power controller saturation in a weak corridor",
+    "regime": "paraphrased",
+    "title": "Reactive-Power Controller Saturation in the Synthetic Meridian Weak Corridor",
+    "core_units": [
+      {
+        "text": "At 06:12:40 the corridor voltage measured 0.912 per unit at Synthetic Meridian Substation while the controller indicated 0.948 per unit.",
+        "role": "trigger_event",
+        "causal_predecessors": [],
+        "summary_priority": 2
+      },
+      {
+        "text": "Independent metering channel Synthetic Meridian PMU-2 recorded 0.909 per unit, confirming the controller's internal estimate ran about 0.036 per unit high.",
+        "role": "trigger_event",
+        "causal_predecessors": [
+          0
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "By 06:13:05 the reactive controller had driven its commanded output to 1.00 per unit, the top of its configured range, with no further margin.",
+        "role": "trigger_event",
+        "causal_predecessors": [
+          0
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "A 42 MVAr shunt capacitor bank at Synthetic Meridian switched out at 06:11:50 for scheduled maintenance, removing local voltage support.",
+        "role": "root_cause",
+        "causal_predecessors": [],
+        "summary_priority": 1
+      },
+      {
+        "text": "The corridor's short-circuit ratio had fallen to 2.1 by 06:00, leaving the controller with insufficient system strength to regulate voltage.",
+        "role": "root_cause",
+        "causal_predecessors": [
+          3
+        ],
+        "summary_priority": 2
+      },
+      {
+        "text": "The controller's voltage error exceeded 0.05 per unit for 25 seconds before saturation, yet its anti-windup limit had been set too high.",
+        "role": "root_cause",
+        "causal_predecessors": [
+          0,
+          2
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "A 0.6 per unit voltage dip at 06:13:18 pushed the saturated controller further, and it could not increase reactive output beyond its ceiling.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          2,
+          5
+        ],
+        "summary_priority": 2
+      },
+      {
+        "text": "Without additional reactive support the corridor voltage sagged to 0.874 per unit by 06:13:30, spreading to two adjacent Synthetic feeder sections.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          6
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "At 06:13:45 the supervisory system issued an alarm for reactive output at limit, but no automatic corrective action followed.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          6
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "Operators at Synthetic Meridian Control observed the voltage decline and manually armed the spare 30 MVAr reactor at 06:14:10.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          8
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "The 30 MVAr reactor closed at 06:14:35, lifting corridor voltage to 0.941 per unit within 12 seconds and relieving the saturated controller.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          9
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "Voltage across the Synthetic Meridian corridor remained below 0.90 per unit for 77 seconds, from 06:13:18 to 06:14:35.",
+        "role": "impact",
+        "causal_predecessors": [
+          6,
+          7
+        ],
+        "summary_priority": 2
+      },
+      {
+        "text": "Two Synthetic industrial customers experienced undervoltage trips, disconnecting a combined 18 MW of load during the 77-second event.",
+        "role": "impact",
+        "causal_predecessors": [
+          11
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "The saturated controller's reactive output stayed pinned at 1.00 per unit for 90 seconds, from 06:13:05 to 06:14:35.",
+        "role": "impact",
+        "causal_predecessors": [
+          2,
+          11
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "No transformer or conductor damage occurred because currents remained below 0.95 of thermal rating throughout the disturbance.",
+        "role": "impact",
+        "causal_predecessors": [
+          11
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "The capacitor bank outage was not the primary cause; its 42 MVAr was already unavailable before the controller entered saturation.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          3
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "Engineers lowered the controller's anti-windup threshold from 0.05 to 0.02 per unit and retuned its gain by 06:40.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          5,
+          10
+        ],
+        "summary_priority": 2
+      },
+      {
+        "text": "A post-event review recommended adding a 25 MVAr static compensator at Synthetic Meridian to raise the short-circuit ratio above 3.0.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          4,
+          10
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "The corridor was restored to normal voltage of 0.985 per unit by 06:45, and the capacitor bank returned to service at 08:00.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          10,
+          17
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "A 0.02 per unit deadband was added to the controller's voltage reference to prevent hunting under weak-grid conditions.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          16
+        ],
+        "summary_priority": 0
+      }
+    ],
+    "distractor_seeds": [
+      "Synthetic corridor studies often compare short-circuit ratios across seasonal load profiles to rank voltage stability margins.",
+      "Reactive power flow on a weak line depends strongly on the sending-end voltage and the line's series reactance.",
+      "Capacitor bank switching transients can excite harmonic resonances when the local short-circuit capacity is low.",
+      "Voltage regulators typically use a time-delay characteristic to avoid responding to momentary voltage excursions.",
+      "Static compensators provide fast reactive support but require careful coordination with existing switched shunts.",
+      "Power system stabilizers damp rotor-angle oscillations by modulating generator excitation in response to speed deviations.",
+      "Transformer tap changers adjust secondary voltage in discrete steps and can interact poorly with reactive controllers.",
+      "Line charging current from long cables can cause overvoltage during light-load conditions in underground networks.",
+      "Load models that treat power as constant impedance versus constant power yield different voltage collapse predictions.",
+      "Phasor measurement units report voltage and current phasors at rates up to sixty samples per second.",
+      "Wind farms connected through weak corridors may need reactive compensation to meet grid-code voltage requirements.",
+      "Series capacitors reduce effective line reactance but introduce subsynchronous resonance risks in some configurations.",
+      "Underfrequency load shedding schemes prioritize feeders to arrest frequency decline after generation loss.",
+      "Harmonic filters are tuned to specific orders and can become detuned if capacitor units age or fail.",
+      "Distribution automation reclosers attempt to restore service after temporary faults without manual intervention.",
+      "Battery energy storage can provide both real and reactive power but has limited energy duration for sustained support.",
+      "Generator capability curves define the reactive power limits as functions of active power and terminal voltage.",
+      "Substation grounding grids must limit touch and step voltages during fault conditions for personnel safety.",
+      "Insulation coordination studies select surge arrester ratings based on expected overvoltage waveforms and durations.",
+      "Cable thermal ratings depend on soil thermal resistivity and burial depth as well as conductor cross-section.",
+      "Microgrid controllers transition between grid-connected and islanded modes using synchronization checks.",
+      "Demand response programs can reduce peak load but may not provide the reactive support needed for voltage control.",
+      "Synchrophasor-based state estimation improves situational awareness compared with traditional SCADA measurements.",
+      "Fault current limiters reduce available short-circuit current but can complicate protection coordination.",
+      "Power factor correction capacitors reduce line losses but may cause overvoltage at light load if not switched properly.",
+      "Dynamic voltage restorers inject series voltage to protect sensitive loads from sags and swells.",
+      "Grid-forming inverters establish voltage and frequency references but require adequate energy storage behind them.",
+      "Transmission line thermal ratings are often limited by sag clearance rather than conductor annealing temperature.",
+      "Protective relay coordination studies ensure that downstream devices trip before upstream devices for faults.",
+      "Voltage stability margins shrink as load increases and generation reactive reserves are depleted.",
+      "Substation battery banks supply control power during station outages but have finite ampere-hour capacity.",
+      "Flexible AC transmission systems can control power flow but add complexity and cost to network operations.",
+      "Load tap changer controls often include line drop compensation to regulate voltage at a remote point.",
+      "Geomagnetically induced currents can cause transformer heating during severe space weather events.",
+      "Islanding detection methods for distributed generation include passive frequency and voltage monitoring schemes."
+    ],
+    "distractor_frames": [
+      "At {time}, the {facility} recorded a {topic} value of {value} {unit}, while the {topic2} remained near {value} {unit}.",
+      "During {time}, operators compared {topic} readings from {facility} against {topic2} logs to assess whether {value} {unit} was plausible.",
+      "The {facility} team reviewed {topic} trends over {seq} intervals, noting that {topic2} varied by less than {value} {unit}.",
+      "By {time}, the {topic} at {facility} had shifted by {value} {unit}, prompting a check of {topic2} calibration records.",
+      "Although {topic} appeared stable, the {facility} log showed {topic2} drifting by {value} {unit} across {seq} consecutive samples.",
+      "At {time}, a {topic} reading of {value} {unit} at {facility} was cross-checked against {topic2} data from the same interval.",
+      "The {topic2} channel at {facility} reported {value} {unit}, which differed from the {topic} estimate by {value} {unit} at {time}.",
+      "After {seq} minutes, the {facility} updated its {topic} baseline to {value} {unit}, affecting how {topic2} alarms were interpreted.",
+      "When {topic} exceeded {value} {unit} at {facility}, the {topic2} response was delayed by {seq} seconds due to sampling limits.",
+      "The {facility} maintenance log for {time} noted that {topic} had been recalibrated, changing {topic2} offsets by {value} {unit}.",
+      "Under normal conditions, {topic} at {facility} stays within {value} {unit} of {topic2}, but {seq} deviations were observed.",
+      "At {time}, the {facility} operator queried {topic} history and found {topic2} excursions of {value} {unit} during {seq} earlier events.",
+      "A {topic} survey at {facility} used {value} {unit} as a reference, while {topic2} measurements followed a different {unit} scale.",
+      "The {facility} report for {time} linked {topic} variability to {topic2} settings, though {value} {unit} remained within tolerance.",
+      "By {time}, {seq} {topic} samples from {facility} had been averaged, yielding {value} {unit} for comparison with {topic2}.",
+      "The {topic2} sensor at {facility} drifted {value} {unit} over {seq} days, which complicated {topic} trend analysis at {time}.",
+      "At {time}, the {facility} compared {topic} against {topic2} and found a {value} {unit} gap that persisted for {seq} hours.",
+      "Routine {topic} checks at {facility} used {value} {unit} thresholds, while {topic2} limits were set independently at {time}.",
+      "The {facility} data for {time} showed {topic} at {value} {unit} and {topic2} at {value} {unit}, a difference of {seq} percent.",
+      "During {seq} maintenance windows, {facility} staff verified {topic} against {topic2}, confirming agreement within {value} {unit}.",
+      "At {time}, the {facility} noted that {topic} and {topic2} responded differently to {value} {unit} step changes.",
+      "The {topic} model for {facility} assumed {value} {unit} uncertainty, but {topic2} data suggested {seq} larger deviations at {time}."
+    ],
+    "core_slot_map": {
+      "u00012": {
+        "core_index": 0,
+        "role": "trigger_event",
+        "slot": 11
+      },
+      "u00027": {
+        "core_index": 1,
+        "role": "trigger_event",
+        "slot": 26
+      },
+      "u00034": {
+        "core_index": 2,
+        "role": "trigger_event",
+        "slot": 33
+      },
+      "u00041": {
+        "core_index": 3,
+        "role": "root_cause",
+        "slot": 40
+      },
+      "u00046": {
+        "core_index": 4,
+        "role": "root_cause",
+        "slot": 45
+      },
+      "u00064": {
+        "core_index": 5,
+        "role": "root_cause",
+        "slot": 63
+      },
+      "u00073": {
+        "core_index": 6,
+        "role": "propagation_or_response",
+        "slot": 72
+      },
+      "u00088": {
+        "core_index": 7,
+        "role": "propagation_or_response",
+        "slot": 87
+      },
+      "u00093": {
+        "core_index": 8,
+        "role": "propagation_or_response",
+        "slot": 92
+      },
+      "u00115": {
+        "core_index": 9,
+        "role": "propagation_or_response",
+        "slot": 114
+      },
+      "u00120": {
+        "core_index": 10,
+        "role": "propagation_or_response",
+        "slot": 119
+      },
+      "u00127": {
+        "core_index": 11,
+        "role": "impact",
+        "slot": 126
+      },
+      "u00132": {
+        "core_index": 12,
+        "role": "impact",
+        "slot": 131
+      },
+      "u00135": {
+        "core_index": 13,
+        "role": "impact",
+        "slot": 134
+      },
+      "u00137": {
+        "core_index": 14,
+        "role": "impact",
+        "slot": 136
+      },
+      "u00149": {
+        "core_index": 15,
+        "role": "mitigation",
+        "slot": 148
+      },
+      "u00151": {
+        "core_index": 16,
+        "role": "mitigation",
+        "slot": 150
+      },
+      "u00158": {
+        "core_index": 17,
+        "role": "mitigation",
+        "slot": 157
+      },
+      "u00163": {
+        "core_index": 18,
+        "role": "mitigation",
+        "slot": 162
+      },
+      "u00170": {
+        "core_index": 19,
+        "role": "mitigation",
+        "slot": 169
+      },
+      "sanitized_facility_rewrites": 0
+    }
+  },
+  {
+    "doc_id": "synthetic_s08_r02",
+    "report_series_id": "synthetic_series_08",
+    "theme": "reactive-power controller saturation in a weak corridor",
+    "regime": "paraphrased",
+    "title": "Reactive-power controller saturation in a weak corridor: Synthetic SVC-11 controller.",
+    "core_units": [
+      {
+        "text": "At 04:12:08 the corridor voltage sagged to 0.87 pu on the independent PT channel.",
+        "role": "trigger_event",
+        "causal_predecessors": [],
+        "summary_priority": 2
+      },
+      {
+        "text": "The sag coincided with a 312 MW load step at the Synthetic feeder bus.",
+        "role": "trigger_event",
+        "causal_predecessors": [
+          0
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "SVC-11 reactive output reached its 148 Mvar ceiling within 4.2 s of the sag.",
+        "role": "root_cause",
+        "causal_predecessors": [
+          0
+        ],
+        "summary_priority": 2
+      },
+      {
+        "text": "The 148 Mvar ceiling was set by the thyristor firing-angle limit at 12 degrees.",
+        "role": "root_cause",
+        "causal_predecessors": [
+          2
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "Controller-indicated reactive was 151 Mvar while the independent CT channel read 148 Mvar.",
+        "role": "root_cause",
+        "causal_predecessors": [
+          2,
+          3
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "The 3 Mvar discrepancy arose from the CT saturation at 1.35 A secondary.",
+        "role": "root_cause",
+        "causal_predecessors": [
+          4
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "Voltage recovery stalled at 0.91 pu for 11.6 s after SVC saturation.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          2
+        ],
+        "summary_priority": 2
+      },
+      {
+        "text": "The stalled voltage pushed the Synthetic transformer tap changer to its 9th step.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          6
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "Tap movement added 2.8 % impedance, reducing SVC effective capacity by 9 Mvar.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          7
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "The 9 Mvar reduction further delayed voltage recovery by an estimated 3.1 s.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          8
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "Corridor current peaked at 2,140 A on the independent CT channel at 04:12:22.",
+        "role": "impact",
+        "causal_predecessors": [
+          2
+        ],
+        "summary_priority": 2
+      },
+      {
+        "text": "The 2,140 A peak exceeded the 1,950 A thermal rating of the Synthetic cable.",
+        "role": "impact",
+        "causal_predecessors": [
+          10
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "Thermal margin erosion was calculated at 0.4 % over the 14 s saturation window.",
+        "role": "impact",
+        "causal_predecessors": [
+          11
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "The 0.4 % erosion assumed a 92 C ambient and 450 A steady-state baseline.",
+        "role": "impact",
+        "causal_predecessors": [
+          12
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "The load step was negated as a non-cause of the SVC ceiling itself.",
+        "role": "impact",
+        "causal_predecessors": [
+          1
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "Operator reduced the load step to 180 MW at 04:12:35 as a corrective action.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          6
+        ],
+        "summary_priority": 2
+      },
+      {
+        "text": "The 180 MW reduction restored voltage to 0.94 pu within 6.8 s.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          15
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "SVC-11 returned to its 112 Mvar operating point after the voltage recovery.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          16
+        ],
+        "summary_priority": 1
+      },
+      {
+        "text": "The remaining 36 Mvar headroom was verified by the independent CT channel.",
+        "role": "mitigation",
+        "causal_predecessors": [
+          17
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "A 14 s saturation duration was logged by the controller event recorder.",
+        "role": "trigger_event",
+        "causal_predecessors": [
+          6
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "The event recorder timestamp aligned with the independent PT channel to 0.3 s.",
+        "role": "trigger_event",
+        "causal_predecessors": [
+          19
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "The 12 degree firing-angle limit was confirmed by the IGBT gate driver trace.",
+        "role": "root_cause",
+        "causal_predecessors": [
+          3
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "Gate driver trace showed no abnormal switching loss during the saturation window.",
+        "role": "root_cause",
+        "causal_predecessors": [
+          21
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "The tap changer 9th step position was held for 22 s before returning.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          7
+        ],
+        "summary_priority": 0
+      },
+      {
+        "text": "Tap return to 7th step reduced impedance by 1.9 % at 04:12:57.",
+        "role": "propagation_or_response",
+        "causal_predecessors": [
+          23
+        ],
+        "summary_priority": 0
+      }
+    ],
+    "distractor_seeds": [
+      "Synthetic SVC-11 thyristor stack comprises 64 parallel arms rated at 2.3 kA each.",
+      "The corridor line impedance is 0.032 pu per mile on the base 100 MVA system.",
+      "Independent PT channel uses a 120 V secondary with 0.5 % accuracy class.",
+      "Synthetic feeder bus nominal voltage is 34.5 kV with 10 % tolerance band.",
+      "The transformer tap changer cycles through 11 positions over a 12 kV range.",
+      "Corridor cable thermal rating assumes 90 C conductor temperature at full load.",
+      "SVC control logic samples the PT signal at 4 kHz for reactive calculation.",
+      "The independent CT channel has a 5 A secondary with 0.2 % ratio error.",
+      "Synthetic corridor spans 14.6 miles between the two terminal stations.",
+      "Thyristor gate drivers use 16 V pulses with 80 microsecond rise time.",
+      "The load step originated from a Synthetic industrial park expansion project.",
+      "Corridor protection relays operate on 120 V PT and 5 A CT inputs.",
+      "Synthetic transformer nameplate specifies 180 MVA at 34.5 kV primary side.",
+      "The tap changer motor draws 12 A during a 4 second step transition.",
+      "SVC reactive output is limited by the DC bus voltage of 2,100 V.",
+      "Independent CT saturation threshold is 1.5 A secondary under steady-state load.",
+      "The corridor line uses 795 kcmil aluminum conductor with 1.2 inch diameter.",
+      "Synthetic station houses 2,400 sq ft of switchgear and control room space.",
+      "The 34.5 kV bus has 62 kA short-circuit capacity at the transformer end.",
+      "SVC thyristor arms are cooled by forced-air fans rated at 4,200 CFM total.",
+      "Corridor voltage regulation target is 0.95 to 1.05 pu under normal conditions.",
+      "The Synthetic feeder bus includes 4 outgoing 34.5 kV circuits to customers.",
+      "Independent PT accuracy is verified annually with a 1,200 V primary test.",
+      "The corridor line sag factor is 0.018 pu per 100 Mvar reactive injection.",
+      "Synthetic station control system uses redundant processors with 2 ms switchover.",
+      "The 148 Mvar SVC ceiling corresponds to 0.98 pu DC bus utilization.",
+      "Corridor cable ampacity is derated 8 % for 92 C ambient temperature conditions.",
+      "The tap changer position feedback uses a 10 kV potentiometer with 1 % linearity.",
+      "Synthetic SVC-11 control cabinet houses 24 IGBT modules in a 3-phase bridge.",
+      "The independent CT channel is calibrated with a 5 A, 50 Hz test current.",
+      "Corridor line resistance is 0.008 ohm per mile at 25 C conductor temperature.",
+      "Synthetic station grounding grid uses 2/0 copper conductors in a 2 ft mesh.",
+      "The 312 MW load step equates to 9,150 A at the 34.5 kV feeder bus.",
+      "SVC reactive power factor correction is limited to 0.92 leading at full output.",
+      "The corridor line inductance is 0.041 H per mile on the 100 MVA base.",
+      "Synthetic transformer cooling uses 6 oil-immersed radiators with 1,800 W capacity each."
+    ],
+    "distractor_frames": [
+      "During {time}, the {facility} logged {topic} drift; {channel} showed {value} {unit} of {topic2} deviation.",
+      "By {time}, {seq} captured {topic} saturation; {facility} reported {value} {unit} of {topic2} lag.",
+      "Within {time}, {channel} flagged {topic} overshoot; {facility} noted {value} {unit} of {topic2} ripple.",
+      "From {time}, {seq} detected {topic} clipping; {channel} displayed {value} {unit} of {topic2} instability.",
+      "Over {time}, {facility} recorded {topic} flattening; {channel} indicated {value} {unit} of {topic2} distortion.",
+      "At {time}, {seq} observed {topic} plateau; {facility} confirmed {value} {unit} of {topic2} static.",
+      "Through {time}, {channel} marked {topic} stalling; {facility} verified {value} {unit} of {topic2} freeze.",
+      "Since {time}, {seq} registered {topic} waning; {channel} revealed {value} {unit} of {topic2} erosion.",
+      "Across {time}, {facility} tracked {topic} dimming; {seq} exposed {value} {unit} of {topic2} fade.",
+      "Before {time}, {channel} identified {topic} softening; {facility} documented {value} {unit} of {topic2} slump.",
+      "Behind {time}, {seq} uncovered {topic} thinning; {channel} quantified {value} {unit} of {topic2} depletion.",
+      "Inside {time}, {facility} measured {topic} weakening; {seq} tallied {value} {unit} of {topic2} loss.",
+      "Along {time}, {channel} sensed {topic} slackening; {facility} counted {value} {unit} of {topic2} deficit.",
+      "Under {time}, {seq} perceived {topic} loosening; {channel} summed {value} {unit} of {topic2} shortfall.",
+      "Against {time}, {facility} acknowledged {topic} yielding; {seq} totaled {value} {unit} of {topic2} gap.",
+      "Beside {time}, {channel} admitted {topic} surrendering; {facility} aggregated {value} {unit} of {topic2} hole.",
+      "Beyond {time}, {seq} confessed {topic} capitulating; {channel} compiled {value} {unit} of {topic2} void.",
+      "Near {time}, {facility} granted {topic} collapsing; {seq} assembled {value} {unit} of {topic2} breach.",
+      "Past {time}, {channel} allowed {topic} breaking; {facility} gathered {value} {unit} of {topic2} rupture.",
+      "Post {time}, {seq} conceded {topic} shattering; {channel} collected {value} {unit} of {topic2} fracture.",
+      "Pre {time}, {facility} admitted {topic} splintering; {seq} harvested {value} {unit} of {topic2} crack.",
+      "Mid {time}, {channel} accepted {topic} crumbling; {facility} culled {value} {unit} of {topic2} fissure.",
+      "Late {time}, {seq} recognized {topic} disintegrating; {channel} culled {value} {unit} of {topic2} split.",
+      "Early {time}, {facility} witnessed {topic} fragmenting; {seq} culled {value} {unit} of {topic2} tear.",
+      "Peak {time}, {channel} monitored {topic} pulverizing; {facility} culled {value} {unit} of {topic2} shred.",
+      "Trough {time}, {seq} surveyed {topic} dissolving; {channel} culled {value} {unit} of {topic2} splatter.",
+      "Cycle {time}, {facility} inspected {topic} evaporating; {seq} culled {value} {unit} of {topic2} mist.",
+      "Phase {time}, {channel} probed {topic} vanishing; {facility} culled {value} {unit} of {topic2} haze."
+    ],
+    "core_slot_map": {
+      "u00001": {
+        "core_index": 0,
+        "role": "trigger_event",
+        "slot": 0
+      },
+      "u00017": {
+        "core_index": 1,
+        "role": "trigger_event",
+        "slot": 16
+      },
+      "u00021": {
+        "core_index": 2,
+        "role": "root_cause",
+        "slot": 20
+      },
+      "u00029": {
+        "core_index": 3,
+        "role": "root_cause",
+        "slot": 28
+      },
+      "u00035": {
+        "core_index": 4,
+        "role": "root_cause",
+        "slot": 34
+      },
+      "u00047": {
+        "core_index": 5,
+        "role": "root_cause",
+        "slot": 46
+      },
+      "u00093": {
+        "core_index": 6,
+        "role": "propagation_or_response",
+        "slot": 92
+      },
+      "u00108": {
+        "core_index": 7,
+        "role": "propagation_or_response",
+        "slot": 107
+      },
+      "u00115": {
+        "core_index": 8,
+        "role": "propagation_or_response",
+        "slot": 114
+      },
+      "u00123": {
+        "core_index": 9,
+        "role": "propagation_or_response",
+        "slot": 122
+      },
+      "u00127": {
+        "core_index": 10,
+        "role": "impact",
+        "slot": 126
+      },
+      "u00133": {
+        "core_index": 11,
+        "role": "impact",
+        "slot": 132
+      },
+      "u00141": {
+        "core_index": 12,
+        "role": "impact",
+        "slot": 140
+      },
+      "u00145": {
+        "core_index": 13,
+        "role": "impact",
+        "slot": 144
+      },
+      "u00154": {
+        "core_index": 14,
+        "role": "impact",
+        "slot": 153
+      },
+      "u00157": {
+        "core_index": 15,
+        "role": "mitigation",
+        "slot": 156
+      },
+      "u00158": {
+        "core_index": 16,
+        "role": "mitigation",
+        "slot": 157
+      },
+      "u00160": {
+        "core_index": 17,
+        "role": "mitigation",
+        "slot": 159
+      },
+      "u00178": {
+        "core_index": 18,
+        "role": "mitigation",
+        "slot": 177
+      },
+      "u00194": {
+        "core_index": 19,
+        "role": "trigger_event",
+        "slot": 193
+      },
+      "u00209": {
+        "core_index": 20,
+        "role": "trigger_event",
+        "slot": 208
+      },
+      "u00214": {
+        "core_index": 21,
+        "role": "root_cause",
+        "slot": 213
+      },
+      "u00215": {
+        "core_index": 22,
+        "role": "root_cause",
+        "slot": 214
+      },
+      "u00216": {
+        "core_index": 23,
+        "role": "propagation_or_response",
+        "slot": 215
+      },
+      "u00222": {
+        "core_index": 24,
+        "role": "propagation_or_response",
+        "slot": 221
+      },
+      "sanitized_facility_rewrites": 0
+    }
+  }
+]

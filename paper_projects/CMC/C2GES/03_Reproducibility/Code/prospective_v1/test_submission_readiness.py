@@ -16,7 +16,11 @@ class SubmissionReadinessTests(unittest.TestCase):
         codes = {row["code"] for row in result["findings"]}
         self.assertIn("E1_PROTOCOL_NOT_FROZEN", codes)
         self.assertIn("E1_RUN_MANIFEST_INVALID", codes)
-        self.assertIn("MANUSCRIPT_NOT_BACKFILLED", codes)
+        # The confirmatory snapshot must remain rejected even if the manuscript
+        # is honestly rewritten for a separate diagnostic submission route.
+        self.assertIn("E1_PROTOCOL_NOT_FROZEN", codes)
+        self.assertIn("E3_PROTOCOL_NOT_FROZEN", codes)
+        self.assertIn("EXTERNAL_GATE_OPEN", codes)
         self.assertIn("FINAL_EVIDENCE_LOCK_MISSING_OR_INVALID", codes)
 
     def test_marker_only_fixture_fails_closed_without_exception(self) -> None:

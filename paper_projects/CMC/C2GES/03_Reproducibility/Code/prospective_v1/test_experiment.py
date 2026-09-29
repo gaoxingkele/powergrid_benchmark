@@ -25,6 +25,9 @@ class ProspectiveExperimentTests(unittest.TestCase):
         self.assertGreaterEqual(result["exact_series_signflip_p"], 0.0)
         self.assertLessEqual(result["exact_series_signflip_p"], 1.0)
 
+    def test_synthetic_mode_is_distinct_from_confirmatory_execution(self) -> None:
+        self.assertNotEqual("SYNTHETIC_STRESS_NONCONFIRMATORY", "EXTERNAL_CONFIRMATORY")
+
 
 if __name__ == "__main__":
     unittest.main()

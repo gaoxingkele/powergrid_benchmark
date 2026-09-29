@@ -1,6 +1,33 @@
-# C2GES submission-final evidence lock
+# C2GES submission evidence locks
 
-This directory remains intentionally incomplete in the protocol-ready release.
+Two scientific routes are kept separate.
+
+## Diagnostic route (current)
+
+The current manuscript is a bounded diagnostic study. Run:
+
+```text
+python 03_Reproducibility/Code/prospective_v1/diagnostic_submission_readiness.py
+```
+
+Its final lock is `DIAGNOSTIC_SUBMISSION_EVIDENCE_LOCK.json`. This route accepts
+only explicitly post-access exploratory results and automated error-discovery
+labels. It requires the manuscript to disclaim confirmatory superiority,
+human validation, semantic construct validity, and operational benefit. The
+item-level disposition of the former 42 findings is stored in
+`CONFIRMATORY_42_FINDINGS_DISPOSITION.json`.
+
+The authoritative scope resolution is
+`CURRENT_SUBMISSION_REQUIREMENTS_RESOLUTION.json`. It distinguishes current
+submission requirements from optional future claim upgrades. When that record
+states `CURRENT_SUBMISSION_REQUIREMENTS_RESOLVED` and `current_required_open=0`,
+the unfinished confirmatory E1/E2 files are not current submission blockers;
+they become mandatory only if the title or claims are upgraded. Author portal
+attestation remains a manual submission step and is not fabricated by the package.
+
+## Confirmatory route (future)
+
+The confirmatory package remains intentionally incomplete.
 It is populated only after confirmatory E1 and E3 have finished, independent E2
 annotation and adjudication are complete, the manuscript has been backfilled
 from those measured results, and the final PDF has been rebuilt.

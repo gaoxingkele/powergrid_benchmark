@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the C2GES component factorial on development data as a non-confirmatory pilot.
+"""Run the C2GES component factorial in explicitly non-confirmatory modes.
 
 The script implements the frozen AB/RP/G identities, complete-ranking word
 budgets, series-level contrasts, cluster bootstrap intervals, exact sign flips,
@@ -324,19 +324,35 @@ def analyze(rows: Sequence[Mapping[str, Any]], config: Mapping[str, Any]) -> dic
 
 
 def run(config_path: Path, out_dir: Path) -> dict[str, Any]:
-    print("This run tests implementation and mechanism diagnostics on development reports; it cannot support confirmatory manuscript claims.")
+    print("This run tests implementation and mechanism diagnostics; it cannot support confirmatory manuscript claims.")
     config = json.loads(config_path.read_text(encoding="utf-8"))
-    if config.get("mode") != "DEV_PILOT_NONCONFIRMATORY" or config.get("confirmatory_claims_allowed") is not False:
-        raise RuntimeError("this entry point is restricted to non-confirmatory development pilots")
-    if config.get("external_test_accessed") is not False:
-        raise RuntimeError("external-test access flag must remain false")
+    allowed_modes = {
+        "DEV_PILOT_NONCONFIRMATORY": "dev",
+        "SYNTHETIC_STRESS_NONCONFIRMATORY": "synthetic_stress",
+        "EXPLORATORY_EXTERNAL_NONCONFIRMATORY": "exploratory_external",
+    }
+    if config.get("mode") not in allowed_modes or config.get("confirmatory_claims_allowed") is not False:
+        raise RuntimeError("this entry point is restricted to non-confirmatory development or synthetic pilots")
+    expected_external_access = config.get("mode") == "EXPLORATORY_EXTERNAL_NONCONFIRMATORY"
+    if config.get("external_test_accessed") is not expected_external_access:
+        raise RuntimeError(f"external_test_accessed must be {str(expected_external_access).lower()} for this mode")
     dataset = (WORKSPACE / config["dataset_relative_to_workspace"]).resolve()
     dataset.relative_to(WORKSPACE.resolve())
     if not dataset.is_file():
         raise FileNotFoundError(dataset)
     reports = jsonl(dataset)
-    if len(reports) != int(config["expected_reports"]) or any(row.get("split") != "dev" for row in reports):
-        raise RuntimeError("pilot requires the declared development-only dataset")
+    expected_split = allowed_modes[config["mode"]]
+    if len(reports) != int(config["expected_reports"]) or any(row.get("split") != expected_split for row in reports):
+        raise RuntimeError(f"pilot requires the declared {expected_split!r} dataset")
+    if config["mode"] == "SYNTHETIC_STRESS_NONCONFIRMATORY" and any(
+            row.get("synthetic") is not True or row.get("confirmatory_claims_allowed") is not False
+            for row in reports):
+        raise RuntimeError("synthetic pilot requires explicit synthetic and claim-boundary markers")
+    if config["mode"] == "EXPLORATORY_EXTERNAL_NONCONFIRMATORY" and any(
+            row.get("synthetic") is not False or row.get("confirmatory_claims_allowed") is not False
+            or "automatically extracted official summary" not in row.get("reference_provenance", "")
+            for row in reports):
+        raise RuntimeError("exploratory external mode requires real-report, automatic-reference, and claim-boundary markers")
     if out_dir.exists():
         raise FileExistsError(f"refusing existing output directory: {out_dir}")
     out_dir.mkdir(parents=True)
@@ -461,7 +477,7 @@ def run(config_path: Path, out_dir: Path) -> dict[str, Any]:
         "status": "COMPLETE" if all(row["status"] == "PASS" for row in result_rows) else "COMPLETE_WITH_FAILURES",
         "mode": config["mode"],
         "confirmatory_claims_allowed": False,
-        "external_test_accessed": False,
+        "external_test_accessed": bool(config["external_test_accessed"]),
         "dataset_sha256": sha256(dataset),
         "config_sha256": sha256(config_path),
         "code_sha256": sha256(Path(__file__)),

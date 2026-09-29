@@ -1,0 +1,72 @@
+{
+  "protocol_id": "C2GES-RSI-PATH-UTILITY-v1",
+  "sealed_at": "2026-09-17T00:00:00Z",
+  "seed": 20260917,
+  "goal": "Evolve a redesigned typed-path utility off evaluation, freeze one configuration, then score a held-out matched-budget comparison for MDPI Information.",
+  "evolution": {
+    "split": "nerc_full_pdf_dev_v0_3.jsonl",
+    "n_reports": 12,
+    "may_use_synthetic_fixtures": true,
+    "forbidden_inputs": [
+      "nerc_full_pdf_test_v0_3.jsonl",
+      "exploratory_external_v0 e1/e3 scores",
+      "15-report retained-test outcomes"
+    ]
+  },
+  "evaluation": {
+    "corpus": "15-report NERC retained test (nerc_full_pdf_test_v0_3.jsonl)",
+    "label": "held-out-for-this-revision",
+    "not_unseen_confirmatory": true,
+    "n_reports": 15,
+    "word_budgets": [110, 260],
+    "primary_comparator": "no_path_c2ges",
+    "named_baseline": "textrank",
+    "metric": "rougeL_f1",
+    "rouge_use_stemmer": true,
+    "unit_of_analysis": "report"
+  },
+  "seen_exclusion": {
+    "registry": "03_Reproducibility/Data/prospective_external_v1/SEEN_EXCLUSION_REGISTRY.csv",
+    "pre_freeze_log": "03_Reproducibility/Data/prospective_external_v1/PRE_FREEZE_ACCESS_LOG.md",
+    "unused_lawful_public_series_available": false,
+    "decision": "No registry-absent lawful public series is used. The 15-test run is held-out-for-this-revision, not unseen confirmatory. The 7-series post-access pilot is not reused as an eval corpus for this revision."
+  },
+  "path_utility_family": {
+    "historical": "minmax of raw qualified-path deletion loss C_raw (published v0.3 term)",
+    "gated_relevance": "minmax(C_raw * Q)",
+    "end_stage": "minmax(C_raw * stage_weight) with impact/mitigation 1.5, propagation 1.0, cause/trigger 0.75, abstention 0.25",
+    "length_damped": "minmax(C_raw / log(1 + words))",
+    "gated_length": "minmax(C_raw * Q / log(1 + words))"
+  },
+  "path_weights": [0.05, 0.1, 0.15],
+  "no_path_base_weights": {
+    "relevance": 0.4,
+    "role": 0.2,
+    "graph": 0.15,
+    "path": 0.0,
+    "position": 0.1
+  },
+  "weight_rule": "For path_weight a>0 set path=a on the no-path base then renormalize all five channels to sum to 1. Redundancy penalty stays 0.50. Reservation on. Typed graph on. Complete-ranking word budget with skip-if-unfit.",
+  "textrank": {
+    "alpha": 0.85,
+    "max_iter": 100,
+    "tolerance": 1e-08,
+    "selection": "complete ranking by pagerank then skip-if-unfit word budget; no role reservation"
+  },
+  "freeze_rule": "Among variants with path_weight>0, maximize ((mean ROUGE-L at 110)+(mean ROUGE-L at 260))/2 on the 12-dev split; ties: higher 260, then higher 110, then lower mean redundancy, then lexicographically earlier utility name, then smaller path_weight. No-path is a development reference, not a freeze candidate. The frozen variant is scored on the 15-test even if it loses to no-path on development.",
+  "historical_numbers_byte_stable": {
+    "retained_test_full_rougel_k5_k10": [0.106, 0.1276],
+    "retained_test_unrenorm_k5_k10": [0.1094, 0.131],
+    "seven_series_full_110_260": [0.1588, 0.1772],
+    "seven_series_nopath_110_260": [0.1668, 0.1844],
+    "seven_series_full_minus_nopath": [-0.00799, -0.00718]
+  },
+  "overwrite": "A sealed run directory with EVALUATION.json or SEALED marker must not be overwritten.",
+  "claims_forbidden": [
+    "unseen confirmatory",
+    "human or expert labels",
+    "no AI used",
+    "operational benefit",
+    "system superiority unless the paper confirmatory bar is met"
+  ]
+}

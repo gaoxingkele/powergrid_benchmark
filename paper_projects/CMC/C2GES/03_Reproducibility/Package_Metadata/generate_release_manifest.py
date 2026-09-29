@@ -41,6 +41,11 @@ EXCLUDED_PARTS = {
     "Definitions_20260623_backup", "_mdpi_template_acs", "_docx_assets",
 }
 EXCLUDED_FILE_SUFFIXES = ("_mdpi_template_acs.zip",)
+# Verbatim third-party passages: the sealed RSI record keeps the selected and
+# reference text so the run can be re-scored offline, and third-party
+# redistribution permission has not been established.  Its rights-safe companion
+# (identifiers, budgets, realised lengths and scores only) is shipped instead.
+EXCLUDED_EXACT_PATHS = {("03_Reproducibility", "Data", "rsi_path_v1", "run", "SEALED_CHOICES.jsonl")}
 BINARY_SUFFIXES = {".pdf", ".png", ".jpg", ".jpeg", ".zip", ".docx", ".eps"}
 
 
@@ -62,6 +67,8 @@ def included_files() -> list[Path]:
             if path.name in EXCLUDED_NAMES or path.suffix.lower() in EXCLUDED_SUFFIXES:
                 continue
             if path.name.endswith(EXCLUDED_FILE_SUFFIXES):
+                continue
+            if relative.parts in EXCLUDED_EXACT_PATHS:
                 continue
             if any(part in EXCLUDED_PARTS for part in relative.parts):
                 continue

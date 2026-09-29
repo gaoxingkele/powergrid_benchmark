@@ -44,12 +44,13 @@ def main() -> None:
     selected = [json.loads(line) for line in (run_dir / "factorial_selected_ids.jsonl").read_text(encoding="utf-8").splitlines() if line.strip()]
     inference = json.loads((run_dir / "factorial_inference.json").read_text(encoding="utf-8"))
 
-    if final.get("mode") != "DEV_PILOT_NONCONFIRMATORY":
-        errors.append("run mode is not development-only")
+    if final.get("mode") not in {"DEV_PILOT_NONCONFIRMATORY", "SYNTHETIC_STRESS_NONCONFIRMATORY", "EXPLORATORY_EXTERNAL_NONCONFIRMATORY"}:
+        errors.append("run mode is not an allowed non-confirmatory mode")
     if final.get("confirmatory_claims_allowed") is not False:
         errors.append("confirmatory_claims_allowed must be false")
-    if final.get("external_test_accessed") is not False:
-        errors.append("external_test_accessed must be false")
+    expected_external_access = final.get("mode") == "EXPLORATORY_EXTERNAL_NONCONFIRMATORY"
+    if final.get("external_test_accessed") is not expected_external_access:
+        errors.append(f"external_test_accessed must be {str(expected_external_access).lower()} for run mode")
     expected = int(final["reports"]) * int(final["conditions"]) * len(final["word_budgets"])
     if len(metrics) != expected or len(selected) != expected:
         errors.append(f"row count mismatch: expected {expected}, metrics={len(metrics)}, selected={len(selected)}")
@@ -99,7 +100,7 @@ def main() -> None:
         raise SystemExit(1)
     print("VALIDATION PASS")
     print(f"rows={len(metrics)} reports={final['reports']} series={final['series']} identities={len(IDENTITIES)}")
-    print("external_test_accessed=false confirmatory_claims_allowed=false")
+    print(f"external_test_accessed={str(bool(final.get('external_test_accessed'))).lower()} confirmatory_claims_allowed=false")
 
 
 if __name__ == "__main__":

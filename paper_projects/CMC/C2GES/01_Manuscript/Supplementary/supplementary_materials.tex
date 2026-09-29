@@ -13,7 +13,7 @@
 
 \section*{Contents and Data Files}
 
-This supplement separates scientific interpretation from implementation records. It contains thirteen tables and one figure referenced by the main manuscript. The main-text evidence-layer table (``Evidence layers and claim bounds'') states the four evaluation layers and what each may and may not support; the tables below are implementation and exploratory-component records for those layers, not a confirmatory external test. Paths below are relative to the C2GES release root. Machine-readable files are provided under \nolinkurl{03_Reproducibility/Data/}: the non-verbatim sampling frames, aggregate metrics, paired ROUGE-L differences, output-length records, exact sign-flip results, page locators, component-factorial diagnostics, and development-only calibration report. Source PDFs and verbatim extracted passages are excluded because third-party redistribution permission has not been established.
+This supplement separates scientific interpretation from implementation records. It contains twenty tables and two figures referenced by the main manuscript. The main-text evidence-layer table (``Evidence layers and claim bounds'') states the four evaluation layers and what each may and may not support; the tables below are implementation and exploratory-component records for those layers, not a confirmatory external test. Paths below are relative to the C2GES release root. Machine-readable files are provided under \nolinkurl{03_Reproducibility/Data/}: the non-verbatim sampling frames, aggregate metrics, paired ROUGE-L differences, output-length records, exact sign-flip results, page locators, component-factorial diagnostics, and development-only calibration report. Source PDFs and verbatim extracted passages are excluded because third-party redistribution permission has not been established.
 
 \section*{Table S1. Rights-Safe Sampling Frame}
 
@@ -257,6 +257,10 @@ TextRank $-$ no-path & 260 & 0.022940 & [0.008540, 0.038543] & 0.008095 & \textb
 
 Composition: six ENTSO-E grid incidents (including the 2024 South-East Europe and 2025 Iberia reports), seven ENTSO-E market-coupling incidents, and six NERC reports; 21--2,000 candidate units and 102--10,935 reference words per document. References are the official summary sections detected after converting each PDF to structured Markdown; the detector accepts Executive Summary, Management Summary and Summary headings, which is a documented generalisation of the earlier Executive-Summary rule made before scoring. Holm adjustment covers the four contrasts shown. The two corrected contrasts favour the untyped ranking over the typed path channel; they do not establish system superiority, expert construct validity, or operational benefit, and they are not author-attested unseen evidence.
 
+\emph{Post-freeze extension (sensitivity, not a pre-registered test).} A later acquisition added five documents (three grid incidents and two frequency-deviation reports), raising the corpus to 24. The direction is unchanged and slightly larger for the path channel --- Full minus no-path is $-0.006908$ at 260 words with 10 negative, 1 positive and 13 exactly tied documents --- but mean-based inference is not stable: the randomised sign-flip value rises to 0.444 (Holm 0.678) because one document with a large positive difference dominates the mean, and the TextRank contrast falls to 0.130 (Holm 0.390). Reporting the extension is therefore a statement about the fragility of mean-based tests on a zero-inflated, heavy-tailed paired distribution, not a replacement of the frozen 19-document result.
+
+\emph{Arm-level decomposition (sensitivity).} Testing the two layers separately rather than jointly shows the same budget dependence. Adding role evidence and role-group reservation to a lexical-and-position baseline changes mean ROUGE-L by $-0.03510$ at 110 words (18 of 22 discordant documents negative; $p=0.0039$, Holm $0.0774$), by $-0.01776$ at 260 words, and by $+0.00626$ and $+0.01079$ under five- and ten-unit budgets; none reaches family-wise correction. The path channel stays at or below zero in all four budgets. The role layer's apparent benefit is therefore tied to the equal-unit-count protocol, whereas the negative component result is stable across budgets and corpora.
+
 \section*{Table S11. Error Profile of Path-Driven Selection Changes}
 
 Descriptive decomposition of the units whose selection changed between Full (AB-5) and no-path (AB-6) in the seven-series matched-budget pilot, grouped by the sign of the report-level ROUGE-L difference. Changed units are the symmetric difference of the two selection sets in a report--budget cell; cells are counted when at least one unit changed. ``Blocked pairs'' count ordered role-compatible pairs (a permitted stage-monotone transition) whose positions differ by more than the 12-position window and therefore could not form an edge. Chronology-violating incident edges are typed edges whose source unit occurs later in the document than its target; direction follows the role stage, not document order, so a high share is a structural property of the design rather than an error count. Machine-readable per-unit records and inputs are in \nolinkurl{03_Reproducibility/Data/descriptive_addenda_v1/}. This profile describes where the path channel acts; it does not apportion causality for the endpoint difference.
@@ -340,6 +344,286 @@ Under the block-preserving rule the same reports yield 14{,}290 layout units of 
 \end{center}
 
 Lines compare reservation off/on while the horizontal axis switches the normalized path term. The rows show 110- and 260-word budgets; columns show ROUGE-L, formal role coverage, and formal typed-edge coverage. The budget-dependent ROUGE-L patterns do not establish a stable interaction after family-wise correction.
+
+% ==== BEGIN ADDENDA V2 TABLES (generated) ====
+
+
+\section*{Table S14. Reservation--Path Factorial Main Effects and Interaction}
+
+Exact values behind Figure~S4, recomputed from the exploratory seven-series factorial (\nolinkurl{factorial_interactions.json}). The family was fixed for the v3 diagnostic run but not before source access, so every entry stays exploratory. Intervals are 95\% series-cluster bootstrap intervals; the exact column is the series sign-flip value and the final column its Holm adjustment inside the six-contrast family. Mean $\Delta$ is in ROUGE-L F1.
+
+\begin{center}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llrrrrrr}
+\toprule
+Budget & Factor & Mean $\Delta$ & 95\% CI low & 95\% CI high & Paired SMD & Exact $p$ & Holm $p$\\
+\midrule
+110 & path channel (paths off vs on) & -0.0025 & -0.0179 & +0.0133 & -0.109 & 0.7969 & 1.0000\\
+110 & role-group reservation (on vs off) & -0.0097 & -0.0175 & -0.0024 & -0.882 & 0.0469 & 0.2344\\
+110 & reservation x path interaction & -0.0110 & -0.0317 & +0.0026 & -0.413 & 0.3438 & 1.0000\\
+260 & path channel (paths off vs on) & -0.0103 & -0.0187 & -0.0037 & -0.930 & 0.0312 & 0.1875\\
+260 & role-group reservation (on vs off) & +0.0005 & -0.0039 & +0.0053 & +0.068 & 0.8750 & 1.0000\\
+260 & reservation x path interaction & +0.0063 & -0.0022 & +0.0160 & +0.478 & 0.2500 & 1.0000\\
+\bottomrule
+\end{tabular}}
+\end{center}
+
+Per-series deltas for the same six contrasts are supplied as \nolinkurl{q5\_reservation\_path\_series\_deltas.csv}. Neither main effect survives family-wise correction at either budget.
+
+
+\section*{Table S15. External Prospective Corpus Stratified by Publisher Family}
+
+Paired ROUGE-L F1 differences inside each publisher family of the frozen 24-report external corpus. Families are reported separately and are never pooled into a single accuracy; family sizes are 2--9, so every entry is descriptive and no test is applied. Candidate units and reference words are given as the observed range inside the family.
+
+\begin{center}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llrrrrrrr}
+\toprule
+Family & Budget & Contrast & Reports & Candidates & Reference words & Mean $\Delta$ & neg/pos/tie\\
+\midrule
+ENTSO-E frequency-deviation reports & word:110 & AB2 - AB0 & 2 & 271--336 & 401--800 & -0.0834 & 2/0/0\\
+ENTSO-E frequency-deviation reports & word:110 & Full - no\_path & 2 & 271--336 & 401--800 & +0.0085 & 0/2/0\\
+ENTSO-E frequency-deviation reports & word:110 & TextRank - no\_path & 2 & 271--336 & 401--800 & -0.0105 & 1/1/0\\
+ENTSO-E frequency-deviation reports & word:260 & AB2 - AB0 & 2 & 271--336 & 401--800 & -0.0235 & 1/1/0\\
+ENTSO-E frequency-deviation reports & word:260 & Full - no\_path & 2 & 271--336 & 401--800 & -0.0799 & 2/0/0\\
+ENTSO-E frequency-deviation reports & word:260 & TextRank - no\_path & 2 & 271--336 & 401--800 & -0.0893 & 1/1/0\\
+ENTSO-E grid incidents & word:110 & AB2 - AB0 & 7 & 589--2000 & 1190--10935 & -0.0026 & 5/2/0\\
+ENTSO-E grid incidents & word:110 & Full - no\_path & 7 & 589--2000 & 1190--10935 & -0.0010 & 2/3/2\\
+ENTSO-E grid incidents & word:110 & TextRank - no\_path & 7 & 589--2000 & 1190--10935 & +0.0205 & 0/7/0\\
+ENTSO-E grid incidents & word:260 & AB2 - AB0 & 7 & 589--2000 & 1190--10935 & +0.0198 & 2/5/0\\
+ENTSO-E grid incidents & word:260 & Full - no\_path & 7 & 589--2000 & 1190--10935 & -0.0028 & 5/0/2\\
+ENTSO-E grid incidents & word:260 & TextRank - no\_path & 7 & 589--2000 & 1190--10935 & +0.0175 & 1/6/0\\
+ENTSO-E market-coupling incidents & word:110 & AB2 - AB0 & 9 & 21--84 & 108--779 & -0.0652 & 7/1/1\\
+ENTSO-E market-coupling incidents & word:110 & Full - no\_path & 9 & 21--84 & 108--779 & -0.0012 & 2/0/7\\
+ENTSO-E market-coupling incidents & word:110 & TextRank - no\_path & 9 & 21--84 & 108--779 & +0.0523 & 3/6/0\\
+ENTSO-E market-coupling incidents & word:260 & AB2 - AB0 & 9 & 21--84 & 108--779 & -0.0614 & 5/3/1\\
+ENTSO-E market-coupling incidents & word:260 & Full - no\_path & 9 & 21--84 & 108--779 & +0.0036 & 1/1/7\\
+ENTSO-E market-coupling incidents & word:260 & TextRank - no\_path & 9 & 21--84 & 108--779 & +0.0604 & 3/6/0\\
+NERC event reports & word:110 & AB2 - AB0 & 6 & 37--334 & 102--1431 & -0.0118 & 4/1/1\\
+NERC event reports & word:110 & Full - no\_path & 6 & 37--334 & 102--1431 & -0.0060 & 2/0/4\\
+NERC event reports & word:110 & TextRank - no\_path & 6 & 37--334 & 102--1431 & -0.0082 & 3/3/0\\
+NERC event reports & word:260 & AB2 - AB0 & 6 & 37--334 & 102--1431 & +0.0058 & 3/3/0\\
+NERC event reports & word:260 & Full - no\_path & 6 & 37--334 & 102--1431 & -0.0031 & 2/0/4\\
+NERC event reports & word:260 & TextRank - no\_path & 6 & 37--334 & 102--1431 & +0.0073 & 2/4/0\\
+\bottomrule
+\end{tabular}}
+\end{center}
+
+The 260-word path-layer difference observed on the pooled corpus is carried by the two frequency-deviation reports; the grid-incident, market-coupling and NERC families sit close to zero. Per-condition family means are supplied as \nolinkurl{q9\_external\_family\_condition\_means.csv}.
+
+
+\section*{Table S16. Per-Report Cost Against Candidate-Set Size, and Role/Edge Coverage}
+
+Measured cost and coverage for the seven post-access external series. Candidate counts come from the private derived corpus and are reported as counts only; times are selection and scoring seconds averaged over the thirteen conditions at that budget, excluding the separately loaded embedding model. Role and typed-edge coverage are formal channel coverage, not accuracy against human judgement.
+
+\begin{center}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrr}
+\toprule
+Series & Candidates & Budget & Selection (s) & Peak MB & Role coverage & Typed-edge coverage\\
+\midrule
+series\_entsoe\_czech\_2025 & 695 & 110 & 0.082 & 1.24 & 0.846 & 0.923\\
+series\_entsoe\_czech\_2025 & 695 & 260 & 0.170 & 1.43 & 0.872 & 0.978\\
+series\_entsoe\_mepso\_2025 & 734 & 110 & 0.101 & 1.29 & 0.821 & 1.000\\
+series\_entsoe\_mepso\_2025 & 734 & 260 & 0.203 & 1.67 & 0.872 & 0.985\\
+series\_entsoe\_see\_2024 & 1408 & 110 & 0.120 & 2.47 & 0.872 & 1.000\\
+series\_entsoe\_see\_2024 & 1408 & 260 & 0.263 & 2.94 & 0.872 & 1.000\\
+series\_nerc\_gmd\_2024 & 200 & 110 & 0.054 & 0.40 & 0.897 & 0.936\\
+series\_nerc\_gmd\_2024 & 200 & 260 & 0.087 & 0.46 & 0.949 & 0.947\\
+series\_nerc\_large\_load\_loss & 58 & 110 & 0.042 & 0.23 & 0.846 & 0.931\\
+series\_nerc\_large\_load\_loss & 58 & 260 & 0.064 & 0.49 & 0.872 & 0.949\\
+series\_nerc\_low\_wind & 153 & 110 & 0.039 & 0.25 & 0.923 & 0.866\\
+series\_nerc\_low\_wind & 153 & 260 & 0.090 & 0.44 & 0.923 & 0.922\\
+series\_transpower\_tower\_130 & 830 & 110 & 0.108 & 1.60 & 0.821 & 0.729\\
+series\_transpower\_tower\_130 & 830 & 260 & 0.237 & 1.86 & 0.897 & 0.814\\
+\bottomrule
+\end{tabular}}
+\end{center}
+
+Per-condition values, including redundancy and budget utilization, are supplied as \nolinkurl{q4\_role\_edge\_coverage\_per\_condition.csv}; the four-condition cost detail is in \nolinkurl{q3\_report\_cost\_vs\_candidates.csv}.
+
+
+\section*{Table S17. One-Sided Bounds on the Frozen External Layer Contrasts}
+
+Post hoc bounds computed on the same frozen 24-report record as Table~S10 and the arm-level experiment. The upper limit is the one-sided 95\% bootstrap percentile of the paired mean difference (200\,000 resamples, seed 20260926), i.e. the largest gain still compatible with the data. The leave-one-out columns report the span of the mean and the worst-case upper limit when any single report is removed. Bounds are post hoc and are not pre-registered confirmatory tests.
+
+\begin{center}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llrrrrrr}
+\toprule
+Contrast & Budget & Reports & Mean $\Delta$ & neg/pos/tie & Upper limit (95\%) & LOO mean range & LOO worst limit\\
+\midrule
+path layer (Full $-$ no-path) & unit:10 & 24 & +0.0010 & 8/6/10 & +0.0038 & [+0.0001, +0.0016] & +0.0043\\
+path layer (Full $-$ no-path) & unit:5 & 24 & -0.0005 & 5/4/15 & +0.0047 & [-0.0026, +0.0012] & +0.0059\\
+path layer (Full $-$ no-path) & word:110 & 24 & -0.0015 & 6/5/13 & +0.0006 & [-0.0020, -0.0004] & +0.0012\\
+path layer (Full $-$ no-path) & word:260 & 24 & -0.0069 & 10/1/13 & +0.0021 & [-0.0094, -0.0006] & +0.0038\\
+role layer (AB-2 $-$ AB-0) & unit:10 & 24 & +0.0108 & 9/15/0 & +0.0228 & [+0.0074, +0.0146] & +0.0255\\
+role layer (AB-2 $-$ AB-0) & unit:5 & 24 & +0.0063 & 10/14/0 & +0.0180 & [+0.0036, +0.0126] & +0.0209\\
+role layer (AB-2 $-$ AB-0) & word:110 & 24 & -0.0351 & 18/4/2 & -0.0166 & [-0.0385, -0.0287] & -0.0125\\
+role layer (AB-2 $-$ AB-0) & word:260 & 24 & -0.0178 & 11/12/1 & +0.0033 & [-0.0207, -0.0074] & +0.0077\\
+TextRank baseline & word:110 & 24 & +0.0227 & 7/17/0 & +0.0442 & [+0.0140, +0.0280] & +0.0492\\
+TextRank baseline & word:260 & 24 & +0.0221 & 7/17/0 & +0.0440 & [+0.0154, +0.0316] & +0.0503\\
+Lead baseline & word:110 & 24 & +0.0104 & 9/15/0 & +0.0276 & [+0.0038, +0.0133] & +0.0306\\
+Lead baseline & word:260 & 24 & +0.0172 & 10/14/0 & +0.0372 & [+0.0092, +0.0209] & +0.0407\\
+\bottomrule
+\end{tabular}}
+\end{center}
+
+The path-layer upper limit stays at or below $+0.0047$ in every budget and at or below $+0.0059$ under leave-one-out, so a path-channel gain larger than $+0.005$ ROUGE-L is excluded on this corpus even though the mean-based test is not significant. The role-layer upper limit is positive under equal-unit budgets and negative at 110 words, which is the budget dependence reported in the main text.
+
+\section*{Figure S5. Budget-Efficiency Curves on the Frozen External Corpus}
+
+\begin{center}
+\includegraphics[width=\textwidth]{figures/figS5_budget_efficiency_curve.pdf}
+\end{center}
+
+Panel (a) holds the selected-word budget fixed (110--600 words) and panel (b) the selected-unit budget (3--15 units); labels give the realised selected words per unit. The ordering of the arms is a property of the budget type: TextRank and Lead lead at mid-range word budgets, whereas the role-conditioned arms lead under equal-unit budgets while packing roughly 1.5 times as many words per selected unit as the lexical-and-position baseline and about three times as many as TextRank. Source values are supplied as \nolinkurl{figS5_source.csv} and the full arm record as \nolinkurl{external\_arms\_curve\_v4.json}.
+
+
+\section*{Table S18. Out-of-Domain Transfer Check on GovReport}
+
+The frozen arm set applied without tuning to 100 length-stratified documents from the GovReport test split (CRS and GAO reports with human-written summaries, CC BY 4.0; drawn with seed 20260926 from 973 test rows). This is a robustness transfer layer, not domain evidence: the role cue lexicon is power-domain specific (mean formal role coverage 0.246, minimum 0.016) and the references are abstractive. Intervals and limits are computed as in Table~S17 (200\,000 bootstrap samples).
+
+\begin{center}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llrrrrrr}
+\toprule
+Contrast & Budget & Reports & Mean $\Delta$ & neg/pos/tie & Upper limit (95\%) & LOO mean range & LOO worst limit\\
+\midrule
+path layer (Full $-$ no-path) & word:110 & 100 & -0.0031 & 24/15/61 & -0.0011 & [-0.0033, -0.0019] & -0.0006\\
+path layer (Full $-$ no-path) & word:260 & 100 & -0.0026 & 37/25/38 & -0.0007 & [-0.0031, -0.0022] & -0.0004\\
+path layer (Full $-$ no-path) & unit:5 & 100 & -0.0052 & 39/13/48 & -0.0030 & [-0.0055, -0.0044] & -0.0025\\
+path layer (Full $-$ no-path) & unit:10 & 100 & -0.0028 & 30/21/49 & -0.0010 & [-0.0030, -0.0024] & -0.0007\\
+role layer (AB-2 $-$ AB-0) & word:110 & 100 & -0.0212 & 81/17/2 & -0.0161 & [-0.0220, -0.0200] & -0.0149\\
+role layer (AB-2 $-$ AB-0) & word:260 & 100 & -0.0204 & 77/22/1 & -0.0143 & [-0.0218, -0.0195] & -0.0135\\
+role layer (AB-2 $-$ AB-0) & unit:5 & 100 & -0.0007 & 52/48/0 & +0.0062 & [-0.0028, +0.0006] & +0.0072\\
+role layer (AB-2 $-$ AB-0) & unit:10 & 100 & -0.0098 & 71/29/0 & -0.0038 & [-0.0111, -0.0087] & -0.0030\\
+TextRank $-$ no-path & word:110 & 100 & +0.0215 & 15/84/1 & +0.0264 & [+0.0209, +0.0230] & +0.0274\\
+TextRank $-$ no-path & word:260 & 100 & +0.0273 & 14/86/0 & +0.0332 & [+0.0264, +0.0287] & +0.0342\\
+TextRank $-$ no-path & unit:5 & 100 & +0.0005 & 43/57/0 & +0.0072 & [-0.0003, +0.0029] & +0.0085\\
+TextRank $-$ no-path & unit:10 & 100 & +0.0119 & 33/67/0 & +0.0182 & [+0.0109, +0.0138] & +0.0194\\
+Lead $-$ no-path & word:110 & 100 & +0.0034 & 57/42/1 & +0.0123 & [+0.0007, +0.0043] & +0.0132\\
+Lead $-$ no-path & word:260 & 100 & +0.0044 & 62/38/0 & +0.0170 & [-0.0005, +0.0056] & +0.0182\\
+Lead $-$ no-path & unit:5 & 100 & -0.0250 & 81/19/0 & -0.0113 & [-0.0308, -0.0238] & -0.0101\\
+Lead $-$ no-path & unit:10 & 100 & -0.0166 & 74/26/0 & -0.0038 & [-0.0203, -0.0153] & -0.0024\\
+\bottomrule
+\end{tabular}}
+\end{center}
+
+Every path-layer upper limit is below zero, so a positive path-channel effect is excluded on this corpus at all four budgets, and the role-conditioned arms are significantly worse than their lexical baseline at both word budgets. Per-document records are supplied as \nolinkurl{govreport\_transfer\_v1.json}.
+
+\textbf{Sensitivity: the frozen strata fully sampled (970 of 973 test rows).} The same frozen protocol run over every document of the five strata, as a sensitivity rather than a new pre-registered test. Holm values are those of the full arm-by-budget family (twelve contrasts).
+
+\begin{center}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llrrrr}
+\toprule
+Contrast & Budget & Reports & Mean $\Delta$ & neg/pos/tie & Upper limit (95\%)\\
+\midrule
+path layer (Full $-$ no-path) & word:110 & 970 & -0.0021 & 233/156/581 & -0.0013\\
+path layer (Full $-$ no-path) & word:260 & 970 & -0.0017 & 330/224/416 & -0.0008\\
+path layer (Full $-$ no-path) & unit:5 & 970 & -0.0032 & 316/166/488 & -0.0024\\
+path layer (Full $-$ no-path) & unit:10 & 970 & -0.0020 & 306/197/467 & -0.0013\\
+role layer (AB-2 $-$ AB-0) & word:110 & 970 & -0.0193 & 722/233/15 & -0.0175\\
+role layer (AB-2 $-$ AB-0) & word:260 & 970 & -0.0220 & 725/241/4 & -0.0199\\
+role layer (AB-2 $-$ AB-0) & unit:5 & 970 & -0.0030 & 508/460/2 & -0.0009\\
+role layer (AB-2 $-$ AB-0) & unit:10 & 970 & -0.0134 & 632/337/1 & -0.0112\\
+\bottomrule
+\end{tabular}}
+\end{center}
+
+Every path-layer upper limit remains below zero at $n=970$ (worst case $-0.0008$), and the path contrasts are family-corrected significant at all four budgets (Holm $0.0002$--$0.0040$); the role layer is negative at every budget as well. Pairwise records are supplied as \nolinkurl{govreport\_transfer\_full970\_pairs.csv}.
+
+\textbf{Energy-topic subset of the same split (160 documents).} Selecting reports whose body matches at least three entries of a frozen keyword list (energy, grid, transmission, power plant, electricity, renewable, nuclear, and so on; the rule was fixed before the subset was formed) gives a topic stratum that is closer to the paper's domain than the full split. The path-layer differences at the four budgets are -0.0009 / -0.0016 / -0.0018 / -0.0025, every positive share of discordant documents is at or below 41\%, and the worst one-sided 95\% upper limit is $+0.0008$, so the $+0.005$ margin still holds; the ten-unit contrast is family-corrected significant (Holm $0.0174$) while the word-budget contrasts are not. Records: \nolinkurl{govreport\_energy160\_pairs.csv}.
+
+
+\section*{Table S19. Reference-Type Sensitivity with Human-Written Highlights}
+
+The frozen arm set applied to 400 length-stratified CNN/DailyMail test articles whose reference is the human-written highlight bullet points rather than an abstractive summary. This is a reference-type sensitivity, not domain evidence: the corpus is news, the articles are short (median 23 candidate units), and the power-domain cue lexicon barely applies (mean formal role coverage 0.116). The point of the layer is that the path channel leaves the selection untouched in almost every document, so a null cannot be an artefact of comparing extracts with rewritten text.
+
+\begin{center}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llrrrr}
+\toprule
+Contrast & Budget & Articles & Mean $\Delta$ & neg/pos/tie & Upper limit (95\%)\\
+\midrule
+path layer (Full $-$ no-path) & word:110 & 400 & +0.0005 & 14/10/376 & +0.0016\\
+path layer (Full $-$ no-path) & word:260 & 400 & -0.0003 & 18/14/368 & +0.0002\\
+path layer (Full $-$ no-path) & unit:5 & 400 & -0.0000 & 4/4/392 & +0.0002\\
+path layer (Full $-$ no-path) & unit:10 & 400 & +0.0000 & 1/4/395 & +0.0000\\
+role layer (AB-2 $-$ AB-0) & word:110 & 400 & -0.0092 & 187/135/78 & -0.0055\\
+role layer (AB-2 $-$ AB-0) & word:260 & 400 & -0.0018 & 134/119/147 & -0.0005\\
+role layer (AB-2 $-$ AB-0) & unit:5 & 400 & -0.0065 & 180/131/89 & -0.0034\\
+role layer (AB-2 $-$ AB-0) & unit:10 & 400 & -0.0013 & 125/130/145 & +0.0003\\
+\bottomrule
+\end{tabular}}
+\end{center}
+
+The path-layer difference is zero to the fourth decimal at three of the four budgets, with 92--99\% of articles exactly tied, and every one-sided upper limit is at most $+0.0016$ --- far inside the $+0.005$ margin. Under this reference the term is inert rather than harmful, and the position baseline dominates (Lead's advantage is family-corrected significant at all four budgets). Per-document pairs are supplied as \nolinkurl{reference\_type\_400\_pairs.csv}.
+
+
+\section*{Table S20. Frozen Parent--Held-Out Synthetic Stress Fixtures}
+
+Sixteen fictional reports in eight series generated under the frozen protocol \nolinkurl{PROTOCOL\_synthetic\_c2ges\_gendata\_v1.md} (sha256 prefix daf7c969, thresholds unchanged after freezing) and shipped with the run manifests, gate ledgers, dataset card and the component-factorial records. The parent and held-out sets use disjoint themes, and the two generator families are swapped between them. All nineteen deterministic gates pass in both sets; the fixtures are software and endpoint stress material and never enter the E1/E2/E3 evidence chain.
+
+\begin{center}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llrrllrr}
+\toprule
+Set & Method & 110 words & 260 words & Set & Method & 110 words & 260 words\\
+\midrule
+Parent & Full \cges{} & 0.1302 & 0.1184 & Held-out & Full \cges{} & 0.1168 & 0.1082\\
+Parent & No-path \cges{} & 0.1199 & 0.1086 & Held-out & No-path \cges{} & 0.1171 & 0.1039\\
+Parent & G-T (typed, no path) & 0.1199 & 0.1086 & Held-out & G-T (typed, no path) & 0.1171 & 0.1039\\
+Parent & G-U (untyped, no path) & 0.0887 & 0.0981 & Held-out & G-U (untyped, no path) & 0.0826 & 0.0910\\
+\bottomrule
+\end{tabular}}
+\end{center}
+
+Full--no-path macro-mean differences (110/260 words) match the table: parent +0.0103 / +0.0098; held-out -0.0003 / +0.0043. Series-equal Full--no-path (110/260 words): parent Full$-$no-path +0.0147 / +0.0178 (Holm 0.75 / 0.75); held-out Full$-$no-path -0.0007 / +0.0032 (Holm 1.00 / 1.00). Typed-minus-untyped graph: parent G-T$-$G-U +0.0312 / +0.0104 (Holm 0.25 / 0.25); held-out G-T$-$G-U +0.0344 / +0.0129 (Holm 0.25 / 0.25). Reservation main effect: parent reservation +0.0089 / -0.0098 (Holm 1.00 / 1.00); held-out reservation +0.0040 / +0.0111 (Holm 1.00 / 1.00). No corrected path contrast is nonzero in either set.
+
+\begin{center}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lllll}
+\toprule
+Gate & Frozen rule (abridged) & Parent measured & Held-out measured & Pass\\
+\midrule
+S1 & 4 series x 2 reports each & 8/8 & 8/8 & 19/19\\
+S2 & reference equals the concatenation of reference\_unit\_ids & 8/8 & 8/8 & 19/19\\
+S3 & causal DAG acyclic & 8/8 & 8/8 & 19/19\\
+S4 & semantic core 18--26 sentences; 10--28 words & 8/8 & 8/8 & 19/19\\
+S5 & five roles x 2--6 each, non-uniform; one priority=2 per role & 8/8 & 8/8 & 19/19\\
+S6 & every report covers all five roles & 8/8 & 8/8 & 19/19\\
+S7 & Synthetic facility prefix; forbidden tokens zero & 8/8 & 8/8 & 19/19\\
+S8 & 24--36 distinct distractors; 10--24 words & 8/8 & 8/8 & 19/19\\
+D1 & candidate-count W1 <= 0.75 & 0.208 & 0.208 & 19/19\\
+D2 & page-count W1 <= 0.75 & 0.131 & 0.131 & 19/19\\
+D3 & layout-share max abs(delta) <= 0.03 & 0.000 & 0.000 & 19/19\\
+D4 & exact duplicate rate <= 0.20 & 0.000 & 0.000 & 19/19\\
+D5 & unit-length W1 <= 0.25 & 0.189 & 0.174 & 19/19\\
+D7 & core-sentence first-quartile share <= 0.25 & 0.000--0.250 & 0.000--0.238 & 19/19\\
+D8 & max Jaccard vs real corpus <= 0.15; hit share <= 2\% & 0.120 / 0.000 & 0.062 / 0.000 & 19/19\\
+D9 & distractor families >= 6; single family <= 40\% & 150--675 / 0.011 & 150--675 / 0.028 & 19/19\\
+E1b & within-set per-report AUROC >= 0.80 & 0.894--0.970 & 0.875--0.945 & 19/19\\
+E2 & distinct-2 >= 0.526 & 0.452--0.656 & 0.535--0.656 & 19/19\\
+E3 & vocabulary overlap >= 0.55 & 0.675 & 0.627 & 19/19\\
+\bottomrule
+\end{tabular}}
+\end{center}
+
+The leakage gate D8 keeps every unit's maximum Jaccard overlap with the real corpus at or below 0.12 (parent) / 0.06 (held-out) against a frozen 0.15 bound; E1b is the within-set per-report document-identity AUROC (frozen floor 0.80), E2 is distinct-2 and E3 is vocabulary overlap with the development lexicon. AUROC(synthetic-vs-real) is reported but descriptive only: it measures document identity, not realism. The fixture is a synthetic assembly with visible seams at distractor joints, an easily separable document identity, and only eight reports per set, so it supports software and mechanism diagnosis but not statistical inference; the parent line saw generator-side tuning on intermediate gate results (thresholds unchanged) and the held-out line is the independent check (README and dataset card shipped beside the records). Records: \nolinkurl{synthetic\_stress\_v1/run\_20260927\_gendata\_parent\_v3r1/} and \nolinkurl{synthetic\_stress\_v1/run\_20260927\_gendata\_heldout\_v2r3/}.
+
+
+% ==== END ADDENDA V2 TABLES ====
 
 \section*{Exploratory Development-Only Calibration}
 

@@ -4,6 +4,11 @@ Date recorded: 2026-09-06
 Protocol state: `DRAFT_NOT_FROZEN`  
 Formal external test accessed: `false`
 
+Updated: 2026-09-12. A fresh discovery search returned the AEMO incident-report
+index together with report titles and, for two reports, content-bearing snippets.
+The affected AEMO index cohort is conservatively added to the exclusion registry;
+none of these items may be used in a future confirmatory split.
+
 ## Why this log exists
 
 During source-discovery work, the web search interface returned content-bearing
@@ -23,6 +28,17 @@ silently treating exposed material as unseen.
 | Incident Review: Preparing the Grid for Wind Energy Droughts and Down-Ramps | `https://www.nerc.com/globalassets/our-work/reports/event-reports/incident_review_low_wind_event.pdf` | title and quoted secondary snippet | exclude; development or qualitative context only |
 | Incident Review: Considering Simultaneous Voltage-Sensitive Load Reductions | `https://www.nerc.com/globalassets/our-work/reports/event-reports/incident_review_large_load_loss.pdf` | title/search-result content snippet | exclude; development or qualitative context only |
 | Inverter-Based Resource Disturbances in the Western Interconnection | `https://www.wecc.org/sites/default/files/documents/progress_report/2025/Inverter-Based%20Resource%20Disturbances%20in%20the%20Western%20Interconnection%2011.5.2025.pdf` | PDF text expanded, including executive summary and event descriptions | exclude from every confirmatory split |
+
+### AEMO discovery exposure on 2026-09-12
+
+The search result expanded the AEMO National Electricity Market incident index
+and displayed titles for the visible 2024--2026 entries, including the six 2026
+events, four 2025 events, and multiple 2024 events. It also returned content from
+the final reports for the 8 July 2024 Northern New South Wales load-shedding event
+and the 13 February 2024 Moorabool--Sydenham event. The AEMO Wholesale Electricity
+Market index exposed 2024--2025 incident titles as well. All entries visible in
+that search session are treated as pre-freeze exposed and excluded by the
+machine-readable registry, even where the PDF itself was not downloaded.
 
 The NERC and FERC index pages used to discover report titles are not experimental
 documents and are retained only as source directories. The January 2025 Arctic
