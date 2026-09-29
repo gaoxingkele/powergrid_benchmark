@@ -6,7 +6,7 @@ import re
 from collections import Counter, defaultdict
 from pathlib import Path
 
-ROOT = Path(r"D:\aicoding\powergrid_benchmark")
+ROOT = Path(r"F:\aicoding\powergrid_benchmark")
 FORMAL = ROOT / "paper_projects" / "applied_sciences_dual_rebuild" / "formal_submission_preview_20260808"
 OUT = Path(__file__).resolve().parent
 

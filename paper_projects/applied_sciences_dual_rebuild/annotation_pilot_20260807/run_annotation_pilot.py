@@ -41,7 +41,7 @@ except ImportError:  # pragma: no cover
     requests = None
     import urllib.request
 
-ROOT = Path("D:/aicoding/powergrid_benchmark")
+ROOT = Path("F:/aicoding/powergrid_benchmark")
 PILOT_DIR = ROOT / "paper_projects/applied_sciences_dual_rebuild/annotation_pilot_20260807"
 
 # frozen protocol hashes (task-frozen, verified 2026-08-07)

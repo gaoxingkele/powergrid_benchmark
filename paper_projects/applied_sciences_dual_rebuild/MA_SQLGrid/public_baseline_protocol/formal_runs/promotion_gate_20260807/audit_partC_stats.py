@@ -11,7 +11,7 @@ from pathlib import Path
 
 import numpy as np
 
-P = Path(r"D:\aicoding\powergrid_benchmark\paper_projects\applied_sciences_dual_rebuild\MA_SQLGrid\public_baseline_protocol")
+P = Path(r"F:\aicoding\powergrid_benchmark\paper_projects\applied_sciences_dual_rebuild\MA_SQLGrid\public_baseline_protocol")
 OUT = P / "formal_runs" / "promotion_gate_20260807"
 MODELS = ("qwen", "granite")
 METHODS = ("B0_DIRECT", "B1_DECOMP", "B2_SCHEMA_SELECT", "B3_EXEC_REPAIR")

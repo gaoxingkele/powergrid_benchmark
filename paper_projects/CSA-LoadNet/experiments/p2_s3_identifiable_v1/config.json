@@ -1,0 +1,101 @@
+{
+  "run_namespace": "p2_s3_identifiable_v1",
+  "status": "frozen_before_execution",
+  "task_scope": "OPSD six-country scalar 24-hour-ahead point forecasting",
+  "source_file": {
+    "path": "D:/aicoding/powergrid_benchmark/data/public_datasets/time_series_market/opsd_time_series/time_series_60min_singleindex.csv",
+    "sha256": "6a7f2bc571314cbf9c321cc03437691cd4be95c3a6f075e60ff99e8035c704c8",
+    "max_retained_rows": 35000,
+    "series": ["DE", "FR", "IT", "ES", "NL", "PL"]
+  },
+  "forecast": {
+    "window_positions": 168,
+    "horizon_positions": 24,
+    "test_origin_positions_per_rolling_origin": 672,
+    "rolling_origin_timestamps_utc": [
+      "2017-01-01T00:00:00Z",
+      "2017-04-01T00:00:00Z",
+      "2017-07-01T00:00:00Z",
+      "2017-10-01T00:00:00Z",
+      "2018-01-01T00:00:00Z",
+      "2018-04-01T00:00:00Z",
+      "2018-07-01T00:00:00Z",
+      "2018-10-01T00:00:00Z"
+    ],
+    "training_target_embargo_positions": 24,
+    "training_origin_stride": 3,
+    "test_origin_stride": 1,
+    "normalization": "per-series mean and sample standard deviation from rows strictly before each rolling origin",
+    "validation": "last 15 percent of eligible strided training origins by time",
+    "timestamp_caveat": "The parser drops any source row with a missing or nonnumeric selected series. Position leads and windows therefore remain processed-row positions; target UTC dates are retained for auditing."
+  },
+  "models": [
+    {
+      "name": "CSA-Poincare-Shared",
+      "role": "proposed",
+      "encoder": "shared 168-96-48",
+      "context": "learned Poincare-distance neighbor aggregation"
+    },
+    {
+      "name": "TargetSelfContext-Matched",
+      "role": "capacity_compute_matched_control",
+      "encoder": "shared 168-96-48",
+      "context": "value-mapped target encoding; neighbor attention is still evaluated as a zero-weight audit path",
+      "match_contract": "same instantiated parameters, prediction head, optimizer, epochs, batches, seeds, and parameterized forward path as CSA-Poincare-Shared"
+    },
+    {
+      "name": "UniformCrossSeries-Matched",
+      "role": "informative_cross_series_control",
+      "encoder": "shared 168-96-48",
+      "context": "uniform mean of value-mapped neighbor encodings; learned scores are evaluated as a zero-weight audit path",
+      "match_contract": "same instantiated parameters, prediction head, optimizer, epochs, batches, seeds, and parameterized forward path as CSA-Poincare-Shared"
+    },
+    {
+      "name": "CSA-Euclidean-Shared",
+      "role": "weight_form_control",
+      "encoder": "shared 168-96-48",
+      "context": "learned Euclidean-distance neighbor aggregation"
+    },
+    {
+      "name": "CSA-FixedScale-Shared",
+      "role": "weight_form_control",
+      "encoder": "shared 168-96-48",
+      "context": "Poincare-distance aggregation with inverse-temperature fixed at one"
+    },
+    {
+      "name": "CSA-Poincare-IndependentEncoder",
+      "role": "shared_encoder_control",
+      "encoder": "six capacity-matched series-specific encoders with hidden widths 16,16,16,16,15,15 plus an effective 194-parameter calibration",
+      "context": "learned Poincare-distance neighbor aggregation",
+      "scope_caveat": "The total parameter count and downstream head are matched, but the independent encoder uses narrower per-series hidden layers and lower encoder arithmetic; this comparison cannot isolate sharing from width allocation."
+    }
+  ],
+  "training": {
+    "seeds": [11, 23, 47, 59, 71],
+    "epochs": 8,
+    "batch_size": 2048,
+    "learning_rate": 0.001,
+    "optimizer": "manual eager Adam beta1=0.9 beta2=0.999 epsilon=1e-8",
+    "loss": "mean squared error on normalized targets",
+    "checkpoint_selection": "lowest validation MSE over all eight completed epochs; no early termination",
+    "device": "cuda if available, otherwise cpu",
+    "determinism": "fixed CPU/CUDA seeds, deterministic cuDNN, cuDNN benchmark disabled, deterministic algorithms requested"
+  },
+  "statistics": {
+    "primary_metric": "mape",
+    "secondary_metric": "wape",
+    "additional_descriptive_metrics": ["mae", "rmse", "smape"],
+    "outer_analysis_unit": "rolling temporal origin",
+    "seed_handling": "average the five matched seed results within each method-origin before inference",
+    "primary_test": "two-sided exact paired sign-flip test over eight origin-level differences",
+    "multiplicity": "Holm adjustment across the five frozen CSA-Poincare-Shared MAPE contrasts",
+    "interval": "pointwise 95 percent percentile bootstrap over rolling origins with 20000 deterministic resamples",
+    "analysis_seed": 20260813,
+    "equivalence_margin": null
+  },
+  "comparison_budget": {
+    "confirmatory_scope": "six component-identification methods on OPSD lead 24 only",
+    "excluded_from_new_confirmatory_family": ["MLP", "LSTM", "TCN", "DLinear", "PatchTST-lite", "SimBench", "Ausgrid", "lead 1"],
+    "reason": "This stage narrows the confirmatory family instead of treating historical three-seed architecture screens as equal-strength controls."
+  }
+}

@@ -30,7 +30,7 @@
 
 ## 新版 Paper Harness 接入
 
-当前执行器位于 `D:/aicoding/Lib/paper_harness`。本目录保存论文组合层面的画像与
+当前执行器位于 `D:/aicoding/mylib/paper_harness`。本目录保存论文组合层面的画像与
 流程回顾；六篇论文分别维护自己的 `.paper_harness` 状态库、计划摘要、人工批准、
 worktree 分支和证据时间线。
 

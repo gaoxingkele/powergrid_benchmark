@@ -1,0 +1,97 @@
+{
+  "schema": "atlas_substantive_deconstruction/1",
+  "paper_id": "p_76bd3403ef95b3c1",
+  "identity": {
+    "title": "Communication-Efficient Federated Learning for Power Load Forecasting in Electric IoTs",
+    "journal": "IEEE Access",
+    "doi": "10.1109/ACCESS.2023.3262171",
+    "year": 2023,
+    "authors": ["Zhengxiong Mao", "Hui Li", "Zuyuan Huang", "Chuanxu Yang", "Yanan Li", "Zihao Zhou"],
+    "source_path": "D:/aicoding/powergrid_benchmark/papers/literature/target_journal_related/pdfs/p1_ieee_access_extension/ieee_access_2023_federated_load_forecasting.pdf",
+    "source_sha256": "76bd3403ef95b3c1176fd9fb6e2801db079ab88be9efe0ed8af99ee5707718b6",
+    "source_version": "Publisher-layout local PDF, volume 11, printed pages 47930-47939, current-version date May 22 2023 on first page; latest correction status not checked",
+    "formal_layout_metrics_eligible": true,
+    "license": "CC BY-NC-ND 4.0 printed on first page; source retained unmodified"
+  },
+  "analysis_status": "full_text_substantive_single_AI_review_partial_field_mapping",
+  "human_calibrated": false,
+  "read_coverage": {"physical_pages_read": [1,2,3,4,5,6,7,8,9,10], "visually_reviewed_pages": [2,4,5,6,7,8,9], "review_date": "2026-09-13", "independent_review": "pending"},
+  "counting_rules": {"pages": "Physical PDF pages, not printed page numbers", "equations": "10 numbered display groups, plus 2 identified unnumbered preprocessing displays; not inline-expression count", "figures": "5 numbered figures, each has a main panel; Figures 3-5 additionally contain zoom insets", "tables": "2 numbered tables; algorithms excluded", "paragraphs": "not yet source-bound mapped; PDF blocks are not paragraphs", "references": "32 numbered references on pages 9-10; six author biographies excluded from body"},
+  "scope": {"domain": "electric power load forecasting", "AI_method": "federated two-layer LSTM", "contribution_type": "communication-constrained distributed training, not a new forecasting backbone", "data_regime": "single-region historical load redistributed among synthetic clients"},
+  "framework": {"levels": ["Distributed learning", "Federated optimization under communication constraints", "Bidirectional quantization + event-triggered lazy upload + accumulated error compensation"], "backbone": "2-layer LSTM", "tradeoff": "transmission bits/frequency versus predictive MSE", "physical_model": "none; no power flow or network operation constraints", "theoretical_scope": "empirical-risk objective and compression definition, without new convergence theorem"},
+  "sections": [
+    {"id":"I","title":"Introduction","level":1,"pages":[1,2],"role":"Power-IoT privacy motivation -> communication bottleneck -> frequency/bitwidth distinction -> three shortcomings -> three contributions -> roadmap"},
+    {"id":"II","title":"Related Work","level":1,"pages":[2,3],"role":"Connect forecasting, distributed privacy motivation and efficient federated optimization"},
+    {"id":"II.A","title":"Power Load Forecasting","level":2,"pages":[2,3],"role":"Statistical and deep forecasting baselines; centralized-data concern"},
+    {"id":"II.B","title":"FL-Based Power Load Forecasting","level":2,"pages":[3],"role":"Position collaborative forecasting"},
+    {"id":"II.C","title":"Communication-Efficient FL","level":2,"pages":[3],"role":"Frequency reduction and compression prior art; LAQ already combines lazy uploads and quantization"},
+    {"id":"III","title":"Preliminary","level":1,"pages":[3,4],"role":"Learning objective and federated iteration scaffolding"},
+    {"id":"III.A","title":"Stochastic Optimization","level":2,"pages":[3],"role":"Empirical risk and SGD"},
+    {"id":"III.B","title":"Federated Learning","level":2,"pages":[3,4],"role":"Client/server iteration and stopping alternatives"},
+    {"id":"IV","title":"CMULA-FL","level":1,"pages":[4,5,6],"role":"Architecture -> protocol -> four update mechanisms"},
+    {"id":"IV.A","title":"Main Idea","level":2,"pages":[4],"role":"Separate transmission size and frequency, then motivate compensation"},
+    {"id":"IV.B","title":"Detailed Description","level":2,"pages":[4,5,6],"role":"Bind Figure 2 and two algorithms to formula definitions"},
+    {"id":"IV.B.1","title":"Model Bidirectional Quantization","level":3,"pages":[5],"role":"Compression contract and two directional updates"},
+    {"id":"IV.B.2","title":"Lazy Upload","level":3,"pages":[5,6],"role":"Norm threshold plus age cap"},
+    {"id":"IV.B.3","title":"Error Compensation","level":3,"pages":[6],"role":"Residual accumulation for quantization and skipped updates"},
+    {"id":"IV.B.4","title":"Model Aggregation","level":3,"pages":[6],"role":"Average participating client updates"},
+    {"id":"V","title":"Experiments","level":1,"pages":[6,7,8,9],"role":"Setup then resource, utility, component and bitwidth evidence"},
+    {"id":"V.A","title":"Experimental Setup","level":2,"pages":[6,7],"role":"Data, model, comparator and metric definitions"},
+    {"id":"V.A.1","title":"Datasets and Models","level":3,"pages":[6,7],"role":"Includes five lower-level headings: data standardization, time-series generation, train/test generation, model, parameter settings"},
+    {"id":"V.A.2","title":"Comparison Algorithms","level":3,"pages":[7],"role":"LAQ and FedPAQ descriptions, FedAvg baseline"},
+    {"id":"V.A.3","title":"Metrics","level":3,"pages":[7],"role":"Training-loss heading defines test MSE; communication heading defines uplink bits"},
+    {"id":"V.B","title":"Experimental Results and Analysis","level":2,"pages":[7,8,9],"role":"Four experiment groups organized into three subsections"},
+    {"id":"V.B.1","title":"Impacts of Quantization Bits on Communication Cost","level":3,"pages":[8],"role":"Table 2 cost and Figure 3 utility comparison"},
+    {"id":"V.B.2","title":"Impacts of Different Components on MSE","level":3,"pages":[8,9],"role":"Error-compensation ablation with two additional reference settings"},
+    {"id":"V.B.3","title":"Impacts of Quantization on MSE","level":3,"pages":[8,9],"role":"Bitwidth sensitivity"},
+    {"id":"VI","title":"Conclusion","level":1,"pages":[9],"role":"Restate mechanism and cost/utility result; admit hyperparameter difficulty and defer theoretical threshold analysis"}
+  ],
+  "equations": [
+    {"id":"1","page":3,"type":"learning_objective","role":"Empirical risk average"},
+    {"id":"2","page":3,"type":"optimization_update","role":"SGD update"},
+    {"id":"3","page":5,"type":"compression_assumption","role":"Definition 1: squared compression error bounded by (1-gamma) times squared input norm; not convergence proof"},
+    {"id":"4","page":5,"type":"quantization_mapping","role":"Client and server quantized updates defined as Q of corresponding pre-quantization updates"},
+    {"id":"5","page":6,"type":"residual_update","role":"Client error compensation","issue":"Residual subtracts Q(pre-quantization update) from the quantized update itself; substituting Eq 4 makes it zero for deterministic Q"},
+    {"id":"6","page":6,"type":"residual_update","role":"Server error and aggregate correction","issue":"Same zero-residual issue under deterministic Q; stochastic re-evaluation is not a specified standard residual either"},
+    {"id":"7","page":6,"type":"lazy_update_accumulation","role":"Local final-minus-initial model plus previous error on skipped upload"},
+    {"id":"8","page":6,"type":"aggregation","role":"Mean participating update plus previous server error","issue":"S_j defined as a set but used as scalar denominator; cardinality and empty-participation policy unspecified"},
+    {"id":"9","page":7,"type":"evaluation_metric","role":"Test MSE despite Training Loss subsection title"},
+    {"id":"10","page":7,"type":"resource_metric","role":"Sum transmitted parameter bits over uploading clients and epochs","issue":"Uplink only; cannot directly substantiate bidirectional total cost"},
+    {"id":"U1","page":6,"type":"outlier_rule","role":"Daily deviation exceeds 3 sigma times empirical epsilon in [1,1.5]","numbered":false},
+    {"id":"U2","page":6,"type":"imputation_rule","role":"Replace flagged value by average of adjacent observations","numbered":false}
+  ],
+  "algorithms": [
+    {"id":"Algorithm 1","page":4,"role":"Server initialize, quantize, broadcast, receive/aggregate, compensate, repeat","numbered_lines":12},
+    {"id":"Algorithm 2","page":5,"role":"Client local training, error accumulation, quantization, norm/age-triggered upload or skip","numbered_lines":11,"issues":"epsilon and local E lack a clearly fixed value in Table 1; exact quantizer mapping also unspecified"}
+  ],
+  "figures": [
+    {"id":"1","page":2,"type":"application_scenario_workflow","role":"Enterprise/individual data -> grid-company model -> dispatch/planning; illustrates privacy risk, not an evaluated downstream task"},
+    {"id":"2","page":5,"type":"algorithm_architecture_dataflow","role":"Eight indexed client/server steps; quantization 3/8, compensation 4/7, lazy upload 5; links directly to methods"},
+    {"id":"3","page":8,"type":"learning_curves_with_zoom_inset","role":"FedAvg, CMULA-FL, LAQ, FedPAQ test MSE across 100 epochs; FedAvg has lowest late MSE"},
+    {"id":"4","page":9,"type":"ablation_learning_curves_with_zoom_inset","role":"No-compensation and one-client comparators; FedAvg remains better, compensated variant better than uncorrected near final epochs"},
+    {"id":"5","page":9,"type":"bitwidth_sensitivity_curves_with_zoom_inset","role":"4/8/16 bits; smaller bitwidth has slower apparent decrease and larger late MSE; curves not uncertainty bands"}
+  ],
+  "tables": [
+    {"id":"1","page":7,"type":"hyperparameter_configuration","values":{"hidden_size":128,"num_layers":2,"learning_rate":0.001,"total_clients":15,"batch_size":50,"selected_clients":7},"outside_table":{"t_max":10,"window":12,"train_test_ratio":"4:1","epochs":100},"issues":"Local E, lazy epsilon and a concrete quantizer are not specified here; backbone prose says Softmax for each layer"},
+    {"id":"2","page":8,"type":"resource_cost_comparison","metric":"Communication cost under Eq 10, bits; printed scientific notation","rows":[{"method":"FedAvg","bits":null,"cost":26200000},{"method":"FedPAQ","bits":null,"cost":21700000},{"method":"LAQ","bits":4,"cost":15800000},{"method":"LAQ","bits":8,"cost":16600000},{"method":"LAQ","bits":16,"cost":17900000},{"method":"CMULA-FL","bits":4,"cost":4380000},{"method":"CMULA-FL","bits":8,"cost":7300000},{"method":"CMULA-FL","bits":16,"cost":10200000}],"reviewer_arithmetic":{"formula":"100*(1-CMULA/FedAvg)","percentage_reduction_at_4_8_16_bits":[83.2824,72.1374,61.0687],"interpretation":"At least 60% holds for the printed FedAvg-relative cells, not proof of bidirectional real-network cost"}}
+  ],
+  "experiments": [
+    {"id":"E1","pages":[7,8],"type":"resource_comparison","question":"Does the protocol reduce counted bits?","evidence":"Table 2","controls":"100 epochs; Table 1 shared defaults; 4/8/16 bits for LAQ and proposed method","limits":"No downlink/metadata accounting, measured latency or energy; FedPAQ quantization bit setting unclear"},
+    {"id":"E2","pages":[8],"type":"predictive_utility_comparison","question":"What accuracy is sacrificed for compression?","evidence":"Figure 3","controls":"8 bits for CMULA-FL and LAQ, shared setup","limits":"FedAvg best MSE; acceptable degradation has no prespecified margin or noninferiority analysis"},
+    {"id":"E3","pages":[8,9],"type":"single_component_ablation","question":"Does removing error compensation change the curve?","evidence":"Figure 4","controls":"Same initial model parameters and 100 epochs stated","limits":"One removed component only; bidirectional versus uplink-only compression and lazy upload not individually isolated; One-Client called centralized but explanation invokes less available data"},
+    {"id":"E4","pages":[8,9],"type":"hyperparameter_sensitivity","question":"How does bitwidth affect MSE?","evidence":"Figure 5","controls":"Fixed 100 epochs and other Table 1 settings","limits":"No epsilon/tmax/client-number/non-IID sensitivity; no repeated-run uncertainty"}
+  ],
+  "data_audit": {"pages":[6,7],"source_description":"Chinese Society of Power Engineering regional load, 2009-2015; footnote shumo.nedu.edu.cn","missing":"Exact dataset file/version, region, sampling frequency, number of observations, timestamps of split, source checksum","split":"4:1 generated-window split; chronological versus randomized split not stated","clients":"Training data randomly allocated with similar data amounts; not demonstrated real consumer partitions","risk":"Outlier replacement uses following observation and normalization is described before splitting. Information availability and train-only fitting require clarification; leakage is a risk, not demonstrated fact.","test_use":"Preliminaries allow test-loss stopping or preset iterations; experiments report 100 epochs, so adaptive test-based stopping is not proven."},
+  "statistics": {"pages":[7,8,9],"primary_metrics":["MSE","parameter upload bits"],"statistical_unit":"Not explicitly defined for inferential analysis; epochs are not independent experimental repetitions","independent_runs":"not reported","seeds":"not reported","confidence_intervals":"not reported","hypothesis_tests":"not reported","effect_size":"Reviewer recomputed relative communication savings from rounded table cells only","convergence":"Visual curve behavior, not formal or probabilistic convergence guarantee","privacy":"No attack evaluation, differential privacy parameters or secure-aggregation proof; local raw-data retention alone is not a privacy guarantee"},
+  "cross_section_logic": [
+    {"from":"Introduction","to":"IV and Figure 2","assessment":"Good two-axis decomposition: communication size and frequency lead to modules; residual correction addresses induced bias"},
+    {"from":"IV bidirectional claim","to":"V Eq 10/Table 2","assessment":"Metric omits downlink, weakening mechanism-to-evidence alignment"},
+    {"from":"IV Eq 4","to":"IV Eq 5/6 and E3","assessment":"Printed residual definitions inconsistent with intended nonzero compensation; experiment behavior cannot repair undefined mathematics"},
+    {"from":"Introduction privacy and heterogeneous-client motivation","to":"V experiments","assessment":"No direct privacy or realistic heterogeneity test"},
+    {"from":"V empirical curves","to":"VI conclusion","assessment":"Cost/utility tradeoff supported descriptively; safety, guarantee and massive-experiment phrasing stronger than evidence"}
+  ],
+  "conclusion_distillation": {"page":9,"slots":["method and application restatement","two communication mechanisms","error correction benefit","empirical validation claim","hyperparameter limitation","future theoretical analysis"],"safe_takeaway":"Illustrates protocol-level cost/accuracy tradeoff for a fixed forecasting backbone; does not establish best forecast accuracy, privacy guarantee or convergence theory."},
+  "language_distillation": {"status":"rhetorical_patterns_reviewed_not_frequency_counted","terms":["communication cost","model utility","quantization bits","lazy upload","error compensation","staleness","model aggregation"],"patterns":["Separate a bottleneck into two controllable dimensions, assign a module to each, then analyze the induced side effect","Pair resource results with predictive-utility results rather than reporting savings alone","Close with the operational parameters whose theory remains unresolved"],"avoid":"Do not copy distinctive sentences or use guarantees without corresponding theory/evidence"},
+  "pending": ["Exact lower-level heading transcription and 211-field mapping","Complete source-bound paragraph roles and length distribution","Sentence/term frequencies","Independent source-object review","Latest version/correction and reference identity checks","Comparable IEEE Access batch and calibrated task-stratified distribution"],
+  "calibration": {"all_fields_verified":false,"venue_profile_ready":false,"difficulty":"Not yet scored against the six-dimensional anchors; no acceptance probability inferred"}
+}

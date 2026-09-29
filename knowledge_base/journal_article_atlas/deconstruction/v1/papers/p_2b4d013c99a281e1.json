@@ -1,0 +1,915 @@
+{
+  "schema": "atlas_substantive_deconstruction/1",
+  "paper_id": "p_2b4d013c99a281e1",
+  "title": "Reducing Phase Lag and Noise in Residential Load Forecasting with a Hybrid Residual-Attention Model",
+  "journal": "Algorithms",
+  "year": 2026,
+  "doi": "10.3390/a19080661",
+  "article_type": "residential smoothed-load trend deep learning framework",
+  "source": {
+    "path": "../sources/10.3390_a19080661.pdf",
+    "sha256": "2b4d013c99a281e1c795859c6c5f48f541318abb88057af2b5efb86f1278e27d",
+    "pages": 21,
+    "authors": [
+      "Sina Mohammadpour Farshbaf",
+      "Kimia Shirini",
+      "Sina Samadi Gharehveran",
+      "Arya Abdollahi"
+    ],
+    "published": "2026-08-10",
+    "license": "CC BY localp1;goldOpenAlexUnpaywall",
+    "download_url": "https://mdpi-res.com/d_attachment/algorithms/algorithms-19-00661/article_deploy/algorithms-19-00661.pdf",
+    "retrieved": "2026-09-13",
+    "acquisition": "publicCDN candidate path supplied by parent,HEAD200application/pdf2494822bytes verified then aria2;originalfirstpageDOI/titleverified",
+    "last_modified": "2026-08-10T07:09:40Z",
+    "version_status": "publisher CDN formatted PDF consistent with recorded VoR upload time; not exhaustive latest-version/correction verification",
+    "version_notes": "MDPI notes search result VoR10Aug2026 09:09CEST,HTML09:11;CDNlastmodified07:09:40Zcorresponds. No later change established.",
+    "retraction_correction_check": "not_assessed"
+  },
+  "analysis_status": "fulltext_single_assistant_analysis_pending_independent_review",
+  "human_calibrated": false,
+  "all_fields_verified": false,
+  "read_coverage": {
+    "physical_pages_read": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21
+    ],
+    "visual_pages": [
+      7,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "method": "completePyMuPDFpagebatches1–5,6–11,12–17,18–21inclallreferences;allfigurepagesvisualchecked",
+    "paragraph_boundary_status": "partial_semantic_anchors_only",
+    "full_field_status": "not_complete",
+    "independent_review": "pending"
+  },
+  "scope": {
+    "decision": "core_ai",
+    "task": "住宅电力需求的平滑趋势预测及事后阈值峰分类",
+    "method_family": "CNN+2layerLSTM+multiheadselfattention+residualbridge",
+    "rationale": "目标是住宅电用能，非空气/通用方法；但不能冒充瞬时原始功率峰预测"
+  },
+  "counts": {
+    "body_numbered_l1_sections": 6,
+    "body_numbered_headings_all_levels": 29,
+    "section_records_including_backmatter": 31,
+    "numbered_display_equation_groups": 5,
+    "unnumbered_display_groups": null,
+    "inline_expressions": null,
+    "theorems": 0,
+    "proofs": 0,
+    "numbered_pseudocode": 0,
+    "numbered_figures": 11,
+    "figure_coordinate_panels_including_single_diagrams": 11,
+    "numbered_tables": 4,
+    "reference_entries": 14,
+    "paragraph_count": null
+  },
+  "sections": [
+    {
+      "id": "1",
+      "title": "Introduction",
+      "pages": [
+        1,
+        2,
+        3
+      ],
+      "logic": "四级动机铺陈，把随机性/相位滞后归为复杂度–噪声悖论。"
+    },
+    {
+      "id": "1.1",
+      "title": "The Imperative of Smart Energy Management in Modern Grids",
+      "pages": [
+        1,
+        2
+      ],
+      "logic": "集中到分布式电源与住宅随机负荷引出预测，但未实测电网稳定性。"
+    },
+    {
+      "id": "1.2",
+      "title": "The Evolution from Statistical Methods to Deep Learning",
+      "pages": [
+        2
+      ],
+      "logic": "统计到CNN/LSTM方法转变叙述，绝对化对传统方法的否定未由本文验证。"
+    },
+    {
+      "id": "1.3",
+      "title": "The Research Gap and the Complexity–Noise Paradox",
+      "pages": [
+        2,
+        3
+      ],
+      "logic": "噪声过拟合及滞后两个难点；将工业负荷一概平滑与实际场景差异需限缩。"
+    },
+    {
+      "id": "1.4",
+      "title": "Proposed Innovation and the Move to Denoised Trend Forecasting",
+      "pages": [
+        3
+      ],
+      "logic": "改预测目标+CNN/LSTM/attention/residual的组合，贡献是整体适配非单独新基础层。"
+    },
+    {
+      "id": "2",
+      "title": "Related Work",
+      "pages": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "logic": "按递归、注意力、前沿三阶段综述再gap比较；多处作者引用编号错配。"
+    },
+    {
+      "id": "2.1",
+      "title": "Limitations of Recurrent and Hybrid Models",
+      "pages": [
+        3,
+        4
+      ],
+      "logic": "讨论LSTM、CNN-LSTM及传统ML弱点，正文[3][4]与参考不匹配。"
+    },
+    {
+      "id": "2.2",
+      "title": "The Attention and Transformer Revolution",
+      "pages": [
+        4
+      ],
+      "logic": "注意力改善记忆与残差稳定梯度；[5]/[7]/[9]作者名错配。"
+    },
+    {
+      "id": "2.3",
+      "title": "Modern Frontiers and Emerging Technologies",
+      "pages": [
+        4,
+        5
+      ],
+      "logic": "解释性/联邦/概率/扩散的比较背景，不是本模型实测能力。"
+    },
+    {
+      "id": "2.4",
+      "title": "Critical Gap Analysis and Proposed Solution",
+      "pages": [
+        5,
+        6
+      ],
+      "logic": "Table1方法比较、Table2区分raw与trend；明确问题更易预测。"
+    },
+    {
+      "id": "3",
+      "title": "Methodology",
+      "pages": [
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "logic": "平滑目标→日历/滞后/天气→混合架构→时间划分。"
+    },
+    {
+      "id": "3.1",
+      "title": "Target Denoising and Trend Formulation",
+      "pages": [
+        6,
+        7
+      ],
+      "logic": "六个10min样本的因果滚动均值定义局部一小时趋势，保留采样步而非明确小时重采样。"
+    },
+    {
+      "id": "3.2",
+      "title": "Multidimensional Feature Engineering and Cyclic Encoding",
+      "pages": [
+        7,
+        8
+      ],
+      "logic": "时钟sin/cos、1/2/3/6/12/24小时lag与天气；Eq4含义/步长未闭合。"
+    },
+    {
+      "id": "3.3",
+      "title": "Robust-RAN Architecture and Hyperparameter Optimization",
+      "pages": [
+        8,
+        9
+      ],
+      "logic": "CNN64→2层128LSTM→4头attention→LSTM+attention residual→64dense→1；grid范围未报。"
+    },
+    {
+      "id": "3.4",
+      "title": "Data Partitioning and Experimental Protocol",
+      "pages": [
+        10
+      ],
+      "logic": "按时间80/10/10，训练更新、验证调参、末段测试；真实日期/窗口边界/缩放拟合需代码。"
+    },
+    {
+      "id": "4",
+      "title": "Experimental Results and Discussion",
+      "pages": [
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18
+      ],
+      "logic": "一个模型回归与峰分类、多图诊断；不是多模型对比。"
+    },
+    {
+      "id": "4.1",
+      "title": "Global Predictive Fidelity and Phase Lag Mitigation",
+      "pages": [
+        10,
+        11,
+        12,
+        13
+      ],
+      "logic": "主要指标、轨迹、散点、crosscorr、日均图；零滞后仅代表性片段。"
+    },
+    {
+      "id": "4.2",
+      "title": "Residual Analytics and Robustness to Stochastic Noise",
+      "pages": [
+        13,
+        14,
+        15
+      ],
+      "logic": "残差直方/CDF/BA/小时箱/小提琴/雷达；统计形状不证明独立噪声或无过拟合。"
+    },
+    {
+      "id": "4.3",
+      "title": "Fairness of Comparison and Scope of Prediction Target",
+      "pages": [
+        15,
+        16
+      ],
+      "logic": "反复界定趋势与原始信号差别，承认不能绝对优于异目标模型、无分组件归因。"
+    },
+    {
+      "id": "4.4",
+      "title": "Practical Deployment Considerations",
+      "pages": [
+        16
+      ],
+      "logic": "AMI/边缘部署设想；无嵌入式或现场计时，设备名称非实装证据。"
+    },
+    {
+      "id": "4.5",
+      "title": "Broader Literature Context and Comparative Discussion",
+      "pages": [
+        17
+      ],
+      "logic": "四篇2023–24相关方法概念对照，无同split数值对比。"
+    },
+    {
+      "id": "4.6",
+      "title": "Advantages and Disadvantages of the Proposed Approach",
+      "pages": [
+        17,
+        18
+      ],
+      "logic": "总成作用与单数据/无消融等边界，在线能力未实测。"
+    },
+    {
+      "id": "5",
+      "title": "Conclusions and Future Directions",
+      "pages": [
+        18,
+        19,
+        20
+      ],
+      "logic": "总结并长篇列不足，部分强结论与局限并存。"
+    },
+    {
+      "id": "5.1",
+      "title": "Summary of Contributions",
+      "pages": [
+        18
+      ],
+      "logic": "R²/峰分类总结，却称SOTA且归因attention，证据不足。"
+    },
+    {
+      "id": "5.2",
+      "title": "Practical Implications for Smart Grids",
+      "pages": [
+        18
+      ],
+      "logic": "备用/调度/碳收益为潜在应用，RMSE不是不确定区间。"
+    },
+    {
+      "id": "5.3",
+      "title": "Limitations and Future Work",
+      "pages": [
+        18,
+        19,
+        20
+      ],
+      "logic": "明确无消融、多run、CI显著检验、解释、外部数据、复杂度/计时；交叉相关已做/未做矛盾。"
+    },
+    {
+      "id": "6",
+      "title": "Data Availability and Implementation Details",
+      "pages": [
+        20
+      ],
+      "logic": "重复透明度与软件背景。"
+    },
+    {
+      "id": "6.1",
+      "title": "Dataset Availability",
+      "pages": [
+        20
+      ],
+      "logic": "UCI374住宅，未给具体处理后样本和时间范围。"
+    },
+    {
+      "id": "6.2",
+      "title": "Implementation Framework",
+      "pages": [
+        20
+      ],
+      "logic": "PyTorch multihead模块；无SHAP独立解释，代码链接未提供。"
+    },
+    {
+      "id": "backmatter",
+      "title": "Declarations",
+      "pages": [
+        20,
+        21
+      ],
+      "logic": "无资助/无利益冲突；IRB字段放利益冲突句式是编辑问题。"
+    },
+    {
+      "id": "references",
+      "title": "References",
+      "pages": [
+        21
+      ],
+      "logic": "14条全读；正文姓名与引用表多处不一致，未外部逐文献真实性核实。"
+    }
+  ],
+  "equations": [
+    {
+      "number": 1,
+      "pages": [
+        7
+      ],
+      "expression": "P_trend(t)=1/6 sum_(i=0)^5 P_raw(t−i)",
+      "category": "target transformation",
+      "function": "causal6samplemovingaverage; smootherchangesestimand and increases autocorrelation. Does not by itself specify target horizon. If predicting next10mintrend, five of six constituent raw measurements already known, making persistence baseline essential."
+    },
+    {
+      "number": 2,
+      "pages": [
+        8
+      ],
+      "expression": "H_sin=sin(2pi hour/24)",
+      "category": "feature encoding",
+      "function": "消除午夜时间编码跳跃；无物理定律证明。"
+    },
+    {
+      "number": 3,
+      "pages": [
+        8
+      ],
+      "expression": "H_cos=cos(2pi hour/24)",
+      "category": "feature encoding",
+      "function": "与sin共同圆周编码，重复小时内分钟是否进入未报。"
+    },
+    {
+      "number": 4,
+      "pages": [
+        8
+      ],
+      "expression": "X_lag(t)=[P_trend(t−1),...,P_trend(t−24)]",
+      "category": "history feature",
+      "function": "文字6个lag1,2,3,6,12,24小时，式子省略号似全1..24；若索引是10min则须乘6，重采样说明缺失。"
+    },
+    {
+      "number": 5,
+      "pages": [
+        9
+      ],
+      "expression": "Attention(Q,K,V)=softmax(QK^T/sqrt(d_k))V",
+      "category": "standard attention",
+      "function": "缩放点积注意力，残差加和文字/图表示无独立编号；mask、pooling/laststate细项未给。"
+    }
+  ],
+  "figures": [
+    {
+      "number": 1,
+      "pages": [
+        7
+      ],
+      "panels": 1,
+      "type": "八步架构",
+      "analysis": "raw→causalsmoothing/cyclic/lag→CNN→LSTM→MHA→residual→dense→trend；没有预测horizon/切窗具体位置。"
+    },
+    {
+      "number": 2,
+      "pages": [
+        11
+      ],
+      "panels": 1,
+      "type": "预测轨迹",
+      "analysis": "May7–9示例，红预测黑实际，峰形可相近但不是提前预警定量验证；纵轴单位未清标。"
+    },
+    {
+      "number": 3,
+      "pages": [
+        11
+      ],
+      "panels": 1,
+      "type": "回归密度",
+      "analysis": "identity附近聚集但峰区离散；不是crosscorrelation，文本多次误引用。"
+    },
+    {
+      "number": 4,
+      "pages": [
+        12
+      ],
+      "panels": 1,
+      "type": "滞后交叉相关柱",
+      "analysis": "−8至+8hour，零峰r=.566；样本窗分析非全test，必须与总体R².9063区分。"
+    },
+    {
+      "number": 5,
+      "pages": [
+        12
+      ],
+      "panels": 1,
+      "type": "日均负荷",
+      "analysis": "24小时实际/预测，晚18时左右峰；汇总抹掉单日误差，不可推断所有峰无迟滞。"
+    },
+    {
+      "number": 6,
+      "pages": [
+        13
+      ],
+      "panels": 1,
+      "type": "残差直方/KDE",
+      "analysis": "尖峰厚尾中心近0，captionGaussian正文leptokurtic；图不能证明正态、独立、无bias。"
+    },
+    {
+      "number": 7,
+      "pages": [
+        13
+      ],
+      "panels": 1,
+      "type": "绝对误差CDF",
+      "analysis": "多于80%误差小，正文不报明确容限；未从像素猜准确分位数。"
+    },
+    {
+      "number": 8,
+      "pages": [
+        14
+      ],
+      "panels": 1,
+      "type": "Bland–Altman",
+      "analysis": "残差对两者均值，红界线约+40/−45；中高负荷显著离群且离散扩展，不能称uniformvariance。"
+    },
+    {
+      "number": 9,
+      "pages": [
+        14
+      ],
+      "panels": 1,
+      "type": "逐小时绝对误差箱",
+      "analysis": "24个小时共一面板，18–19h误差/须更宽，揭示峰时更难。"
+    },
+    {
+      "number": 10,
+      "pages": [
+        14
+      ],
+      "panels": 1,
+      "type": "实际/预测小提琴",
+      "analysis": "边际分布相近但尾部不同；边际一致不证明逐时预测机制正确。"
+    },
+    {
+      "number": 11,
+      "pages": [
+        15
+      ],
+      "panels": 1,
+      "type": "综合雷达",
+      "analysis": "R²、Accuracy、Recall、Precision、F1五轴；R²非分类指标，图形高面积非额外性能证据。"
+    }
+  ],
+  "tables": [
+    {
+      "number": 1,
+      "pages": [
+        5
+      ],
+      "purpose": "10类文献vsproposed定性比较",
+      "analysis": "不是本数据重跑基线。参考1LSTM,2probabilistic,3review,4seq2seq,5diffusion,6residual,7CNNLSTM,8transformer,9transfer,10federated；正文不少引用错位。表写overcomes不提供对照。"
+    },
+    {
+      "number": 2,
+      "pages": [
+        6
+      ],
+      "purpose": "rawvsdenoised目标区分",
+      "analysis": "明确denoised更易预测；稳定/在线适用性属概念判断，无调度收益实测。"
+    },
+    {
+      "number": 3,
+      "pages": [
+        9
+      ],
+      "purpose": "最优超参",
+      "values": {
+        "cnn_filters": 64,
+        "kernel": 3,
+        "padding": 1,
+        "cnn_activation": "ReLU+BatchNorm+dropout.1",
+        "lstm_hidden": 128,
+        "lstm_layers": 2,
+        "sequence_timesteps": 18,
+        "lstm_dropout": 0.1,
+        "attention_heads": 4,
+        "embedding": 128,
+        "dense_units": 64,
+        "output_units": 1,
+        "optimizer": "Adam",
+        "lr": 0.001,
+        "loss": "MSE",
+        "batch": 64,
+        "maxepochs": 40,
+        "earlystop": true
+      },
+      "analysis": "gridsearch范围/次数、earlystop阈值/seed、outputlead未报；18timesteps若10min仅3h。"
+    },
+    {
+      "number": 4,
+      "pages": [
+        10
+      ],
+      "purpose": "单模型六指标",
+      "values": {
+        "MAE_paper_W": 13,
+        "MAPE_percent": 13.12,
+        "RMSE_paper_W": 22,
+        "R2": 0.9063,
+        "peak_accuracy_percent": 96.63,
+        "F1": 0.8529
+      },
+      "analysis": "precision.8412和recall.8650于p15补充；无模型基线比较、CI或重复训练。单位需核对UCIWh。"
+    }
+  ],
+  "framework": {
+    "inputs": [
+      "outdoortemperature",
+      "relativehumidity",
+      "windspeed",
+      "cyclichour",
+      "laggedsmoothedload"
+    ],
+    "target": "causal6×10minsmoothedloadtrend; notrawinstantaneousload",
+    "pipeline": "featureengineering→CNN64/ReLU/BN/dropout→2×128LSTM→4headMHA→identityaddLSTMoutput→dense64→linear1",
+    "theory": "standardlearnedmodules, nophysicalgoverningconstraints,noerror/convergence/phase-delay theorem",
+    "temporal_assumptions": [
+      "causal smoothing only current/past relative targettime",
+      "history/target offset must ensure no contemporaneous observation leakage",
+      "wholearraystandardization fit scope unspecified",
+      "forecastlead not unambiguously reported"
+    ],
+    "novelty_boundary": "residualLSTM-to-attentionpath is stated contribution; no ablation demonstrates unique effect",
+    "outputs": "onecontinuoussmoothedtrend estimate; thresholdpostprocessingpeaklabel"
+  },
+  "experiments": {
+    "dataset": {
+      "name": "UCI Appliances Energy Prediction374",
+      "paper_sample_count": null,
+      "paper_date_range": null,
+      "official_dataset": {
+        "instances": 19735,
+        "features": 28,
+        "resolution": "10minabout4.5months",
+        "target_unit": "Wh",
+        "missing": "none",
+        "source": "https://archive.ics.uci.edu/dataset/374/appliances%2Benergy%2Bprediction",
+        "checked": "2026-09-13"
+      },
+      "unit_risk": "官方Appliances是Wh；论文称instantaneousW，未展示从每10minWh到平均W的×6转换；不能擅自把MAE13直接当13W正确。",
+      "split": "chronological80/10/10;nodates/postlagcounts;scalerfitrangeunreported"
+    },
+    "training": {
+      "framework": "PyTorch2.0.1 p9 /2.0+ p20",
+      "gpu": "RTX3090",
+      "maxepochs": 40,
+      "seed": null,
+      "run_count": 1,
+      "earlystop": "validation monitored;patience notspecified",
+      "tuning": "gridsearch claimed;searchspace notreported"
+    },
+    "baselines": {
+      "retrained_count": 0,
+      "discussion_only": "Table1andrelatedwork;noequal-target same-split numericalcomparisons"
+    },
+    "ablation": "explicitly absent p16/17/19",
+    "sensitivity": "none",
+    "robustness": "singlehouse/singledata/onefinalrun;noexternalclimate test",
+    "phase_lag": "crosscorrelationrepresentativetestwindowonly,-8to8hours;maxr.566at0;entiretestvalidationpending",
+    "peak_protocol": "threshold=mean(testobservedload)+sd(testobservedload);positiveifabove;no numericthreshold/confusion counts,threshold unavailablepredeployment",
+    "deployment": "AMI250/edgeareproposals,nohardwareinferencebenchmark",
+    "code": "notprovided/downloaded/executed"
+  },
+  "statistics": {
+    "metrics": "descriptive point errors/R²/threshold classification/distribution plots;formalmetricformulasnotprovided",
+    "additional_values": {
+      "precision": 0.8412,
+      "recall": 0.865,
+      "F1_recomputed": 0.8529340053920993
+    },
+    "F1_check": ".852933995≈.8529consistentwithroundedP/R",
+    "classification_boundary": "accuracy96.63 is overallthresholdclassification not precisionofpeaks; classproportion/confusionmatrixnotreported;test-derivedthresholdmakesretrospectiveevaluationnot fixedoperatingrule",
+    "phase_lag_boundary": "zero global correlationpeak onselectedwindowdoesnotmeanallpeaksearlyorlagfree;correlation.566cannotdirectlycomparetooverallR².9063differentwindows",
+    "residual_boundary": "near-zero or symmetric histogram not prove independence/unbiasedness/absenceoverfitting;BApointwithin95%limits partly construction and heteroscedasticitynotexcluded",
+    "uncertainty": "noCIbootstrapmulti-runorpairedtests;authors explicitlyadmit p19",
+    "runtime": "notmeasured",
+    "normality_test": "none",
+    "smoothing_overlap": "adjacentsixtickaverages overlap5samples;strongautocorrelationandtargeteasier,needcausalpersistenceandrawvsrawfairbaseline"
+  },
+  "conclusions": {
+    "supported": [
+      "单模型在所定义平滑目标上报告MAE13/RMSE22/R².9063，单位未经实现确认",
+      "单代表窗零滞后相关最高，非完整统计验证",
+      "趋势/原始目标不同的边界和诸多未做实验已明文承认"
+    ],
+    "overstatements": [
+      {
+        "pages": [
+          18
+        ],
+        "claim": "state-of-the-art R²",
+        "reason": "无同目标同split重跑基线。"
+      },
+      {
+        "pages": [
+          12,
+          15,
+          18
+        ],
+        "claim": "attention/encoding removes phase lag",
+        "reason": "没有消融，零滞后最大不提供组件因果归因。"
+      },
+      {
+        "pages": [
+          13,
+          14,
+          15
+        ],
+        "claim": "no bias/random errors/uniform stability/identical distributions",
+        "reason": "图形描述不等于检验；BA和小时箱图显出高负荷更分散。"
+      },
+      {
+        "pages": [
+          18
+        ],
+        "claim": "RMSEreduces uncertainty margins and substantial costs/carbon",
+        "reason": "无预测分布/区间、调度/备用或碳成本实验。"
+      },
+      {
+        "pages": [
+          16,
+          17
+        ],
+        "claim": "edgeefficiency",
+        "reason": "单前向不保证时延/内存符合部署预算，作者自己列未来。"
+      }
+    ],
+    "internal_conflicts": [
+      {
+        "pages": [
+          11,
+          12,
+          19,
+          20
+        ],
+        "issue": "p11和p20称crosscorrelation需未来做，p12/19已做；实际Fig4确有柱图，只接受selected-window结果。"
+      },
+      {
+        "pages": [
+          11,
+          12,
+          19
+        ],
+        "issue": "crosscorr反复引Fig3，实际Fig3回归散点；p11称Fig4residual但实际crosscorr。"
+      },
+      {
+        "pages": [
+          4,
+          5,
+          21
+        ],
+        "issue": "Triban[3]实际7；Sehovac[5]实际4；Chenresidual[7]实际6；Wang[2]实际Cheng；Xing[9]实际Spencer；Ahmad[8]实际Xu/Chen。内引身份需统一，不据此直接判文献不存在。"
+      },
+      {
+        "pages": [
+          8,
+          9
+        ],
+        "issue": "lags hours vs10minindices和18timesteps未闭合；forecastlead未明确。"
+      },
+      {
+        "pages": [
+          1,
+          6,
+          10
+        ],
+        "issue": "UCIWh被称powerW，无转换证据。"
+      }
+    ],
+    "scientific_judgment": "AIevidenceaudit,notauthorfinaljudgment"
+  },
+  "narrative": {
+    "arc": "强烈宏观必要性→两种模型失败→改目标+组合设计→多图诊断→长篇边界澄清",
+    "language_observations": [
+      {
+        "pages": [
+          1,
+          2,
+          3
+        ],
+        "analysis": "violent,radical,unequivocally,unmatched等过强修辞，且p1‘though not ecologically important’语义反常；不推断作者/AI身份。"
+      },
+      {
+        "pages": [
+          11,
+          12,
+          19,
+          20
+        ],
+        "analysis": "新增crosscorr证据后前后局限未同步，是修订残留式矛盾，版本原因尚未证实。"
+      },
+      {
+        "pages": [
+          16,
+          19
+        ],
+        "analysis": "无ablation/multirun/CI坦陈清楚，应约束前文因果和SOTA措辞。"
+      }
+    ],
+    "original_sentence_frameworks": [
+      "本研究预测的是经[严格因果变换]定义的[目标量]，因此其误差不应与预测[另一目标量]的结果直接比较。",
+      "在[明确测试片段]上，[时序诊断]于[滞后值]达到最大；该结果支持[有限观察]，但尚不能确证[全数据或逐事件性质]。",
+      "虽然整体架构取得[单次结果]，由于未进行[组件消融与多次重复]，各模块贡献和结果稳定性仍待独立检验。"
+    ]
+  },
+  "paragraphs": {
+    "status": "partial_semantic_only",
+    "units": [
+      {
+        "pages": [
+          7
+        ],
+        "anchor": "It should be emphasized",
+        "role": "scope justification",
+        "analysis": "明确改目标，不与raw同评估。"
+      },
+      {
+        "pages": [
+          10
+        ],
+        "anchor": "In order to fairly evaluate",
+        "role": "experimental setup",
+        "analysis": "80/10/10时序划分但缺具体样本/日期。"
+      },
+      {
+        "pages": [
+          12
+        ],
+        "anchor": "To quantitatively prove this claim",
+        "role": "diagnostic evidence",
+        "analysis": "零lag仅代表窗且图引错。"
+      },
+      {
+        "pages": [
+          15
+        ],
+        "anchor": "To address the evaluation transparency",
+        "role": "metric protocol",
+        "analysis": "testmean+stdthreshold事后定义峰类。"
+      },
+      {
+        "pages": [
+          19
+        ],
+        "anchor": "Furthermore, the results presented",
+        "role": "limitation",
+        "analysis": "明示单run无CI/检验。"
+      },
+      {
+        "pages": [
+          20
+        ],
+        "anchor": "Another limitation of this study is the lack",
+        "role": "limitation",
+        "analysis": "仍称未做crosscorr，与Fig4矛盾。"
+      }
+    ]
+  },
+  "difficulty": {
+    "status": "single_assistant_provisional",
+    "scale": "0–4 workload not quality",
+    "dimensions": {
+      "theory": {
+        "value": 1,
+        "pages": [
+          7,
+          8,
+          9
+        ],
+        "rationale": "5标准公式无证明"
+      },
+      "algorithm": {
+        "value": 2,
+        "pages": [
+          7,
+          8,
+          9
+        ],
+        "rationale": "CNNLSTMattentionresidual集成及切窗对齐"
+      },
+      "statistics": {
+        "value": 2,
+        "pages": [
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "rationale": "回归分类与时序/残差多视角，但无推断；图多不等于检验多"
+      },
+      "data": {
+        "value": 1,
+        "pages": [
+          6,
+          10,
+          20
+        ],
+        "rationale": "公开单站现成数据，基本预处理"
+      },
+      "engineering": {
+        "value": 1,
+        "pages": [
+          16,
+          19,
+          20
+        ],
+        "rationale": "离线GPU训练，部署只设想"
+      },
+      "cross_discipline": {
+        "value": 1,
+        "pages": [
+          8,
+          18
+        ],
+        "rationale": "日历/气象与负荷映射，无物理控制耦合"
+      }
+    },
+    "composite": null
+  },
+  "remaining_work": [
+    "independentAIreview/humancalibration",
+    "paragraphbbox/length/rolesfullmapping",
+    "full211fields",
+    "rawdata/codeunitandhorizonaudit",
+    "same-targetbaseline/ablation/multiseed",
+    "exacttestwindowcrosscorr/confusioncounts",
+    "completeversioncorrectioncheck"
+  ]
+}

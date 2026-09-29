@@ -9,7 +9,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 
-ROOT = Path(r"D:\aicoding\powergrid_benchmark")
+ROOT = Path(r"F:\aicoding\powergrid_benchmark")
 BASE = ROOT / "paper_projects" / "applied_sciences_dual_rebuild"
 FINAL = BASE / "formal_submission_p60_revision_20260808" / "three_round_peer_review" / "final"
 CORPUS = BASE / "comparative_quality_audit_20260808" / "corpus_20x2"

@@ -1,0 +1,272 @@
+{
+  "schema": "atlas_independent_review_v1",
+  "paper_id": "p_654ca5ab287c1e14",
+  "reviewer": "independent AI assistant /root/scope_other",
+  "review_date": "2026-09-13",
+  "human_calibrated": false,
+  "review_type": "AI source-grounded independent review; NOT human calibration",
+  "source": {
+    "path": "../sources/10.3390_info12120516.pdf",
+    "sha256": "654ca5ab287c1e149f782c80f2fee337dd340392139435aeef4f6391f2ed048f",
+    "pages": 22,
+    "hash_recomputed": true
+  },
+  "reviewed_artifacts": [
+    "p_654ca5ab287c1e14.json",
+    "p_654ca5ab287c1e14.md",
+    "p_654ca5ab287c1e14.printed_values.json",
+    "p_654ca5ab287c1e14.numeric_audit.json"
+  ],
+  "read_coverage": {
+    "physical_pages_text_read": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22
+    ],
+    "physical_pages_visually_checked": [
+      5,
+      10,
+      14,
+      15,
+      19,
+      20
+    ],
+    "method": "Fulltext read in 1-6,7-14,15-22 page batches; targeted rendered pages; independently recomputed attachment arithmetic with Python datetime/calendar and sorted Holm algorithm",
+    "not_performed": [
+      "原始AEMO数据或预测代码复现",
+      "全部图和公式逐符号视觉检查",
+      "逐段边界与词句统计",
+      "六维难度独立重评分",
+      "外部参考/更正/最新版本核验"
+    ]
+  },
+  "overall": "accept_with_minor_clarifications; substantive source flaws remain unresolved",
+  "checks": [
+    {
+      "id": "identity",
+      "decision": "accept",
+      "pages": [
+        1
+      ],
+      "finding": "题名Short-Term Load Forecasting Based on the Transformer Model，Information2021,12,516，DOI与源哈希相符，22物理页。"
+    },
+    {
+      "id": "section_inventory",
+      "decision": "accept",
+      "pages": [
+        1,
+        2,
+        5,
+        6,
+        8,
+        9,
+        11,
+        14,
+        15,
+        16,
+        17,
+        20
+      ],
+      "finding": "5一级章与20个正文各级标题一致。3.4.2于p11开始；4.3标题确为Evaluation of the Effective of Future Weighted，原稿保留不润色是正确的。声明和References不属于20标题正文口径。"
+    },
+    {
+      "id": "object_inventory",
+      "decision": "accept",
+      "pages": [
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22
+      ],
+      "finding": "实际列式(1)-(18)共18编号组；Algorithm1一个；Figures1-14共14；Tables1/2两张；References1-38共38。17panel口径为Figure14四字母panel、其余13图各一；不能混算Figure8编解码模块和Figure9三个时间示例为额外panel。未独立确认全部非编号数学式。"
+    },
+    {
+      "id": "split_transcription",
+      "decision": "accept",
+      "pages": [
+        5
+      ],
+      "finding": "视觉确认78,883训练、8765测试、训练终点2010-07-04 11:00、测试起点同日11:30以及87648总数均按原文转录。"
+    },
+    {
+      "id": "split_arithmetic",
+      "decision": "accept",
+      "pages": [
+        5
+      ],
+      "assumption": "连续naive local半小时格点、起止均inclusive，未处理缺失或DST",
+      "recomputed": {
+        "train": 78983,
+        "test": 8665,
+        "total": 87648,
+        "end_for_reported_78883_training_rows": "2010-07-02 09:00:00"
+      },
+      "finding": "父numeric_audit结果独立复算完全一致；报道行数与日时存在100行互补差异，不是总行数不守恒。真实源文件缺失/DST协议未验，不能直接指定实际split日期。"
+    },
+    {
+      "id": "test_period_conflict",
+      "decision": "accept",
+      "pages": [
+        5,
+        17,
+        18,
+        19,
+        20
+      ],
+      "finding": "p5只声明7月起测试，p19表却有2010全年12月指标，图14的3月/5月也早于测试起点，p20结论称2010测试。源内协议冲突确定，但不证明执行时一定泄漏；也可能存在未报告不同划分。"
+    },
+    {
+      "id": "printed_cells_and_hash",
+      "decision": "accept",
+      "pages": [
+        19,
+        20
+      ],
+      "finding": "两表可见值逐行核对，附件月值、平均列、六个p值均与PDF一致。printed_values SHA256重算与numeric_audit.input_sha256相符。",
+      "input_sha256": "118cb94b6325f43d55051f02d729f49a2575ba03bf10180f098d5fc2a11da48e"
+    },
+    {
+      "id": "monthly_means",
+      "decision": "accept",
+      "pages": [
+        19
+      ],
+      "finding": "七模型等月及日数加权均值独立复算均与numeric_audit一致。LSTM等月1.8316666667、按2010各月天数加权1.8310684932，均不支持1.93；两位小数两阶段舍入不足解释约0.0983个百分点差异。GRU3.0683与3.06的小差异在所定义两阶段舍入容差内，不应与LSTM等同。"
+    },
+    {
+      "id": "reduction_claim",
+      "decision": "accept",
+      "pages": [
+        1,
+        19,
+        20
+      ],
+      "finding": "41.4%来自(1.93-1.13)/1.93；依赖争议LSTM平均。若使用表中12月等权均值，Transformer1.1333333 vsLSTM1.8316667，相对降低约38.13%，这是印刷值条件复算而非改正后的真实实验结果。",
+      "boundary": "不擅改论文平均列为自认真实全年MAPE；月采样权重/真实预测未取得。"
+    },
+    {
+      "id": "holm",
+      "decision": "accept",
+      "pages": [
+        20
+      ],
+      "family": "将6个已发表模型对照p值一起定义为事后比较族，alpha=.05",
+      "raw_p": {
+        "RNN": 0.0086,
+        "LSTM": 0.0145,
+        "GRU": 0.0001,
+        "TCN": 0.0197,
+        "CNN+LSTM": 0.0284,
+        "seq2seq-LSTM": 0.0336
+      },
+      "adjusted_p": {
+        "GRU": 0.0006,
+        "RNN": 0.043,
+        "LSTM": 0.058,
+        "TCN": 0.0591,
+        "CNN+LSTM": 0.0591,
+        "seq2seq-LSTM": 0.0591
+      },
+      "below_005": [
+        "GRU",
+        "RNN"
+      ],
+      "finding": "排序乘剩余检验数并取累积最大，复算一致；仅以公开p值有效为条件，不验证配对单位、对称性/独立性、时间依赖或原检验实现。不是作者预声明检验，也不说明另外四对等效或没有效应。"
+    },
+    {
+      "id": "algorithm1",
+      "decision": "accept",
+      "pages": [
+        9,
+        10
+      ],
+      "finding": "视觉确认缺迭代中心重算和成员清空。初始化只有N1明确赋值、c_(q+1).add(Ntemp)不清楚如何建立N2..；后续l/e循环却仍算N_k,d_q；E_temp记录后ce.add(dl)不引用它，T/Tmax和K/m不一致。Eq3虽给质心均值，算法未调用。评价应停留在发表伪代码缺陷，不代表实际程序必错。"
+    },
+    {
+      "id": "softmax",
+      "decision": "uncertain",
+      "pages": [
+        8,
+        14
+      ],
+      "finding": "正文明确最后全连接softmax得预测值，而图4写Linear & SoftMax。softmax可产生归一分配/概率，需额外缩放、解码或回归映射才对应任意连续MW向量；文中未给。可以确认接口说明不足，不能据此断言模型无法预测或真实实现就是softmax。"
+    },
+    {
+      "id": "normalization_and_gates",
+      "decision": "accept",
+      "pages": [
+        14,
+        15
+      ],
+      "finding": "视觉确认mean and unit variance zero的原文自相矛盾；式14-16实际印[Y_n−1,x_n]，不是清楚的Y_(n−1)下标，与式13字体区别可见。保留排印/符号歧义，不能直接认定代码进行Y_n减1。MAPE/RMSE两式视觉为标准形式。"
+    },
+    {
+      "id": "ablation_count_boundary",
+      "decision": "correct",
+      "pages": [
+        16,
+        17
+      ],
+      "finding": "3个配置是完整Transformer组合、无权重聚类Transformer、纯Transformer，包含full参照；若字段ablation_conditions意指删减变体应为2，若指该设计全部配置则3。建议字段明确full_included=true，避免以后把3记为3种删除。主文件已注控制不完整和单日曲线，边界恰当。"
+    },
+    {
+      "id": "table1_caption_and_negative_month",
+      "decision": "correct",
+      "pages": [
+        19
+      ],
+      "finding": "建议补充源表题称three models但实际7行。Transformer不是每月最优：February1.46高于seq2seq-LSTM1.35；总体平均最优不能升级为每月全胜。该补充不推翻主记录平均对比。"
+    },
+    {
+      "id": "claim_and_reproducibility_limits",
+      "decision": "accept",
+      "pages": [
+        1,
+        16,
+        17,
+        20,
+        21
+      ],
+      "finding": "没有支持避免局部最优/全局优化保证的证明或专项实验；一天组件曲线不证明所有假日可靠；全文明确峰值预测仍不足。数据可用性写Not applicable，未提供实际源数据/代码链接；无调参预算和统计配对细节，当前不是可复现实验验收。"
+    },
+    {
+      "id": "review_status",
+      "decision": "accept",
+      "pages": [],
+      "finding": "本次为独立AI源文复核，不是人工校准；保持human_calibrated=false及全字段未完成。主代理正在补段落，未以本审核替代段落映射或全图审计。"
+    }
+  ],
+  "authoritative_artifacts_modified": false
+}

@@ -1,0 +1,247 @@
+{
+  "schema_version": "paper_harness.review.v2",
+  "venue": "mdpi_energies",
+  "manuscript": "manuscript/journal_submission/paper.tex",
+  "manuscript_sha256": "b8d6c58e0c1939a138ea243411a97547cc508a9d45395c4fe718ee15b813a816",
+  "coverage": {
+    "characters_total": 73598,
+    "characters_supplied": 73598,
+    "complete": true,
+    "sections_detected": [
+      "Introduction",
+      "Related Work",
+      "Distribution Network Expansion Planning with DER and Storage",
+      "Evolutionary and Swarm Metaheuristics in Power System Planning",
+      "Self-Adaptive Differential Evolution and Constraint Handling",
+      "Gap Statement",
+      "Problem Formulation and Public Benchmark",
+      "Planning Portfolios as Multi-Objective Binary Selection",
+      "Benchmark Construction from SimBench",
+      "Planning Scenarios",
+      "CARS-MODE",
+      "jDE Self-Adaptive Control Parameters",
+      "Success-Driven Two-Strategy Pool",
+      "Constraint-Aware Budget Repair",
+      "Crowding-Based Diversity Preservation",
+      "Algorithm Summary",
+      "Experimental Setup",
+      "Methods Compared",
+      "Protocol",
+      "Evaluation Metric and Statistics",
+      "AC Load-Flow Validation Protocol",
+      "Results",
+      "Main Comparison",
+      "Ablation Study",
+      "AC Load-Flow Validation and the HV--AC Trade-Off",
+      "Parameter Sensitivity Analysis",
+      "Quality--Cost and AC-Margin Diagnostics",
+      "Direct Multi-Objective DE Controls",
+      "Discussion",
+      "Limitations",
+      "Conclusions",
+      "Author Contributions",
+      "Funding",
+      "Institutional Review Board Statement",
+      "Informed Consent Statement",
+      "Data Availability Statement",
+      "Acknowledgments",
+      "Conflicts of Interest"
+    ]
+  },
+  "decision": "major_revision",
+  "primary_story": "A binary multi-objective DE framework improves hypervolume on a constructed SimBench-derived portfolio proxy, while its ablations and composition-level AC diagnostic indicate that repair and diversity—not the unresolved adaptation bundle—drive the proxy result and that proxy rank need not transfer to electrical rank.",
+  "primary_result": "Across seven experiments representing six distinct proxy configurations with 30 runs per stochastic method, CARS-MODE reports 6.22% higher pooled hypervolume than matched-repair NSGA-II, while FixedDE is nominally 0.60% higher and the seed-0 composition diagnostic places CARS-MODE mid-pack in AC feasibility.",
+  "positive_findings": [
+    "The negative result for the combined parameter-and-strategy adaptation bundle is reported consistently in the abstract, results, discussion, limitations, and conclusion rather than being converted into a superiority claim.",
+    "The benchmark includes matched-repair NSGA-II and direct Pareto-based DE controls, reducing reliance on weak scalarized baselines.",
+    "Thirty optimizer runs, rank-based comparisons, effect sizes, bootstrap intervals, and explicitly scoped Holm correction provide substantially better uncertainty reporting than is typical for this application class.",
+    "The manuscript clearly separates proxy hypervolume from electrical feasibility and openly reports the unfavorable mid-pack AC rank and high-DER mapping artifact.",
+    "Public SimBench provenance, explicit limitations, runtime reporting, and a data-availability statement provide a promising reproducibility foundation.",
+    "The manuscript does not treat absence of an adaptation gain or absence of electrical dominance as a defect; these are scientifically informative findings."
+  ],
+  "issues": [
+    {
+      "id": "I001",
+      "type": "TITLE_METHOD_MISMATCH",
+      "dimension": "soundness",
+      "severity": "major",
+      "location": "Title; Sections 3.1–3.2; Table 2; Sections 5.4, 7, and 8",
+      "manuscript_evidence": "The title and framing describe distribution network expansion planning, but the 72 optimization candidates come from EHV1, HV1, HV2, and LV subnet aggregates, with no MV candidate network. AC calculations are subsequently performed on four separate MV networks after reducing optimized plans to four action counts and remapping those counts by fixed heuristics.",
+      "reviewer_inference": "The experiment directly evaluates a synthetic mixed-voltage binary portfolio benchmark, not expansion decisions on the electrical networks used for validation. The action identities, locations, costs, and proxy benefits are not preserved into the AC layer, so the current evidence does not directly support an engineering-grade distribution-expansion interpretation.",
+      "required_action": "Either reframe the title, abstract, contributions, and conclusions around a SimBench-derived mixed-voltage portfolio proxy and call the AC stage a composition diagnostic, or rebuild the experiment so each optimized action maps to a specified bus, line, asset, and cost on the same distribution networks used for power-flow evaluation.",
+      "acceptance_test": "Every optimized action is traceable to the same network element used in its objective and AC evaluation, or all title-level and conclusion-level claims are explicitly limited to performance on the constructed portfolio proxy.",
+      "evidence_boundary": "Reframing alone licenses conclusions about the constructed optimization benchmark; engineering conclusions about distribution expansion require action-preserving network validation."
+    },
+    {
+      "id": "I002",
+      "type": "METHOD_IMPLEMENTATION_MISMATCH",
+      "dimension": "reproducibility",
+      "severity": "major",
+      "location": "Sections 3.1–3.2 and 4.3",
+      "manuscript_evidence": "The manuscript gives only symbolic names for the five objectives and states that their analytic rules are implemented in code. It does not provide the candidate cost and benefit equations, coefficients, units, the role of the DER-support attribute, repair weights, tie handling, or whether repaired binary values are written back to the continuous genome.",
+      "reviewer_inference": "The benchmark and repair operator cannot be independently reconstructed from the manuscript. Because these definitions determine the objective landscape and the mechanism credited with a 6.84% gain, this is load-bearing rather than cosmetic implementation detail.",
+      "required_action": "Provide complete equations or pseudocode for every candidate attribute and objective, all constants and units, the 55% target rationale, repair weights and tie rules, action-exclusion implementation, genome/phenotype handling after repair, and a machine-readable candidate table.",
+      "acceptance_test": "An independent implementation using only the paper and supplied tables produces the same 72 candidates, objective vectors for stated test plans, repaired plans, and benchmark scenario definitions.",
+      "evidence_boundary": "Closure establishes reproducibility of the synthetic benchmark and repair implementation, not physical or monetary calibration."
+    },
+    {
+      "id": "I003",
+      "type": "CONTRIBUTION_EVIDENCE_MISMATCH",
+      "dimension": "experiments",
+      "severity": "major",
+      "location": "Sections 5.4, 6.3, 7, and 8; Table 7; Figure 4",
+      "manuscript_evidence": "AC results use the seed-0 compromise plan from three experiments, but the compromise-selection rule is not defined. The reported 72 outcomes per method arise from three selected plans evaluated on a fixed network-by-stress panel. The manuscript itself shows that fixed DER and storage mapping rules can reverse apparent feasibility.",
+      "reviewer_inference": "These correlated outcomes do not estimate an algorithm-level probability of producing electrically feasible portfolios, and arbitrary seed-0 selection prevents evaluation of selection bias. The evidence demonstrates a counterexample under one mapping but not a stable method ranking or general transfer failure.",
+      "required_action": "Define a deterministic compromise selector before inspecting AC outcomes and apply it to all optimizer seeds. Estimate, for each method, the seed-level probability or mean rate of AC feasibility over the common network/stress panel, using No-Plan and the same mapping as controls. Treat optimizer seed within planning configuration as the analysis unit and network/stress cases as repeated blocks; report blocked bootstrap or hierarchical intervals. Also test plausible storage, DER, reinforcement, and stress-multiplier mappings. If this analysis is not added, relabel the section as an illustrative composition diagnostic and remove method-level AC ranking claims.",
+      "acceptance_test": "AC results include every seed under a documented selector, uncertainty over optimizer seeds, a declared analysis unit, and a mapping-sensitivity table, or all claims are explicitly limited to the displayed seed-0 examples.",
+      "evidence_boundary": "Even after closure, the composition mapping can support seed-robust composition-level transfer conclusions, not nodal siting causality or deployment validity."
+    },
+    {
+      "id": "I004",
+      "type": "STATISTICAL_UNIT_AMBIGUITY",
+      "dimension": "statistics",
+      "severity": "major",
+      "location": "Sections 3.3, 5.3, 6.1, and 9; Tables 3 and 5",
+      "manuscript_evidence": "The base and pareto_quality experiments have identical configuration but independent method-specific seed streams. Nevertheless, the paper repeatedly calls the design seven scenarios and uses a pooled 210-run mean under experiment-specific normalization as its headline 6.22% effect.",
+      "reviewer_inference": "There are six distinct configurations plus one internal replication. Pooling raw normalized hypervolumes double-weights the base configuration and makes optimizer runs, rather than planning configurations, appear to represent external scenario breadth.",
+      "required_action": "Describe the design as seven experiments over six distinct configurations. Report the base replicate as replication evidence, make configuration-specific effects primary, and define an equal-configuration aggregate or a prespecified meta-analysis of relative effects rather than treating 210 runs as one homogeneous sample.",
+      "acceptance_test": "The abstract, tables, and conclusions distinguish experiments from distinct configurations; the pooled headline is replaced or qualified; and each aggregate assigns an explicit weight to each distinct configuration.",
+      "evidence_boundary": "The data can establish consistent within-configuration optimizer behavior on this benchmark family, not performance across seven independent planning scenarios or network populations."
+    },
+    {
+      "id": "I005",
+      "type": "CONTRIBUTION_EVIDENCE_MISMATCH",
+      "dimension": "soundness",
+      "severity": "major",
+      "location": "Section 5.3 and the hypervolume-dependent results",
+      "manuscript_evidence": "Normalization upper bounds are obtained from the empty plan, single-action plans, and 2048 sampled feasible plans, after which the hypervolume reference is fixed at 1.1. The manuscript does not demonstrate that this reference dominates every coordinate of every evaluated front.",
+      "reviewer_inference": "A sampled upper bound can be exceeded by optimizer output. If any normalized coordinate reaches or exceeds the reference, solutions may be excluded or their hypervolume contribution altered, directly affecting the paper's primary metric and rankings.",
+      "required_action": "Report coordinate-wise extrema for the union of all evaluated feasible fronts, prove or verify reference-point dominance, document handling of out-of-bound points, and repeat the ranking analysis with analytically safe bounds or a demonstrably dominating reference point.",
+      "acceptance_test": "For every configuration and objective, the reported maximum normalized coordinate is below the reference point, and a reference/normalization sensitivity audit preserves the material rankings; otherwise all affected hypervolumes and tests are recomputed.",
+      "evidence_boundary": "Closure licenses comparisons under the declared normalization and reference, not reference-independent optimizer superiority."
+    },
+    {
+      "id": "I006",
+      "type": "BASELINE_BUDGET_MISMATCH",
+      "dimension": "experiments",
+      "severity": "minor",
+      "location": "Sections 5.1–5.2 and 6.1; Tables 4–5",
+      "manuscript_evidence": "Population-based methods share population size and generations, but exact objective-evaluation counts and material operator settings are not reported. GA, Standard DE, and PSO optimize a scalarization and return one point, while front-returning methods are judged by hypervolume; MOEA/D collapses under a distinct penalty configuration. These heterogeneous comparisons contribute to the headline 55-of-56 count.",
+      "reviewer_inference": "The direct Pareto controls are informative, but the omnibus win count mixes comparisons with different tasks, constraint handlers, and output cardinalities. Equal population and generation counts alone do not establish a fully matched computational or tuning budget.",
+      "required_action": "Disclose objective-evaluation counts, initialization, operators, hyperparameters, repair calls, termination rules, tuning visibility, and constraint handling for every method. Designate matched Pareto-front controls as the confirmatory comparison set and treat scalarized and failed-penalty configurations as supporting diagnostics.",
+      "acceptance_test": "A comparison table demonstrates matched or explicitly unequal evaluation and tuning budgets, and headline conclusions are based on task-matched Pareto controls rather than the aggregate 55-of-56 count.",
+      "evidence_boundary": "The evidence supports superiority over named implementations under disclosed settings, not over the algorithm families in general."
+    },
+    {
+      "id": "I007",
+      "type": "COMBINED_ABLATION_ATTRIBUTION",
+      "dimension": "novelty",
+      "severity": "minor",
+      "location": "Introduction contribution 1; Table 1; opening of Section 4; Sections 6.2 and 7",
+      "manuscript_evidence": "The manuscript says each named mechanism is one switch and Table 1 claims per-component ablation, but FixedDE jointly removes parameter adaptation and strategy adaptation, while NoDER changes the problem rather than an algorithmic component. Later sections correctly describe these limitations.",
+      "reviewer_inference": "The accurate bundle-level conclusion conflicts with the earlier per-component and clean-attribution language. The current design cannot attribute any effect to jDE control or the strategy pool individually.",
+      "required_action": "Remove the per-component and one-switch claims and describe the study as two individual operator ablations plus one combined adaptation control and one problem-variant probe. If individual claims are retained, add parameter-only and strategy-only controls; their estimands should be the within-configuration hypervolume changes caused by each switch while holding the other fixed, with optimizer seed as the analysis unit.",
+      "acceptance_test": "All contribution tables and narrative use bundle-level language, or separate controls independently identify parameter-control and strategy-pool effects.",
+      "evidence_boundary": "Without new controls, the strongest conclusion is that the combined adaptation bundle has no demonstrated proxy advantage over FixedDE."
+    },
+    {
+      "id": "I008",
+      "type": "SENSITIVITY_GAP",
+      "dimension": "experiments",
+      "severity": "minor",
+      "location": "Section 6.4; Table 8; Figure 5",
+      "manuscript_evidence": "Population size is varied from 20 to 60 while generations remain fixed at 40, increasing the objective-evaluation budget threefold. The resulting 10.5% spread is described as population-size sensitivity.",
+      "reviewer_inference": "The experiment confounds population size with computational budget and therefore cannot identify sensitivity to population size itself.",
+      "required_action": "Either repeat the population sweep at a fixed total number of objective evaluations or relabel it as a joint population-and-budget scaling experiment. Report runtime and evaluation counts at every point.",
+      "acceptance_test": "Population-size effects are estimated under constant evaluations, or all sensitivity claims explicitly refer to the tested population-by-budget combinations.",
+      "evidence_boundary": "The current data support absence of a rank reversal under the displayed resource settings, not insensitivity to population size."
+    },
+    {
+      "id": "I009",
+      "type": "METHOD_IMPLEMENTATION_MISMATCH",
+      "dimension": "clarity",
+      "severity": "minor",
+      "location": "Sections 3.3, 5.4, and 8",
+      "manuscript_evidence": "The paper states that stochastic stress enters at the AC stage and later refers to stochastic load, DER, and outage variation, but the AC protocol describes six fixed deterministic stress scenarios and no probability distributions or random sampling.",
+      "reviewer_inference": "The wording overstates uncertainty coverage and can be read as evidence from stochastic operating-condition sampling.",
+      "required_action": "Replace stochastic with deterministic stress-scenario language throughout, or document the sampling distributions, dependence assumptions, sample counts, and random seeds actually used.",
+      "acceptance_test": "Every uncertainty statement matches a documented deterministic or stochastic protocol.",
+      "evidence_boundary": "As written, the AC stage supports conclusions only for the six fixed stress cases."
+    },
+    {
+      "id": "I010",
+      "type": "VISUAL_QA_STALE",
+      "dimension": "clarity",
+      "severity": "minor",
+      "location": "Table 5 versus Section 6.5 and Figure 7 discussion",
+      "manuscript_evidence": "Table 5 reports runtimes of 0.119 s for CARS-MODE and 0.077 s for NSGA-II, whereas Section 6.5 reports 0.122 s and 0.080 s for what is described as the same pooled archive.",
+      "reviewer_inference": "The inconsistent values suggest that at least one table, figure source, or narrative value was generated from a different artifact version.",
+      "required_action": "Regenerate all runtime tables, figures, ratios, and prose from one current result file and document the aggregation and rounding rules.",
+      "acceptance_test": "The same pooled method runtimes and derived percentage appear consistently in Table 5, Figure 7, and the surrounding text.",
+      "evidence_boundary": "This correction affects only the reported efficiency comparison unless broader artifact differences are discovered."
+    },
+    {
+      "id": "I011",
+      "type": "DECLARATION_PLACEHOLDER",
+      "dimension": "submission",
+      "severity": "blocker",
+      "location": "Author Contributions and Funding",
+      "manuscript_evidence": "Both sections contain explicit AUTHOR INPUT REQUIRED placeholders. CRediT roles, verified funding, grant number, and APC funding status are absent.",
+      "reviewer_inference": "The manuscript is not submission-ready and the declarations cannot be completed by inference from the scientific text.",
+      "required_action": "Obtain approval from every author for the CRediT statement and insert verified funding and APC information or the journal's no-external-funding statement.",
+      "acceptance_test": "No declaration placeholder remains, every named author has at least one approved role, and funding statements are internally consistent with acknowledgments and conflicts disclosures.",
+      "evidence_boundary": "Closure resolves submission compliance but does not alter the scientific findings."
+    },
+    {
+      "id": "I012",
+      "type": "REFERENCE_OR_METADATA_UNVERIFIED",
+      "dimension": "reproducibility",
+      "severity": "minor",
+      "location": "Data Availability Statement; figure references; bibliography entries 29–30",
+      "manuscript_evidence": "The paper states that code, 2940 run records, effect tables, AC outputs, and figure scripts are included in a supplementary package, but those assets and the rendered figures were not supplied in the review payload. DOI URLs in references 29 and 30 contain malformed brace characters.",
+      "reviewer_inference": "Artifact-backed numerical and visual claims remain unverified from the supplied evidence, and the malformed links impede citation checking. This is not by itself a major scientific defect because the manuscript text is complete.",
+      "required_action": "Supply the cited supplementary package and rendered figures to reviewers, correct the malformed DOI URLs, and run bibliography and figure-table consistency checks against the submitted artifact.",
+      "acceptance_test": "All declared supplementary files are accessible and reproduce the reported tables and figures, and every DOI resolves from the final bibliography.",
+      "evidence_boundary": "Until then, reproducibility, visual consistency, and external bibliographic metadata remain unverified."
+    }
+  ],
+  "claim_map": [
+    {
+      "claim": "CARS-MODE provides higher proxy hypervolume than the tested external baselines.",
+      "method_support": "A binary MODE framework with repair, crowding, adaptive controls, fixed normalization, and named Pareto and scalarized controls is described.",
+      "experiment_support": "Thirty runs per method and experiment report higher CARS-MODE means in 56 baseline cells, including matched-repair NSGA-II, GDE3, and NSDE.",
+      "status": "partial"
+    },
+    {
+      "claim": "Budget repair and crowding diversity carry the measured proxy gain.",
+      "method_support": "NoRepair and NoDiversity each remove one stated mechanism while retaining the remainder of the framework.",
+      "experiment_support": "Pooled hypervolume decreases by 6.84% and 33.56%, respectively, with reported scenario-level significance, although complete effect tables reside in an unverified supplement.",
+      "status": "partial"
+    },
+    {
+      "claim": "The combined parameter-and-strategy adaptation bundle has no demonstrated proxy advantage over FixedDE.",
+      "method_support": "FixedDE jointly fixes F and CR and replaces the two-strategy pool with rand/1.",
+      "experiment_support": "FixedDE is nominally 0.60% higher and the contrast is unresolved in all seven experiments; the manuscript does not claim equivalence or individual-component effects.",
+      "status": "supported"
+    },
+    {
+      "claim": "Proxy hypervolume ranking does not reliably transfer to electrical ranking.",
+      "method_support": "Selected plan compositions are mapped by common fixed rules to four MV networks and evaluated by AC power flow.",
+      "experiment_support": "The displayed seed-0 compositions produce a different AC-feasibility ordering and expose a high-DER mapping artifact, but no across-seed transfer estimand is evaluated.",
+      "status": "partial"
+    },
+    {
+      "claim": "The study supplies a reproducible public distribution-planning benchmark.",
+      "method_support": "The source SimBench dataset, subnet list, action count, budgets, and high-level construction logic are identified.",
+      "experiment_support": "The manuscript reports a 2940-row archive and supplementary implementation, but the objective and candidate formulas are incomplete and the external package was not supplied.",
+      "status": "blocked"
+    },
+    {
+      "claim": "Performance is insensitive to the tested jDE resampling range and improves with larger populations.",
+      "method_support": "Tau and population-size sweeps are defined on the base configuration.",
+      "experiment_support": "No mean-rank reversal is observed across the six settings, but population size is confounded with evaluation budget and the sweep uses ten runs per point.",
+      "status": "partial"
+    }
+  ],
+  "summary": "The manuscript has an unusually honest and potentially publishable central finding: the complete search pipeline performs well on its proxy, the branded adaptation bundle is unresolved, and proxy ranking disagrees with a composition-level AC diagnostic. Major revision is required because the title-level distribution-planning interpretation exceeds the mixed-voltage synthetic benchmark, the load-bearing objective construction is not reproducible from the manuscript, the AC claim rests on an undefined seed-0 compromise selection, and the pooled headline mixes six configurations with a duplicated base experiment. Resolving these issues through explicit proxy-level reframing, complete benchmark definitions, configuration-aware statistics, and seed-robust AC analysis would leave a credible incremental Energies contribution; author and funding placeholders must also be completed before submission."
+}

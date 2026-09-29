@@ -1,0 +1,1862 @@
+{
+  "schema": "atlas_substantive_deconstruction/1",
+  "paper_id": "p_61e82cc0ce8ee029",
+  "title": "Cooling, Heat, Electricity and Gas Joint Load Forecasting Method Based on Modal Decomposition and Dynamic Model Selection",
+  "journal": "Information",
+  "year": 2026,
+  "doi": "10.3390/info17080789",
+  "article_type": "applied hybrid forecasting method",
+  "source": {
+    "path": "../sources/10.3390_info17080789.pdf",
+    "sha256": "61e82cc0ce8ee029692e147b37efade748be45d91f843c1d4634b174d2184fbd",
+    "pages": 29,
+    "authors": [
+      "He Jiang",
+      "Ruicong Han",
+      "Tianhui Shi",
+      "Yi Yang"
+    ],
+    "published": "2026-08-17",
+    "license": "CC BY per physical page 1",
+    "version_status": "publisher-formatted version; latest version NOT fully verified",
+    "version_notes": "Parent acquisition reports CDN Last-Modified 2026-08-17 while MDPI notes records update 2026-08-18. This analyst did not independently fetch version notes; the supplied local hash is the sole analyzed version. Do not label it confirmed latest VoR.",
+    "retraction_correction_check": "not_assessed"
+  },
+  "analysis_status": "fulltext_analysis_targeted_independent_ai_review_completed_all_fields_pending",
+  "human_calibrated": false,
+  "annotation_version": "2026-09-13/1",
+  "read_coverage": {
+    "physical_pages_read": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29
+    ],
+    "method": "PyMuPDF text read in page batches 1-5,6-11,12-17,18-23,24-29 without skipped truncated content; selected rendered pages visually inspected",
+    "visual_pages": [
+      7,
+      8,
+      10,
+      11,
+      14,
+      17,
+      18,
+      19,
+      20,
+      22,
+      23,
+      25
+    ],
+    "paragraph_boundary_status": "partial_selected_semantic_paragraphs_only",
+    "full_field_status": "not_complete",
+    "independent_review": "p_61e82cc0ce8ee029.independent_review.json; targeted non-blinded second-AI source audit complete, not human calibration"
+  },
+  "scope": {
+    "decision": "core_ai",
+    "relevance": "direct",
+    "task": "IES cooling/heating/electricity/gas daily joint forecasting",
+    "method_family": "serial MVMD + tabular Q-learning parameter search + sample entropy reconstruction + stochastic dynamic model selection"
+  },
+  "counts": {
+    "body_numbered_l1_sections": 5,
+    "body_headings_all_levels": 23,
+    "section_records_including_backmatter": 26,
+    "numbered_display_equation_groups": 49,
+    "equation_count_method": "individually read and enumerated equations (1)-(49), multiline groups count once",
+    "unnumbered_display_groups": null,
+    "inline_expressions": null,
+    "theorems": 0,
+    "proofs": 0,
+    "numbered_pseudocode": 0,
+    "numbered_figures": 9,
+    "figure_coordinate_panels_including_single_diagrams": 36,
+    "numbered_tables": 2,
+    "unnumbered_nomenclature_tables": 2,
+    "references": 33,
+    "integrated_target_datasets": 1,
+    "load_channels": 4,
+    "candidate_base_models": 4,
+    "terminal_model_conditions": 6,
+    "comparators_relative_to_M1": 5,
+    "controlled_ablation_designs_confirmed": 0,
+    "reported_ablation_comparison_designs": 1,
+    "mechanism_replacement_contrasts": 1,
+    "systematic_sensitivity_designs": 0,
+    "core_comparative_designs": 2,
+    "additional_descriptive_diagnostics": 2,
+    "exact_paragraph_count": null,
+    "body_word_count": null
+  },
+  "sections": [
+    {
+      "id": "1",
+      "parent": null,
+      "level": 1,
+      "heading": "Introduction",
+      "physical_pages": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "input_commitment": "IES多负荷波动和耦合",
+      "core_logic": "比较MTL/独立分解/固定预测器局限，定位低维tabular QL而非DRL",
+      "output_commitment": "四模块贡献进入方法",
+      "word_count": null
+    },
+    {
+      "id": "2",
+      "parent": null,
+      "level": 1,
+      "heading": "Enhanced MVMD-SE-Based Multivariate Load Data Processing Method",
+      "physical_pages": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "input_commitment": "原序列非平稳",
+      "core_logic": "同步分解、参数搜索、熵重构",
+      "output_commitment": "提供低维组分",
+      "word_count": null
+    },
+    {
+      "id": "2.1",
+      "parent": "2",
+      "level": 2,
+      "heading": "Multivariate Variational Mode Decomposition",
+      "physical_pages": [
+        5
+      ],
+      "input_commitment": "多通道共频要求",
+      "core_logic": "约束目标转ADMM更新及停止准则",
+      "output_commitment": "共享频率IMF",
+      "word_count": null
+    },
+    {
+      "id": "2.2",
+      "parent": "2",
+      "level": 2,
+      "heading": "Tabular Q-Learning-Based Adaptive Optimization of the MVMD Penalty Factor",
+      "physical_pages": [
+        6,
+        7,
+        8
+      ],
+      "input_commitment": "alpha经验选择",
+      "core_logic": "有限状态三动作负重构误差奖励，Q表更新、最佳状态映射",
+      "output_commitment": "alpha*但范围和实际值缺失",
+      "word_count": null
+    },
+    {
+      "id": "2.3",
+      "parent": "2",
+      "level": 2,
+      "heading": "SE-Based Multivariate Load Component Reconstruction",
+      "physical_pages": [
+        8,
+        9
+      ],
+      "input_commitment": "IMF过多",
+      "core_logic": "嵌入距离匹配→熵→均值阈值",
+      "output_commitment": "每通道高低频及独立残差",
+      "word_count": null
+    },
+    {
+      "id": "3",
+      "parent": null,
+      "level": 1,
+      "heading": "QL-MVMD-SE-DMS Based Hybrid Forecasting Model",
+      "physical_pages": [
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "input_commitment": "已分解组分",
+      "core_logic": "串联完整流程及异质模型池",
+      "output_commitment": "组分预测与重构",
+      "word_count": null
+    },
+    {
+      "id": "3.1",
+      "parent": "3",
+      "level": 2,
+      "heading": "BiLSTM",
+      "physical_pages": [
+        10,
+        11
+      ],
+      "input_commitment": "长短时依赖",
+      "core_logic": "双向递推门控RMSE训练与模态均值",
+      "output_commitment": "一个基预测器",
+      "word_count": null
+    },
+    {
+      "id": "3.2",
+      "parent": "3",
+      "level": 2,
+      "heading": "SVR",
+      "physical_pages": [
+        11
+      ],
+      "input_commitment": "有限样本平滑组件",
+      "core_logic": "epsilon带优化与RBF核",
+      "output_commitment": "一个核预测器",
+      "word_count": null
+    },
+    {
+      "id": "3.3",
+      "parent": "3",
+      "level": 2,
+      "heading": "XGBoost",
+      "physical_pages": [
+        12
+      ],
+      "input_commitment": "非线性局部模式",
+      "core_logic": "正则化二阶树提升、分裂增益",
+      "output_commitment": "一个树提升预测器",
+      "word_count": null
+    },
+    {
+      "id": "3.4",
+      "parent": "3",
+      "level": 2,
+      "heading": "LightGBM",
+      "physical_pages": [
+        12,
+        13
+      ],
+      "input_commitment": "高效树提升",
+      "core_logic": "残差学习和叶分裂规则",
+      "output_commitment": "另一树预测器",
+      "word_count": null
+    },
+    {
+      "id": "3.5",
+      "parent": "3",
+      "level": 2,
+      "heading": "Dynamic Model Selection (DMS) Mechanism",
+      "physical_pages": [
+        13,
+        14
+      ],
+      "input_commitment": "不同组分适配不同模型",
+      "core_logic": "复合分→168步均分→负softmax→随机抽取",
+      "output_commitment": "随机单模型选取，不是严格argmin",
+      "word_count": null
+    },
+    {
+      "id": "4",
+      "parent": null,
+      "level": 1,
+      "heading": "Calculated Case Analysis",
+      "physical_pages": [
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "input_commitment": "框架收益承诺",
+      "core_logic": "数据/协议/特征分析/组分比较/终端比较/联合分布",
+      "output_commitment": "单校区离线证据",
+      "word_count": null
+    },
+    {
+      "id": "4.1",
+      "parent": "4",
+      "level": 2,
+      "heading": "Experimental Platform Configuration and Data Sources",
+      "physical_pages": [
+        14,
+        15
+      ],
+      "input_commitment": "实验可复现",
+      "core_logic": "ASU2016—2020日数据、NREL天气、时序训练测试",
+      "output_commitment": "56日输入7日预测",
+      "word_count": null
+    },
+    {
+      "id": "4.2",
+      "parent": "4",
+      "level": 2,
+      "heading": "Evaluation Indicators and Data Normalization",
+      "physical_pages": [
+        15,
+        16
+      ],
+      "input_commitment": "公平无未来预处理",
+      "core_logic": "训练拟合minmax，逐原点历史分解和更新",
+      "output_commitment": "作者声称无泄漏，代码未验",
+      "word_count": null
+    },
+    {
+      "id": "4.3",
+      "parent": "4",
+      "level": 2,
+      "heading": "Comprehensive Energy Load Analysis",
+      "physical_pages": [
+        16,
+        17,
+        18
+      ],
+      "input_commitment": "能耗季节性",
+      "core_logic": "以2016年度箱图描述四负荷",
+      "output_commitment": "描述性背景",
+      "word_count": null
+    },
+    {
+      "id": "4.3.1",
+      "parent": "4.3",
+      "level": 3,
+      "heading": "Seasonal Load Characteristics",
+      "physical_pages": [
+        16,
+        17
+      ],
+      "input_commitment": "季度能耗差异",
+      "core_logic": "四季箱图解释冷电夏高热冬高",
+      "output_commitment": "周期性动机而非因果识别",
+      "word_count": null
+    },
+    {
+      "id": "4.3.2",
+      "parent": "4.3",
+      "level": 3,
+      "heading": "Monthly Load Characteristics",
+      "physical_pages": [
+        17,
+        18
+      ],
+      "input_commitment": "季节到月细化",
+      "core_logic": "12月箱图与异常点描述",
+      "output_commitment": "复用同年数据不算独立外测",
+      "word_count": null
+    },
+    {
+      "id": "4.4",
+      "parent": "4",
+      "level": 2,
+      "heading": "Simulation Condition Setting",
+      "physical_pages": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "input_commitment": "模型设置和实验",
+      "core_logic": "分解数量、组分最佳、对照、相关分布",
+      "output_commitment": "检验整框架但QL贡献未隔离",
+      "word_count": null
+    },
+    {
+      "id": "4.4.1",
+      "parent": "4.4",
+      "level": 3,
+      "heading": "Parameter Selection and Sensitivity Analysis",
+      "physical_pages": [
+        18,
+        19
+      ],
+      "input_commitment": "确定分解层数和重组",
+      "core_logic": "PCC<.1选择K5，按平均SE分组",
+      "output_commitment": "未实际报告参数网格/敏感性曲线",
+      "word_count": null
+    },
+    {
+      "id": "4.4.2",
+      "parent": "4.4",
+      "level": 3,
+      "heading": "Optimal Model Selection",
+      "physical_pages": [
+        19,
+        20,
+        21
+      ],
+      "input_commitment": "异质组分需适配",
+      "core_logic": "4模型×3组分×4载能指标表与雷达图",
+      "output_commitment": "各组分赢家不同，叙述有泛化",
+      "word_count": null
+    },
+    {
+      "id": "4.4.3",
+      "parent": "4.4",
+      "level": 3,
+      "heading": "Prediction Analysis",
+      "physical_pages": [
+        21,
+        22,
+        23,
+        24
+      ],
+      "input_commitment": "MVMD和DMS的终端收益",
+      "core_logic": "6条件同一2020测试期指标与曲线",
+      "output_commitment": "M1总分最佳但冷热气均非最佳",
+      "word_count": null
+    },
+    {
+      "id": "4.4.4",
+      "parent": "4.4",
+      "level": 3,
+      "heading": "Analysis of Multiple Load Distribution and Forecasting Characteristics",
+      "physical_pages": [
+        24,
+        25
+      ],
+      "input_commitment": "点误差不足说明耦合",
+      "core_logic": "六负荷对联合直方/预测颜色叠加",
+      "output_commitment": "描述分布贴合，无定量联合检验",
+      "word_count": null
+    },
+    {
+      "id": "5",
+      "parent": null,
+      "level": 1,
+      "heading": "Conclusions",
+      "physical_pages": [
+        25,
+        26
+      ],
+      "input_commitment": "总结贡献与应用",
+      "core_logic": "总体指标收益、机制归因、适用边界、未来概率预测跨站优化",
+      "output_commitment": "机制与严格耦合保持证据不足",
+      "word_count": null
+    },
+    {
+      "id": "decl",
+      "parent": null,
+      "level": 1,
+      "heading": "Author Contributions / Funding / Ethics / Data Availability / Conflicts of Interest",
+      "physical_pages": [
+        26
+      ],
+      "input_commitment": "可追溯性",
+      "core_logic": "经费、雇佣关系、数据按请求",
+      "output_commitment": "无开放代码或精确数据URL",
+      "word_count": null
+    },
+    {
+      "id": "nomen",
+      "parent": null,
+      "level": 1,
+      "heading": "Nomenclature / Principal symbols",
+      "physical_pages": [
+        26,
+        27
+      ],
+      "input_commitment": "术语符号",
+      "core_logic": "缩写与主要符号表",
+      "output_commitment": "辅助阅读非新增 numbered table",
+      "word_count": null
+    },
+    {
+      "id": "refs",
+      "parent": null,
+      "level": 1,
+      "heading": "References",
+      "physical_pages": [
+        27,
+        28,
+        29
+      ],
+      "input_commitment": "依据来源",
+      "core_logic": "33条参考",
+      "output_commitment": "外部逐条真实性未审",
+      "word_count": null
+    }
+  ],
+  "equations": [
+    {
+      "id": "E1",
+      "label": "(1)",
+      "physical_page": 5,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "optimization/objective/single",
+      "function": "MVMD各通道解析模态解调后的总带宽最小化",
+      "origin": "标准MVMD建模",
+      "assumptions_and_audit": "共同中心频率可作数学耦合，但不保证物理因果耦合",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E2",
+      "label": "(2)",
+      "physical_page": 5,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "optimization/constraint/equality",
+      "function": "各通道模态和重构原信号",
+      "origin": "标准重构约束",
+      "assumptions_and_audit": "后文另保留残差，须说明数值容差下的重构方式",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E3",
+      "label": "(3)",
+      "physical_page": 5,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "optimization/reformulation/dual",
+      "function": "增广拉格朗日：带宽+重构误差+乘子",
+      "origin": "标准改写",
+      "assumptions_and_audit": "惩罚与等式约束的数值实现待代码",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E4",
+      "label": "(4)",
+      "physical_page": 5,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "algorithm/update/local_search",
+      "function": "频域模态ADMM更新",
+      "origin": "标准迭代",
+      "assumptions_and_audit": "b与i索引、更新次序需实现核对",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E5",
+      "label": "(5)",
+      "physical_page": 5,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "algorithm/update/local_search",
+      "function": "跨通道能谱加权中心频率更新",
+      "origin": "标准迭代",
+      "assumptions_and_audit": "分母总能量非零",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E6",
+      "label": "(6)",
+      "physical_page": 5,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "algorithm/update/local_search",
+      "function": "对偶变量随重构残差更新",
+      "origin": "标准迭代",
+      "assumptions_and_audit": "求和写k而模态为b，符号一致性问题",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E7",
+      "label": "(7)",
+      "physical_page": 5,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "algorithm/guarantee/convergence_bound",
+      "function": "相邻迭代相对变化停止阈值",
+      "origin": "停止准则非收敛证明",
+      "assumptions_and_audit": "eta数值未报告",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E8",
+      "label": "(8)",
+      "physical_page": 6,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "algorithm/update/local_search",
+      "function": "离散alpha候选集合",
+      "origin": "本文参数搜索定义",
+      "assumptions_and_audit": "alpha上下界与Delta未给数值",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E9",
+      "label": "(9)",
+      "physical_page": 6,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "algorithm/update/local_search",
+      "function": "每候选alpha对应一个状态",
+      "origin": "本文状态定义",
+      "assumptions_and_audit": "状态只含参数，不含信号窗口变化",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E10",
+      "label": "(10)",
+      "physical_page": 6,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "algorithm/update/local_search",
+      "function": "增减或保持alpha的三个动作",
+      "origin": "本文动作定义",
+      "assumptions_and_audit": "边界动作截断/回退未说明",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E11",
+      "label": "(11)",
+      "physical_page": 6,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "algorithm/update/local_search",
+      "function": "epsilon-greedy动作采样",
+      "origin": "标准策略写法",
+      "assumptions_and_audit": "epsilon=.8按正文意图表示80%随机，且图/公式需统一；重置日程未量化",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E12",
+      "label": "(12)",
+      "physical_page": 6,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "learning/training/loss",
+      "function": "四通道平均负重构MSE奖励",
+      "origin": "本文奖励选择",
+      "assumptions_and_audit": "训练数据专用；重构误差不等于预测误差或可分辨性",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E13",
+      "label": "(13)",
+      "physical_page": 7,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "algorithm/update/RL",
+      "function": "Q表Bellman更新",
+      "origin": "声称标准Q-learning但式有疑点",
+      "assumptions_and_audit": "视觉式为(1-delta)Q+delta[R+lambda max(Qnext-Qcurrent)]，重复扣当前Q；max缺明确动作下标，非标准Q=(1-delta)Q+delta(R+lambda max_a Qnext)；实现未知",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E14",
+      "label": "(14)",
+      "physical_page": 7,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "algorithm/update/local_search",
+      "function": "全Q表取最佳状态",
+      "origin": "本文决策规则",
+      "assumptions_and_audit": "最高状态动作价值不必等于最小即时重构误差，需边界与转移分析",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E15",
+      "label": "(15)",
+      "physical_page": 7,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "algorithm/update/local_search",
+      "function": "最佳状态索引转alpha",
+      "origin": "索引映射",
+      "assumptions_and_audit": "实际alpha*未披露",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E16",
+      "label": "(16)",
+      "physical_page": 8,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "statistics/estimation/sample_entropy",
+      "function": "延迟嵌入m维向量",
+      "origin": "标准SE定义",
+      "assumptions_and_audit": "m=2；样本数量N与n混用",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E17",
+      "label": "(17)",
+      "physical_page": 8,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "statistics/estimation/sample_entropy",
+      "function": "最大坐标绝对差距离",
+      "origin": "标准Chebyshev距离",
+      "assumptions_and_audit": "视觉确认绝对值",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E18",
+      "label": "(18)",
+      "physical_page": 8,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "statistics/estimation/sample_entropy",
+      "function": "阈值内匹配比例",
+      "origin": "标准SE构件",
+      "assumptions_and_audit": "未明确排除自身i=j，影响样本熵与近似熵区别",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E19",
+      "label": "(19)",
+      "physical_page": 9,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "statistics/estimation/sample_entropy",
+      "function": "匹配比例跨向量平均",
+      "origin": "标准SE构件",
+      "assumptions_and_audit": "求和索引l与B_i符号不同",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E20",
+      "label": "(20)",
+      "physical_page": 9,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "statistics/estimation/sample_entropy",
+      "function": "负对数匹配概率比",
+      "origin": "SE定义写法",
+      "assumptions_and_audit": "分母写B_i^m非平均B^m，需核对；零匹配处理未说明",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E21",
+      "label": "(21)",
+      "physical_page": 9,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "statistics/estimation/mean",
+      "function": "以各IMF样本熵均值为分类阈值",
+      "origin": "本文聚类规则",
+      "assumptions_and_audit": "每通道单独计算；熵高低不是严格频率标签",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E22",
+      "label": "(22)",
+      "physical_page": 10,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "learning/architecture/gating",
+      "function": "模态BiLSTM输出及1/K均值聚合",
+      "origin": "基线架构",
+      "assumptions_and_audit": "模态通常重构相加，1/K均值与后文加权和不一致；重构权重未给",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E23",
+      "label": "(23)",
+      "physical_page": 10,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "learning/architecture/gating",
+      "function": "正向反向LSTM状态递推",
+      "origin": "标准BiLSTM",
+      "assumptions_and_audit": "只能在已可用历史输入内双向，不应跨预测未来",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E24",
+      "label": "(24)",
+      "physical_page": 11,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "learning/architecture/gating",
+      "function": "候选记忆、遗忘/输入/输出门及状态",
+      "origin": "标准LSTM六行单编号组",
+      "assumptions_and_audit": "参数维数和网络层数未报",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E25",
+      "label": "(25)",
+      "physical_page": 11,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "learning/training/loss",
+      "function": "BiLSTM RMSE目标",
+      "origin": "标准损失",
+      "assumptions_and_audit": "有平方根，勿因提取损坏误判MSE",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E26",
+      "label": "(26)",
+      "physical_page": 11,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "optimization/objective/single",
+      "function": "SVR范数正则加epsilon松弛损失",
+      "origin": "标准SVR",
+      "assumptions_and_audit": "C需正",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E27",
+      "label": "(27)",
+      "physical_page": 11,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "optimization/constraint/inequality",
+      "function": "SVR epsilon带及松弛非负约束",
+      "origin": "标准SVR",
+      "assumptions_and_audit": "四条件共用单编号",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E28",
+      "label": "(28)",
+      "physical_page": 11,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "learning/architecture/kernel",
+      "function": "RBF核",
+      "origin": "标准核",
+      "assumptions_and_audit": "gamma未报告实际设置",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E29",
+      "label": "(29)",
+      "physical_page": 12,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "algorithm/update/boosting",
+      "function": "XGBoost加法树更新未写步长",
+      "origin": "标准模型描述",
+      "assumptions_and_audit": "与35加步长版本对应",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E30",
+      "label": "(30)",
+      "physical_page": 12,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "learning/training/loss",
+      "function": "XGBoost损失加树正则",
+      "origin": "标准目标",
+      "assumptions_and_audit": "具体训练损失未明细",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E31",
+      "label": "(31)",
+      "physical_page": 12,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "learning/training/regularization",
+      "function": "叶数与叶权L2复杂度罚项",
+      "origin": "标准正则",
+      "assumptions_and_audit": "符号tau/nu与别处重复",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E32",
+      "label": "(32)",
+      "physical_page": 12,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "learning/training/gradient",
+      "function": "负梯度残差",
+      "origin": "标准梯度提升",
+      "assumptions_and_audit": "非单独新算法",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E33",
+      "label": "(33)",
+      "physical_page": 12,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "algorithm/update/boosting",
+      "function": "XGBoost分裂增益",
+      "origin": "标准二阶增益",
+      "assumptions_and_audit": "G/H定义对应一二阶梯度",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E34",
+      "label": "(34)",
+      "physical_page": 12,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "optimization/objective/single",
+      "function": "最优叶权闭式",
+      "origin": "标准叶解",
+      "assumptions_and_audit": "H+nu非零",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E35",
+      "label": "(35)",
+      "physical_page": 12,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "algorithm/update/boosting",
+      "function": "带学习率的XGBoost更新",
+      "origin": "标准迭代",
+      "assumptions_and_audit": "学习率未给数值",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E36",
+      "label": "(36)",
+      "physical_page": 12,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "learning/architecture/ensemble",
+      "function": "LightGBM基学习器和",
+      "origin": "标准提升架构",
+      "assumptions_and_audit": "一般GBDT式不代表完整LightGBM独特机制",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E37",
+      "label": "(37)",
+      "physical_page": 13,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "optimization/objective/single",
+      "function": "逐轮寻找降低损失弱学习器",
+      "origin": "标准阶段优化",
+      "assumptions_and_audit": "样本求和/函数参数简略",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E38",
+      "label": "(38)",
+      "physical_page": 13,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "learning/training/gradient",
+      "function": "LightGBM负梯度",
+      "origin": "标准梯度",
+      "assumptions_and_audit": "标准式借用，未独立数学复核",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E39",
+      "label": "(39)",
+      "physical_page": 13,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "learning/training/loss",
+      "function": "拟合梯度的平方损失",
+      "origin": "标准梯度拟合",
+      "assumptions_and_audit": "标准式借用，未独立数学复核",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E40",
+      "label": "(40)",
+      "physical_page": 13,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "algorithm/update/boosting",
+      "function": "LightGBM强学习器相加",
+      "origin": "标准迭代",
+      "assumptions_and_audit": "标准式借用，未独立数学复核",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E41",
+      "label": "(41)",
+      "physical_page": 13,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "algorithm/update/boosting",
+      "function": "节点左右分裂方差增益",
+      "origin": "标准分裂描述",
+      "assumptions_and_audit": "公式右支>=且左支<=重复等值，文字右支>；z/d符号混用",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E42",
+      "label": "(42)",
+      "physical_page": 14,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "evaluation/predictive/composite",
+      "function": "S=.4RMSE+.4MAPE-.2R²",
+      "origin": "本文复合指标",
+      "assumptions_and_audit": "权重无敏感性；误差归一化不保证三指标等尺度",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E43",
+      "label": "(43)",
+      "physical_page": 14,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "evaluation/predictive/MAE_RMSE",
+      "function": "RMSE",
+      "origin": "标准指标",
+      "assumptions_and_audit": "平方根视觉确认，u样本索引与求和i不一致",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E44",
+      "label": "(44)",
+      "physical_page": 14,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "evaluation/predictive/MAE_RMSE",
+      "function": "标MAPE的平均绝对误差",
+      "origin": "源式实为MAE",
+      "assumptions_and_audit": "视觉无真实值分母、无百分比；实际表中MAPE实现未知",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E45",
+      "label": "(45)",
+      "physical_page": 14,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "evaluation/predictive/R_squared",
+      "function": "决定系数1-SSE/SST",
+      "origin": "标准指标",
+      "assumptions_and_audit": "真实序列方差非零",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E46",
+      "label": "(46)",
+      "physical_page": 14,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "statistics/estimation/mean",
+      "function": "最近168步复合分数均值",
+      "origin": "本文历史评分",
+      "assumptions_and_audit": "日数据和56天初始化下168的单位/冷启动未解释",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E47",
+      "label": "(47)",
+      "physical_page": 14,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "algorithm/update/probabilistic_selection",
+      "function": "负历史分数softmax选模概率",
+      "origin": "本文随机选模",
+      "assumptions_and_audit": "beta=2且Monte Carlo抽一模型，不是确定最佳或四模型输出加权",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E48",
+      "label": "(48)",
+      "physical_page": 15,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "statistics/estimation/normalization",
+      "function": "训练集min-max归一化",
+      "origin": "标准预处理",
+      "assumptions_and_audit": "训练极差非零；test超训练范围可超[0,1]",
+      "implementation_verification": "not_assessed"
+    },
+    {
+      "id": "E49",
+      "label": "(49)",
+      "physical_page": 18,
+      "counting_unit": "numbered_display_group",
+      "primary_type": "statistics/estimation/correlation",
+      "function": "Pearson相关筛过分解",
+      "origin": "标准PCC",
+      "assumptions_and_audit": "阈值<.1而非绝对值；与原信号低相关不等价于无用模式",
+      "implementation_verification": "not_assessed"
+    }
+  ],
+  "figures": [
+    {
+      "id": "F1",
+      "label": "Figure 1",
+      "physical_pages": [
+        8
+      ],
+      "type": "algorithm_flow",
+      "panel_count": 1,
+      "panel_count_boundary": "独立坐标轴/单幅流程计数；复合模块不另计",
+      "content": "日历天气负荷→alpha状态动作QL-MVMD→高低残差→模型池→预测",
+      "evidence_role": "说明QL及后续流程，非收敛性能证据",
+      "visually_checked": true,
+      "uncertainty_display": "没有推断区间；箱图表达样本分布而非估计不确定性"
+    },
+    {
+      "id": "F2",
+      "label": "Figure 2",
+      "physical_pages": [
+        10
+      ],
+      "type": "framework",
+      "panel_count": 1,
+      "panel_count_boundary": "独立坐标轴/单幅流程计数；复合模块不另计",
+      "content": "IES输入场景、SVR/LightGBM/BiLSTM/XGB模块、评估选模、分解和预测输出",
+      "evidence_role": "主框架；图内Model Testing不能据图断言测试集参与选择",
+      "visually_checked": true,
+      "uncertainty_display": "没有推断区间；箱图表达样本分布而非估计不确定性"
+    },
+    {
+      "id": "F3",
+      "label": "Figure 3",
+      "physical_pages": [
+        17
+      ],
+      "type": "box_violin",
+      "panel_count": 4,
+      "panel_count_boundary": "独立坐标轴/单幅流程计数；复合模块不另计",
+      "content": "2016四季的冷/热/电/气箱图",
+      "evidence_role": "证明同站季节差异，非置信区间；电轴kW、气Tons/h等单位待数据核验",
+      "visually_checked": true,
+      "uncertainty_display": "没有推断区间；箱图表达样本分布而非估计不确定性"
+    },
+    {
+      "id": "F4",
+      "label": "Figure 4",
+      "physical_pages": [
+        18
+      ],
+      "type": "box_violin",
+      "panel_count": 4,
+      "panel_count_boundary": "独立坐标轴/单幅流程计数；复合模块不另计",
+      "content": "同年12月四载能箱图",
+      "evidence_role": "细化季节模式，与Fig3同一数据",
+      "visually_checked": true,
+      "uncertainty_display": "没有推断区间；箱图表达样本分布而非估计不确定性"
+    },
+    {
+      "id": "F5",
+      "label": "Figure 5",
+      "physical_pages": [
+        19
+      ],
+      "type": "bar",
+      "panel_count": 1,
+      "panel_count_boundary": "独立坐标轴/单幅流程计数；复合模块不另计",
+      "content": "4载能×5IMF样本熵及红阈值线",
+      "evidence_role": "支撑分组；图示阈值/文本分组存在疑点需高分辨原数据复核",
+      "visually_checked": true,
+      "uncertainty_display": "没有推断区间；箱图表达样本分布而非估计不确定性"
+    },
+    {
+      "id": "F6",
+      "label": "Figure 6",
+      "physical_pages": [
+        19
+      ],
+      "type": "time_series",
+      "panel_count": 11,
+      "panel_count_boundary": "独立坐标轴/单幅流程计数；复合模块不另计",
+      "content": "左原信号+IMF1..5+残差7轴，右原信号+高频+低频+残差4轴",
+      "evidence_role": "展示分解重构而非新增测试；横轴到约1750，是否全期间仅说明图或参与拟合需澄清",
+      "visually_checked": true,
+      "uncertainty_display": "没有推断区间；箱图表达样本分布而非估计不确定性"
+    },
+    {
+      "id": "F7",
+      "label": "Figure 7",
+      "physical_pages": [
+        22
+      ],
+      "type": "radar",
+      "panel_count": 4,
+      "panel_count_boundary": "独立坐标轴/单幅流程计数；复合模块不另计",
+      "content": "四载能三个组分的模型指标雷达",
+      "evidence_role": "Table1的可视化，无新增独立样本；负复合分与方向读图须小心",
+      "visually_checked": true,
+      "uncertainty_display": "没有推断区间；箱图表达样本分布而非估计不确定性"
+    },
+    {
+      "id": "F8",
+      "label": "Figure 8",
+      "physical_pages": [
+        23
+      ],
+      "type": "time_series",
+      "panel_count": 4,
+      "panel_count_boundary": "独立坐标轴/单幅流程计数；复合模块不另计",
+      "content": "2020全年冷/热/电/气真实值与M1..6",
+      "evidence_role": "同Table2预测轨迹；单位与日粒度对应不清",
+      "visually_checked": true,
+      "uncertainty_display": "没有推断区间；箱图表达样本分布而非估计不确定性"
+    },
+    {
+      "id": "F9",
+      "label": "Figure 9",
+      "physical_pages": [
+        25
+      ],
+      "type": "distribution",
+      "panel_count": 6,
+      "panel_count_boundary": "独立坐标轴/单幅流程计数；复合模块不另计",
+      "content": "四载能六对3D联合频数柱和预测热度",
+      "evidence_role": "定性联合分布一致性；无预测区间、联合距离或假设检验",
+      "visually_checked": true,
+      "uncertainty_display": "没有推断区间；箱图表达样本分布而非估计不确定性"
+    }
+  ],
+  "framework": {
+    "composition": [
+      "serial",
+      "nested",
+      "probabilistic_selection"
+    ],
+    "input": "每原点前56天可用四载能日负荷、天气和日历，预测随后7天（作者明确声明）；各模型实际输入形状和多步输出实现未给",
+    "modules": [
+      {
+        "id": "QL",
+        "input": "训练多通道信号与alpha离散集合",
+        "operation": "负重构MSE奖励，epsilon=.8,delta=.1,lambda=.9，最多500迭代",
+        "output": "alpha*",
+        "novelty_boundary": "低维参数选择应用，不是新RL理论或DRL"
+      },
+      {
+        "id": "MVMD",
+        "input": "四通道与alpha*,K5",
+        "operation": "共享中心频率ADMM同步分解",
+        "output": "每通道5IMF+残差",
+        "novelty_boundary": "借用标准分解，物理耦合保持尚无证明"
+      },
+      {
+        "id": "SE",
+        "input": "各通道5IMF",
+        "operation": "m2、r写0.2，按IMF平均SE阈值高低分组；残差不参与",
+        "output": "各通道3重构组分",
+        "novelty_boundary": "阈值分组不等于真实频带验证"
+      },
+      {
+        "id": "DMS",
+        "input": "每组分四模型历史复合误差",
+        "operation": "最近168步平均分、beta2负softmax、Monte Carlo抽选1模型",
+        "output": "各组分预测",
+        "novelty_boundary": "随机抽样与正文确定性最佳选模有差异；跨分量加权重构可与每分量随机选一个模型共存，不能仅凭加权二字判冲突"
+      },
+      {
+        "id": "reconstruction",
+        "input": "组分预测",
+        "operation": "文中交替写1/K平均、加权求和、动态加权",
+        "output": "四负荷与total指标",
+        "novelty_boundary": "权重和总负荷定义未充分披露"
+      }
+    ],
+    "training_inference": "2016—2019训练内滚动验证，无固定验证段；minmax/QL/K/SE/DMS配置只用训练；2020每原点仅历史窗口分解并更新可用历史评分。该防泄漏声明被文本确认，未运行代码验证。p15‘test not used for model selection’与其后test期间历史更新须区分离线配置/在线已揭示反馈。",
+    "hyperparameters_not_reported": [
+      "alpha_min/alpha_max/Delta/最终alpha*",
+      "MVMD停止eta数值",
+      "各基模型网络结构/训练epoch/batch/早停/超参搜索预算",
+      "DMS历史168步与日数据单位关系/初始化不足窗口处理",
+      "随机种子与Monte Carlo重复次数",
+      "预测原点步长和重叠7日误差如何计权"
+    ],
+    "theory_assumptions": [
+      "有限状态可重复奖励与充分探索，但无收敛证明且Q更新公式可疑",
+      "同步中心频率只是数学频域约束，不自动保持全部时空/物理相关",
+      "以重构误差最小选择alpha未直接优化未来预测",
+      "SE相似度阈值和残差近零会影响稳定性",
+      "复合分权重固定，量纲/零分母需定义"
+    ],
+    "complexity": "not_reported",
+    "implementation_match": "not_assessed; no code inspected"
+  },
+  "dataset": {
+    "id": "D1",
+    "name": "ASU Tempe Campus integrated energy daily loads + NREL weather (author reported)",
+    "pages": [
+      14,
+      15,
+      16,
+      26
+    ],
+    "time_span": "2016-01-01 through 2020-12-31",
+    "sampling": "daily",
+    "split": {
+      "training": "2016-01-01 through 2019-12-31",
+      "validation": "rolling chronological folds internal to training; fold boundaries/count not reported",
+      "test": "2020-01-01 through 2020-12-31"
+    },
+    "rows_reported": null,
+    "calendar_days_if_complete": {
+      "all": 1827,
+      "training": 1461,
+      "test": 366,
+      "status": "calendar inference only, NOT observed valid rows or independent n"
+    },
+    "input_window_days": 56,
+    "horizon_days": 7,
+    "forecast_origin_stride": "not_reported",
+    "normalization": "training-only minmax, frozen for validation/test; separate historical-window decomposition at every origin",
+    "missing_outlier_policy": "not_reported beyond descriptive claim few outliers",
+    "provenance_limit": "No direct dataset DOI/version or usable URL provided in source; public ASU/NREL claim is not a successful dataset-access audit.",
+    "unit_audit": "Figures use cooling tons/h, heating mmBTU/h, electricity kW and gas Tons/h despite daily observations. Units, aggregation and conversion underlying total load require verification.",
+    "code_availability": "no code availability link reported",
+    "data_availability": "article contributions; further inquiries to corresponding author, p26"
+  },
+  "tables": [
+    {
+      "id": "T1",
+      "label": "Table 1",
+      "pages": [
+        20
+      ],
+      "type": "component_model_comparison",
+      "rows": "4 loads ×3 component types ×4 models =48 condition rows, presented in four subpanels",
+      "columns": [
+        "RMSE",
+        "MAPE",
+        "R²",
+        "S"
+      ],
+      "unit": "normalized/ratio convention not adequately specified; MAPE formula conflict",
+      "sample_size_visible": false,
+      "uncertainty": "no SD/CI or repeated-run markers",
+      "supports": [
+        "component specificity",
+        "Ecomp"
+      ],
+      "results": "按S最低：电高LightGBM/低BiLSTM/残LightGBM；热高BiLSTM/低XGBoost/残XGBoost；冷高LightGBM/低SVR/残SVR；气高LightGBM/低BiLSTM/残LightGBM。不能一概说高频残差树模型最好。",
+      "visual_review": true,
+      "full_cell_transcription": "not_completed"
+    },
+    {
+      "id": "T2",
+      "label": "Table 2",
+      "pages": [
+        22,
+        23
+      ],
+      "type": "main_comparison",
+      "rows": "5 metric blocks (total and four load channels) ×4 metrics ×6 methods; continued gas rows count once",
+      "columns": [
+        "M1 MVMD-SF-DMS identified as proposed QL-MVMD-SE-DMS in prose",
+        "M2 CEEMDAN-SF-DMS",
+        "M3 MVMD-SF-XGBoost",
+        "M4 MVMD-SF-SVR",
+        "M5 MVMD-SF-BiLSTM",
+        "M6 MVMD-SF-LightGBM"
+      ],
+      "uncertainty": "no inferential statistics or repeated-run dispersion",
+      "unit": "normalized RMSE and unspecified MAPE scale; total block seems macro-average, not established physical aggregate",
+      "M1": {
+        "total": {
+          "S": -0.1598,
+          "RMSE": 0.0359,
+          "MAPE": 0.0426,
+          "R2": 0.9561
+        },
+        "cool": {
+          "S": -0.1572,
+          "RMSE": 0.0309,
+          "MAPE": 0.0645,
+          "R2": 0.9767
+        },
+        "heat": {
+          "S": -0.1515,
+          "RMSE": 0.0477,
+          "MAPE": 0.0428,
+          "R2": 0.9388
+        },
+        "electric": {
+          "S": -0.1641,
+          "RMSE": 0.0331,
+          "MAPE": 0.0264,
+          "R2": 0.9394
+        },
+        "gas": {
+          "S": -0.1665,
+          "RMSE": 0.0321,
+          "MAPE": 0.0366,
+          "R2": 0.9696
+        }
+      },
+      "total_comparators": {
+        "M2": {
+          "S": -0.1211,
+          "RMSE": 0.0566,
+          "MAPE": 0.0699,
+          "R2": 0.8583
+        },
+        "M3": {
+          "S": -0.1566,
+          "RMSE": 0.0367,
+          "MAPE": 0.04,
+          "R2": 0.9365
+        },
+        "M4": {
+          "S": -0.0988,
+          "RMSE": 0.0682,
+          "MAPE": 0.1078,
+          "R2": 0.846
+        },
+        "M5": {
+          "S": -0.0994,
+          "RMSE": 0.0708,
+          "MAPE": 0.0892,
+          "R2": 0.8169
+        },
+        "M6": {
+          "S": -0.1567,
+          "RMSE": 0.0376,
+          "MAPE": 0.0424,
+          "R2": 0.9435
+        }
+      },
+      "negative_results": "M3在冷、热、气的4指标全部优于M1；M6在冷/热4指标也优于M1，气S四舍五入持平；M1 total MAPE不及M3/M6。",
+      "visual_review": true,
+      "full_cell_transcription": "partial key results; not all 120 numeric cells"
+    }
+  ],
+  "experiments": [
+    {
+      "id": "Ecomp",
+      "pages": [
+        19,
+        20,
+        21,
+        22
+      ],
+      "design_type": "component_model_comparison",
+      "rq": "各载能/组分是否适用不同模型",
+      "factors": "4载能×3组分×4预测器；48条件不是48独立实验",
+      "dataset": "D1; exact Table1 evaluation partition not explicit, source method says rolling training validation",
+      "finding": "12个component赢家多样；展示选择动机",
+      "confounders": [
+        "相同训练调参预算未知",
+        "无方差或多次种子",
+        "模型池外更强基线未评"
+      ],
+      "controls": "same declared data; fairness not verified"
+    },
+    {
+      "id": "Eend",
+      "pages": [
+        21,
+        22,
+        23,
+        24
+      ],
+      "design_type": [
+        "main_comparison",
+        "reported_ablation",
+        "mechanism_substitution"
+      ],
+      "rq": "MVMD替代CEEMDAN及DMS替代固定模型是否改进",
+      "conditions": [
+        "M1",
+        "M2",
+        "M3",
+        "M4",
+        "M5",
+        "M6"
+      ],
+      "contrasts": {
+        "decomposition": "M1 versus M2",
+        "selector": "M1 versus fixed M3-M6"
+      },
+      "controlled_ablation_status": "作者称消融，但预算/训练控制和QL/SE应用范围未足够定义，不能计已确认受控消融",
+      "finding": "M1 total score/RMSE/R²最优，electric全指标最优；三个其他载能均有固定树模型反超",
+      "not_tested": [
+        "QL vs grid/random/GA/PSO等预算匹配搜索",
+        "无QL、无SE单模块消融",
+        "独立单载能分解 vs同步MVMD",
+        "权重与beta/epsilon/K网格敏感性",
+        "跨校区或外部数据测试"
+      ],
+      "runtime": "hardware reported, no measured runtime table"
+    },
+    {
+      "id": "Dseason",
+      "pages": [
+        16,
+        17,
+        18
+      ],
+      "design_type": "descriptive_diagnostic",
+      "rq": "四载能是否有季节与月变化",
+      "data": "2016 only",
+      "finding": "冷电夏高热冬高气随季节变化",
+      "boundary": "同一数据两种分组，不是额外外测或气候因果实验"
+    },
+    {
+      "id": "Djoint",
+      "pages": [
+        24,
+        25
+      ],
+      "design_type": "case_visualization",
+      "rq": "预测是否处于观测联合分布高频区域",
+      "conditions": "4载能的6对",
+      "finding": "3D图定性贴合",
+      "boundary": "无联合距离、相关误差、置信区间及跨模型量化；不证明严格保持耦合"
+    }
+  ],
+  "statistics": {
+    "analysis_unit": "forecast origin × horizon × load channel within one campus",
+    "independent_n": "not_reported; cannot equate 366 test days or overlapping 7-day predictions to independent n",
+    "dependence": [
+      "temporal",
+      "cross_carrier",
+      "overlapping_horizon_possible"
+    ],
+    "methods": [
+      "descriptive boxplots",
+      "PCC for decomposition heuristic",
+      "sample entropy",
+      "RMSE/reported MAPE/R²",
+      "fixed weighted score"
+    ],
+    "seeds": "not_reported",
+    "repeat_runs": "not_reported",
+    "confidence_intervals": "not_reported",
+    "hypothesis_tests": "not_reported",
+    "multiplicity": "not_reported",
+    "power_precision": "not_reported",
+    "reward_vs_endpoint": "reconstruction MSE reward differs from forecasting endpoints; no demonstrated correlation",
+    "total_metric_inference": "M1 mean of four reported RMSE=(.0309+.0477+.0331+.0321)/4=.03595; mean R²=.956125; table total=.0359/.9561. This strongly suggests channel-macro-average rather than physical total-load forecast, but source does not explicitly define total. Keep as inference.",
+    "effect_audit": "Reported total RMSE reduction vsM3 2.18% matches rounded values (.0367-.0359)/.0367=2.1798%. Reported R² relative rise vsM6 1.32%, rounded table gives(.9561-.9435)/.9435=1.3355%, about1.34%; may involve rounding, no significance established.",
+    "leakage_status": "author states train-only and origin-causal processing; not independently executable",
+    "uncertainty_caveat": "stochastic QL and Monte Carlo selection without repeated-run dispersion cannot support statistically significant superiority"
+  },
+  "conclusions": {
+    "pages": [
+      25,
+      26
+    ],
+    "supported": "单站指定split上报告较好总体复合分、RMSE、R²及electric表现；不在所有载能/指标占优",
+    "quantified": "total R² .9561 vsM6 .9435；RMSE .0359 vsM3 .0367，参照模型不同",
+    "mechanism": "MVMD避免混叠、SE提取物理耦合、DMS互补解释主要为设计叙述，无隔离实验/物理验证",
+    "negative_results_preserved": "冷/热/气均有固定XGBoost更优；total MAPE非最佳",
+    "limits": [
+      "单校区",
+      "指标定义及算法公式错误/歧义",
+      "模型配置与数据来源不足",
+      "随机性无复测",
+      "没有调度、容量、收益或实时系统实验"
+    ],
+    "future_work": [
+      "概率预测",
+      "在线学习",
+      "不同IES数据泛化",
+      "设备容量与储能调度和运行优化结合"
+    ],
+    "unsupported_strength": [
+      "strictly maintained spatial and temporal correlation",
+      "物理解释已证明",
+      "显著优越若指统计显著",
+      "所有负荷最优"
+    ],
+    "positive_boundary": "明确声明容量优化和详细技经设计不在本文范围；这些应用只作潜在输入，不算已验证"
+  },
+  "quality_findings": [
+    {
+      "id": "Qmetric",
+      "pages": [
+        14,
+        20
+      ],
+      "finding": "Eq44名MAPE实际MAE，视觉确认无分母或百分比。Table1电残XGB所谓MAPE1.2018远高于RMSE.0572；若同数据/同单位真MAE必<=RMSE，故公式与数值至少一处定义不同，不能自行把所有表数值改成MAE。",
+      "status": "source_formula_verified_implementation_uncertain"
+    },
+    {
+      "id": "Qbellman",
+      "pages": [
+        7
+      ],
+      "finding": "Eq13(1-delta)Q之外又在bootstrap中扣Q；与正文声称标准Bellman不一致。源式错误不等于实际代码必照做。",
+      "status": "source_visual_issue_pending_math_and_code_review"
+    },
+    {
+      "id": "Qfreq",
+      "pages": [
+        9,
+        19
+      ],
+      "finding": "SE高低被叫高低频，未检验谱频阈值；Fig5阈值线与柱均值及电IMF3/4归组看起来不一致，需高分辨/数值源复核。",
+      "status": "uncertain"
+    },
+    {
+      "id": "Qunits",
+      "pages": [
+        14,
+        15,
+        17,
+        23
+      ],
+      "finding": "日数据56→7框架与168步DMS窗口缺单位桥接；图中气Tons/h、电约850000kW也需核对日聚合和物理单位。",
+      "status": "reporting_ambiguity"
+    },
+    {
+      "id": "Qselection",
+      "pages": [
+        14,
+        21,
+        26
+      ],
+      "finding": "3.5随机抽样一个模型，4.4.2称确定最佳单模型，二者不等价。结论的跨分量动态加权重构本身可与逐分量抽样共存，不作为独立矛盾；式22的1/K平均与模态求和接口及实际权重仍需代码说明。",
+      "status": "source_internal_inconsistency"
+    },
+    {
+      "id": "Qabl",
+      "pages": [
+        6,
+        7,
+        18,
+        21,
+        22
+      ],
+      "finding": "缺alpha范围/最终值及基模型配置；标题Sensitivity Analysis下没有参数扰动结果；QL优于经验搜索的收益未隔离。",
+      "status": "not_reported_after_fulltext_read"
+    },
+    {
+      "id": "Qranking",
+      "pages": [
+        20,
+        22,
+        23
+      ],
+      "finding": "Table1热高频BiLSTM、冷残差SVR赢，反例限制树模型全优叙述；Table2冷热气固定XGBoost全指标胜M1。",
+      "status": "source_verified"
+    },
+    {
+      "id": "Qprovenance",
+      "pages": [
+        14,
+        15,
+        26
+      ],
+      "finding": "公开ASU/NREL数据但无具体版本链接；原始贡献在article/询问作者不等于可复现数据发布。",
+      "status": "source_verified"
+    },
+    {
+      "id": "Qgeneralization",
+      "pages": [
+        24,
+        25,
+        26
+      ],
+      "finding": "联合图描述不能证明严格保持物理耦合；没有跨站验证或推断统计。",
+      "status": "evidence_boundary"
+    }
+  ],
+  "language": {
+    "status": "qualitative_source_review_not_lexical_statistics",
+    "terms": [
+      "cross-carrier coupling",
+      "common center frequencies",
+      "multichannel reconstruction error",
+      "component-specific model selection",
+      "rolling forecasting origin"
+    ],
+    "narrative": "现实协同需求→三类方法局限→4项模块贡献→标准方法公式铺陈→单校区组分及总体比较→定性联合分布→潜在系统用途和未来边界",
+    "issues": "标准算法说明占大量公式；novelty主要组合而非49式新理论。正文strong/significant/strictly maintained强于证据；摘要competitive及potentially useful较审慎。SE/SF混称、modality/mode和air/gas混用影响一致性。",
+    "original_sentence_frames": [
+      "在仅使用[原点前可用信息]的条件下，[流程]对[载能/预测期]取得[指标结果]，其对照为[具体方法]。",
+      "虽然[总体指标]改善，[子任务]仍落后于[基线]，因此收益应限定为[范围]。",
+      "[模块]通过[数学机制]施加[约束]；这一约束尚不能证明[更强物理性质]。",
+      "将[潜在应用]作为下一步验证方向，而不把预测误差改善直接解释为[系统收益]。"
+    ],
+    "frequency_counts": null,
+    "tense_voice_statistics": null,
+    "reuse_boundary": "自行功能抽象，不复制原句或借用原文结果为用户结果"
+  },
+  "paragraphs": {
+    "status": "partial",
+    "count_total": null,
+    "word_statistics": null,
+    "boundary_rule": "正文Introduction至Conclusion，排除标题/题注/公式/表/声明/参考；跨页语义合并。这里只人工定位少数完整逻辑段，非全部PDF块计数。",
+    "selected": [
+      {
+        "id": "P1",
+        "pages": [
+          2
+        ],
+        "anchor": "Beyond short-term operations",
+        "role": "implication",
+        "paraphrase": "把预测输入关联容量设计和水氢系统，同时明确容量优化不属本文。",
+        "cross_page": false
+      },
+      {
+        "id": "P2",
+        "pages": [
+          2
+        ],
+        "anchor": "Existing integrated energy system",
+        "role": "gap",
+        "paraphrase": "提出独立建模、原序列非平稳、独立分解/固定预测器三类问题。",
+        "cross_page": false
+      },
+      {
+        "id": "P3",
+        "pages": [
+          3,
+          4
+        ],
+        "anchor": "Reinforcement learning has increasingly",
+        "role": "background",
+        "paraphrase": "综述RL在电力紧急控制、电压、调度及预测选择中的应用。",
+        "cross_page": true
+      },
+      {
+        "id": "P4",
+        "pages": [
+          6
+        ],
+        "anchor": "All Q-learning parameter selection",
+        "role": "experimental_setup",
+        "paraphrase": "声明测试集不参与QL奖励、收敛或配置。",
+        "cross_page": false
+      },
+      {
+        "id": "P5",
+        "pages": [
+          14
+        ],
+        "anchor": "At each forecasting time",
+        "role": "algorithm_explanation",
+        "paraphrase": "按负softmax概率Monte Carlo选取一个模型，保留探索。",
+        "cross_page": false
+      },
+      {
+        "id": "P6",
+        "pages": [
+          14,
+          15
+        ],
+        "anchor": "The public integrated energy system dataset",
+        "role": "experimental_setup",
+        "paraphrase": "交代ASU日数据/NREL天气，2016—2019训练内滚动验证、2020测试。",
+        "cross_page": true
+      },
+      {
+        "id": "P7",
+        "pages": [
+          19
+        ],
+        "anchor": "Figure 5 presents",
+        "role": "algorithm_explanation",
+        "paraphrase": "逐通道平均SE阈值分组，电IMF1/3/4归低，2/5归高，残差独立。",
+        "cross_page": false
+      },
+      {
+        "id": "P8",
+        "pages": [
+          23,
+          24
+        ],
+        "anchor": "Combining the performance",
+        "role": "comparison",
+        "paraphrase": "比较MVMD与CEEMDAN，给两个不同参照的总体收益，并归因组分互补。",
+        "cross_page": true
+      },
+      {
+        "id": "P9",
+        "pages": [
+          24
+        ],
+        "anchor": "As evidenced by the visualization",
+        "role": "result_description",
+        "paraphrase": "联合分布图的定性贴合被用于支持耦合预测合理性。",
+        "cross_page": false
+      },
+      {
+        "id": "P10",
+        "pages": [
+          25,
+          26
+        ],
+        "anchor": "In this study, an adaptive forecasting framework",
+        "role": "contribution",
+        "paraphrase": "整段结论汇总机制收益、限定技经范围，再提出概率预测、跨系统与优化集成未来工作。",
+        "cross_page": true
+      }
+    ]
+  },
+  "difficulty": {
+    "status": "single_assistant_provisional",
+    "scale": "DESIGN v0.1,0-4; workload/technical demands, NOT quality or acceptance",
+    "reviewer": "/root/scope_other",
+    "dimensions": {
+      "theory": {
+        "value": 2,
+        "range": [
+          1,
+          2
+        ],
+        "pages": [
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ],
+        "rationale": "标准MVMD/RL/SE/预测器公式改写与衔接，无新证明；公式错误另属质量问题"
+      },
+      "algorithm": {
+        "value": 3,
+        "range": [
+          2,
+          3
+        ],
+        "pages": [
+          6,
+          7,
+          9,
+          14,
+          15
+        ],
+        "rationale": "嵌套参数搜索+逐原点分解+随机选模的多阶段实现有实质耦合，但复杂度和配置不足"
+      },
+      "statistics": {
+        "value": 1,
+        "range": [
+          1,
+          2
+        ],
+        "pages": [
+          16,
+          17,
+          18,
+          20,
+          22,
+          23,
+          25
+        ],
+        "rationale": "描述指标/箱图/PCC，无重复推断或依赖处理"
+      },
+      "data": {
+        "value": 2,
+        "range": [
+          1,
+          2
+        ],
+        "pages": [
+          14,
+          15
+        ],
+        "rationale": "四载能与天气日历多源、时序预处理；仅一校区无外测，来源不完整"
+      },
+      "engineering": {
+        "value": 1,
+        "range": [
+          1,
+          1
+        ],
+        "pages": [
+          15,
+          26
+        ],
+        "rationale": "离线预测，硬件配置仅运行环境，无物理控制/容量或现场验证"
+      },
+      "cross_discipline": {
+        "value": 2,
+        "range": [
+          1,
+          2
+        ],
+        "pages": [
+          2,
+          5,
+          15,
+          26
+        ],
+        "rationale": "能量载体到多通道预测接口明确，但物理系统方程/调度反馈未耦合"
+      }
+    },
+    "composite": null
+  },
+  "remaining_work": [
+    "独立AI核心复核已完成；仍需全字段复核、人工校准及版本核验",
+    "版本链/8月18更新内容及当前VoR核实",
+    "全部公式数学和代码映射",
+    "Fig5高清阈值数值及电分组核验",
+    "全文逐段边界bbox、词句和语言量化",
+    "全部表格数值转录/复算",
+    "数据实际获取与预测可复现",
+    "统一211字段obs映射"
+  ],
+  "all_fields_verified": false
+}

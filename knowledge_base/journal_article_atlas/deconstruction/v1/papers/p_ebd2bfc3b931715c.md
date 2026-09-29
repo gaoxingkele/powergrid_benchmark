@@ -1,0 +1,3573 @@
+# Multi-Objective Optimization and Optimal Airfoil Blade Selection for a Small Horizontal-Axis Wind Turbine (HAWT) for Application in Regions with Various Wind Potential
+
+单助手全文解构；未完成人工校准或独立复核，逐段标注仍为partial。
+
+
+## schema_version
+
+deconstruction.v1.single_assistant.2026-09-13
+
+## analysis_status
+
+fulltext_single_assistant_analysis_pending_independent_review
+
+## human_calibrated
+
+false
+
+## annotator
+
+Codex / scope_core
+
+## annotation_version
+
+1.0
+
+## review_date
+
+2026-09-13
+
+## provenance_policy
+
+本地只读作者/出版社原件逐页阅读并渲染对象复核；Crossref/OpenAlex/Unpaywall核身份与OA；不外传LLM；不升级为独立/人工校准。
+
+## measurement_status
+
+single_assistant_source_checked_pending_independent_review
+
+## paragraph_analysis
+
+
+### status
+
+partial
+
+### note
+
+完整阅读正文，已做章节和关键论证动作解构；未完成逐语义段跨页重建、逐段独立ID/词数/句数/词性时态标注。不得把PDF块数当段落数。
+
+### paragraph_count
+
+未评估/未报告
+
+### word_count
+
+未评估/未报告
+
+### body_share
+
+未评估/未报告
+
+## remaining_not_assessed
+
+逐段边界与全文逐句标签；正文/摘要精确词数及分布；无编号公式和行内数学穷尽计数；逐式量纲与实现源码一致性全面复核；引用文献原文和外部元数据/撤稿核验；数据下载、代码执行与实验复现；独立第二标注者一致性和人工校准；录用概率、期刊门槛或期刊平均水平
+
+## read_coverage
+
+
+### physical_pages_read
+
+1；2；3；4；5；6；7；8；9；10；11；12；13；14；15；16；17；18；19；20；21；22；23；24
+
+### status
+
+all_physical_pages_read
+
+### fulltext_text_read
+
+true
+
+### reference_pages_read
+
+22；23；24
+
+### not_claimed
+
+全文逐段精确切分；全部行内数学/无编号陈述穷尽；出版商最终版字节一致性；数据/代码复现实验
+
+### appendix_pages_read
+
+19；20；21；22
+
+### visual_pages_reviewed
+
+4；5；6；7；8；9；10；11；12；13；14；15；16；17；19；20；21；22
+
+### extraction
+
+complete page text output plus Poppler object PNGs
+
+## paper_id
+
+p_ebd2bfc3b931715c
+
+## identity
+
+
+### title
+
+Multi-Objective Optimization and Optimal Airfoil Blade Selection for a Small Horizontal-Axis Wind Turbine (HAWT) for Application in Regions with Various Wind Potential
+
+### authors
+
+Vahid Akbari；Mohammad Naghashzadegan；Ramin Kouhikamali；Farhad Afsharpanah；Wahiba Yaïci
+
+### year
+
+2022
+
+### publication_date
+
+2022-08-13
+
+### publication_type
+
+journal-article
+
+### publisher_article_type
+
+Article
+
+### functional_article_type
+
+simulation_based_design_research
+
+### journal
+
+Machines
+
+### venue
+
+Machines 2022, 10(8), 687
+
+### publisher
+
+MDPI
+
+### doi
+
+10.3390/machines10080687
+
+### source_path
+
+D:/aicoding/powergrid_benchmark/knowledge_base/journal_article_atlas/deconstruction/v1/sources/machines/machines-10-00687.pdf
+
+### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### pages
+
+24
+
+### source_version
+
+publisherPDF obtained2026-09-13; latest revisions not independently verified
+
+### formal_layout_metrics_eligible
+
+true
+
+### pdf_url
+
+https://mdpi-res.com/d_attachment/machines/machines-10-00687/article_deploy/machines-10-00687.pdf
+
+### full_text_status
+
+open_pdf
+
+### download_status
+
+downloaded
+
+### download_tool
+
+aria2c
+
+### open_access_status
+
+gold
+
+### license
+
+cc-by-4.0
+
+### source_platforms
+
+Crossref；Semantic Scholar；OpenAlex；Unpaywall；MDPI PDF
+
+### fetched_at
+
+2026-09-13
+
+### citation_count
+
+56
+
+### citation_count_source
+
+Semantic Scholar
+
+### citation_count_date
+
+2026-09-13
+
+### oa_checks
+
+
+#### OpenAlex
+
+W4291449582 gold publishedVersion cc-by
+
+#### Unpaywall
+
+gold publishedVersion cc-by
+
+#### SemanticScholar
+
+985fce00591494b4b05b3e77c511128d0f899fad GOLD noArxiv
+
+### code_url
+
+未评估/未报告
+
+### code_status
+
+MATLAB code described no repository
+
+### data_availability
+
+reasonable request to corresponding author (p18)
+
+### retraction_correction_status
+
+not_assessed; landing429
+
+### related_original_candidate
+
+p_cfabc8737fb852fe is a different Savonius PDF with mismatched filename; this acquired publisher PDF is not a version of that content
+
+## scope
+
+
+### decision
+
+core_ai
+
+### relevance
+
+direct
+
+### task
+
+1kW小型风力发电机叶片气动/启动设计
+
+### method_family
+
+Differential Evolution + BEM numerical objective
+
+### ai_role
+
+central_evolutionary_optimization
+
+### not_used
+
+ANN appears in keywords but no neural architecture/training in full text; do not label ANN
+
+### cohort_warning
+
+与machines10090785同作者组和相近平台，不是独立团队重复；预测与设计研究不混算实验均值
+
+## sections
+
+
+### 1
+
+
+#### label
+
+1
+
+#### heading
+
+Introduction
+
+#### level
+
+1
+
+#### parent_id
+
+未评估/未报告
+
+#### pages
+
+1；2；3
+
+#### core_logic
+
+能源动机→SWT无变桨导致启动滞后→现有几何优化忽略翼型启动差异→承诺10翼型Cp/Ts比较
+
+#### input_commitment
+
+承接父节定义/前节技术承诺
+
+#### output_commitment
+
+能源动机→SWT无变桨导致启动滞后→现有几何优化忽略翼型启动差异→承诺10翼型Cp/Ts比较
+
+#### object_id
+
+p_ebd2bfc3b931715c.sections.1
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 2
+
+
+#### label
+
+2
+
+#### heading
+
+The Selected Airfoils
+
+#### level
+
+1
+
+#### parent_id
+
+未评估/未报告
+
+#### pages
+
+3；4
+
+#### core_logic
+
+选低Re工业翼型，提供几何及Cl/Cd数据来源，输出BEM数据库
+
+#### input_commitment
+
+承接父节定义/前节技术承诺
+
+#### output_commitment
+
+选低Re工业翼型，提供几何及Cl/Cd数据来源，输出BEM数据库
+
+#### object_id
+
+p_ebd2bfc3b931715c.sections.2
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 3
+
+
+#### label
+
+3
+
+#### heading
+
+Numerical Procedure
+
+#### level
+
+1
+
+#### parent_id
+
+未评估/未报告
+
+#### pages
+
+4；5；6；7；8；9；10；11
+
+#### core_logic
+
+把双目标DE、物理BEM/启动动力学与代码验证连接到设计比较
+
+#### input_commitment
+
+承接父节定义/前节技术承诺
+
+#### output_commitment
+
+把双目标DE、物理BEM/启动动力学与代码验证连接到设计比较
+
+#### object_id
+
+p_ebd2bfc3b931715c.sections.3
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 4
+
+
+#### label
+
+3.1
+
+#### heading
+
+Multi-Objective Optimization
+
+#### level
+
+2
+
+#### parent_id
+
+3
+
+#### pages
+
+4；5
+
+#### core_logic
+
+种群变异交叉选择+动态归一加权目标；n指定Cp与启动时间偏好，停滞误称全局保证
+
+#### input_commitment
+
+承接父节定义/前节技术承诺
+
+#### output_commitment
+
+种群变异交叉选择+动态归一加权目标；n指定Cp与启动时间偏好，停滞误称全局保证
+
+#### object_id
+
+p_ebd2bfc3b931715c.sections.4
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 5
+
+
+#### label
+
+3.2
+
+#### heading
+
+Calculating Design Goals
+
+#### level
+
+2
+
+#### parent_id
+
+3
+
+#### pages
+
+5；6；7
+
+#### core_logic
+
+速度角→升阻力矩→Cp与叶尖损失；高攻角平板→启动转矩→含惯量ODE→Ts
+
+#### input_commitment
+
+承接父节定义/前节技术承诺
+
+#### output_commitment
+
+速度角→升阻力矩→Cp与叶尖损失；高攻角平板→启动转矩→含惯量ODE→Ts
+
+#### object_id
+
+p_ebd2bfc3b931715c.sections.5
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 6
+
+
+#### label
+
+3.3
+
+#### heading
+
+Adjusting the Input Parameters
+
+#### level
+
+2
+
+#### parent_id
+
+3
+
+#### pages
+
+7；8；9
+
+#### core_logic
+
+MATLAB、15叶素、边界和DE预算、1kW三叶基机约束用于后续可重复算例
+
+#### input_commitment
+
+承接父节定义/前节技术承诺
+
+#### output_commitment
+
+MATLAB、15叶素、边界和DE预算、1kW三叶基机约束用于后续可重复算例
+
+#### object_id
+
+p_ebd2bfc3b931715c.sections.6
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 7
+
+
+#### label
+
+3.4
+
+#### heading
+
+Validation of the BEM Code
+
+#### level
+
+2
+
+#### parent_id
+
+3
+
+#### pages
+
+9；10
+
+#### core_logic
+
+不同的1.5m两叶NACA4412风洞数据检验Cp曲线，量化误差；不验证新优化叶片Ts
+
+#### input_commitment
+
+承接父节定义/前节技术承诺
+
+#### output_commitment
+
+不同的1.5m两叶NACA4412风洞数据检验Cp曲线，量化误差；不验证新优化叶片Ts
+
+#### object_id
+
+p_ebd2bfc3b931715c.sections.7
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 8
+
+
+#### label
+
+3.5
+
+#### heading
+
+Validation of the Optimization Code
+
+#### level
+
+2
+
+#### parent_id
+
+3
+
+#### pages
+
+10；11
+
+#### core_logic
+
+无阻力/无叶尖损失理想式与BW3 n1分布比对，提示根部差异，不能证明真实问题全局最优
+
+#### input_commitment
+
+承接父节定义/前节技术承诺
+
+#### output_commitment
+
+无阻力/无叶尖损失理想式与BW3 n1分布比对，提示根部差异，不能证明真实问题全局最优
+
+#### object_id
+
+p_ebd2bfc3b931715c.sections.8
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 9
+
+
+#### label
+
+4
+
+#### heading
+
+Discussion of Results
+
+#### level
+
+1
+
+#### parent_id
+
+未评估/未报告
+
+#### pages
+
+12；13；14；15；16；17
+
+#### core_logic
+
+以n1/n.8代表两种偏好场景，表4总览，附录n.6检验功率代价
+
+#### input_commitment
+
+承接父节定义/前节技术承诺
+
+#### output_commitment
+
+以n1/n.8代表两种偏好场景，表4总览，附录n.6检验功率代价
+
+#### object_id
+
+p_ebd2bfc3b931715c.sections.9
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 10
+
+
+#### label
+
+4.1
+
+#### heading
+
+Investigating the Performance of Airfoils in Windy Areas
+
+#### level
+
+2
+
+#### parent_id
+
+4
+
+#### pages
+
+12；13；14
+
+#### core_logic
+
+n1 Cp排序→升阻比与局部Re/弦长解释→根部功率贡献小
+
+#### input_commitment
+
+承接父节定义/前节技术承诺
+
+#### output_commitment
+
+n1 Cp排序→升阻比与局部Re/弦长解释→根部功率贡献小
+
+#### object_id
+
+p_ebd2bfc3b931715c.sections.10
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 11
+
+
+#### label
+
+4.2
+
+#### heading
+
+Investigating the Performance of Airfoils in Areas with Low Wind Speed
+
+#### level
+
+2
+
+#### parent_id
+
+4
+
+#### pages
+
+14；15；16；17
+
+#### core_logic
+
+n.8 Ts排序→截面积/惯量/启动转矩关系→更薄不一定更快的反例
+
+#### input_commitment
+
+承接父节定义/前节技术承诺
+
+#### output_commitment
+
+n.8 Ts排序→截面积/惯量/启动转矩关系→更薄不一定更快的反例
+
+#### object_id
+
+p_ebd2bfc3b931715c.sections.11
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 12
+
+
+#### label
+
+5
+
+#### heading
+
+Conclusions
+
+#### level
+
+1
+
+#### parent_id
+
+未评估/未报告
+
+#### pages
+
+17；18
+
+#### core_logic
+
+九项几何/物理发现与两场景翼型建议；未讨论结构可行性和真实风分布的外推
+
+#### input_commitment
+
+承接父节定义/前节技术承诺
+
+#### output_commitment
+
+九项几何/物理发现与两场景翼型建议；未讨论结构可行性和真实风分布的外推
+
+#### object_id
+
+p_ebd2bfc3b931715c.sections.12
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 13
+
+
+#### label
+
+decl
+
+#### heading
+
+Author Contributions; Funding; IRB; Consent; Data; Conflicts
+
+#### level
+
+1
+
+#### parent_id
+
+未评估/未报告
+
+#### pages
+
+18
+
+#### core_logic
+
+无外部资助；伦理/同意NA；数据合理请求，无代码仓库
+
+#### input_commitment
+
+承接父节定义/前节技术承诺
+
+#### output_commitment
+
+无外部资助；伦理/同意NA；数据合理请求，无代码仓库
+
+#### object_id
+
+p_ebd2bfc3b931715c.sections.13
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 14
+
+
+#### label
+
+nomen
+
+#### heading
+
+Nomenclature
+
+#### level
+
+1
+
+#### parent_id
+
+未评估/未报告
+
+#### pages
+
+18；19
+
+#### core_logic
+
+变量、希腊字母、下标和缩写；A单位与归一化定义需区分
+
+#### input_commitment
+
+承接父节定义/前节技术承诺
+
+#### output_commitment
+
+变量、希腊字母、下标和缩写；A单位与归一化定义需区分
+
+#### object_id
+
+p_ebd2bfc3b931715c.sections.14
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 15
+
+
+#### label
+
+A
+
+#### heading
+
+Appendix A
+
+#### level
+
+1
+
+#### parent_id
+
+未评估/未报告
+
+#### pages
+
+19；20；21
+
+#### core_logic
+
+10种翼型升阻极曲线，作为输入数据库而非新增预测实验
+
+#### input_commitment
+
+承接父节定义/前节技术承诺
+
+#### output_commitment
+
+10种翼型升阻极曲线，作为输入数据库而非新增预测实验
+
+#### object_id
+
+p_ebd2bfc3b931715c.sections.15
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 16
+
+
+#### label
+
+B
+
+#### heading
+
+Appendix B
+
+#### level
+
+1
+
+#### parent_id
+
+未评估/未报告
+
+#### pages
+
+21
+
+#### core_logic
+
+14个λ的Cp验证明细，Absolute Error实际含负号
+
+#### input_commitment
+
+承接父节定义/前节技术承诺
+
+#### output_commitment
+
+14个λ的Cp验证明细，Absolute Error实际含负号
+
+#### object_id
+
+p_ebd2bfc3b931715c.sections.16
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 17
+
+
+#### label
+
+C
+
+#### heading
+
+Appendix C
+
+#### level
+
+1
+
+#### parent_id
+
+未评估/未报告
+
+#### pages
+
+21；22
+
+#### core_logic
+
+10翼型×3权重Cp/Ts/Jb/Qs0扩展表，重用表4数据
+
+#### input_commitment
+
+承接父节定义/前节技术承诺
+
+#### output_commitment
+
+10翼型×3权重Cp/Ts/Jb/Qs0扩展表，重用表4数据
+
+#### object_id
+
+p_ebd2bfc3b931715c.sections.17
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 18
+
+
+#### label
+
+refs
+
+#### heading
+
+References
+
+#### level
+
+1
+
+#### parent_id
+
+未评估/未报告
+
+#### pages
+
+22；23；24
+
+#### core_logic
+
+51条文献；列表已读、引用原文未逐项核验
+
+#### input_commitment
+
+承接父节定义/前节技术承诺
+
+#### output_commitment
+
+51条文献；列表已读、引用原文未逐项核验
+
+#### object_id
+
+p_ebd2bfc3b931715c.sections.18
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+## equations
+
+
+### 1
+
+
+#### label
+
+1
+
+#### pages
+
+5
+
+#### primary_type
+
+optimization.objective.multi
+
+#### content
+
+maximize n Cp/max(Cp)+(1-n) min(Ts)/Ts
+
+#### function
+
+把双目标变为单标量适应度
+
+#### assumptions
+
+每代归一分母更新；比较跨代父子需一致重算，实现未核；正Ts且0<n≤1
+
+#### origin
+
+标准引用/应用改写
+
+#### implementation_match
+
+not_assessed
+
+#### object_id
+
+p_ebd2bfc3b931715c.equations.1
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 2
+
+
+#### label
+
+2
+
+#### pages
+
+5
+
+#### primary_type
+
+physical.energy.conversion
+
+#### content
+
+phi=atan((1-a)U/((1+a')rω))
+
+#### function
+
+BEM入流角
+
+#### assumptions
+
+诱导因子迭代，低ω及根部边界需数值处理
+
+#### origin
+
+标准引用/应用改写
+
+#### implementation_match
+
+not_assessed
+
+#### object_id
+
+p_ebd2bfc3b931715c.equations.2
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 3
+
+
+#### label
+
+3
+
+#### pages
+
+6
+
+#### primary_type
+
+physical.energy.conversion
+
+#### content
+
+dFx=.5ρUT²c dr(Cl cosφ+Cd sinφ)
+
+#### function
+
+轴向叶素力
+
+#### assumptions
+
+二维极曲线/独立叶素
+
+#### origin
+
+标准引用/应用改写
+
+#### implementation_match
+
+not_assessed
+
+#### object_id
+
+p_ebd2bfc3b931715c.equations.3
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 4
+
+
+#### label
+
+4
+
+#### pages
+
+6
+
+#### primary_type
+
+physical.energy.conversion
+
+#### content
+
+dQ=.5ρUT²cr dr(Cl sinφ-Cd cosφ)
+
+#### function
+
+切向转矩供积分
+
+#### assumptions
+
+同式3假设
+
+#### origin
+
+标准引用/应用改写
+
+#### implementation_match
+
+not_assessed
+
+#### object_id
+
+p_ebd2bfc3b931715c.equations.4
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 5
+
+
+#### label
+
+5
+
+#### pages
+
+6
+
+#### primary_type
+
+physical.energy.conversion
+
+#### content
+
+Cp=Qω/(.5ρSU³)
+
+#### function
+
+无量纲气动功率系数
+
+#### assumptions
+
+不是包括所有电损的电功率效率
+
+#### origin
+
+标准引用/应用改写
+
+#### implementation_match
+
+not_assessed
+
+#### object_id
+
+p_ebd2bfc3b931715c.equations.5
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 6
+
+
+#### label
+
+6
+
+#### pages
+
+6
+
+#### primary_type
+
+physical.energy.conversion
+
+#### content
+
+F=2acos(exp(-f))/π
+
+#### function
+
+Prandtl尖端损失因子
+
+#### assumptions
+
+标准模型，并非消融验证
+
+#### origin
+
+标准引用/应用改写
+
+#### implementation_match
+
+not_assessed
+
+#### object_id
+
+p_ebd2bfc3b931715c.equations.6
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 7
+
+
+#### label
+
+7
+
+#### pages
+
+6
+
+#### primary_type
+
+physical.energy.conversion
+
+#### content
+
+f=N(R-r)/(2r sinφ)
+
+#### function
+
+叶尖因子中间量
+
+#### assumptions
+
+依赖式2、叶素半径和叶数
+
+#### origin
+
+标准引用/应用改写
+
+#### implementation_match
+
+not_assessed
+
+#### object_id
+
+p_ebd2bfc3b931715c.equations.7
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 8
+
+
+#### label
+
+8
+
+#### pages
+
+7
+
+#### primary_type
+
+physical.energy.conversion
+
+#### content
+
+Cl=sin(2α)
+
+#### function
+
+高攻角启动升力平板近似
+
+#### assumptions
+
+与具体翼型无关，仅启动高攻角假设
+
+#### origin
+
+标准引用/应用改写
+
+#### implementation_match
+
+not_assessed
+
+#### object_id
+
+p_ebd2bfc3b931715c.equations.8
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 9
+
+
+#### label
+
+9
+
+#### pages
+
+7
+
+#### primary_type
+
+physical.energy.conversion
+
+#### content
+
+Cd=2sin²α
+
+#### function
+
+高攻角启动阻力平板近似
+
+#### assumptions
+
+与式8构成模型而非测量拟合
+
+#### origin
+
+标准引用/应用改写
+
+#### implementation_match
+
+not_assessed
+
+#### object_id
+
+p_ebd2bfc3b931715c.equations.9
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 10
+
+
+#### label
+
+10
+
+#### pages
+
+7
+
+#### primary_type
+
+physical.energy.conversion
+
+#### content
+
+Qs=NρU²R³ ∫sqrt(1+λr²)cr sinθ(cosθ-λr sinθ)dr
+
+#### function
+
+启动转矩
+
+#### assumptions
+
+c,r用R归一；rh积分下界的归一/物理符号混用需核，单位不能直接照名词表
+
+#### origin
+
+标准引用/应用改写
+
+#### implementation_match
+
+not_assessed
+
+#### object_id
+
+p_ebd2bfc3b931715c.equations.10
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 11
+
+
+#### label
+
+11
+
+#### pages
+
+7
+
+#### primary_type
+
+physical.energy.storage_dynamics
+
+#### content
+
+dλ/dt=R(Qs-Qr)/(JU)
+
+#### function
+
+从静止积分到λ=1计算Ts
+
+#### assumptions
+
+风速R/Qr常数、启动不发电、J=Jb+JG；Adams–Moulton
+
+#### origin
+
+标准引用/应用改写
+
+#### implementation_match
+
+not_assessed
+
+#### object_id
+
+p_ebd2bfc3b931715c.equations.11
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 12
+
+
+#### label
+
+12
+
+#### pages
+
+7
+
+#### primary_type
+
+physical.energy.storage_dynamics
+
+#### content
+
+Jb=Nρb A R⁵[∫(cr)²dr+(∫c⁴cos²θdr+A²∫c⁴sin²θdr)/12]
+
+#### function
+
+叶片惯量将几何/材料接入启动ODE
+
+#### assumptions
+
+c,r归一且A单位弦长面积约定，名词表A[m²]解释需一致；梯形积分
+
+#### origin
+
+标准引用/应用改写
+
+#### implementation_match
+
+not_assessed
+
+#### object_id
+
+p_ebd2bfc3b931715c.equations.12
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 13
+
+
+#### label
+
+13
+
+#### pages
+
+10
+
+#### primary_type
+
+physical.energy.conversion
+
+#### content
+
+tanφ=2/(3λr+2/λr)
+
+#### function
+
+理想最优几何参考
+
+#### assumptions
+
+忽略尖端损失与阻力，不能直接证明实际目标最优
+
+#### origin
+
+标准引用/应用改写
+
+#### implementation_match
+
+not_assessed
+
+#### object_id
+
+p_ebd2bfc3b931715c.equations.13
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 14
+
+
+#### label
+
+14
+
+#### pages
+
+10
+
+#### primary_type
+
+physical.energy.conversion
+
+#### content
+
+cCl=16π/[9Nλ sqrt(4/9+(λr+2/(9λr))²)]
+
+#### function
+
+理想弦长参考
+
+#### assumptions
+
+BW3 Re200000 α5.39° Cl1.034；归一尺度须注意
+
+#### origin
+
+标准引用/应用改写
+
+#### implementation_match
+
+not_assessed
+
+#### object_id
+
+p_ebd2bfc3b931715c.equations.14
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+## framework
+
+
+### pages
+
+4；5；6；7；8
+
+### family
+
+optimization.evolutionary.DE
+
+### composition
+
+nested optimization calls physics simulator
+
+### inputs
+
+10翼型geometry及Cl/Cd(Re,α)；15叶素的θ和c设计变量；基机/材料固定值；目标权重n
+
+### modules
+
+
+#### 1
+
+
+##### name
+
+candidate encoding
+
+##### output
+
+每叶素c/R与θ（30变量推断，正文为15元素×2变量）
+
+#### 2
+
+
+##### name
+
+BEM evaluator
+
+##### output
+
+在额定风速/尖速比下Cp并计tip-loss
+
+#### 3
+
+
+##### name
+
+startup dynamics
+
+##### output
+
+恒5m/s下Qs,J及ODE到λ1的Ts
+
+#### 4
+
+
+##### name
+
+DE
+
+##### output
+
+给定n和翼型的最佳几何及Cp/Ts
+
+### hyperparameters
+
+
+#### population
+
+2000
+
+#### generations
+
+500
+
+#### mutation
+
+DE/rand/1
+
+#### F
+
+0.8
+
+#### crossover
+
+Uniform
+
+#### CR
+
+0.1
+
+#### n
+
+1；0.8；0.6
+
+#### theta_deg
+
+-5；25
+
+#### c_over_R
+
+0.01；0.2
+
+### novelty
+
+翼型类型与双目标优化的工程比较，不是新DE算法，也非ANN
+
+### constraints
+
+几何盒边界；无应力/疲劳/屈曲约束或制造平滑性约束
+
+### training_inference
+
+不适用监督训练split；优化和模型验证分开
+
+### complexity
+
+未报告渐近复杂度或墙钟耗时；预算上限种群×代=1e6量级试探不等于真实独立运行次数
+
+### convergence
+
+100代不变/500代预算仅经验停滞，非全局证明
+
+## algorithms
+
+
+### 1
+
+
+#### label
+
+DE-BEM design loop
+
+#### pages
+
+4；5；7；8
+
+#### formal_pseudocode
+
+false
+
+#### flow
+
+随机种群→目标→变异→交叉→选择→目标→停止→几何
+
+#### reproduction_gaps
+
+边界越界修复；多次种子重复；动态归一父子比较处理；诱导因子停止阈值；ODE步长/容差
+
+#### object_id
+
+p_ebd2bfc3b931715c.algorithms.1
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+## figures
+
+
+### 1
+
+
+#### label
+
+1
+
+#### pages
+
+4
+
+#### panel_count
+
+10
+
+#### type
+
+problem_scenario
+
+#### content
+
+10翼型截面，x/c,y/c；BW3 5%至S822/S834/SG6040 16%厚度，建立比较对象
+
+#### uncertainty_display
+
+not_shown
+
+#### raw_points
+
+not_digitized
+
+#### role
+
+物理说明、输入数据或模拟证据；不作为额外独立试验
+
+#### object_id
+
+p_ebd2bfc3b931715c.figures.1
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 2
+
+
+#### label
+
+2
+
+#### pages
+
+5；6
+
+#### panel_count
+
+1
+
+#### type
+
+conceptual
+
+#### content
+
+叶素相对速度U1、rω、a'rω、UT和α/θ/φ；图在p5题注p6
+
+#### uncertainty_display
+
+not_shown
+
+#### raw_points
+
+not_digitized
+
+#### role
+
+物理说明、输入数据或模拟证据；不作为额外独立试验
+
+#### object_id
+
+p_ebd2bfc3b931715c.figures.2
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 3
+
+
+#### label
+
+3
+
+#### pages
+
+6
+
+#### panel_count
+
+2
+
+#### type
+
+conceptual
+
+#### content
+
+转子正面/侧面轴向力与切向力及r/dr，帮助式3/4物理定位
+
+#### uncertainty_display
+
+not_shown
+
+#### raw_points
+
+not_digitized
+
+#### role
+
+物理说明、输入数据或模拟证据；不作为额外独立试验
+
+#### object_id
+
+p_ebd2bfc3b931715c.figures.3
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 4
+
+
+#### label
+
+4
+
+#### pages
+
+8
+
+#### panel_count
+
+1
+
+#### type
+
+algorithm_flow
+
+#### content
+
+DE初始化→目标→变异/交叉/选择→停止返回，目标计算箭头不替代源码
+
+#### uncertainty_display
+
+not_shown
+
+#### raw_points
+
+not_digitized
+
+#### role
+
+物理说明、输入数据或模拟证据；不作为额外独立试验
+
+#### object_id
+
+p_ebd2bfc3b931715c.figures.4
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 5
+
+
+#### label
+
+5
+
+#### pages
+
+9
+
+#### panel_count
+
+1
+
+#### type
+
+problem_scenario
+
+#### content
+
+风洞验证两叶NACA4412的twist deg/chord cm vs radius cm，共轴异单位，作为输入
+
+#### uncertainty_display
+
+not_shown
+
+#### raw_points
+
+not_digitized
+
+#### role
+
+物理说明、输入数据或模拟证据；不作为额外独立试验
+
+#### object_id
+
+p_ebd2bfc3b931715c.figures.5
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 6
+
+
+#### label
+
+6
+
+#### pages
+
+9
+
+#### panel_count
+
+2
+
+#### type
+
+distribution
+
+#### content
+
+NACA4412 Cl/Cd对α、五Re的参考极曲线；非本文训练结果
+
+#### uncertainty_display
+
+not_shown
+
+#### raw_points
+
+not_digitized
+
+#### role
+
+物理说明、输入数据或模拟证据；不作为额外独立试验
+
+#### object_id
+
+p_ebd2bfc3b931715c.figures.6
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 7
+
+
+#### label
+
+7
+
+#### pages
+
+10
+
+#### panel_count
+
+1
+
+#### type
+
+main_comparison
+
+#### content
+
+当前BEM vs Anderson风洞 Cp–λ 14点，支持模型验证，非新翼型实验
+
+#### uncertainty_display
+
+not_shown
+
+#### raw_points
+
+not_digitized
+
+#### role
+
+物理说明、输入数据或模拟证据；不作为额外独立试验
+
+#### object_id
+
+p_ebd2bfc3b931715c.figures.7
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 8
+
+
+#### label
+
+8
+
+#### pages
+
+11
+
+#### panel_count
+
+2
+
+#### type
+
+main_comparison
+
+#### content
+
+BW3 twist/chord vs radius，DE n1对理想式13/14；根部明显偏离，理想弦长可超过c/R .2边界
+
+#### uncertainty_display
+
+not_shown
+
+#### raw_points
+
+not_digitized
+
+#### role
+
+物理说明、输入数据或模拟证据；不作为额外独立试验
+
+#### object_id
+
+p_ebd2bfc3b931715c.figures.8
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 9
+
+
+#### label
+
+9
+
+#### pages
+
+11
+
+#### panel_count
+
+2
+
+#### type
+
+distribution
+
+#### content
+
+BW3升阻比与Cl对α、五Re，支持选择Re200k处最佳α/Cl
+
+#### uncertainty_display
+
+not_shown
+
+#### raw_points
+
+not_digitized
+
+#### role
+
+物理说明、输入数据或模拟证据；不作为额外独立试验
+
+#### object_id
+
+p_ebd2bfc3b931715c.figures.9
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 10
+
+
+#### label
+
+10
+
+#### pages
+
+13
+
+#### panel_count
+
+1
+
+#### type
+
+distribution
+
+#### content
+
+10翼型最大升阻比对Re，SG6043较高；输入空气动力数据库描述
+
+#### uncertainty_display
+
+not_shown
+
+#### raw_points
+
+not_digitized
+
+#### role
+
+物理说明、输入数据或模拟证据；不作为额外独立试验
+
+#### object_id
+
+p_ebd2bfc3b931715c.figures.10
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 11
+
+
+#### label
+
+11
+
+#### pages
+
+13
+
+#### panel_count
+
+2
+
+#### type
+
+main_comparison
+
+#### content
+
+n1十翼型twist/chord随r/R，根部不平滑，FX63-137弦长偏小
+
+#### uncertainty_display
+
+not_shown
+
+#### raw_points
+
+not_digitized
+
+#### role
+
+物理说明、输入数据或模拟证据；不作为额外独立试验
+
+#### object_id
+
+p_ebd2bfc3b931715c.figures.11
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 12
+
+
+#### label
+
+12
+
+#### pages
+
+14
+
+#### panel_count
+
+1
+
+#### type
+
+distribution
+
+#### content
+
+SG6043/S822各叶素转矩随r/R，中外段主导，尖端下降；纵轴未明确单位
+
+#### uncertainty_display
+
+not_shown
+
+#### raw_points
+
+not_digitized
+
+#### role
+
+物理说明、输入数据或模拟证据；不作为额外独立试验
+
+#### object_id
+
+p_ebd2bfc3b931715c.figures.12
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 13
+
+
+#### label
+
+13
+
+#### pages
+
+14
+
+#### panel_count
+
+1
+
+#### type
+
+distribution
+
+#### content
+
+n.8十翼型Jb柱图kgm²，BW3最低、S822最高；无误差棒
+
+#### uncertainty_display
+
+not_shown
+
+#### raw_points
+
+not_digitized
+
+#### role
+
+物理说明、输入数据或模拟证据；不作为额外独立试验
+
+#### object_id
+
+p_ebd2bfc3b931715c.figures.13
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 14
+
+
+#### label
+
+14
+
+#### pages
+
+15
+
+#### panel_count
+
+1
+
+#### type
+
+distribution
+
+#### content
+
+翼型单位弦长截面积A柱图，标m²；不应自动等同实际整片截面积
+
+#### uncertainty_display
+
+not_shown
+
+#### raw_points
+
+not_digitized
+
+#### role
+
+物理说明、输入数据或模拟证据；不作为额外独立试验
+
+#### object_id
+
+p_ebd2bfc3b931715c.figures.14
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 15
+
+
+#### label
+
+15
+
+#### pages
+
+15；16
+
+#### panel_count
+
+2
+
+#### type
+
+main_comparison
+
+#### content
+
+n.8十翼型twist/chord分布，根部θ与c较n1增大；图p15题注p16
+
+#### uncertainty_display
+
+not_shown
+
+#### raw_points
+
+not_digitized
+
+#### role
+
+物理说明、输入数据或模拟证据；不作为额外独立试验
+
+#### object_id
+
+p_ebd2bfc3b931715c.figures.15
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 16
+
+
+#### label
+
+16
+
+#### pages
+
+16
+
+#### panel_count
+
+10
+
+#### type
+
+time_series
+
+#### content
+
+十翼型Qs Nm对Ts s，各panel纵轴不同；先降后增。图曲线终点视觉上与Table4/A2的Ts不一致（如BW3约2.7s vs1.82s），终点定义/参数需核实；不据此推断造假
+
+#### uncertainty_display
+
+not_shown
+
+#### raw_points
+
+not_digitized
+
+#### role
+
+物理说明、输入数据或模拟证据；不作为额外独立试验
+
+#### object_id
+
+p_ebd2bfc3b931715c.figures.16
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 17
+
+
+#### label
+
+17
+
+#### pages
+
+17
+
+#### panel_count
+
+1
+
+#### type
+
+conceptual
+
+#### content
+
+按Cp和Ts两目标的翼型排名树，重述Table4非新独立证据
+
+#### uncertainty_display
+
+not_shown
+
+#### raw_points
+
+not_digitized
+
+#### role
+
+物理说明、输入数据或模拟证据；不作为额外独立试验
+
+#### object_id
+
+p_ebd2bfc3b931715c.figures.17
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 18
+
+
+#### label
+
+A1
+
+#### pages
+
+19；20；21
+
+#### panel_count
+
+20
+
+#### type
+
+distribution
+
+#### content
+
+10翼型各Cl/Cd两子图共20绘图区，标a–j十父组；p19三组、p20七组、p21题注。α deg/Re是输入数据库
+
+#### uncertainty_display
+
+not_shown
+
+#### raw_points
+
+not_digitized
+
+#### role
+
+物理说明、输入数据或模拟证据；不作为额外独立试验
+
+#### object_id
+
+p_ebd2bfc3b931715c.figures.18
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+## tables
+
+
+### 1
+
+
+#### label
+
+1
+
+#### pages
+
+8
+
+#### type
+
+configuration
+
+#### columns
+
+parameter；min；max
+
+#### rows
+
+
+##### 1
+
+θ deg；-5；25
+
+##### 2
+
+c/R；0.01；0.2
+
+#### role
+
+设计边界
+
+#### object_id
+
+p_ebd2bfc3b931715c.tables.1
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 2
+
+
+#### label
+
+2
+
+#### pages
+
+8
+
+#### type
+
+configuration
+
+#### columns
+
+parameter；value
+
+#### rows
+
+
+##### 1
+
+population；2000
+
+##### 2
+
+generation；500
+
+##### 3
+
+mutation；DE/rand/1
+
+##### 4
+
+F；0.8
+
+##### 5
+
+crossover；uniform
+
+##### 6
+
+CR；0.1
+
+#### role
+
+DE预算及设置；无重复数
+
+#### object_id
+
+p_ebd2bfc3b931715c.tables.2
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 3
+
+
+#### label
+
+3
+
+#### pages
+
+8；9
+
+#### type
+
+configuration
+
+#### rows
+
+
+##### 1
+
+P W；1000
+
+##### 2
+
+N；3
+
+##### 3
+
+R m；1.21
+
+##### 4
+
+rh m；0.125
+
+##### 5
+
+ω rpm；450
+
+##### 6
+
+λrated；5.71
+
+##### 7
+
+Urated m/s；10
+
+##### 8
+
+JG kgm²；0.01
+
+##### 9
+
+Qr Nm；0.5
+
+##### 10
+
+ρb kg/m³；550
+
+##### 11
+
+Us m/s；5
+
+##### 12
+
+airfoil；SG6043
+
+#### role
+
+基准1kW平台，不是14点验证风机
+
+#### object_id
+
+p_ebd2bfc3b931715c.tables.3
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 4
+
+
+#### label
+
+4
+
+#### pages
+
+12
+
+#### type
+
+main_comparison
+
+#### columns
+
+airfoil；n1 Cp；n1 Ts s；n.8 Cp；n.8 Ts s
+
+#### rows
+
+
+##### 1
+
+BW-3；0.496；2.78；0.486；1.82
+
+##### 2
+
+E387；0.502；4.87；0.485；3.1
+
+##### 3
+
+FX 63-137；0.499；8.44；0.489；3.26
+
+##### 4
+
+S822；0.495；13.25；0.481；7.02
+
+##### 5
+
+S834；0.498；11.54；0.483；6.87
+
+##### 6
+
+SD7062；0.497；6.15；0.488；4.49
+
+##### 7
+
+SG6040；0.495；15.67；0.48；6.02
+
+##### 8
+
+SG6043；0.506；5.72；0.496；2.89
+
+##### 9
+
+SG6051；0.504；9.8；0.49；5.13
+
+##### 10
+
+USNPS4；0.503；5.36；0.493；4.22
+
+#### role
+
+十翼型两偏好方案比较；不是10个统计重复
+
+#### object_id
+
+p_ebd2bfc3b931715c.tables.4
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 5
+
+
+#### label
+
+A1
+
+#### pages
+
+21
+
+#### type
+
+statistics
+
+#### columns
+
+λ；numerical Cp；experimental Cp
+
+#### rows
+
+
+##### 1
+
+5.45；0.2596；0.26498
+
+##### 2
+
+6.17；0.31963；0.34177
+
+##### 3
+
+6.93；0.36843；0.39325
+
+##### 4
+
+7.759；0.41506；0.41983
+
+##### 5
+
+8.34；0.43715；0.42827
+
+##### 6
+
+8.97；0.45241；0.44008
+
+##### 7
+
+9.329；0.45768；0.43207
+
+##### 8
+
+9.73；0.46076；0.44346
+
+##### 9
+
+10.16；0.46081；0.45443
+
+##### 10
+
+10.48；0.45829；0.44726
+
+##### 11
+
+10.918；0.45114；0.43966
+
+##### 12
+
+11.62；0.43138；0.42152
+
+##### 13
+
+11.89；0.42146；0.4
+
+##### 14
+
+13.02；0.36678；0.36878
+
+#### additional_columns
+
+印有Absolute Error、Squared Error、Error%；未逐cell结构化转写这些派生列
+
+#### role
+
+14点验证；Absolute Error为有符号experimental-numerical，标签不准确；最大|relative error|6.47%
+
+#### reported_MSE
+
+0.000228562
+
+#### object_id
+
+p_ebd2bfc3b931715c.tables.5
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 6
+
+
+#### label
+
+A2
+
+#### pages
+
+21；22
+
+#### type
+
+sensitivity
+
+#### columns
+
+airfoil；A m²；n1 Cp；n1 Ts s；n1 Jb kgm²；n1 Qs0 Nm；n.8 Cp；n.8 Ts s；n.8 Jb kgm²；n.8 Qs0 Nm；n.6 Cp；n.6 Ts s；n.6 Jb kgm²；n.6 Qs0 Nm
+
+#### rows
+
+
+##### 1
+
+BW-3；0.0364；0.496；2.78；0.438；1.165；0.486；1.82；0.494；1.651；0.435；1.33；0.364；1.673
+
+##### 2
+
+E387；0.0573；0.502；4.87；0.786；1.213；0.485；3.1；0.889；1.722；0.439；2.27；0.66；1.753
+
+##### 3
+
+FX 63-137；0.0831；0.499；8.44；0.584；0.795；0.489；3.26；0.964；1.757；0.449；2.59；0.76；1.749
+
+##### 4
+
+S822；0.1087；0.495；13.25；1.6；1.006；0.481；7.02；2；1.711；0.416；4.71；1.337；1.725
+
+##### 5
+
+S834；0.1042；0.498；11.54；1.872；1.193；0.483；6.87；1.921；1.682；0.411；4.37；1.137；1.641
+
+##### 6
+
+SD7062；0.0883；0.497；6.15；1.394；1.435；0.488；4.49；1.421；1.834；0.438；3.31；1.003；1.794
+
+##### 7
+
+SG6040；0.1042；0.495；15.67；1.105；0.817；0.48；6.02；1.678；1.695；0.429；4.31；1.233；1.726
+
+##### 8
+
+SG6043；0.0685；0.506；5.72；0.58；0.972；0.496；2.89；0.842；1.743；0.459；2.33；0.687；1.759
+
+##### 9
+
+SG6051；0.0839；0.504；9.8；1.253；1.118；0.49；5.13；1.456；1.708；0.428；3.45；0.95；1.689
+
+##### 10
+
+USNPS4；0.0884；0.503；5.36；1.586；1.731；0.493；4.22；1.423；1.919；0.443；3.14；0.987；1.836
+
+#### role
+
+30设计配置的全部原表结果，表4是子集；不是30独立实验
+
+#### object_id
+
+p_ebd2bfc3b931715c.tables.6
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+## experiments
+
+
+### 1
+
+
+#### label
+
+E1
+
+#### pages
+
+9；10；21
+
+#### rq
+
+BEM Cp预测符合已有风洞数据吗
+
+#### design_type
+
+physical_reference_validation
+
+#### design
+
+1.5m两叶NACA4412，14λ点对Anderson文献风洞Cp
+
+#### metrics
+
+
+##### max_relative_error_percent
+
+6.47
+
+##### MSE
+
+0.000228562
+
+#### limitations
+
+引用既有风洞，不是本文新造10翼型实测；无Ts验证新数据
+
+#### object_id
+
+p_ebd2bfc3b931715c.experiments.1
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 2
+
+
+#### label
+
+E2
+
+#### pages
+
+10；11
+
+#### rq
+
+DE几何是否接近理想功率设计
+
+#### design_type
+
+analytical_reference_validation
+
+#### design
+
+BW3 n1 vs无阻力/尖端损失理想式13/14，Re200000, α5.39°, Cl1.034
+
+#### limitations
+
+对象/边界不同，根部偏差存在；接近理想解不等于实际全局最优
+
+#### object_id
+
+p_ebd2bfc3b931715c.experiments.2
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+### 3
+
+
+#### label
+
+E3
+
+#### pages
+
+12；13；14；15；16；17；21；22
+
+#### rq
+
+翼型与权重如何改变Cp/Ts
+
+#### design_type
+
+multi_factor_design_comparison_and_preference_sensitivity
+
+#### factors
+
+
+##### airfoil
+
+BW-3；E387；FX 63-137；S822；S834；SD7062；SG6040；SG6043；SG6051；USNPS4
+
+##### n
+
+1；0.8；0.6
+
+#### design
+
+同一基机/几何范围/DE预算下逐翼型重优化；n1/.8主结果，n.6附录
+
+#### metrics
+
+Cp；Ts s；Jb kgm²；Qs0 Nm
+
+#### controlled_ablation
+
+false
+
+#### confounders
+
+改变翼型同时改变极曲线、面积和最优几何，无法把效应归因于单一厚度；无真实风速分布或年发电量
+
+#### seeds
+
+未评估/未报告
+
+#### run_count
+
+未评估/未报告
+
+#### object_id
+
+p_ebd2bfc3b931715c.experiments.3
+
+#### source_sha256
+
+ebd2bfc3b931715c8fbd437d0fe17da6a6930d0f6a04d4c994c694f5bf857162
+
+## statistics
+
+
+### pages
+
+10；12；21；22
+
+### analysis_unit
+
+确定的翼型/偏好配置与单一验证风机λ点；非随机抽样独立设备
+
+### independent_n
+
+未评估/未报告
+
+### dependence
+
+shared_simulator；same_turbine；same_airfoil_data
+
+### training_split
+
+not_applicable: evolutionary physical design not supervised learning
+
+### method
+
+描述性配置排序、14点Cp误差；未报告CI/SD/显著性检验、重复DE种子或多重校正
+
+### not_reported
+
+随机重复；不确定度传播；实测误差条；power/precision设计
+
+### appropriateness
+
+可作模型内比较，不足以认定10翼型在所有低风地区的最优排序
+
+### negative_result
+
+n.6降低Ts却显著牺牲Cp；更薄不必启动更快
+
+## theory
+
+
+### pages
+
+5；6；7；10；11
+
+### named
+
+BEM；Prandtl tip loss；flat-plate high-angle approximation；rigid rotational dynamics；DE weighted scalarization
+
+### usage
+
+物理计算+数值优化，局部模型验证；无新定理或严谨全局证明
+
+### assumptions
+
+均匀定风、刚性、固定材料密度与发电机阻力；启动直到λ1且不输出电能；单翼型沿整叶；二维极曲线可移植BEM叶素
+
+### limits
+
+无疲劳/气弹/噪声/屈曲/控制约束；风速区域标签由n偏好代理，并非真实地点风况；动态归一标量化不保证所有Pareto段覆盖
+
+## conclusion_claims
+
+
+### 1
+
+
+#### pages
+
+17；18
+
+#### claim
+
+ideal Cp-focused design raises Ts
+
+#### support
+
+Table4；A2
+
+#### limit
+
+九结论之一；可支持同研究n1 vs.8，不是所有理想公式/翼型的普遍定理
+
+### 2
+
+
+#### pages
+
+17；18
+
+#### claim
+
+SG6043最高Cp .506；S822/SG6040 .495最低
+
+#### support
+
+Table4；Fig10
+
+#### limit
+
+只在给定基机/约束/极数据/风速；升阻比解释未独立操控
+
+### 3
+
+
+#### pages
+
+17；18
+
+#### claim
+
+FX63-137最短弦长、USNPS4偏长影响Re和Cp
+
+#### support
+
+Fig11；Fig10
+
+#### limit
+
+几何–Re机制解释，非因果分离实验
+
+### 4
+
+
+#### pages
+
+17；18
+
+#### claim
+
+根部c和θ提高降低Ts
+
+#### support
+
+Figs11,15；Table4
+
+#### limit
+
+重优化多变量共变，不能单因素归因
+
+### 5
+
+
+#### pages
+
+17；18
+
+#### claim
+
+BW3启动最快
+
+#### support
+
+Table4；Fig13；A2
+
+#### limit
+
+n.8 1.82s且Jb.494；需要结构可行性和真实风况验证
+
+### 6
+
+
+#### pages
+
+17；18
+
+#### claim
+
+S822/S834/SG6040启动慢，较大面积相关
+
+#### support
+
+Fig14；A2
+
+#### limit
+
+面积非唯一决定因素；不建议at all措辞过强
+
+### 7
+
+
+#### pages
+
+17；18
+
+#### claim
+
+薄翼型不必启动快
+
+#### support
+
+E387 vs SG6043 Table4
+
+#### limit
+
+保留负反例；惯量/转矩共同影响
+
+### 8
+
+
+#### pages
+
+17；18
+
+#### claim
+
+启动转矩先降后升
+
+#### support
+
+Fig16
+
+#### limit
+
+模型曲线支持但终点时间与表格不一致需核
+
+### 9
+
+
+#### pages
+
+17；18
+
+#### claim
+
+USNPS4最高、BW3最低启动转矩
+
+#### support
+
+Fig16；A2
+
+#### limit
+
+n.8 Qs0 1.919 vs1.651；最高转矩不等于最短Ts
+
+## narrative
+
+
+### pages
+
+1；2；3；4；5；6；7；8；9；10；11；12；13；14；15；16；17；18
+
+### macro_chain
+
+小型机启动问题→翼型筛选缺口→DE/BEM与启动ODE→两种独立验证→权重场景排序→几何/惯量/转矩机制→条件化选择
+
+### important_patterns
+
+把求解器验证和物理模型验证分节；结果先给总表，再解释排序反直觉：高升阻比不一定高Cp、更薄不一定更快；根部与尖部的不同功能为设计改动提供物理解读
+
+### risks
+
+global guarantee和highly recommended措辞强于证据；关键词ANN无实际方法；正文p12误称AppendixC TableA1，实际A2；大量图是输入极曲线或同表重画，非独立证据
+
+### original_sentence_frames
+
+For [fixed turbine specification], the preferred [airfoil] depends on the relative emphasis on [power capture] and [startup response].；A higher [local aerodynamic metric] does not necessarily produce a higher [system metric], because [optimized geometry] also changes [intermediate physical variable].；Agreement with [reference under ideal assumptions] checks [implementation component] but does not establish [global optimality or field performance].
+
+### frequency_status
+
+not_assessed
+
+## difficulty
+
+
+### scale
+
+DESIGN0–4 single-assistant provisional
+
+### D_T
+
+
+#### value
+
+2
+
+#### interval
+
+1；2
+
+#### pages
+
+5；6；7；10
+
+#### reason
+
+BEM/启动动力学与归一化模型组合，非新证明
+
+### D_A
+
+
+#### value
+
+2
+
+#### interval
+
+2；3
+
+#### pages
+
+4；5；8
+
+#### reason
+
+DE嵌套物理目标评估，算法标准、无复杂度
+
+### D_S
+
+
+#### value
+
+1
+
+#### interval
+
+1；2
+
+#### pages
+
+10；21
+
+#### reason
+
+描述误差及排序，无依赖推断
+
+### D_D
+
+
+#### value
+
+2
+
+#### interval
+
+1；2
+
+#### pages
+
+3；19；20；21
+
+#### reason
+
+多翼型外部气动数据组织
+
+### D_E
+
+
+#### value
+
+2
+
+#### interval
+
+1；2
+
+#### pages
+
+6；7；8；9
+
+#### reason
+
+物理惯量/气动耦合与文献风洞验证，非新硬件
+
+### D_X
+
+
+#### value
+
+2
+
+#### interval
+
+2；3
+
+#### pages
+
+5；6；7
+
+#### reason
+
+进化算法和风机气动/启动动力学接口明确
+
+### composite
+
+未评估/未报告
+
+## quality_notes
+
+
+### status
+
+provisional
+
+### priority_issues
+
+经验停滞被称全局保证；Fig16时间与表格端点定义需独立核对；区域风潜力未用现场风分布验证；结构/制造约束缺失
+
+### misconduct_inference
+
+none

@@ -1,0 +1,260 @@
+{
+  "schema_version": "paper_harness.review.v2",
+  "venue": "mdpi_applied_sciences",
+  "manuscript": "manuscript/journal_submission/paper.tex",
+  "manuscript_sha256": "ca9b3b32061540ba6b6830263c6117c14a4a9b3bb0120b93c758a46c2c021496",
+  "coverage": {
+    "characters_total": 78212,
+    "characters_supplied": 78212,
+    "complete": true,
+    "sections_detected": [
+      "Introduction",
+      "Related Work",
+      "Budget-Constrained Combinatorial Optimization and Project Portfolio Selection",
+      "Power Grid Investment Planning and Project Review Decision Methods",
+      "Local-Search-Enhanced Multi-Objective Evolutionary Algorithms",
+      "Relation to TRACE-MOEA and Gap Statement",
+      "Problem Formulation and Public Benchmark",
+      "Budget-Constrained Portfolio Review as Multi-Objective Selection",
+      "Benchmark Construction from Public Data",
+      "Review Scenarios",
+      "Shared Public Benchmark Statement",
+      "BiLo-NSGA",
+      "Non-Dominated Sorting Kernel",
+      "Forward Insertion",
+      "Atomic Backward--Forward Substitution",
+      "Dependency-Aware Move Bonus",
+      "Feasibility Recovery",
+      "Per-Move Decision Trace",
+      "Algorithm Summary",
+      "Experimental Setup",
+      "Methods Compared",
+      "Protocol",
+      "Evaluation Metric and Statistics",
+      "Results",
+      "Main Comparison",
+      "Budget-Indexed Cross-Scenario Behavior",
+      "Ablation Study: Scenario-Dependent Forward Effects and Unresolved Substitution",
+      "External Consistency: NERC Rule-Based Backtest",
+      "Historical Outcome Consistency: MISO MTEP16 Backtest",
+      "Data and Protocol",
+      "Results",
+      "Outcome-Definition and Dependence Limits",
+      "Search-Effort and Outcome-Definition Diagnostics",
+      "Direct Local-Search and Substitution Controls",
+      "Discussion",
+      "Evidence-Driven Extensions",
+      "Limitations",
+      "Conclusions",
+      "Author Contributions",
+      "Funding",
+      "Institutional Review Board Statement",
+      "Informed Consent Statement",
+      "Data Availability Statement",
+      "Acknowledgments",
+      "Conflicts of Interest"
+    ]
+  },
+  "decision": "major_revision",
+  "primary_story": "BiLo-NSGA augments NSGA-II with budget-aware project-vocabulary local moves and move logging on a public proxy benchmark, yielding a modest hypervolume gain whose resolved component evidence is limited to scenario-dependent forward insertion.",
+  "primary_result": "Across eight proxy scenarios with 30 runs per stochastic method, BiLo-NSGA reports pooled hypervolume 0.17190 versus 0.17000 for NSGA-II, a 1.12% gain obtained with additional local evaluations and 2.74 times the measured runtime; forward insertion resolves positively in three scenarios, whereas atomic substitution has no demonstrated accuracy benefit.",
+  "positive_findings": [
+    "The manuscript consistently retains the unfavorable and null component results in the abstract, results, discussion, and conclusion rather than converting them into a superiority claim.",
+    "Deterministic baselines are treated descriptively rather than as 30 independent observations, and the primary stochastic tests state their correction family, effect measure, and confidence-interval convention.",
+    "A direct add/delete/swap Pareto-local-search control and separate no-forward, no-backward, and legacy-deletion controls materially improve the evidential coverage.",
+    "The manuscript clearly separates trace production from explanation quality and bounds both external backtests as descriptive consistency checks.",
+    "Limitations concerning proxy attributes, synthetic costs, outcome imbalance, construct overlap, portfolio dependence, one benchmark family, and absent load-flow validation are unusually explicit.",
+    "The intended beneficiaries—utility planning departments and investment review boards—are identified, while operational effectiveness is not claimed as established."
+  ],
+  "issues": [
+    {
+      "id": "I001",
+      "type": "BASELINE_BUDGET_MISMATCH",
+      "dimension": "experiments",
+      "severity": "major",
+      "location": "Sections 4 and 5.2; Sections 6.1, 6.6, and 6.7; Tables 3, 4, and 7",
+      "manuscript_evidence": "All evolutionary methods receive 40 individuals for 40 generations, but BiLo-NSGA additionally evaluates up to eight forward and four substitution proposals on half of the offspring. Its runtime is 0.2188 s versus 0.0798 s for NSGA-II. Pareto Local Search is capped at 1600 neighbor evaluations, which matches the nominal offspring ceiling rather than the full BiLo-NSGA evaluation count.",
+      "reviewer_inference": "The reported hypervolume advantage does not isolate the project-level operators from additional search effort. Runtime disclosure is valuable, but it does not make the central quality comparison effort-matched, and the purportedly matched local-search control may receive substantially fewer candidate evaluations.",
+      "required_action": "Count every objective evaluation and local proposal evaluation. Recompare BiLo-NSGA, NSGA-II, and Pareto Local Search under an identical total-evaluation budget and, separately, an identical wall-clock budget on the same eight scenarios. The estimand is the per-run feasible-front hypervolume difference at matched effort; the analysis unit is one independent run, with 30 runs per method and a declared multiplicity family.",
+      "acceptance_test": "The revision reports evaluation-count distributions and matched-budget hypervolume tables for all eight scenarios, and scopes the headline advantage to whichever evaluation or runtime condition actually supports it.",
+      "evidence_boundary": "Without this control, the evidence licenses only a quality–computation trade-off for the disclosed implementations, not greater search efficiency or an operator-specific advantage at equal effort."
+    },
+    {
+      "id": "I002",
+      "type": "METHOD_IMPLEMENTATION_MISMATCH",
+      "dimension": "soundness",
+      "severity": "major",
+      "location": "Section 3.1 budget-violation equation; Section 4 formal definitions; Sections 4.2–4.5",
+      "manuscript_evidence": "Section 3.1 defines normalized violation as max(0,(cost-B)/B), whereas Section 4 redefines it in cost units as max(0,-s_B). The local fitness includes an unspecified penalty lambda. The insertion score uses undefined quantities b_jq and omega_q, while the prose alternates between equal weights and scenario-dependent scalar weights.",
+      "reviewer_inference": "These are behavior-changing ambiguities rather than cosmetic notation differences. The violation scale determines the penalty, and the undisclosed benefit components and weights determine every accepted insertion, substitution, and repair drop.",
+      "required_action": "Provide one consistent violation definition and state the implemented lambda, all per-scenario weight vectors, the definition and normalization of every b_jq term, tie-breaking rules, initialization distribution, offspring-local-search selection rule, and whether the local normalization equals the hypervolume normalization. Reconcile the equations, pseudocode, configuration files, and implementation.",
+      "acceptance_test": "A reader can reproduce every proposal ranking and acceptance decision from the manuscript and supplied configuration, and an implementation-conformance check shows that the equations and released code use the same units and parameter values.",
+      "evidence_boundary": "After closure, the paper may claim results for a precisely specified BiLo-NSGA configuration; the current text does not uniquely identify that configuration."
+    },
+    {
+      "id": "I003",
+      "type": "CONTRIBUTION_EVIDENCE_MISMATCH",
+      "dimension": "soundness",
+      "severity": "major",
+      "location": "Introduction; Sections 2.1–2.4, 3.1, 4.4, and 6.3",
+      "manuscript_evidence": "The paper motivates the method by dependency synergies and portfolio interactions, but the four optimization objectives are separable sums or a mean and contain no pairwise dependency benefit, prerequisite, or group constraint. Dependency information enters only through a fixed 1.06 proposal-ranking bonus. Disabling or thinning this mechanism produces no claimed resolved benefit.",
+      "reviewer_inference": "A search heuristic that favors an already represented group does not establish that the optimization problem models or captures dependency synergy. The current evidence supports budget coupling and a group-aware proposal bias, not optimization of inter-project dependency value.",
+      "required_action": "Either narrow all interaction and synergy claims to budget crowding and a heuristic group bonus, or define an operational dependency benefit or constraint in the problem and evaluate it. For the latter route, hold pool, budget, weights, and randomization fixed; compare the bonus and no-bonus controls over 30 runs, with dependency-value or dependency-constraint satisfaction and hypervolume as prespecified estimands.",
+      "acceptance_test": "Every dependency-related claim maps either to an explicit modeled quantity with a controlled result or is rewritten as a bounded description of proposal ordering without asserted synergy capture.",
+      "evidence_boundary": "The present experiment supports budget-aware portfolio search with a group-aware heuristic, not validated dependency-aware portfolio value."
+    },
+    {
+      "id": "I004",
+      "type": "TRACE_UTILITY_CONFLATION",
+      "dimension": "novelty",
+      "severity": "major",
+      "location": "Introduction contribution 1; Sections 4.6, 6.6, and 7; Tables 4 and 7",
+      "manuscript_evidence": "The trace records accepted forward insertions, substitutions, and repair drops. Crossover, mutation, parentage, environmental selection, and portfolio lineage are not described as logged. Coverage means that a project appearing in the final front appeared in at least one logged operation somewhere in the run, and the manuscript reports about 3668 events per run.",
+      "reviewer_inference": "A run-level collection of local events does not necessarily provide the claimed account of the moves producing a particular final recommendation. Project-level coverage is not lineage coverage, replayability, semantic correctness, or review utility.",
+      "required_action": "Either rename the artifact as a run-level accepted-local-move log and remove recommendation-path language, or bind events to parent, offspring, generation, and final-solution identifiers while recording every unlogged state-changing operation. For the stronger claim, provide a replay test that reconstructs each returned portfolio exactly.",
+      "acceptance_test": "Either automated replay reconstructs 100% of final portfolios from their recorded lineages, or the manuscript consistently limits the claim to production and coverage of local-move records and makes no decision-path or explanation implication.",
+      "evidence_boundary": "Even after replay validation, the evidence would establish trace completeness, not explanation quality, human-review benefit, safety, or deployment readiness."
+    },
+    {
+      "id": "I005",
+      "type": "SENSITIVITY_GAP",
+      "dimension": "experiments",
+      "severity": "major",
+      "location": "Sections 4, 5, 6.2, 6.3, and 7.1",
+      "manuscript_evidence": "The proposed defaults include forward depth 8, substitution depth 4, local search on half the offspring, a 1.06 dependency bonus, scalarization weights, and a violation penalty. Apart from a combined shallow-depth ablation and disabling selected components, no controlled sensitivity is reported. The section called budget sensitivity changes scalar weights and random streams as well as budget.",
+      "reviewer_inference": "For a metaheuristic whose pooled margin over NSGA-II is 1.12% and whose operator effects reverse across settings, unexplored default sensitivity prevents assessment of application robustness and possible benchmark-specific tuning. The budget-indexed plot is correctly caveated but is not a budget-only sensitivity analysis.",
+      "required_action": "Disclose how defaults were chosen and whether the reported scenarios were visible during tuning. Run a prespecified sensitivity analysis for forward depth, substitution depth, local-search probability, dependency-bonus magnitude, and scalarization weights while holding the scenario, pool, budget, and randomization blocks fixed. Report mean hypervolume and runtime; the analysis unit is a run, with uncertainty across 30 runs.",
+      "acceptance_test": "The revision identifies parameter ranges over which the principal NSGA-II comparison and forward-versus-no-forward conclusion retain their direction, or explicitly limits the contribution to the single tested configuration.",
+      "evidence_boundary": "Closure licenses robustness only over the tested parameter ranges, not universal parameter insensitivity."
+    },
+    {
+      "id": "I006",
+      "type": "SENSITIVITY_GAP",
+      "dimension": "statistics",
+      "severity": "major",
+      "location": "Section 5.3 hypervolume normalization and reference-point specification",
+      "manuscript_evidence": "Per-experiment bounds are estimated from the empty portfolio, all singleton portfolios, and 2048 random feasible portfolios, after which every objective is clipped to [0,1]. No method-by-objective clipping frequency or reference-bound sensitivity is reported.",
+      "reviewer_inference": "An optimizer can exceed random-reference extrema, especially on benefit objectives. Clipping would collapse distinct high-quality portfolios onto the same boundary and could change small hypervolume contrasts, including the 1.12% headline difference.",
+      "required_action": "Report clipping counts and magnitudes for every method, scenario, and objective. Recompute the per-run hypervolumes using fixed, method-independent bounds demonstrated to contain all scored points and under at least one reasonable alternative reference point. The estimand is the BiLo-NSGA minus baseline hypervolume contrast; the analysis unit remains the run.",
+      "acceptance_test": "No scored point is silently clipped under the primary analysis, and the direction and inferential status of the headline comparisons are reported under the alternative normalization and reference-point choices.",
+      "evidence_boundary": "The primary hypervolume ranking is credible only for normalization choices under which it is shown to be stable."
+    },
+    {
+      "id": "I007",
+      "type": "METHOD_IMPLEMENTATION_MISMATCH",
+      "dimension": "experiments",
+      "severity": "major",
+      "location": "Sections 5.1–5.2; Table 3; Section 6.4",
+      "manuscript_evidence": "NSGA-II and NSGA-III are described as constrained, while MOEA/D uses an unspecified budget penalty and returns no feasible portfolio in one reported panel. Reference-direction counts, MOEA/D decomposition and neighborhood settings, penalty magnitude, software versions, and infeasible-run rates are not reported.",
+      "reviewer_inference": "Different and incompletely specified feasibility handling can severely disadvantage MOEA/D and inflate the aggregate count of baseline wins. The very low MOEA/D hypervolume is not interpretable as algorithm-family inferiority without showing that its constraint treatment is viable.",
+      "required_action": "Disclose complete baseline configurations and feasibility rates. Re-run MOEA/D with comparable constraint handling or a documented penalty sensitivity/tuning protocol, and report the five-baseline win count both including and excluding any configuration that systematically fails to produce feasible fronts.",
+      "acceptance_test": "Every baseline has reproducible settings and a viable feasibility rate, or is explicitly labeled a failed configuration and removed from broad algorithm-family claims.",
+      "evidence_boundary": "The current evidence compares the disclosed implementations only and cannot support superiority over MOEA/D or Pareto local search as general method families."
+    },
+    {
+      "id": "I008",
+      "type": "PROXY_TASK_MISMATCH",
+      "dimension": "clarity",
+      "severity": "minor",
+      "location": "Table 2; Sections 3.3, 6.2, and 6.7",
+      "manuscript_evidence": "The project_pool_scalability scenario retains the same 120-candidate full pool and changes the budget to 1.20 times nominal. The local_move_explainability and ranking_robustness scenarios also use the full pool and nominal budget, with their distinguishing manipulations not specified beyond possible scalar-weight changes.",
+      "reviewer_inference": "These labels suggest scalability, explanation, and robustness tests that the disclosed manipulations do not operationalize. The manuscript partly acknowledges this by calling one setting large-pool-labeled, but the labels still enter the mechanism narrative.",
+      "required_action": "Rename scenarios according to their actual controlled variables, disclose every weight or configuration difference, and remove scalability, robustness, or explainability implications unless a corresponding pool-size, perturbation, or human/trace-quality estimand is measured.",
+      "acceptance_test": "Each scenario name and result sentence identifies an observable manipulation, and no application property is inferred from a label alone.",
+      "evidence_boundary": "The existing cells support results for named benchmark configurations, not scalability, ranking robustness, or explanation quality."
+    },
+    {
+      "id": "I009",
+      "type": "DECLARATION_PLACEHOLDER",
+      "dimension": "submission",
+      "severity": "blocker",
+      "location": "Author Contributions and Funding declarations",
+      "manuscript_evidence": "Both sections contain explicit AUTHOR INPUT REQUIRED placeholders. CRediT roles, author approval, funding, grant information, and APC funding are not supplied.",
+      "reviewer_inference": "The submission is not publication-ready and these facts cannot be inferred by a reviewer or generated from the scientific content.",
+      "required_action": "Obtain confirmation from every author, insert verified CRediT roles, and provide the verified funding and APC statement or the journal's no-external-funding wording.",
+      "acceptance_test": "No declaration placeholder remains, all named authors have confirmed their roles, and the funding statement contains only human-verified information.",
+      "evidence_boundary": "No acceptance decision can be finalized while authorship and funding declarations remain unresolved."
+    },
+    {
+      "id": "I010",
+      "type": "REFERENCE_OR_METADATA_UNVERIFIED",
+      "dimension": "reproducibility",
+      "severity": "minor",
+      "location": "Contribution 2; Data Availability Statement; References 2 and 33",
+      "manuscript_evidence": "The text says the full generation code is released, while the Data Availability Statement says the package is available from the corresponding author and that a persistent archive can be supplied before publication. The package and companion TRACE-MOEA manuscript were not supplied here. Reference 2 contains a malformed DOI string with an extra closing brace inside the identifier.",
+      "reviewer_inference": "The benchmark, run archive, code, external-source contents, and companion-overlap assertions remain unverified within the supplied evidence. This is not by itself a demonstrated scientific defect, but the release-status contradiction and malformed reference require correction.",
+      "required_action": "Use one accurate availability statement, provide reviewers with the stated supplementary package and companion manuscript, deposit the final code/data/run records in a persistent accessible archive when redistribution permits, and correct the malformed DOI.",
+      "acceptance_test": "The stated package is accessible and contains the candidate generator, configurations, 4320 run records, inference tables, and backtest inputs; the availability wording matches the actual access state and all DOI links are syntactically valid.",
+      "evidence_boundary": "Until supplied, reproducibility and companion independence are manuscript assertions rather than independently verified findings."
+    },
+    {
+      "id": "I011",
+      "type": "AUDIT_NARRATIVE_DOMINANCE",
+      "dimension": "clarity",
+      "severity": "advisory",
+      "location": "Section 5.3 and Data Availability Statement",
+      "manuscript_evidence": "The main text names real_project_review_inference_v2.csv, describes an original rectangular significance output retained as provenance, and notes that pre-atomic-substitution backtests remain suffixed and excluded.",
+      "reviewer_inference": "These version-history details support artifact governance but do not advance the scientific argument and draw attention to audit chronology in the main manuscript.",
+      "required_action": "Move filenames, superseded-output lineage, exclusion manifests, and version chronology to the supplement or repository documentation; retain only the final analysis definition and scientifically relevant exclusion rule in the article.",
+      "acceptance_test": "The main text describes the final protocol without internal version labels or incident-history language, while the supplementary archive preserves the complete provenance record.",
+      "evidence_boundary": "Artifact provenance can support reproducibility but does not strengthen the method-effect or application-validity claims."
+    }
+  ],
+  "claim_map": [
+    {
+      "claim": "BiLo-NSGA is a project-level, budget-aware local-search extension of NSGA-II.",
+      "method_support": "Forward insertion, atomic substitution, feasibility repair, dependency-biased proposal ranking, and non-dominated environmental selection are formally described.",
+      "experiment_support": "The full method is compared with NSGA-II and direct component controls across eight proxy scenarios.",
+      "status": "partial"
+    },
+    {
+      "claim": "BiLo-NSGA improves pooled hypervolume over NSGA-II by 1.12% on the eight-scenario benchmark.",
+      "method_support": "Both methods operate on the same stated objective definition and population/generation settings.",
+      "experiment_support": "Reported pooled means are 0.17190 and 0.17000, with scenario-level means, rank effects, and corrected tests.",
+      "status": "partial"
+    },
+    {
+      "claim": "BiLo-NSGA broadly outperforms five stochastic baselines.",
+      "method_support": "Five stochastic baseline implementations are included.",
+      "experiment_support": "The manuscript reports 37 positive mean differences and 36 corrected wins in 40 cells, with no significant loss.",
+      "status": "partial"
+    },
+    {
+      "claim": "Forward insertion has scenario-dependent positive effects rather than a universal pooled benefit.",
+      "method_support": "A no-forward control changes the forward component while retaining the remaining search framework.",
+      "experiment_support": "The full method wins significantly in three primary-family scenarios, while the no-forward control has the higher pooled mean and four scenarios remain unresolved.",
+      "status": "supported"
+    },
+    {
+      "claim": "Atomic substitution supplies replacement semantics but has no demonstrated hypervolume gain.",
+      "method_support": "The proposed move commits or rolls back removal and insertion atomically, and no-backward and legacy-deletion controls are present.",
+      "experiment_support": "Both controls have higher pooled means, and no scenario-level contrast involving substitution resolves significantly.",
+      "status": "partial"
+    },
+    {
+      "claim": "The method provides a reviewable decision path for returned recommendations.",
+      "method_support": "Accepted local moves and repairs are logged, but complete portfolio lineage through crossover, mutation, and selection is not established.",
+      "experiment_support": "The reported 99.6% statistic measures project occurrence in any logged event, not replayable recommendation-specific lineage or human utility.",
+      "status": "unsupported"
+    },
+    {
+      "claim": "The benchmark captures inter-project dependencies.",
+      "method_support": "Dependency groups affect a 1.06 insertion-ranking bonus, but no dependency value or constraint appears in the optimization problem.",
+      "experiment_support": "No resolved dependency-bonus or dependency-density benefit is reported.",
+      "status": "unsupported"
+    },
+    {
+      "claim": "The NERC and MTEP16 analyses provide descriptive external consistency.",
+      "method_support": "Both backtests define explicit rule- or outcome-based readouts and disclose construct overlap and dependence limitations.",
+      "experiment_support": "NERC rank associations are nonsignificant; MTEP broad capture is 1.0715 while strict capture is near parity and underpowered.",
+      "status": "partial"
+    },
+    {
+      "claim": "The public proxy benchmark and full experimental archive are reproducible.",
+      "method_support": "Source families, pool size, archetypes, scenario structure, and deterministic-construction intent are described.",
+      "experiment_support": "The manuscript asserts availability of code, configurations, 4320 records, corrected inference tables, and figure scripts.",
+      "status": "blocked"
+    }
+  ],
+  "summary": "Major revision is warranted. The manuscript is unusually candid about its modest gain, adverse pooled ablations, unresolved substitution effect, runtime cost, proxy scope, and descriptive backtests; those are substantial strengths. However, the headline comparison is not effort-matched, core equations and local-search weights do not uniquely specify the implementation, hypervolume clipping has not been audited, and the application-facing dependency and decision-path narratives exceed what the objective model and trace evidence establish. Baseline feasibility handling and parameter sensitivity also require correction. These defects are scientifically repairable through matched-budget controls, specification reconciliation, normalization and parameter sensitivity analyses, and claim narrowing. Author-contribution and funding placeholders are absolute pre-acceptance blockers, while external artifacts and bibliography contents remain unverified within the supplied evidence."
+}

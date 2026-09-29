@@ -1,0 +1,77 @@
+version: 1
+paper_id: mintou_p2
+tag: mintou
+nodes:
+  - id: root
+    type: planning
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Create independent ARA project for HyG-LoadFormer."
+    children:
+      - experiment_matrix
+      - smoke_benchmark
+      - real_opsd_v1
+      - residual_refinement_v2
+      - real_simbench_v1
+      - public_benchmark_upgrade
+      - validation_gate_v3_rejected
+      - rolling_split_v4
+  - id: experiment_matrix
+    type: decision
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Define target-journal-level baselines, ablations, metrics, and datasets."
+    children: []
+  - id: smoke_benchmark
+    type: experiment
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Run deterministic synthetic smoke benchmark for pipeline validation."
+    children: []
+  - id: real_opsd_v1
+    type: experiment
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Run first public OPSD benchmark; observed weak value signal for HyG-LoadFormer on 1h and 24h before residual refinement."
+    children: []
+  - id: residual_refinement_v2
+    type: decision
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Apply compliant residual-seasonal refinement after preserving v1 weak evidence; 24h improves, 1h remains a limitation."
+    children: []
+  - id: real_simbench_v1
+    type: experiment
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Run SimBench feeder/profile-level benchmark; 24h normalized MAE improves while 1h and MAPE remain limitations."
+    children: []
+  - id: public_benchmark_upgrade
+    type: experiment
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Replace smoke results with OPSD and SimBench fixed-split plus rolling temporal split public benchmarks."
+    children:
+      - validation_gate_v3_rejected
+      - rolling_split_v4
+  - id: validation_gate_v3_rejected
+    type: dead_end
+    status: preserved
+    provenance: ai-executed
+    support_level: explicit
+    summary: "A global validation residual gate improved some short-horizon behavior but harmed OPSD and SimBench 24h evidence; preserved as mixed rejected revision."
+    children: []
+  - id: rolling_split_v4
+    type: experiment
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Add rolling temporal split evidence. OPSD 24h rolling MAPE gains 39.16% over best baseline; SimBench 24h rolling normalized MAE gains 5.15%; 1h remains a limitation."
+    children: []

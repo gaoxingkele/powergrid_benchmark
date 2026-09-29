@@ -1,0 +1,273 @@
+{
+  "schema_version": "paper_harness.review.v2",
+  "venue": "mdpi_electronics",
+  "manuscript": "manuscript/journal_submission/paper.tex",
+  "manuscript_sha256": "72d2227c6e17f0c8925068c8d395feeea0f5c4c1172c1bdd9318762e416f8ae3",
+  "coverage": {
+    "characters_total": 61160,
+    "characters_supplied": 61160,
+    "complete": true,
+    "sections_detected": [
+      "Introduction",
+      "Related Work",
+      "Deep Architectures for Short-Term and Day-Ahead Load Forecasting",
+      "Cross-Series and Graph-Structured Load Forecasting",
+      "Simple Baselines and Honest Evaluation",
+      "Datasets, Tasks, and Split Protocol",
+      "Datasets and Forecast Tasks",
+      "Primary Metrics and Why They Differ per Dataset",
+      "Leakage-Free Temporal Protocol",
+      "CSA-LoadNet",
+      "Shared Temporal Encoder",
+      "Cross-Series Attention Aggregation",
+      "Prediction Head and Calendar Features",
+      "Ablation Switches",
+      "Weighting Variants and Artifact Labels",
+      "Experimental Setup",
+      "Methods Compared",
+      "Training Protocol and Hyperparameter Disclosure",
+      "Statistical Methodology",
+      "Results",
+      "Day-Ahead Main Result on OPSD",
+      "Component Significance Across All Settings",
+      "Aggregation Helps, but the Tested Weight Forms Do Not Separate",
+      "The Hierarchical Setting: Where the Method Loses",
+      "Short-Horizon and SimBench Boundaries",
+      "Cross-Setting Rank and Compute Profiles",
+      "Discussion",
+      "Aggregation, Weighting, and Hierarchical Coherence",
+      "Why Aggregation Helps at 24 h and Not at 1 h",
+      "Implications for the Cross-Series Forecasting Literature",
+      "Limitations",
+      "Conclusions",
+      "Author Contributions",
+      "Funding",
+      "Institutional Review Board Statement",
+      "Informed Consent Statement",
+      "Data Availability Statement",
+      "Acknowledgments",
+      "Conflicts of Interest"
+    ]
+  },
+  "decision": "major_revision",
+  "primary_story": "CSA-LoadNet is presented as a component-identifiable cross-series forecaster whose fixed-split experiments locate a favorable aggregation result at 24-hour lead on OPSD while finding no advantage for the tested weighting forms and an accuracy loss to DLinear on an exact hierarchy.",
+  "primary_result": "Conditional on one OPSD split, the compact training budget, and variation over ten training seeds, CSA-LoadNet records MAPE 0.0323 versus 0.0337 for MLP and 0.0346 for TemporalOnly, but this does not establish general day-ahead, temporal-population, or weighting-geometry superiority.",
+  "positive_findings": [
+    "The manuscript reports favorable, null, and adverse findings consistently and does not conceal the OPSD 1 h or Ausgrid losses.",
+    "The exact Ausgrid hierarchy usefully separates forecast accuracy from structural coherence and applies common reconciliation transformations across models.",
+    "The method is specified mathematically, and the principal aggregation and weighting alternatives are described as explicit switches.",
+    "Chronological splitting, training-only normalization, temporally ordered validation, complete test trajectories, ten seeds, and multiplicity correction are stronger than the venue's usual minimum disclosure.",
+    "Dataset-specific primary metrics avoid applying MAPE where near-zero loads make it unstable.",
+    "The limitations section appropriately confines the favorable result to OPSD at 24 h and acknowledges the single split, bounded training budget, lack of weather inputs, and untested equivalence.",
+    "The related-work section covers deep, graph-structured, hierarchical, and simple-baseline forecasting and contains a substantial proportion of recent literature."
+  ],
+  "issues": [
+    {
+      "id": "I001",
+      "type": "COMBINED_ABLATION_ATTRIBUTION",
+      "dimension": "soundness",
+      "severity": "major",
+      "location": "CSA-LoadNet formal definitions; Ablation Switches; Sections 6.1, 7.1, and Conclusions",
+      "manuscript_evidence": "TemporalOnly removes g_i from the head and removes the cross-series value-mapping path, whereas the full model concatenates h_i and g_i. Exact parameter counts or a capacity-matched target-only control are not reported.",
+      "reviewer_inference": "The significant full-versus-TemporalOnly contrast changes informative cross-series inputs, branch structure, head input dimension, and effective capacity. It therefore supports a joint bundle, not the claimed isolated effect of cross-series aggregation.",
+      "required_action": "Estimate the effect of informative other-series context using an otherwise identical, parameter- and compute-matched control, such as a target-only duplicated context branch or a suitably permuted cross-series context, while retaining the same head and training protocol. Report exact parameter counts. The analysis units should follow the temporally replicated design requested in I003.",
+      "acceptance_test": "A control differing only in access to informative other-series context is fully specified and evaluated, and every aggregation-effect statement is based on that comparison or narrowed to a joint architecture-bundle conclusion.",
+      "evidence_boundary": "A resolved contrast would show that informative cross-series context improves expected error under the tested dataset, horizon, split, and budget; it would not establish that learned attention or a particular geometry is responsible."
+    },
+    {
+      "id": "I002",
+      "type": "CONTRIBUTION_EVIDENCE_MISMATCH",
+      "dimension": "novelty",
+      "severity": "major",
+      "location": "Introduction contribution 1; Shared Temporal Encoder; Ablation Switches",
+      "manuscript_evidence": "The paper claims that the shared temporal encoder, aggregation, distance weighting, and curvature choice are separated into independently testable switches, but no shared-versus-series-specific encoder ablation is defined or reported.",
+      "reviewer_inference": "The central description of CSA-LoadNet as component-identifiable overstates the implemented experiment. The shared encoder's necessity and contribution cannot be attributed from the supplied results.",
+      "required_action": "Either add a clearly controlled shared-versus-independent encoder comparison with disclosed capacity implications, or remove the claim that encoder sharing is independently tested and restrict contribution 1 to the switches actually evaluated.",
+      "acceptance_test": "The contribution list, method section, ablation inventory, result tables, discussion, and conclusion name exactly the same identifiable components.",
+      "evidence_boundary": "Without a new control, encoder sharing may be described as an implementation choice motivated by panel forecasting, not an empirically isolated contribution."
+    },
+    {
+      "id": "I003",
+      "type": "STATISTICAL_UNIT_AMBIGUITY",
+      "dimension": "statistics",
+      "severity": "major",
+      "location": "Statistical Methodology; all significance language in Results, Abstract, Discussion, and Conclusions",
+      "manuscript_evidence": "Mann–Whitney tests, bootstrap intervals, and paired sign-flip sensitivity analyses operate on ten seed-level aggregate errors from one fixed temporal split. The test trajectory is shared by every seed, and weather-year sensitivity is explicitly untested.",
+      "reviewer_inference": "These tests quantify optimization-randomness differences conditional on one realized test period; they do not quantify uncertainty across forecast origins, seasons, years, or regional populations. Unqualified statements that aggregation 'significantly improves' forecasting exceed that estimand. Using the same numeric seeds across different architectures also does not by itself establish a substantively paired randomization design.",
+      "required_action": "State the estimand and analysis unit explicitly and restrict all existing p-value claims to the fixed split and seed distribution. If temporal-population inference is retained, evaluate prespecified rolling temporal origins or independent weather-year splits, average or nest seed variation within each split, and compare paired loss differentials using an analysis that accounts for serial dependence, such as a block bootstrap or an appropriately specified Diebold–Mariano procedure.",
+      "acceptance_test": "Every interval and p-value identifies what was resampled or ranked; the abstract and conclusion use conditional language unless temporally replicated inference is supplied; any paired-seed analysis includes a defensible pairing rationale.",
+      "evidence_boundary": "The present data license a reproducibility statement about algorithmic variation on one split, not general forecast-population or weather-year significance."
+    },
+    {
+      "id": "I004",
+      "type": "BASELINE_BUDGET_MISMATCH",
+      "dimension": "experiments",
+      "severity": "major",
+      "location": "Methods Compared; Training Protocol and Hyperparameter Disclosure; Sections 6.1 and 6.6",
+      "manuscript_evidence": "MLP was selected for ten-seed confirmation after a three-seed screen on the same OPSD test split. LSTM, TCN, DLinear, and PatchTST-lite retain only three-seed support there. Table 3 is called full hyperparameter disclosure but does not give the baseline architectures, patch length, channel widths, layer counts, decomposition settings, parameter counts, or architecture-specific validation choices.",
+      "reviewer_inference": "The external comparison is not independently confirmatory, and the assertions of a common parameter-budget class and fair compact implementations cannot be checked. Applying one generic epoch and learning-rate budget can favor some architectures, while the rank display mixes means with different seed support.",
+      "required_action": "Disclose all baseline architectures, parameter counts, optimization settings, stopping behavior, and tuning/data-visibility rules. Define the estimand as the error difference against named compact implementations under a declared validation-only budget. Either run the full external set with equal seed and temporal support under a prespecified comparison family or restrict the inferential and rank claims to MLP and label the other results exploratory.",
+      "acceptance_test": "A reader can recreate every comparator, verify the claimed resource matching, and distinguish test-informed screening from prespecified evaluation; no figure presents three-seed and ten-seed means as equal-strength ranks without prominent qualification.",
+      "evidence_boundary": "Even after closure, the result would compare CSA-LoadNet with the specifically implemented compact baselines, not with the model families or their best-tuned literature versions."
+    },
+    {
+      "id": "I005",
+      "type": "PROXY_TASK_MISMATCH",
+      "dimension": "experiments",
+      "severity": "major",
+      "location": "Title; Introduction operational motivation; Datasets and Forecast Tasks; formal prediction head; Conclusions",
+      "manuscript_evidence": "The experiment predicts one scalar y at t+24 from each hourly sliding origin. It does not issue a 24-value next-day trajectory at a fixed day-ahead gate, although the title and motivation invoke day-ahead scheduling and unit commitment.",
+      "reviewer_inference": "A rolling 24-hour-ahead point forecast is not automatically equivalent to the operational day-ahead product invoked by the paper. The distinction affects information availability, evaluation units, and the licensed application claim.",
+      "required_action": "Either rename the task and title consistently as 24-hour-ahead point forecasting and remove unsupported operational implications, or add a true day-ahead experiment whose estimand is next-day trajectory error, whose controls use the same information gate, and whose analysis unit is the forecast day.",
+      "acceptance_test": "Title, task equations, forecast issuance schedule, target dimensionality, metrics, and operational discussion describe one consistent forecasting task.",
+      "evidence_boundary": "Under the current experiment, conclusions are limited to rolling 24-hour-ahead point prediction."
+    },
+    {
+      "id": "I006",
+      "type": "METHOD_IMPLEMENTATION_MISMATCH",
+      "dimension": "soundness",
+      "severity": "major",
+      "location": "Formal definitions; Cross-Series Attention Aggregation; Fixed curvature ablation; Sections 6.3 and 9",
+      "manuscript_evidence": "The displayed Poincaré distance uses a fixed unit ball, while c_i multiplies distance inside the softmax and is described as an 'inverse-temperature/curvature parameter.' The FixedCurvature ablation freezes c_i.",
+      "reviewer_inference": "In the supplied equations, c_i is a logit scale or inverse temperature, not the curvature of the Poincaré metric. Consequently, the claim that learnable versus fixed curvature has no effect is not tested by the stated implementation.",
+      "required_action": "Rename c_i and the ablation as temperature or distance-scale controls throughout, or implement a curvature-dependent Poincaré metric and rerun the comparison. Do not retain a curvature-specific negative conclusion without that implementation.",
+      "acceptance_test": "The mathematical metric, configuration names, implementation description, table labels, and result interpretation use the same parameter semantics.",
+      "evidence_boundary": "With the current equations, the evidence concerns learned versus fixed distance scaling, not learned hyperbolic curvature."
+    },
+    {
+      "id": "I007",
+      "type": "REFERENCE_OR_METADATA_UNVERIFIED",
+      "dimension": "reproducibility",
+      "severity": "major",
+      "location": "Table 1; Leakage-Free Temporal Protocol; Ausgrid hierarchy description",
+      "manuscript_evidence": "OPSD is described as covering 2015-01-01 through 2018-12-31 with 35,000 hourly rows; SimBench is described as the full year 2016 with 8760 hourly values and an hourly split timestamp ending in 13:45. Ausgrid leaves are the 12 highest-energy complete customers, but the period used to determine energy rank and completeness is not explicitly stated.",
+      "reviewer_inference": "The row counts and timestamps require unreported leap-day, missing-value, truncation, interval-label, or aggregation rules. The Ausgrid selection wording also leaves unresolved whether test-period outcomes influenced customer inclusion. These ambiguities prevent independent verification of the load-bearing leakage-free claim.",
+      "required_action": "Provide a raw-to-analysis data audit specifying source row counts, time zones, daylight-saving handling, missing and duplicate timestamps, leap-day treatment, aggregation labels, final first/last timestamps, and split index after aggregation. State whether Ausgrid ranking and completeness were determined using training data only; if not, revise the leakage statement and characterize the population filter.",
+      "acceptance_test": "All counts, timestamps, selection rules, and config/source-profile records agree exactly, and affected experiments are regenerated if the audit changes any sample or split.",
+      "evidence_boundary": "Closure would establish reproducibility and data visibility for the reported fixed splits, not robustness to other split positions or customer populations."
+    },
+    {
+      "id": "I008",
+      "type": "NEGATIVE_RESULT_DRIFT",
+      "dimension": "clarity",
+      "severity": "minor",
+      "location": "Table 4; Cross-Setting Rank and Compute Profiles; Section 6.1",
+      "manuscript_evidence": "Table 4 gives lower nominal OPSD 24 h MAPE to NoCalendar, Euclidean weights, and Fixed curvature than to CSA-LoadNet, yet Section 6.6 says CSA-LoadNet ranks first in that setting. Section 6.1 also calls TemporalOnly's 0.034591 value '6.5% above' the full model's 0.032345, whereas 6.5% is the reduction relative to TemporalOnly, not the increase relative to the full model.",
+      "reviewer_inference": "The narrative overstates the proposed configuration's nominal rank and switches percentage denominators. Statistical inseparability does not make CSA-LoadNet rank first by mean.",
+      "required_action": "Regenerate all ranks and percentage statements from the current table, name the denominator for each relative change, and distinguish 'best among named external baselines' from 'best mean among all configurations.'",
+      "acceptance_test": "Table 4, Figure 7, captions, prose, abstract, and conclusion agree numerically and directionally.",
+      "evidence_boundary": "The supported statement is that CSA-LoadNet beats MLP and TemporalOnly under the reported test, not that it has the lowest observed OPSD 24 h mean."
+    },
+    {
+      "id": "I009",
+      "type": "METHOD_IMPLEMENTATION_MISMATCH",
+      "dimension": "soundness",
+      "severity": "minor",
+      "location": "Abstract; Training Protocol; Hierarchical Setting; Figure 5 caption",
+      "manuscript_evidence": "Four reconciliation regimes include top-down allocation, but the results and Figure 5 emphasize only base, bottom-up, and OLS and state that bottom-up and OLS are the two coherent methods.",
+      "reviewer_inference": "A standard top-down procedure that allocates a root forecast to leaves and reconstructs aggregates should also be coherent. Its omission or nonzero violation needs explanation and makes the four-regime claim incomplete.",
+      "required_action": "Specify the top-down equations, report its hierarchy-weighted sMAPE and coherence violation for every model, and explain any deviation from standard coherent top-down reconciliation.",
+      "acceptance_test": "All four declared regimes appear consistently in methods, results, figures or tables, and the count of coherent methods follows the reported implementation.",
+      "evidence_boundary": "The currently visible evidence directly supports the accuracy/coherence comparison for bottom-up and OLS only."
+    },
+    {
+      "id": "I010",
+      "type": "CONTRIBUTION_EVIDENCE_MISMATCH",
+      "dimension": "experiments",
+      "severity": "minor",
+      "location": "Primary Metrics; Results tables and figures",
+      "manuscript_evidence": "The text says MAE, RMSE, and other secondary metrics are preserved in evidence tables, but the supplied manuscript presents the main non-hierarchical leaderboards only through one dataset-specific primary metric.",
+      "reviewer_inference": "Electronics' prediction-paper profile expects at least two appropriate error metrics. The absent supplementary assets prevent verification that rankings and conclusions are not specific to one metric.",
+      "required_action": "Include or directly link a current table reporting at least two suitable metrics per prediction setting, with units and aggregation rules, and discuss any rank reversal without extending multiplicity claims post hoc.",
+      "acceptance_test": "At least two appropriate metrics are visible for each principal forecasting experiment and their numerical direction is consistent with the stated conclusion or explicitly qualified.",
+      "evidence_boundary": "Primary-metric evidence alone licenses conclusions only for MAPE, nMAE, or hierarchy-weighted sMAPE as separately defined."
+    },
+    {
+      "id": "I011",
+      "type": "VISUAL_QA_STALE",
+      "dimension": "reproducibility",
+      "severity": "minor",
+      "location": "Weighting Variants and Artifact Labels; Data Availability Statement; figure captions",
+      "manuscript_evidence": "The Data Availability Statement claims 420 non-hierarchical decision-set records, while the described OPSD/SimBench decision set has four dataset–horizon blocks, seven methods, and ten seeds, which yields 280 method-seed cells. The manuscript also retains v6/v7/v8 lineage, a historical method label, and references to excluded earlier non-exact aggregates.",
+      "reviewer_inference": "The count may include obsolete or otherwise undescribed blocks, creating a stale-artifact risk. Audit history and historical labels also complicate the scientific narrative and could cause the wrong records to be treated as current.",
+      "required_action": "Generate the manifest and counts from the final included results, identify excluded records explicitly, make CSA-LoadNet the canonical label in deliverables, and move version lineage and incident history to supplementary provenance documentation.",
+      "acceptance_test": "Every stated record count is derivable from a manifest of current dataset–horizon–method–seed–reconciliation cells, and all figures and tables use one canonical current label.",
+      "evidence_boundary": "Artifact counts support traceability only; they do not add scientific support to the forecasting claims."
+    },
+    {
+      "id": "I012",
+      "type": "DECLARATION_PLACEHOLDER",
+      "dimension": "submission",
+      "severity": "blocker",
+      "location": "Author Contributions and Funding",
+      "manuscript_evidence": "Both sections contain explicit 'AUTHOR INPUT REQUIRED' placeholders; the CRediT assignments, verified funder, grant number, and APC funding status are absent.",
+      "reviewer_inference": "The manuscript is not submission-ready and its funding and responsibility metadata cannot be verified.",
+      "required_action": "Obtain approval from every author, insert complete CRediT roles, and provide verified funding and APC information or the journal's no-external-funding statement.",
+      "acceptance_test": "No placeholder remains, all named authors have approved their roles, and the funding declaration is complete and consistent with conflicts and acknowledgments.",
+      "evidence_boundary": "Completion resolves submission metadata only and does not change the scientific assessment."
+    },
+    {
+      "id": "I013",
+      "type": "REFERENCE_OR_METADATA_UNVERIFIED",
+      "dimension": "related_work",
+      "severity": "minor",
+      "location": "Bibliography, reference 25; external bibliography, code, data, supplementary tables, and figure assets",
+      "manuscript_evidence": "Reference 25 contains a malformed DOI string with an unmatched brace. Bibliographic source documents, compiled figures, code, CSV evidence tables, and the supplementary package were not supplied in the review material.",
+      "reviewer_inference": "The DOI defect is directly correctable, while the remaining citation, visual, numerical-traceability, and release claims are unverified rather than demonstrated defects.",
+      "required_action": "Correct and validate reference 25, run a bibliography/link check, and provide the final compiled figures and supplementary manifest for editorial verification. Rephrase 'released' if the package is only available on request or awaiting a persistent archive.",
+      "acceptance_test": "All bibliography links compile and resolve syntactically, and every referenced supplementary asset is present with a stable identifier or is accurately described as available on request.",
+      "evidence_boundary": "This closes metadata and artifact verification; it does not independently validate the external sources' substantive claims."
+    }
+  ],
+  "claim_map": [
+    {
+      "claim": "CSA-LoadNet is a component-identifiable forecaster that independently tests its shared encoder, aggregation, weighting geometry, curvature, and calendar channel.",
+      "method_support": "Aggregation, weighting, distance, scale, and calendar variants are defined, but no shared-encoder control exists and the alleged curvature parameter is a softmax scale in the equations.",
+      "experiment_support": "Ten-seed comparisons cover TemporalOnly and the named weighting/calendar variants, not encoder sharing.",
+      "status": "partial"
+    },
+    {
+      "claim": "Cross-series aggregation improves OPSD forecasting at 24 h.",
+      "method_support": "The full model includes other-series context and TemporalOnly removes it, but the ablation also changes branch structure and capacity.",
+      "experiment_support": "MAPE is 0.032345 versus 0.034591 with Holm-adjusted p = 0.0011 over ten seeds on one split.",
+      "status": "partial"
+    },
+    {
+      "claim": "CSA-LoadNet improves over the targeted MLP on OPSD at 24 h.",
+      "method_support": "Both methods use the same stated inputs, split, and generic training regime, but the MLP architecture and exact resource matching are not disclosed.",
+      "experiment_support": "MAPE is 0.032345 versus 0.033715 with Holm-adjusted p = 0.0085 over ten seeds; MLP was selected after a same-split three-seed screen.",
+      "status": "partial"
+    },
+    {
+      "claim": "No tested weighting form is resolved as better.",
+      "method_support": "Poincaré-distance, Euclidean-distance, equal-weight, and fixed-scale variants share the stated downstream model, although the curvature terminology is incorrect.",
+      "experiment_support": "All reported Holm-adjusted comparisons equal 1 across the five settings, and the manuscript correctly states that equivalence was not tested.",
+      "status": "partial"
+    },
+    {
+      "claim": "Hierarchical coherence and forecast accuracy are distinct, and DLinear is more accurate than CSA-LoadNet on the exact Ausgrid hierarchy.",
+      "method_support": "An exact 17-node summing structure and common bottom-up and OLS transformations are defined.",
+      "experiment_support": "DLinear bottom-up reaches hierarchy-weighted sMAPE 0.2802, CSA-LoadNet OLS reaches 0.2895, and the OLS contrast favors DLinear; top-down reporting remains incomplete.",
+      "status": "supported"
+    },
+    {
+      "claim": "The evaluation protocol is leakage-free.",
+      "method_support": "Chronological splits, training-only normalization, temporally ordered validation, and full test trajectories are specified.",
+      "experiment_support": "Source profiles are cited but not supplied; baseline selection used the same test split, dataset timing metadata need reconciliation, and the Ausgrid customer-selection period is unclear.",
+      "status": "partial"
+    },
+    {
+      "claim": "The result demonstrates day-ahead multi-region forecasting value.",
+      "method_support": "The implemented target is a scalar at t+24 from hourly rolling origins rather than a next-day trajectory issued at a fixed operational gate.",
+      "experiment_support": "No unit-commitment, scheduling, or fixed-gate day-ahead experiment is reported.",
+      "status": "unsupported"
+    },
+    {
+      "claim": "CSA-LoadNet is not generally superior across horizons or datasets.",
+      "method_support": "The same compact architecture is evaluated across OPSD, SimBench, and an Ausgrid hierarchy.",
+      "experiment_support": "The method loses to MLP at OPSD 1 h, is unresolved against MLP on SimBench, and loses to DLinear on Ausgrid.",
+      "status": "supported"
+    }
+  ],
+  "summary": "The manuscript has a publishable and unusually honest negative-result structure: it localizes one favorable OPSD 24-hour result, rejects a weighting-geometry advantage, and distinguishes coherence from accuracy. Major revision is nevertheless required because the no-aggregation control does not isolate aggregation, seed-level inference is overextended beyond one fixed temporal realization, baseline selection and budget matching are insufficiently verifiable, the operational day-ahead label does not match the scalar rolling task, and the stated curvature parameter is mathematically a temperature. Dataset metadata must also be reconciled, numerical and artifact inconsistencies corrected, secondary metrics exposed, and the author-contribution and funding placeholders completed before submission."
+}

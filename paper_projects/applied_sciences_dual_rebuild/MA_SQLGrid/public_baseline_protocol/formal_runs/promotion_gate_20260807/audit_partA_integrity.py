@@ -8,7 +8,7 @@ import json
 import os
 from pathlib import Path
 
-P = Path(r"D:\aicoding\powergrid_benchmark\paper_projects\applied_sciences_dual_rebuild\MA_SQLGrid\public_baseline_protocol")
+P = Path(r"F:\aicoding\powergrid_benchmark\paper_projects\applied_sciences_dual_rebuild\MA_SQLGrid\public_baseline_protocol")
 OUT = P / "formal_runs" / "promotion_gate_20260807"
 EXPECTED_FREEZE_SHA = "c77699593d7752ffc2c5c0fa0e58ef4f48db1a05f2a827ff4dde1cb8c936a05b"
 EXPECTED_EVALUATOR_SHA = "da1bbcd4530be83692d7c650c814ea9704bb710d0c953eb75d02ccb38233cf89"

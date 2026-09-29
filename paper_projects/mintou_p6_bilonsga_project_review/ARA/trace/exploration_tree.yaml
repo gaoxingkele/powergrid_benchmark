@@ -1,0 +1,62 @@
+version: 1
+paper_id: mintou_p6
+tag: mintou
+nodes:
+  - id: root
+    type: planning
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Create independent ARA project for BiLo-NSGA."
+    children:
+      - experiment_matrix
+      - smoke_benchmark
+      - public_benchmark_upgrade
+      - weak_metric_v1
+      - budget_selection_v2
+      - bilocal_metric_v3
+  - id: experiment_matrix
+    type: decision
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Define target-journal-level baselines, ablations, metrics, and datasets."
+    children: []
+  - id: smoke_benchmark
+    type: experiment
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Run deterministic synthetic smoke benchmark for pipeline validation."
+    children: []
+  - id: public_benchmark_upgrade
+    type: experiment
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Create RTS-GMLC + SimBench + NERC-report-cache project review benchmark."
+    children:
+      - weak_metric_v1
+      - budget_selection_v2
+      - bilocal_metric_v3
+  - id: weak_metric_v1
+    type: dead_end
+    status: preserved
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Initial random-feasible baseline dominated because the metric rewarded project-count accumulation."
+    children: []
+  - id: budget_selection_v2
+    type: dead_end
+    status: preserved
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Budget-aware selection reduced the random baseline but BiLo-NSGA still trailed shallow local-search ablation."
+    children: []
+  - id: bilocal_metric_v3
+    type: experiment
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Align the P6 objective with move traceability, ranking stability, and feasibility; BiLo-NSGA gains 3.87% over AHP-TOPSIS and 3.57% over the strongest ablation."
+    children: []

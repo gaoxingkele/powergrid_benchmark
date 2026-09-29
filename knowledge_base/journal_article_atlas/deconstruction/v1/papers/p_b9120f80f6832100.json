@@ -1,0 +1,1109 @@
+{
+  "schema": "atlas_substantive_deconstruction/1",
+  "paper_id": "p_b9120f80f6832100",
+  "title": "Applying MLP and SVM Models to Detect Potential Damages on High-Voltage Power Transmission Towers and Lines Using Multi-Temporal SAR Images",
+  "journal": "Remote Sensing",
+  "year": 2026,
+  "doi": "10.3390/rs18121998",
+  "article_type": "applied_method_feasibility",
+  "source": {
+    "path": "../sources/10.3390_rs18121998.pdf",
+    "sha256": "b9120f80f6832100ad753781e2f7c70827dd60b2bb73995645751f3548055cb6",
+    "pages": 30,
+    "authors": [
+      "Raffaele Nutricato",
+      "Alessandro Parisi",
+      "Alberto Morea",
+      "Davide Oscar Nitti",
+      "Khalid Tijani",
+      "Mirko Di Noia",
+      "Filomena Ciola",
+      "Enrico Sain",
+      "Alberto Bigazzi",
+      "Gabriele Mascetti",
+      "Gianluca Pari",
+      "Maria Virelli",
+      "Cataldo Guaragnella"
+    ],
+    "download_url": "https://mdpi-res.com/d_attachment/remotesensing/remotesensing-18-01998/article_deploy/remotesensing-18-01998.pdf",
+    "last_modified": "2026-06-16T07:36:48Z",
+    "license": "CC BY",
+    "version_status": "publisher PDF, identity confirmed first page; OpenAlex/Unpaywall goldOA but no PDF timestamp; notes web error and curl access denied, latest/correction/retraction status not fully verified",
+    "retrieved": "2026-09-13",
+    "acquisition": "aria2; publicCDN HEAD200 application/pdf; OA via official APIs; no access circumvention"
+  },
+  "analysis_status": "fulltext_single_assistant_analysis_pending_independent_review",
+  "human_calibrated": false,
+  "all_fields_verified": false,
+  "read_coverage": {
+    "physical_pages_read": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30
+    ],
+    "visual_pages": [
+      5,
+      6,
+      7,
+      9,
+      10,
+      11,
+      12,
+      13,
+      15,
+      16,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24
+    ],
+    "references_read": true,
+    "method": "every page PyMuPDF in bounded chunks incl90 refs/declarations; Poppler all19figures/3tables/6equations checked"
+  },
+  "scope": {
+    "decision": "core_ai",
+    "relevance": "direct",
+    "task": "高压输电塔和导线完整/坍塌或移除状态，已知坐标/可见性预筛SAR变化分类；非泛遥感图像凑数"
+  },
+  "counts": {
+    "level1_sections": 5,
+    "numbered_body_headings": 20,
+    "numbered_equations": 6,
+    "figures": 19,
+    "tables": 3,
+    "numbered_algorithms": 0,
+    "references": 90,
+    "paragraph_count": null
+  },
+  "sections": [
+    {
+      "id": "1",
+      "title": "Introduction",
+      "level": 1,
+      "parent_id": null,
+      "pages": [
+        2,
+        4
+      ],
+      "logic": "灾害电网恢复信息缺口→地面/UAV安全与覆盖约束→SAR全天候但几何可见性约束→COSMO档案与在轨处理研究目标；本文只是第一步可行性。"
+    },
+    {
+      "id": "2",
+      "title": "Data Collection and Preparation: Real Case Studies and Simulated Data",
+      "level": 1,
+      "parent_id": null,
+      "pages": [
+        4,
+        11
+      ],
+      "logic": "稀有损坏类→真实A与模拟训练B→共同真实目标评估框架；来源/模拟域是论证核心。"
+    },
+    {
+      "id": "2.1",
+      "title": "Setting A: Real Intact and Collapsed Tower Data Collection and COSMO SAR Chip Extraction",
+      "level": 2,
+      "parent_id": "2",
+      "pages": [
+        5,
+        8
+      ],
+      "logic": "媒体/光学交叉定位4事件→6 SAR stacks→亚像素配准辐射校准→10期均值+后1期→自适应chip/人工可见性筛选。"
+    },
+    {
+      "id": "2.2",
+      "title": "Setting B: Generation of Simulation-Based Intact/Collapsed Power Transmission Towers",
+      "level": 2,
+      "parent_id": "2",
+      "pages": [
+        8,
+        11
+      ],
+      "logic": "真实损坏少→真实特征启发5×25模板模拟→模拟训验、全部真实测试；不是完整电磁仿真。"
+    },
+    {
+      "id": "2.2.1",
+      "title": "Assumptions and Scope",
+      "level": 3,
+      "parent_id": "2.2",
+      "pages": [
+        9,
+        10
+      ],
+      "logic": "明确只保存高对比/坍塌辐射变化，不拟合绝对σ0；限定轻量模拟适用域。"
+    },
+    {
+      "id": "2.2.2",
+      "title": "Analytical Formulation",
+      "level": 3,
+      "parent_id": "2.2",
+      "pages": [
+        10,
+        11
+      ],
+      "logic": "确定模板×均匀随机场→完整/底座残留两类；只模拟杆塔，不模拟导线。"
+    },
+    {
+      "id": "3",
+      "title": "Methodological Approach",
+      "level": 1,
+      "parent_id": null,
+      "pages": [
+        11,
+        15
+      ],
+      "logic": "可变尺寸chip→六个可解释统计特征→MLP/SVM二分类，避免原图尺寸统一的重采样。"
+    },
+    {
+      "id": "3.1",
+      "title": "Selection of Radiometric Features",
+      "level": 2,
+      "parent_id": "3",
+      "pages": [
+        11,
+        13
+      ],
+      "logic": "用相关性/结构/亮像素存留与重叠捕获目标变化；并非充分因果解释。"
+    },
+    {
+      "id": "3.1.1",
+      "title": "Feature 1: Pearson’s Correlation Coefficient",
+      "level": 3,
+      "parent_id": "3.1",
+      "pages": [
+        12,
+        12
+      ],
+      "logic": "共定位像素强度线性相关，标准PCC。"
+    },
+    {
+      "id": "3.1.2",
+      "title": "Feature 2 (Mean Value) and Feature 3 (Max Value) of Structural Similarity Index Measure",
+      "level": 3,
+      "parent_id": "3.1",
+      "pages": [
+        12,
+        12
+      ],
+      "logic": "局部SSIM图均值和最大值→整体/局部结构一致性；窗口/常数值未给。"
+    },
+    {
+      "id": "3.1.3",
+      "title": "Feature 4: Pixel-Count Ratio",
+      "level": 3,
+      "parent_id": "3.1",
+      "pages": [
+        12,
+        13
+      ],
+      "logic": "pre Otsu掩码与阈值转移post→亮像素存留比例，依赖准确配准/校准。"
+    },
+    {
+      "id": "3.1.4",
+      "title": "Feature 5: Dice Similarity Coefficient",
+      "level": 3,
+      "parent_id": "3.1",
+      "pages": [
+        13,
+        13
+      ],
+      "logic": "沿用PCR掩码计算空间重叠。"
+    },
+    {
+      "id": "3.1.5",
+      "title": "Feature 6: Jaccard Similarity Coefficient",
+      "level": 3,
+      "parent_id": "3.1",
+      "pages": [
+        13,
+        13
+      ],
+      "logic": "post独立阈值与Dice共享阈值区分，试图提供补充信息；实现细节仍需代码核查。"
+    },
+    {
+      "id": "3.2",
+      "title": "Selected Automatic AI-Based SAR Classification Models",
+      "level": 2,
+      "parent_id": "3",
+      "pages": [
+        13,
+        15
+      ],
+      "logic": "特征而非图像模型理由→MLP与RBF SVM原理及标签定义，无新模型理论。"
+    },
+    {
+      "id": "4",
+      "title": "Results and Discussion",
+      "level": 1,
+      "parent_id": null,
+      "pages": [
+        15,
+        25
+      ],
+      "logic": "样本量→特征分布→四配置分类/耗时→真实案例→可见性/分辨率/在轨部署边界。"
+    },
+    {
+      "id": "4.1",
+      "title": "Datasets and Radiometric Feature Computation",
+      "level": 2,
+      "parent_id": "4",
+      "pages": [
+        15,
+        16
+      ],
+      "logic": "表3明确A/B训验测分母；图6六特征分布只探索，不是单特征分类消融。"
+    },
+    {
+      "id": "4.2",
+      "title": "Model Configuration and Comparison of the Two Automatic AI-Based Models: Computational and Inference Performances",
+      "level": 2,
+      "parent_id": "4",
+      "pages": [
+        16,
+        18
+      ],
+      "logic": "同CPU软件→Bayes5fold SVM/3层30MLP→时间与混淆矩阵；MLP零观测错不等于真实零风险。"
+    },
+    {
+      "id": "4.3",
+      "title": "Application Example of Methodological Workflow on Real Cases",
+      "level": 2,
+      "parent_id": "4",
+      "pages": [
+        18,
+        23
+      ],
+      "logic": "Puglia case3场景及塔/线chip示例→特征变化与预测对应；不是新增独立外部测试。"
+    },
+    {
+      "id": "4.4",
+      "title": "Operational Considerations and Roadmap Towards On-Board Processing",
+      "level": 2,
+      "parent_id": "4",
+      "pages": [
+        23,
+        25
+      ],
+      "logic": "可见性限定→单塔降采样定性3m建议→聚焦/配准/硬件/downlink待验证。"
+    },
+    {
+      "id": "5",
+      "title": "Conclusions",
+      "level": 1,
+      "parent_id": null,
+      "pages": [
+        25,
+        25
+      ],
+      "logic": "总结条件化可行性/MLP优势→明确监测域与跨传感器待验证→未来样本和在轨完整链。"
+    }
+  ],
+  "equations": [
+    {
+      "id": "(1)",
+      "page": 10,
+      "type": "physical/remote_sensing/synthetic_template",
+      "purpose": "Ipre=ηpre Tintact, Ipost=ηpost Tκ，同组两生成式；κ完整或坍塌。",
+      "assumptions": [
+        "5×25固定模板，η均匀[0,1]，不保证绝对σ0逼真",
+        "背景/目标对比和足迹先验来自真实观测"
+      ],
+      "note": "未列模板全部数值、随机场空间/时序独立性和seed；真实pre为10期均值，模拟pre仅uniform调制，等效noise分布未校验。"
+    },
+    {
+      "id": "(2)",
+      "page": 12,
+      "type": "statistics/estimation/correlation",
+      "purpose": "Pearson强度相关，−1到1，跨chip像素关系特征。",
+      "note": "标准引用；零方差处理/linear intensity vs dB实施需明确。"
+    },
+    {
+      "id": "(3)",
+      "page": 12,
+      "type": "statistics/estimation/structural_similarity",
+      "purpose": "SSIM局部均值/方差/协方差比，图均值与最大产生两个特征。",
+      "note": "C1/C2、窗口尺寸、边界、data_range值未报告，不能单凭式复现。"
+    },
+    {
+      "id": "(4)",
+      "page": 12,
+      "type": "statistics/estimation/pixel_retention",
+      "purpose": "PCR=Npost/Npre；pre Otsu阈值/掩码移到post量亮像素存留。",
+      "note": "若严格仅pre mask内post计数则B⊆A，DSC=2PCR/(1+PCR)；无正像素分母策略未明确，可见性筛查减少但不形式排除。"
+    },
+    {
+      "id": "(5)",
+      "page": 13,
+      "type": "statistics/estimation/mask_similarity",
+      "purpose": "DSC=2|A∩B|/(|A|+|B|)，PCR同源掩码。",
+      "note": "标准Dice，不能因采用常见生态指标就排除电力任务。"
+    },
+    {
+      "id": "(6)",
+      "page": 13,
+      "type": "statistics/estimation/mask_similarity",
+      "purpose": "JSC=|A∩B|/|A∪B|；作者说明post独立阈值使与Dice非必然单调等价。",
+      "note": "但Fig12–18全部JSC= PCR且DSC≈2JSC/(1+JSC)到报告精度，可能阈值同掩码，也可能实现沿用；需源mask/代码核对，不凭七例断言全库冗余。"
+    }
+  ],
+  "figures": [
+    {
+      "id": "Figure 1",
+      "page": 6,
+      "panels": 1,
+      "type": "地图",
+      "purpose": "4事件跨意大利定位，病例便利样本不是全国随机采样。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 2",
+      "page": 7,
+      "panels": 1,
+      "type": "预处理框架",
+      "purpose": "SAR stack→master/co-registration/calibration→均值/单后期→坐标与可见性筛查→chip，包含人工/半自动门槛。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 3",
+      "page": 9,
+      "panels": 2,
+      "type": "前后SAR示例",
+      "purpose": "10期pre均值对单post降低speckle；塔和导线亮点不同形状，色条dB。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 4",
+      "page": 10,
+      "panels": 4,
+      "type": "模拟模板/随机实现",
+      "purpose": "完整与坍塌两类×模板/调制，5×25；固定几何和uniform随机非完整电磁/真实speckle仿真。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 5",
+      "page": 11,
+      "panels": 1,
+      "type": "A/B实验流程",
+      "purpose": "虚线明确真实数据库启发模拟器，故全部真实B测试并非与方法设计完全独立。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 6",
+      "page": 16,
+      "panels": 2,
+      "type": "特征柱图",
+      "purpose": "塔/线各六特征均值±2SD，不是CI；损坏线n=1且无误差条，不能推出单特征都必不足。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 7",
+      "page": 18,
+      "panels": 2,
+      "type": "SVM混淆矩阵",
+      "purpose": "A[[39,1],[0,6]]，B[[166,1],[5,29]]，行真I/C列预测I/C；OA97.8/97.0，错分方向核对通过。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 8",
+      "page": 18,
+      "panels": 2,
+      "type": "MLP混淆矩阵",
+      "purpose": "A[[40,0],[0,6]]、B[[167,0],[0,34]]；仅所选目标46/201准确，无CI或多次稳定性。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 9",
+      "page": 19,
+      "panels": 1,
+      "type": "pre场景",
+      "purpose": "Puglia stack5，13个已知目标蓝框；不是盲定位整图检测。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 10",
+      "page": 20,
+      "panels": 1,
+      "type": "post场景分类",
+      "purpose": "同场景绿I红C，8/10坍塌塔；不是新增测试样本。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 11",
+      "page": 20,
+      "panels": 2,
+      "type": "局部前后放大",
+      "purpose": "8/10C、9导线与11塔I；caption错指Fig8/9应为9/10。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 12",
+      "page": 21,
+      "panels": 2,
+      "type": "tower chip Class I",
+      "purpose": "pre/post及绿色pre掩码；六特征=0.64/0.52/0.8/0.75/0.86/0.75; MLP预测I。仅案例，不是独立消融。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 13",
+      "page": 21,
+      "panels": 2,
+      "type": "tower chip Class I",
+      "purpose": "pre/post及绿色pre掩码；六特征=0.48/0.46/0.73/0.6/0.75/0.6; MLP预测I。仅案例，不是独立消融。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 14",
+      "page": 21,
+      "panels": 2,
+      "type": "tower chip Class C",
+      "purpose": "pre/post及绿色pre掩码；六特征=0.3/0.17/0.53/0.19/0.32/0.19; MLP预测C。仅案例，不是独立消融。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 15",
+      "page": 21,
+      "panels": 2,
+      "type": "tower chip Class C",
+      "purpose": "pre/post及绿色pre掩码；六特征=0.14/0.03/0.5/0.19/0.32/0.19; MLP预测C。仅案例，不是独立消融。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 16",
+      "page": 22,
+      "panels": 2,
+      "type": "line chip Class I",
+      "purpose": "pre/post及绿色pre掩码；六特征=0.81/0.69/0.85/0.63/0.78/0.63; MLP预测I。仅案例，不是独立消融。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 17",
+      "page": 22,
+      "panels": 2,
+      "type": "line chip Class I",
+      "purpose": "pre/post及绿色pre掩码；六特征=0.77/0.55/0.89/0.68/0.81/0.68; MLP预测I。仅案例，不是独立消融。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 18",
+      "page": 23,
+      "panels": 2,
+      "type": "line chip Class C",
+      "purpose": "pre/post及绿色pre掩码；六特征=0.1/0.1/0.43/0.05/0.09/0.05; MLP预测C。仅案例，不是独立消融。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 19",
+      "page": 24,
+      "panels": 5,
+      "type": "单塔分辨率退化",
+      "purpose": "1m原图及2–5倍降采样，3m近实用界限仅定性，作者明确不可当通用阈值。",
+      "visual_checked": true
+    }
+  ],
+  "tables": [
+    {
+      "id": "Table 1",
+      "page": 5,
+      "type": "dataset_inventory",
+      "columns": [
+        "case",
+        "date",
+        "region",
+        "event",
+        "collapsed/removed_towers"
+      ],
+      "rows": [
+        [
+          1,
+          "2018-10-28/30",
+          "Veneto",
+          "VAIA storm",
+          8
+        ],
+        [
+          2,
+          "2020-03/07",
+          "Campania",
+          "maintenance removal",
+          19
+        ],
+        [
+          3,
+          "2022-10-28",
+          "Puglia",
+          "metal theft failure",
+          2
+        ],
+        [
+          4,
+          "2023-07-22",
+          "Emilia Romagna",
+          "tornado",
+          3
+        ]
+      ],
+      "purpose": "来源可追溯4事件32物理塔；移除不等同自然灾害坍塌",
+      "audit": "Table3 ClassC34目标含塔/线，物理塔vs多轨观测映射未给，32与34不能简单当错误也不能当34独立倒塔。",
+      "visual_checked": true
+    },
+    {
+      "id": "Table 2",
+      "page": 7,
+      "type": "acquisition",
+      "columns": [
+        "stack",
+        "orbit",
+        "pre dates",
+        "post date",
+        "case"
+      ],
+      "rows": [
+        [
+          1,
+          "ascending",
+          "2018-05-20/2018-10-27",
+          "2018-11-12",
+          1
+        ],
+        [
+          2,
+          "descending",
+          "2018-05-20/2018-10-27",
+          "2018-11-12",
+          1
+        ],
+        [
+          3,
+          "ascending",
+          "2019-11-13/2020-01-08",
+          "2020-08-11",
+          2
+        ],
+        [
+          4,
+          "descending",
+          "2019-07-01/2020-01-25",
+          "2020-08-04",
+          2
+        ],
+        [
+          5,
+          "ascending",
+          "2022-05-09/2022-10-16",
+          "2022-11-01",
+          3
+        ],
+        [
+          6,
+          "ascending",
+          "2023-02-17/2023-07-11",
+          "2023-07-27",
+          4
+        ]
+      ],
+      "units": "COSMO Stripmap3m,HH",
+      "purpose": "6同几何stack，10pre/1post；灾后实际采集延迟4/5/13–15天级，不是亚毫秒响应",
+      "visual_checked": true
+    },
+    {
+      "id": "Table 3",
+      "page": 15,
+      "type": "split",
+      "columns": [
+        "setting",
+        "train+validation I",
+        "train+validation C",
+        "test I",
+        "test C"
+      ],
+      "rows": [
+        [
+          "A real",
+          127,
+          28,
+          40,
+          6
+        ],
+        [
+          "B synthetic train real test",
+          200,
+          200,
+          167,
+          34
+        ]
+      ],
+      "purpose": "训验池各70/30；A总201，B模拟400+同真实201。B测试含A全部真实数据，不能当两套独立验证。",
+      "audit": "155×70%=108.5，精确分层/舍入/索引未给；B280/120算术但是否各类140/60未明确。",
+      "visual_checked": true
+    }
+  ],
+  "framework": {
+    "inputs": [
+      "有可靠坐标/高度/事件时间的塔线目标",
+      "6个COSMO X-band HH Stripmap3m stack；10期pre平均+1期post",
+      "DEM与雷达几何/辐射校准"
+    ],
+    "outputs": [
+      "I intact / C collapsed-or-removed预测",
+      "非监测域目标应flag不可靠，而非强制解释为完整"
+    ],
+    "modules": [
+      "SPINUA DEM-assisted subpixel coregistration and calibration",
+      "保持原雷达geometry的target-adaptive bounding box",
+      "visible tower:95%chip背景<−5dB且≥4像素>0dB，再人工验收；导线±10°azimuth alignment",
+      "PCC/meanSSIM/maxSSIM/PCR/Dice/Jaccard six-feature vector",
+      "zscore MLP 6→30→30→30→2,LeakyReLU/Softmax,Adam/CE",
+      "或standardized RBF SVM Bayesian5foldCV tuned"
+    ],
+    "composition": "serial signal preprocessing→features→classifier; A/B different training source not ensemble",
+    "simulation": "tower-only fixed template×uniform modulation; physics-guided contrast signatures, not electromagnetic forward model",
+    "hyperparameters": {
+      "svm_A": {
+        "box_constraint": 21.19,
+        "kernel_scale": 17.65
+      },
+      "svm_B": {
+        "box_constraint": 50.99,
+        "kernel_scale": 1.02
+      },
+      "svm_tuning": "Bayesian optimization5fold CV, loss objective",
+      "mlp_hidden": [
+        30,
+        30,
+        30
+      ]
+    },
+    "critical_missing": [
+      "MLP lr/batch/epochs/earlystop/seed/LeakyReLU slope",
+      "SVM search bounds/evaluation budget and CV vs70/30 relationship",
+      "train-only normalization/CV fit details",
+      "target/event/stack group mapping and split",
+      "simulator template full values/seed/distribution fidelity",
+      "SSIM constants/window and intensity representation"
+    ],
+    "theory_boundary": "radiometric/geometry observation assumptions substantively enter screening/features; no new theorem or formal convergence claim"
+  },
+  "experiments": [
+    {
+      "id": "E1",
+      "type": "feature_distribution",
+      "pages": [
+        15,
+        16
+      ],
+      "rq": "六特征是否有类差异",
+      "design": "full real dataset mean±2SD by tower/line and I/C",
+      "limits": "查看包含测试的分布用于解释/动机；特征选择是否预冻结未知，损坏线仅1例；未实际训练单特征对照，不能证明多特征必要。"
+    },
+    {
+      "id": "E2",
+      "type": "main_comparison",
+      "pages": [
+        15,
+        18
+      ],
+      "rq": "SVM/MLP在真实与模拟训练下性能与CPU代价",
+      "factors": [
+        "classifier2",
+        "training-sourceA/B2"
+      ],
+      "test_A": {
+        "n": 46,
+        "I": 40,
+        "C": 6
+      },
+      "test_B": {
+        "n": 201,
+        "I": 167,
+        "C": 34
+      },
+      "confusion_orientation": "rows true I/C, columns predicted I/C",
+      "matrices": {
+        "SVM_A": [
+          [
+            39,
+            1
+          ],
+          [
+            0,
+            6
+          ]
+        ],
+        "SVM_B": [
+          [
+            166,
+            1
+          ],
+          [
+            5,
+            29
+          ]
+        ],
+        "MLP_A": [
+          [
+            40,
+            0
+          ],
+          [
+            0,
+            6
+          ]
+        ],
+        "MLP_B": [
+          [
+            167,
+            0
+          ],
+          [
+            0,
+            34
+          ]
+        ]
+      },
+      "recomputed": {
+        "SVM_A_oa": 0.9782608695652174,
+        "SVM_B_oa": 0.9701492537313433,
+        "SVM_B_C_recall": 0.8529411764705882,
+        "SVM_B_C_precision": 0.9666666666666667,
+        "MLP_A_oa": 1,
+        "MLP_B_oa": 1
+      },
+      "runtime": {
+        "hardware": "Intel Core Ultra7 258V2.2GHz,32GB,x64;MATLABR2025b",
+        "training_seconds": {
+          "MLP_A": [
+            12,
+            23
+          ],
+          "MLP_B": [
+            303,
+            382
+          ],
+          "SVM_A": [
+            90,
+            427
+          ],
+          "SVM_B": [
+            3600,
+            7200
+          ]
+        },
+        "inference_ms": {
+          "MLP": 0.212,
+          "SVM": 0.451
+        },
+        "speed_ratio_svm_over_mlp": 2.1273584905660377
+      },
+      "limitations": [
+        "只classifier latency，不含SAR focusing/配准/10期参考/特征提取/传输",
+        "训练耗时范围重复数/调参耗时是否包含未知，不能仅归因模型复杂度",
+        "A/B测试不同且重叠，无法隔离模拟增广因果效应",
+        "SVM/MLP调参预算未匹配"
+      ]
+    },
+    {
+      "id": "E3",
+      "type": "case_visualization",
+      "pages": [
+        18,
+        23
+      ],
+      "rq": "变化特征与预测是否符合真实灾害",
+      "data": "Case3 Stack5 scene,4tower+3line illustrated chips",
+      "feature_order": [
+        "PCC",
+        "SSIM_mean",
+        "SSIM_max",
+        "PCR",
+        "DSC",
+        "JSC"
+      ],
+      "illustrated_values": [
+        {
+          "figure": 12,
+          "page": 21,
+          "target": "tower",
+          "label": "I",
+          "values": [
+            0.64,
+            0.52,
+            0.8,
+            0.75,
+            0.86,
+            0.75
+          ]
+        },
+        {
+          "figure": 13,
+          "page": 21,
+          "target": "tower",
+          "label": "I",
+          "values": [
+            0.48,
+            0.46,
+            0.73,
+            0.6,
+            0.75,
+            0.6
+          ]
+        },
+        {
+          "figure": 14,
+          "page": 21,
+          "target": "tower",
+          "label": "C",
+          "values": [
+            0.3,
+            0.17,
+            0.53,
+            0.19,
+            0.32,
+            0.19
+          ]
+        },
+        {
+          "figure": 15,
+          "page": 21,
+          "target": "tower",
+          "label": "C",
+          "values": [
+            0.14,
+            0.03,
+            0.5,
+            0.19,
+            0.32,
+            0.19
+          ]
+        },
+        {
+          "figure": 16,
+          "page": 22,
+          "target": "line",
+          "label": "I",
+          "values": [
+            0.81,
+            0.69,
+            0.85,
+            0.63,
+            0.78,
+            0.63
+          ]
+        },
+        {
+          "figure": 17,
+          "page": 22,
+          "target": "line",
+          "label": "I",
+          "values": [
+            0.77,
+            0.55,
+            0.89,
+            0.68,
+            0.81,
+            0.68
+          ]
+        },
+        {
+          "figure": 18,
+          "page": 23,
+          "target": "line",
+          "label": "C",
+          "values": [
+            0.1,
+            0.1,
+            0.43,
+            0.05,
+            0.09,
+            0.05
+          ]
+        }
+      ],
+      "limits": "已有测试病例展示，不新增独立样本；只1个removed line。"
+    },
+    {
+      "id": "E4",
+      "type": "qualitative_resolution_sensitivity",
+      "pages": [
+        23,
+        24
+      ],
+      "rq": "目标几何细节随降采样如何消失",
+      "design": "1个1m intacttower×1–5 downsample",
+      "limits": "没有多塔分类性能/阈值统计，3m不是普适极限。"
+    }
+  ],
+  "statistics": {
+    "analysis_unit": "target chip pairs, clustered by physical tower/line, event and ascending/descending stack",
+    "independent_n": null,
+    "events": 4,
+    "stacks": 6,
+    "physical_collapsed_removed_towers_inventory": 32,
+    "real_target_total": 201,
+    "synthetic_total": 400,
+    "rare_line_damage_n": 1,
+    "screening_denominator": "not_reported: rejected/ineligible count unknown",
+    "uncertainty": "no CI/hypothesis tests/repeated seeds reported;Fig6 ±2SD descriptive",
+    "leakage_risk": "SettingB simulator explicitly informed by observed real database (Fig5 dashed arrow), then whole real database test. No direct real training feature rows claimed, but design-level test independence not established. Need held-out events/sites not used to design simulator; do not assert proven leakage.",
+    "temporal_assumptions": "ten pre looks comparable to3×3speckle sample count does not guarantee equal independent effective looks; decorrelation/number spacing sensitivity deferred",
+    "imbalance": "A devI127/C28;B synthetic200/200, tests realI167/C34; selected prevalence not nationwide failure risk",
+    "metric_boundary": "100% sampleOA vs true zero false-negative risk must remain distinct",
+    "numeric_checks": [
+      "45/46=97.826%,195/201=97.015%,29/34=85.294% match printed",
+      "0.451/0.212=2.127x classifier speed ratio",
+      "32 inventory towers vs34 C target chips unexplained identity mapping, not automatically contradiction"
+    ]
+  },
+  "conclusions": {
+    "supported": [
+      "visibility-screened real targets yielded no MLP errors in46/201 tests under described settings",
+      "small feature MLP classifier faster than testedRBF SVM on desktopCPU",
+      "simulation-trained MLP transfer to this observed real-database target set feasible"
+    ],
+    "not_supported": [
+      "100% accuracy for entire transmission network, invisible targets, all hazards or fine conductor breaks",
+      "onboard satellite implementation demonstrated",
+      "onboard compute reduces event-to-overpass waiting time; it can reduce post-acquisition processing/downlink not orbit timing",
+      "simulator independent-generalization advantage or feature complementarity causally proven",
+      "cross-sensor TSX/PAZ validated"
+    ],
+    "limitations": [
+      "observable-only selection; reject count unknown",
+      "1 real damaged/removed line",
+      "maintenance removal mixed with disaster collapse",
+      "unknown physical-target/event independence",
+      "design-informed simulator and Btest full observeddatabase",
+      "no CI/seeds/feature ablation or component sensitivity",
+      "end-to-end hardware chain future"
+    ],
+    "future_work": [
+      "larger diverse C cases",
+      "cross-sensor quantitative tests",
+      "prelook count/time spacing effects",
+      "visibility screening automation",
+      "onboard focusing/registration/port/downlink"
+    ]
+  },
+  "narrative": {
+    "trajectory": "电力灾害需求→SAR可见域/采样现实→模拟器简化假设→可解释特征→MLP/SVM比较→零观测错误但限定域→部署路线，长篇边界讨论比泛化口号更扎实",
+    "language_findings": [
+      "'no observed errors within visibility-screened test set'较恰当地把结果限定为样本",
+      "'physically interpretable'是特征含义明确，不代表分类器因果解释/校准",
+      "'statistically robust'与更大n不自动同义，缺聚类/CI",
+      "多处Figure错引(Fig11称8/9; p21称Fig5的特征实Fig6)，p2保留'. . .'排版",
+      "p26披露ChatGPT GPT-5.2语言编辑；不能据此判断科学结果真伪"
+    ],
+    "original_sentence_frames": [
+      "Within the subset satisfying [observability criterion], [model] produced [errors/denominator]; targets outside this subset remain unvalidated.",
+      "The simulator preserves [task-relevant signature] without claiming to reproduce [full physical process].",
+      "Although [classifier latency] is low, operational readiness additionally requires [upstream and downstream chain]."
+    ]
+  },
+  "difficulty": {
+    "status": "single_assistant_provisional_not_human",
+    "reviewer": "Codex /root/scope_other",
+    "dimensions": [
+      {
+        "dimension": "theory",
+        "score": 2,
+        "range": [
+          1,
+          2
+        ],
+        "evidence": "几何/辐射对比模板改写，非完整电磁或证明"
+      },
+      {
+        "dimension": "algorithm",
+        "score": 2,
+        "range": [
+          1,
+          2
+        ],
+        "evidence": "成熟SAR预处理+六特征+MLP/SVM组合，非新学习算法"
+      },
+      {
+        "dimension": "statistics",
+        "score": 1,
+        "range": [
+          1,
+          2
+        ],
+        "evidence": "混淆矩阵/均值SD与CV调参，没有误差推断；大n非独立n"
+      },
+      {
+        "dimension": "data",
+        "score": 3,
+        "range": [
+          2,
+          3
+        ],
+        "evidence": "4事件6轨档案/光学核验/DEM/人工可见筛查，真实罕见目标采集昂贵"
+      },
+      {
+        "dimension": "engineering",
+        "score": 2,
+        "range": [
+          2,
+          3
+        ],
+        "evidence": "实际SAR处理链和几何辐射约束，仍无在轨实现"
+      },
+      {
+        "dimension": "cross_discipline",
+        "score": 3,
+        "range": [
+          2,
+          3
+        ],
+        "evidence": "雷达观测几何和设备状态实质耦合特征/筛查，但转移理论未独立验证"
+      }
+    ]
+  },
+  "paragraph_analysis": {
+    "status": "not_completed",
+    "paragraph_count": null,
+    "reason": "全页阅读不等于段落bbox/跨页重组逐段标签完成，保持unknown"
+  },
+  "unassessed": [
+    "211字段完整observation",
+    "逐段/长度/POS/频次",
+    "原代码数据/模拟器运行",
+    "所有图值digitization",
+    "独立复核与人工校准",
+    "完整版本/更正链"
+  ],
+  "disclosures": {
+    "data": "TOWER-CHECK project available uponrequest; ASI imagery licence",
+    "code": "not_reported afterdeclarations review",
+    "ai": "p26 authors discloseChatGPT GPT-5.2 forlanguageediting",
+    "conflicts": "GAP/Planetek employment disclosed"
+  }
+}

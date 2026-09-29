@@ -1,0 +1,77 @@
+version: 1
+paper_id: mintou_p3
+tag: mintou
+nodes:
+  - id: root
+    type: planning
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Create independent ARA project for CARS-MODE."
+    children:
+      - experiment_matrix
+      - smoke_benchmark
+      - real_simbench_v1
+      - cars_repair_revision
+      - noder_ablation_correction
+      - public_benchmark_upgrade
+      - der_stress_v4_near_miss
+      - diversity_ablation_v5
+  - id: experiment_matrix
+    type: decision
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Define target-journal-level baselines, ablations, metrics, and datasets."
+    children: []
+  - id: smoke_benchmark
+    type: experiment
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Run deterministic synthetic smoke benchmark for pipeline validation."
+    children: []
+  - id: real_simbench_v1
+    type: experiment
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Run SimBench benchmark-derived distribution planning experiment; CARS-MODE did not beat strongest baseline or NoDER ablation."
+    children: []
+  - id: cars_repair_revision
+    type: decision
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Revise CARS-MODE to prioritize budget-aware constraint repair and limit DER/storage over-selection; result remained weak."
+    children: []
+  - id: noder_ablation_correction
+    type: decision
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Correct NoDER ablation to remove DER/storage candidates instead of only downweighting them; current evidence still does not support positive CARS-MODE claims."
+    children: []
+  - id: public_benchmark_upgrade
+    type: experiment
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Replace smoke results with public SimBench DER/storage stress planning benchmark."
+    children:
+      - der_stress_v4_near_miss
+      - diversity_ablation_v5
+  - id: der_stress_v4_near_miss
+    type: dead_end
+    status: preserved
+    provenance: ai-executed
+    support_level: explicit
+    summary: "DER/storage stress redesign beat baselines but failed against NoDiversity; preserved as v4 near-miss."
+    children: []
+  - id: diversity_ablation_v5
+    type: experiment
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Correct NoDiversity and FixedDE semantics; CARS-MODE gains 0.46% over NSGA-II and 0.19% over FixedDE on proxy hypervolume."
+    children: []

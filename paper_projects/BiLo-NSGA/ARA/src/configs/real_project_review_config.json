@@ -1,0 +1,63 @@
+{
+  "source_dirs": [
+    "data/public_datasets/production_cost/rts-gmlc/RTS_Data/SourceData",
+    "data/public_datasets/grid_cases/simbench/simbench/networks/1-complete_data-mixed-all-0-sw",
+    "data/public_datasets/reliability_reports/c2ges_nerc_reports"
+  ],
+  "experiments": [
+    "budget_constrained_selection",
+    "reliability_prioritized_review",
+    "renewable_accommodation_review",
+    "dependency_constrained_review",
+    "local_move_explainability",
+    "ranking_robustness",
+    "budget_sensitivity",
+    "project_pool_scalability"
+  ],
+  "methods": [
+    "BiLo-NSGA",
+    "NSGA-II",
+    "NSGA-III",
+    "MOEA/D",
+    "Greedy BCR",
+    "AHP-TOPSIS",
+    "Random Feasible",
+    "Pareto Local Search",
+    "Ablation-NoForwardSearch",
+    "Ablation-NoBackwardSearch",
+    "Ablation-LegacyDeletion",
+    "Ablation-RandomMutationOnly",
+    "Ablation-NoDependencyMoves",
+    "Ablation-NoFeasibilityRecovery",
+    "Ablation-WeightedRankingOnly",
+    "Ablation-ShallowLocalSearch",
+    "Ablation-LowDependencyDensity",
+    "Ablation-LooseBudget"
+  ],
+  "method_descriptions": {
+    "BiLo-NSGA": "NSGA-II core + forward insertion + atomic backward-forward substitution + dependency moves + feasibility recovery.",
+    "NSGA-II": "pymoo NSGA-II, binary encoding, constrained.",
+    "NSGA-III": "pymoo NSGA-III with Das-Dennis reference directions.",
+    "MOEA/D": "pymoo MOEA/D, penalty for budget.",
+    "Greedy BCR": "Benefit-cost-ratio greedy under budget.",
+    "AHP-TOPSIS": "AHP-derived weights + TOPSIS ranking + greedy fill.",
+    "Random Feasible": "Random permutation greedy fill (no penalties).",
+    "Pareto Local Search": "Multi-start Pareto local search with add, delete, and swap moves under a fixed 1600-neighbour budget.",
+    "Ablation-NoForwardSearch": "Forward insertion disabled.",
+    "Ablation-NoBackwardSearch": "Backward deletion disabled.",
+    "Ablation-LegacyDeletion": "Atomic substitution replaced by the legacy standalone greedy deletion.",
+    "Ablation-RandomMutationOnly": "Local search replaced by high-rate random mutation.",
+    "Ablation-NoDependencyMoves": "Dependency-aware move bonus disabled.",
+    "Ablation-NoFeasibilityRecovery": "Budget repair disabled.",
+    "Ablation-WeightedRankingOnly": "Weighted ranking without evolution.",
+    "Ablation-ShallowLocalSearch": "Local-search depth reduced to 2.",
+    "Ablation-LowDependencyDensity": "Dependency graph thinned (every 3rd candidate isolated).",
+    "Ablation-LooseBudget": "Search at 1.2x budget, evaluated at the true budget."
+  },
+  "seeds_per_method_per_experiment": 30,
+  "population_size": 40,
+  "generations": 40,
+  "evaluation": "standard hypervolume, fixed seeded normalization bounds, ref point 1.1^d; feasible non-dominated front only",
+  "statistics": "Mann-Whitney U two-sided, Holm correction per experiment",
+  "status": "public_rts_simbench_nerc_project_review_v3_direct_family_controls"
+}

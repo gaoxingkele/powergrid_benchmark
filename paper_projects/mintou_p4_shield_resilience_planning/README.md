@@ -17,13 +17,13 @@
 
 ## ARA 源工程路径
 
-- ARA 根目录: `D:\aicoding\powergrid_benchmark\papers\mintou\mintou_p4_shield_resilience_planning\`
+- ARA 根目录: `F:\aicoding\powergrid_benchmark\papers\mintou\mintou_p4_shield_resilience_planning\`
   - 论文主页: `PAPER.md`
   - 逻辑层: `logic\problem.md`, `logic\claims.md`, `logic\experiments.md`, `logic\related_work.md`, `logic\concepts.md`, `logic\solution\method.md`, `logic\solution\constraints.md`
   - 证据层: `evidence\README.md`, `evidence\runs\`（含 SimBench v2 结果与保留的 v1 弱结果）, `evidence\tables\`, `evidence\source\`
   - 环境: `src\environment.md`
-- 组合上下文: `D:\aicoding\powergrid_benchmark\papers\mintou\portfolio_status.md`
-- 本地数据集缓存: `D:\aicoding\powergrid_benchmark\data\public_datasets\CACHE_STATUS.md`
+- 组合上下文: `F:\aicoding\powergrid_benchmark\papers\mintou\portfolio_status.md`
+- 本地数据集缓存: `F:\aicoding\powergrid_benchmark\data\public_datasets\CACHE_STATUS.md`
 
 ## 当前证据快照（2026-08）
 
@@ -45,4 +45,4 @@
 | `ROUND2_REVIEW.md` | 完整 7 维评审(novelty/soundness/experiments/reproducibility/related_work/clarity/ethics),含 RRI、预测决策、允许修改范围、最快路径 |
 | `GAP_ANALYSIS_ROUND2.md` | 每项目缺啥清单(P0/P1/P2 优先级 + 工作量估算 + 投稿可行性 + 行动清单 + 诚实边界 + 关联文件) |
 
-组合级报告见 `D:\aicoding\powergrid_benchmark\reviews\2026-07-13_round2_mintou_summary.md`(6 项目对比 + 投稿顺序裁决 + 综合时间线)。
+组合级报告见 `F:\aicoding\powergrid_benchmark\reviews\2026-07-13_round2_mintou_summary.md`(6 项目对比 + 投稿顺序裁决 + 综合时间线)。

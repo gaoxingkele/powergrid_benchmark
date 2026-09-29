@@ -1,0 +1,237 @@
+{
+  "schema_version": "paper_harness.review.v2",
+  "venue": "ieee_access",
+  "manuscript": "manuscript/journal_submission/paper.tex",
+  "manuscript_sha256": "b655ef5626b68c55b92f418b03686cba9055a232fa0a598a296a2e9d97911990",
+  "coverage": {
+    "characters_total": 66651,
+    "characters_supplied": 66651,
+    "complete": true,
+    "sections_detected": [
+      "Introduction",
+      "Related Work",
+      "Curtailment forecasting and renewable accommodation assessment",
+      "Retrieval, analogues, and metric learning in power system decision support",
+      "Naive baselines and benchmark design in time-series forecasting",
+      "Gap statement",
+      "The Curtailment-Risk Benchmark",
+      "Method-independent task construction",
+      "Temporal protocol",
+      "Onset-slice evaluation",
+      "Statistical protocol",
+      "Reference-cap choice and sensitivity of the task",
+      "Construct validity and method-independent target construction",
+      "The Operating-State Retrieval Framework",
+      "Design",
+      "Baselines",
+      "Mechanism ablations",
+      "Experimental Setup",
+      "Fairness statement",
+      "Hyperparameter disclosure",
+      "Computational footprint",
+      "Results",
+      "Overall accuracy and naive-reference performance",
+      "Onset warning: the operationally relevant slice reorders the field",
+      "The scale-dependent utility of retrieval: significant in both directions",
+      "Stress subset",
+      "Multi-Metric Rank Profile and Computational Cost",
+      "Modern Temporal Controls and Fixed-Cap Transportability",
+      "Discussion",
+      "Why retrieval helps at 1 h",
+      "Why the same mechanism harms 24 h onset warning",
+      "What the benchmark discriminates",
+      "Implications for benchmarked decision support",
+      "Limitations",
+      "Conclusion",
+      "Acknowledgment",
+      "Funding",
+      "Data Availability and Reproducibility",
+      "Conflicts of Interest",
+      "Author Biographies"
+    ]
+  },
+  "decision": "reject",
+  "primary_story": "The manuscript constructs a fixed-policy curtailment-risk proxy benchmark and uses it to test whether learned operating-state retrieval has different value for short-horizon estimation and day-ahead onset warning.",
+  "primary_result": "On one RTS-GMLC year, one 70% cap, and one temporal split, the configured MAE-selected retrieval framework reports lower 1-hour MAE than specified removal and degradation controls but lower 24-hour onset F1 than no-retrieval and raw-space variants, without leading the overall benchmark.",
+  "positive_findings": [
+    "The manuscript clearly distinguishes its policy-derived risk proxy from observed dispatch curtailment and repeatedly limits physical and operational claims.",
+    "The evaluation includes persistence, seasonal, linear, raw-neighbor, recurrent, decomposition-linear, and temporal-convolutional references rather than relying on weak deep-learning baselines.",
+    "The negative results are scientifically informative and are mostly reported openly: persistence, raw-feature retrieval, ridge regression, and a degenerate low-event configuration outperform the framework on different endpoints.",
+    "The onset slice usefully demonstrates that aggregate MAE and rare-transition warning measure different capabilities.",
+    "The temporal split, training-only normalization, multiple stochastic seeds, multiplicity correction, hyperparameter table, computational measurements, and explicit limitations are stronger than typical disclosure for this problem class.",
+    "The NREL-118 zero-positive result is correctly treated as a task-transport boundary rather than converted into an unsupported external-performance claim."
+  ],
+  "issues": [
+    {
+      "id": "I001",
+      "type": "NEGATIVE_RESULT_DRIFT",
+      "dimension": "soundness",
+      "severity": "major",
+      "location": "Abstract; Introduction contribution 3; Table 5; Overall accuracy results; Conclusion",
+      "manuscript_evidence": "The abstract states that Persistence achieves the lowest overall MAE at both horizons, and the conclusion says Persistence leads aggregate MAE. Table 5 instead ranks SmallBank first at 24 hours with MAE 0.01534, raw-feature kNN second or third at 0.01946, and Persistence sixth at 0.02036.",
+      "reviewer_inference": "This is a direct headline-to-table contradiction, not a stylistic qualification. It hides an important negative result: the lowest 24-hour MAE belongs to a configuration with zero event F1, while raw kNN also beats Persistence on MAE.",
+      "required_action": "Correct the abstract, contribution list, discussion, and conclusion to state that Persistence leads 1-hour MAE, SmallBank leads 24-hour MAE while failing event detection, and raw-feature kNN is the strongest non-degenerate 24-hour MAE reference under the authors' stated criterion.",
+      "acceptance_test": "Every statement about the overall-MAE leader agrees with Tables 4 and 5 and specifies both horizon and whether degenerate configurations are excluded.",
+      "evidence_boundary": "The results license metric- and horizon-specific leader statements, not the claim that Persistence has the lowest MAE at both horizons."
+    },
+    {
+      "id": "I002",
+      "type": "PROXY_TASK_MISMATCH",
+      "dimension": "soundness",
+      "severity": "major",
+      "location": "Abstract; Method-independent task construction; Temporal protocol; onset-warning discussion",
+      "manuscript_evidence": "The target at hour t+h is a deterministic function of target-hour renewable generation and load, both drawn from series described as day-ahead data. Models nevertheless receive only a 48-hour window ending at observation time t, and the 24-hour task is interpreted as day-ahead scheduling support. Forecast vintages and the information available at each issue time are not defined.",
+      "reviewer_inference": "If target-hour day-ahead load and renewable forecasts are available at the scheduling origin, applying the stated cap formula is a direct and potentially exact baseline. If they are not available, calling the source series day-ahead and interpreting lag-only extrapolation as day-ahead scheduling is ambiguous. The operational meaning of the benchmark therefore cannot be evaluated from the supplied information set.",
+      "required_action": "Define forecast issue times, delivery times, data vintages, and the exact information available to every method. Add a policy-transform control that applies the cap to target-hour load and renewable forecasts available at the origin, or explicitly redefine the task as lagged extrapolation of a synthetic fixed-policy series and remove scheduling-utility language. The estimand must be performance using only information available at each forecast origin, with forecast origins as the analysis units.",
+      "acceptance_test": "A timestamp-level example demonstrates what is known at an origin for both horizons, the direct policy-transform control is reported when applicable, and no model or target uses a later data vintage than the stated decision time.",
+      "evidence_boundary": "Without this correction, the evidence supports only retrospective lagged forecasting of a constructed time series, not operational day-ahead warning or scheduling support."
+    },
+    {
+      "id": "I003",
+      "type": "BASELINE_BUDGET_MISMATCH",
+      "dimension": "experiments",
+      "severity": "major",
+      "location": "Temporal protocol; Fairness statement; Table 3; 24-hour onset results",
+      "manuscript_evidence": "The validation slice is described as reserved for selection and calibration, and the framework encoder and retrieval bank are fitted on the fit split. Table 3 states that Ridge is fitted on train plus validation. Ridge is then reported as the leading 24-hour onset method. The text also alternates between calibration on the validation slice and calibration on the training window.",
+      "reviewer_inference": "Ridge receives additional labeled fitting data, and its warning threshold may be calibrated on in-sample predictions, whereas neural methods use validation labels for checkpoint selection. This data-visibility asymmetry can affect the headline ridge comparison and contradicts the fairness statement.",
+      "required_action": "Rerun Ridge using the same fit-only labels as the other learned methods, or adopt a symmetric refit-and-recalibration procedure for every learned method. Keep threshold calibration strictly out of the final fitting sample and provide a method-by-stage data-visibility table.",
+      "acceptance_test": "All methods use identical labeled windows for fitting, selection, blending, and threshold calibration; revised leaderboards and statistical tables are regenerated from that protocol.",
+      "evidence_boundary": "Until corrected, Ridge's reported 24-hour onset leadership is descriptive under an asymmetric training protocol rather than a fair comparative conclusion."
+    },
+    {
+      "id": "I004",
+      "type": "COMBINED_ABLATION_ATTRIBUTION",
+      "dimension": "experiments",
+      "severity": "major",
+      "location": "Validated-blend definition; Scale-dependent utility results; Why the same mechanism harms 24-hour onset warning; Conclusion",
+      "manuscript_evidence": "The retrieval blend coefficient is selected to minimize overall validation MAE, but the principal adverse 24-hour claim is based on onset F1. The manuscript itself notes that this MAE-selected blend favors persistence-like behavior and may be unable to rescue onset warning.",
+      "reviewer_inference": "The evidence identifies harm from the configured retrieval-plus-MAE-selection pipeline, not retrieval as a horizon-general mechanism. Retrieval content, blend weight, and selection objective jointly determine the onset prediction.",
+      "required_action": "Either narrow all central claims to the MAE-selected retrieval configuration or run a factorial control crossing retrieval presence with selection objective and fixed blend weights. The estimand should be the change in 24-hour onset F1 caused by retrieval under a common target-matched selection rule; controls should include head-only, retrieval-only, and fixed-alpha blends; analysis should be performed over matched seeds and test onsets.",
+      "acceptance_test": "The abstract and conclusion name the selection rule as part of the adverse result, or target-matched controls show that the direction persists when blend selection is held constant.",
+      "evidence_boundary": "Current results support harm from this validation-tuned retrieval pipeline on the fixed benchmark, not a general claim that operating-state retrieval harms day-ahead onset warning."
+    },
+    {
+      "id": "I005",
+      "type": "STATISTICAL_UNIT_AMBIGUITY",
+      "dimension": "statistics",
+      "severity": "minor",
+      "location": "Statistical protocol; Introduction contribution 3; Scale-dependent utility results",
+      "manuscript_evidence": "Mann–Whitney tests treat ten seeded aggregate scores per method as samples even though methods share seed indices and the same single test period. The manuscript acknowledges that its intervals do not cover year-to-year or event-block uncertainty, but calls the result a statistically resolved map and a significant horizon-dependent reversal.",
+      "reviewer_inference": "The tests quantify training-randomness variation conditional on one fixed test sequence; they do not estimate uncertainty over hours, events, seasons, years, or systems. The paired design also makes the prespecified unpaired test a less direct primary analysis than the supplied sign-flip sensitivity.",
+      "required_action": "State the estimand as the mean difference over training randomness on the fixed test period and make a paired seed analysis primary. If population-level or event-level inference is retained, add rolling-origin, event-block, or multi-year resampling with temporal blocks as the analysis units.",
+      "acceptance_test": "Every significance claim names its inferential unit and fixed-test conditioning; broader horizon or event-population claims appear only if temporal uncertainty is analyzed.",
+      "evidence_boundary": "The existing statistics license seed-stability statements for one fixed cap, split, and year."
+    },
+    {
+      "id": "I006",
+      "type": "METHOD_IMPLEMENTATION_MISMATCH",
+      "dimension": "reproducibility",
+      "severity": "minor",
+      "location": "Opening of The Curtailment-Risk Benchmark; Data Availability and Reproducibility",
+      "manuscript_evidence": "The benchmark section identifies run version public_rts_curtailment_v5_onset_eval, whereas the data-availability section identifies public_rts_curtailment_v6_modern_temporal_controls as the implementation underlying the reported benchmark.",
+      "reviewer_inference": "The manuscript does not establish whether v5 and v6 share an identical target and split or which version generated each table and figure. This is contradictory provenance for load-bearing results.",
+      "required_action": "Identify one canonical release or explicitly document the relationship between versions, and provide a manifest mapping every table, figure, and CSV to a configuration identifier and immutable code revision.",
+      "acceptance_test": "A clean rerun from the cited revision reproduces all reported rows, and the same canonical version or an explained version lineage appears throughout the manuscript.",
+      "evidence_boundary": "The algorithm is described in detail, but artifact-level reproducibility remains unverified until the version conflict is resolved."
+    },
+    {
+      "id": "I007",
+      "type": "SENSITIVITY_GAP",
+      "dimension": "experiments",
+      "severity": "minor",
+      "location": "Reference-cap choice and sensitivity; Limitations; Conclusion",
+      "manuscript_evidence": "Target prevalence varies substantially across caps 0.60, 0.70, and 0.80, but all method comparisons and the retrieval sign reversal use cap 0.70 only. The manuscript explicitly states that rankings at the other caps are untested.",
+      "reviewer_inference": "Because sparsity and onset counts are consequences of the cap, the central mechanism ordering may be specific to the selected prevalence regime. Series-level sensitivity does not establish method-level robustness.",
+      "required_action": "Either report a prespecified method-level cap sensitivity for the principal controls or consistently state that the mechanism result concerns only the 0.70-cap task. A robustness experiment should estimate the retrieval-minus-control difference at each cap using identical splits, seeds, and correction rules.",
+      "acceptance_test": "No cross-policy robustness is implied without results, or the retrieval direction and uncertainty are reported separately for all tested caps.",
+      "evidence_boundary": "The current mechanism result applies only to the fixed 0.70-cap RTS-GMLC construction."
+    },
+    {
+      "id": "I008",
+      "type": "TITLE_METHOD_MISMATCH",
+      "dimension": "clarity",
+      "severity": "minor",
+      "location": "Abstract and Operating-State Retrieval Framework design",
+      "manuscript_evidence": "DSTAR-GRU is expanded as Digital-twin Siamese Temporal Alignment and Retrieval GRU, while the implemented method is a forecast-trained GRU representation, Euclidean k-NN, and a validated blend. The paper explicitly states that there is no contrastive Siamese loss, and it defines neither a digital twin nor a separate temporal-alignment operation.",
+      "reviewer_inference": "The branded expansion attributes capabilities not operationalized or tested, even though the plainer operating-state retrieval description is accurate.",
+      "required_action": "Rename the method to describe the implemented GRU retrieval blend, or define and directly evaluate the claimed digital-twin and temporal-alignment components.",
+      "acceptance_test": "Every term in the method name maps to a defined operation and, where load-bearing, a direct control.",
+      "evidence_boundary": "The supplied method supports the label learned-embedding operating-state retrieval framework."
+    },
+    {
+      "id": "I009",
+      "type": "DECLARATION_PLACEHOLDER",
+      "dimension": "submission",
+      "severity": "blocker",
+      "location": "Author block; address; correspondence; first-page footnote; Funding; Author Biographies; DOI and publication-history fields",
+      "manuscript_evidence": "The manuscript contains explicit AUTHOR INPUT REQUIRED placeholders for authors, institutions, correspondence, funding, and biographies, together with template DOI and publication-history values.",
+      "reviewer_inference": "The manuscript is not submission-ready and its authorship, responsibility, correspondence, and funding declarations cannot be evaluated.",
+      "required_action": "Replace all placeholders with author-confirmed metadata, provide the required biographies, complete the funding declaration, and leave publisher-assigned DOI and publication-history fields in the IEEE-prescribed submission state.",
+      "acceptance_test": "A literal search finds no author-input, bracketed metadata, template DOI, or placeholder history text, and all declarations agree with the submission system.",
+      "evidence_boundary": "This issue does not negate the reported scientific results, but it blocks submission and integrity review."
+    },
+    {
+      "id": "I010",
+      "type": "REFERENCE_OR_METADATA_UNVERIFIED",
+      "dimension": "reproducibility",
+      "severity": "advisory",
+      "location": "Related Work; figures and CSV citations; Data Availability and Reproducibility",
+      "manuscript_evidence": "The manuscript supplies bibliographic entries and states that code, configurations, figures, CSV files, RTS-GMLC data, and NREL-118 assets are available, but the external papers and supplementary assets were not included in the supplied review evidence.",
+      "reviewer_inference": "Citation accuracy, novelty coverage, data preprocessing, figure consistency, and numerical regeneration cannot be independently verified here. This is an evidence boundary rather than a demonstrated scientific defect.",
+      "required_action": "Provide the cited supplementary package, immutable repository revision, data acquisition instructions, and figure/result regeneration manifest for artifact review.",
+      "acceptance_test": "The supplied package regenerates the target summaries, 208 run records, tables, statistics, and figures from the documented public inputs.",
+      "evidence_boundary": "Literature-positioning and artifact-reproducibility claims remain unverified pending access to the cited external materials."
+    }
+  ],
+  "claim_map": [
+    {
+      "claim": "The fixed-cap construction provides a method-independent curtailment-risk proxy benchmark.",
+      "method_support": "The target is explicitly defined as a deterministic transformation of load and renewable generation before model fitting, and the manuscript distinguishes it from observed dispatch.",
+      "experiment_support": "Target sparsity, cap-level summaries, onset counts, and one-system transportability statistics are reported.",
+      "status": "partial"
+    },
+    {
+      "claim": "DSTAR-GRU implements shared-encoder learned-space retrieval blended with a recurrent forecast head.",
+      "method_support": "The encoder, bank, Euclidean neighbor rule, retrieval estimate, and validation-selected convex blend are formally specified.",
+      "experiment_support": "NoSiamese, NoRetrievalBank, SmallBank, LSTMEncoder, and NoTopology comparisons are reported.",
+      "status": "supported"
+    },
+    {
+      "claim": "Learned-space retrieval improves 1-hour overall MAE relative to specified retrieval-removal and degradation controls.",
+      "method_support": "DSTAR-GRU is compared with head-only, raw-space, and reduced-bank configurations under the same MAE selection objective.",
+      "experiment_support": "Reported mean differences and Holm-adjusted seed-based tests favor DSTAR-GRU over NoSiamese, NoRetrievalBank, and SmallBank on the fixed test split.",
+      "status": "supported"
+    },
+    {
+      "claim": "The same retrieval mechanism harms 24-hour onset warning.",
+      "method_support": "The full pipeline is compared with no-retrieval and raw-space variants, but its blend is selected for overall MAE rather than onset F1.",
+      "experiment_support": "The configured framework has lower reported onset F1 than NoSiamese and NoRetrievalBank across seeds.",
+      "status": "partial"
+    },
+    {
+      "claim": "Persistence achieves the lowest overall MAE at both horizons.",
+      "method_support": "Persistence is correctly defined as the last observed target.",
+      "experiment_support": "Table 4 supports the 1-hour claim, but Table 5 places Persistence sixth at 24 hours behind SmallBank and raw-feature kNN.",
+      "status": "unsupported"
+    },
+    {
+      "claim": "Ridge regression leads 24-hour onset detection.",
+      "method_support": "Ridge uses flattened windows and a calibrated warning threshold.",
+      "experiment_support": "Its reported onset F1 is highest, but it is fitted on train plus validation while other learned methods reserve validation for selection.",
+      "status": "partial"
+    },
+    {
+      "claim": "The fixed 70% task does not transport directly to NREL-118.",
+      "method_support": "The same cap rule is reportedly applied without post hoc recalibration.",
+      "experiment_support": "The manuscript reports a maximum renewable share of 0.369 and no positive target hours, so no cross-system ranking is identifiable.",
+      "status": "partial"
+    },
+    {
+      "claim": "The benchmark is fully reproducible from the cited release.",
+      "method_support": "Algorithms, splits, hyperparameters, seeds, file names, and output tables are extensively documented.",
+      "experiment_support": "The reported run-version identifiers conflict, and the code and supplementary archive were not supplied for independent regeneration.",
+      "status": "blocked"
+    }
+  ],
+  "summary": "The manuscript has a worthwhile benchmark idea and an unusually candid, scientifically informative negative result: retrieval is useful for one short-horizon endpoint but counterproductive for the configured day-ahead warning pipeline. The present IEEE Access submission is nevertheless not acceptable in near-final form. Its abstract and conclusion contradict the 24-hour leaderboard, the operational information set is undefined for a target constructed from day-ahead inputs, Ridge receives different labeled-data access, and the central retrieval attribution conflates the retrieval path with an overall-MAE blend-selection rule. Seed-based tests also support only fixed-test training-randomness claims. Contradictory run identifiers and unresolved author, funding, and correspondence placeholders add reproducibility and submission blockers. These problems concern claim-evidence alignment and comparison validity, not the absence of SOTA performance."
+}

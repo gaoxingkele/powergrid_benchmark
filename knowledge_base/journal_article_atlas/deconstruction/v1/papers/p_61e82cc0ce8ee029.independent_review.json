@@ -1,0 +1,987 @@
+{
+  "schema": "atlas_independent_ai_review/1",
+  "paper_id": "p_61e82cc0ce8ee029",
+  "reviewer": "Codex /root/scope_core",
+  "first_analyst": "Codex /root/scope_other",
+  "review_date": "2026-09-13",
+  "review_type": "second-assistant source reread and targeted object/algebra audit; not blinded",
+  "independence_disclosure": "复核前已查看主解构以定位指定问题；随后独立阅读全文原PDF并重做公式转写、表2全部120数值与算术检查。此为第二AI分析者复核，不是双人人工标注，也不是全字段独立校准。",
+  "human_calibrated": false,
+  "all_fields_verified": false,
+  "review_status": "targeted_independent_ai_review_complete_pending_human_and_version_review",
+  "source": {
+    "path": "D:/aicoding/powergrid_benchmark/knowledge_base/journal_article_atlas/deconstruction/v1/sources/10.3390_info17080789.pdf",
+    "sha256": "61e82cc0ce8ee029692e147b37efade748be45d91f843c1d4634b174d2184fbd",
+    "hash_verified": true,
+    "pages": 29,
+    "doi": "10.3390/info17080789",
+    "title": "Cooling, Heat, Electricity and Gas Joint Load Forecasting Method Based on Modal Decomposition and Dynamic Model Selection",
+    "latest_version_verified": false,
+    "version_boundary": "仅此本地哈希；首页Published2026-08-17。主记录称版本页8月18更新，本复核未联网核实更新内容，绝不称已确认最新VoR。",
+    "retraction_correction_check": "not_assessed"
+  },
+  "read_coverage": {
+    "physical_pages_read": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29
+    ],
+    "text_read_complete": true,
+    "batches": [
+      [
+        1,
+        5
+      ],
+      [
+        6,
+        11
+      ],
+      [
+        12,
+        17
+      ],
+      [
+        18,
+        23
+      ],
+      [
+        24,
+        29
+      ]
+    ],
+    "visual_pages": [
+      7,
+      14,
+      22,
+      23
+    ],
+    "visual_targets": [
+      "Eq13",
+      "Eq42–47",
+      "Table2全部含续页",
+      "Figure8作为表2上下文"
+    ],
+    "not_visual_rechecked": [
+      "全部49公式",
+      "全部9图",
+      "Table1其他数值"
+    ],
+    "method": "PyMuPDF1.28.0完整页文本输出无截断跳页；1.7x渲染指定页；手工独立转录后JS重算"
+  },
+  "summary": {
+    "Eq13": "确认印刷式非标准Q-learning更新；可精确展开额外旧Q扣除。",
+    "Eq44": "确认名为MAPE但表达式为MAE；不能把论文表中MAPE值直接重命名MAE。",
+    "DMS": "确认随机单模型抽样与最优单模型叙述不完全一致；跨分量加权重构本身可与抽样共存，不应一概视为冲突。",
+    "Table2_total": "全24个总体单元均与四载能等权指标均值相容（按四位小数输入/输出的误差界）；强支持宏平均解释，仍非作者明示协议。",
+    "M3_vs_M1": "冷热气12/12分载能指标严格优于M1；电4/4落后；M1总体S/RMSE/R²优而MAPE劣。"
+  },
+  "findings": [
+    {
+      "id": "IR-Q13",
+      "target": "Eq13 / primary Qbellman",
+      "pages": [
+        7
+      ],
+      "decision": "confirmed_and_mathematically_refined",
+      "source_transcription": "Q_new(s,a)=(1−δ)Q_old(s,a)+δ[R(s,a)+λ max(Q_old(s_next,a_next)−Q_old(s,a))]",
+      "notes": "原式max没有标明对哪一动作求最大，且写a_next；按正文最有利解释为max_a'，当前Q不依赖a'。",
+      "algebra": "Q_new=[1−δ−δλ]Q_old+δR+δλ max_a'Q_old(s_next,a')",
+      "standard_comparator": "Q_new=(1−δ)Q_old+δ[R+λ max_a'Q_old(s_next,a')]，等价Q_old+δ[R+λmaxQnext−Q_old]",
+      "numeric_implication": {
+        "delta": 0.1,
+        "lambda": 0.9,
+        "printed_old_Q_coefficient": 0.81,
+        "standard_old_Q_coefficient": 0.9,
+        "extra_old_Q_term": "−δλ Q_old=−0.09Q_old"
+      },
+      "claim_boundary": "明确为印刷式与正文所谓Bellman规则不一致；未运行代码，不能断言实验实际采用错误更新，也不能断言结果因此无效。",
+      "confidence": "high for print/algebra; implementation unknown"
+    },
+    {
+      "id": "IR-MAPE",
+      "target": "Eq44 / primary Qmetric",
+      "pages": [
+        14,
+        15,
+        20
+      ],
+      "decision": "confirmed",
+      "source_transcription": "MAPE=(1/n)sum |y−yhat|",
+      "mathematical_identification": "右端为MAE，无真实值分母及百分比转换；p15却称平均相对误差。",
+      "necessary_bound": "若同样本同单位且公式真为MAE，则MAE≤RMSE。",
+      "independent_counterexample": {
+        "source": "Table2 cooling M1,visually checked p22",
+        "reported_MAPE": 0.0645,
+        "reported_RMSE": 0.0309,
+        "interpretation": "所谓MAPE大于RMSE，不可能同时按Eq43/44同点同单位执行。无需依赖主记录的Table1电残差案例。"
+      },
+      "resolution": "保留列名reported_MAPE与数值；真实实现可能是MAPE、不同尺度或公式排印遗漏，资料不足不选一个替作者修正。归一化到[0,1]并不能自动把MAE变成MAPE。",
+      "confidence": "high print/inequality; computed metric definition unknown"
+    },
+    {
+      "id": "IR-DMS",
+      "target": "Eqs42/46/47 and Sections3.5/4.4.2/5",
+      "pages": [
+        4,
+        10,
+        11,
+        14,
+        21,
+        24,
+        26
+      ],
+      "decision": "partly_confirmed_with_important_qualification",
+      "stages": [
+        {
+          "stage": "score",
+          "source": "Eq42 p14",
+          "meaning": "0.4RMSE+0.4MAPE−0.2R²，分越低越好；这是指标加权，不是预测器输出加权"
+        },
+        {
+          "stage": "history",
+          "source": "Eq46 p14",
+          "meaning": "过去168个评分步等权均值；数据为日、初始56日，168的时间/评分粒度及启动衔接未交代"
+        },
+        {
+          "stage": "probability",
+          "source": "Eq47 p14",
+          "meaning": "exp(−2P)/sum exp(−2P)，低分高概率；符号方向正确，非argmin"
+        },
+        {
+          "stage": "model selection",
+          "source": "p14末段",
+          "meaning": "Monte Carlo抽样一个候选模型，其他模型非零概率；不会每次保证选最优"
+        },
+        {
+          "stage": "narrative contrast",
+          "source": "p4与p21/24",
+          "meaning": "称选择最佳滚动验证模型或单个最佳模型；若按字面确定argmin，与随机抽样有差异"
+        },
+        {
+          "stage": "component reconstruction",
+          "source": "p21/24/26",
+          "meaning": "将每分量所选模型预测按重构权重求和，可与每分量抽样选一个模型共存；不是自动证明多个候选模型在同一分量软加权"
+        }
+      ],
+      "refinement_to_primary": "主Qselection不应把所有‘加权’表述都判为同一冲突。最明确的冲突为抽样与确定性最优选择；‘dynamic weighted integration’可能指跨分量重构，因权重公式/实施缺失仍有歧义。Eq22的1/K平均属于另一重构尺度问题，应单独定位而不与DMS概率权重合并。",
+      "reproducibility_gaps": [
+        "未明确预测值是一次抽样还是多次抽样平均",
+        "无随机种子/抽样重复数/方差",
+        "重构权重取值与计算未给",
+        "168评分窗、56日初始化与7日预测之间的时序缺口",
+        "历史未选模型怎样获取评分未清楚"
+      ],
+      "confidence": "high for source distinction; implementation unresolved"
+    },
+    {
+      "id": "IR-MACRO",
+      "target": "Table2 total load",
+      "pages": [
+        22,
+        23
+      ],
+      "decision": "strongly_supported_inference_not_explicit_definition",
+      "test": "对6模型×4指标，各取cool/heat/electric/gas四值算术平均，比较total报告值。",
+      "n_cells": 24,
+      "max_abs_residual": 0.00007499999999993623,
+      "rounding_tolerance": 0.0001,
+      "rounding_rationale": "每个分载能值四位小数舍入误差≤.00005，四值均值误差≤.00005，加总体四位舍入误差≤.00005，合计≤.0001。",
+      "result": "24/24差异均≤.000075；M4R²均值.846075对total.8460不由已舍入值直接标准四舍五入得到，但可由隐藏精度解释。",
+      "interpretation": "比只查M1两个指标更强地支持宏平均；不能据此宣称作者明确使用等权宏平均或已经复现代码。",
+      "aggregation_boundary": "平均各通道RMSE不是把误差池化后开方的RMSE；平均R²不是物理总负荷R²。冷/热/电/气单位不同，若没有单位转换和系统边界更不可直接称物理总和预测。",
+      "recommended_label": "Table2 reported overall metrics (numerically consistent with channel-macro averages; definition unreported)",
+      "confidence": "high for arithmetic, inference for evaluation protocol"
+    },
+    {
+      "id": "IR-RANK",
+      "target": "Table2 M3 vsM1",
+      "pages": [
+        22,
+        23
+      ],
+      "decision": "confirmed_full_requested_cells",
+      "rule": "S/RMSE/reported_MAPE越小越好，R²越大越好",
+      "comparisons": [
+        {
+          "channel": "cool",
+          "metrics": [
+            {
+              "metric": "S",
+              "M1": -0.1572,
+              "M3": -0.1706,
+              "M3_better": true
+            },
+            {
+              "metric": "RMSE",
+              "M1": 0.0309,
+              "M3": 0.0212,
+              "M3_better": true
+            },
+            {
+              "metric": "MAPE",
+              "M1": 0.0645,
+              "M3": 0.047,
+              "M3_better": true
+            },
+            {
+              "metric": "R2",
+              "M1": 0.9767,
+              "M3": 0.9892,
+              "M3_better": true
+            }
+          ]
+        },
+        {
+          "channel": "heat",
+          "metrics": [
+            {
+              "metric": "S",
+              "M1": -0.1515,
+              "M3": -0.1692,
+              "M3_better": true
+            },
+            {
+              "metric": "RMSE",
+              "M1": 0.0477,
+              "M3": 0.0329,
+              "M3_better": true
+            },
+            {
+              "metric": "MAPE",
+              "M1": 0.0428,
+              "M3": 0.0312,
+              "M3_better": true
+            },
+            {
+              "metric": "R2",
+              "M1": 0.9388,
+              "M3": 0.9745,
+              "M3_better": true
+            }
+          ]
+        },
+        {
+          "channel": "gas",
+          "metrics": [
+            {
+              "metric": "S",
+              "M1": -0.1665,
+              "M3": -0.1699,
+              "M3_better": true
+            },
+            {
+              "metric": "RMSE",
+              "M1": 0.0321,
+              "M3": 0.028,
+              "M3_better": true
+            },
+            {
+              "metric": "MAPE",
+              "M1": 0.0366,
+              "M3": 0.0364,
+              "M3_better": true
+            },
+            {
+              "metric": "R2",
+              "M1": 0.9696,
+              "M3": 0.978,
+              "M3_better": true
+            }
+          ]
+        },
+        {
+          "channel": "electric",
+          "metrics": [
+            {
+              "metric": "S",
+              "M1": -0.1641,
+              "M3": -0.1169,
+              "M3_better": false
+            },
+            {
+              "metric": "RMSE",
+              "M1": 0.0331,
+              "M3": 0.0645,
+              "M3_better": false
+            },
+            {
+              "metric": "MAPE",
+              "M1": 0.0264,
+              "M3": 0.0453,
+              "M3_better": false
+            },
+            {
+              "metric": "R2",
+              "M1": 0.9394,
+              "M3": 0.8042,
+              "M3_better": false
+            }
+          ]
+        }
+      ],
+      "interpretation": "固定XGBoost M3在冷热气三个通道全四指标优于M1；M1在电四指标优于M3。宏平均可被电优势抵消其他通道损失，不能宣称所有通道最佳。",
+      "total_tradeoff": {
+        "M1": {
+          "S": -0.1598,
+          "RMSE": 0.0359,
+          "reported_MAPE": 0.0426,
+          "R2": 0.9561
+        },
+        "M3": {
+          "S": -0.1566,
+          "RMSE": 0.0367,
+          "reported_MAPE": 0.04,
+          "R2": 0.9365
+        }
+      },
+      "significance": "仅报告点指标排序，无统计显著性含义",
+      "confidence": "high"
+    },
+    {
+      "id": "IR-SCORE",
+      "target": "Table2 vsEq42",
+      "pages": [
+        14,
+        22,
+        23
+      ],
+      "decision": "numerically_consistent_with_printed_score_rule",
+      "test": "30个block-model S=0.4RMSE+0.4reported_MAPE−0.2R²重算",
+      "n_cells": 30,
+      "max_abs_residual": 0.0000800000000000245,
+      "result": "所有差异≤.0001；综合分算术相容不解决MAPE定义错误，也不验证权重合理性。",
+      "confidence": "high"
+    }
+  ],
+  "table2_transcription": {
+    "source_pages": [
+      22,
+      23
+    ],
+    "full_numeric_cells": 120,
+    "model_order": [
+      "M1",
+      "M2",
+      "M3",
+      "M4",
+      "M5",
+      "M6"
+    ],
+    "column_label_policy": "MAPE保持原列名，不解释为MAE或自行乘100",
+    "data": {
+      "total": {
+        "S": [
+          -0.1598,
+          -0.1211,
+          -0.1566,
+          -0.0988,
+          -0.0994,
+          -0.1567
+        ],
+        "RMSE": [
+          0.0359,
+          0.0566,
+          0.0367,
+          0.0682,
+          0.0708,
+          0.0376
+        ],
+        "MAPE": [
+          0.0426,
+          0.0699,
+          0.04,
+          0.1078,
+          0.0892,
+          0.0424
+        ],
+        "R2": [
+          0.9561,
+          0.8583,
+          0.9365,
+          0.846,
+          0.8169,
+          0.9435
+        ]
+      },
+      "cool": {
+        "S": [
+          -0.1572,
+          -0.1557,
+          -0.1706,
+          -0.1079,
+          -0.1207,
+          -0.1665
+        ],
+        "RMSE": [
+          0.0309,
+          0.0316,
+          0.0212,
+          0.0522,
+          0.0534,
+          0.025
+        ],
+        "MAPE": [
+          0.0645,
+          0.0671,
+          0.047,
+          0.1454,
+          0.1094,
+          0.0514
+        ],
+        "R2": [
+          0.9767,
+          0.9761,
+          0.9892,
+          0.9346,
+          0.9288,
+          0.9851
+        ]
+      },
+      "heat": {
+        "S": [
+          -0.1515,
+          -0.1207,
+          -0.1692,
+          -0.0908,
+          -0.0994,
+          -0.1636
+        ],
+        "RMSE": [
+          0.0477,
+          0.0653,
+          0.0329,
+          0.0777,
+          0.0695,
+          0.0382
+        ],
+        "MAPE": [
+          0.0428,
+          0.0829,
+          0.0312,
+          0.1242,
+          0.0912,
+          0.0354
+        ],
+        "R2": [
+          0.9388,
+          0.8997,
+          0.9745,
+          0.8579,
+          0.8185,
+          0.9656
+        ]
+      },
+      "electric": {
+        "S": [
+          -0.1641,
+          -0.0497,
+          -0.1169,
+          -0.0823,
+          -0.0474,
+          -0.1301
+        ],
+        "RMSE": [
+          0.0331,
+          0.0927,
+          0.0645,
+          0.0792,
+          0.1011,
+          0.0565
+        ],
+        "MAPE": [
+          0.0264,
+          0.0808,
+          0.0453,
+          0.0678,
+          0.0867,
+          0.0432
+        ],
+        "R2": [
+          0.9394,
+          0.5956,
+          0.8042,
+          0.7053,
+          0.6126,
+          0.85
+        ]
+      },
+      "gas": {
+        "S": [
+          -0.1665,
+          -0.1581,
+          -0.1699,
+          -0.1144,
+          -0.13,
+          -0.1665
+        ],
+        "RMSE": [
+          0.0321,
+          0.0369,
+          0.028,
+          0.0636,
+          0.0591,
+          0.0308
+        ],
+        "MAPE": [
+          0.0366,
+          0.0487,
+          0.0364,
+          0.0938,
+          0.0697,
+          0.0395
+        ],
+        "R2": [
+          0.9696,
+          0.9618,
+          0.978,
+          0.8865,
+          0.9076,
+          0.9733
+        ]
+      }
+    }
+  },
+  "calculations": {
+    "macro_average_all_24": [
+      {
+        "model": "M1",
+        "metric": "S",
+        "mean": -0.159825,
+        "reported": -0.1598,
+        "residual": 0.000024999999999997247
+      },
+      {
+        "model": "M2",
+        "metric": "S",
+        "mean": -0.12104999999999999,
+        "reported": -0.1211,
+        "residual": -0.00005000000000000837
+      },
+      {
+        "model": "M3",
+        "metric": "S",
+        "mean": -0.15665,
+        "reported": -0.1566,
+        "residual": 0.00005000000000002225
+      },
+      {
+        "model": "M4",
+        "metric": "S",
+        "mean": -0.09885,
+        "reported": -0.0988,
+        "residual": 0.00004999999999999449
+      },
+      {
+        "model": "M5",
+        "metric": "S",
+        "mean": -0.099375,
+        "reported": -0.0994,
+        "residual": -0.000024999999999997247
+      },
+      {
+        "model": "M6",
+        "metric": "S",
+        "mean": -0.156675,
+        "reported": -0.1567,
+        "residual": -0.000024999999999997247
+      },
+      {
+        "model": "M1",
+        "metric": "RMSE",
+        "mean": 0.035949999999999996,
+        "reported": 0.0359,
+        "residual": -0.00004999999999999449
+      },
+      {
+        "model": "M2",
+        "metric": "RMSE",
+        "mean": 0.056624999999999995,
+        "reported": 0.0566,
+        "residual": -0.000024999999999997247
+      },
+      {
+        "model": "M3",
+        "metric": "RMSE",
+        "mean": 0.03665,
+        "reported": 0.0367,
+        "residual": 0.00005000000000000143
+      },
+      {
+        "model": "M4",
+        "metric": "RMSE",
+        "mean": 0.068175,
+        "reported": 0.0682,
+        "residual": 0.000024999999999997247
+      },
+      {
+        "model": "M5",
+        "metric": "RMSE",
+        "mean": 0.070775,
+        "reported": 0.0708,
+        "residual": 0.000024999999999997247
+      },
+      {
+        "model": "M6",
+        "metric": "RMSE",
+        "mean": 0.037625,
+        "reported": 0.0376,
+        "residual": -0.000024999999999997247
+      },
+      {
+        "model": "M1",
+        "metric": "MAPE",
+        "mean": 0.042575,
+        "reported": 0.0426,
+        "residual": 0.000024999999999997247
+      },
+      {
+        "model": "M2",
+        "metric": "MAPE",
+        "mean": 0.069875,
+        "reported": 0.0699,
+        "residual": 0.000024999999999997247
+      },
+      {
+        "model": "M3",
+        "metric": "MAPE",
+        "mean": 0.039975,
+        "reported": 0.04,
+        "residual": 0.000025000000000004186
+      },
+      {
+        "model": "M4",
+        "metric": "MAPE",
+        "mean": 0.1078,
+        "reported": 0.1078,
+        "residual": 0
+      },
+      {
+        "model": "M5",
+        "metric": "MAPE",
+        "mean": 0.08925,
+        "reported": 0.0892,
+        "residual": -0.00004999999999999449
+      },
+      {
+        "model": "M6",
+        "metric": "MAPE",
+        "mean": 0.042375,
+        "reported": 0.0424,
+        "residual": 0.000024999999999997247
+      },
+      {
+        "model": "M1",
+        "metric": "R2",
+        "mean": 0.9561249999999999,
+        "reported": 0.9561,
+        "residual": -0.000024999999999941735
+      },
+      {
+        "model": "M2",
+        "metric": "R2",
+        "mean": 0.8583000000000001,
+        "reported": 0.8583,
+        "residual": -1.1102230246251565e-16
+      },
+      {
+        "model": "M3",
+        "metric": "R2",
+        "mean": 0.936475,
+        "reported": 0.9365,
+        "residual": 0.000025000000000052758
+      },
+      {
+        "model": "M4",
+        "metric": "R2",
+        "mean": 0.8460749999999999,
+        "reported": 0.846,
+        "residual": -0.00007499999999993623
+      },
+      {
+        "model": "M5",
+        "metric": "R2",
+        "mean": 0.816875,
+        "reported": 0.8169,
+        "residual": 0.000024999999999941735
+      },
+      {
+        "model": "M6",
+        "metric": "R2",
+        "mean": 0.9435,
+        "reported": 0.9435,
+        "residual": 0
+      }
+    ],
+    "score_all_30": [
+      {
+        "channel": "total",
+        "model": "M1",
+        "reported": -0.1598,
+        "computed": -0.15982000000000002,
+        "residual": 0.000020000000000020002
+      },
+      {
+        "channel": "total",
+        "model": "M2",
+        "reported": -0.1211,
+        "computed": -0.12106,
+        "residual": -0.00003999999999999837
+      },
+      {
+        "channel": "total",
+        "model": "M3",
+        "reported": -0.1566,
+        "computed": -0.15662,
+        "residual": 0.000020000000000020002
+      },
+      {
+        "channel": "total",
+        "model": "M4",
+        "reported": -0.0988,
+        "computed": -0.09880000000000001,
+        "residual": 1.3877787807814457e-17
+      },
+      {
+        "channel": "total",
+        "model": "M5",
+        "reported": -0.0994,
+        "computed": -0.09938,
+        "residual": -0.000020000000000006124
+      },
+      {
+        "channel": "total",
+        "model": "M6",
+        "reported": -0.1567,
+        "computed": -0.1567,
+        "residual": 0
+      },
+      {
+        "channel": "cool",
+        "model": "M1",
+        "reported": -0.1572,
+        "computed": -0.15718000000000001,
+        "residual": -0.000019999999999992246
+      },
+      {
+        "channel": "cool",
+        "model": "M2",
+        "reported": -0.1557,
+        "computed": -0.15574,
+        "residual": 0.00003999999999998449
+      },
+      {
+        "channel": "cool",
+        "model": "M3",
+        "reported": -0.1706,
+        "computed": -0.17056000000000002,
+        "residual": -0.00003999999999998449
+      },
+      {
+        "channel": "cool",
+        "model": "M4",
+        "reported": -0.1079,
+        "computed": -0.10788,
+        "residual": -0.000019999999999992246
+      },
+      {
+        "channel": "cool",
+        "model": "M5",
+        "reported": -0.1207,
+        "computed": -0.12064,
+        "residual": -0.000060000000000004494
+      },
+      {
+        "channel": "cool",
+        "model": "M6",
+        "reported": -0.1665,
+        "computed": -0.16646,
+        "residual": -0.00004000000000001225
+      },
+      {
+        "channel": "heat",
+        "model": "M1",
+        "reported": -0.1515,
+        "computed": -0.15156000000000003,
+        "residual": 0.00006000000000003225
+      },
+      {
+        "channel": "heat",
+        "model": "M2",
+        "reported": -0.1207,
+        "computed": -0.12066000000000002,
+        "residual": -0.00003999999999998449
+      },
+      {
+        "channel": "heat",
+        "model": "M3",
+        "reported": -0.1692,
+        "computed": -0.16926000000000002,
+        "residual": 0.00006000000000003225
+      },
+      {
+        "channel": "heat",
+        "model": "M4",
+        "reported": -0.0908,
+        "computed": -0.09082000000000001,
+        "residual": 0.000020000000000006124
+      },
+      {
+        "channel": "heat",
+        "model": "M5",
+        "reported": -0.0994,
+        "computed": -0.09942000000000001,
+        "residual": 0.000020000000000006124
+      },
+      {
+        "channel": "heat",
+        "model": "M6",
+        "reported": -0.1636,
+        "computed": -0.16368000000000002,
+        "residual": 0.0000800000000000245
+      },
+      {
+        "channel": "electric",
+        "model": "M1",
+        "reported": -0.1641,
+        "computed": -0.16408,
+        "residual": -0.000019999999999992246
+      },
+      {
+        "channel": "electric",
+        "model": "M2",
+        "reported": -0.0497,
+        "computed": -0.04972,
+        "residual": 0.000019999999999999185
+      },
+      {
+        "channel": "electric",
+        "model": "M3",
+        "reported": -0.1169,
+        "computed": -0.11692000000000001,
+        "residual": 0.000020000000000006124
+      },
+      {
+        "channel": "electric",
+        "model": "M4",
+        "reported": -0.0823,
+        "computed": -0.08226000000000001,
+        "residual": -0.00003999999999998449
+      },
+      {
+        "channel": "electric",
+        "model": "M5",
+        "reported": -0.0474,
+        "computed": -0.04740000000000001,
+        "residual": 1.3877787807814457e-17
+      },
+      {
+        "channel": "electric",
+        "model": "M6",
+        "reported": -0.1301,
+        "computed": -0.13012,
+        "residual": 0.000020000000000020002
+      },
+      {
+        "channel": "gas",
+        "model": "M1",
+        "reported": -0.1665,
+        "computed": -0.16644,
+        "residual": -0.000060000000000004494
+      },
+      {
+        "channel": "gas",
+        "model": "M2",
+        "reported": -0.1581,
+        "computed": -0.15811999999999998,
+        "residual": 0.000019999999999992246
+      },
+      {
+        "channel": "gas",
+        "model": "M3",
+        "reported": -0.1699,
+        "computed": -0.16984,
+        "residual": -0.000060000000000004494
+      },
+      {
+        "channel": "gas",
+        "model": "M4",
+        "reported": -0.1144,
+        "computed": -0.11434000000000001,
+        "residual": -0.000059999999999990616
+      },
+      {
+        "channel": "gas",
+        "model": "M5",
+        "reported": -0.13,
+        "computed": -0.13,
+        "residual": 0
+      },
+      {
+        "channel": "gas",
+        "model": "M6",
+        "reported": -0.1665,
+        "computed": -0.16654000000000002,
+        "residual": 0.00004000000000001225
+      }
+    ],
+    "reported_relative_gain": {
+      "RMSE_M1_vs_M3": 2.179836512261586,
+      "R2_M1_vs_M6": 1.3354531001589767,
+      "note": "2.18%可由表值复现，R²按表值约1.34%而正文1.32%；可能隐藏精度，小差异不作重大问题。"
+    }
+  },
+  "additional_read_observations": [
+    {
+      "pages": [
+        6
+      ],
+      "target": "Eq11 epsilon convention",
+      "finding": "正文称1−ε选最优、ε随机；印刷分段看文本为τ≤ε选argmax、τ>ε随机，可能约定反向。未视觉专查此页，保留待查，不作为已确认结论。"
+    },
+    {
+      "pages": [
+        15
+      ],
+      "target": "leakage claims",
+      "finding": "作者明确训练内滚动验证、2020测试和逐原点历史分解；应保留作者声明，不因复杂分解就断言泄漏。代码与数据不可得，实际无泄漏未独立证实。"
+    }
+  ],
+  "unresolved": [
+    "最新修订版本与本地副本差异",
+    "实际代码Q更新与指标实现",
+    "DMS随机/最优/跨分量重构具体实现",
+    "Table2精确聚合定义与预测原点/步长分母",
+    "完整Table1数值复核",
+    "Figure5阈值/归组高分辨数值",
+    "全部公式符号、量纲和实现映射",
+    "逐段边界及语言量化",
+    "原始数据与重跑、种子重复、人工校准"
+  ],
+  "ethics_and_scope": "未改主JSON/MD、未改索引、未改PDF、未上传全文；不推断造假。独立AI复核不能升级为人工校准或全字段verified。"
+}

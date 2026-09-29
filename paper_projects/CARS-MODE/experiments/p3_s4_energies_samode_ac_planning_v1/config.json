@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "experiment_id": "p3_v2_s04_frozen_2x2_ac_validation",
+  "project": "mintou_p3_samode_distribution_planning",
+  "locked_title": "Power Distribution Network Planning Strategy Optimization based on Self-Adaption Multi-objective Differential Evolution Algorithm",
+  "status": "FROZEN",
+  "execution_gate": "BLOCKED_ACTION_AND_AC_PROVENANCE",
+  "results_status": "NO_RESULTS",
+  "datasets": ["simbench:1-complete_data-mixed-all-0-sw", "simbench:MV-rural:EXACT_ID_BLOCKED", "simbench:MV-semi-urban:EXACT_ID_BLOCKED", "simbench:MV-urban:EXACT_ID_BLOCKED", "simbench:MV-commercial:EXACT_ID_BLOCKED"],
+  "arms": [
+    {"label": "Fixed-Fixed", "id": "fixed_parameter__fixed_strategy", "parameter_adaptive": false, "strategy_adaptive": false},
+    {"label": "AdaptiveParam-FixedStrategy", "id": "adaptive_parameter__fixed_strategy", "parameter_adaptive": true, "strategy_adaptive": false},
+    {"label": "FixedParam-AdaptiveStrategy", "id": "fixed_parameter__adaptive_strategy", "parameter_adaptive": false, "strategy_adaptive": true},
+    {"label": "Full-SAMODE", "id": "adaptive_parameter__adaptive_strategy", "parameter_adaptive": true, "strategy_adaptive": true}
+  ],
+  "baselines": [
+    {"id": "gde3", "label": "GDE3", "role": "direct multi-objective DE control", "parameters": {"variant": "rand/1/bin", "f": 0.5, "cr": 0.9}},
+    {"id": "nsde", "label": "NSDE", "role": "direct multi-objective DE control", "parameters": {"variant": "rand/1/bin", "f_distribution": [0.3, 0.9], "cr": 0.9}},
+    {"id": "nsga_ii", "label": "NSGA-II", "role": "direct non-DE MOEA control", "parameters": {"encoding": "binary", "crossover": "two-point", "crossover_probability": 0.9, "mutation": "bit-flip", "mutation_probability": "1/n"}}
+  ],
+  "configurations": ["base", "storage_excluded", "der_excluded", "load_1p3", "budget_0p82", "budget_1p20"],
+  "primary_outcomes": [{"id": "analytic_hv_ref105", "direction": "higher", "normalization": "equation-derived feasible bounds; no clipping", "reference_point": [1.05, 1.05, 1.05, 1.05, 1.05]}],
+  "secondary_outcomes": ["common_empirical_reference_igd_plus", "seed_level_ac_feasible_fraction", "ac_voltage_line_transformer_and_loss_diagnostics"],
+  "seeds": [11001, 11002, 11003, 11004, 11005, 11006, 11007, 11008, 11009, 11010, 11011, 11012, 11013, 11014, 11015, 11016, 11017, 11018, 11019, 11020, 11021, 11022, 11023, 11024, 11025, 11026, 11027, 11028, 11029, 11030],
+  "comparison_family": ["parameter_main_effect", "strategy_main_effect", "parameter_by_strategy_interaction", "full_samode_vs_gde3", "full_samode_vs_nsde", "full_samode_vs_nsga_ii"],
+  "multiplicity": {"method": "Holm", "alpha": 0.05, "sidedness": "two-sided", "families": ["primary_hv", "secondary_igd_plus", "secondary_ac_feasibility"]},
+  "failure_policy": "retain every planned seed; invalid primary run scores zero HV and one plus the configuration's largest valid IGD+ in intention-to-run; AC/application failures are infeasible; infrastructure-wide incidents suspend the complete paired block",
+  "negative_result_policy": "retain null, negative, reversed, and failed outcomes; no post-hoc metric, reference, network, subset, or seed substitution; joint contrasts remain joint",
+  "budget": {"population": 40, "raw_objective_rows_per_method_seed_configuration": 4800, "counter_is_stopping_rule": true},
+  "seeding": {"paired": true, "pilot": [99001, 99002, 99003], "tuning": [91001, 91002, 91003, 91004, 91005, 91006, 91007, 91008, 91009, 91010], "statistics": 73021},
+  "inference": {"configuration_aggregation": "equal-weight mean of six within-seed configuration contrasts", "test": "two-sided paired sign-flip randomization", "monte_carlo_draws": 1000000, "confidence_interval": "seed-level bootstrap 95%", "bootstrap_replicates": 10000},
+  "pilot": {"status": "BLOCKED", "paper_use": false, "seeds": [99001, 99002, 99003]},
+  "formal": {"status": "BLOCKED", "runs_executed": 0, "results_generated": false},
+  "output_schema": {"optimizer_key": ["configuration_id", "method_id", "seed"], "ac_key": ["configuration_id", "method_id", "seed", "plan_rank", "network_id", "scenario_id"], "failure_rows_required": true}
+}

@@ -1,0 +1,205 @@
+{
+  "schema": "p1_ieee_access_upgrade_execution_manifest",
+  "schema_version": 1,
+  "run_namespace": "p1_ieee_access_upgrade_v2",
+  "status": "completed",
+  "started_at": "2026-08-28T00:03:20+00:00",
+  "command": [
+    "D:\\aicoding\\powergrid_benchmark\\.venv_mintou_cuda\\Scripts\\python.exe",
+    "C:\\Users\\10175\\AppData\\Local\\Temp\\paper_harness_worktrees\\f95ce9f54d2fc6d6\\paper_projects\\mintou_p1_dstar_gru_dispatch\\experiments\\p1_ieee_access_upgrade_v2_stage6_attempt5\\run_upgrade.py",
+    "--rts-data",
+    "D:\\aicoding\\powergrid_benchmark\\data\\public_datasets\\production_cost\\rts-gmlc\\RTS_Data",
+    "--device",
+    "cuda"
+  ],
+  "approved_stage": "p1v4_s2_fair_baselines_attribution",
+  "contract": {
+    "path": "experiments\\p1_ieee_access_upgrade_v2_stage6_attempt5\\upgrade_contract.json",
+    "sha256": "3d99dc96aeb9ac51974f76e5c0f544083f4dc41a4f5de5998b7b3e7f2ec78878"
+  },
+  "script": {
+    "path": "experiments\\p1_ieee_access_upgrade_v2_stage6_attempt5\\run_upgrade.py",
+    "sha256": "d4f0e14dd010e4f429e2d61771d781b169a673b73156dac5236113f0e3f34e28"
+  },
+  "source_profile": {
+    "evaluated_rows": 8760,
+    "source_rows": {
+      "load": 8784,
+      "wind": 8784,
+      "pv": 8784
+    },
+    "first_delivery_key": [
+      2020,
+      1,
+      1,
+      1
+    ],
+    "last_delivery_key": [
+      2020,
+      12,
+      30,
+      24
+    ],
+    "branch_count": 120,
+    "total_branch_rating": 46697.0,
+    "weighted_outage": 1.1283367239865516,
+    "source_files": {
+      "load": {
+        "path": "D:\\aicoding\\powergrid_benchmark\\data\\public_datasets\\production_cost\\rts-gmlc\\RTS_Data\\timeseries_data_files\\Load\\DAY_AHEAD_regional_Load.csv",
+        "sha256": "6efb6e3e06f7f1cee0d59eaf33768e06c33c737beb875676433850d8659943ee",
+        "bytes": 432487
+      },
+      "wind": {
+        "path": "D:\\aicoding\\powergrid_benchmark\\data\\public_datasets\\production_cost\\rts-gmlc\\RTS_Data\\timeseries_data_files\\WIND\\DAY_AHEAD_wind.csv",
+        "sha256": "b933f810511ce3d2128c490e4b230defcdc3c15ed4db0838c6fd4c62640e2208",
+        "bytes": 288304
+      },
+      "pv": {
+        "path": "D:\\aicoding\\powergrid_benchmark\\data\\public_datasets\\production_cost\\rts-gmlc\\RTS_Data\\timeseries_data_files\\PV\\DAY_AHEAD_pv.csv",
+        "sha256": "bfede6e558df5ea0f244b6326940a4ee0b95138643aa8a062897c67134c9c185",
+        "bytes": 842651
+      },
+      "branch": {
+        "path": "D:\\aicoding\\powergrid_benchmark\\data\\public_datasets\\production_cost\\rts-gmlc\\RTS_Data\\SourceData\\branch.csv",
+        "sha256": "2f8f80f6f95ca46c2997646d56892436b50d7fb81163b680d06767bc3c1b179f",
+        "bytes": 7263
+      }
+    }
+  },
+  "parameter_counts": {
+    "GRU": 8257,
+    "LSTM": 10993,
+    "DLinear": 106,
+    "TCN": 28273,
+    "randomized_GRU_encoder": 8208
+  },
+  "environment": {
+    "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "numpy": "2.4.6",
+    "torch": "2.13.0+cu130",
+    "device": "cuda",
+    "cuda_version": "13.0",
+    "cuda_device": "NVIDIA GeForce RTX 3090",
+    "cudnn_deterministic": true,
+    "cudnn_benchmark": false,
+    "global_deterministic_algorithms_enforced": false,
+    "cublas_workspace_config": ":4096:8",
+    "cpu_threads": 4
+  },
+  "fixed_budgets": {
+    "fit_partition_only": true,
+    "loss": "mean squared error",
+    "dtype": "float32",
+    "epochs": 20,
+    "checkpoint_epochs": [
+      5,
+      10,
+      15,
+      20
+    ],
+    "batch_size": 256,
+    "optimizer": "manual eager-mode Adam",
+    "learning_rate": 0.001,
+    "beta1": 0.9,
+    "beta2": 0.999,
+    "epsilon": 1e-08,
+    "weight_decay": 0.0,
+    "gradient_clipping": null,
+    "initialization": "PyTorch default module initialization after setting the common seed",
+    "minibatch_order": "one torch.randperm per epoch from a CPU torch.Generator initialized with the common seed",
+    "training_trajectories": 240,
+    "training_trajectory_formula": "3 caps * 2 horizons * 4 architectures * 10 seeds",
+    "no_extra_budget": "No architecture receives additional epochs, checkpoints, seeds, restarts, early-stopping patience, or result-triggered tuning."
+  },
+  "outputs": {
+    "cap_k_sensitivity.csv": {
+      "sha256": "d59e93e4773e192e4756e45128f0dbe97f6cf5b0321c03ab9d0baf30f995365a",
+      "bytes": 107981
+    },
+    "completeness_ledger.csv": {
+      "sha256": "7e9c1af4d855c1e0a631aadde9b5cde895d5263f2332a88a41aefab44df067f2",
+      "bytes": 308447
+    },
+    "failure_ledger.csv": {
+      "sha256": "80b44fbb2364b6a72ef79c8fd68ccc2226f5cab88948abcb142adab9f80e6b9c",
+      "bytes": 168
+    },
+    "moving_block_supplement.csv": {
+      "sha256": "c113d21fa08d39401d2c158c683a350be6dba4853059284341b7165764770404",
+      "bytes": 8628
+    },
+    "paired_effects.csv": {
+      "sha256": "edc1877c7efb3456cb88c9cdea02e28665da3a7df3b210152a685d9c6d4cf534",
+      "bytes": 9672
+    },
+    "protocol_validity.json": {
+      "sha256": "bf5d7ccdf832093d27fcf9aa5dcb356c584db72ac5efab630bab54791d85fe43",
+      "bytes": 1345
+    },
+    "run_results.csv": {
+      "sha256": "39d3b58f3cdaccd4333417d70fa7c8cfa7d2f132a15b913c26739d1c70542fc8",
+      "bytes": 921338
+    },
+    "test_predictions_primary_mae.npz": {
+      "sha256": "9f6abe5152e93212d8d78bcd8f68d23b3350a3bd4ef2803d6a1056100a050a9d",
+      "bytes": 1230374
+    },
+    "trajectory_ledger.csv": {
+      "sha256": "a45292febaed234e2793f0794650c4b40482f1c5886817c13683a6cfbcd20c3c",
+      "bytes": 21839
+    }
+  },
+  "completed_at": "2026-08-28T00:06:07+00:00",
+  "protocol_valid": true,
+  "row_counts": {
+    "run_results": 2310,
+    "trajectory_ledger": 240,
+    "paired_effects": 30,
+    "cap_k_sensitivity": 258,
+    "moving_block_supplement": 36,
+    "completeness_ledger": 2310
+  },
+  "runtimes_seconds": {
+    "total": 166.1597529000137,
+    "unique_trajectory_sum": 149.5303993,
+    "by_architecture": {
+      "GRU": 34.02618050004821,
+      "LSTM": 33.998096799943596,
+      "DLinear": 25.735058299964294,
+      "TCN": 55.77106370020192
+    },
+    "retrieval_by_space": {
+      "raw": 0.344384599942714,
+      "randomized": 1.4176647000713274,
+      "learned": 2.8547193000558764
+    }
+  },
+  "selections": {
+    "checkpoint_epoch_counts": {
+      "10": 79,
+      "15": 120,
+      "20": 371,
+      "5": 750
+    },
+    "selected_alpha_counts": {
+      "0.0": 60,
+      "1.0": 60
+    },
+    "ridge_lambda_counts": {
+      "0.1": 1,
+      "1": 4,
+      "1e-06": 7
+    }
+  },
+  "completeness": {
+    "expected_rows": 2310,
+    "observed_rows": 2310,
+    "unique_observed_keys": 2310,
+    "completed_rows": 2310,
+    "failed_rows": 0,
+    "missing_keys": 0,
+    "unexpected_keys": 0,
+    "duplicate_keys": 0
+  }
+}

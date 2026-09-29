@@ -1,0 +1,40 @@
+{
+  "sources": {
+    "pool": "data/public_datasets/production_cost/miso_mtep/ieca_archive/MTEP16-Appendix-AB.xlsx",
+    "snapshots": [
+      "data/public_datasets/production_cost/miso_mtep/ieca_archive/20161230-MTEP16-Appendix-A-Status-Report.xlsx",
+      "data/public_datasets/production_cost/miso_mtep/ieca_archive/20170330-MTEP16-Appendix-A-Status-Report.xlsx",
+      "data/public_datasets/production_cost/miso_mtep/ieca_archive/20170630-MTEP16-Appendix-A-Status-Report.xlsx",
+      "data/public_datasets/production_cost/miso_mtep/ieca_archive/20170930-MTEP16-Appendix-A-Status-Report.xlsx",
+      "data/public_datasets/production_cost/miso_mtep/ieca_archive/20180109-MTEP16-Appendix-A-Status-Report.xlsx"
+    ],
+    "in_service_2026": "data/public_datasets/production_cost/miso_mtep/Appendix_A_InService_Projects.xlsx",
+    "active_2026": "data/public_datasets/production_cost/miso_mtep/Appendix_A_Status_Report.xlsx"
+  },
+  "cache": "data/public_datasets/production_cost/miso_mtep/mtep16_backtest_cache.json",
+  "experiments": [
+    "budget_constrained_selection",
+    "reliability_prioritized_review"
+  ],
+  "n_seeds": 10,
+  "budget_fraction_of_pool_cost_at_flagship": 0.05,
+  "label_definition": {
+    "built": "in 2026 MISO Appendix A in-service list OR 'In Service' in a 2016-2018 quarterly snapshot",
+    "withdrawn": "explicit Withdrawn status in a quarterly snapshot, never in service",
+    "deferred": "still listed in the 2026 active Appendix A status report (excluded from capture)",
+    "unresolved": "absent from all 2026 lists and never withdrawn on record (broad negatives only)"
+  },
+  "metrics": [
+    "outcome_capture_strict",
+    "outcome_capture_broad",
+    "pointbiserial_r",
+    "mannwhitney_p",
+    "withdrawn_capture"
+  ],
+  "ladder": [
+    "nerc_rule_backtest (done)",
+    "miso_mtep16_outcome_backtest (this)",
+    "expert_labels (optional)"
+  ],
+  "status": "public_miso_mtep16_outcome_backtest_v1"
+}

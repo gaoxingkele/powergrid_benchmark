@@ -804,7 +804,7 @@ The authors declare no conflicts of interest.
 
 41. Qi, H.; Zhao, C.; Yan, X.; Zhang, W.; Guo, F.; Zhang, L.; Yang, B.; Lu, H. Vulnerability-driven multi-objective energy storage planning using enhanced beluga whale optimization for resilient distribution networks. *Energies* **2026**, *19*(1), 210. https://doi.org/10.3390/en19010210
 
-42. Zhang, L.; Zheng, J.; Zhang, Z.; Ni, S.; Wu, G. CARS-MODE: Constraint-Aware Repair and Strategy-Pool Multi-Objective Differential Evolution on a SimBench-Derived Mixed-Voltage Portfolio Proxy. Unpublished manuscript, 2026; available to editors and reviewers on request.
+42. Zhang, L.; Zheng, J.; Zhang, Z.; Ni, S.; Wu, G. CARS-MODE: Constraint-Aware Multi-Objective Differential Evolution with Metric-Sensitivity Diagnostics on a SimBench-Derived Portfolio Proxy. Unpublished manuscript, 2026; available to editors and reviewers on request.
 
 43. Blank, J.; Deb, K. pymoo: Multi-objective optimization in Python. *IEEE Access* **2020**, *8*, 89497-89509. https://doi.org/10.1109/ACCESS.2020.2990567
 

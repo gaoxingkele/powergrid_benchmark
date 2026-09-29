@@ -64,7 +64,7 @@ Each paper completed three review-and-revision rounds covering narrative logic, 
 
 ## 5. Harness improvements produced by the execution
 
-The workflow exposed and corrected three orchestration defects in `D:\aicoding\Lib\paper_harness`:
+The workflow exposed and corrected three orchestration defects in `D:\aicoding\mylib\paper_harness`:
 
 - version 0.2.3 added process-tree timeout containment;
 - version 0.2.4 made custom Python checks import code from the isolated worktree rather than the mutable main tree;

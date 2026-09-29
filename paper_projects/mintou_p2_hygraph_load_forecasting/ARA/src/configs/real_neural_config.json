@@ -1,0 +1,38 @@
+{
+  "models": {
+    "MLP": {
+      "description": "Feedforward 168-lag + calendar, 128-64-1.",
+      "epochs": 20
+    },
+    "LSTM": {
+      "description": "Univariate LSTM over the 168h window, hidden 48.",
+      "epochs": 6
+    },
+    "TCN": {
+      "description": "Dilated causal Conv1d stack, k=3, dilations 1..64.",
+      "epochs": 10
+    },
+    "DLinear": {
+      "description": "Moving-average decomposition + per-branch linear (Zeng et al. 2023).",
+      "epochs": 20
+    },
+    "PatchTST-lite": {
+      "description": "Patch embedding (16/8) + 2-layer Transformer encoder.",
+      "epochs": 8
+    }
+  },
+  "window_hours": 168,
+  "train_stride": 3,
+  "batch_size": 512,
+  "seeds": [
+    11,
+    23,
+    47
+  ],
+  "optimizer": "Adam lr=1e-3, MSE on per-series z-normalized target",
+  "early_stopping": "last 15% of training window by time, best-val state restored",
+  "test_protocol": "identical splits and full test sets as real_load_forecasting stdlib rows",
+  "torch_version": "2.13.0+cpu",
+  "device": "cpu",
+  "status": "public_data_benchmark_v5_neural_baselines"
+}

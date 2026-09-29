@@ -1,0 +1,999 @@
+{
+  "schema": "atlas_substantive_deconstruction/1",
+  "paper_id": "p_275a3fd0baafde9e",
+  "title": "Short-Term Photovoltaic Power Forecasting Based on a Novel Autoformer Model",
+  "journal": "Symmetry",
+  "year": 2023,
+  "doi": "10.3390/sym15010238",
+  "article_type": "PV multistep forecasting composite deep learning",
+  "source": {
+    "path": "../sources/10.3390_sym15010238.pdf",
+    "sha256": "275a3fd0baafde9e09b936df7d279521419b86ab9d35378f2299783dd342a0b6",
+    "pages": 29,
+    "authors": [
+      "Yuanshao Huang",
+      "Yonghong Wu"
+    ],
+    "download_url": "https://mdpi-res.com/d_attachment/symmetry/symmetry-15-00238/article_deploy/symmetry-15-00238-v2.pdf",
+    "license": "CC BY;OpenAlex+Unpaywall gold OA confirmed",
+    "last_modified": "2023-01-20T01:14:06Z",
+    "version_status": "publisher CDN v2;API version timestamp1674177246 matches CDNlastmod;notes fetch failed and search not exact,known-latest not established",
+    "retrieved": "2026-09-13",
+    "acquisition": "HEAD200application/pdf6136665bytes thenaria2;firstpageDOIverified"
+  },
+  "analysis_status": "fulltext_single_assistant_analysis_pending_independent_review",
+  "human_calibrated": false,
+  "all_fields_verified": false,
+  "read_coverage": {
+    "physical_pages_read": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29
+    ],
+    "visual_pages": [
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28
+    ],
+    "references_read": true,
+    "method": "all text bounded page batches;Poppler rendering all figure pages and tables/formula details"
+  },
+  "scope": {
+    "decision": "core_ai",
+    "task": "PV power multihorizon forecasting",
+    "method_family": "Autoformer + Scaleformer-style multiscale + destationaryattention + adaptive robust loss"
+  },
+  "counts": {
+    "numbered_body_headings": 27,
+    "level1_sections": 6,
+    "numbered_equations": 22,
+    "figures": 14,
+    "tables": 5,
+    "numbered_algorithms": 0,
+    "references": 26,
+    "paragraph_count": null
+  },
+  "sections": [
+    {
+      "id": "1",
+      "title": "Introduction",
+      "pages": [
+        1,
+        3
+      ],
+      "logic": "电网PV不确定性→标准模型缺口→三项贡献"
+    },
+    {
+      "id": "2",
+      "title": "Related Work",
+      "pages": [
+        3,
+        4
+      ],
+      "logic": "统计/ML/RNN/Transformer/Autoformer逐类比较，存在LSTM只能单步的不当泛化"
+    },
+    {
+      "id": "3",
+      "title": "ADAMS Network Architecture",
+      "pages": [
+        4,
+        10
+      ],
+      "logic": "Autoformer+多尺度+去平稳注意力+鲁棒损失"
+    },
+    {
+      "id": "3.1",
+      "title": "Decomposition Architecture",
+      "pages": [
+        5,
+        6
+      ],
+      "logic": "分解编码解码"
+    },
+    {
+      "id": "3.1.1",
+      "title": "Series Decomposition Block",
+      "pages": [
+        5,
+        5
+      ],
+      "logic": "平均池化趋势+剩余季节"
+    },
+    {
+      "id": "3.1.2",
+      "title": "Model Inputs",
+      "pages": [
+        5,
+        5
+      ],
+      "logic": "历史24点，后半历史与0/均值占位"
+    },
+    {
+      "id": "3.1.3",
+      "title": "Encoder",
+      "pages": [
+        5,
+        5
+      ],
+      "logic": "季节残差编码，趋势剔除"
+    },
+    {
+      "id": "3.1.4",
+      "title": "Decoder",
+      "pages": [
+        6,
+        6
+      ],
+      "logic": "三处分解与趋势累加"
+    },
+    {
+      "id": "3.2",
+      "title": "Auto-Correlation Mechanism",
+      "pages": [
+        6,
+        7
+      ],
+      "logic": "跨周期序列级依赖"
+    },
+    {
+      "id": "3.2.1",
+      "title": "Period-Based Dependencies",
+      "pages": [
+        6,
+        6
+      ],
+      "logic": "自相关选周期"
+    },
+    {
+      "id": "3.2.2",
+      "title": "Time Delay Aggregation",
+      "pages": [
+        6,
+        7
+      ],
+      "logic": "TopK lag滚动加权"
+    },
+    {
+      "id": "3.2.3",
+      "title": "Efficient Computation",
+      "pages": [
+        7,
+        7
+      ],
+      "logic": "FFT推O(LlogL)"
+    },
+    {
+      "id": "3.3",
+      "title": "Multi-Scale Framework",
+      "pages": [
+        7,
+        8
+      ],
+      "logic": "共享参数粗到细预测+跨尺度中心化"
+    },
+    {
+      "id": "3.4",
+      "title": "De-Stationary Attention",
+      "pages": [
+        8,
+        9
+      ],
+      "logic": "实例标准化+原始统计MLP修正attention"
+    },
+    {
+      "id": "3.5",
+      "title": "Adaptive Loss Function",
+      "pages": [
+        10,
+        10
+      ],
+      "logic": "Barron鲁棒损失"
+    },
+    {
+      "id": "4",
+      "title": "Experimental Preparation and Framework",
+      "pages": [
+        10,
+        13
+      ],
+      "logic": "数据/基线/预处理/指标"
+    },
+    {
+      "id": "4.1",
+      "title": "Experimental Input Data",
+      "pages": [
+        10,
+        11
+      ],
+      "logic": "单Yulara1058.4kW两分辨率"
+    },
+    {
+      "id": "4.2",
+      "title": "Experimental Framework",
+      "pages": [
+        11,
+        12
+      ],
+      "logic": "7模型流程及超参"
+    },
+    {
+      "id": "4.3",
+      "title": "Data Pre-Processing",
+      "pages": [
+        12,
+        12
+      ],
+      "logic": "负值删除、插值、70/20/10"
+    },
+    {
+      "id": "4.4",
+      "title": "Evaluation Metrics",
+      "pages": [
+        12,
+        13
+      ],
+      "logic": "MSE/MAE/RMSE/adjustedR²"
+    },
+    {
+      "id": "5",
+      "title": "Experiment and Analysis",
+      "pages": [
+        13,
+        20
+      ],
+      "logic": "双分辨率预测、DM、消融、长度敏感性"
+    },
+    {
+      "id": "5.1",
+      "title": "Experiment I: 5-min PV Power Forecasting Experiment",
+      "pages": [
+        13,
+        15
+      ],
+      "logic": "4/8/12/24步20–120min预测"
+    },
+    {
+      "id": "5.2",
+      "title": "Experiment II: Hourly PV Power Forecasting Experiment",
+      "pages": [
+        15,
+        16
+      ],
+      "logic": "4–24h预测"
+    },
+    {
+      "id": "5.3",
+      "title": "Diebold-Mariano Test",
+      "pages": [
+        17,
+        17
+      ],
+      "logic": "MSE损失成对检验，宣称全显著与附表冲突"
+    },
+    {
+      "id": "5.4",
+      "title": "Ablation Study",
+      "pages": [
+        17,
+        17
+      ],
+      "logic": "去scale、attention、adaptive loss"
+    },
+    {
+      "id": "5.5",
+      "title": "Further Study",
+      "pages": [
+        18,
+        20
+      ],
+      "logic": "1–12月/1–6年数据长度比较，解释为未来假说"
+    },
+    {
+      "id": "6",
+      "title": "Conclusions",
+      "pages": [
+        20,
+        20
+      ],
+      "logic": "重申性能及长历史干扰假说"
+    },
+    {
+      "id": "Appendix A",
+      "title": "Metric scatter plots",
+      "pages": [
+        21,
+        22
+      ],
+      "logic": "2图各16小轴，重复主表非新试验"
+    },
+    {
+      "id": "Appendix B",
+      "title": "Forecast traces",
+      "pages": [
+        23,
+        27
+      ],
+      "logic": "每种模型单独7条曲线两分辨率"
+    },
+    {
+      "id": "Appendix C",
+      "title": "DM matrices",
+      "pages": [
+        27,
+        28
+      ],
+      "logic": "两表四horizon7×7矩阵"
+    },
+    {
+      "id": "backmatter",
+      "title": "Declarations and References",
+      "pages": [
+        20,
+        29
+      ],
+      "logic": "26参考，DKASC开放数据，代码未给"
+    }
+  ],
+  "equations": [
+    {
+      "id": "(1)",
+      "page": 5,
+      "type": "decomposition",
+      "purpose": "趋势AvgPool、季节X-Xt；基础Autoformer机制"
+    },
+    {
+      "id": "(2)",
+      "page": 5,
+      "type": "operator",
+      "purpose": "SeriesDecomp接口"
+    },
+    {
+      "id": "(3)",
+      "page": 5,
+      "type": "initialization",
+      "purpose": "半历史+0/均值decoder占位"
+    },
+    {
+      "id": "(4)",
+      "page": 5,
+      "type": "encoder",
+      "purpose": "残差auto-correlation与FFN后两次分解"
+    },
+    {
+      "id": "(5)",
+      "page": 6,
+      "type": "decoder",
+      "purpose": "self/cross correlation和FFN三分解，累加趋势"
+    },
+    {
+      "id": "(6)",
+      "page": 6,
+      "type": "autocorrelation",
+      "purpose": "无限长时间均值定义相关，无有限样本假设证明"
+    },
+    {
+      "id": "(7)",
+      "page": 7,
+      "type": "aggregation",
+      "purpose": "TopK相关lag、softmax、Roll加权"
+    },
+    {
+      "id": "(8)",
+      "page": 7,
+      "type": "multihead",
+      "purpose": "拼接各头+投影"
+    },
+    {
+      "id": "(9)",
+      "page": 7,
+      "type": "FFT",
+      "purpose": "Wiener-Khinchin频谱逆变换，标准复杂度来源"
+    },
+    {
+      "id": "(10)",
+      "page": 8,
+      "type": "multiscale",
+      "purpose": "平均池化生成不同尺度历史和预测窗口"
+    },
+    {
+      "id": "(11)",
+      "page": 8,
+      "type": "interpolation",
+      "purpose": "印刷插值增量两项下标相同，相减0；非正常线性插值，代码待查"
+    },
+    {
+      "id": "(12)",
+      "page": 8,
+      "type": "normalization",
+      "purpose": "历史和decoder预测/占位联合均值去中心，不能直接认定使用真实future泄漏"
+    },
+    {
+      "id": "(13)",
+      "page": 8,
+      "type": "embedding",
+      "purpose": "尺度位置sin/cos，外加来源和尺度标志"
+    },
+    {
+      "id": "(14)",
+      "page": 9,
+      "type": "stationarization",
+      "purpose": "z-score不保证Gaussian；零方差epsilon未给"
+    },
+    {
+      "id": "(15)",
+      "page": 9,
+      "type": "denormalization",
+      "purpose": "印刷σ⊙(y′+μ)不是σ⊙y′+μ，不能严格逆式14；实现未核"
+    },
+    {
+      "id": "(16)",
+      "page": 9,
+      "type": "attention",
+      "purpose": "原始数据与均值/σ生成τ、Δ修正QK；与FFT autocorrelation整合细节不足"
+    },
+    {
+      "id": "(17)",
+      "page": 10,
+      "type": "loss",
+      "purpose": "Barron鲁棒loss，α/c训练或取值、特殊值极限未给"
+    },
+    {
+      "id": "(18)",
+      "page": 12,
+      "type": "metric",
+      "purpose": "MSE"
+    },
+    {
+      "id": "(19)",
+      "page": 12,
+      "type": "metric",
+      "purpose": "MAE"
+    },
+    {
+      "id": "(20)",
+      "page": 12,
+      "type": "metric",
+      "purpose": "RMSE应sqrt(MSE)同一聚合"
+    },
+    {
+      "id": "(21)",
+      "page": 12,
+      "type": "metric",
+      "purpose": "R² SSE/SST；视觉确认分母有均值bar不是同项相减"
+    },
+    {
+      "id": "(22)",
+      "page": 12,
+      "type": "metric",
+      "purpose": "adjustedR² k未给，实际可以负值非仅0–1"
+    }
+  ],
+  "figures": [
+    {
+      "id": "Figure 1",
+      "pages": [
+        10
+      ],
+      "panels": 2,
+      "purpose": "位置与场站属性",
+      "content": "Yulara示意+1058.4kW设备规格表，系统共1.8MW不等所选站。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 2",
+      "pages": [
+        11
+      ],
+      "panels": 2,
+      "purpose": "数据两分辨率",
+      "content": "14堆叠变量曲线；小时轴2018–2022与正文2017–2020不符，实际输入变量数需核（正文列12，图另CPAM/AEDR）。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 3",
+      "pages": [
+        11
+      ],
+      "panels": 1,
+      "purpose": "实验流程",
+      "content": "预处理在split前画出，训练折拟合标准化/插值边界未说明；风险不是已证泄漏。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 4",
+      "pages": [
+        14
+      ],
+      "panels": 4,
+      "purpose": "5min指标堆叠柱",
+      "content": "不同模型误差直接堆叠无统计意义，仅视觉比较；以Table2为准。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 5",
+      "pages": [
+        14
+      ],
+      "panels": 1,
+      "purpose": "5min所有预测曲线",
+      "content": "kW曲线范围3000点，负预测存在，不同RNN曲线与附图差异待查。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 6",
+      "pages": [
+        16
+      ],
+      "panels": 4,
+      "purpose": "1h指标堆叠柱",
+      "content": "同Table3描述性数据重复。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 7",
+      "pages": [
+        16
+      ],
+      "panels": 1,
+      "purpose": "小时所有预测",
+      "content": "约300h重叠曲线，局部细节不能证明泛化。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 8",
+      "pages": [
+        17
+      ],
+      "panels": 2,
+      "purpose": "消融指标和运行时间",
+      "content": "MSE ADAMS .174,去scale .200,去attention .300,去loss .182；time92.261/41.717/104.414/96.579s。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 9",
+      "pages": [
+        18
+      ],
+      "panels": 4,
+      "purpose": "5min数据长度敏感性",
+      "content": "1–12个月指标曲线+2/9/11月代表预测；4月MSE最低，选择过程需独立验证。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 10",
+      "pages": [
+        19
+      ],
+      "panels": 4,
+      "purpose": "小时数据长度敏感性",
+      "content": "1–6年及2/5/6年预测；4年MSE最低但R²图约.9+与主表.824不符，归因假说未证。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure A1",
+      "pages": [
+        21
+      ],
+      "panels": 16,
+      "purpose": "5min指标散点",
+      "content": "4指标×4horizon，不是预测真值散点也不是多次重复。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure A2",
+      "pages": [
+        22
+      ],
+      "panels": 16,
+      "purpose": "1h指标散点",
+      "content": "同上；个别数值与主表待全面转录核查。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure A3",
+      "pages": [
+        23,
+        24,
+        25
+      ],
+      "panels": 7,
+      "purpose": "七方法5min单独曲线",
+      "content": "LSTM/GRU明显峰值低估，不能凭测试误差称过拟合；ADAMS同样有负值。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure A4",
+      "pages": [
+        25,
+        26,
+        27
+      ],
+      "panels": 7,
+      "purpose": "七方法1h单独曲线",
+      "content": "峰值偏差与RNN夜间负预测；仅一个示例片段。",
+      "visual_checked": true
+    }
+  ],
+  "tables": [
+    {
+      "id": "Table 1",
+      "page": 12,
+      "purpose": "7模型配置",
+      "content": "ADAMS/Autoformer/Informer/Transformer dmodel512,seq24,label12,horizon4/8/12/24,itr1,5epochs,lr.0001,dropout.05,batch64;ADAMSadaptive其他MSE。LSTM/GRU/RNN100epochs,相同lr/drop/batch/seq/horizon。",
+      "limits": "无head/layer/scale列表、MLP宽度、lossαc、seed；训练预算异质且作者不比较跨模型收敛时间。"
+    },
+    {
+      "id": "Table 2",
+      "page": 13,
+      "purpose": "5min7模型4horizon4指标",
+      "selected_values": {
+        "ADAMS": {
+          "4": [
+            0.061,
+            0.146,
+            0.248,
+            0.94
+          ],
+          "8": [
+            0.074,
+            0.134,
+            0.273,
+            0.927
+          ],
+          "12": [
+            0.099,
+            0.164,
+            0.315,
+            0.903
+          ],
+          "24": [
+            0.173,
+            0.227,
+            0.416,
+            0.831
+          ]
+        },
+        "ordering": [
+          "MSE",
+          "MAE",
+          "RMSE",
+          "adjustedR2"
+        ]
+      },
+      "audit": "length4 TransformerMAE.120<ADAMS.146；LSTM MSE.234而正文.304；Informerlength12MSE.130而RMSE.355不相容。"
+    },
+    {
+      "id": "Table 3",
+      "page": 15,
+      "purpose": "1h同结构指标",
+      "selected_values": {
+        "ADAMS": {
+          "4": [
+            0.197,
+            0.265,
+            0.455,
+            0.873
+          ],
+          "8": [
+            0.219,
+            0.265,
+            0.468,
+            0.856
+          ],
+          "12": [
+            0.251,
+            0.283,
+            0.501,
+            0.842
+          ],
+          "24": [
+            0.28,
+            0.302,
+            0.529,
+            0.824
+          ]
+        },
+        "ordering": [
+          "MSE",
+          "MAE",
+          "RMSE",
+          "adjustedR2"
+        ]
+      },
+      "audit": "ADAMSlength4RMSE.455²=.207025不吻合MSE.197；AutoformerRMSE.448更低。length8adjustedR²Autoformer.857>.856。length24GRUMAE.301<.302。GRUlength12MSE.280与RMSE.540不吻合（平方.2916）。"
+    },
+    {
+      "id": "Table A1",
+      "pages": [
+        27,
+        28
+      ],
+      "purpose": "5min DM4个7×7p矩阵",
+      "selected_ADAMS_pvalues": {
+        "4": [
+          0.0489,
+          0.0137,
+          1.3e-12,
+          1.39e-133,
+          1.13e-235,
+          1e-292
+        ],
+        "8": [
+          9.78e-75,
+          3.27e-58,
+          0.0068,
+          2.61e-42,
+          0,
+          0
+        ],
+        "12": [
+          3e-109,
+          0.052,
+          0.714,
+          1.32e-191,
+          1.48e-10,
+          3.42e-253
+        ],
+        "24": [
+          0.00167,
+          7.54e-185,
+          1.26e-7,
+          0,
+          0,
+          0
+        ]
+      },
+      "baseline_order": [
+        "Autoformer",
+        "Informer",
+        "Transformer",
+        "LSTM",
+        "GRU",
+        "RNN"
+      ],
+      "audit": "ADAMS12-step对Informer.052、Transformer.714不显著。部分上下三角不对称（如4stepADAMS-LSTM1.39e-133,反向0），若双侧同法不应不同；0可能舍入/下溢非精确零。"
+    },
+    {
+      "id": "Table A2",
+      "page": 28,
+      "purpose": "小时DM4个7×7p矩阵",
+      "audit": "ADAMS对6基线均印刷p<.05，但其他配对并非全显著：4hLSTM-GRU.918，8hTransformer-RNN.822。没有原始损失序列无法复算DM。"
+    }
+  ],
+  "framework": {
+    "input": "24历史点多变量PV/天气；decoder后12点历史+0/均值占位",
+    "output": "4/8/12/24步PV序列：5min为20/40/60/120min，1h为4/8/12/24h",
+    "modules": [
+      "内部分解趋势/季节",
+      "FFT自相关TopK时滞聚合",
+      "共享模块多尺度迭代细化",
+      "原始统计MLPτΔ去平稳修正",
+      "Barronadaptive loss"
+    ],
+    "assumptions": [
+      "历史周期可用于未来",
+      "多尺度共享结构有用",
+      "标准化后统计可恢复",
+      "气象变量在所需输入时点可获得"
+    ],
+    "symmetry_assessment": "周期同相/平移尺度标准化是实际设计；p9宣称平移缩放等变但没有证明，Eq15印刷逆变换错误且MLP依赖rawx使整体等变不能自动推出；非仅标题修辞但严格性质未验证",
+    "complexity": "O(LlogL)源于FFT+TopK aggregation，完整多尺度/MLP计算和显存未实测证明"
+  },
+  "experiments": [
+    {
+      "id": "E1",
+      "pages": [
+        10,
+        13,
+        14
+      ],
+      "dataset": "YularaNo1 1058.4kW2020Sep1–Dec31,5min,reported34080",
+      "design": "7models×4horizon,70/20/10split",
+      "issues": "连续日期理论35136样本，删除负值/缺测可能解释差额但未提供清洗日志；无明确chronological或边界日期。"
+    },
+    {
+      "id": "E2",
+      "pages": [
+        10,
+        11,
+        15,
+        16
+      ],
+      "dataset": "hourly33740,prose2017–2020;Fig2b2018–2022",
+      "design": "同一站另一分辨率不是跨站外部验证",
+      "issues": "两个四年区间均应约35064小时，清洗及日期不确定；标准化拟合范围不明，指标没有物理单位。"
+    },
+    {
+      "id": "ablation",
+      "page": 17,
+      "variants": [
+        "full",
+        "minus_multiscale",
+        "minus_destationaryattention",
+        "adaptive_loss_replaced_by_MSE"
+      ],
+      "MSE": [
+        0.174,
+        0.2,
+        0.3,
+        0.182
+      ],
+      "runtime_seconds": [
+        92.261,
+        41.717,
+        104.414,
+        96.579
+      ],
+      "audit": "去scale相对MSE+14.9425%，去loss+4.5977%；正文将两者比例对调；去attention+72.4138%。full.174与Table2.173轻微差别。无重复CI。"
+    },
+    {
+      "id": "dataset_length",
+      "pages": [
+        18,
+        19,
+        20
+      ],
+      "design": "5min1–12月共12组，1h1–6年6组，horizon24",
+      "audit": "选4月/4年因最低MSE，但保持相同test/holdout未说明，可能选择偏差；不能仅测试曲线证明过拟合或长历史分散attention，seq_len24和训练总跨度不同概念。"
+    }
+  ],
+  "statistics": {
+    "reported_tests": "DM MSE-loss two-model accuracy equality,threshold.05",
+    "missing_test_details": [
+      "loss sequence definition for overlapping multihorizon",
+      "HAC/truncation lag",
+      "one/two-sided implementation",
+      "Harvey correction",
+      "multiplicity correction",
+      "effective sample size"
+    ],
+    "replicates": "itr=1 reported Transformer family;no seed/repeated-run CI",
+    "interpretation": "p>.05不能证明相等；拒绝双侧差异需结合效应方向；正文全显著与TableA1冲突",
+    "full_numeric_transcription": "partial:selected main values,all ADAMS TableA1 rows;not all392DMcells",
+    "data_leakage": "risk_only:preprocessing before split diagram,undefined interpolation and dataset-length selection;no code/data examined"
+  },
+  "conclusions": {
+    "supported": "多数表内MSE/MAE/RMSE/adjustedR²更优；特定一场站双分辨率数据；attention消融误差增幅最大。",
+    "not_supported": "所有指标/所有DM比较最优显著、跨领域泛化、对称性保证、长数据导致过拟合的确定因果、真实运行效率优于所有基线。",
+    "limitations": [
+      "日期/图表冲突",
+      "公式11/15印刷问题",
+      "标准化非Gaussian误述",
+      "DM与消融正文错误",
+      "无重复且计算预算不等",
+      "无外部场站",
+      "架构和预处理细节不全"
+    ]
+  },
+  "narrative": {
+    "trajectory": "问题背景→模型类别短板→模块公式叠加→双时间尺度→显著性→消融→反直觉数据长度现象→假说和未来验证",
+    "language_findings": [
+      "p15同时说比较成功又未比较，表述自相矛盾。",
+      "p3重复ML缺点并p4把RNN限定单步，非方法学必然。",
+      "p3GaoLSTM[11]参考实际wordembedding论文，Zang[10]实际He等，引用内部错配。",
+      "强肯定语言多，但5.5和结论承认长数据机制证据不足。"
+    ],
+    "original_sentence_frames": [
+      "在相同[预测跨度]下，以[基准结构]为载体增加[机制]，再通过[单模块移除]评估其边际贡献。",
+      "观察到[经验趋势]尚不足以确认[因果机制]，因此将[固定测试集/注意力诊断]列为后续验证。"
+    ]
+  },
+  "difficulty": {
+    "status": "single_assistant_provisional_not_human",
+    "reviewer": "Codex /root/scope_other",
+    "dimensions": [
+      {
+        "dimension": "theory",
+        "score": 2,
+        "range": [
+          1,
+          2
+        ],
+        "evidence": "标准FFT/去平稳/多尺度公式重组，无新证明p5–10"
+      },
+      {
+        "dimension": "algorithm",
+        "score": 3,
+        "range": [
+          2,
+          3
+        ],
+        "evidence": "多个耦合模块、多尺度共享和loss，细节仍不足"
+      },
+      {
+        "dimension": "statistics",
+        "score": 2,
+        "range": [
+          2,
+          3
+        ],
+        "evidence": "DM成对检验有序列相关背景但实现未披露，消融和长度实验"
+      },
+      {
+        "dimension": "data",
+        "score": 1,
+        "range": [
+          1,
+          2
+        ],
+        "evidence": "公开单站两分辨率，非多地独立验证"
+      },
+      {
+        "dimension": "engineering",
+        "score": 1,
+        "range": [
+          1,
+          2
+        ],
+        "evidence": "离线预测未闭环约束部署"
+      },
+      {
+        "dimension": "cross_domain",
+        "score": 2,
+        "range": [
+          1,
+          2
+        ],
+        "evidence": "天气+PV特征时序预测接口明确"
+      }
+    ]
+  },
+  "paragraph_analysis": {
+    "status": "not_completed",
+    "paragraph_count": null,
+    "reason": "全文已读但未逐段视觉边界编码，不把块计数当段落"
+  },
+  "unassessed": [
+    "211字段全覆盖",
+    "人工校准",
+    "独立复核",
+    "代码/数据复现",
+    "完整数字转录",
+    "逐段地图",
+    "全部引用外部校验"
+  ]
+}

@@ -1,0 +1,305 @@
+{
+  "schema": "atlas_independent_review_v1",
+  "paper_id": "p_71fe4f1acd7e01c5",
+  "reviewer": "independent AI assistant /root/scope_other",
+  "review_date": "2026-09-13",
+  "human_calibrated": false,
+  "review_type": "AI source-grounded independent review; not human calibration",
+  "source": {
+    "path": "../sources/10.3390_info12020050.pdf",
+    "sha256": "71fe4f1acd7e01c532fbb0eecc169e0e5cbac5a390ad84eebdb16efc4c556d87",
+    "pages": 21,
+    "hash_recomputed": true
+  },
+  "read_coverage": {
+    "physical_pages_text_read": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21
+    ],
+    "physical_pages_visually_checked": [
+      9,
+      10,
+      11,
+      12,
+      13,
+      14
+    ],
+    "not_performed": [
+      "原始数据或预测代码复算",
+      "全部图表视觉审计",
+      "逐段边界与长度分析",
+      "外部引文真实性逐条核验",
+      "六维难度独立重评分"
+    ]
+  },
+  "overall": "accept_with_corrections_and_unresolved_protocol_questions",
+  "checks": [
+    {
+      "id": "identity",
+      "decision": "accept",
+      "pages": [
+        1
+      ],
+      "finding": "题名、Information 2021,12,50、DOI、21物理页及SHA256一致。"
+    },
+    {
+      "id": "section_counts",
+      "decision": "accept",
+      "pages": [
+        1,
+        2,
+        5,
+        7,
+        11,
+        16,
+        17
+      ],
+      "finding": "正文一级编号章4个，子标题4个，总正文标题8个；包括无编号Literature Review与Limitations and Future Work。该8个口径排除摘要、关键词、声明和References，并非全文件所有标题。"
+    },
+    {
+      "id": "section_2_1_title",
+      "decision": "correct",
+      "pages": [
+        5
+      ],
+      "target": "sections[S21].heading",
+      "finding": "主JSON简写不等于原文标题。",
+      "replacement": "Data Sources, Data Extraction, and Data Preparation"
+    },
+    {
+      "id": "object_counts",
+      "decision": "accept",
+      "pages": [
+        7,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        18,
+        19,
+        20,
+        21
+      ],
+      "finding": "5幅编号图、6张编号表、78条编号参考文献、0个编号显示公式组；Table3有5个无编号指标定义；p7另有1个已识别行内拟合式。Figure1/2各1panel、Figure3为2、Figure4为3、Figure5为2，合计9。未把该9解释为独立实验。"
+    },
+    {
+      "id": "design_counts",
+      "decision": "accept",
+      "pages": [
+        7,
+        8,
+        13,
+        15,
+        16
+      ],
+      "finding": "1个整合的国家负荷目标数据集；5种拟合ML模型+历史Pre-Dispatch，共6条件；14测试周；1主比较+时间曲线/特征重要性诊断的划分合理，后者不是独立外部测试。没有受控消融或系统超参敏感性实验。"
+    },
+    {
+      "id": "metric_mape",
+      "decision": "accept",
+      "pages": [
+        9,
+        11
+      ],
+      "expression": "100% * (1/n) * sum_h abs((A_h-F_h)/A_h)",
+      "finding": "视觉确认；n=168；实际负荷必须非零；等长度周的周MAPE均值应等于同样小时集合的整体APE均值（舍入除外）。"
+    },
+    {
+      "id": "metric_rmse",
+      "decision": "accept",
+      "pages": [
+        9,
+        11
+      ],
+      "expression": "sqrt((1/n)*sum_h (A_h-F_h)^2)",
+      "finding": "视觉确认标准RMSE；原表单位MWh。周RMSE均值一般不等于池化RMSE，也不等于逐小时绝对误差均值。"
+    },
+    {
+      "id": "metric_peak",
+      "decision": "accept",
+      "pages": [
+        11
+      ],
+      "expression": "100% * abs((max(A)-max(F))/max(A))",
+      "finding": "比较两序列峰值幅度，不要求峰出现于同一小时，不能表述为峰值时刻预测准确率。"
+    },
+    {
+      "id": "metric_valley",
+      "decision": "accept",
+      "pages": [
+        11
+      ],
+      "expression": "100% * abs((min(A)-min(F))/min(A))",
+      "finding": "比较谷值幅度，不评价谷值出现时刻；分母需非零。"
+    },
+    {
+      "id": "metric_energy",
+      "decision": "accept",
+      "pages": [
+        11
+      ],
+      "expression": "100% * abs((sum_h A_h-sum_h F_h)/sum_h A_h)",
+      "finding": "先有符号误差求和后取绝对值；小时高估低估可抵消，不能替代小时准确度。"
+    },
+    {
+      "id": "table2_conflict",
+      "decision": "accept",
+      "pages": [
+        10
+      ],
+      "finding": "视觉确认KNN n_neighbors随机候选(3,6,9,12,15,18,21,24,27)却RS Selection=29；Grid候选包含29且GS=29。错误发生在RS列；不能据此判定实际运行使用了什么候选。"
+    },
+    {
+      "id": "table4_table5_mape",
+      "decision": "correct",
+      "pages": [
+        9,
+        12,
+        13
+      ],
+      "finding": "应扩充为五个ML模型均有MAPE不一致，而不是只记XGB。原文称各周均168小时，因此普通均值口径差异不能单独解释MAPE差异。下列Table5平均由可见14个周数值独立算术复算，非原始预测复算。",
+      "table4_means": {
+        "PreDisp": 4.95,
+        "MLR": 4.43,
+        "KNN": 4.56,
+        "SVR": 4.08,
+        "RF": 4.11,
+        "XGB": 3.66
+      },
+      "table5_reported_means": {
+        "PreDisp": 4.95,
+        "MLR": 4.5,
+        "KNN": 4.48,
+        "SVR": 4.2,
+        "RF": 4.15,
+        "XGB": 3.74
+      },
+      "table5_recomputed_from_rounded_cells": {
+        "PreDisp": 4.952857142857142,
+        "MLR": 4.504285714285715,
+        "KNN": 4.477857142857142,
+        "SVR": 4.203571428571428,
+        "RF": 4.149285714285714,
+        "XGB": 3.737857142857142
+      },
+      "boundary": "14周单元格及均值均有舍入，但0.04至0.12个百分点差异远大于两位小数舍入通常可解释的范围；数据集/实现是否不同待代码或原预测核实。"
+    },
+    {
+      "id": "table4_rmse_implementation",
+      "decision": "uncertain",
+      "pages": [
+        11,
+        12,
+        13
+      ],
+      "target": "equations[M2].audit and tables[T4].audit",
+      "finding": "原文把Figure3/Table4称为hourly error distribution，但Table3 RMSE定义是168小时集合指标。若逐小时各算sqrt(error²)，那实际是绝对误差；无代码不能确认实现。建议将主记录确定口吻‘is not the Table5 weekly RMSE estimand’改成：原文呈现的小时分布与周RMSE存在聚合/标签歧义，实际估计量未复现。仅数值不同本身并不证明公式错误。"
+    },
+    {
+      "id": "table4_prose_sd",
+      "decision": "correct",
+      "pages": [
+        12
+      ],
+      "finding": "可新增原文数值叙述冲突：正文称Pre-Dispatch在两指标均有更大SD，但MAPE SD Pre=3.88低于MLR=3.91，RMSE SD Pre=44.45低于MLR=49.66。因此不能推成所有ML都改善离散度。"
+    },
+    {
+      "id": "secondary_metric_ranking",
+      "decision": "accept",
+      "pages": [
+        13,
+        14
+      ],
+      "finding": "XGB平均峰2.93不及MLR2.74和Pre2.76；谷3.04不及KNN2.91；能量1.75不及RF1.71。现有主记录例值正确，可补峰指标真正最优MLR。"
+    },
+    {
+      "id": "per_week_claim_boundary",
+      "decision": "accept",
+      "pages": [
+        13,
+        14
+      ],
+      "finding": "XGB对Pre-Dispatch在14周MAPE/RMSE均较低；p14的all testing weeks在该对照意义下成立。若解释为每周优于所有ML则不成立，例如2019 week21 MAPE XGB2.46、SVR2.23、MLR2.45，RMSE XGB45.9、SVR39.5。不要把平均最优变成每周全模型最优，也不要无视对照对象而直接判原文错。"
+    },
+    {
+      "id": "figure4_conflict",
+      "decision": "accept",
+      "pages": [
+        7,
+        14,
+        15
+      ],
+      "finding": "视觉确认caption(b)写Week10,2020却括号March2019，(c)写Week24,2020却June2019。正文p15将quarantine/no quarantine分别指b,c，与p7 2020-03-25封锁起点及panel周数相反；应b为封锁前、c为封锁后。图形b负荷较高更规则、c较低更不规则亦与此一致，但不单凭曲线推日期。"
+    },
+    {
+      "id": "conclusion_scope",
+      "decision": "accept",
+      "pages": [
+        15,
+        16,
+        17,
+        18
+      ],
+      "finding": "支持本巴拿马个案在14选定周中XGB最低报告平均MAPE/RMSE，不支持所有指标/国家/时段普遍优越；重要性分析非消融/因果；未做调度成本、市场价格不确定性或上线替换试验。未来工作不能计为已完成实验。"
+    },
+    {
+      "id": "forecast_availability",
+      "decision": "uncertain",
+      "pages": [
+        6,
+        7,
+        8,
+        9,
+        17
+      ],
+      "finding": "h时刻天气来自历史数据且准确天气预报列为未来补充，真实发布时可用性未证；不能直接宣判代码泄漏。另L_(h-168)在72小时gap+168小时预测尾部可能越过预测起点，应逐变量核对forecast-origin时间轴与代码，而非仅核对CV图。"
+    },
+    {
+      "id": "citation_mismatch",
+      "decision": "accept",
+      "pages": [
+        3,
+        18,
+        19
+      ],
+      "finding": "内部错配可确认：p3 Ontario2006 ANN引用[10]而列表[10]Li2020；对应Ontario条实际[26]。只确认本PDF内部不一致，未做所有外部文献真实性审计。"
+    },
+    {
+      "id": "human_and_completion_status",
+      "decision": "accept",
+      "pages": [],
+      "finding": "单助手解构及本次AI独立复核均不等于人工校准。保持human_calibrated=false；逐段工作由主代理另做，本审核不能替代全字段验收。"
+    }
+  ],
+  "recommended_actions": [
+    "修正2.1精确标题",
+    "扩充Table4/5五模型MAPE冲突及SD叙述反例",
+    "RMSE实现保持uncertain，区分数字不一致和已证算法错误",
+    "保留每周对Pre-Dispatch改进成立的对照边界",
+    "附本独立AI审核，不覆盖原主文件或自动升为人工完成"
+  ],
+  "authoritative_artifacts_modified": false
+}

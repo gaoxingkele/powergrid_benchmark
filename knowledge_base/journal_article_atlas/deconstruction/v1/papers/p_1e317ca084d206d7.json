@@ -1,0 +1,1024 @@
+{
+  "schema": "atlas_substantive_deconstruction/1",
+  "paper_id": "p_1e317ca084d206d7",
+  "title": "Electric Load Forecasting for a Quicklime Company Using a Temporal Fusion Transformer",
+  "journal": "Algorithms",
+  "year": 2026,
+  "doi": "10.3390/a19030208",
+  "article_type": "industrial applied probabilistic forecasting",
+  "source": {
+    "path": "../sources/10.3390_a19030208.pdf",
+    "sha256": "1e317ca084d206d77cd3f2b3ef8c6c0766638e29f7b63a4e5420a42ed9e28fa4",
+    "pages": 23,
+    "authors": [
+      "Jersson X. Leon-Medina",
+      "Diego A. Tibaduiza",
+      "Claudia Patricia Siachoque Celys",
+      "Bernardo Umbarila Suarez",
+      "Francesc Pozo"
+    ],
+    "published": "2026-03-10",
+    "license": "CC BY; local p1 and OpenAlex/Unpaywall cc-by",
+    "retrieved": "2026-09-13",
+    "download_url": "https://upcommons.upc.edu/server/api/core/bitstreams/99211737-fbff-4a8d-9a51-b7dfb608a5c4/content",
+    "version_status": "publisher-formatted repository copy; current latest version not fully hash-matched",
+    "version_notes": "MDPI notes shows VoR PDF upload 2026-03-10 10:16 CET and HTML update10:18. Repository copy matches title DOI23pages; publisher PDF403 means no bytewise latest-VoR comparison.",
+    "retraction_correction_check": "not_assessed"
+  },
+  "analysis_status": "fulltext_single_assistant_analysis_pending_independent_review",
+  "human_calibrated": false,
+  "all_fields_verified": false,
+  "read_coverage": {
+    "physical_pages_read": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ],
+    "method": "PyMuPDF complete text page batches1–5,6–11,12–17,18–23; all references read; all figure pages visually inspected",
+    "visual_pages": [
+      5,
+      6,
+      8,
+      9,
+      11,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "paragraph_boundary_status": "partial_semantic_anchors_only",
+    "full_field_status": "not_complete",
+    "independent_review": "pending"
+  },
+  "scope": {
+    "decision": "core_ai",
+    "task": "厂级工业电负荷24h多步及周滚动预测",
+    "method_family": "existing TFT with quantile regression and operational covariates",
+    "rationale": "预测对象为电力kW/kWh，非仅热力或通用时间序列"
+  },
+  "counts": {
+    "body_numbered_l1_sections": 4,
+    "body_numbered_headings_all_levels": 23,
+    "unnumbered_body_headings": [
+      "Contributions",
+      "Model Inputs"
+    ],
+    "section_records_including_backmatter": 25,
+    "numbered_display_equation_groups": 0,
+    "unique_unnumbered_display_formula_groups": 6,
+    "inline_expressions": null,
+    "theorems": 0,
+    "proofs": 0,
+    "numbered_pseudocode": 2,
+    "numbered_figures": 14,
+    "figure_coordinate_panels_including_single_diagrams": 15,
+    "numbered_tables": 5,
+    "reference_entries": 30,
+    "paragraph_count": null
+  },
+  "sections": [
+    {
+      "id": "1",
+      "title": "Introduction",
+      "pages": [
+        2,
+        3,
+        4
+      ],
+      "logic": "工业电耗场景→传统/深度方法→TFT应用空缺→六项贡献；算法为现有TFT的工业适配，不是新Transformer。"
+    },
+    {
+      "id": "2",
+      "title": "Materials and Methods",
+      "pages": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "logic": "由工厂采样、特征到训练和概率评价构成实现链；两套配置未明确区分。"
+    },
+    {
+      "id": "2.1",
+      "title": "Dataset Description",
+      "pages": [
+        4,
+        5
+      ],
+      "logic": "2024实测厂级小时平均功率，四生产阶段、周一至五8–18点、焦炭上下文；个体电机非直接输入。"
+    },
+    {
+      "id": "2.2",
+      "title": "Data Preprocessing and Treatment of Non-Operational Periods",
+      "pages": [
+        6
+      ],
+      "logic": "保留真实零值，缺测按长度删除/插值但阈值不报；Algorithm1规范past/future和train-only缩放。"
+    },
+    {
+      "id": "2.3",
+      "title": "Temporal Fusion Transformer (TFT) Model",
+      "pages": [
+        6,
+        7
+      ],
+      "logic": "引入多变量多步概率架构；未编号Model Inputs列举一般TFT输入，静态输入实例未落实。"
+    },
+    {
+      "id": "2.4",
+      "title": "Main Components of the TFT",
+      "pages": [
+        7,
+        8
+      ],
+      "logic": "依次说明门控、选择、静态编码、LSTM局部与注意力长程、分位数输出；通用原理无新推导。"
+    },
+    {
+      "id": "2.4.1",
+      "title": "Quantile Regression",
+      "pages": [
+        7
+      ],
+      "logic": "pinball训练P10/P50/P90，未写损失公式。"
+    },
+    {
+      "id": "2.4.2",
+      "title": "Interpretability",
+      "pages": [
+        7,
+        8
+      ],
+      "logic": "变量选择与注意力作为解释线索，不能直接视为因果解释。"
+    },
+    {
+      "id": "2.4.3",
+      "title": "Implementation",
+      "pages": [
+        8
+      ],
+      "logic": "Darts0.30.0/Python3.10/Lightning2.1.2实现。"
+    },
+    {
+      "id": "2.5",
+      "title": "Energy Deviation Metric",
+      "pages": [
+        8,
+        9
+      ],
+      "logic": "小时功率积分成kWh，再算总量相对绝对差；正负误差会抵消。"
+    },
+    {
+      "id": "2.6",
+      "title": "TFT Training and Forecasting Pipeline",
+      "pages": [
+        9,
+        10
+      ],
+      "logic": "六步骤从TimeSeries构造到CSV导出；12月1切分及逐日24h推断。"
+    },
+    {
+      "id": "2.7",
+      "title": "Model Configuration and Training Procedure",
+      "pages": [
+        10,
+        11,
+        12
+      ],
+      "logic": "168历史→24未来，32隐藏/1LSTM/4head/0.1dropout/64batch/50epochs；训练截至原点减输入窗的措辞需代码核实。"
+    },
+    {
+      "id": "2.8",
+      "title": "Forecasting Strategy and Rolling Evaluation",
+      "pages": [
+        12
+      ],
+      "logic": "每日观察过去168h，直接预测24h，平移24h拼一周；预测窗不重叠不意味着统计独立。"
+    },
+    {
+      "id": "2.9",
+      "title": "Baseline Models and Comparative Experimental Setup",
+      "pages": [
+        12,
+        13
+      ],
+      "logic": "三深度基线+TFT，168h输出30epochs；past/future/无外生输入不同，不能声称完全同协变量。"
+    },
+    {
+      "id": "2.10",
+      "title": "Probabilistic Forecasting and Uncertainty Estimation",
+      "pages": [
+        13
+      ],
+      "logic": "200样本估分位数；PICP和MPIW界定覆盖/宽度。"
+    },
+    {
+      "id": "3",
+      "title": "Results",
+      "pages": [
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "logic": "周预测→点与总量误差→基线→概率→残差→解释；证据按任务层次组织。"
+    },
+    {
+      "id": "3.1",
+      "title": "Weekly Energy Consumption Forecasting",
+      "pages": [
+        13,
+        14
+      ],
+      "logic": "Fig7示例启停可跟随，但图示不能量化峰值可靠性。"
+    },
+    {
+      "id": "3.2",
+      "title": "Forecast Error Metrics",
+      "pages": [
+        14,
+        15
+      ],
+      "logic": "Table3主周全时/活动时误差；澄清Table4另一周，不能用两表归因训练轮数收益。"
+    },
+    {
+      "id": "3.3",
+      "title": "Comparison of Deep Learning Models for Industrial Energy Forecasting",
+      "pages": [
+        15
+      ],
+      "logic": "承认LSTM点误差最佳、NBEATS总量最佳、TFT概率功能；公平性配置需限缩。"
+    },
+    {
+      "id": "3.4",
+      "title": "Probabilistic Weekly Load Forecasting",
+      "pages": [
+        16,
+        17
+      ],
+      "logic": "两周P10–P90区间和已保存模型推断；86%覆盖高于名义80%，不是统计校准证明。"
+    },
+    {
+      "id": "3.5",
+      "title": "Residual Analysis of the Forecasting Model",
+      "pages": [
+        17,
+        18
+      ],
+      "logic": "箱图近零IQR有正负离群；非活动零多会压低总体离散度。"
+    },
+    {
+      "id": "3.6",
+      "title": "Model Explainability and Attention Analysis",
+      "pages": [
+        17,
+        18,
+        19,
+        20
+      ],
+      "logic": "生产阶段权重最高，decoder仅relative_index；注意力反复历史窗口，未有干预消融。"
+    },
+    {
+      "id": "4",
+      "title": "Conclusions",
+      "pages": [
+        20,
+        21
+      ],
+      "logic": "复述应用可行性、能量和概率能力，展望价格/气候/调度RL；优于基线的概括与Table4冲突。"
+    },
+    {
+      "id": "backmatter",
+      "title": "Declarations and Abbreviations",
+      "pages": [
+        21,
+        22
+      ],
+      "logic": "资金、工厂作者利益关系、GitHub声明、6缩略语；仓库未访问执行。"
+    },
+    {
+      "id": "references",
+      "title": "References",
+      "pages": [
+        22,
+        23
+      ],
+      "logic": "30编号文献，含原始TFT与多场景预测；参考逐条阅读但未逐DOI外部核实。"
+    }
+  ],
+  "equations": [
+    {
+      "id": "U1",
+      "pages": [
+        8
+      ],
+      "expression": "E = sum(P_t Δt)",
+      "category": "evaluation aggregation",
+      "function": "小时平均kW乘1h累加得kWh，非预测器或物理约束。"
+    },
+    {
+      "id": "U2",
+      "pages": [
+        8
+      ],
+      "expression": "E_hat = sum(P_hat_t Δt)",
+      "category": "evaluation aggregation",
+      "function": "相同预测总电量；输出为功率，文中energy/load用语需区分。"
+    },
+    {
+      "id": "U3",
+      "pages": [
+        9,
+        10
+      ],
+      "expression": "EE=100*abs(E_hat−E)/E",
+      "category": "metric",
+      "function": "总能量相对偏差；Algorithm2重复定义不新增公式种类；正负偏差抵消且E=0需要规则未报。"
+    },
+    {
+      "id": "U4",
+      "pages": [
+        13
+      ],
+      "expression": "[Q_0.10({yhat^(s)}), Q_0.90({yhat^(s)})], S=200",
+      "category": "probabilistic output",
+      "function": "经验分位数区间，中位数为Q.5；量化预测分布而非重复训练置信区间。"
+    },
+    {
+      "id": "U5",
+      "pages": [
+        13
+      ],
+      "expression": "PICP=N^(-1)sum I(y_t in [q_.1,t,q_.9,t])",
+      "category": "coverage metric",
+      "function": "经验覆盖比例；无显著性校准检验。"
+    },
+    {
+      "id": "U6",
+      "pages": [
+        13
+      ],
+      "expression": "MPIW=N^(-1)sum(q_.9,t−q_.1,t)",
+      "category": "sharpness metric",
+      "function": "均宽kW；仅一个值不能判断模型间锐度。"
+    }
+  ],
+  "algorithms": [
+    {
+      "number": 1,
+      "pages": [
+        6
+      ],
+      "input": "raw timestamp, P, S, coke C",
+      "output": "Y,Xpast,Xfuture,train/validation",
+      "logic": "resample→缺测区分→停机零保留→one-hot→past(stage,coke)/future(hour,weekday)→train-fit scaler→168/24→时序split",
+      "limitation": "伪代码缩放位于split之前但显式train拟合；不据顺序单独判泄漏；missing-gap规则未给。"
+    },
+    {
+      "number": 2,
+      "pages": [
+        10
+      ],
+      "input": "target and past/future covariates",
+      "output": "median/quantiles and metrics",
+      "logic": "设TFT/pinball→训练早停→每日观察168h预测24h→聚合MAE/RMSE/EE/PICP",
+      "limitation": "早停patience未报；与Table2输出168及30轮口径冲突。"
+    }
+  ],
+  "figures": [
+    {
+      "number": 1,
+      "pages": [
+        5
+      ],
+      "type": "采集漏斗图",
+      "analysis": "小时电测→功率整理→设备阶段→变异→焦炭融合；交代数据链，未包含具体传感器精度。",
+      "panels": 1
+    },
+    {
+      "number": 2,
+      "pages": [
+        5
+      ],
+      "type": "一天数据截图",
+      "analysis": "展示timestamp/stage/coke/load及设备列；是编号Figure而非Table，截图未逐单元转录。",
+      "panels": 1
+    },
+    {
+      "number": 3,
+      "pages": [
+        6
+      ],
+      "type": "一周真实电力曲线",
+      "analysis": "2024-01-29至02-05工作日尖峰与周末近零；证明结构性停机非缺测。",
+      "panels": 1
+    },
+    {
+      "number": 4,
+      "pages": [
+        8
+      ],
+      "type": "TFT五组件串联图",
+      "analysis": "门控、静态、变量选择、LSTM、注意力通用架构；不等价执行计算图。",
+      "panels": 1
+    },
+    {
+      "number": 5,
+      "pages": [
+        9
+      ],
+      "type": "六步实现流程",
+      "analysis": "训练<Dec1、验证≥Dec1；168输入24输出，末端CSV。",
+      "panels": 1
+    },
+    {
+      "number": 6,
+      "pages": [
+        11
+      ],
+      "type": "Lightning模型摘要截图",
+      "analysis": "60.3K可训练参数、0不可训练、0.241MB；232模块train；GPU available True used False；Epoch29显示30轮证据。",
+      "panels": 1
+    },
+    {
+      "number": 7,
+      "pages": [
+        14
+      ],
+      "type": "单周点预测",
+      "analysis": "12月1日起黑真实蓝中位数；caption30epochs，峰值匹配与Fig8曲线不完全相同，不能默认同模型。",
+      "panels": 1
+    },
+    {
+      "number": 8,
+      "pages": [
+        16
+      ],
+      "type": "第一周概率带",
+      "analysis": "12月1–7蓝实值、绿中位、橙P10–90；尖峰中位明显平滑；视觉证据非逐点数值。",
+      "panels": 1
+    },
+    {
+      "number": 9,
+      "pages": [
+        17
+      ],
+      "type": "加载模型的第二周概率带",
+      "analysis": "15–22December，运行期带宽扩张；不重训主张仅作者陈述，端点是否含22日需代码核实。",
+      "panels": 1
+    },
+    {
+      "number": 10,
+      "pages": [
+        18
+      ],
+      "type": "残差箱图",
+      "analysis": "中心近0、离群约−13至+26kW；正均值红菱形，误差方向正文称正为高估但公式未定义。",
+      "panels": 1
+    },
+    {
+      "number": 11,
+      "pages": [
+        18
+      ],
+      "type": "encoder/decoder变量权重",
+      "analysis": "两面板；encoder etapa_num>weekday>hour>coke>target>relative；decoder100%relativeindex；与one-hot/future-calendar说明需要核对。",
+      "panels": 2
+    },
+    {
+      "number": 12,
+      "pages": [
+        19
+      ],
+      "type": "平均时间注意力",
+      "analysis": "历史相对索引至未来24；最早处有峰，不能仅凭此证明周因果。",
+      "panels": 1
+    },
+    {
+      "number": 13,
+      "pages": [
+        19
+      ],
+      "type": "各24步注意力叠线",
+      "analysis": "24条曲线同一坐标面板，不计24子图；展示时间权重相似。",
+      "panels": 1
+    },
+    {
+      "number": 14,
+      "pages": [
+        20
+      ],
+      "type": "注意力热图",
+      "analysis": "预测horizon对相对历史位置，竖纹重复；仅内部权重解释。",
+      "panels": 1
+    }
+  ],
+  "tables": [
+    {
+      "number": 1,
+      "pages": [
+        12
+      ],
+      "purpose": "主TFT配置",
+      "values": {
+        "input_h": 168,
+        "output_h": 24,
+        "hidden": 32,
+        "lstm_layers": 1,
+        "heads": 4,
+        "dropout": 0.1,
+        "batch": 64,
+        "epochs": 50,
+        "lr": 0.001,
+        "quantiles": [
+          0.1,
+          0.5,
+          0.9
+        ],
+        "seed": 42
+      },
+      "analysis": "足够定位常规实现；优化搜索策略/早停细项无。"
+    },
+    {
+      "number": 2,
+      "pages": [
+        13
+      ],
+      "purpose": "比较配置",
+      "rows": [
+        [
+          "TFT",
+          168,
+          168,
+          "past",
+          30
+        ],
+        [
+          "LSTM",
+          168,
+          168,
+          "future",
+          30
+        ],
+        [
+          "GRU",
+          168,
+          168,
+          "future",
+          30
+        ],
+        [
+          "N-BEATS",
+          168,
+          168,
+          "none",
+          30
+        ]
+      ],
+      "analysis": "相同窗口/轮数但不同信息；不是与Table1完全一致的主实验。"
+    },
+    {
+      "number": 3,
+      "pages": [
+        15
+      ],
+      "purpose": "12月1起主周结果",
+      "columns": [
+        "scope",
+        "MAE_kW",
+        "RMSE_kW",
+        "EE_percent"
+      ],
+      "rows": [
+        [
+          "global",
+          3.38,
+          6.56,
+          4.78
+        ],
+        [
+          "active",
+          9.02,
+          11.45,
+          5.25
+        ]
+      ],
+      "analysis": "活动段更难；总能量小偏差不能证明尖峰准确。"
+    },
+    {
+      "number": 4,
+      "pages": [
+        15
+      ],
+      "purpose": "12月15起比较",
+      "columns": [
+        "model",
+        "MAE_kW",
+        "RMSE_kW",
+        "EE_global_percent",
+        "EE_active_percent"
+      ],
+      "rows": [
+        [
+          "LSTM",
+          1.314,
+          2.835,
+          2.152,
+          2.052
+        ],
+        [
+          "GRU",
+          1.342,
+          2.993,
+          1.988,
+          2.738
+        ],
+        [
+          "N-BEATS",
+          1.916,
+          3.132,
+          1.453,
+          3.509
+        ],
+        [
+          "TFT",
+          2.261,
+          4.583,
+          1.9,
+          3.876
+        ]
+      ],
+      "analysis": "LSTM点/活动EE最佳,NBEATS全局EE最佳,TFT点/活动EE最差；TFT全局第二。"
+    },
+    {
+      "number": 5,
+      "pages": [
+        17
+      ],
+      "purpose": "概率覆盖和宽度",
+      "values": {
+        "PICP": 0.86,
+        "MPIW_kW": 11.2,
+        "nominal": 0.8
+      },
+      "analysis": "超名义6个百分点，单一周/汇总归属不够清楚，未比较概率基线。"
+    }
+  ],
+  "framework": {
+    "inputs": {
+      "history": "168h target",
+      "past": "production stage and coke; Figure11 additionally past calendar",
+      "future": "Algorithm1 hour/day-of-week, while Figure11 decoder only relative index",
+      "static": "generic TFT explanation; actual static covariates not evidenced"
+    },
+    "modules": [
+      "resampling and gap handling",
+      "train-fitted continuous scaling / stage encoding",
+      "Darts TFT: gating, variable selection, static contexts if supplied, LSTM, interpretable attention",
+      "quantile outputs and rolling24h aggregation",
+      "point, cumulative-energy and interval assessment"
+    ],
+    "outputs": [
+      "hourly median kW",
+      "P10/P90 interval",
+      "weekly cumulative kWh"
+    ],
+    "assumptions": [
+      "weekly fixed operation carries into evaluation",
+      "past operational variables available at forecast origin",
+      "future calendar genuinely known",
+      "single plant2024 representative"
+    ],
+    "theory_status": "no novel theorem, convergence proof or physical energy-balance constraint; EE is posthoc metric",
+    "novelty_boundary": "application and evaluation framing, not new TFT algorithm"
+  },
+  "experiments": {
+    "data": {
+      "site": "SUMININCO LTDA quicklime plant Colombia",
+      "period": "full2024 claimed",
+      "resolution": "hourly mean kW",
+      "sample_count": null,
+      "stage_count": 4,
+      "working_hours": "Mon–Fri08:00–18:00",
+      "missingness": "real zero retained, gaps deleted/interpolated by unspecified length threshold",
+      "source_pages": [
+        4,
+        5,
+        6
+      ]
+    },
+    "splits": {
+      "main": "train before2024-12-01; thereafter validation/prediction p10",
+      "secondary": "Table4 week starts2024-12-15;Fig9 caption15–22",
+      "rolling": "p12 observed168h→direct24h each day",
+      "conflict": "p11 train cutoff forecaststart−168; p12 baselines train throughstart and predict168; no unambiguous train/validation/test separation for tuning"
+    },
+    "baselines": [
+      "LSTM",
+      "GRU",
+      "N-BEATS"
+    ],
+    "ablation": "none isolating TFT components/covariates",
+    "sensitivity": "no controlled epoch/window/heads sensitivity; p14 epoch improvement not established across fixed data",
+    "robustness": "two December weeks; no multi-site/year independent test",
+    "hardware": "Fig6 GPUavailable but unused; exact CPU/GPU model and runtime not reported",
+    "code": "GitHub jerssonleon/Paper_TFT declared p21, not fetched/executed",
+    "replications": "single reported seed42; no multi-seed run dispersion"
+  },
+  "statistics": {
+    "reported": [
+      "MAE",
+      "RMSE",
+      "global/active EE",
+      "PICP",
+      "MPIW",
+      "residual boxplot",
+      "attention/variable importance"
+    ],
+    "not_reported": [
+      "confidence intervals",
+      "hypothesis tests",
+      "multiple comparison correction",
+      "multi-seed variance",
+      "residual autocorrelation tests",
+      "calibration by horizon or active hours"
+    ],
+    "independently_checked": [
+      {
+        "item": "Table4 model ranking",
+        "result": "TFT not best globalEE;1.900>1.453NBEATS;active3.876largest",
+        "pages": [
+          15,
+          21
+        ]
+      },
+      {
+        "item": "nominal80 vs observed86",
+        "result": "6percentage-point overcoverage; not sufficient to establish well-calibrated conditional coverage",
+        "pages": [
+          16,
+          17,
+          21
+        ]
+      }
+    ],
+    "dependency": "non-overlapping daily forecast windows still correlated; paper's independence phrase p12 overstates",
+    "word_sentence_counts": "not_measured"
+  },
+  "conclusions": {
+    "supported": [
+      "厂级电负荷的TFT概率预测实测应用可行性",
+      "Table3给出两种时段口径和两周展示",
+      "内部变量权重以阶段为主"
+    ],
+    "unsupported_or_overstated": [
+      {
+        "claim": "TFT superior global energy consistency",
+        "pages": [
+          1,
+          21
+        ],
+        "reason": "Table4 NBEATS1.453<TFT1.900；只能称部分基线前，不能整体最优。"
+      },
+      {
+        "claim": "recurrent particularly GRU lowest MAE/RMSE",
+        "pages": [
+          21
+        ],
+        "reason": "Table4 LSTM1.314/2.835低于GRU1.342/2.993"
+      },
+      {
+        "claim": "identical covariates ensure fair comparison",
+        "pages": [
+          4,
+          12,
+          13
+        ],
+        "reason": "Table2 TFTpast/LSTMfuture/NBEATSnone；比较涵盖架构与信息差"
+      },
+      {
+        "claim": "epochs significantly enhance",
+        "pages": [
+          14
+        ],
+        "reason": "未报告同周同设定30vs50受控消融，Table3/4明确异周"
+      },
+      {
+        "claim": "attention confirms causal stage-driven dynamics",
+        "pages": [
+          17,
+          19,
+          20
+        ],
+        "reason": "模型权重不是干预或因果证据"
+      },
+      {
+        "claim": "energy procurement/tariff benefits",
+        "pages": [
+          20,
+          21
+        ],
+        "reason": "未优化/部署或计费实测；应用动机及未来方向"
+      }
+    ],
+    "open_issues": [
+      "one-hot描述与etapa_num单特征截图不一致，需代码核对编码",
+      "futurecalendar描述与decoder仅relative_index不一致",
+      "24h/50轮与168h/30轮混用，需识别不同实验",
+      "Fig7与Fig8同周预测中位曲线不同，不能混合作单模型证据",
+      "单年单厂且停机零值多，泛化范围有限"
+    ],
+    "scientific_judgment": "evidence-bound AI critique, not author-final judgment"
+  },
+  "narrative": {
+    "arc": "场景难点→成熟TFT能力→操作协变量→超越逐点误差的总电量指标→点预测劣势下转向概率与解释价值→部署展望",
+    "language_observations": [
+      {
+        "pages": [
+          2,
+          3
+        ],
+        "role": "literature synthesis",
+        "analysis": "方法家族罗列较长，再收束quicklime场景空缺；不能把引用性能概括成本文结果。"
+      },
+      {
+        "pages": [
+          14,
+          15,
+          21
+        ],
+        "role": "claim calibration",
+        "analysis": "Results承认NBEATS最佳，Abstract/Conclusion反而用superior；结论强度未与表格同步。"
+      },
+      {
+        "pages": [
+          16,
+          17,
+          20
+        ],
+        "role": "visual interpretation",
+        "analysis": "频繁 confirms/robust/reliable 由示例图推断泛化；建议以show/suggest且附适用范围。"
+      }
+    ],
+    "original_sentence_frameworks": [
+      "在[具体运行机制]导致[可观测数据特性]的场景下，将[成熟模型]与[部署时可用协变量]结合，并同时评价[逐点目标]和[计划相关汇总目标]。",
+      "尽管[模型A]在[指标一]上落后于[基线]，其[另一个独立验证能力]仍可能服务于[明确下游用途]；该用途尚需[额外实验]检验。",
+      "模型权重与[领域假设]相容，但在缺少[干预/消融]的条件下，不应将该一致性解释为因果证明。"
+    ],
+    "copying_status": "原创抽象句式，不抄原文"
+  },
+  "paragraphs": {
+    "status": "partial_no_exhaustive_boundary_map",
+    "units": [
+      {
+        "pages": [
+          4
+        ],
+        "anchor": "An hourly dataset was collected",
+        "role": "data provenance",
+        "analysis": "限定真实2024厂级数据，奠定方法适用域。"
+      },
+      {
+        "pages": [
+          6
+        ],
+        "anchor": "Non-operational periods",
+        "role": "preprocessing rationale",
+        "analysis": "把停机零与缺失区分，是模型结构有效性关键。"
+      },
+      {
+        "pages": [
+          12
+        ],
+        "anchor": "This strategy results",
+        "role": "evaluation justification",
+        "analysis": "从不重叠预测窗跳到independence过强。"
+      },
+      {
+        "pages": [
+          14
+        ],
+        "anchor": "It is important to note",
+        "role": "evaluation disambiguation",
+        "analysis": "Table3/4异周解释不可忽略。"
+      },
+      {
+        "pages": [
+          15
+        ],
+        "anchor": "When shifting the evaluation criterion",
+        "role": "comparative result",
+        "analysis": "正确承认NBEATS全局总量最好。"
+      },
+      {
+        "pages": [
+          21
+        ],
+        "anchor": "A comparative analysis",
+        "role": "conclusion",
+        "analysis": "将TFT概括superior与结果段冲突。"
+      }
+    ]
+  },
+  "difficulty": {
+    "status": "single_assistant_provisional",
+    "scale": "0–4 workload, not quality/acceptance",
+    "dimensions": {
+      "theory": {
+        "value": 1,
+        "pages": [
+          7,
+          8,
+          13
+        ],
+        "rationale": "标准TFT解释与评价公式，无新推导"
+      },
+      "algorithm": {
+        "value": 2,
+        "pages": [
+          6,
+          10,
+          12
+        ],
+        "rationale": "Darts多协变量滚动概率实现需集成"
+      },
+      "statistics": {
+        "value": 1,
+        "pages": [
+          15,
+          17,
+          18
+        ],
+        "rationale": "描述指标箱图，无推断"
+      },
+      "data": {
+        "value": 2,
+        "pages": [
+          4,
+          5,
+          6
+        ],
+        "rationale": "工业采样、运行记录对齐，单站但有真实缺测/停机界定"
+      },
+      "engineering": {
+        "value": 2,
+        "pages": [
+          4,
+          5,
+          21
+        ],
+        "rationale": "现场数据接入但无在线控制和下游收益验证"
+      },
+      "cross_discipline": {
+        "value": 2,
+        "pages": [
+          8,
+          9,
+          14
+        ],
+        "rationale": "工业阶段功率与累计能量规划指标连接明确"
+      }
+    },
+    "composite": null
+  },
+  "remaining_work": [
+    "independent AI review and human calibration",
+    "latest publisher PDF hash/version matching",
+    "all paragraph bbox and role mapping",
+    "all211 observation fields",
+    "source code reproduction and model/covariate configuration audit",
+    "raw data/date/sample counts and metric replication"
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "stage": "p2_v2_s03_method_task_implementation_contract",
+  "status": "METHOD_TASK_CONTRACT_IMPLEMENTED_INPUT_REGISTRIES_NO_GO_NO_RESULTS",
+  "legacy_archive_mutated": false,
+  "task_families": [
+    {
+      "id": "rts_transmission_reinforcement",
+      "source": "RTS-GMLC",
+      "generator": "build_rts_transmission_tasks",
+      "action": "increase the rating of the identified source branch by a preregistered MVA increment",
+      "cost": "preregistered fixed-plus-increment formula in synthetic benchmark units, with source digest, formula id, inputs, coefficients, and provenance retained"
+    },
+    {
+      "id": "simbench_feeder_reinforcement",
+      "source": "SimBench",
+      "generator": "build_simbench_feeder_tasks",
+      "action": "increase the rating of the identified source line by a preregistered MVA increment",
+      "cost": "preregistered fixed-plus-line-length formula in synthetic benchmark units, with source digest, formula id, inputs, coefficients, and provenance retained"
+    }
+  ],
+  "independence": "separate source snapshots, generator functions, action namespaces, task instances, seeds, budgets, normalization references, and result rows; no pooled task-family inference",
+  "method": {
+    "violation": "max(0, (sum_j c_j*x_j - B)/B), with B finite and strictly positive",
+    "repair": "repeat deletion of selected minimum benefit/cost action; exact ties by ascending action_id; stop at affordability",
+    "forward": "add the affordable unselected maximum benefit/cost action; exact ties by ascending action_id",
+    "backward": "delete the selected minimum benefit/cost action; exact ties by ascending action_id",
+    "atomic_substitution": "provisionally delete the backward candidate and add the best affordable different action; evaluate once; accept or roll back both edits",
+    "acceptance": "strict decrease in the frozen normalized-objective sum plus lambda times normalized violation; equality and non-finite values reject",
+    "pass_rule": "first improvement with stop at the first non-improvement; no candidate, depth cap, request cap, or unique-evaluation cap also terminates",
+    "arms": ["nds_only", "forward_only", "backward_only", "bidirectional"],
+    "atomic_substitution_arm": "separate optional factorial control; it must not be silently substituted for backward deletion"
+  },
+  "evaluation_accounting": {
+    "cache_key": "canonical binary phenotype within one task-family instance",
+    "generated_requests": "all requested candidate scorings, including duplicates",
+    "unique_evaluations": "cache misses scored once; this counter is the primary evaluation budget",
+    "cache_hits": "duplicate requests served from cached objective and violation values without a new unique charge",
+    "termination_backstop": "a separately frozen request cap prevents duplicate-only loops"
+  },
+  "input_gates": {
+    "status": "NO_GO",
+    "missing": [
+      "frozen RTS action rows and source SHA-256",
+      "frozen SimBench action rows and source SHA-256",
+      "preregistered capacity increments",
+      "cost-model coefficients and provenance for each family",
+      "family-specific budgets, seeds, objective bounds, and formal comparison plan"
+    ]
+  },
+  "security_semantics": "none; grid reliability attributes and run records are not cybersecurity evidence",
+  "logging_semantics": "counters and records are diagnostics only, not an audit mechanism, lineage proof, replay record, or explanation validation",
+  "formal_run_allowed": false,
+  "results": []
+}

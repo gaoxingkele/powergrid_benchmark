@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "experiment_id": "p2_v2_s04_orthogonal_matched_compute_v1",
+  "project": "mintou_p6_bilonsga_project_review",
+  "locked_title": "Multi-objective Evolution Algorithm based on Non-Dominated Sorting and Bidirectional Local Search for Investment Effectiveness Strategy Optimization",
+  "status": "FROZEN",
+  "execution_gate": "NO_GO_MISSING_EVIDENCE_BOUND_INPUTS",
+  "results_status": "NO_RESULTS",
+  "datasets": [
+    {
+      "id": "rts_transmission_reinforcement",
+      "source": "RTS-GMLC",
+      "instance_id": "rts_main_v1",
+      "action": "identified branch rating increase by a preregistered MVA increment",
+      "cost_unit": "synthetic benchmark units unless a traceable calibration is frozen",
+      "formal_seeds": [910001, 910002, 910003, 910004, 910005, 910006, 910007, 910008, 910009, 910010, 910011, 910012, 910013, 910014, 910015, 910016, 910017, 910018, 910019, 910020, 910021, 910022, 910023, 910024, 910025, 910026, 910027, 910028, 910029, 910030],
+      "pilot_seeds": [919001, 919002, 919003, 919004, 919005]
+    },
+    {
+      "id": "simbench_feeder_reinforcement",
+      "source": "SimBench",
+      "instance_id": "simbench_main_v1",
+      "action": "identified line rating increase by a preregistered MVA increment",
+      "cost_unit": "synthetic benchmark units unless a traceable calibration is frozen",
+      "formal_seeds": [920001, 920002, 920003, 920004, 920005, 920006, 920007, 920008, 920009, 920010, 920011, 920012, 920013, 920014, 920015, 920016, 920017, 920018, 920019, 920020, 920021, 920022, 920023, 920024, 920025, 920026, 920027, 920028, 920029, 920030],
+      "pilot_seeds": [929001, 929002, 929003, 929004, 929005]
+    }
+  ],
+  "arms": [
+    {"id": "nds_only", "forward": false, "backward": false},
+    {"id": "forward_only", "forward": true, "backward": false},
+    {"id": "backward_only", "forward": false, "backward": true},
+    {"id": "bidirectional", "forward": true, "backward": true}
+  ],
+  "local_search": {
+    "forward_depth": 2,
+    "backward_depth": 2,
+    "bidirectional_order": ["forward", "backward"],
+    "move_acceptance": "strict decrease in frozen normalized objective sum plus lambda times normalized violation",
+    "tie_or_nonfinite": "reject",
+    "pass_rule": "first improvement; stop at first non-improvement",
+    "backward_semantics": "standalone deletion",
+    "atomic_substitution": "excluded from the principal matrix"
+  },
+  "baselines": [
+    {"id": "nsga2", "scope": "stage-local constrained NSGA-II already disclosed in p6_s3_matched_effort", "role": "canonical evolutionary comparator"},
+    {"id": "pareto_local_search", "scope": "stage-local add-delete-swap PLS already disclosed in p6_s3_matched_effort", "role": "neighborhood-search comparator"}
+  ],
+  "excluded_comparators": {
+    "ids": ["nsga3", "moead", "exact_solver"],
+    "reason": "no audited task-aligned implementation and fair tuning contract exists in this worktree; exclusion is not a performance claim"
+  },
+  "seeds": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29],
+  "pairing": "within task family, pair all six methods by the same formal seed index; family-specific seed values differ; no replacement seeds",
+  "pilot": {
+    "paper_use": false,
+    "seeds_per_family": 5,
+    "purpose": "accounting, cache, constraint, move-semantics, metric, and environment validation only",
+    "output_namespace": "pilot/"
+  },
+  "formal": {
+    "methods_per_family": 6,
+    "seeds_per_method": 30,
+    "protocols": [
+      {"id": "matched_unique_evaluations", "role": "primary", "unique_evaluation_cap": 3200, "requested_evaluation_cap": 6400, "termination": "first reached cap; retain unique shortfall"},
+      {"id": "matched_wall_time", "role": "secondary", "wall_time_seconds": 0.2, "clock": "monotonic", "deadline_check": "before each scoring request", "unique_evaluation_safety_cap": 3200, "requested_evaluation_safety_cap": 6400, "metric_timing": "after search deadline"}
+    ],
+    "planned_runs": 720,
+    "output_namespace": "formal/"
+  },
+  "evaluation_accounting": {
+    "requested_evaluations": "every scoring request including cache hits",
+    "unique_evaluations": "cache-miss canonical phenotypes scored once within a run",
+    "cache_hits": "requested evaluations served without a unique charge",
+    "cache_scope": "one shared population/local-search cache per run",
+    "repair_charge": "repair itself is uncharged; the repaired phenotype is charged on first scoring"
+  },
+  "primary_outcomes": [
+    {"id": "hv_clipped_ref_1p05", "direction": "higher_better", "front": "finite feasible nondominated unique vectors", "normalization": "family-specific analytic bounds frozen before pilot", "clip": [0.0, 1.0], "reference_coordinate": 1.05, "empty_front": 0.0}
+  ],
+  "secondary_outcomes": [
+    {"id": "igd_plus", "direction": "lower_better", "reference_rule": "within family, instance, and protocol: nondominated union of all frozen methods and all 30 formal seeds under the same normalization", "empty_run_front": "positive_infinity_if_reference_exists", "empty_reference": "unavailable_for_entire_cell"},
+    {"id": "feasibility", "fields": ["any_feasible", "final_population_feasible_fraction", "feasible_front_size", "minimum_violation", "mean_violation", "repair_calls", "repair_removals"]},
+    {"id": "cost", "fields": ["selected_synthetic_cost_units", "cost_to_budget_ratio", "feasible_front_cost_distribution", "calibrated_cost_nullable"]},
+    {"id": "compute", "fields": ["requested_evaluations", "unique_evaluations", "cache_hits", "target_search_seconds", "realized_search_seconds", "total_process_seconds", "termination_reason"]}
+  ],
+  "comparison_family": {
+    "analysis_unit": "one seeded method-task-family invocation",
+    "separate_by_task_family": true,
+    "primary_hv_orthogonal": ["forward_only-nds_only", "bidirectional-backward_only", "backward_only-nds_only", "bidirectional-forward_only", "forward_by_backward_interaction"],
+    "primary_hv_baseline": ["bidirectional-nsga2", "bidirectional-pareto_local_search"],
+    "secondary_igd_plus": "same contrasts in separately corrected families",
+    "wall_time_and_other_outcomes": "descriptive"
+  },
+  "multiplicity": {
+    "test": "two-sided paired randomization/sign-flip test",
+    "correction": "Holm separately within each task-family x outcome x orthogonal-or-baseline family",
+    "alpha": 0.05,
+    "effect_reporting": ["paired_median_difference", "hodges_lehmann_paired_location", "rank_biserial_effect", "deterministic_seed_index_bootstrap_95pct_ci"]
+  },
+  "failure_policy": {
+    "infrastructure_retry": "at most once with identical inputs, hashes, environment, method, and seed; retain both attempts",
+    "algorithmic_failure": "no retry for exceptions, non-finite objectives, cap shortfall, or empty feasible front",
+    "seed_replacement": false,
+    "imputation": false,
+    "paired_analysis": "contrast-specific complete paired blocks with every exclusion and reason reported",
+    "downgrade_rule": "more than 3 of 30 unavailable blocks or method-dependent failures makes the contrast descriptive and inconclusive"
+  },
+  "negative_result_policy": {
+    "retain_all_directions": true,
+    "retain_null_and_inconclusive": true,
+    "protected_historical_result": "under the prior primary matched-evaluation family BiLo-NSGA loses four of eight NSGA-II comparisons and wins none",
+    "cross_family_generalization": false,
+    "pilot_as_confirmatory": false,
+    "no_result_dependent_tuning": true
+  },
+  "output_schema": {
+    "run_key": ["experiment_id", "task_family", "instance_id", "protocol", "method", "seed_index", "seed_value", "attempt"],
+    "required_run_fields": ["config_sha256", "data_manifest_sha256", "environment_sha256", "status", "requested_evaluations", "unique_evaluations", "cache_hits", "target_search_seconds", "realized_search_seconds", "total_process_seconds", "termination_reason", "any_feasible", "final_population_feasible_fraction", "feasible_front_size", "minimum_violation", "mean_violation", "selected_synthetic_cost_units", "cost_to_budget_ratio", "calibrated_cost", "front_objectives_sha256"],
+    "formal_raw": "formal/raw/results.csv",
+    "failures": "formal/failed_runs.csv",
+    "metrics": "statistics/PRIMARY_RESULTS.csv",
+    "negative_results": "statistics/NEGATIVE_RESULTS.csv"
+  }
+}

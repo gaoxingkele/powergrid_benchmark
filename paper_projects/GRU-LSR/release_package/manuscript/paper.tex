@@ -1,0 +1,438 @@
+\documentclass{ieeeaccess}
+% Deterministic PDF metadata/trailer controls. The build also sets
+% SOURCE_DATE_EPOCH=1787867025, FORCE_SOURCE_DATE=1, and TZ=UTC.
+\pdfinfoomitdate=1
+\pdftrailerid{}
+\pdfsuppressptexinfo=15
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs,tabularx,array,longtable}
+\usepackage{url}
+\providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\begin{document}
+\history{Date of publication xxxx 00, 0000, date of current version xxxx 00, 0000.}
+\doi{10.1109/ACCESS.XXXX.XXXXXXX}
+\title{A Reproducible Retrospective Curtailment-Risk Benchmark and Fair Evaluation of GRU Learned-Space Retrieval on RTS-GMLC}
+\author{\uppercase{Author Details Required before Submission}}
+\address[1]{[AUTHOR INPUT REQUIRED: complete institutional addresses]}
+\tfootnote{Funding and sponsor information must be confirmed by the authors before submission.}
+\markboth{Author et al.: A Reproducible Retrospective Curtailment-Risk Benchmark and Fair Evaluation of GRU Learned-Space Retrieval on RTS-GMLC}{Author et al.: A Reproducible Retrospective Curtailment-Risk Benchmark and Fair Evaluation of GRU Learned-Space Retrieval on RTS-GMLC}
+\corresp{Corresponding author: [AUTHOR INPUT REQUIRED: name and e-mail].}
+\begin{abstract}
+The explicitly verified curtailment-forecasting literature spans system-specific targets and protocols, while retrieval-augmented forecasting is usually evaluated on adjacent tasks. We present a reproducible retrospective benchmark built from the first 8760 delivery rows of hashed 8784-row RTS-GMLC source files and use GRU learned-space retrieval (GRU-LSR) as its matched application. A fixed 70\% system-non-synchronous-penetration-type rule defines a method-independent proxy. The source lacks forecast issue times and data vintages; therefore, the 1 h and 24 h tasks are delivery-row lags, not operational forecasts. The frozen execution contains 2310 completed condition rows and 240 training trajectories across four architectures, ten common seeds, raw-feature and randomized-encoder retrieval controls, deterministic references, three caps, and four neighbor counts. At the primary cap, MAE selection chooses retrieval-only in every seed. Persistence nevertheless has lower MAE than selected GRU-LSR at both lags: 0.00690794 versus 0.00777391 at 1 h and 0.02054651 versus 0.02076857 at 24 h. Learned retrieval has lower MAE than both attribution controls at 1 h (learned-minus-raw -0.00498575; learned-minus-randomized -0.00026812; Holm-adjusted exact sign-flip p=0.01171875 for both). At 24 h it is worse than raw retrieval (+0.00126543, adjusted p=0.01171875) and unresolved versus randomized retrieval (-0.00004826, adjusted p=0.36328125), so no general learned-space advantage is supported. Onset-targeted analysis is inapplicable because selection and calibration contain no positive onsets at any cap or lag. Moving-block intervals are conditional descriptive sensitivities on the single test sequence and do not replace seed-paired decisions. The contribution is a bounded protocol/evidence advance over the explicitly verified corpus, not a new recurrent architecture, an operational curtailment forecast, or deployment evidence.
+\end{abstract}
+\begin{keywords}
+renewable energy curtailment, benchmark, reproducibility, analogue retrieval, time-series forecasting, RTS-GMLC, naive baselines
+\end{keywords}
+\maketitle
+\section{Introduction}\label{introduction}
+
+Curtailment arises from interacting resource, network, and operating constraints. International reviews document its levels, causes, and mitigation {[}1{]}, and studies of China describe its evolution, drivers, and proposed remedies {[}2{]}. Planning work also establishes a curtailment paradox and associated trade-offs {[}3{]}. An explicit operational mechanism is the system non-synchronous penetration (SNSP) limit used for Irish frequency stability {[}4{]}; forecasting the continuous day-ahead SNSP trajectory has been studied on Irish system data {[}5{]}. These records motivate a cap-based risk proxy, but they do not turn that proxy into observed curtailment.
+
+RTS-GMLC provides synchronized load and renewable scenario series {[}6{]}. We use it to define an auditable method-independent target and then test retrieval as one matched use case. The execution deliberately retains Persistence, Seasonal-24h, Ridge, raw-feature kNN, randomized-encoder retrieval, four direct-head architectures, and a privileged target-hour transform. This breadth matters because large forecasting comparisons and evaluation guidance show the continuing value of simple references and leakage-aware temporal design {[}7{]}, {[}8{]}, {[}22{]}--{[}28{]}.
+
+The source assets identify delivery rows but not forecast issue timestamps, as-of mappings, release identifiers, or vintages. A query ending at benchmark row \(s\) therefore predicts the proxy at row \(s+h\), for \(h\in\{1,24\}\), as a retrospective lag task. The evaluated sequence uses the first 8760 of 8784 available rows and ends on December 30; it is not a complete calendar year. These boundaries apply from the title and abstract through the conclusion.
+
+Three research questions organize the paper:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{RQ1:} Under the frozen benchmark, how does primary-cap learned \(k=8\) retrieval compare with its matched GRU head, raw-feature retrieval, and randomized-encoder retrieval at 1 h and 24 h?
+\item
+  \textbf{RQ2:} Does pre-test support permit a valid onset-targeted analysis?
+\item
+  \textbf{RQ3:} Do the selected-learned-versus-Persistence MAE orderings remain unchanged across the three frozen caps on the same sequence?
+\end{itemize}
+
+The contributions follow those questions:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{A reproducible retrospective benchmark with an explicit information boundary.} The method-independent proxy, horizon-offset temporal gate, comparison budget, failures, statistics, and sensitivities are frozen and manifest bound.
+\item
+  \textbf{A matched retrieval use case.} Learned, raw-feature, and randomized-encoder \(k=8\) retrieval paths are evaluated at common head-selected checkpoints; GRU, LSTM, DLinear, and TCN heads receive the same epoch/checkpoint budget.
+\item
+  \textbf{An evidence-ranked result record.} The paper retains the primary-cap Persistence ordering, horizon-dependent retrieval attribution, adverse and unresolved architecture contrasts, onset inapplicability, cross-cap crossings, and conditional moving-block sensitivity.
+\end{enumerate}
+
+\begin{table*}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\caption{Gap-to-contribution-to-result map within the explicitly verified corpus.}\label{tab:1}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
+\toprule
+Verified gap boundary & Contribution & Result licensed by this study \\
+\midrule
+Direct curtailment studies use different observed targets, visibility, horizons, and protocols [13], [31]--[33] & C1: frozen retrospective RTS-GMLC proxy benchmark & 2310/2310 expected result rows completed; claim remains proxy-specific and non-operational \\
+Adjacent analogue/retrieval work does not establish this exact checkpoint-matched two-lag attribution design [9], [17]--[21], [34]--[37] & C2: matched learned/raw/randomized $k=8$ retrieval controls & Learned-space claim licensed at 1 h only; no learned-space advantage at 24 h \\
+Benchmark guidance motivates leakage control and simple references but does not supply this task's event support [7], [8], [22]--[28], [38] & C3: evidence-ranked reporting & Persistence stays ahead at the primary cap; onset analysis is inapplicable; block intervals stay conditional/descriptive \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+This map supports only a bounded protocol/evidence advance over the explicitly verified corpus. It is not proof of a global first, exhaustive state-of-the-art coverage, cross-paper superiority, or external expert validation.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{Related Work}\label{related-work}
+
+\subsection{Direct and adjacent curtailment forecasting}\label{direct-and-adjacent-curtailment-forecasting}
+
+The predictive evidence closest to the present target remains heterogeneous. Cardo-Miota et al.~forecast continuous day-ahead SNSP rather than curtailment onset {[}5{]}. Shams et al.~evaluate several machine-learning models for CAISO wind and solar oversupply/curtailment {[}31{]}. Hadian and Naderkhani report a one-hour-ahead CAISO comparison in 2023 {[}13{]}; their 2026 journal work instead uses 2019--2024 data and a wavelet-augmented Transformer, and the exact lead horizon was not established by the Stage-4 audit {[}32{]}. These lineage members are not treated as interchangeable. A 2026 IEEE Access study forecasts constrained-off energy at one Brazilian wind farm at 3, 5, and 10 steps with conformal intervals {[}33{]}. The target, data visibility, and statistical units differ in every case, so no cross-paper score ranking is admissible.
+
+The benchmark target is also narrower than planning and assessment work. Yasuda et al.~relate annual curtailment rates to renewable share {[}11{]}, while Newbery evaluates wind, interconnection, and storage planning in Ireland {[}12{]}. Net-load forecasting {[}14{]} is adjacent to renewable accommodation but does not evaluate this proxy or onset definition.
+
+\subsection{Analogue and retrieval methods}\label{analogue-and-retrieval-methods}
+
+Retrieval has a long power-system lineage. Rahman and Bhatnagar present an early expert-system load forecaster {[}15{]}, Mandal et al.~use a similar-days approach for several-hour-ahead load forecasting {[}16{]}, and Lora et al.~use weighted nearest neighbors for next-day price forecasting {[}17{]}. Case-based reasoning has also been used for coordinated voltage control {[}10{]}. Analog ensembles retrieve comparable past forecasts and their verifying observations in weather {[}9{]}, wind {[}18{]}, and solar applications {[}19{]}. Siamese representations have been studied for appliance identification {[}20{]} and, with kNN, power-quality classification {[}21{]}. These sources do not establish the exact details that the Stage-4 audit marked unverified, such as a specific metric in {[}16{]} or a four-stage case cycle in {[}10{]}.
+
+Recent adjacent retrieval records further delimit the contribution. RAFT retrieves correlated historical patches and future-value patches on general multivariate benchmarks {[}34{]}. TimeRAG retrieves DTW-nearest sequences for LLM prompting on M4 {[}35{]}. CRATEBoost uses target-supervised analogue retrieval within probabilistic PV forecasting {[}36{]}. A 2026 review organizes similar-day load forecasting into rule-, metric-, intelligent-, and hybrid categories {[}37{]}. GRU-LSR differs in target and protocol: its embedding is trained only through forecasting loss, its bank contains fit targets only, and its attribution controls share the common benchmark gate. These distinctions do not imply external superiority.
+
+\subsection{Benchmark and architecture context}\label{benchmark-and-architecture-context}
+
+M3 and later M competitions demonstrate the need to retain simple references at scale {[}7{]}, {[}22{]}, {[}24{]}, {[}25{]}. Hyndman and Koehler document failure modes of common accuracy measures {[}23{]}; GEFCom2014 provides competition-grade forecasting context {[}26{]}; deterministic solar-verification guidance standardizes persistence and climatology references {[}27{]}; and forecasting guidance identifies leakage, missing naive baselines, and metric misuse {[}28{]}. Kapoor and Narayanan document broader leakage and reproducibility concerns {[}8{]}. SynTSBench is an adjacent synthetic benchmark for temporal pattern capabilities rather than a task-equivalent curtailment benchmark {[}38{]}.
+
+Recent IEEE Access load-forecasting studies illustrate architecture-centered evaluation through LoadSeer {[}29{]} and a TimesNet--Crossformer--LSTM stack {[}30{]}. Their targets differ from the present proxy. Importantly, the inspected papers support their stated architectures but do not establish a general requirement for naive and linear references. That requirement here follows the benchmark design and forecasting-evaluation sources {[}22{]}, {[}27{]}, {[}28{]}, not {[}29{]} or {[}30{]}.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{Benchmark and Method}\label{benchmark-and-method}
+
+\subsection{Method-independent target}\label{method-independent-target}
+
+Let \(d_t\) be system load and \(r_t\) the sum of wind and PV availability at delivery row \(t\). For cap \(c\), the accepted renewable amount and proxy rate are
+
+\[
+u_t=\min(r_t,cd_t),\qquad
+y_t=\frac{\max(0,r_t-u_t)}{\max(1,r_t)}.
+\]
+
+The primary cap is \(c=0.70\); \(c\in\{0.60,0.80\}\) is frozen descriptive sensitivity. The cap is motivated by SNSP-class constraints {[}4{]}, not asserted as a universal physical limit. The target is neither observed curtailment nor an operator action, OPF/UC output, or economic outcome.
+
+Each query contains 48 rows of load, wind, PV, nonnegative net load, net-load ramp, renewable share, and an engineered branch-informed stress feature. With \(n_t=\max(0,d_t-r_t)\), \(R=\sum_j R_j\) over positive branch contingency ratings, and \(\bar o=\sum_jR_j(o_j^{\mathrm{perm}}+o_j^{\mathrm{tran}})/R\), the seventh feature is
+
+\[
+z_t=\min\!\left(1,0.55\frac{d_t}{R}+0.25\bar o+0.20\frac{|n_t-n_{t-1}|}{\max(1,d_t)}\right).
+\]
+
+This is an engineered input, not a power-flow, contingency, or feasibility calculation.
+
+\subsection{Temporal gate and onset boundary}\label{temporal-gate-and-onset-boundary}
+
+Fit, selection, calibration, and test end at delivery rows 4380, 5256, 6132, and 8760. For each downstream phase, the first target is offset by \(h\) so that the query endpoint \(s=t-h\) has crossed the phase boundary. Earlier-phase history within a 48-row downstream query window is permitted. Normalization, training, and the retrieval bank use fit rows only; checkpoints and hyperparameters use selection rows; thresholds use calibration rows; test rows are scored once.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.94\textwidth]{figures/fig_benchmark_overview.png}
+\caption{Manifest-bound temporal gate, target counts, and positive-onset support. Selection and calibration contain no positive onsets at either primary lag; the same zero-support condition holds at all three caps. Counts are delivery targets, not independent inferential units.}\label{fig:1}
+\end{figure*}
+
+An onset is \(y_t\geq0.02\) and \(y_{t-h}<0.02\). Selection and calibration contain zero positive onsets at every cap and lag. The frozen procedure therefore retains diagnostic test rows but marks every onset-targeted claim invalid. Exact tests cannot repair the missing support, and a fallback identity is not proof of no effect.
+
+\subsection{GRU-LSR and matched controls}\label{gru-lsr-and-matched-controls}
+
+For standardized window \(X_s\in\mathbb R^{48\times7}\), a direct head maps the final GRU embedding \(E_\theta(X_s)\) to
+
+\[
+\hat y^{\mathrm{head}}_{s+h}=w_h^\top E_\theta(X_s)+b_h.
+\]
+
+The learned retrieval estimate averages the targets of the \(k=8\) nearest fit-bank embeddings under Euclidean distance,
+
+\[
+\hat y^{\mathrm{ret}}_{s+h}=\frac{1}{8}\sum_{q\in\mathcal N_8(s)}y_{q+h},
+\]
+
+and the blend is \(\hat y(\alpha)=\alpha\hat y^{\mathrm{head}}+(1-\alpha)\hat y^{\mathrm{ret}}\). For each objective and seed, the head checkpoint is selected first; it is then frozen while \(\alpha\) is evaluated. Learned, raw-feature, and randomized-encoder controls share this head-first selection boundary. The raw control uses the flattened standardized 336-dimensional window. The randomized control uses the 48-dimensional output of an untrained GRU initialized with the same seed and no training updates.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.94\textwidth]{figures/fig_architecture.png}
+\caption{GRU-LSR use case within the benchmark. Learned, raw, and randomized retrieval share the fit-only target bank and $k=8$ primary rule. Persistence, Seasonal-24h, and Ridge are external references. The target-hour direct transform is a privileged construction audit, not a forecaster.}\label{fig:2}
+\end{figure*}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{Experimental and Statistical Contract}\label{experimental-and-statistical-contract}
+
+The execution spans three caps, two lags, two selection objectives, ten common seeds, four direct-head architectures, three retrieval spaces, and \(k\in\{4,8,16,32\}\). GRU, LSTM, DLinear, and TCN each receive 20 epochs and checkpoints at 5, 10, 15, and 20. They are budget matched but not parameter-count matched. The manifest records 2310 completed result rows, 240 training trajectories, 30 paired effects, 36 moving-block cells, 258 cap/\(k\) aggregate rows, and no failed condition.
+
+\begin{table*}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\caption{Frozen benchmark and inference contract.}\label{tab:2}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
+\toprule
+Item & Frozen rule & Interpretation boundary \\
+\midrule
+Source & first 8760 of 8784 hashed RTS-GMLC rows; one system & sequence ends December 30; no complete-year or cross-system unit \\
+Visibility & delivery keys available; issue time, as-of map, release identifier, and vintage absent & retrospective delivery-row lags only \\
+Gate & fit / selection / calibration / test with horizon-length target embargoes & earlier history inside the 48-row query window is allowed \\
+Training & four architectures; 20 epochs; four checkpoints; ten common seeds & architectures are not parameter-count matched \\
+Retrieval & learned/raw/randomized; $k=8$ primary; 4/16/32 descriptive & no alternative distance and no test-selected $k$ \\
+Primary inference & paired treatment-minus-control difference per seed; exact two-sided sign flip; Holm by family and lag & seeds are algorithmic initializations, not randomized assignments \\
+Seed interval & $\bar d\pm2.262157\,s_d/\sqrt{10}$ & conditional on ten seeds and one fixed sequence \\
+Moving block & ordinary overlapping non-circular blocks of 24/168; 5000 PCG64 replicates & descriptive dependence sensitivity; excluded from Holm \\
+Deterministic references & Persistence, Seasonal-24h, Ridge, privileged transform & descriptive; no seed-based p-value; privileged transform not rank eligible \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+The primary estimand is the mean within-seed treatment-minus-control difference at cap 0.70 and \(k=8\), conditional on the frozen seeds, sequence, lag, protocol, metric, and contrast. The analysis unit is one paired method-seed run. The 2627 test targets at 1 h and 2604 at 24 h are reused across seeds and are not independent replications.
+
+Three families are adjusted separately within each lag: six primary MAE mechanism/attribution contrasts, three architecture-head MAE contrasts, and six onset-F1 diagnostics. The exact test enumerates all \(2^{10}=1024\) sign assignments and assumes sign-exchangeability under a no-effect null. Non-significance is reported as unresolved, not converted to no effect.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{Results}\label{results}
+
+\subsection{RQ1: Matched retrieval effects}\label{rq1-matched-retrieval-effects}
+
+MAE selection chooses \(\alpha=0\) for all ten seeds at both primary-cap lags, so the selected condition equals retrieval-only. Its MAE is 0.00777391 at 1 h and 0.02076857 at 24 h. Persistence is lower at 0.00690794 and 0.02054651, respectively; selected-minus-Persistence is +0.00086597 and +0.00022206. These are descriptive comparisons because Persistence has one deterministic row.
+
+The matched seed contrasts are shown in Table 3 and Fig. 3. Selected retrieval improves on the GRU head at both lags. Learned-space attribution, however, is horizon dependent: learned retrieval improves on raw and randomized retrieval at 1 h, is worse than raw retrieval at 24 h, and is unresolved versus randomized retrieval at 24 h.
+
+\begin{table*}[t]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\caption{Primary-cap MAE contrasts. Differences are treatment minus control; negative favors treatment. Intervals are 95\% seed-conditional t intervals.}\label{tab:3}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
+\toprule
+Lag & Treatment minus control & Mean difference & Seed interval & Wins / ties / losses & Holm p & Licensed result \\
+\midrule
+1 h & selected learned minus GRU head & -0.00496069 & [-0.00600698, -0.00391440] & 10 / 0 / 0 & 0.01171875 & favorable named contrast \\
+1 h & learned retrieval minus raw retrieval & -0.00498575 & [-0.00510389, -0.00486761] & 10 / 0 / 0 & 0.01171875 & favorable attribution control \\
+1 h & learned retrieval minus randomized retrieval & -0.00026812 & [-0.00037108, -0.00016515] & 10 / 0 / 0 & 0.01171875 & favorable attribution control \\
+24 h & selected learned minus GRU head & -0.00220055 & [-0.00306671, -0.00133440] & 10 / 0 / 0 & 0.01171875 & favorable named contrast \\
+24 h & learned retrieval minus raw retrieval & +0.00126543 & [+0.00109991, +0.00143095] & 0 / 0 / 10 & 0.01171875 & adverse attribution control \\
+24 h & learned retrieval minus randomized retrieval & -0.00004826 & [-0.00015858, +0.00006206] & 6 / 0 / 4 & 0.36328125 & unresolved \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+\begingroup
+\makeatletter
+\def\fnum@figure{\hspace*{1.2em}\figurename~\thefigure}
+\makeatother
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.94\textwidth]{figures/fig_primary_effects.png}
+\caption{Paired primary-cap MAE effects over ten common seeds. Whiskers are predeclared seed-conditional intervals. They do not quantify uncertainty over hours, years, systems, operators, or deployments.}\label{fig:3}
+\end{figure*}
+
+\endgroup
+
+The raw and randomized controls rule out an unconditional learned-space claim. RQ1 therefore has a split answer: the implemented selected retrieval path improves on its matched head at both lags, but learned-space attribution is supported only at 1 h. Neither result establishes overall forecasting superiority because Persistence remains lower-MAE at the primary cap.
+
+\subsection{Architecture and dependence sensitivities}\label{architecture-and-dependence-sensitivities}
+
+Architecture contrasts are method specific (Table 4). At 1 h the GRU head is worse than LSTM and TCN and better than DLinear after the separate three-contrast Holm adjustment. At 24 h GRU is better than DLinear, while its adverse mean differences versus LSTM and TCN are unresolved. There is no overall architecture winner.
+
+\begingroup
+\makeatletter
+\def\fnum@table{\hspace*{1.2em}\tablename~\thetable}
+\makeatother
+
+\begin{table*}[t]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\caption{GRU-head-minus-comparator MAE contrasts at cap 0.70. Negative favors GRU.}\label{tab:4}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
+\toprule
+Lag & Comparator & Mean difference & Seed interval & Wins / ties / losses & Holm p & Result \\
+\midrule
+1 h & LSTM & +0.00234867 & [+0.00135906, +0.00333828] & 0 / 0 / 10 & 0.00585938 & adverse \\
+1 h & DLinear & -0.01293725 & [-0.01472280, -0.01115171] & 10 / 0 / 0 & 0.00585938 & favorable \\
+1 h & TCN & +0.00258371 & [+0.00079659, +0.00437082] & 2 / 0 / 8 & 0.01562500 & adverse \\
+24 h & LSTM & +0.00064659 & [-0.00005372, +0.00134690] & 3 / 0 / 7 & 0.14843750 & unresolved, adverse mean \\
+24 h & DLinear & -0.00383620 & [-0.00578337, -0.00188903] & 10 / 0 / 0 & 0.00585938 & favorable \\
+24 h & TCN & +0.00012199 & [-0.00127742, +0.00152139] & 5 / 0 / 5 & 0.83789063 & unresolved, adverse mean \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+\endgroup
+
+The moving-block analysis resamples the chronological series of across-seed mean paired hourly absolute-loss differences. Its percentile intervals condition on the single observed test sequence (Table 5). They are not confidence intervals across years or systems, do not enter Holm decisions, and do not override the seed-paired family. Most importantly, the 24 h learned-versus-raw intervals include zero at both block lengths even though the seed-paired family is adverse after Holm adjustment; the analyses vary different axes and are reported together without forcing agreement.
+
+\begin{table*}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\caption{Conditional moving-block sensitivity for the three principal MAE contrasts.}\label{tab:5}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
+\toprule
+Lag & Contrast & Mean & Block 24 interval & Block 168 interval \\
+\midrule
+1 h & selected learned minus GRU head & -0.00496069 & [-0.00568067, -0.00427679] & [-0.00586827, -0.00425381] \\
+1 h & learned minus raw & -0.00498575 & [-0.00691363, -0.00341792] & [-0.00778500, -0.00296113] \\
+1 h & learned minus randomized & -0.00026812 & [-0.00041141, -0.00015344] & [-0.00048531, -0.00014103] \\
+24 h & selected learned minus GRU head & -0.00220055 & [-0.00322938, -0.00115356] & [-0.00301662, -0.00117240] \\
+24 h & learned minus raw & +0.00126543 & [-0.00032314, +0.00305015] & [-0.00008188, +0.00309993] \\
+24 h & learned minus randomized & -0.00004826 & [-0.00017757, +0.00008504] & [-0.00018966, +0.00009717] \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+\subsection{RQ2: Onset inapplicability}\label{rq2-onset-inapplicability}
+
+RQ2 cannot be estimated. Selection and calibration contain zero positive onsets for all six cap/lag cells. The frozen fallback keeps the first checkpoint and \(\alpha=1\) when all selection scores tie and uses threshold 0.02 rather than calling it calibrated. At the primary cap, the selected onset condition therefore equals the head at both lags: mean difference 0, ten ties, Holm p=1. All other onset-family values remain diagnostics. A favorable, adverse, or unresolved diagnostic contrast cannot cure the missing pre-test support or license an onset-benefit claim.
+
+\subsection{RQ3: Cap-dependent Persistence ordering}\label{rq3-cap-dependent-persistence-ordering}
+
+The selected-learned-versus-Persistence ordering crosses across caps (Table 6 and Fig. 4). Selected learned retrieval is descriptively lower-MAE only at cap 0.60/1 h and cap 0.80/24 h. Persistence is lower in the other four cells, including both primary-cap lags. These are same-sequence descriptive comparisons, not independent policy replications.
+
+\begin{table*}[t]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\caption{Selected learned retrieval versus Persistence across frozen caps.}\label{tab:6}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
+\toprule
+Cap & Lag & Selected learned MAE & Persistence MAE & Selected minus Persistence & Lower-MAE condition \\
+\midrule
+0.60 & 1 h & 0.01326705 & 0.01336988 & -0.00010283 & selected learned retrieval \\
+0.60 & 24 h & 0.04384275 & 0.04301798 & +0.00082476 & Persistence \\
+0.70 & 1 h & 0.00777391 & 0.00690794 & +0.00086597 & Persistence \\
+0.70 & 24 h & 0.02076857 & 0.02054651 & +0.00022206 & Persistence \\
+0.80 & 1 h & 0.00356056 & 0.00280581 & +0.00075475 & Persistence \\
+0.80 & 24 h & 0.00790535 & 0.00804469 & -0.00013934 & selected learned retrieval \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.94\textwidth]{figures/fig_cap_profile.png}
+\caption{Selected learned retrieval minus Persistence MAE. Negative values favor selected learned retrieval. Persistence receives no seed-based p-value, and no cross-cap generalization is made.}\label{fig:4}
+\end{figure*}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{Discussion}\label{discussion}
+
+The benchmark is the central contribution; retrieval is its matched use case. The selected path improves on the GRU head at both retrospective lags, but the attribution controls change the interpretation. At 1 h, learned retrieval is favorable against both raw and randomized \(k=8\) retrieval. At 24 h, raw retrieval is better and randomized retrieval is unresolved. A general claim that forecasting-trained geometry is superior is therefore unsupported.
+
+The negative reference result is equally central. Persistence remains the lower-MAE primary-cap reference at both lags. It has no training-seed distribution, so the result is an ordering rather than a paired significance claim. Cross-cap crossings further show why the primary benchmark result should not be generalized to other policy thresholds.
+
+Onset analysis fails for a different reason: there is no positive onset in either pre-test decision phase. The test set contains positive onsets, but using them to choose a checkpoint, blend, or threshold would violate the gate. Preserving inapplicability is more informative than presenting a test diagnostic as a validated onset method.
+
+The seed-paired and moving-block analyses also answer different questions. Seed intervals describe variability across the ten frozen training seeds conditional on this sequence. Block intervals describe a dependence sensitivity along the single chronological test sequence after averaging across seeds. Neither creates independent years, systems, policies, operators, or deployments.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{Limitations}\label{limitations}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Retrospective visibility.} Issue timestamps, as-of mappings, release identifiers, and vintages are absent. The lags are not operational forecasts.
+\item
+  \textbf{Proxy target.} The SNSP-type rule does not produce observed curtailment, an operator action, dispatch, network feasibility, or an economic outcome.
+\item
+  \textbf{Single truncated sequence.} One RTS-GMLC system and the first 8760 of 8784 rows support every result; the sequence ends December 30.
+\item
+  \textbf{Onset inapplicability.} No selection or calibration cell has a positive onset. Test onset metrics remain diagnostic.
+\item
+  \textbf{Conditional statistics.} Training seeds are not randomized assignments. Seed and block intervals do not provide uncertainty across years or systems.
+\item
+  \textbf{Comparison budget.} Architectures share epochs and checkpoints but not parameter counts. \(k=4,16,32\) and cross-cap results are descriptive; no alternative distance is evaluated.
+\item
+  \textbf{Point prediction and no deployment validation.} No probabilistic calibration is evaluated for GRU-LSR, and there is no operator, safety, physical, economic, or field validation.
+\end{enumerate}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{Reproducibility and Data Boundary}\label{reproducibility-and-data-boundary}
+
+The sealed execution manifest lists every expected key and hashes nine outputs. The Stage-3 derivation independently reconstructs the paired effects, exact sign-flip values, Holm adjustment, seed intervals, and moving-block sensitivity, then records hashes for five paper-facing CSV tables. The figure generator verifies those bindings before producing every paper-facing image. Detailed hashes, environment versions, runtime, version history, and incident notes remain in the supplementary audit because they are not needed to interpret the scientific result.
+
+RTS-GMLC is available from the GridMod repository {[}6{]}. The accepted evidence package is stored locally under \texttt{experiments/p1\_ieee\_access\_upgrade\_v2/}; no public repository URL or archival DOI is claimed until authors provide one. {[}AUTHOR INPUT REQUIRED: insert the public release URL and/or archival DOI before submission.{]}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{Conclusion}\label{conclusion}
+
+This study contributes a reproducible retrospective curtailment-risk benchmark and evaluates GRU learned-space retrieval as its matched use case. The execution completes the frozen comparison budget without changing an adverse or null result.
+
+At the primary cap, Persistence remains lower-MAE than selected GRU-LSR at both lags. Learned \(k=8\) retrieval is favorable against raw and randomized attribution controls at 1 h, but at 24 h it is adverse versus raw retrieval and unresolved versus randomized retrieval. The selected path improves on its matched GRU head at both lags, which is a contrast-specific result rather than overall superiority. Architecture contrasts are method specific, moving-block intervals are conditional descriptive sensitivities, and cap orderings cross on the same sequence.
+
+Onset-targeted analysis is inapplicable because selection and calibration contain no positive onsets. Together with the missing issue/vintage metadata and single truncated sequence, that boundary precludes operational, deployment, observed-curtailment, cross-year, or cross-system claims. The licensed advance is therefore the manifest-bound benchmark and its evidence-ranked evaluation, not a claim of global recurrent-method novelty or an operational decision system.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{Acknowledgment and Generative-AI Disclosure}\label{acknowledgment-and-generative-ai-disclosure}
+
+{[}AUTHOR INPUT REQUIRED: confirm the final acknowledgment and venue-compliant generative-AI disclosure. The preparation record indicates AI-assisted drafting and code support, but the submitting authors must verify the tools, purposes, and responsibility statement.{]}
+
+\section*{Funding}
+
+{[}AUTHOR INPUT REQUIRED: insert the funder and grant number, or explicitly state that the work received no external funding.{]}
+
+\section{Ethics Declaration}\label{ethics-declaration}
+
+The executed study uses synthetic power-system benchmark data and does not involve human participants, animals, or personal data. {[}AUTHOR INPUT REQUIRED: confirm the venue-specific ethics wording.{]}
+
+\section*{Author Contributions}
+
+{[}AUTHOR INPUT REQUIRED: provide a CRediT contribution statement. Contributions cannot be inferred from repository history.{]}
+
+\section*{Conflicts of Interest}
+
+{[}AUTHOR INPUT REQUIRED: confirm the conflicts-of-interest statement.{]}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\begin{thebibliography}{99}
+\bibitem{ref1} L. Bird et al., "Wind and solar energy curtailment: A review of international experience," \emph{Renewable and Sustainable Energy Reviews}, vol. 65, pp. 577--586, 2016, doi: 10.1016/j.rser.2016.06.082.
+\bibitem{ref2} G. Luo, Y. Li, W. Tang, and X. Wei, "Wind curtailment of China's wind power operation: Evolution, causes and solutions," \emph{Renewable and Sustainable Energy Reviews}, vol. 53, pp. 1190--1201, 2016, doi: 10.1016/j.rser.2015.09.075.
+\bibitem{ref3} B. Frew et al., "The curtailment paradox in the transition to high solar power systems," \emph{Joule}, vol. 5, no. 5, pp. 1143--1167, 2021, doi: 10.1016/j.joule.2021.03.021.
+\bibitem{ref4} J. O'Sullivan, A. Rogers, D. Flynn, P. Smith, A. Mullane, and M. O'Malley, "Studying the maximum instantaneous non-synchronous generation in an island system---Frequency stability challenges in Ireland," \emph{IEEE Transactions on Power Systems}, vol. 29, no. 6, pp. 2943--2951, 2014, doi: 10.1109/TPWRS.2014.2316974.
+\bibitem{ref5} J. Cardo-Miota, R. Trivedi, S. Patra, S. Khadem, and M. Bahloul, "Data-driven approach for day-ahead System Non-Synchronous Penetration forecasting: A comprehensive framework, model development and analysis," \emph{Applied Energy}, vol. 362, Art. no. 123006, 2024, doi: 10.1016/j.apenergy.2024.123006.
+\bibitem{ref6} C. Barrows et al., "The IEEE Reliability Test System: A proposed 2019 update," \emph{IEEE Transactions on Power Systems}, vol. 35, no. 1, pp. 119--127, 2020, doi: 10.1109/TPWRS.2019.2925557.
+\bibitem{ref7} S. Makridakis, E. Spiliotis, and V. Assimakopoulos, "Statistical and machine learning forecasting methods: Concerns and ways forward," \emph{PLOS ONE}, vol. 13, no. 3, Art. no. e0194889, 2018, doi: 10.1371/journal.pone.0194889.
+\bibitem{ref8} S. Kapoor and A. Narayanan, "Leakage and the reproducibility crisis in machine-learning-based science," \emph{Patterns}, vol. 4, no. 9, Art. no. 100804, 2023, doi: 10.1016/j.patter.2023.100804.
+\bibitem{ref9} L. Delle Monache, F. A. Eckel, D. L. Rife, B. Nagarajan, and K. Searight, "Probabilistic weather prediction with an analog ensemble," \emph{Monthly Weather Review}, vol. 141, no. 10, pp. 3498--3516, 2013, doi: 10.1175/MWR-D-12-00281.1.
+\bibitem{ref10} T. Xu, N. S. Wade, E. M. Davidson, P. C. Taylor, S. D. J. McArthur, and W. G. Garlick, "Case-based reasoning for coordinated voltage control on distribution networks," \emph{Electric Power Systems Research}, vol. 81, no. 12, pp. 2088--2098, 2011, doi: 10.1016/j.epsr.2011.08.005.
+\bibitem{ref11} Y. Yasuda et al., "C-E (curtailment -- Energy share) map: An objective and quantitative measure to evaluate wind and solar curtailment," \emph{Renewable and Sustainable Energy Reviews}, vol. 160, Art. no. 112212, 2022, doi: 10.1016/j.rser.2022.112212.
+\bibitem{ref12} D. Newbery, "National Energy and Climate Plans for the island of Ireland: wind curtailment, interconnectors and storage," \emph{Energy Policy}, vol. 158, Art. no. 112513, 2021, doi: 10.1016/j.enpol.2021.112513.
+\bibitem{ref13} H. Hadian and F. Naderkhani, "Deep learning-based models for wind and solar curtailment forecasting," in \emph{Proc. 7th Int. Conf. Energy Harvesting, Storage, and Transfer (EHST)}, 2023, paper 120, doi: 10.11159/ehst23.120.
+\bibitem{ref14} A. Kaur, L. Nonnenmacher, and C. F. M. Coimbra, "Net load forecasting for high renewable energy penetration grids," \emph{Energy}, vol. 114, pp. 1073--1084, 2016, doi: 10.1016/j.energy.2016.08.067.
+\bibitem{ref15} S. Rahman and R. Bhatnagar, "An expert system based algorithm for short term load forecast," \emph{IEEE Transactions on Power Systems}, vol. 3, no. 2, pp. 392--399, 1988, doi: 10.1109/59.192889.
+\bibitem{ref16} P. Mandal, T. Senjyu, N. Urasaki, and T. Funabashi, "A neural network based several-hour-ahead electric load forecasting using similar days approach," \emph{International Journal of Electrical Power \& Energy Systems}, vol. 28, no. 6, pp. 367--373, 2006, doi: 10.1016/j.ijepes.2005.12.007.
+\bibitem{ref17} A. T. Lora, J. M. R. Santos, A. G. Exposito, J. L. M. Ramos, and J. C. R. Santos, "Electricity market price forecasting based on weighted nearest neighbors techniques," \emph{IEEE Transactions on Power Systems}, vol. 22, no. 3, pp. 1294--1301, 2007, doi: 10.1109/TPWRS.2007.901670.
+\bibitem{ref18} S. Alessandrini, L. Delle Monache, S. Sperati, and J. N. Nissen, "A novel application of an analog ensemble for short-term wind power forecasting," \emph{Renewable Energy}, vol. 76, pp. 768--781, 2015, doi: 10.1016/j.renene.2014.11.061.
+\bibitem{ref19} S. Alessandrini, L. Delle Monache, S. Sperati, and G. Cervone, "An analog ensemble for short-term probabilistic solar power forecast," \emph{Applied Energy}, vol. 157, pp. 95--110, 2015, doi: 10.1016/j.apenergy.2015.08.011.
+\bibitem{ref20} L. De Baets, C. Develder, T. Dhaene, and D. Deschrijver, "Detection of unidentified appliances in non-intrusive load monitoring using siamese neural networks," \emph{International Journal of Electrical Power \& Energy Systems}, vol. 104, pp. 645--653, 2019, doi: 10.1016/j.ijepes.2018.07.026.
+\bibitem{ref21} R. Zhu, X. Gong, S. Hu, and Y. Wang, "Power quality disturbances classification via fully-convolutional Siamese network and k-nearest neighbor," \emph{Energies}, vol. 12, no. 24, Art. no. 4732, 2019, doi: 10.3390/en12244732.
+\bibitem{ref22} S. Makridakis and M. Hibon, "The M3-Competition: results, conclusions and implications," \emph{International Journal of Forecasting}, vol. 16, no. 4, pp. 451--476, 2000, doi: 10.1016/S0169-2070(00)00057-1.
+\bibitem{ref23} R. J. Hyndman and A. B. Koehler, "Another look at measures of forecast accuracy," \emph{International Journal of Forecasting}, vol. 22, no. 4, pp. 679--688, 2006, doi: 10.1016/j.ijforecast.2006.03.001.
+\bibitem{ref24} S. Makridakis, E. Spiliotis, and V. Assimakopoulos, "The M4 Competition: 100,000 time series and 61 forecasting methods," \emph{International Journal of Forecasting}, vol. 36, no. 1, pp. 54--74, 2020, doi: 10.1016/j.ijforecast.2019.04.014.
+\bibitem{ref25} S. Makridakis, E. Spiliotis, and V. Assimakopoulos, "M5 accuracy competition: Results, findings, and conclusions," \emph{International Journal of Forecasting}, vol. 38, no. 4, pp. 1346--1364, 2022, doi: 10.1016/j.ijforecast.2021.11.013.
+\bibitem{ref26} T. Hong, P. Pinson, S. Fan, H. Zareipour, A. Troccoli, and R. J. Hyndman, "Probabilistic energy forecasting: Global Energy Forecasting Competition 2014 and beyond," \emph{International Journal of Forecasting}, vol. 32, no. 3, pp. 896--913, 2016, doi: 10.1016/j.ijforecast.2016.02.001.
+\bibitem{ref27} D. Yang et al., "Verification of deterministic solar forecasts," \emph{Solar Energy}, vol. 210, pp. 20--37, 2020, doi: 10.1016/j.solener.2020.04.019.
+\bibitem{ref28} H. Hewamalage, K. Ackermann, and C. Bergmeir, "Forecast evaluation for data scientists: common pitfalls and best practices," \emph{Data Mining and Knowledge Discovery}, vol. 37, no. 2, pp. 788--832, 2023, doi: 10.1007/s10618-022-00894-5.
+\bibitem{ref29} J. Zhang et al., "LoadSeer: Exploiting Tensor Graph Convolutional Network for Power Load Forecasting With Spatio-Temporal Characteristics," \emph{IEEE Access}, vol. 12, pp. 190337--190346, 2024, doi: 10.1109/ACCESS.2024.3514174.
+\bibitem{ref30} J. He, K. Yuan, Z. Zhong, and Y. Sun, "Enhancing Short-Term Power Load Forecasting With a TimesNet-Crossformer-LSTM Approach," \emph{IEEE Access}, vol. 12, pp. 56774--56788, 2024, doi: 10.1109/ACCESS.2024.3383912.
+\bibitem{ref31} M. H. Shams, H. Niaz, B. Hashemi, J. J. Liu, P. Siano, and A. Anvari-Moghaddam, "Artificial intelligence-based prediction and analysis of the oversupply of wind and solar energy in power systems," \emph{Energy Conversion and Management}, vol. 250, Art. no. 114892, 2021, doi: 10.1016/j.enconman.2021.114892.
+\bibitem{ref32} H. Hadian and F. Naderkhani, "Multi-scale system-level forecasting of solar and wind curtailment using a wavelet-augmented transformer," \emph{Sustainable Energy, Grids and Networks}, 2026, Art. no. 102496, doi: 10.1016/j.segan.2026.102496.
+\bibitem{ref33} M. Z. Heidrich, M. A. F. Reis, C. K. Yamaguchi, L. O. Seman, and S. F. Stefenon, "Patch-Based Transformer With Mixture of Experts and Conformal Inference for Curtailment Time Series Forecasting," \emph{IEEE Access}, vol. 14, pp. 64144--64160, 2026, doi: 10.1109/ACCESS.2026.3686958.
+\bibitem{ref34} S. Han, S. Lee, M. Cha, S. O. Arik, and J. Yoon, "Retrieval Augmented Time Series Forecasting," in \emph{Proc. 42nd Int. Conf. Machine Learning}, PMLR, vol. 267, pp. 21774--21797, 2025. [Online]. Available: \url{https://proceedings.mlr.press/v267/han25d.html}
+\bibitem{ref35} S. Yang, D. Wang, H. Zheng, and R. Jin, "TimeRAG: Boosting LLM Time Series Forecasting via Retrieval-Augmented Generation," in \emph{Proc. IEEE ICASSP}, pp. 1--5, 2025, doi: 10.1109/ICASSP49660.2025.10889933.
+\bibitem{ref36} S. Hussain, A. Ali, S. A. Qadir, and F. Baig, "Contextual retrieval-augmented tree ensemble boosting for multi-horizon solar PV power forecasting," \emph{Energy and AI}, vol. 25, Art. no. 100855, 2026, doi: 10.1016/j.egyai.2026.100855.
+\bibitem{ref37} M. Borunda, L. Conde-López, G. Ruiz-Chavarr\'{\i}a, G. Lopez Lopez, V. M. Alvarado, and E. de J. Carrera Avenda\~{n}o, "Advances in Similar Day Methods for Short-Term Load Forecasting for Power Systems," \emph{Forecasting}, vol. 8, no. 2, Art. no. 32, 2026, doi: 10.3390/forecast8020032.
+\bibitem{ref38} Q. Tan, Y. Chen, M. Li, R. Gu, Y. Su, and X.-P. Zhang, "SynTSBench: Rethinking Temporal Pattern Learning in Deep Learning Models for Time Series," in \emph{Proc. 39th Conf. Neural Information Processing Systems, Datasets and Benchmarks Track}, 2025, doi: 10.52202/085713-4860.
+\end{thebibliography}
+\section*{Author Biographies}
+
+{[}AUTHOR INPUT REQUIRED: add an IEEE Access short biography and photograph for every author after the references.{]}
+
+\EOD
+\end{document}

@@ -1,0 +1,60 @@
+version: 1
+paper_id: mintou_p1
+tag: mintou
+nodes:
+  - id: root
+    type: planning
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Create independent ARA project for DSTAR-GRU."
+    children:
+      - experiment_matrix
+      - smoke_benchmark
+      - real_rts_v1
+      - adaptive_retrieval_v2
+      - public_benchmark_upgrade
+      - stress_rolling_v3
+  - id: experiment_matrix
+    type: decision
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Define target-journal-level baselines, ablations, metrics, and datasets."
+    children: []
+  - id: smoke_benchmark
+    type: experiment
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Run deterministic synthetic smoke benchmark for pipeline validation."
+    children: []
+  - id: real_rts_v1
+    type: experiment
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Run RTS-GMLC benchmark-derived dispatch experiment; first result was slightly weaker than Renewable-First ED."
+    children: []
+  - id: adaptive_retrieval_v2
+    type: decision
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Apply compliant refinement: retrieval state adapts renewable absorption and reserve margin; result becomes marginally positive."
+    children: []
+  - id: public_benchmark_upgrade
+    type: experiment
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Replace smoke results with RTS-GMLC fixed, rolling, and pressure-subset dispatch proxy benchmarks."
+    children:
+      - stress_rolling_v3
+  - id: stress_rolling_v3
+    type: experiment
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Add rolling scenario windows and stress subsets. DSTAR-GRU gains 0.08% fixed, 0.07% rolling, and 0.72% in high-renewable subset over strongest baseline; OPF/UC remains pending."
+    children: []

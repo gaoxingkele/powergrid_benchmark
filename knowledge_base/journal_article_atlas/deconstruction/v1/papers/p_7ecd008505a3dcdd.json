@@ -1,0 +1,806 @@
+{
+  "schema": "atlas_substantive_deconstruction/1",
+  "paper_id": "p_7ecd008505a3dcdd",
+  "title": "End-to-End Powerline Detection Based on Images from UAVs",
+  "journal": "Remote Sensing",
+  "year": 2023,
+  "doi": "10.3390/rs15061570",
+  "article_type": "research_method",
+  "source": {
+    "path": "../sources/10.3390_rs15061570.pdf",
+    "sha256": "7ecd008505a3dcdd792d2a1bca7c4a613d6b3d6903369d97be5e16b0f9526e23",
+    "pages": 18,
+    "authors": [
+      "Jingwei Hu",
+      "Jing He",
+      "Chengjun Guo"
+    ],
+    "download_url": "https://mdpi-res.com/d_attachment/remotesensing/remotesensing-15-01570/article_deploy/remotesensing-15-01570.pdf",
+    "license": "CC BY 4.0",
+    "last_modified": "2023-03-13T13:43:46Z",
+    "version_status": "Publisher PDF; CDN timestamp matches OpenAlex/Unpaywall version=1678715026. Notes request failed; latest version/correction/retraction status not exhaustively verified.",
+    "acquisition": "aria2 via download_tools; gold OA verified OpenAlex and Unpaywall; HEAD 200 application/pdf; first-page DOI verified",
+    "retrieved": "2026-09-13"
+  },
+  "analysis_status": "fulltext_single_assistant_analysis_pending_independent_review",
+  "human_calibrated": false,
+  "all_fields_verified": false,
+  "read_coverage": {
+    "physical_pages_read": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18
+    ],
+    "visual_pages": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    "references_read": true,
+    "method": "PyMuPDF every page in bounded chunks; Poppler renders inspected for all numbered figures/table, key equations/pseudocode. Not an independent or human review."
+  },
+  "scope": {
+    "decision": "core_ai",
+    "task": "UAV输电导线端点/线段检测，电网巡检感知子任务；不是已验证自主导航或故障诊断",
+    "family": "prediction/deep/CNN",
+    "relevance": "direct"
+  },
+  "counts": {
+    "level1_sections": 6,
+    "numbered_body_headings": 20,
+    "numbered_equations": 12,
+    "figures": 14,
+    "tables": 1,
+    "numbered_algorithms": 1,
+    "references": 40,
+    "paragraph_count": null,
+    "unnumbered_equations": null,
+    "inline_math": null
+  },
+  "sections": [
+    {
+      "id": "1",
+      "title": "Introduction",
+      "level": 1,
+      "parent_id": null,
+      "pages": [
+        1,
+        2
+      ],
+      "logic": "电网巡检成本→近距离线缆长直/跨图假设→三点表示、Hough FPN与多尺度/NMS贡献→要求实证检测与效率。"
+    },
+    {
+      "id": "2",
+      "title": "Literature Review",
+      "level": 1,
+      "parent_id": null,
+      "pages": [
+        2,
+        4
+      ],
+      "logic": "按Hough、目标检测、FPN、电力导线深度方法分四条脉络→组合的技术来源；参考28的PANet书目信息与描述机制错配。"
+    },
+    {
+      "id": "2.1",
+      "title": "Hough Transform",
+      "level": 2,
+      "parent_id": "2",
+      "pages": [
+        2,
+        3
+      ],
+      "logic": "从经典参数化与投票到抗噪/高效变体→为特征域Hough模块铺垫。"
+    },
+    {
+      "id": "2.2",
+      "title": "Object Detection",
+      "level": 2,
+      "parent_id": "2",
+      "pages": [
+        3,
+        3
+      ],
+      "logic": "框检测→无锚关键点检测→引出中心点/端点表示。"
+    },
+    {
+      "id": "2.3",
+      "title": "FPN",
+      "level": 2,
+      "parent_id": "2",
+      "pages": [
+        3,
+        3
+      ],
+      "logic": "跨尺度高低层特征融合→强调浅层边缘对细线价值；FPN起源指向Faster-RCNN且PANet引文28实为prototype alignment，需文献核验。"
+    },
+    {
+      "id": "2.4",
+      "title": "Powerline Detection Based on Deep Learning",
+      "level": 2,
+      "parent_id": "2",
+      "pages": [
+        3,
+        4
+      ],
+      "logic": "分割/线框、LiDAR与中点方向方案比较→明确线段向量输出需求。"
+    },
+    {
+      "id": "3",
+      "title": "Methods",
+      "level": 1,
+      "parent_id": null,
+      "pages": [
+        4,
+        9
+      ],
+      "logic": "空间长直先验→特征变换+三点头+多尺度→NMS形成唯一线段；实现定义存在缺口。"
+    },
+    {
+      "id": "3.1",
+      "title": "Proposed Net Architecture",
+      "level": 2,
+      "parent_id": "3",
+      "pages": [
+        4,
+        5
+      ],
+      "logic": "MobileNetV2深度可分离编解码器→同尺寸拼接→5通道中点与4端点偏移；误指具体FPN见2.2。"
+    },
+    {
+      "id": "3.2",
+      "title": "Hough FPN",
+      "level": 2,
+      "parent_id": "3",
+      "pages": [
+        5,
+        8
+      ],
+      "logic": "HT/参数域卷积/IHT将直线汇成峰→自定义梯度→focal与smoothL1→多尺度正样本处理。"
+    },
+    {
+      "id": "3.3",
+      "title": "Non-Maximum Suppression",
+      "level": 2,
+      "parent_id": "3",
+      "pages": [
+        8,
+        9
+      ],
+      "logic": "重复线段问题→双距离阈值抑制/融合→向量唯一性目标；伪代码与文字平均/最大长度不一致。"
+    },
+    {
+      "id": "4",
+      "title": "Results",
+      "level": 1,
+      "parent_id": null,
+      "pages": [
+        9,
+        15
+      ],
+      "logic": "数据和实现→像素指标→传统/深度比较→FPN及NMS消融；没有现场导航验证。"
+    },
+    {
+      "id": "4.1",
+      "title": "Dataset",
+      "level": 2,
+      "parent_id": "4",
+      "pages": [
+        9,
+        9
+      ],
+      "logic": "1497 RGB，UAV:网络2:1，端点手工标注；9:1训练测试；无按航次/线路/地点隔离说明。"
+    },
+    {
+      "id": "4.2",
+      "title": "Implement Details",
+      "level": 2,
+      "parent_id": "4",
+      "pages": [
+        9,
+        10
+      ],
+      "logic": "软硬件、训练和耗时测量范围→对照实验执行条件。"
+    },
+    {
+      "id": "4.2.1",
+      "title": "Experiment Environment",
+      "level": 3,
+      "parent_id": "4.2",
+      "pages": [
+        9,
+        9
+      ],
+      "logic": "RTX3090+i5-12600KF，Ubuntu20.04/PyTorch1.8/cuDNN8.2；150图平均推理速度。"
+    },
+    {
+      "id": "4.2.2",
+      "title": "Training Detail",
+      "level": 3,
+      "parent_id": "4.2",
+      "pages": [
+        10,
+        10
+      ],
+      "logic": "双线性/式2/Kaiming初始化；SGD+decay+warmup；batch8累积32，wireframe50epoch再本集150epoch；裁剪旋转增强。"
+    },
+    {
+      "id": "4.3",
+      "title": "Metric",
+      "level": 2,
+      "parent_id": "4",
+      "pages": [
+        10,
+        10
+      ],
+      "logic": "线段栅格化为热图→像素P/R和F-score，GT512缩至128；线段结构质量不直接衡量。"
+    },
+    {
+      "id": "4.4",
+      "title": "Comparison with Other Methods",
+      "level": 2,
+      "parent_id": "4",
+      "pages": [
+        10,
+        13
+      ],
+      "logic": "4基线同任务比较→KDE/PR及案例解释误检；硬件和输入大小不完全匹配。"
+    },
+    {
+      "id": "4.5",
+      "title": "Ablation Study",
+      "level": 2,
+      "parent_id": "4",
+      "pages": [
+        13,
+        15
+      ],
+      "logic": "无FPN与无NMS比较→FPN部分精度收益及NMS像素负结果→区分向量唯一性和像素重叠目标。"
+    },
+    {
+      "id": "5",
+      "title": "Discussion",
+      "level": 1,
+      "parent_id": null,
+      "pages": [
+        15,
+        16
+      ],
+      "logic": "弯曲/场景转移/GPU能耗/线状障碍失败→建议负样本、场景专用训练；定位和帧间匹配仍未来工作。"
+    },
+    {
+      "id": "6",
+      "title": "Conclusions",
+      "level": 1,
+      "parent_id": null,
+      "pages": [
+        16,
+        17
+      ],
+      "logic": "总结三点+HoughFPN+NMS→检测可行与潜在高层用途；导航能力的末尾措辞超出已做实验。"
+    }
+  ],
+  "equations": [
+    {
+      "id": "(1)",
+      "page": 5,
+      "type": "physical/geometry/line_parameterization",
+      "purpose": "r=x cosθ+y sinθ将图像直线映射为Hough点；标准几何先验。",
+      "note": "坐标尺度、角度/半径分箱及离散化未完整报告。"
+    },
+    {
+      "id": "(2)",
+      "page": 6,
+      "type": "learning/architecture/convolution",
+      "purpose": "中心8周围−1的3×3核，参数域尖峰/边缘初始化。",
+      "note": "不是最终固定权重；§4.2.2说明初始化。"
+    },
+    {
+      "id": "(3)",
+      "page": 6,
+      "type": "learning/training/gradient",
+      "purpose": "HT反向张量域映射(C,θ,r)→(C,H,W)。",
+      "note": "仅域映射并非充分梯度推导。"
+    },
+    {
+      "id": "(4)",
+      "page": 6,
+      "type": "learning/training/gradient",
+      "purpose": "将相关Hough投票bin梯度平均回图像。",
+      "note": "i兼作通道/求和、n兼作上限及索引，离散投票算子的精确导数未验证。"
+    },
+    {
+      "id": "(5)",
+      "page": 7,
+      "type": "learning/training/gradient",
+      "purpose": "IHT反向域映射(C,H,W)→(C,θ,r)。",
+      "note": "需与正向算子的伴随匹配，代码未查。"
+    },
+    {
+      "id": "(6)",
+      "page": 7,
+      "type": "learning/training/gradient",
+      "purpose": "文字意图对原图直线上的梯度求均值。",
+      "note": "印刷右端仍grad(C_i,θ_n,r_m)，与左同域；未写H/W索引，无法依此复现文字所称操作。"
+    },
+    {
+      "id": "(7)",
+      "page": 7,
+      "type": "learning/training/loss",
+      "purpose": "正负类对应pt定义。",
+      "note": "标准二分类真类概率。"
+    },
+    {
+      "id": "(8)",
+      "page": 7,
+      "type": "learning/training/loss",
+      "purpose": "加权focal中心点分类。",
+      "note": "印刷式缺负号；若按最小化会鼓励错误概率方向，不能据此断言开源实现同错；γ抑制易样本而正文称惩罚难样本。"
+    },
+    {
+      "id": "(9)",
+      "page": 7,
+      "type": "learning/training/regularization",
+      "purpose": "Nall/Npositive或Nall/Nnegative类别逆频权重。",
+      "note": "零正样本图的除零策略未报告。"
+    },
+    {
+      "id": "(10)",
+      "page": 7,
+      "type": "learning/training/loss",
+      "purpose": "端点误差smoothL1分段损失。",
+      "note": "四偏移的mask/归约/尺度系数未完全写出。"
+    },
+    {
+      "id": "(11)",
+      "page": 7,
+      "type": "optimization/objective/single",
+      "purpose": "中心分类与位移损失相加。",
+      "note": "多尺度各头权重和累计规则未报告。"
+    },
+    {
+      "id": "(12)",
+      "page": 10,
+      "type": "evaluation/predictive/classification",
+      "purpose": "同一编号组中Rec=TP/(TP+FN),Prec=TP/(TP+FP)。",
+      "note": "12个编号组非13个独立式；F-score未另列编号式，像素汇总/逐图平均需代码核对。"
+    }
+  ],
+  "figures": [
+    {
+      "id": "Figure 1",
+      "page": 4,
+      "panels": 1,
+      "type": "网络框图",
+      "purpose": "三尺度编码-HT-FPN-解码连接→多头NMS→线段；未标逐层channel。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 2",
+      "page": 5,
+      "panels": 2,
+      "type": "Hough示意",
+      "purpose": "原空间曲直线与参数域峰，解释直线汇聚；非性能实验。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 3",
+      "page": 6,
+      "panels": 3,
+      "type": "HT处理示意",
+      "purpose": "变换→峰增强→逆投影抑制非直线，展示结构先验。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 4",
+      "page": 8,
+      "panels": 1,
+      "type": "重复检测案例",
+      "purpose": "一根线多个颜色线段，NMS问题动机。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 5",
+      "page": 9,
+      "panels": 5,
+      "type": "数据样例",
+      "purpose": "5张天空/树木背景的塔线图，不能证明地域代表性。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 6",
+      "page": 12,
+      "panels": 3,
+      "type": "P/R核密度图",
+      "purpose": "LSD/HoughP/ours每图分布；KDE延伸到[0,1]外是平滑伪影而非合法概率范围，不是CI。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 7",
+      "page": 12,
+      "panels": 15,
+      "type": "传统方法检测案例矩阵",
+      "purpose": "5场景×3方法；复杂树木背景传统方法误检更多，简单天空传统可用。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 8",
+      "page": 13,
+      "panels": 1,
+      "type": "PR对照曲线",
+      "purpose": "3深度检测器，ours在主要重叠区较好但高召回下降；原始点未取得。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 9",
+      "page": 13,
+      "panels": 15,
+      "type": "深度方法案例矩阵",
+      "purpose": "5场景×AFM/DWP/ours；局部连接错误与噪声比较，选择机制未说明。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 10",
+      "page": 14,
+      "panels": 1,
+      "type": "训练loss曲线",
+      "purpose": "有/无FPN约100epoch，曲线重叠且交叉；不能把低loss自动解释成wall-clock加速，正文150训练epoch与图100范围需解释。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 11",
+      "page": 14,
+      "panels": 4,
+      "type": "FPN案例消融",
+      "purpose": "2场景×有/无FPN，声称未用NMS以隔离因素，非完整参数匹配。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 12",
+      "page": 15,
+      "panels": 4,
+      "type": "NMS案例消融",
+      "purpose": "2场景×前后，减少重复线；未量化唯一性指标。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 13",
+      "page": 15,
+      "panels": 1,
+      "type": "FPN/NMS变体PR",
+      "purpose": "full、withFPN/noNMS、withNMS/noFPN；缺双去除故非完整2×2因子设计；NMS保留明显负结果。",
+      "visual_checked": true
+    },
+    {
+      "id": "Figure 14",
+      "page": 16,
+      "panels": 1,
+      "type": "弯曲导线场景",
+      "purpose": "曲线大跨度示例，标示长直先验边界；并非附误差统计的外测。",
+      "visual_checked": true
+    }
+  ],
+  "tables": [
+    {
+      "id": "Table 1",
+      "page": 11,
+      "type": "main_comparison",
+      "columns": [
+        "method",
+        "input",
+        "F-score",
+        "recall",
+        "precision",
+        "inferences/s"
+      ],
+      "rows": [
+        [
+          "LSD",
+          "512x512",
+          0.34,
+          0.98,
+          0.22,
+          74.9
+        ],
+        [
+          "HoughP",
+          "512x512",
+          0.42,
+          0.82,
+          0.34,
+          88.6
+        ],
+        [
+          "DWP",
+          "320x320",
+          0.73,
+          0.75,
+          0.63,
+          24.8
+        ],
+        [
+          "AFM",
+          "512x512",
+          0.7,
+          0.81,
+          0.65,
+          6
+        ],
+        [
+          "Ours",
+          "512x512",
+          0.86,
+          0.85,
+          0.88,
+          122.7
+        ]
+      ],
+      "notes": [
+        "LSD/HoughP为CPU，深度方法GPU，不应跨硬件宣称算法效率绝对优越。",
+        "首页2页文字precision=.85/recall=.88与表1列倒置，表为recall=.85/precision=.88。",
+        "DWP印刷P=.63,R=.75的调和均值=.6848而F=.73；HoughP调和=.4807而F=.42；可能逐图宏平均/不同阈值，但未给汇总规则，不能直接改表。",
+        "无SD/CI/种子/显著性标记；150图仅用于速度说明，实际9:1测试整数数未报告。"
+      ],
+      "visual_checked": true
+    }
+  ],
+  "algorithms": [
+    {
+      "id": "Algorithm 1",
+      "page": 8,
+      "title": "Non-Maximum Suppression",
+      "inputs": [
+        "lines L",
+        "scores S",
+        "Nt",
+        "Mt（说明行但未列Input首行）"
+      ],
+      "output": "去重/融合线段D",
+      "logic": "选最高分→端点线距离与中点距离判据→融合或抑制→保留",
+      "audit": [
+        "选中M后从L删除但没有相应S删除，后续argmax索引一致性缺失。",
+        "第二分支两次L=L−M，M已被删，疑应删li；保留D位置缩进含糊。",
+        "伪码长度=max而文字说累计平均；中点迭代二分平均非全体等权平均。",
+        "Nt/Mt数值、端点距离如何组合未完整披露；只审论文未执行代码。"
+      ]
+    }
+  ],
+  "framework": {
+    "inputs": [
+      "512×512 RGB UAV/网络图像",
+      "训练:线段两个端点标注；wireframe预训练"
+    ],
+    "outputs": [
+      "线段中点概率+两个端点的4个偏移，多尺度融合后向量线段"
+    ],
+    "modules": [
+      "MobileNetV2深度可分离编码器",
+      "1/2、1/4、1/8尺度HT→3×3可训练conv→IHT FPN",
+      "解码器同尺寸stack",
+      "三点头及多尺度neck",
+      "双距离NMS"
+    ],
+    "assumptions": [
+      "近距离视角导线近似长直且跨图；不适用于明显悬链线弯曲",
+      "稀疏中点正类须类别平衡",
+      "训练网络图像与部署场景分布相关"
+    ],
+    "novelty_boundary": "组合/任务适配而非Hough、MobileNet或三点表示本身原创",
+    "critical_missing": [
+      "HT离散化和精确反向",
+      "全层channel/参数量/FLOPs",
+      "学习率具体值/衰减安排/阈值",
+      "航次/地理split及标注一致性",
+      "实现与式/伪代码吻合"
+    ],
+    "code_url": "https://github.com/iifeve/power_line_detection",
+    "code_status": "paper_link_reported_not_executed",
+    "data_status": "author request due to privacy; not downloaded"
+  },
+  "experiments": [
+    {
+      "id": "E1",
+      "type": "main_comparison",
+      "pages": [
+        9,
+        13
+      ],
+      "rq": "是否改善输电导线像素检测与桌面推理速度",
+      "dataset": "1497图；UAV:网络2:1，9:1训练测试（整数/分组未报告）",
+      "baselines": [
+        "LSD",
+        "HoughP",
+        "DWP",
+        "AFM"
+      ],
+      "training": "50epoch wireframe+150epoch target;深度基线同训练流程，§4.4称iterations与§4.2epochs术语不一致",
+      "metrics": [
+        "pixel F-score",
+        "P",
+        "R",
+        "inferences/s"
+      ],
+      "matching_limits": [
+        "DWP320输入vs其余512",
+        "传统CPUvs深度GPU",
+        "无地理/航次外测、无多种子",
+        "未单独验证web来源重复"
+      ],
+      "result": "Table1 ours F=.86、122.7/s，高于本表4对照；LSD recall=.98仍优于ours .85。"
+    },
+    {
+      "id": "E2",
+      "type": "component_ablation",
+      "pages": [
+        13,
+        15
+      ],
+      "rq": "Hough-FPN是否改变检测及训练曲线",
+      "variants": [
+        "full",
+        "noFPN"
+      ],
+      "controls": "案例叙述为无NMS对比；Fig13 full/noFPN都保留NMS",
+      "limits": "无参数/算力匹配和随机重复；loss曲线只能训练动态，不能证明速度提升"
+    },
+    {
+      "id": "E3",
+      "type": "postprocessing_ablation",
+      "pages": [
+        14,
+        15
+      ],
+      "rq": "NMS是否减少重复而损害像素重叠",
+      "variants": [
+        "full",
+        "noNMS"
+      ],
+      "negative_result": "NMS降低高召回区PR；唯一线段的任务价值只案例说明，没有导航/定位终点。"
+    }
+  ],
+  "statistics": {
+    "analysis_unit": "图像/图内像素层级；独立线路/航次数未知",
+    "independent_n": null,
+    "spatial_split": "not_reported after reviewing Methods/Results",
+    "dependence": [
+      "same-scene images",
+      "spatial pixel dependence",
+      "web duplication possible not proven"
+    ],
+    "annotation": "人工端点，未报告双标注一致性或定位误差",
+    "sensor_resolution": "图像5m飞行高度，原尺寸印为960×20需核实；无GSD/相机模型",
+    "inference": "仅点指标/KDE/PR，无CI、检验、功效、多重校正或种子",
+    "leakage_control": "9:1未定义地理/对象/航次group，不能由图像数量推断外部泛化"
+  },
+  "conclusions": {
+    "supported": [
+      "离线图像检测任务下三点+HoughFPN系统在给定像素指标/基线中较强",
+      "NMS对重复线段有案例收益但有像素指标负收益"
+    ],
+    "not_supported": [
+      "自主导航、真实无人机上实时运行及人工资源节约的量化效果",
+      "跨地域/季节普遍泛化",
+      "FPN wall-clock训练加速（只有epoch-loss曲线）"
+    ],
+    "limitations": [
+      "长直线假设",
+      "线状障碍误检",
+      "GPU能耗及端侧算力",
+      "数据私有、split未知",
+      "式6/8及Algorithm1复现疑点"
+    ],
+    "future_work": [
+      "场景特定训练与负样本",
+      "LBD描述子/帧间匹配和位姿估计"
+    ]
+  },
+  "narrative": {
+    "trajectory": "应用困难→几何先验→模块对应→像素比较→消融负结果→部署边界；Discussion比结论末尾更谨慎",
+    "language_findings": [
+      "Methods混用net/model、epochs/iterations；bath normalization拼写及2.2错指降低精确性。",
+      "speculates较适合机制解释，但loss下降直接推训练加速语气过强。",
+      "PANet引文28为few-shot prototype alignment不是所述path aggregation，相关工作需核实。"
+    ],
+    "original_sentence_frames": [
+      "For [geometry-defined target], [representation] preserves [downstream information] that [pixel-only output] omits.",
+      "Under [shared evaluation], [postprocessing] improved [structural property] while reducing [pixel metric].",
+      "The observed gain is limited to [image/sensor regime]; [operational capability] remains untested."
+    ]
+  },
+  "difficulty": {
+    "status": "single_assistant_provisional_not_human",
+    "reviewer": "Codex /root/scope_other",
+    "dimensions": [
+      {
+        "dimension": "theory",
+        "score": 2,
+        "range": [
+          1,
+          2
+        ],
+        "evidence": "Hough域/梯度改写，未有严谨导数证明且式6疑点"
+      },
+      {
+        "dimension": "algorithm",
+        "score": 2,
+        "range": [
+          2,
+          3
+        ],
+        "evidence": "多尺度CNN+HT/IHT+NMS耦合，但复现缺口使复杂实现深度未确认"
+      },
+      {
+        "dimension": "statistics",
+        "score": 1,
+        "range": [
+          1,
+          1
+        ],
+        "evidence": "描述指标/PR/KDE，无推断"
+      },
+      {
+        "dimension": "data",
+        "score": 2,
+        "range": [
+          1,
+          2
+        ],
+        "evidence": "混源人工端点标注，无跨地域独立验证"
+      },
+      {
+        "dimension": "engineering",
+        "score": 1,
+        "range": [
+          1,
+          2
+        ],
+        "evidence": "真实图像离线GPU推断，未上机闭环"
+      },
+      {
+        "dimension": "cross_discipline",
+        "score": 2,
+        "range": [
+          1,
+          2
+        ],
+        "evidence": "导线几何先验明确映射视觉模块，但无电网运行变量"
+      }
+    ]
+  },
+  "paragraph_analysis": {
+    "status": "not_completed",
+    "paragraph_count": null,
+    "reason": "已连续读全部正文/参考但未逐段边界和跨页bbox系统校准，不将PDF blocks当段落。"
+  },
+  "unassessed": [
+    "211字段完整逐项observation",
+    "逐段长度/POS/语态/标准化词频",
+    "全部无编号/行内数学",
+    "原始数据和代码执行",
+    "独立AI复核/人工校准",
+    "完整撤稿更正链"
+  ]
+}

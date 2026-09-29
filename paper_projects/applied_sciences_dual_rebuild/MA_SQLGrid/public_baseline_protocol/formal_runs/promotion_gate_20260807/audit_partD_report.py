@@ -2,7 +2,7 @@
 import json
 from pathlib import Path
 
-P = Path(r"D:\aicoding\powergrid_benchmark\paper_projects\applied_sciences_dual_rebuild\MA_SQLGrid\public_baseline_protocol")
+P = Path(r"F:\aicoding\powergrid_benchmark\paper_projects\applied_sciences_dual_rebuild\MA_SQLGrid\public_baseline_protocol")
 OUT = P / "formal_runs" / "promotion_gate_20260807"
 
 partA = json.loads((OUT / "_partA_results.json").read_text(encoding="utf-8"))

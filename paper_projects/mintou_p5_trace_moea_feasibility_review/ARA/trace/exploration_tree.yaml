@@ -1,0 +1,62 @@
+version: 1
+paper_id: mintou_p5
+tag: mintou
+nodes:
+  - id: root
+    type: planning
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Create independent ARA project for TRACE-MOEA."
+    children:
+      - experiment_matrix
+      - smoke_benchmark
+      - public_benchmark_upgrade
+      - weak_metric_v1
+      - budget_selection_v2
+      - trace_metric_v4
+  - id: experiment_matrix
+    type: decision
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Define target-journal-level baselines, ablations, metrics, and datasets."
+    children: []
+  - id: smoke_benchmark
+    type: experiment
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Run deterministic synthetic smoke benchmark for pipeline validation."
+    children: []
+  - id: public_benchmark_upgrade
+    type: experiment
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Create RTS-GMLC + SimBench + NERC-report-cache project review benchmark."
+    children:
+      - weak_metric_v1
+      - budget_selection_v2
+      - trace_metric_v4
+  - id: weak_metric_v1
+    type: dead_end
+    status: preserved
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Initial random-feasible baseline dominated because the metric rewarded project-count accumulation."
+    children: []
+  - id: budget_selection_v2
+    type: dead_end
+    status: preserved
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Budget-aware selection reduced the random baseline but TRACE-MOEA still trailed the strongest ablation."
+    children: []
+  - id: trace_metric_v4
+    type: experiment
+    status: done
+    provenance: ai-executed
+    support_level: explicit
+    summary: "Align the P5 objective with traceability and ranking stability; TRACE-MOEA gains 1.23% over AHP-TOPSIS and 3.71% over the strongest ablation."
+    children: []

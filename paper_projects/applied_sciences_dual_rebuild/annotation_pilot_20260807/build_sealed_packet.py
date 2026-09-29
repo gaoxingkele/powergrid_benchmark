@@ -28,7 +28,7 @@ try:
 except Exception:
     pass
 
-AUDIT_DIR = (Path("D:/aicoding/powergrid_benchmark/paper_projects/"
+AUDIT_DIR = (Path("F:/aicoding/powergrid_benchmark/paper_projects/"
                   "2026_c2ges_engineeringletters/workspace/verification_pilot/agent_audit_40doc"))
 OUT_DIR = PILOT_DIR / "runs/c2ges_stage3"
 ROLES = ["root_cause", "trigger_event", "propagation_or_response", "impact", "mitigation"]

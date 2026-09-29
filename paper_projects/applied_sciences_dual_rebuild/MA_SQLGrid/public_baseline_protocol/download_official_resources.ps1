@@ -7,7 +7,7 @@ $ErrorActionPreference = 'Stop'
 $ProtocolRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $MetadataDir = Join-Path $ProtocolRoot 'official_metadata'
 $DownloadDir = Join-Path $ProtocolRoot 'official_downloads'
-$DownloadLib = 'D:\aicoding\Lib'
+$DownloadLib = 'D:\aicoding\mylib'
 
 if (-not (Test-Path -LiteralPath $DownloadLib -PathType Container)) {
     throw "Global download library not found: $DownloadLib"

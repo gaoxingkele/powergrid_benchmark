@@ -1,0 +1,1875 @@
+{
+  "schema_version": "deconstruction.v1.single_assistant",
+  "paper_id": "p_1725337431f8f83f",
+  "analysis_status": "fulltext_single_assistant_analysis_pending_independent_review",
+  "human_calibrated": false,
+  "analysis_date": "2026-09-13",
+  "annotator": "Codex/scope_energy single assistant",
+  "independent_review_status": "pending",
+  "identity": {
+    "title": "Deep Policy Gradient for Reactive Power Control in Distribution Systems",
+    "authors": [
+      "Qiuling Yang",
+      "Alireza Sadeghi",
+      "Gang Wang",
+      "Georgios B. Giannakis",
+      "Jian Sun"
+    ],
+    "doi": "10.1109/smartgridcomm47815.2020.9302996",
+    "journal": "IEEE SmartGridComm",
+    "venue": "2020 IEEE International Conference on Communications, Control, and Computing Technologies for Smart Grids (SmartGridComm)",
+    "year": 2020,
+    "article_type": "conference_research_article",
+    "source_path": "D:/aicoding/powergrid_benchmark/knowledge_base/journal_article_atlas/deconstruction/v1/sources/smartgridcomm2020_reactive_9302996_nsf.pdf",
+    "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+    "actual_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+    "hash_match": true,
+    "page_count": 6,
+    "parser": "PyMuPDF1.28.0",
+    "source_version": "NSF repository copy with IEEE conference running header and 2020 IEEE copyright, original IEEE download footer; no claim of open reuse license or binary equality to current publisher PDF",
+    "license": "IEEE copyright; NSF public-access repository copy, no CC license verified",
+    "arxiv_id": null,
+    "arxiv_version": null,
+    "formal_publication_pages": "1-6",
+    "formal_layout_metrics_eligible": false,
+    "metadata_evidence": {
+      "crossref_url": "https://api.crossref.org/works/10.1109/SmartGridComm47815.2020.9302996",
+      "crossref_http_status": 200
+    },
+    "retraction_correction_status": "not_assessed"
+  },
+  "read_coverage": {
+    "physical_pages_read": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "fulltext_read": true,
+    "text_read_mode": "PyMuPDF全部页面正文/声明/脚注/参考文献，分批无截断",
+    "visual_pages_reviewed": [
+      3,
+      4,
+      5,
+      6
+    ],
+    "physical_page_numbering": "1-based local source",
+    "visual_review_status": "all5figures+algorithm and core learning equations reviewed; p1/2 text only"
+  },
+  "scope": {
+    "decision": "core_ai",
+    "ai_role": "central",
+    "task": "distribution-grid inverter reactive power control",
+    "method_family": "deep neural policy gradient",
+    "evidence": "local original PDF physical page 1: title, authors, abstract read"
+  },
+  "coverage": {
+    "identity": "source and Crossref matched",
+    "sections": "full source-reviewed",
+    "numbered_equations": "enumerated and interpreted",
+    "numbered_figures_tables": "enumerated with source pages and function",
+    "experimental_design": "source-reviewed with explicit gaps",
+    "paragraph_annotation": "partial: chapter-level only; no full paragraph boundaries/roles",
+    "language_quantification": "not_assessed",
+    "independent_review": "pending",
+    "all_fields_complete": false
+  },
+  "unassessed_fields": {
+    "paragraph_count": null,
+    "paragraph_boundaries": null,
+    "per_paragraph_labels": null,
+    "paragraph_boundary_f1": null,
+    "word_count": null,
+    "sentence_length": null,
+    "lexical_frequency": null,
+    "pos": null,
+    "section_word_proportions": null,
+    "inline_math_count": null,
+    "all_unnumbered_math_count": null,
+    "full_symbol_dimension_audit": null,
+    "code_equation_match": null,
+    "full_reproduction": null,
+    "external_reference_truth": null,
+    "formal_layout_metrics": null,
+    "acceptance_probability": null
+  },
+  "unassessed_policy": "null明确not_assessed，不等于零；not_reported为阅读全文未找到报告。",
+  "quality_status": {
+    "status": "single_assistant_provisional",
+    "priority_issues": [
+      "model-free update ≠ end-to-end no model: experiments useCVX",
+      "inverter bounds omitted from displayed baseline16",
+      "no explicit voltage safety response to infeasible sampled actions",
+      "robustness/runtimes claims not substantiated by designed noise tests/numeric timing"
+    ],
+    "score": null
+  },
+  "research_questions": [
+    {
+      "id": "RQ1",
+      "pages": [
+        1,
+        2,
+        3
+      ],
+      "question": "如何把依赖实时非凸求解的逆变器无功调节转移到离线学习、在线快速推断，避免大量最优动作标签？",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              1,
+              2,
+              3
+            ],
+            "object_label": "RQ1"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "RQ2",
+      "pages": [
+        4,
+        5,
+        6
+      ],
+      "question": "用有限动作域截断高斯策略与损耗观测的policy gradient，能否接近SOCP优化基线？",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              4,
+              5,
+              6
+            ],
+            "object_label": "RQ2"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    }
+  ],
+  "sections": [
+    {
+      "id": "S1",
+      "label": "I",
+      "parent_id": null,
+      "level": 1,
+      "heading": "INTRODUCTION",
+      "pages": [
+        1,
+        2
+      ],
+      "core_logic": "新能源波动/通信延迟→传统求解慢/监督标签难→无标签统计学习与离线在线分离。",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              1,
+              2
+            ],
+            "object_label": "I"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "S2",
+      "label": "II",
+      "parent_id": null,
+      "level": 1,
+      "heading": "SYSTEM MODEL",
+      "pages": [
+        2
+      ],
+      "core_logic": "径向branch flow、过额定逆变器固定无功域和电压限值，定义物理可行性。",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              2
+            ],
+            "object_label": "II"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "S3",
+      "label": "III",
+      "parent_id": null,
+      "level": 1,
+      "heading": "PROBLEM FORMULATION",
+      "pages": [
+        2,
+        3
+      ],
+      "core_logic": "瞬时loss minimization→非凸支路等式→SOCP松弛→随机状态期望损耗目标。",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              2,
+              3
+            ],
+            "object_label": "III"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "S4",
+      "label": "IV",
+      "parent_id": null,
+      "level": 1,
+      "heading": "STATISTICAL LEARNING",
+      "pages": [
+        3,
+        4,
+        5
+      ],
+      "core_logic": "神经策略参数化、likelihood-ratio梯度、截断高斯采样与离线训练/在线执行。",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              3,
+              4,
+              5
+            ],
+            "object_label": "IV"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "S5",
+      "label": "IV.A",
+      "parent_id": "S4",
+      "level": 2,
+      "heading": "Parameterization",
+      "pages": [
+        4
+      ],
+      "core_logic": "q=phi(s;theta)、期望损耗优化，利用函数值估计policy gradient；确定性delta用密度近似。",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              4
+            ],
+            "object_label": "IV.A"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "S6",
+      "label": "IV.B",
+      "parent_id": "S4",
+      "level": 2,
+      "heading": "Model-free learning",
+      "pages": [
+        4,
+        5
+      ],
+      "core_logic": "DNN输出每逆变器mu/sigma，截断采样满足box bounds；SGD/Adam用loss反馈。",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              4,
+              5
+            ],
+            "object_label": "IV.B"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "S7",
+      "label": "V",
+      "parent_id": null,
+      "level": 1,
+      "heading": "NUMERICAL TESTS",
+      "pages": [
+        5
+      ],
+      "core_logic": "SCE47节点5逆变器、Smart*单日split、CVX和TF，对比SOCP训练和推断loss。",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              5
+            ],
+            "object_label": "V"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "S8",
+      "label": "VI",
+      "parent_id": null,
+      "level": 1,
+      "heading": "CONCLUSIONS",
+      "pages": [
+        5,
+        6
+      ],
+      "core_logic": "总结无标签快速无功控制；对抗/腐败观测鲁棒性和物理感知架构明确列为未来。",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              5,
+              6
+            ],
+            "object_label": "VI"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    }
+  ],
+  "equations": [
+    {
+      "id": "E1",
+      "label": "1",
+      "page": 2,
+      "type_primary": "physical_model.branchflow",
+      "content_summary": "1a active balance;1b reactive balance;1c squared voltage drop;1d current-power equality",
+      "subequations": [
+        "1a",
+        "1b",
+        "1c",
+        "1d"
+      ],
+      "function": "径向网络精确非线性关系（vn为电压平方）",
+      "origin": "standard branch-flow/SOCP physical model adapted",
+      "implementation_match": "not_assessed",
+      "complete_symbol_dimension_audit": "not_assessed; key issues noted",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              2
+            ],
+            "object_label": "1"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "E2",
+      "label": "2",
+      "page": 2,
+      "type_primary": "constraint.inverter",
+      "content_summary": "qg_lower≤qg≤qg_upper",
+      "subequations": [
+        "2"
+      ],
+      "function": "过额定逆变器固定凸无功box域",
+      "origin": "standard branch-flow/SOCP physical model adapted",
+      "implementation_match": "not_assessed",
+      "complete_symbol_dimension_audit": "not_assessed; key issues noted",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              2
+            ],
+            "object_label": "2"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "E3",
+      "label": "3",
+      "page": 2,
+      "type_primary": "constraint.voltage",
+      "content_summary": "v∈V={v:vlower≤v≤vupper}",
+      "subequations": [
+        "3"
+      ],
+      "function": "所有bus电压平方范围",
+      "origin": "standard branch-flow/SOCP physical model adapted",
+      "implementation_match": "not_assessed",
+      "complete_symbol_dimension_audit": "not_assessed; key issues noted",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              2
+            ],
+            "object_label": "3"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "E4",
+      "label": "4",
+      "page": 3,
+      "type_primary": "optimization.instantaneous_policy",
+      "content_summary": "qg_star=argmin_box f(pt,qg−qc_t)",
+      "subequations": [
+        "4"
+      ],
+      "function": "给定瞬时状态的无功loss最优策略",
+      "origin": "standard branch-flow/SOCP physical model adapted",
+      "implementation_match": "not_assessed",
+      "complete_symbol_dimension_audit": "not_assessed; key issues noted",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              3
+            ],
+            "object_label": "4"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "E5",
+      "label": "5",
+      "page": 3,
+      "type_primary": "optimization.inner_nonlinear_flow",
+      "content_summary": "5a min sum r*l;5b active;5c reactive;5d voltage;5e current equality;5f voltagebox",
+      "subequations": [
+        "5a",
+        "5b",
+        "5c",
+        "5d",
+        "5e",
+        "5f"
+      ],
+      "function": "定义loss oracle，含非凸支路等式",
+      "origin": "standard branch-flow/SOCP physical model adapted",
+      "implementation_match": "not_assessed",
+      "complete_symbol_dimension_audit": "not_assessed; key issues noted",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              3
+            ],
+            "object_label": "5"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "E6",
+      "label": "6",
+      "page": 3,
+      "type_primary": "relaxation.hyperbolic",
+      "content_summary": "P²+Q²≤v_parent*l",
+      "subequations": [
+        "6"
+      ],
+      "function": "将等式放宽为凸锥约束",
+      "origin": "standard branch-flow/SOCP physical model adapted",
+      "implementation_match": "not_assessed",
+      "complete_symbol_dimension_audit": "not_assessed; key issues noted",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              3
+            ],
+            "object_label": "6"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "E7",
+      "label": "7",
+      "page": 3,
+      "type_primary": "optimization.socp_oracle",
+      "content_summary": "7a min losses;7b5b–5d/5f;7c l≥(P²+Q²)/v",
+      "subequations": [
+        "7a",
+        "7b",
+        "7c"
+      ],
+      "function": "训练计算loss的CVX/SOCP oracle",
+      "origin": "standard branch-flow/SOCP physical model adapted",
+      "implementation_match": "not_assessed",
+      "complete_symbol_dimension_audit": "not_assessed; key issues noted",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              3
+            ],
+            "object_label": "7"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "E8",
+      "label": "8",
+      "page": 3,
+      "type_primary": "constraint.second_order_cone",
+      "content_summary": "norm([2P,2Q,l−v])≤v+l",
+      "subequations": [
+        "8"
+      ],
+      "function": "式7c等价SOC表达",
+      "origin": "standard branch-flow/SOCP physical model adapted",
+      "implementation_match": "not_assessed",
+      "complete_symbol_dimension_audit": "not_assessed; key issues noted",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              3
+            ],
+            "object_label": "8"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "E9",
+      "label": "9",
+      "page": 3,
+      "type_primary": "objective.expected_loss",
+      "content_summary": "argmin_box E[f(pt,qg−qc_t)]",
+      "subequations": [
+        "9"
+      ],
+      "function": "从固定观测转向随机注入期望loss",
+      "origin": "standard statistical policy-gradient/optimization applied",
+      "implementation_match": "not_assessed",
+      "complete_symbol_dimension_audit": "not_assessed; key issues noted",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              3
+            ],
+            "object_label": "9"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "E10",
+      "label": "10",
+      "page": 3,
+      "type_primary": "objective.state_policy",
+      "content_summary": "qg_star(st)=argmin_box E[f(qg;st)]",
+      "subequations": [
+        "10"
+      ],
+      "function": "state=(pt,qct)重写；固定action期望与state-dependent policy记号衔接待严化",
+      "origin": "standard statistical policy-gradient/optimization applied",
+      "implementation_match": "not_assessed",
+      "complete_symbol_dimension_audit": "not_assessed; key issues noted",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              3
+            ],
+            "object_label": "10"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "E11",
+      "label": "11",
+      "page": 4,
+      "type_primary": "learning.parameterization",
+      "content_summary": "qg=phi(s;theta)",
+      "subequations": [
+        "11"
+      ],
+      "function": "DNN策略参数化",
+      "origin": "standard statistical policy-gradient/optimization applied",
+      "implementation_match": "not_assessed",
+      "complete_symbol_dimension_audit": "not_assessed; key issues noted",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              4
+            ],
+            "object_label": "11"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "E12",
+      "label": "12",
+      "page": 4,
+      "type_primary": "learning.objective",
+      "content_summary": "theta_star=argmin E[f(phi(s;theta);s)]",
+      "subequations": [
+        "12"
+      ],
+      "function": "学习参数的期望损耗目标",
+      "origin": "standard statistical policy-gradient/optimization applied",
+      "implementation_match": "not_assessed",
+      "complete_symbol_dimension_audit": "not_assessed; key issues noted",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              4
+            ],
+            "object_label": "12"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "E13",
+      "label": "13",
+      "page": 4,
+      "type_primary": "learning.gradient_derivation",
+      "content_summary": "13a derivative expectation;13b integrate stochastic action;13c likelihood-ratio;13d E[f grad log pi]",
+      "subequations": [
+        "13a",
+        "13b",
+        "13c",
+        "13d"
+      ],
+      "function": "核心score-function梯度推导，交换积分/微分及策略平滑条件未详证",
+      "origin": "standard statistical policy-gradient/optimization applied",
+      "implementation_match": "not_assessed",
+      "complete_symbol_dimension_audit": "not_assessed; key issues noted",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              4
+            ],
+            "object_label": "13"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "E14",
+      "label": "14",
+      "page": 4,
+      "type_primary": "learning.gradient_estimator",
+      "content_summary": "ghat=fhat(qhat;s)*grad_theta log pi(qhat)",
+      "subequations": [
+        "14"
+      ],
+      "function": "只需函数值而不需loss解析导数的采样梯度",
+      "origin": "standard statistical policy-gradient/optimization applied",
+      "implementation_match": "not_assessed",
+      "complete_symbol_dimension_audit": "not_assessed; key issues noted",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              4
+            ],
+            "object_label": "14"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "E15",
+      "label": "15",
+      "page": 4,
+      "type_primary": "learning.update",
+      "content_summary": "theta_(t+1)=theta_t−beta_t ghat",
+      "subequations": [
+        "15"
+      ],
+      "function": "网络权重梯度下降；实验使用Adam",
+      "origin": "standard statistical policy-gradient/optimization applied",
+      "implementation_match": "not_assessed",
+      "complete_symbol_dimension_audit": "not_assessed; key issues noted",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              4
+            ],
+            "object_label": "15"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "E16",
+      "label": "16",
+      "page": 5,
+      "type_primary": "optimization.baseline",
+      "content_summary": "16a min_(qg,P,Q,l,v)sum r*l;16b7b–7c",
+      "subequations": [
+        "16a",
+        "16b"
+      ],
+      "function": "实时完美观测SOCP baseline；展示约束未引用式2box，需核实实现",
+      "origin": "standard statistical policy-gradient/optimization applied",
+      "implementation_match": "not_assessed",
+      "complete_symbol_dimension_audit": "not_assessed; key issues noted",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              5
+            ],
+            "object_label": "16"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    }
+  ],
+  "unnumbered_math_key_items": [
+    {
+      "id": "U1",
+      "pages": [
+        2
+      ],
+      "type": "inverter_capability",
+      "content": "|qg_n|≤sqrt(sbar_n²−pg_n²); oversized sbar=1.08pbar → fixed conservative bound about.4pbar",
+      "function": "把时变capability转成固定动作box",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              2
+            ],
+            "object_label": "U1"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "U2",
+      "pages": [
+        4
+      ],
+      "type": "stochastic_policy",
+      "content": "pi(qg|s,theta)为固定support[qmin,qmax]的截断高斯；DNN输出M组mu,sigma",
+      "function": "用随机化光滑策略/score-function学习并保证box动作",
+      "missing": "联合分布/归一化常数/正sigma参数化未明写；文中standard deviation与算法variance用词不一致",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              4
+            ],
+            "object_label": "U2"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "U3",
+      "pages": [
+        4
+      ],
+      "type": "deterministic_limit",
+      "content": "pi=delta(x−phi(s;theta))，用已知密度近似delta",
+      "function": "连接确定性控制与随机policy gradient；近似误差未给",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              4
+            ],
+            "object_label": "U3"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    }
+  ],
+  "algorithms": [
+    {
+      "id": "A1",
+      "label": "Algorithm1",
+      "page": 5,
+      "title": "A deep policy gradient approach to reactive power control",
+      "training_steps": [
+        "初始化theta",
+        "输入历史s",
+        "DNN输出mu/sigma→截断分布采样q",
+        "式7求loss oracle",
+        "式14估计梯度",
+        "式15更新"
+      ],
+      "inference_steps": [
+        "输入实时s",
+        "DNN输出mu/sigma",
+        "从截断分布抽样q"
+      ],
+      "input_output": "s→随机qg，训练需loss scalar",
+      "function": "完整两阶段程序；推断也采样不是必然直接输出均值",
+      "visual_verified": true,
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              5
+            ],
+            "object_label": "Algorithm1"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    }
+  ],
+  "framework": {
+    "pages": [
+      2,
+      3,
+      4,
+      5
+    ],
+    "inputs": [
+      "state s=(active net injections p,reactive consumption qc)",
+      "known actuator fixed bounds",
+      "loss observation/oracle during offline training"
+    ],
+    "outputs": [
+      "M=5 inverter reactive injections sampled from truncated Gaussian"
+    ],
+    "modules": [
+      {
+        "id": "M1",
+        "operation": "DNN48→32→16 ReLU",
+        "output": "5 mean/std pairs"
+      },
+      {
+        "id": "M2",
+        "operation": "fixedsupport truncatedGaussian",
+        "output": "feasible box q sample"
+      },
+      {
+        "id": "M3",
+        "operation": "observed loss or CVX SOCP7",
+        "output": "loss value for state/action"
+      },
+      {
+        "id": "M4",
+        "operation": "score-function14,weight15 (Adam)",
+        "output": "policy parameters"
+      },
+      {
+        "id": "M5",
+        "operation": "online DNN+density sampling, no online OPF stated",
+        "output": "reactive action"
+      }
+    ],
+    "training": {
+      "hidden_neurons": [
+        48,
+        32,
+        16
+      ],
+      "optimizer": "Adam",
+      "learning_rate": 0.001,
+      "batch_size": 30,
+      "epochs": 40,
+      "software": "TensorFlow + CVX2.1 citation",
+      "hardware": "NVIDIA TitanX12GB",
+      "initialization_seed": "not_reported",
+      "dataset_split": "not_reported precisely"
+    },
+    "assumptions": [
+      "radial network, stationary state process",
+      "sufficient observed/simulated loss feedback for candidate actions",
+      "fixed box support from oversized inverter",
+      "SOCP exact only under cited conditions, not verified for every sample",
+      "box-feasible action need not automatically ensure allbus voltage feasibility"
+    ],
+    "model_free_boundary": "update不需f解析表达/状态概率密度；实证loss由已知模型CVX算，不能称整个实验无系统知识",
+    "safety_gap": "截断只约束逆变器无功；采样动作使OPF不可行时的loss/修正处理未报告",
+    "evidence": [
+      {
+        "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+        "locator": {
+          "physical_pages": [
+            2,
+            3,
+            4,
+            5
+          ],
+          "object_label": "paper.framework"
+        },
+        "review_status": "single_assistant_source_reviewed_pending_independent_review"
+      }
+    ]
+  },
+  "datasets": [
+    {
+      "id": "DS1",
+      "pages": [
+        5,
+        6
+      ],
+      "name": "Smart* consumption and solar generation, 2011-08-24, on SCE47-bus feeder",
+      "type": "one-day real-trace simulation",
+      "date": "2011-08-24",
+      "sample_interval": "not_reported",
+      "sample_count": "not_reported",
+      "split": "明确split training/test，但比例、索引、是否shuffle/连续时间隔离未给",
+      "topology": "SCE47-bus feeder",
+      "inverter_buses": [
+        2,
+        16,
+        18,
+        21,
+        22
+      ],
+      "inverter_capacities_kw": [
+        300,
+        80,
+        300,
+        400,
+        200
+      ],
+      "load_power_factor": 0.8,
+      "preprocessing_and_mapping": "household→feeder scaling/mapping not fully given",
+      "source_reference": "Smart* [2], feeder [3]",
+      "external_data_verification": "not_assessed",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              5,
+              6
+            ],
+            "object_label": "DS1"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    }
+  ],
+  "experiments": [
+    {
+      "id": "X1",
+      "pages": [
+        5,
+        6
+      ],
+      "design": "training convergence comparison",
+      "objects": [
+        "F4"
+      ],
+      "baseline": "deterministic perfect-observationSOCP16",
+      "metrics": "observed loss and running average",
+      "finding": "学习loss下降接近但未重合baseline；没有精确最终均值/差距表",
+      "boundary": "训练过程点轨迹，不独立测试误差",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              5,
+              6
+            ],
+            "object_label": "X1"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "X2",
+      "pages": [
+        5,
+        6
+      ],
+      "design": "heldout inference loss comparison",
+      "objects": [
+        "F5"
+      ],
+      "baseline": "SOCP16",
+      "finding": "学习与基线走势接近但通常更高且波动；near-optimal无gap bound",
+      "runtime_claim": "正文一数量级更快；没有绝对秒值/重复/平台对齐的timing表",
+      "boundary": "单日单网络，无noise magnitude或延迟扰动设计",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              5,
+              6
+            ],
+            "object_label": "X2"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    }
+  ],
+  "figures": [
+    {
+      "id": "F1",
+      "label": "Figure1",
+      "page": 3,
+      "title": "Statistical learning architecture.",
+      "type": "architecture",
+      "panel_count": 1,
+      "content_and_function": "状态→DNN→mu/sigma→概率密度块→无功采样，解释策略分布",
+      "visual_verified": true,
+      "uncertainty": "不是独立训练CI；图4浅色为实际观察值",
+      "digitization_status": "not_assessed;未从图近似读出精确结果",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              3
+            ],
+            "object_label": "Figure1"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "F2",
+      "label": "Figure2",
+      "page": 4,
+      "title": "Two-phase reactive power control procedure.",
+      "type": "workflow",
+      "panel_count": 1,
+      "content_and_function": "离线历史训练/在线实时推断；两个流程并列（作为1个复合流程图）",
+      "visual_verified": true,
+      "uncertainty": "不是独立训练CI；图4浅色为实际观察值",
+      "digitization_status": "not_assessed;未从图近似读出精确结果",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              4
+            ],
+            "object_label": "Figure2"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "F3",
+      "label": "Figure3",
+      "page": 5,
+      "title": "Schematic diagram of the47-bus distribution feeder.",
+      "type": "network",
+      "panel_count": 1,
+      "content_and_function": "提供案例拓扑，不是实物部署照片",
+      "visual_verified": true,
+      "uncertainty": "不是独立训练CI；图4浅色为实际观察值",
+      "digitization_status": "not_assessed;未从图近似读出精确结果",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              5
+            ],
+            "object_label": "Figure3"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "F4",
+      "label": "Figure4",
+      "page": 6,
+      "title": "Training loss of statistical learning compared with baseline(optimal).",
+      "type": "convergence",
+      "panel_count": 1,
+      "content_and_function": "红学习/蓝baseline，浅色观测/深色running average；学习有残留gap；非CI",
+      "visual_verified": true,
+      "uncertainty": "不是独立训练CI；图4浅色为实际观察值",
+      "digitization_status": "not_assessed;未从图近似读出精确结果",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              6
+            ],
+            "object_label": "Figure4"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "F5",
+      "label": "Figure5",
+      "page": 6,
+      "title": "Inference loss values of statistical learning and baseline(optimal).",
+      "type": "test_timeseries",
+      "panel_count": 1,
+      "content_and_function": "测试约0–250横轴iteration、红学习蓝虚线baseline；无指定物理单位、无数值聚合表",
+      "visual_verified": true,
+      "uncertainty": "不是独立训练CI；图4浅色为实际观察值",
+      "digitization_status": "not_assessed;未从图近似读出精确结果",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              6
+            ],
+            "object_label": "Figure5"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    }
+  ],
+  "tables": [],
+  "table_inventory_status": {
+    "status": "source_reviewed_absent",
+    "pages": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "count": 0,
+    "explanation": "全文无编号表格；Algorithm1单列algorithms，不伪造table占位。",
+    "evidence": [
+      {
+        "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+        "locator": {
+          "physical_pages": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "object_label": "paper.table_inventory_status"
+        },
+        "review_status": "single_assistant_source_reviewed_pending_independent_review"
+      }
+    ]
+  },
+  "statistics": {
+    "pages": [
+      5,
+      6
+    ],
+    "independent_experiment_designs": 2,
+    "baseline_count": 1,
+    "training_epochs": 40,
+    "batch_size": 30,
+    "learning_rate": 0.001,
+    "train_test_split": "exists but exact proportion/index/chronological separation unreported",
+    "seeds_repeats": "not_reported",
+    "sd_ci": "not_reported",
+    "hypothesis_tests": "not_reported",
+    "numerical_aggregate_metrics": "not_reported; Figure4/5 trajectories only",
+    "runtime": "order-of-magnitude faster stated without exact timing or variance",
+    "ablation": "not_reported; no architecture/depth/distribution/noise/gradient-estimator ablation",
+    "sensitivity": "not_reported",
+    "robustness": "abstract claims robust to input perturbations; no explicit noise/delay/adversarial experiment; conclusion leaves corrupt observation handling future",
+    "leakage_audit": "not_assessed; no temporal split details",
+    "fairness": "displayed baseline16 omits explicit inverterbox2; code would be required to establish same constraints",
+    "evidence": [
+      {
+        "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+        "locator": {
+          "physical_pages": [
+            5,
+            6
+          ],
+          "object_label": "paper.statistics"
+        },
+        "review_status": "single_assistant_source_reviewed_pending_independent_review"
+      }
+    ]
+  },
+  "theory": {
+    "pages": [
+      3,
+      4
+    ],
+    "formal_theorems": 0,
+    "formal_proofs": 0,
+    "derivation_objects": [
+      {
+        "id": "DER1",
+        "page": 3,
+        "equations": [
+          "E6",
+          "E7",
+          "E8"
+        ],
+        "logic": "非凸branchcurrent等式→SOC relaxation，标准数学变换",
+        "limit": "精确性只引用特定条件，未列case逐样本tightness验证",
+        "evidence": [
+          {
+            "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+            "locator": {
+              "physical_pages": [
+                3
+              ],
+              "object_label": "DER1"
+            },
+            "review_status": "single_assistant_source_reviewed_pending_independent_review"
+          }
+        ]
+      },
+      {
+        "id": "DER2",
+        "page": 4,
+        "equations": [
+          "E13",
+          "E14"
+        ],
+        "logic": "随机策略积分→likelihood-ratio→函数值×score unbiased形式",
+        "limit": "积分微分交换/支撑正密度等条件未详述；确定性phi与随机pi对应依赖平滑近似",
+        "evidence": [
+          {
+            "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+            "locator": {
+              "physical_pages": [
+                4
+              ],
+              "object_label": "DER2"
+            },
+            "review_status": "single_assistant_source_reviewed_pending_independent_review"
+          }
+        ]
+      }
+    ],
+    "guarantees": "没有DNN训练收敛/全局最优/近最优误差或所有电压安全定理",
+    "statistical_learning_usage": "作者称unsupervised/model-free；本质基于loss feedback的随机策略梯度，非监督标签回归",
+    "evidence": [
+      {
+        "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+        "locator": {
+          "physical_pages": [
+            3,
+            4
+          ],
+          "object_label": "paper.theory"
+        },
+        "review_status": "single_assistant_source_reviewed_pending_independent_review"
+      }
+    ]
+  },
+  "issues": [
+    {
+      "id": "I1",
+      "pages": [
+        2,
+        4,
+        5
+      ],
+      "category": "model_free_scope",
+      "detail": "声称无system knowledge，但Alg1 step8与实证需CVX解SOCP7得到loss。更新规则可model-free，而本案例训练oracle有已知物理模型。",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              2,
+              4,
+              5
+            ],
+            "object_label": "I1"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "I2",
+      "pages": [
+        2,
+        3,
+        5
+      ],
+      "category": "baseline_constraint_omission",
+      "detail": "式16b只引用7b–7c，未显式包含qg的式2界；不能确定baseline和policy是否同一可行集。仅指展示式缺项，不声称代码错。",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              2,
+              3,
+              5
+            ],
+            "object_label": "I2"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "I3",
+      "pages": [
+        4,
+        5
+      ],
+      "category": "safety_unresolved",
+      "detail": "截断高斯保证box动作但未保证voltage3；未报告动作导致oracle不可行的处理/修正/电压违规次数。",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              4,
+              5
+            ],
+            "object_label": "I3"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "I4",
+      "pages": [
+        3,
+        4
+      ],
+      "category": "objective_notation",
+      "detail": "式9–10固定q期望与state-dependent policy映射混用；式13a→13b从deterministicphi到stochasticpi后提delta近似，未给近似误差。",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              3,
+              4
+            ],
+            "object_label": "I4"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "I5",
+      "pages": [
+        1,
+        5,
+        6
+      ],
+      "category": "robustness_evidence_gap",
+      "detail": "摘要random input perturbation robust，正文无noise/延迟强度或分布外测试；未来才讨论corrupted/adversarial observations。",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              1,
+              5,
+              6
+            ],
+            "object_label": "I5"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "I6",
+      "pages": [
+        5,
+        6
+      ],
+      "category": "runtime_reporting",
+      "detail": "称one order magnitude speedup，无实际运行时间、warmup、求解器设置或重复；不能提取精确加速比表。",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              5,
+              6
+            ],
+            "object_label": "I6"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "I7",
+      "pages": [
+        4,
+        5
+      ],
+      "category": "distribution_parameter_terminology",
+      "detail": "正文DNN输出standard deviation，Alg1说variance sigma；具体density实现与sigma正值参数化未报告。",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              4,
+              5
+            ],
+            "object_label": "I7"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    }
+  ],
+  "claim_evidence": [
+    {
+      "id": "C1",
+      "pages": [
+        5,
+        6
+      ],
+      "claim": "learning near-optimal reactive control",
+      "support": [
+        "F4",
+        "F5"
+      ],
+      "boundary": "单一feeder/单日且curve有gap；无gap数值或理论界，baseline同约束待核实",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              5,
+              6
+            ],
+            "object_label": "C1"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "C2",
+      "pages": [
+        4,
+        5
+      ],
+      "claim": "no labeled optimal actions needed",
+      "support": [
+        "E14",
+        "A1"
+      ],
+      "boundary": "仍需state-action损耗反馈/已知模型SOCP oracle；不等于无反馈数据",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              4,
+              5
+            ],
+            "object_label": "C2"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "C3",
+      "pages": [
+        5
+      ],
+      "claim": "fast online inference",
+      "support": [
+        "A1",
+        "F2"
+      ],
+      "boundary": "神经推断设计合理；原文runtime只定性量级，无实测细项供验证",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              5
+            ],
+            "object_label": "C3"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    },
+    {
+      "id": "C4",
+      "pages": [
+        1,
+        6
+      ],
+      "claim": "robust control under unreliable observations",
+      "support": [],
+      "boundary": "motivating claim not tested by explicit perturbation study",
+      "evidence": [
+        {
+          "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+          "locator": {
+            "physical_pages": [
+              1,
+              6
+            ],
+            "object_label": "C4"
+          },
+          "review_status": "single_assistant_source_reviewed_pending_independent_review"
+        }
+      ]
+    }
+  ],
+  "conclusions": {
+    "pages": [
+      5,
+      6
+    ],
+    "supported": "通过随机截断高斯神经策略和score-function学习，把无功控制的优化负担移至离线；单日SCE47节点实证显示学习loss接近SOCP基线。",
+    "not_established": [
+      "无模型端到端训练",
+      "所有bus电压安全保证",
+      "general optimality guarantee",
+      "定量鲁棒性",
+      "可核验精确10倍speedup",
+      "大系统/跨日泛化"
+    ],
+    "future_work": "损坏/对抗观测鲁棒统计、拓扑物理感知网络",
+    "reviewer_boundary": "保留原文证据边界，不替作者给最终判断",
+    "evidence": [
+      {
+        "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+        "locator": {
+          "physical_pages": [
+            5,
+            6
+          ],
+          "object_label": "paper.conclusions"
+        },
+        "review_status": "single_assistant_source_reviewed_pending_independent_review"
+      }
+    ]
+  },
+  "narrative": {
+    "pages": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "macro_arc": "实时约束动机→物理非凸问题→SOC对照→统计参数化→score-function学习→单案例曲线→未来鲁棒/结构化",
+    "theory_experiment_link": "式7既训练loss oracle又提供式16对照，因此应说明模型依赖而非简单无模型标语",
+    "original_sentence_frameworks": [
+      {
+        "move": "计算迁移",
+        "template": "将[在线求解负担]转移到[离线学习]后，[在线模块]只执行[简单计算]；实际收益仍需以[统一计时协议]量化。",
+        "status": "助手原创非引用"
+      },
+      {
+        "move": "无标签边界",
+        "template": "该方法不需要[最优动作标签]，但仍依赖[状态—动作评价反馈]，因此[无标签]与[无系统模型]应分别界定。",
+        "status": "助手原创"
+      },
+      {
+        "move": "理论到实验",
+        "template": "[松弛模型]在[条件]下与原问题一致；本文实验支持[有限观察]，尚未验证[条件在每个案例成立]。",
+        "status": "助手原创"
+      }
+    ],
+    "paragraph_annotation": "partial:章节/论证链，非全部段落标注",
+    "language_quantification": "not_assessed",
+    "evidence": [
+      {
+        "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+        "locator": {
+          "physical_pages": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "object_label": "paper.narrative"
+        },
+        "review_status": "single_assistant_source_reviewed_pending_independent_review"
+      }
+    ]
+  },
+  "difficulty": {
+    "status": "single_assistant_provisional_pending_independent_review",
+    "rating_version": "DESIGN.v0.1",
+    "scale": "0–4 ordinal, not quality",
+    "dimensions": {
+      "D_T": {
+        "value": 2,
+        "range": [
+          1,
+          2
+        ],
+        "reason": "SOC变换与score-function推导，属于标准理论应用，无新定理",
+        "pages": [
+          3,
+          4
+        ],
+        "evidence": [
+          {
+            "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+            "locator": {
+              "physical_pages": [
+                3,
+                4
+              ],
+              "object_label": "paper.difficulty.dimensions.D_T"
+            },
+            "review_status": "single_assistant_source_reviewed_pending_independent_review"
+          }
+        ]
+      },
+      "D_A": {
+        "value": 2,
+        "range": [
+          1,
+          2
+        ],
+        "reason": "DNN+截断分布+lossoracle训练集成，无新复杂度分析",
+        "pages": [
+          4,
+          5
+        ],
+        "evidence": [
+          {
+            "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+            "locator": {
+              "physical_pages": [
+                4,
+                5
+              ],
+              "object_label": "paper.difficulty.dimensions.D_A"
+            },
+            "review_status": "single_assistant_source_reviewed_pending_independent_review"
+          }
+        ]
+      },
+      "D_S": {
+        "value": 1,
+        "range": [
+          1,
+          1
+        ],
+        "reason": "训练/测试曲线无重复统计或扰动设计",
+        "pages": [
+          5,
+          6
+        ],
+        "evidence": [
+          {
+            "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+            "locator": {
+              "physical_pages": [
+                5,
+                6
+              ],
+              "object_label": "paper.difficulty.dimensions.D_S"
+            },
+            "review_status": "single_assistant_source_reviewed_pending_independent_review"
+          }
+        ]
+      },
+      "D_D": {
+        "value": 1,
+        "range": [
+          1,
+          2
+        ],
+        "reason": "单日真实负荷/solar搭配单feeder，数据工程有限且split不全",
+        "pages": [
+          5
+        ],
+        "evidence": [
+          {
+            "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+            "locator": {
+              "physical_pages": [
+                5
+              ],
+              "object_label": "paper.difficulty.dimensions.D_D"
+            },
+            "review_status": "single_assistant_source_reviewed_pending_independent_review"
+          }
+        ]
+      },
+      "D_E": {
+        "value": 2,
+        "range": [
+          1,
+          2
+        ],
+        "reason": "CVX与TF/GPU训练反馈需集成，但无实际运行控制部署",
+        "pages": [
+          5
+        ],
+        "evidence": [
+          {
+            "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+            "locator": {
+              "physical_pages": [
+                5
+              ],
+              "object_label": "paper.difficulty.dimensions.D_E"
+            },
+            "review_status": "single_assistant_source_reviewed_pending_independent_review"
+          }
+        ]
+      },
+      "D_X": {
+        "value": 2,
+        "range": [
+          2,
+          3
+        ],
+        "reason": "支路潮流/凸松弛/逆变器边界与随机神经策略实质耦合",
+        "pages": [
+          2,
+          3,
+          4
+        ],
+        "evidence": [
+          {
+            "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+            "locator": {
+              "physical_pages": [
+                2,
+                3,
+                4
+              ],
+              "object_label": "paper.difficulty.dimensions.D_X"
+            },
+            "review_status": "single_assistant_source_reviewed_pending_independent_review"
+          }
+        ]
+      }
+    },
+    "composite": null
+  },
+  "availability": {
+    "pages": [
+      1,
+      5,
+      6
+    ],
+    "code": "not_reported",
+    "data": "Smart* reference supplied; no exact split artifacts",
+    "software": "CVX2.1/TF citations, TitanX12GB; no TFversion",
+    "references_count": 25,
+    "external_reference_verification": "not_assessed",
+    "funding": "NSFC61522303,61720106011,61621063,U1613225;CSC;NSF1711471,1901134",
+    "evidence": [
+      {
+        "source_sha256": "1725337431f8f83f19a9d57b58cccae84def18094c379cb19773ae154a218c60",
+        "locator": {
+          "physical_pages": [
+            1,
+            5,
+            6
+          ],
+          "object_label": "paper.availability"
+        },
+        "review_status": "single_assistant_source_reviewed_pending_independent_review"
+      }
+    ]
+  },
+  "inventory_counts": {
+    "physical_pages": 6,
+    "body_top_level_sections": 6,
+    "body_all_numbered_sections": 8,
+    "numbered_equation_groups": 16,
+    "numbered_subequation_items": 30,
+    "numbered_figures": 5,
+    "numbered_tables": 0,
+    "algorithms": 1,
+    "experimental_designs": 2,
+    "references": 25,
+    "formal_theorems": 0,
+    "proofs": 0,
+    "strict_controlled_component_ablation_count": 0,
+    "paragraph_count": null,
+    "all_unnumbered_math_count": null
+  }
+}

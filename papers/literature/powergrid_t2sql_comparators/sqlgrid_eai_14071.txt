@@ -1,0 +1,1076 @@
+EAI Endorsed Transactions
+on Energy Web                                                                                      Research Article
+
+
+SQL-GRID: A Grounded Retrieval and Interactive
+Disambiguation Agent for Text-to-SQL over Power Grid
+Data
+Yaoqiang Xu 1*, Li Li 1, Chen Qian 1 and Jin Zhou 1
+
+1
+ East Branch of State Grid Corporation of China, Shanghai 200120, China
+
+
+
+Abstract
+
+    Power grid data often contain highly abstract metadata, ambiguous business terms, and complex statistical scopes. These
+    characteristics make general large language models prone to semantic deviation and SQL hallucination in Text-to-SQL tasks.
+    To address this problem, this paper proposes SQL-GRID, a grounded retrieval and interactive disambiguation agent for Text-
+    to-SQL over power grid data. The framework is based on a multi-agent collaboration mechanism. It integrates retrieval,
+    validation, disambiguation, and SQL generation modules to transform natural language intent into accurate SQL statements.
+    To bridge the gap between business semantics and database structures, this paper constructs a Business Knowledge
+    Representation(BKR) based knowledge base, which integrates database structural information, business descriptions, real
+    data samples, and statistical rules. A multi-strategy RAG method is also designed. It combines semantic vector retrieval with
+    keyword matching and provides accurate domain knowledge for SQL generation. To address business ambiguity, this paper
+    further proposes a closed-loop mechanism consisting of pre-generation disambiguation, interactive clarification, and post-
+    generation validation. Through explicit human-machine interaction, the framework guides users to clarify statistical
+    granularity and statistical scope constraints. This process effectively reduces uncertainty during SQL generation.
+    Experimental results show that the proposed method achieves a metadata recall rate of 94% on the power grid dataset. The
+    SQL execution rate increases from 40.2% in the traditional baseline to 84.6%. The semantic matching score reaches 4.85.
+    These results show that the proposed framework significantly improves the accuracy and reliability of self-service queries
+    in complex power grid scenarios.
+
+
+    Keywords: SQL-GRID, Text-to-SQL, Power Grid Data, Grounded Retrieval, Interactive Disambiguation, Business Knowledge
+    Representation(BKR), SQL Hallucination
+
+    Received on 16 July 2026, accepted on 25 August 2026, published on 04 September 2026
+
+    Copyright © 2026 Yaoqiang Xu et al., licensed to EAI. This is an open access article distributed under the terms of the CC BY-NC-
+    SA 4.0, which permits copying, redistributing, remixing, transformation, and building upon the material in any medium so long as the
+    original work is properly cited.
+
+    doi: 10.4108/ew.14071
+
+    Corresponding author. Email: psc01sgcc@139.com
+    *
+
+
+
+
+1. Introduction
+                                                                         [3–5,6]. This provides a new technical approach for non-
+In recent years, large language models (LLMs) have made                  technical users to access databases through natural language.
+rapid progress in natural language understanding, text                      At the same time, power systems are undergoing rapid
+generation, and complex reasoning [1,2]. Their potential in              digital and intelligent transformation. Large amounts of real-
+structured data querying has also become increasingly                    time and historical data have been accumulated in dispatch
+important. LLMs have shown a strong ability to map natural               operation, equipment maintenance, power generation
+language intents to executable queries. They have also                   management, and raw material procurement. These data
+achieved significant progress in general Text-to-SQL tasks               provide an important foundation for safe grid operation and
+
+
+                                                                                                               EAI Endorsed Transactions on
+                                                                                                                               Energy Web
+                                                                     1                                                  | Volume 13 | 2026 |
+Y. Xu et al.
+
+
+
+
+refined management. However, current power grid data                            Instead, they involve multi-step calculation logic.
+analysis methods still mainly rely on professional developers                   Such logic is often hidden in business rules. This
+to write SQL statements. They also depend on predefined                         increases the reasoning burden of SQL
+reports, fixed query templates, or drag-and-drop visualization                  construction.
+tools. These methods cannot meet the flexible and changing               (v)    SQL hallucination under complex table structures:
+self-service analysis needs of business users in practical                      Power grid data structures are complex.Without
+scenarios. Power grid business users usually have strong                        accurate metadata constraints, LLMs lack a reliable
+domain knowledge and business semantic understanding.                           basis for identifying the correct context. As a result,
+They can clearly describe business questions and constraints.                   they may generate SQL statements that are
+However, they often lack knowledge of database schemas and                      syntactically correct but semantically meaningless.
+SQL programming. This limits the efficiency of data value                       Typical errors include incorrect table associations
+extraction. Therefore, introducing Text-to-SQL into power                       and invalid query logic. These errors directly affect
+grid systems can reduce the technical threshold of data                         the credibility and usability of query results [7-
+querying and improve query flexibility for business users.                      9,13].
+   However, power grid data and power grid queries are
+highly specialized and semantically complex. Existing                     Overall, these problems often lead to semantic mis-
+general Text-to-SQL methods face several challenges in this            understanding, poor metadata retrieval, and hallucinated
+scenario [7,8,9]. These challenges can be summarized as                schema completion in power grid scenarios. The generated
+follows:                                                               SQL statements may fail to execute or may return irrelevant
+                                                                       results. Therefore, the core bottleneck of Text-to-SQL in the
+   (i)    Highly abstract metadata with weak self-                     power grid domain is not only SQL generation itself. It
+          descriptiveness: Table names and field names in              mainly lies in three aspects: accurate semantic representation
+          power grid databases are highly abstract. Many               of domain metadata, efficient metadata retrieval, and
+          names use Chinese pinyin abbreviations or mixed              effective multi-level ambiguity resolution.
+          Chinese-English naming styles. They cannot                      To address these challenges, this paper proposes SQL-
+          directly reflect their business meanings. For                GRID, a grounded retrieval and interactive disambiguation
+          example, the table name “DW_H_MON_DC”                        agent for Text-to-SQL over power grid data. SQL-GRID
+          represents monthly historical data of power plants in        adopts a multi-agent collaboration mechanism [14-17]. It
+          grid management. The field “FYGZ” represents the             constrains and enhances the SQL generation process through
+          electricity category of “peak, shoulder, valley, and         several key stages, including natural language understanding,
+          total”. Such naming rules greatly increase the               domain semantic retrieval, ambiguity resolution, and query
+          difficulty of mapping database structures to                 result verification. The goal is to provide reliable natural-
+          business semantics.                                          language-driven self-service query capability for power grid
+  (ii)    Complex professional expressions and ambiguous               business users.
+          semantic boundaries: The same business concept                  The main contributions of this paper are summarized as
+          may have multiple synonymous expressions, such               follows:
+          as “load” and “demand”. In contrast, terms with
+          similar surface meanings may have different                     (i)   A business knowledge construction method for
+          business semantics. For example, “generator-side               power grid data: To address the problems of highly abstract
+          power generation” and “grid-connected power                    database naming and implicit business rules in power grid
+          generation” both describe generated electricity.               databases, this paper integrates database structural
+          However, they differ in statistical boundaries and             information, business documents, statistical rules, and real
+          application scenarios. This may cause semantic                 data samples to construct a unified Business Knowledge
+          mapping errors between natural language queries                Representation. The proposed representation provides
+          and underlying data semantics [10,11,12].                      domain knowledge that is both understandable and
+ (iii)    Complex and inconsistent metric definitions: The               reasoning-oriented, thereby offering effective support for
+          same metric name may correspond to different                   retrieval augmentation and SQL generation.
+          statistical periods, statistical objects, or spatial           (ii)   A high-recall and low-noise multi-strategy retrieval-
+          scopes in different tables. For example, “grid-                augmented generation method: To address the semantic
+          connected power generation” may have different                 complexity and ambiguous semantic boundaries of power
+          calculation methods and business meanings under                grid data, this paper designs a multi-strategy RAG method
+          monthly statistics, daily statistics, single power             that combines semantic vector retrieval and keyword
+          plant scope, whole-grid scope, dispatching scope, or           retrieval. This method improves metadata recall while
+          full-scope statistics. These differences place higher          reducing irrelevant retrieval noise. It provides accurate
+          requirements on semantic understanding and SQL                 metadata support and concise contextual information for
+          construction in Text-to-SQL systems.                           Text-to-SQL generation.
+ (iv)     Widespread implicit calculation logic of metrics:             (iii)   A semantic-enhanced ambiguity resolution strategy
+          In power grid business scenarios, many commonly                for ambiguous metrics: To address terminology ambiguity,
+          used metrics are not stored as single database fields.         metric definition ambiguity, and statistical scope ambiguity
+
+
+                                                                                                            EAI Endorsed Transactions on
+                                                                                                                            Energy Web
+                                                                   2                                                 | Volume 13 | 2026 |
+            SQL-GRID: A Grounded Retrieval and Interactive Disambiguation Agent for Text-to-SQL over Power Grid Data
+
+
+
+  in power grid business queries, this paper proposes an               [25] improve retrieval efficiency by constructing high-quality
+  ambiguity resolution strategy driven by Business Knowledge           knowledge representations.Although the context windows of
+  Representation. The strategy combines ambiguity detection,           LLMs continue to expand, models may still fail to effectively
+  user-oriented interactive selection, and post-generation             use relevant information when it is embedded in long and
+  SQL validation. It effectively reduces semantic mapping              redundant contexts [18]. Therefore, recent RAG research
+  errors and SQL hallucination. It also improves the accuracy          increasingly emphasizes high-quality and concise knowledge
+  and interpretability of generated SQL statements.                    representations [26]. This work focuses on structured
+                                                                       knowledge representation and efficient retrieval in the power
+   Experimental results show that the proposed framework               grid domain, aiming to achieve seamless integration between
+performs well on a power grid business dataset. The average            structured information and LLM reasoning.
+metadata recall rate reaches 94%. Compared with the
+traditional baseline method, the SQL execution rate increases
+from 40.2% to 84.6%. The average semantic matching score               2.3. Semantic Ambiguity Resolution
+reaches 4.85 out of 5. These results verify the effectiveness
+of the proposed method in complex power grid scenarios.                    Existing studies have extensively investigated query
+                                                                       ambiguity in Text-to-SQL tasks. According to the
+                                                                       intervention stage in the processing pipeline, current methods
+2. Related Work                                                        can generally be categorized into three groups: preprocessing,
+                                                                       in-processing, and post-processing methods.Preprocessing
+                                                                       methods aim to resolve ambiguity before SQL generation.
+2.1. Text-to-SQLResearch Progress of LLM-                              For example, APA [10] fine-tunes LLMs to actively generate
+based Text-to-SQL                                                      clarification requests for ambiguous inputs. User interaction
+                                                                       is then utilized to complete ambiguity resolution before the
+   Large language models (LLMs) have recently attracted                generation stage.In-processing methods focus on identifying
+significant attention in SQL generation due to their strong text       and resolving ambiguity during SQL generation. RTS [11]
+generation capability [1]. LLM-based Text-to-SQL systems               concentrates on the schema linking stage. It utilizes
+have gradually evolved into a modular collaborative                    pretrained classifiers on LLM hidden representations and
+paradigm. For example, DIN-SQL[3] and MAC-SQL [4]                      combines consistency prediction techniques to provide
+adopt multi-agent frameworks to decompose tasks into                   reliable probabilistic guarantees for error detection during
+multiple subtasks, thereby improving execution efficiency.             translation.Post-processing methods mainly refine and
+MCS-SQL [5], DAIL-SQL [18], and Chase-SQL [6] also                     optimize initially generated SQL statements. SQLens [13]
+follow a workflow that retrieves relevant context, selects             trains classifiers to predict potential errors and then performs
+schemas, and synthesizes SQL queries.However, these                    correction and auditing to improve SQL quality. The method
+systems generally assume that natural language queries are             proposed in [12] generates multiple interpretation candidates
+precisely expressed. When queries contain ambiguity, these             using LLMs and employs pretrained models to complete
+methods are prone to hallucination issues, which reduce                missing information, thereby producing semantically clearer
+system reliability [7, 8]. This work also adopts a modular             SQL outputs.This work mainly addresses various ambiguous
+collaborative framework and further introduces ambiguity               expressions in power grid business queries. Corresponding
+detection and resolution mechanisms for power grid query               ambiguity handling strategies are introduced in all three
+scenarios.                                                             stages.
+
+
+2.2. Retrieval-Augmented Generation                                    2.4. Multi-Agent Collaborative Framework
+   The performance of LLMs on knowledge-intensive natural                 Multi-agent collaboration aims to utilize collective
+language tasks heavily depends on the accuracy and relevance           intelligence to solve complex problems that are difficult for a
+of the available contextual information [2,19,20]. Retrieval-          single agent to handle. In terms of collaboration mechanisms,
+Augmented Generation (RAG) explicitly introduces external              CAMEL [14] first introduced a role-playing framework for
+document retrieval modules into the generation process. It is          automatic task decomposition. MetaGPT [15] further
+widely regarded as an important technical paradigm for                 incorporated Standard Operating Procedures (SOPs) to
+addressing the limitations of LLMs in knowledge coverage               standardize workflows among agents. Regarding
+and update capability [9].With the development of intelligent          collaboration topology, GPTSwarm [16] proposed an
+agents, RAG systems have gradually evolved into modular                optimizable graph structure to adapt to dynamic task
+and complex intelligent architectures, with retrieval quality          requirements. In addition, studies such as AgentVerse [17]
+becoming a major research focus. Studies [21-23] improve               demonstrated that social interaction environments can
+retrieval decisions through reinforcement learning, adaptive           effectively stimulate emergent capabilities, improve
+retrieval, and self-reflective generation. Deep-RAG [24]               reasoning quality, and suppress hallucinations. Multi-agent
+provides a flexible end-to-end solution that enables arbitrary         systems can achieve collaborative reasoning capabilities
+models to progressively retrieve information according to              beyond those of individual agents. They effectively reduce
+their evolving reasoning process. In addition, some methods            hallucinations and improve the ability to solve complex
+
+                                                                                                            EAI Endorsed Transactions on
+                                                                                                                            Energy Web
+                                                                   3                                                 | Volume 13 | 2026 |
+Y. Xu et al.
+
+
+
+
+problems. Similarly, this work implements an interactive
+Text-to-SQL system based on a multi-agent collaborative
+framework.
+
+
+
+
+                      Figure 1. Architecture of SQL-GRID for Text-to-SQL over Power Grid Data
+
+
+3. Multi-Agent Text-to-SQL Interactive                                 business user, the execution process of the multi-agent
+Assistance System for Power Grid Data                                  framework is described as follows:
+
+To address the limitation that conventional power grid data              • Retrieval and validation stage. Based on the semantic
+analysis methods cannot support flexible and self-service                  understanding of Q, the Retrieval Agent retrieves
+analysis needs, this paper proposes SQL-GRID, a Text-to-                   relevant candidate metadata from the external
+SQL interactive assistance system based on multi-agent                     knowledge base. The candidate metadata are then
+collaboration. The overall architecture is shown in Figure 1.              passed to the Validation Agent. The Validation Agent
+The system consists of five core agents: the Retrieval Agent,              determines whether the current query can be answered
+Validation Agent, Disambiguation Agent, SQL Generation                     by the data source. If the data source cannot support Q,
+Agent, and Visualization Agent. These agents work together                 the system informs the user that the current query is not
+to achieve end-to-end processing from natural language                     answerable.
+intent to visualized analytical reports. This section introduces         • Ambiguity detection and resolution stage. If Q is
+the overall system architecture and the functions of each                  answerable but contains semantic ambiguity, the
+agent. The key technical details, including the retrieval                  Disambiguation Agent triggers an interactive
+method and the disambiguation mechanism, are presented in                  clarification mechanism. This mechanism helps the user
+Sections 4 and 5, respectively.                                            identify the target metadata. Multi-round interaction
+                                                                           continues until the query intent becomes clear and
+                                                                           unambiguous.
+3.1. Framework Design                                                    • SQL generation and self-verification stage. The SQL
+                                                                           Generation Agent constructs SQL statements based on
+Framework Workflow                                                         the ambiguity-free context. It also performs dual self-
+As shown in Figure 1, the agents cooperate along the main                  verification from both semantic and syntactic
+process of metadata perception, query feasibility validation,              perspectives. If verification fails, the system
+semantic disambiguation, SQL generation and verification,                  automatically performs iterative correction until the
+and result visualization. This process forms a complete Text-              SQL statement passes all checks.
+to-SQL workflow for power grid business queries. Given a                 • Visualization stage. The data results obtained by
+database query requirement Q submitted by a power grid                     executing the final SQL statement are rendered into
+                                                                           charts by the Visualization Agent.
+
+                                                                                                          EAI Endorsed Transactions on
+                                                                                                                          Energy Web
+                                                                   4                                               | Volume 13 | 2026 |
+            SQL-GRID: A Grounded Retrieval and Interactive Disambiguation Agent for Text-to-SQL over Power Grid Data
+
+
+
+   The whole process supports user interaction. For example,         performs semantic back-translation to verify the consistency
+when validation fails, the system promptly informs the user          between the SQL statement and the original query. On the
+that the current query is not answerable. When ambiguity             syntactic side, the system checks syntax correctness and
+exists, the system explains the source of ambiguity and              executability in a sandbox environment. If verification fails,
+provides candidate options for user selection. Users can also        iterative regeneration is triggered until a semantically
+choose the preferred visualization style for the final output.       consistent and executable SQL statement is obtained.
+This design forms a user-friendly interactive system.                   Visualization Agent. The Visualization Agent is
+                                                                     responsible for visualizing the SQL query results as charts.
+Agent Functions                                                      The agent selects appropriate chart types according to the
+    Retrieval Agent. The Retrieval Agent provides the data           query semantics and data characteristics, such as bar charts
+foundation for the entire multi-agent framework. It is               or line charts. For example, trend charts are preferred for
+responsible for accurate metadata retrieval. The input of this       time-series metrics to ensure that the results are intuitive and
+agent is the user natural language query Q. The agent adopts         easy to understand.
+a multi-strategy RAG retrieval mechanism, which is
+described in Section 4, to perform semantic matching over
+the Semantic-Enhanced Metadata Knowledge Base in the                 3.2. Key Technical Challenges
+power grid domain. It combines vector-based semantic
+retrieval and BM25 keyword matching for parallel retrieval.          In the complete Text-to-SQL generation process, SQL
+It also applies deduplication fusion and path reachability           generation accuracy depends not only on the reasoning
+filtering. This ensures that the retrieved candidate metadata        ability of LLMs. It also depends heavily on their ability to
+are valid in both semantic relevance and structural                  perceive power grid domain knowledge and resolve complex
+availability. This process provides concise and reliable             business semantics. A comprehensive analysis shows that
+contextual support for the subsequent validation and                 insufficient knowledge perception and amplified semantic
+disambiguation stages.                                               ambiguity are two key bottlenecks that affect system
+    Validation Agent. The Validation Agent determines                performance. Specifically, the system faces the following
+whether the current query can be answered by the business            two technical challenges:
+database. It receives the candidate knowledge retrieved by
+the Retrieval Agent together with the user query Q. After               • Challenge 1: Insufficient metadata perception under
+performing semantic understanding of Q with the assistance                semantic-structure disconnection. During long-term
+of an LLM, the agent initiates the validation process. The                evolution, power grid databases have formed highly
+validation process consists of three sequential checks:                   abstract and weakly self-descriptive metadata. Problems
+business scope coverage, data attribute completeness, and                 such as compressed naming and implicit business
+business rule satisfaction. If any validation step fails, the             semantics are common. As a result, structured metadata
+system explicitly reports why the query cannot be answered                cannot explicitly express actual business meanings.
+and prompts the user to refine the query, thereby preventing              Without semantic-enhanced representation and
+unnecessary downstream processing.                                        effective retrieval mechanisms, the model cannot
+    Disambiguation Agent. The Disambiguation Agent                        accurately establish the mapping between query intent
+detects and resolves ambiguity in queries that are answerable             and database structures.
+but semantically unclear. Based on semantic-enhanced                    • Challenge 2: SQL hallucination caused by complex
+metadata, the agent compares highly similar candidate                     business ambiguity. Power grid business queries often
+metadata from several dimensions, including terminology,                  contain multiple forms of semantic ambiguity, such as
+business meaning, statistical scope, and temporal granularity.            inconsistent statistical scopes and unclear temporal
+When multiple candidate metadata entries can answer the                   granularity. Users usually have limited knowledge of
+user query but contain key differences, the system presents               database contents. If the system lacks an explicit
+the candidate options and their distinguishing features to the            clarification mechanism, the model may make implicit
+user through an interactive interface. For example, for the               semantic assumptions. This may lead to SQL statements
+query power plant generation”, both monthly power                         that are inconsistent with actual business requirements.
+generation” and “daily power generation” may answer the
+                                                                        To address these challenges, this paper proposes
+query, but they differ in temporal granularity. By making
+                                                                     systematic solutions in the following sections:
+ambiguity explicit and asking the user to confirm the
+                                                                        For Challenge 1, Section 4 proposes a semantic-structure
+intended option, the system effectively reduces the risk of
+                                                                     aligned knowledge enhancement and retrieval method for
+semantic hallucination in subsequent SQL generation.
+                                                                     power grid data. By constructing a Business Knowledge
+    SQL Generation Agent. The SQL Generation Agent
+                                                                     Index that integrates business semantics, statistical rules, and
+generates SQL statements based on the ambiguity-free query
+                                                                     real data characteristics, and by combining it with a multi-
+intent and the support of enhanced metadata. The system
+                                                                     strategy RAG retrieval mechanism, the proposed method
+feeds the semantic parsing result and metadata descriptions
+                                                                     improves the perception of domain knowledge.
+into the LLM as contextual input. The LLM then generates
+                                                                        For Challenge 2, Section 5 proposes a closed-loop SQL
+an initial SQL statement. The generated SQL then enters the
+                                                                     Hallucination suppression method consisting of “pre-
+self-verification stage. On the semantic side, the system
+
+                                                                                                          EAI Endorsed Transactions on
+                                                                                                                          Energy Web
+                                                                 5                                                 | Volume 13 | 2026 |
+Y. Xu et al.
+
+
+
+
+generation disambiguation → interactive clarification                and execution errors during SQL generation. This ensures the
+→post-generation validation”. The method combines                    semantic consistency and executability of the final SQL
+semantic enhancement, user interaction, and iterative SQL            statement.
+verification. It continuously detects and corrects ambiguities
+
+
+
+
+                          Figure 2. Construction of the Business Knowledge Representation
+
+
+4. Semantic-Structure Aligned Business                               Power grid databases are characterized by highly abstract
+Knowledge Perception and Retrieval                                   naming conventions, implicit business rules, and complex
+                                                                     statistical definitions. To address these challenges, this work
+Method for Power Grid Data                                           constructs a unified Business Knowledge Representation
+                                                                     (BKR). Instead of directly relying on database schemas, the
+As discussed in Section 3.2, the core bottleneck of Text-to-
+                                                                     proposed representation integrates database structural
+SQL in power grid scenarios is not the lack of SQL
+                                                                     information, historical business documents, real data
+generation capability. Instead, LLMs struggle to consistently
+                                                                     samples, and domain expert knowledge to organize business
+perceive the highly abstract database structures and the
+                                                                     information required for query understanding into a
+implicit business semantics embedded in power grid data.
+                                                                     collection of Knowledge Units.
+When query semantics cannot be accurately aligned with the
+                                                                        Each Knowledge Unit contains not only structural
+underlying data structures, the model is prone to generating
+                                                                     descriptions of the underlying data but also integrates
+incorrect field selections, invalid table associations, and
+                                                                     business semantics, statistical rules, representative example
+other semantic errors.
+                                                                     values, and semantic relationships. This representation
+   To address this issue, this paper proposes a Semantic-
+                                                                     enables LLMs to understand business concepts directly
+Structure Aligned Business Knowledge Perception and
+                                                                     without depending on the naming conventions of the
+Retrieval Method for power grid data. Rather than relying
+                                                                     underlying database objects. The overall construction
+directly on raw database schemas, the proposed method
+                                                                     process is illustrated in Figure 2.
+focuses on the business semantics and structural constraints
+                                                                        Formally, a Knowledge Unit is defined as Equation (1),
+of power grid databases. By constructing a Business
+                                                                     where 𝐷𝐷𝑖𝑖 denotes the structural description of the underlying
+Knowledge Representation centered on business semantics
+                                                                     data object,𝐴𝐴𝑖𝑖 denotes the attribute semantic set, 𝑅𝑅𝑖𝑖 denotes
+and combining it with a multi-strategy retrieval mechanism
+and context refinement strategy, the method provides                 the associated business rule set, 𝐸𝐸𝑖𝑖 denotes representative
+accurate and reliable domain knowledge for SQL generation.           example values, and 𝐿𝐿𝑖𝑖 denotes semantic links to other
+                                                                     Knowledge Units. The complete Business Knowledge
+                                                                     Representation is then formulated as Equation (2).
+4.1. Construction of Business Knowledge
+                                                                                     K𝑈𝑈𝑖𝑖 = {𝐷𝐷𝑖𝑖 , 𝐴𝐴𝑖𝑖 , 𝑅𝑅𝑖𝑖 , 𝐸𝐸𝑖𝑖 , 𝐿𝐿𝑖𝑖 }            (1)
+Representation
+                                                                                  𝐵𝐵𝐵𝐵𝐵𝐵 = {K𝑈𝑈1 , K𝑈𝑈2 , ⋯ , K𝑈𝑈𝑛𝑛 }                       (2)
+
+                                                                                                                     EAI Endorsed Transactions on
+                                                                                                                                     Energy Web
+                                                                 6                                                            | Volume 13 | 2026 |
+               SQL-GRID: A Grounded Retrieval and Interactive Disambiguation Agent for Text-to-SQL over Power Grid Data
+
+
+
+   Business semantic description generation. The system                             knowledge. Knowledge Units containing unresolved
+combines database structural information, attribute                                 conflicts or inconsistent information are marked for further
+composition, relationship constraints, and historical business                      verification before being updated in the knowledge index.
+documents. An LLM is employed to automatically generate                             This quality-control process reduces the propagation of
+business-oriented      descriptions     and      identify     the                   semantic errors from automatically generated descriptions
+corresponding                                                                       and improves the reliability of the knowledge used for
+business scenario and statistical scope, enabling raw                               retrieval and SQL generation.
+database objects to be associated with explicit business
+semantics.
+   Attribute semantic enrichment. The system further                                4.2. Retrieval Context Refinement and Scale
+incorporates attribute types, real data samples, and business                       Control for SQL Generation
+context to generate natural language explanations for
+important business attributes involved in user queries.                             To simultaneously support the diverse semantic expressions
+Representative example values are also provided to improve                          in power grid business queries and the precise matching of
+the model’s understanding of encoded attributes, status                             entity identifiers, this work designs a dual-path retrieval
+attributes, and textual attributes.For an attribute 𝑎𝑎𝑖𝑖𝑖𝑖 in                       mechanism that combines semantic vector retrieval with
+Knowledge Unit 𝐾𝐾𝑈𝑈𝑖𝑖 , its semantic representation is                              BM25 keyword retrieval. A weighted fusion strategy
+formulated as Equation (3),where 𝑡𝑡𝑖𝑖𝑖𝑖 is the attribute type,𝐸𝐸𝑖𝑖𝑖𝑖                together with path consistency constraints is further
+denotes example values, 𝐶𝐶𝑖𝑖 denotes the business context of                        introduced to improve the quality of retrieved candidate
+𝐾𝐾𝑈𝑈𝑖𝑖 , and fattr (·) represents the LLM-based attribute                           knowledge.
+                                                                                        Given a user query Q which is defined as Equation (8), the
+semantic enrichment function.
+                                                                                    system first employs an LLM to extract key semantic
+                 𝑠𝑠𝑠𝑠𝑠𝑠                                                             elements, including business entities, metric names, and
+               𝐴𝐴𝑖𝑖𝑖𝑖   = 𝑓𝑓𝑎𝑎𝑎𝑎𝑎𝑎𝑎𝑎 (𝑎𝑎𝑖𝑖𝑖𝑖 , 𝑡𝑡𝑖𝑖𝑖𝑖 , 𝐸𝐸𝑖𝑖𝑖𝑖 , 𝐶𝐶𝑖𝑖 )   (3)
+                                                                                    filtering conditions, and then constructs a semantic vector
+                                                                                    representation of the query. During the retrieval stage, two
+   Business rule enrichment. For business statistical rules                         retrieval paths are executed in parallel. On the one hand,
+that cannot be directly represented by the database, the                            semantic vector retrieval is performed by computing the
+system constructs business rule descriptions based on                               cosine similarity between the query vector and different
+historical reports and domain expert knowledge. These rules                         types of business knowledge, including business semantic
+are further associated with the underlying data structures to                       descriptions, business attributes, and business rules, to
+support complex metric interpretation and SQL                                       retrieve the most relevant candidate Knowledge Units. For
+reasoning.Formally, a business rule 𝑟𝑟𝑘𝑘 is represented as                          semantic vector retrieval, the relevance score between Q and
+Equation (4), where 𝑚𝑚𝑘𝑘 denotes the target metric, 𝑃𝑃𝑘𝑘 denotes                    𝐾𝐾𝑈𝑈𝑖𝑖 is computed as Equation (9).On the other hand, BM25
+the calculation procedure, 𝐶𝐶𝑘𝑘 denotes applicable conditions,                      keyword retrieval is employed to accurately match domain-
+and 𝐺𝐺𝑘𝑘 denotes the statistical granularity or scope. The rule-                    specific entities, such as power plant IDs and equipment
+to-data association is defined as Equation (5),where ϕ(·)                           codes.For keyword retrieval, the BM25 score is computed as
+maps a business rule to the required data attributes.                               Equation (10). The retrieval results from the two paths are
+                                    𝑟𝑟𝑘𝑘 = {𝑚𝑚𝑘𝑘 , 𝑃𝑃𝑘𝑘 , 𝐶𝐶𝑘𝑘 , 𝐺𝐺𝑘𝑘 }. (4)        combined using a weighted fusion strategy, as shown in
+                                 𝜙𝜙(𝑟𝑟𝑘𝑘 ) = {𝑎𝑎1 , 𝑎𝑎2 , ⋯ , 𝑎𝑎𝑝𝑝 }. (5)           Equation (11). Here, α denotes the weighting parameter. In
+   Finally, each Knowledge Unit is encoded into a unified                           this work, α is set to 0.65 to achieve a good balance between
+semantic vector representation and organized within a                               semantic retrieval capability and entity matching precision.
+Unified Knowledge Index, which enables efficient retrieval                          The fusion weight α and the number of retained candidates
+during subsequent query processing. As shown in Equation                            K were determined using the development set and were kept
+(6) and Equation (7), Enc(·) denotes the text embedding                             fixed during evaluation on the test set. We compared several
+function and 𝑣𝑣𝑖𝑖 is the vector representation of 𝐾𝐾𝑈𝑈𝑖𝑖 .                          candidate configurations by jointly considering metadata
+                                      𝑣𝑣𝑖𝑖 = 𝐸𝐸𝐸𝐸𝐸𝐸(𝐾𝐾𝑈𝑈𝑖𝑖 ).            (6)        recall, exact entity matching, and retrieval-context size. The
+                                    𝑈𝑈𝑈𝑈𝑈𝑈 = {(𝐾𝐾𝑈𝑈𝑖𝑖 , 𝑣𝑣𝑖𝑖 )}𝑛𝑛𝑖𝑖=1 . (7)         configuration α=0.65 and K=8 provided the best overall
+   Knowledge quality control. To reduce potential                                   balance between semantic retrieval and keyword-based exact
+semantic errors introduced during automatic BKR                                     matching and was therefore adopted in all subsequent
+construction, each Knowledge Unit is checked before being                           experiments. The test set was not used for parameter
+incorporated into the Unified Knowledge Index. First,                               selection.
+structural consistency is verified by comparing table names,                                                                       𝑞𝑞 = 𝐸𝐸𝐸𝐸𝐸𝐸(𝑄𝑄).            (8)
+field names, data types, and relationships against the original                                                                                     𝑞𝑞∙𝑣𝑣
+                                                                                                                 𝑠𝑠𝑖𝑖𝑣𝑣𝑣𝑣𝑣𝑣 = 𝑐𝑐𝑐𝑐𝑐𝑐(𝑞𝑞, 𝑣𝑣𝑖𝑖 ) = ‖𝑞𝑞‖‖𝑣𝑣𝑖𝑖 ‖. (9)
+database schema, thereby preventing nonexistent database                                                                                                𝑖𝑖
+
+objects or invalid structural relationships from being                                                           𝑠𝑠𝑖𝑖𝑏𝑏𝑏𝑏25 = 𝐵𝐵𝐵𝐵25(𝑄𝑄, 𝐾𝐾𝑈𝑈𝑖𝑖 ).        (10)
+                                                                                                         𝑓𝑓𝑓𝑓𝑓𝑓𝑓𝑓𝑓𝑓            𝑣𝑣𝑣𝑣𝑣𝑣            𝑏𝑏𝑏𝑏25
+introduced. Second, business-semantic information,                                                    𝑠𝑠𝑖𝑖           = 𝛼𝛼 ∙ 𝑠𝑠𝑖𝑖 + (1 − 𝛼𝛼) ∙ 𝑠𝑠𝑖𝑖      . (11)
+including metric definitions, statistical scopes, and                                  When conflicts occur between the two retrieval paths, the
+calculation rules, is checked against the source business                           system applies a conflict resolution rule. For example, if the
+documents, rule descriptions, and available domain                                  same Knowledge Unit is retrieved by both methods but the
+
+
+                                                                                                                                 EAI Endorsed Transactions on
+                                                                                                                                                 Energy Web
+                                                                                7                                                         | Volume 13 | 2026 |
+Y. Xu et al.
+
+
+
+
+ranking difference is greater than three positions, the vector                     Excessive retrieval information may cause contextual
+retrieval result is prioritized because vector retrieval is better                 redundancy and interfere with the reasoning attention of
+at capturing implicit semantics. The final candidate set is                        LLMs. To avoid this problem, this work introduces a strict
+formulated as Equation (12). This operation removes                                context refinement strategy during the generation stage.
+duplicate Knowledge Units and retains only the most                                During context construction, the system only preserves the
+relevant candidates for SQL generation.                                            final Top-K relevant metadata. Intermediate retrieval
+                                                          𝑓𝑓𝑓𝑓𝑓𝑓𝑓𝑓𝑓𝑓
+                     𝐶𝐶𝑘𝑘 = 𝑇𝑇𝑇𝑇𝑇𝑇𝑇𝑇({𝐾𝐾𝑈𝑈𝑖𝑖 }𝑛𝑛𝑖𝑖=1 , 𝑠𝑠𝑖𝑖          ). (12)       information, such as similarity scores and tool invocation
+   After deduplication based on metadata IDs, the system                           traces, is excluded from the main context. This design
+generates a concise candidate set. This mechanism                                  prevents the model from performing unnecessary secondary
+effectively suppresses retrieval noise while maintaining high                      reasoning over the retrieval process itself during SQL
+recall.                                                                            generation. It also reduces attention distraction.
+                                                                                      Through the above strategy, the system significantly
+                                                                                   reduces token consumption while preserving sufficient
+4.3. Business-Semantics-Oriented                                                   semantic information. As a result, the model can focus more
+Knowledge Base Retrieval                                                           effectively on critical business logic. This improves the
+                                                                                   generation stability and result accuracy of the multi-agent
+                                                                                   Text-to-SQL system in power grid scenarios.
+
+
+
+
+                                 Figure 3. Multi-Stage SQL Hallucination Suppression Framework
+
+
+5. Semantic-Enhanced Ambiguity                                                     mechanism throughout the Text-to-SQL pipeline. The
+Resolution Method                                                                  mechanism covers the stages before, during, and after SQL
+                                                                                   generation. It combines pre-generation ambiguity detection,
+After constructing the Semantic-Enhanced Metadata                                  interactive semantic clarification, and post-generation
+Knowledge Base, the LLM obtains sufficient domain                                  validation and repair. In this way, it forms a closed-loop SQL
+knowledge support for power grid scenarios. However, in                            quality control process.
+real business queries, enhanced metadata retrieval alone is
+still insufficient to fully avoid SQL generation errors. On the                    5.1. Definition and Classification of Semantic
+one hand, user queries often contain imprecise descriptions
+or implicit constraints, which may introduce semantic                              Ambiguity in Power Grid Queries
+ambiguity. On the other hand, SQL is a highly structured
+language. It has strict requirements for syntax and execution                      This work defines “semantic ambiguity” as the existence of
+conditions. If these problems are not properly handled, the                        multiple reasonable database mapping paths under a given
+model may generate SQL statements that are semantically                            user query and the current metadata knowledge base. In
+inconsistent or non-executable. This leads to the problem of                       power grid scenarios, a query may correspond to multiple
+SQL hallucination.                                                                 reasonable interpretations under different business contexts
+    To address this problem, this work introduces a multi-                         or statistical scopes. To address this problem, this work
+stage ambiguity resolution and hallucination suppression
+
+                                                                                                                       EAI Endorsed Transactions on
+                                                                                                                                       Energy Web
+                                                                               8                                                | Volume 13 | 2026 |
+            SQL-GRID: A Grounded Retrieval and Interactive Disambiguation Agent for Text-to-SQL over Power Grid Data
+
+
+
+identifies three major types of semantic ambiguity. Their             guesses. This can lead to hallucinated SQL generation.
+definitions and detection rules are described below.                  Therefore, an explicit ambiguity resolution process is
+   Terminology ambiguity. If a business term in the query             necessary.
+matches multiple semantically similar fields in field-level               Ambiguity detection criteria. To further clarify the
+metadata, the query is identified as containing terminology           triggering conditions of semantic ambiguity, the system
+ambiguity. For example, the term “power generation” may               combines the number of candidate mappings, semantic
+correspond to generator-side power generation, grid-                  relevance, and differences in business attributes.
+connected power generation, or total power generation in the          Terminology ambiguity is triggered when a query term can
+same table. This type of ambiguity is mainly detected by              be mapped to at least two candidate fields whose semantic
+checking whether the semantic similarity among candidate              relevance exceeds a predefined threshold τ. Statistical-scope
+fields exceeds a predefined threshold.                                ambiguity is triggered when two or more candidate tables
+   Statistical scope ambiguity. If candidate metadata                 belong to the same business topic but differ in their
+correspond to multiple tables with similar semantics but              statistical-scope attributes. Granularity ambiguity is
+different statistical scopes, the query is identified as              triggered when the user query does not explicitly specify
+containing statistical scope ambiguity. For example,                  temporal or spatial granularity, while two or more valid
+DDKJ_H_DAY_DW” and DW_H_DAY_DW” represent                             candidate mappings with different granularities are retrieved.
+daily grid electricity data under the dispatching scope and the       In our implementation, τ is set to 0.85 based on the
+whole-grid scope, respectively. Both tables are highly                development set and is kept fixed throughout all experiments.
+relevant to the query “daily grid electricity”. This type of
+ambiguity is mainly detected by checking whether candidate
+tables share the same business topic but differ in statistical        5.2. Multi-Stage Semantic Resolution and
+scope.                                                                SQL Hallucination Suppression Mechanism
+   Granularity ambiguity. If the query does not explicitly
+specify temporal or spatial granularity, while the candidate          To address semantic uncertainty commonly found in power
+metadata contain multiple granularity levels, the query is            grid business queries, this work proposes a multi-stage
+identified as containing granularity ambiguity. For example,          ambiguity resolution and hallucination suppression
+the query calculate power generation” may correspond to the           mechanism. The mechanism consists of “pre-generation
+monthly power generation table DW_H_MON_DC” or the                    semantic disambiguation → interactive semantic
+daily power generation table “DW_H_DAY_DC”.                           clarification →post-generation syntax validation and repair”.
+   If these ambiguities are not identified before SQL                 The overall workflow is illustrated in Figure 3.
+generation, the model may make unstable probabilistic
+
+
+
+
+Pre-generation stage: semantic disambiguation                         concepts in the query with the descriptions of candidate
+based on enhanced metadata                                            Knowledge Units and detects one-to-many mapping
+The system first takes the user query and the retrieved highly        conflicts, such as a query term matching multiple statistical
+relevant Knowledge Units as input. As described in                    scopes at the same time.
+Algorithm 1, the LLM extracts semantic intents and
+constraints from the query and performs semantic                      Generation stage: interactive semantic clarification
+completeness validation. The model compares the business              and explicit constraint specification
+
+
+                                                                                                          EAI Endorsed Transactions on
+                                                                                                                          Energy Web
+                                                                  9                                                | Volume 13 | 2026 |
+Y. Xu et al.
+
+
+
+
+As described in Algorithm 1, When semantic ambiguity is                suppression process is summarized in Algorithm 2. The
+detected, the system automatically generates targeted                  algorithm evaluates generated SQL from both execution and
+clarification questions according to the ambiguity type and            semantic consistency perspectives and iteratively repairs
+the business descriptions in the enhanced metadata. The                invalid SQL statements based on validation feedback. For
+corresponding metadata information is also presented to the            example, the actual format of a date field may be 2025-11-
+user. Taking statistical scope ambiguity as an example, the            04”, while the generated SQL incorrectly uses 2025.11.04”.
+system asks the user to confirm the data source: A.                    To address this problem, the system introduces an
+DDKJ_H_DAY_DW” (daily grid electricity data under the                  executability-oriented validation and repair mechanism after
+dispatching scope); B. DW_H_DAY_DW” (daily grid                        SQL generation. First, based on the confirmed semantic
+electricity data under the whole-grid scope). This interaction         constraints, the system checks the syntax and structural
+guides the user to explicitly specify the desired statistical          validity of the generated SQL. The checked items include
+scope. The user’s selection is then transformed into an                table-field relationships, the legality of aggregation function
+explicit semantic constraint. It is combined with the original         usage, and the completeness of multi-table join conditions.
+query as the input condition for SQL generation.                       Then, the system performs pre-execution verification to test
+                                                                       SQL executability. If validation fails, the system feeds the
+Post-generation          stage:      executability-oriented            error information and repair instructions back to the
+syntax validation and iterative repair                                 generation model. It then triggers targeted local regeneration.
+Even after pre-generation ambiguity resolution and                     After a limited number of validation and repair iterations, the
+interactive clarification, the generated SQL may still fail due        system outputs a final SQL statement that is semantically
+to syntax errors, invalid structural associations, or                  consistent and stably executable. As illustrated in Algorithm
+inconsistent filtering conditions. To further suppress SQL             2, the proposed mechanism forms a closed-loop process from
+hallucination, this work introduces a closed-loop validation           SQL generation, execution validation, error analysis, and
+and repair mechanism. The complete SQL hallucination                   iterative repair.
+
+
+
+
+6. Experimental Results and Analysis                                   interactive disambiguation effectiveness, and system
+                                                                       efficiency. The experiments are designed to evaluate
+To verify the effectiveness of the proposed SQL-GRID                   whether semantic-enhanced metadata can alleviate the
+system for Text-to-SQL over power grid data in complex                 semantic-structure gap in power grid data, whether
+power grid business scenarios, this paper conducts                     multi-strategy retrieval can improve metadata recall
+experimental analysis from several aspects, including                  quality, whether Interactive Disambiguation can reduce
+overall performance, module contribution, retrieval                    semantic deviation in SQL generation, and whether the
+quality,                                                               complete
+
+                                                                                                            EAI Endorsed Transactions on
+                                                                                                                            Energy Web
+                                                                  10                                                 | Volume 13 | 2026 |
+             SQL-GRID: A Grounded Retrieval and Interactive Disambiguation Agent for Text-to-SQL over Power Grid Data
+
+
+
+system can maintain an acceptable interaction cost while                   time dispatching, and operation analysis. Each domain
+improving accuracy.                                                        contains 100 queries. To ensure that the evaluation samples
+                                                                           reflect the complexity of power grid Text-to-SQL tasks, each
+                                                                           query contains at least one of the following characteristics:
+6.1. Experimental Settings and Evaluation                                  unclear business terminology or multiple synonymous
+Metrics                                                                    expressions; unspecified statistical scope or temporal
+                                                                           granularity; implicit metric calculation; multi-table
+   Dataset construction. To realistically reflect the                      association or complex filtering conditions. For each sample,
+semantic understanding challenges in power grid business                   domain experts manually annotate the corresponding
+scenarios, this paper constructs an evaluation dataset                     standard SQL statement, related tables and fields, ambiguity
+containing 500 representative natural language queries. The                type, and expected query result. These annotations are used
+dataset covers five core business domains: meteorological                  as Ground Truth for experimental evaluation. The
+risk monitoring, fuel market, equipment maintenance, real-                 composition of the dataset is shown in Table 1.
+
+                                        Table 1. Composition of the Evaluation Dataset
+
+
+               Business Domain                       Number of Queries       Main Ambiguity Type
+               Meteorological Risk Monitoring        100                     Time range and regional range
+               Fuel Market                           100                     Market source and statistical scope
+               Equipment Maintenance                 100                     Equipment type and code mapping
+               Real-Time Dispatching                 100                     Dispatching scope and time window
+               Operation Analysis                    100                     Metric definition and daily/monthly granularity
+
+
+    Experimental environment. All experiments are conducted                  Evaluation metrics. This paper uses the following
+under the same software and hardware environment. The base                 metrics to evaluate system performance:
+model used in this work is qwen3-coder:30b-a3b-q8_0. Only the
+metadata enhancement method, retrieval strategy, Interactive                   (i) SQL execution rate: The proportion of generated SQL
+Disambiguation module, and post-generation validation module                 statements that can be executed in the database without errors.
+are configured differently across experiments. This setting                   (ii) Average semantic matching score: This metric
+ensures a fair comparison.                                                   evaluates the consistency between the generated SQL and the
+    Comparison methods. This paper sets the following                        original user query intent. The score is evaluated by domain
+comparison methods:                                                          experts with the assistance of LLMs. The maximum score is 5.
+     (i) Schema-only: Only the raw database schema and the                   The semantic matching score was independently assessed by
+   user query are provided to the LLM. No semantic                           two domain evaluators with experience in power-grid business
+   enhancement, retrieval augmentation, or Interactive                       analysis. For each query, the evaluators compared the original
+   Disambiguation is used.                                                   user request, the ground-truth SQL, and the generated SQL
+    (ii) General RAG: A knowledge base is constructed based                  according to the criteria in Table 2. The LLM was used only to
+   on the raw schema. Vector retrieval is used to retrieve relevant          assist in interpreting the business semantics of SQL statements
+   tables and fields. However, semantic-enhanced information                 and did not directly determine the final score. When the
+   such as business descriptions, example values, metric                     difference between evaluator scores exceeded 1, the sample
+   definitions, and calculation logic is not included.                       was re-examined and the final score was determined after
+  (iii)    Semantic-Enhanced RAG: Enhanced information,                      discussion. This procedure was adopted to reduce subjectivity
+   including business descriptions, real data samples, statistical           and improve scoring consistency.The detailed scoring criteria
+   rules, and calculation knowledge, is introduced. Retrieval is             are shown in Table 2.
+   then performed based on this enhanced information.                       (iii)     Metadata recall rate: This metric measures the
+  (iv) Semantic Enhancement+Multi-Strategy Retrieval:                        proportion of manually annotated relevant tables or fields
+   Based on semantic-enhanced metadata, both BM25                            that are hit in the Top-K candidate metadata returned by
+   keyword retrieval and semantic vector retrieval are used                  retrieval. It includes table_recall, column_recall, and
+   for multi-path recall and fusion ranking.                                 avg_recall.
+   (v) Complete System: Based on semantic-enhanced                          (iv) Average repair rounds: This metric measures the
+   metadata and multi-strategy retrieval, the complete system                average number of iterations required by the validation and
+   further introduces pre-generation ambiguity detection,                    repair mechanism after SQL generation.
+   interactive semantic clarification, and post-generation                   (v) Average interaction rounds: This metric measures
+   SQL validation and repair.                                                the average number of clarification rounds initiated by the
+                                                                             system to resolve ambiguity.
+
+
+                                                                                                                 EAI Endorsed Transactions on
+                                                                                                                                 Energy Web
+                                                                      11                                                  | Volume 13 | 2026 |
+Y. Xu et al.
+
+
+
+
+  (vi) Average response time: This metric measures the                   (vii) Average token consumption: This metric measures
+  average time required by the system from receiving a query to           the average number of tokens consumed in one query
+  outputting the SQL statement and result explanation. The actual         process, including prompts, retrieval context, clarification
+  thinking time of the user is not included.                              content, and model outputs.
+
+
+                                         Table 2. Semantic Matching Scoring Criteria
+
+
+                 Semantic Matching Score     Scoring Criteria
+                                             The generated SQL fully matches the business semantics. The tables,
+                 5
+                                             fields, filtering conditions, and statistical scopes are all correct.
+                                              The generated SQL generally matches the business semantics, with only
+                 4
+                                             minor deviations that do not affect the core business intent of the query.
+                                             The generated SQL partially matches the business semantics, but contains
+                 3
+                                             obvious deviations in business understanding.
+                                             The generated SQL only matches partial keywords and fails to correctly
+                 2
+                                             represent the business intent.
+                 1                           The generated SQL is largely unrelated to the semantics of the user query.
+                 0                            No valid SQL statement is generated.
+
+
+
+6.2. Overall Performance Comparison and                                  Schema-only method using only the raw database schema,
+Module Contribution Analysis                                             General RAG with vector retrieval, Semantic-Enhanced
+                                                                         RAG with semantic-enhanced metadata, Semantic
+                                                                         Enhancement+ Multi-Strategy Retrieval with both BM25
+This experiment compares the overall performance of                      and vector retrieval, and the Complete System with
+different system configurations. It also analyzes the                    Interactive    Disambiguation      and     post-generation
+contribution of each core module by gradually                            validation. The experimental results are shown in Table 3.
+introducing different modules. Specifically, this paper                  Figure 4 shows the dual-axis comparison of the SQL
+compares the                                                             execution rate and the average semantic matching score.
+
+
+
+
+        Figure 4. Comparison of SQL Executability and Semantic Matching Score among Different Methods
+
+
+                                                                                                              EAI Endorsed Transactions on
+                                                                                                                              Energy Web
+                                                                    12                                                 | Volume 13 | 2026 |
+              SQL-GRID: A Grounded Retrieval and Interactive Disambiguation Agent for Text-to-SQL over Power Grid Data
+
+
+
+                             Table 3. Overall Performance Comparison of Different Methods
+
+
+     Method                      Meta.    Retr.             Dis.        Val.     Exec.     Score     Repair     Time/s     Tokens
+     Schema-only                 No       No                No          No       40.2%     2.95      3.66       99.4       24052
+     General RAG                 No       Vector            No          No       50.6%     3.08      3.41       111.7      18260
+     Semantic-Enhanced RAG       Yes      Vector            No          No       74.8%     4.18      4.56       112.9      20874
+     SE + Multi-Strategy
+     Retrieval
+                                 Yes      BM25+Vector       No          No       80.4%     4.35      4.62       113.5      21420
+     SQL-GRID                    Yes      BM25+Vector       Yes         Yes      84.6%     4.85      3.46       120.2      19761
+
+
+
+   As shown in Table 3, the Schema-only method only relies                 For the auxiliary metrics, the Complete System has an
+on the raw database schema. It is difficult for this method to          average response time of 120.2s and an average token
+understand highly abstract table names and field names in               consumption of 19761. These values change compared with
+power grid databases. Therefore, its SQL execution rate is              the previous methods, but the performance improvement is
+only 40.2%, and its average semantic matching score is 2.95.            significant. Overall, the stepwise comparison in Table 3
+General RAG introduces part of the structured context                   clearly demonstrates the contribution of each module. These
+through external retrieval. It improves the SQL execution               results also verify the effectiveness of the formalized pipeline
+rate to 50.6%. However, the retrieved content lacks business            from Knowledge Unit construction, dual-path retrieval,
+semantic explanations. It provides limited support for field            interactive disambiguation, to post-generation validation.
+meanings, statistical scopes, and implicit metric calculations.         Semantic enhancement mainly improves domain
+Therefore, the average semantic matching score only                     understanding. Multi-Strategy Retrieval mainly improves
+increases to 3.08.                                                      metadata recall quality. Interactive Disambiguation and post-
+   After introducing semantic-enhanced metadata, the                    generation validation further improve the accuracy and
+system expands raw database objects into enriched business              robustness of the final SQL statements.
+knowledge that incorporates business semantic descriptions,                The increased response time of the complete system
+representative example values, and statistical rules. As a              mainly results from the additional multi-stage processing
+result, the SQL execution rate increases to 74.8%, and the              required for reliable SQL generation, including multi-
+average semantic matching score increases to 4.18. This                 strategy knowledge retrieval, ambiguity detection,
+result shows that the key bottleneck of power grid. Text-to-            interactive clarification when necessary, and post-generation
+SQL is not the lack of SQL generation capability of LLMs.               execution validation and iterative repair. In particular,
+Instead, the key bottleneck lies in the stable perception of            validation failures may introduce additional LLM inference
+domain metadata semantics.                                              and database execution overhead due to targeted SQL
+   Furthermore, after combining BM25 and vector retrieval               regeneration. Therefore, the current implementation
+based on semantic enhancement, the system can support both              prioritizes semantic correctness and reliability for complex
+exact matching of entity identifiers and semantic matching of           business queries rather than minimizing response latency.
+natural language business expressions. The SQL execution                Future work will investigate parallel execution of
+rate increases to 80.4%, and the average semantic matching              independent agent operations, caching of frequently
+score increases to 4.35. This shows that Multi-Strategy                 retrieved knowledge, more compact retrieval contexts, and
+Retrieval has strong complementary advantages in power                  lightweight validation models to further reduce end-to-end
+grid scenarios. It can further improve metadata recall quality          latency.
+and downstream SQL generation performance.
+   Finally, based on semantic enhancement and Multi-
+Strategy Retrieval, the Complete System introduces                      6.3. Recall Capability Analysis of the Multi-
+Interactive Disambiguation and post-generation validation.              Strategy Retrieval Mechanism
+The SQL execution rate further increases to 84.6%, and the
+average semantic matching score increases to 4.85. This is
+the best performance among all methods. The results show                This experiment evaluates the performance of three
+that Interactive Disambiguation can effectively reduce                  retrieval strategies, namely BM25, Vector, and
+semantic deviation caused by statistical scope ambiguity,               BM25+Vector, in the power grid metadata retrieval task.
+temporal granularity ambiguity, and terminology ambiguity.              The manually annotated relevant tables and fields are used
+The post-generation validation mechanism can further filter             as the Ground Truth. Precision@K, Top-1 hit rate, and
+non-executable or inconsistent SQL statements.                          context token count are used as evaluation metrics. The
+                                                                        experimental results are shown in Table 4.
+
+
+
+
+                                                                                                              EAI Endorsed Transactions on
+                                                                                                                              Energy Web
+                                                                   13                                                  | Volume 13 | 2026 |
+Y. Xu et al.
+
+
+
+
+               Table 4. Impact of Retrieval Strategies on Metadata Recall Quality and Retrieval Efficiency
+
+
+                                                                                       Precision      Top-1 Hit     Context
+               Method               table_recall   column_recall         avg_recall
+                                                                                       @K             Rate          Tokens
+               BM25                 0.88           0.63                  0.76          0.83           0.67          1326
+               Vector               0.92           0.77                  0.85          0.78           0.76          1564
+               BM25+Vector          1.00           0.88                  0.94          0.86           0.83          1840
+
+
+
+   As shown in Table 4, BM25 achieves high Precision@K                    6.4. Effectiveness Analysis of the Interactive
+when keywords or entity identifiers are clearly expressed.                Disambiguation Module
+However, it has limited coverage for synonymous natural
+language expressions and implicit business semantics. Its                 To verify the effect of the Interactive Disambiguation
+column_recall is only 0.63. Vector retrieval can better                   module on complex business queries, the experiment shown
+capture semantic associations, such as the relationship                   in Table 5 is conducted. Without the ambiguity resolution
+between electricity during “valley periods” and “FYGZ”.                   module, the system can generate executable SQL
+Therefore, its column_recall increases to 0.77. However,                  statements based on semantic-enhanced metadata.
+Vector retrieval is slightly weaker in distinguishing similar             However, when facing ambiguity in terminology, statistical
+entity identifiers and fields with close statistical scopes.After         scope, and temporal granularity, the model still tends to
+combining BM25 and Vector retrieval, the system uses both                 make implicit selections according to retrieval scores. After
+the precision of keyword matching and the semantic                        introducing Interactive Disambiguation, the system can
+generalization ability of vector retrieval. The table_recall              identify potential one-to-many mapping relationships
+reaches 1.00, the column_recall increases to 0.88, and the                before SQL generation. It can also transform user selections
+average recall rate reaches 0.94. Although the fusion strategy            into explicit constraints through clarification questions. As a
+slightly increases the number of candidate metadata items                 result, the average semantic matching score increases from
+and the context token count, the increase remains within an               4.35 to 4.85, and the SQL execution rate increases by 2.2%.
+acceptable range. Therefore, the proposed retrieval strategy
+can meet the real-time requirements of interactive query
+scenarios.
+
+         Table 5. Impact of the Disambiguation Module on SQL Semantic Alignment and SQL Executability
+
+
+                 Method                              Average Semantic Matching Score          SQL Execution Rate
+                 Without Disambiguation Module       4.35                                     80.4%
+                 With Disambiguation Module          4.85                                     82.6%
+
+
+   To further distinguish the respective contributions of                 matching score remains at 4.85. These results suggest that
+Interactive Disambiguation and post-generation validation,                post-generation validation primarily improves SQL
+the results in Tables 3 and 5 are jointly analyzed. Starting              executability and robustness by detecting and repairing
+from the Semantic Enhancement + Multi-Strategy                            syntactic, structural, and execution-related errors after the
+Retrieval configuration in Table 3, the SQL execution rate                semantic intent has been clarified.
+is 80.4%, and the semantic matching score is 4.35. After                     This paper further analyzes the processing effect
+introducing Interactive Disambiguation, as shown in Table                 of Interactive Disambiguation according to different
+5, the SQL execution rate increases to 82.6%, while the                   ambiguity types. The ambiguities in user queries are
+semantic matching score improves substantially to 4.85.                   divided into terminology ambiguity, statistical scope
+This indicates that Interactive Disambiguation primarily                  ambiguity, and granularity ambiguity. The semantic
+improves semantic alignment by explicitly resolving                       matching scores before and after disambiguation and
+ambiguity in terminology, statistical scope, and granularity              the ambiguity detection accuracy are compared. The
+before SQL generation. Based on this configuration, the                   experimental results are shown in Table 6. Interactive
+complete SQL-GRID system further incorporates post-                       Disambiguation improves all three types of ambiguity.
+generation validation and repair, increasing the SQL                      Among them, granularity ambiguity achieves the
+execution rate from 82.6% to 84.6%, while the semantic                    highest       semantic       matching        score       after
+                                                                          disambiguation, reaching 4.90. This indicates that
+                                                                          for
+                                                                                                                  EAI Endorsed Transactions on
+                                                                                                                                  Energy Web
+                                                                    14                                                     | Volume 13 | 2026 |
+            SQL-GRID: A Grounded Retrieval and Interactive Disambiguation Agent for Text-to-SQL over Power Grid Data
+
+
+
+granularity-related questions, such as whether the query               support the system in identifying key differences among
+should be calculated by day or by month, the system can help           candidate tables. The detection accuracy of terminology
+users quickly clarify the query target through simple                  ambiguity is relatively lower. The main reason is that some
+clarification options. Statistical scope ambiguity achieves the        business terms have highly similar semantic boundaries. For
+highest detection accuracy, reaching 0.94. This shows that             example, concepts such as power generation”, grid-
+the statistical scope, business topic, and definition                  connected electricity”, and “generator-side power
+descriptions in semantic-enhanced metadata can effectively             generation” require specific business contexts for accurate
+                                                                       distinction.
+
+                        Table 6. Disambiguation Performance under Different Ambiguity Types
+
+
+                    Ambiguity Type                  Samples       Detection Acc.    Score Before    Score After
+                    Terminology Ambiguity           140           0.89              4.21            4.78
+                    Statistical Scope Ambiguity     170           0.94              4.29            4.86
+                    Granularity Ambiguity           190           0.93              4.51            4.90
+
+
+6.5. Case Studies                                                      ambiguity and a fuel market query with statistical scope
+                                                                       ambiguity.
+                                                                       The two cases presented in this section are selected from the
+To more intuitively demonstrate the workflow of the                    500-query evaluation dataset described in Section 6.1. They
+proposed SQL-GRID system in real power grid                            represent two typical ambiguity scenarios, namely
+business scenarios, this section presents two                          statistical-scope ambiguity and temporal-granularity
+representative case studies. These cases show the ability              ambiguity. The case studies are provided to illustrate the
+of the system to handle complex semantic ambiguity                     end-to-end workflow of SQL-GRID, and their results are
+and generate highly accurate SQL statements. The two                   already included in the overall quantitative evaluation
+cases include an operation analysis query with temporal                reported above.
+granularity
+
+
+
+
+                                                                                                           EAI Endorsed Transactions on
+                                                                                                                           Energy Web
+                                                                  15                                                | Volume 13 | 2026 |
+Y. Xu et al.
+
+
+
+
+                                        Figure 5. Demonstration of Case Study 1
+
+
+Case 1: Statistical Scope Ambiguity Resolution in                    database. Third, the Disambiguation Agent detects that
+the Fuel Market Scenario                                             “crude oil price” corresponds to multiple market sources in
+                                                                     the database, while the user has not specified the statistical
+When the user inputs the query “Retrieve the Brent crude oil         scope. Therefore, the interactive clarification mechanism is
+price trend from the exchange in December 2025”, the                 triggered. As shown in Figure 5, the ambiguous candidate
+system starts the execution process.                                 tables are presented to the user for selection. The user selects
+   First, the Retrieval Agent retrieves two tables related to        “CE_ICE_DAY_NATION_OIL_P”                      (Intercontinental
+crude oil price: “CE_ICE_DAY_NATION_OIL_P”                           Exchange ICE data). Fourth, based on the clarified intent, the
+(Intercontinental      Exchange       ICE      data)     and         SQL Generation Agent identifies the Intercontinental
+“CE_NYMEX_DAY_NATION_OIL_P”                   (New      York         Exchange as the target data source and constructs an accurate
+Mercantile Exchange NYMEX data). Second, the Validation              SQL query. Finally, the Visualization Agent selects an
+Agent confirms that the current query can be answered by the         appropriate chart type to visually present the query results.
+
+
+
+
+                                        Figure 6. Demonstration of Case Study 2
+
+
+                                                                     table). Second, the Validation Agent confirms that both
+Case    2:   Temporal     Granularity   Ambiguity                    tables contain power generation fields and that the user query
+Resolution in the Operation Analysis Scenario.                       can be answered by the current database. Third, the
+                                                                     Disambiguation Agent detects temporal granularity ambiguity
+When the user inputs the query “Retrieve the total grid-             between the daily and monthly dimensions in the candidate
+connected power generation of each power plant in June”,             metadata, while the user has not explicitly specified the required
+the system starts the execution process.                             temporal granularity. Therefore, the interactive clarification
+                                                                     mechanism is triggered. As shown in Figure 6, the ambiguous
+   First, based on keywords such as power plant” and power           candidate tables are presented to the user for selection. The user
+generation”, the Retrieval Agent retrieves two highly                selects “DW_H_MON_DC” (monthly data). Fourth, based on the
+relevant tables: “DW_H_MON_DC” (monthly power plant                  clarified intent, the SQL Generation Agent identifies the
+data table) and “DW_H_DAY_DC” (daily power plant data                monthly table and constructs an accurate SQL query. Finally,
+
+                                                                                                           EAI Endorsed Transactions on
+                                                                                                                           Energy Web
+                                                                16                                                  | Volume 13 | 2026 |
+            SQL-GRID: A Grounded Retrieval and Interactive Disambiguation Agent for Text-to-SQL over Power Grid Data
+
+
+
+the Visualization Agent selects an appropriate chart type to         [2] Brown, T.B.; Mann, B.; Ryder, N.; Subbiah, M.; Kaplan,
+visually present the query results.                                       J.D.; Dhariwal, P.; Neelakantan, A.; Shyam, P.; Sastry,
+   The above case studies demonstrate that the proposed                   G.; Askell, A.; et al. Language Models Are Few-Shot
+framework can not only understand professional business                   Learners. In Proceedings of the Advances in Neural
+                                                                          Information Processing Systems 33, Online, 6–12
+terms but also reduce uncertainty at the source through the               December 2020; Curran Associates, Inc.: Red Hook, NY,
+“pre-generation disambiguation → interactive clarification”               USA, 2020; pp. 1877–1901.
+mechanism. This ensures that the generated SQL statements            [3] Pourreza, M.; Rafiei, D. DIN-SQL: Decomposed In-
+have clear logic and accurate semantics.                                  Context Learning of Text-to-SQL with Self-Correction.
+                                                                          In Proceedings of the Advances in Neural Information
+                                                                          Processing Systems 36, New Orleans, LA, USA, 10–16
+7. Conclusion                                                             December 2023; Curran Associates, Inc.: Red Hook, NY,
+                                                                          USA, 2023; pp. 36339–36348.
+To address the challenges of self-service data querying and          [4] Wang, B.; Ren, C.; Yang, J.; Liang, X.; Bai, J.; Chai, L.;
+the semantic-structure gap in the digital transformation of               Yan, Z.; Zhang, Q.-W.; Yin, D.; Sun, X.; et al. MAC-
+power grid systems, this paper proposes SQL-GRID, a                       SQL: A Multi-Agent Collaborative Framework for Text-
+                                                                          to-SQL. In Proceedings of the 31st International
+grounded retrieval and interactive disambiguation agent for               Conference on Computational Linguistics, Abu Dhabi,
+Text-to-SQL over power grid data. SQL-GRID constructs a                   United Arab Emirates, 19–24 January 2025; Association
+Semantic-Enhanced Metadata Knowledge Base by                              for Computational Linguistics: Stroudsburg, PA, USA,
+integrating business semantics, database schema information,              2025; pp. 540–557.
+and metadata descriptions. It also combines Multi-Strategy           [5] Lee, D.; Park, C.; Kim, J.; Park, H. MCS-SQL:
+Retrieval with a closed-loop Interactive Disambiguation                   Leveraging Multiple Prompts and Multiple-Choice
+strategy. This strategy consists of pre-generation ambiguity              Selection for Text-to-SQL Generation. In Proceedings of
+detection, interactive clarification, and post-generation SQL             the 31st International Conference on Computational
+validation. The proposed system effectively alleviates SQL                Linguistics, Abu Dhabi, United Arab Emirates, 19–24
+                                                                          January 2025; Association for Computational
+hallucination when LLMs process highly abstract database                  Linguistics: Stroudsburg, PA, USA, 2025; pp. 337–353.
+names, complex statistical scopes, and ambiguous business            [6] Pourreza, M.; Li, H.; Sun, R.; Chung, Y.; Talaei, S.;
+terms in power grid data scenarios.                                       Kakkar, G.T.; Gan, Y.; Saberi, A.; Özcan, F.; Arık, S.Ö.
+   Experimental results show that SQL-GRID significantly                  CHASE-SQL: Multi-Path Reasoning and Preference
+improves metadata recall, SQL execution rate, and semantic                Optimized Candidate Selection in Text-to-SQL. In
+matching performance compared with traditional baseline                   Proceedings of the Thirteenth International Conference
+methods. The average metadata recall rate reaches 94%. The                on Learning Representations, Singapore, 24–28 April
+SQL execution rate increases from 40.2% to 84.6%. The                     2025.
+                                                                     [7] Farquhar, S.; Kossen, J.; Kuhn, L.; Gal, Y. Detecting
+average semantic matching score reaches 4.85 out of 5.
+                                                                          Hallucinations in Large Language Models Using
+These results verify the effectiveness, robustness, and                   Semantic Entropy. Nature 2024, 630, 625–630.
+practical value of SQL-GRID in complex power grid data               [8] Ji, Z.; Lee, N.; Frieske, R.; Yu, T.; Su, D.; Xu, Y.; Ishii,
+scenarios.                                                                E.; Bang, Y.; Madotto, A.; Fung, P. Survey of
+   Nevertheless, SQL-GRID still relies on manual expertise                Hallucination in Natural Language Generation. ACM
+during the construction of semantic-enhanced metadata. The                Comput. Surv. 2023, 55, 248:1–248:38.
+experimental dataset also remains limited in scale. Future           [9] Huang, L.; Yu, W.; Ma, W.; Zhong, W.; Feng, Z.; Wang,
+work will further explore automatic metadata evolution                    H.; Chen, Q.; Peng, W.; Feng, X.; Qin, B.; et al. A Survey
+mechanisms, methods for reducing interaction costs, and                   on Hallucination in Large Language Models: Principles,
+large-scale validation in real business environments. These               Taxonomy, Challenges, and Open Questions. ACM
+                                                                          Trans. Inf. Syst. 2025, 43, 42:1–42:55.
+studies will help evaluate the generalization capability and         [10] Kim, H.J.; Kim, Y.; Park, C.; Kim, J.; Park, C.; Yoo,
+engineering applicability of the proposed system.                         K.M.; Lee, S.-G.; Kim, T. Aligning Language Models to
+                                                                          Explicitly Handle Ambiguity. In Proceedings of the 2024
+Acknowledgements.                                                         Conference on Empirical Methods in Natural Language
+                                                                          Processing, Miami, FL, USA, 12–16 November 2024;
+This research was funded by the Science and Technology
+                                                                          Association for Computational Linguistics: Stroudsburg,
+Project of the East China Branch of State Grid Corporation                PA, USA, 2024; pp. 1989–2007.
+of China, grant number 52992425001D.                                 [11] Chen, K.; Chen, Y.; Koudas, N.; Yu, X. Reliable Text-to-
+                                                                          SQL with Adaptive Abstention. Proc. ACM Manag. Data
+                                                                          2025, 3, Article 69, 1–30.
+References                                                           [12] Saparina, I.; Lapata, M. Disambiguate First, Parse Later:
+                                                                          Generating Interpretations for Ambiguity Resolution in
+    [1] Vaswani, A.; Shazeer, N.; Parmar, N.; Uszkoreit, J.;              Semantic Parsing. In Findings of the Association for
+        Jones, L.; Gomez, A.N.; Kaiser, L.; Polosukhin, I.                Computational Linguistics: ACL 2025, Vienna, Austria,
+        Attention Is All You Need. In Proceedings of the                  July 2025; Association for Computational Linguistics:
+        Advances in Neural Information Processing Systems 30,             Stroudsburg, PA, USA, 2025; pp. 16825–16839.
+        Long Beach, CA, USA, 4–9 December 2017; Curran               [13] Gong, Y.; Lei, C.; Qin, X.; Vaidya, K.; Narayanaswamy,
+        Associates, Inc.: Red Hook, NY, USA, 2017; pp. 5998–              B.; Kraska, T. SQLens: An End-to-End Framework for
+        6008.                                                             Error Detection and Correction in Text-to-SQL. In
+
+                                                                                                        EAI Endorsed Transactions on
+                                                                                                                        Energy Web
+                                                                17                                               | Volume 13 | 2026 |
+Y. Xu, L. Li, C. Qian and J. Zhou
+
+
+
+
+         Proceedings of the Advances in Neural Information                [20] Jiang, P.; Xiao, C.; Jiang, M.; Bhatia, P.; Kass-Hout, T.;
+         Processing Systems 38, 2025.                                          Sun, J.; Han, J. Reasoning-Enhanced Healthcare
+    [14] Li, G.; Hammoud, H.A.A.K.; Itani, H.; Khizbullin, D.;                 Predictions with Knowledge Graph Community
+         Ghanem, B. CAMEL: Communicative Agents for                            Retrieval. In Proceedings of the Thirteenth International
+         “Mind” Exploration of Large Language Model Society.                   Conference on Learning Representations, Singapore, 24–
+         In Proceedings of the Advances in Neural Information                  28 April 2025.
+         Processing Systems 36, New Orleans, LA, USA, 10–16               [21] Jin, B.; Zeng, H.; Yue, Z.; Yoon, J.; Arık, S.Ö.; Wang,
+         December 2023; Curran Associates, Inc.: Red Hook, NY,                 D.; Zamani, H.; Han, J. Search-R1: Training LLMs to
+         USA, 2023; pp. 51991–52008.                                           Reason and Leverage Search Engines with
+    [15] Hong, S.; Zhuge, M.; Chen, J.; Zheng, X.; Cheng, Y.;                  Reinforcement Learning. In Proceedings of the
+         Wang, J.; Zhang, C.; Wang, Z.; Yau, S.K.S.; Lin, Z.; et               Conference on Language Modeling, Montreal, QC,
+         al. MetaGPT: Meta Programming for a Multi-Agent                       Canada, 7–10 October 2025.
+         Collaborative Framework. In Proceedings of the Twelfth           [22] Asai, A.; Wu, Z.; Wang, Y.; Sil, A.; Hajishirzi, H. Self-
+         International Conference on Learning Representations,                 RAG: Learning to Retrieve, Generate, and Critique
+         Vienna, Austria, 7–11 May 2024.                                       through Self-Reflection. In Proceedings of the Twelfth
+    [16] Zhuge, M.; Wang, W.; Kirsch, L.; Faccio, F.; Khizbullin,              International Conference on Learning Representations,
+         D.; Schmidhuber, J. GPTSwarm: Language Agents as                      Vienna, Austria, 7–11 May 2024.
+         Optimizable Graphs. In Proceedings of the 41st                   [23] Gao, J.; Li, L.; Ji, K.; Li, W.; Lian, Y.; Fu, Y.; Dai, B.
+         International Conference on Machine Learning, Vienna,                 SmartRAG: Jointly Learn RAG-Related Tasks from the
+         Austria, 21–27 July 2024; Proceedings of Machine                      Environment Feedback. In Proceedings of the Thirteenth
+         Learning Research; PMLR, 2024; Volume 235, pp.                        International Conference on Learning Representations,
+         62743–62767.                                                          Singapore, 24–28 April 2025.
+    [17] Chen, W.; Su, Y.; Zuo, J.; Yang, C.; Yuan, C.; Chan, C.-         [24] Guan, X.; Zeng, J.; Meng, F.; Xin, C.; Lu, Y.; Lin, H.;
+         M.; Yu, H.; Lu, Y.; Hung, Y.-H.; Qian, C.; et al.                     Han, X.; Sun, L.; Zhou, J. DeepRAG: Thinking to
+         AgentVerse: Facilitating Multi-Agent Collaboration and                Retrieve Step by Step for Large Language Models. In
+         Exploring Emergent Behaviors. In Proceedings of the                   Proceedings of the Fourteenth International Conference
+         Twelfth International Conference on Learning                          on Learning Representations, Rio de Janeiro, Brazil, 23–
+         Representations, Vienna, Austria, 7–11 May 2024.                      27 April 2026.
+    [18] Gao, D.; Wang, H.; Li, Y.; Sun, X.; Qian, Y.; Ding, B.;          [25] Jiang, P.; Cao, L.; Xiao, C.; Bhatia, P.; Sun, J.; Han, J.
+         Zhou, J. Text-to-SQL Empowered by Large Language                      KG-FIT: Knowledge Graph Fine-Tuning upon Open-
+         Models: A Benchmark Evaluation. Proc. VLDB Endow.                     World Knowledge. In Proceedings of the Advances in
+         2024, 17, 1132–1145.                                                  Neural Information Processing Systems 37, Vancouver,
+    [19] Lewis, P.; Perez, E.; Piktus, A.; Petroni, F.; Karpukhin,             BC, Canada, December 2024; Curran Associates, Inc.:
+         V.; Goyal, N.; Küttler, H.; Lewis, M.; Yih, W.-T.;                    Red Hook, NY, USA, 2024; pp. 136220–136258.
+         Rocktäschel, T.; et al. Retrieval-Augmented Generation           [26] Liu, N.F.; Lin, K.; Hewitt, J.; Paranjape, A.; Bevilacqua,
+         for Knowledge-Intensive NLP Tasks. In Proceedings of                  M.; Petroni, F.; Liang, P. Lost in the Middle: How
+         the Advances in Neural Information Processing Systems                 Language Models Use Long Contexts. Trans. Assoc.
+         33, Online, 6–12 December 2020; Curran Associates,                    Comput. Linguist. 2024, 12, 157–173.
+         Inc.: Red Hook, NY, USA, 2020; pp. 9459–9474.
+
+
+
+
+                                                                                                             EAI Endorsed Transactions on
+                                                                                                                             Energy Web
+                                                                     18                                               | Volume 13 | 2026 |
+
