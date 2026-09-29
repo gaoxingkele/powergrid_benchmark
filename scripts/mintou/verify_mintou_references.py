@@ -10,7 +10,7 @@ from urllib.parse import quote
 import requests
 
 
-ROOT = Path(r"D:\aicoding\powergrid_benchmark")
+ROOT = Path(r"F:\aicoding\powergrid_benchmark")
 OUT = ROOT / "reviews" / "mintou_2026-08-09_journal_fit_audit"
 PROJECTS = ROOT / "paper_projects"
 

@@ -1,5 +1,5 @@
 param(
-    [string]$RepositoryRoot = "D:\aicoding\powergrid_benchmark"
+    [string]$RepositoryRoot = "F:\aicoding\powergrid_benchmark"
 )
 
 $ErrorActionPreference = "Stop"

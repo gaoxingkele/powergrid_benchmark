@@ -1,5 +1,16 @@
 $ErrorActionPreference = 'Stop'
 
+throw @'
+This legacy one-shot converter is intentionally disabled because it contains
+hard-coded historical claims, results, author placeholders, and retired paths.
+It must not be used to regenerate the audited CMC manuscripts.
+
+Use the read-only Applied Sciences workflow instead:
+  python scripts/papers/applsci_preflight.py <paper-project> --baseline-ref <git-ref> --run-project-verifier
+
+See docs/paper_workflows/APPLIED_SCIENCES_PRE_SUBMISSION_WORKFLOW.md.
+'@
+
 $WorkspaceRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 
 function New-AppliedSciencesManuscript {

@@ -64,3 +64,11 @@ Append a research-wiki event:
 ```powershell
 python scripts/wiki/log_research_event.py --title "event title" --observation "..." --action "..." --rationale "..." --evidence "..." --impact "..." --next "..."
 ```
+
+Run the read-only MDPI Applied Sciences pre-submission audit:
+
+```powershell
+python scripts/papers/applsci_preflight.py paper_projects/CMC/C2GES --baseline-ref 840dcce5 --run-project-verifier
+```
+
+The former string-replacement converter is retained only as a disabled historical record. See `docs/paper_workflows/APPLIED_SCIENCES_PRE_SUBMISSION_WORKFLOW.md`.

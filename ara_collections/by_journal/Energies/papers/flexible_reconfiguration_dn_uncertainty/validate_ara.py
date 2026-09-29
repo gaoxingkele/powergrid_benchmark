@@ -1,6 +1,6 @@
 import os
 
-base = 'D:/aicoding/powergrid_benchmark/ara_collections/by_journal/Energies/papers/flexible_reconfiguration_dn_uncertainty'
+base = 'F:/aicoding/powergrid_benchmark/ara_collections/by_journal/Energies/papers/flexible_reconfiguration_dn_uncertainty'
 
 checks = {
     'Required files': [

@@ -31,7 +31,7 @@ def resolve_pandoc() -> Path:
     candidates = [
         Path(os.environ["PAPER_HARNESS_PANDOC"]) if os.environ.get("PAPER_HARNESS_PANDOC") else None,
         PANDOC,
-        Path(r"D:/aicoding/powergrid_benchmark/.tools/pandoc-3.6.4/pandoc.exe"),
+        Path(r"F:/aicoding/powergrid_benchmark/.tools/pandoc-3.6.4/pandoc.exe"),
     ]
     for candidate in candidates:
         if candidate and candidate.exists():

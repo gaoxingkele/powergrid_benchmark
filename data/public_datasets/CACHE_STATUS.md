@@ -52,6 +52,26 @@ python scripts/data_acquisition/download_zenodo_aria2.py
 - 仍卡：`nasa_randomized_recommissioned_battery`（门户/联系）、`battery_archive`（条款）、`nsrdb`/`pjm_dataminer`/`tamu_test_cases`/`acn_data` API。
 - `large_synthetic_power_grid_ml`：目录曾丢失，已用 aria2+代理重下完成 **19/19**（~17.8GB）；`audit_public_datasets.py` 已通过。
 
+## Grid tracking bundle (2026-08-23)
+
+从国重/总部指南抽取的 **PG-T01…T24** 跟踪目标，已下载论文/代码/数据集子集：
+
+| 资产 | 路径 | 状态 |
+|---|---|---|
+| OA 论文 PDF ×24 | `papers/literature/grid_tracking_targets/pdfs/` | downloaded |
+| GitHub ×20 | `data/public_datasets/grid_tracking/code/` | shallow clone |
+| SMIB PINN CSV | `…/datasets/smib_pinn/` | downloaded (~249MB) |
+| IEEE33 DER fault xlsx | `…/datasets/fault_location/` | downloaded (16MB) |
+| MAPDN HF zips | `…/datasets/mapdn/` | downloaded (~6.0GB) |
+| WindFM weights | `…/datasets/windfm/` | downloaded (~16MB) |
+| SIIB-Time | `…/datasets/siib_time/` | metadata only |
+| SIIB-Time 全量 | `…/datasets/siib_time_full/` | downloaded (~44.4GB, 18009 files) |
+| PROTECT-90 zip | `…/datasets/protect90/` | downloaded (~12.05GB) |
+| InspecSafe-V1 | `…/datasets/inspecsafe/` | downloaded (~23.6GB) |
+| EnEnv scenarios | `…/datasets/enenv/scenarios/` | downloaded (~7.96GB; 3/3 complete) |
+
+说明见 `data/public_datasets/grid_tracking/README.md`。脚本：`download_grid_tracking_bundle.py`。
+
 ## Verification
 
 ```powershell

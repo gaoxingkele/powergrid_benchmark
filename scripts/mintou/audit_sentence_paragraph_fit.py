@@ -10,7 +10,7 @@ from pathlib import Path
 import fitz
 
 
-ROOT = Path(r"D:\aicoding\powergrid_benchmark")
+ROOT = Path(r"F:\aicoding\powergrid_benchmark")
 PROJECTS = ROOT / "paper_projects"
 OUT = ROOT / "reviews" / "mintou_2026-08-09_journal_fit_audit"
 MANIFEST = ROOT / "ara_collections" / "target_journal_related" / "collection_manifest.csv"

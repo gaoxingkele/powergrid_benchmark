@@ -9,7 +9,7 @@ from pathlib import Path
 
 from pypdf import PdfReader
 
-ROOT = Path(r"D:/aicoding/powergrid_benchmark")
+ROOT = Path(r"F:/aicoding/powergrid_benchmark")
 PDF_ROOT = ROOT / "papers/literature/dataset_benchmark_papers/pdfs"
 OUT = Path(r"C:/Users/10175/.claude/skills/Paper_CCF/resources/powergrid-open-data-corpus-distill.md")
 META = ROOT / "papers/literature/dataset_benchmark_papers/metadata"

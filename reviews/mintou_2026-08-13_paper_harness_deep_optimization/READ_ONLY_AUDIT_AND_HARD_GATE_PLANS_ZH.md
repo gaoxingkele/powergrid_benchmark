@@ -16,7 +16,7 @@
 9. trace、日志、来源链接和接口覆盖不能自动推出解释质量、审核效率、安全性或人工接受度。
 10. P3/P4 与 P5/P6 的共享代码和数据必须双向披露；共享回归测试不等于两篇可以重复宣称同一创新。
 
-以上规则已写入 `D:/aicoding/Lib/paper_harness/resources/paper_experience_digest.json` 和
+以上规则已写入 `D:/aicoding/mylib/paper_harness/resources/paper_experience_digest.json` 和
 `reviewer_protocol.md`，并注入 planner、executor 和 reviewer 的执行提示。
 
 ## 2. Harness 本轮加固结果
