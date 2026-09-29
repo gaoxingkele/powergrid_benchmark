@@ -1,0 +1,15 @@
+--- 
++++ 
+@@ -351,9 +351,9 @@
+ 
+ \subsection{Evidence Summary and Reading Guide}
+ 
+-The experiments produced three main observations. First, schema context, structural hints, and presented values affected the two model snapshots differently; no single context strategy dominated across every analysis. Second, under the unified evaluator, historical-pool reference matches were 76/180 for C000, 99/180 for validation ranking, and 100/180 with complete witness evidence, while the fixed Qwen F01 source reached 129/180. Third, both evidence-aware selectors produced top-score ties on 130/180 questions and remained sensitive to candidate order. Validation evidence changed choices relative to C000, but the available signals often remained too coarse for stable ranking and did not outperform the best fixed source.
+-
+-The historical-pool comparison and exhaustive failure partition address RQ1. Role-utilization, tie, and constructed-state diagnostics address RQ2. Generation, presented-value, and BIRD studies address RQ3 as supporting evidence about candidate production and evaluation boundaries. BIRD does not rerun the historical-pool selector, so its database diversity cannot be credited as external replication of RQ1. Implementation conformance is summarized after the empirical results and documented fully in the Supplementary Materials.
++The core results distinguish unavailable answers from selection failures. In the historical pool, 42 questions had no correct candidate; neither selector lost all correct candidates at eligibility. Scoring accounted for six failures and tie order for another 33 or 32 (Table~\ref{tab:failure-partition}). Validation-aware and complete-witness selection matched 99/180 and 100/180 references, versus 76/180 for C000 and 129/180 for the strongest fixed source (Table~\ref{tab:offline}). Both selectors had slot ties on 130 questions, but mixed-correctness top sets on 51. The diagnosis therefore distinguishes candidate availability, score discrimination, and unresolved ambiguity rather than treating every tie as a failure.
++
++The historical-pool comparison and exhaustive failure partition address RQ1. Role-utilization, tie, and constructed-state diagnostics address RQ2. Generation, presented-value, and BIRD studies address RQ3 as supporting evidence about candidate production and evaluation boundaries: context effects differed between model snapshots, and no context strategy dominated every analysis. BIRD does not rerun the historical-pool selector, so its database diversity cannot be credited as external replication of RQ1. Implementation conformance is summarized after the empirical results and documented fully in the Supplementary Materials.
+ 
+ \subsection{Validation-Aware Selection in the Historical Candidate Pool}
+ 

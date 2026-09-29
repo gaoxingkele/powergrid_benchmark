@@ -1,5 +1,7 @@
 # CMC 两篇论文工作区
 
+> 2026-09-12 目录入口更新：两篇实体工作区已归入 [C2GES](../C2GES/PROJECT_INDEX.md) 与 [MA-SQLGrid](../MA-SQLGrid/PROJECT_INDEX.md) 缩写项目；本目录下原路径是兼容联接。MA-SQLGrid 最新入口已是 Information 版本。以下 2026-08-23 说明保留作历史记录，不再用于判断最新期刊或 PDF。
+
 `CMC` 是历史别名。两篇论文当前目标期刊均为 MDPI *Applied Sciences*，当前正文基准统一为 2026-08-23 收到的 LaTeX，不再以旧 Word、旧 PDF 或 2026-08-05 源文件判断版本。
 
 ## 当前稿入口

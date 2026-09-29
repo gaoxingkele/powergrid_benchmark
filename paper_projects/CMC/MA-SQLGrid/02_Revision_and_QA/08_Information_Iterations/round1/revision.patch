@@ -1,0 +1,62 @@
+--- paper_information.before.tex
++++ paper_information.round1.tex
+@@ -1,4 +1,4 @@
+-% MA-SQLGrid Information rewrite v1, 2026-09-12.
++% MA-SQLGrid Information reconstruction, round 1, 2026-09-13.
+ % Empirical evidence retained; formal properties are not new efficacy experiments.
+ \documentclass[information,article,submit,moreauthors]{Definitions/mdpi}
+ \firstpage{1}
+@@ -188,6 +188,8 @@
+ 
+ Averaging Equation~\ref{eq:poolbound} over questions separates three sources of error: a correct candidate may be absent, excluded by a gate, or available but not selected. The maxima require reference outcomes and are oracle diagnostics, not deployable policies. A best fixed source is a different comparator: it uses one source for every question and need not attain the question-wise oracle.
+ 
++For diagnosis, a failed decision can be assigned to exactly one of four stages, examined in order: no correct candidate in $\mathcal{Y}_i$; correct candidates exist but none survives in $\mathcal{A}_i$; an eligible correct candidate exists but none reaches $\mathcal{T}_i$; or the top set contains a correct candidate that the tie rule does not select. Together with a correct selected answer, these categories partition the evaluated questions. The partition locates a failure in the disclosed decision rule; it does not identify the business-semantic cause of an incorrect candidate or imply that a different tie policy can attain every question-wise oracle simultaneously.
++
+ \begin{Proposition}[Order dependence of the top set]
+ \label{prop:ties}
+ If $\mathcal{T}_i$ contains one candidate, changing candidate order does not change the selection. If it contains multiple distinct candidates, each can be selected by an order placing it before the other top candidates. Correctness varies with order if and only if the top set contains both evaluator-correct and evaluator-incorrect candidates.
+@@ -328,6 +330,8 @@
+ The randomization procedures assume exchangeability of group-level signs under the tested sharp null. Exact enumeration is used for the 12-group constructed-state analysis ($2^{12}=4096$ assignments), while the larger documented families use the stated Monte Carlo procedures and seeds. All tests are two-sided, zero paired differences remain in the estimand and contribute no sign, and the Holm families are defined separately for the nine GridDB factorial effects, projected-column manipulation checks, three two-member component families, nine constructed-state contrasts, and 12 BIRD pairings. Count differences, paired effects, rescue/harm, and sensitivity results remain visible whether or not a Holm-adjusted decision is met.
+ 
+ The historical-pool comparison is reported through complete counts, paired rescue/harm, coverage, abstention, tie multiplicity, and candidate-order sensitivity. Because same-item outcomes were accessible during earlier development, these quantities describe the observed pool and do not estimate a population or causal multi-agent effect.
++
++The reconciliation table additionally retains a historical question-level analysis: paired question-composition bootstrap intervals and exact discordant-sign tests against C000, with Holm adjustment over nine unique comparisons. Unlike the grouped analyses above, these tests do not protect against dependence between questions sharing a SQL structure. Their small values must not be read as confirmation across templates or databases. Complete finite-pool counts are the principal evidence for the selection diagnosis. The new stage decomposition joins frozen candidate correctness to recorded eligibility, scores, and sealed choices only after selection; it produces no online feature and is explicitly post-result.
+ 
+ \subsection{Implementation and Reproducibility}
+ 
+@@ -473,6 +477,26 @@
+ 
+ The order feature accounts for most of the observed post-review change in this decomposition: removing it changes 49 validation choices and lowers the match count by 22. Removing lexical value hits changes 14 choices but exchanges one gain for one loss, while removing the shape term changes none. Removing constructed-state eligibility changes only Q039. These same-item, outcome-aware diagnostics localize behavior in the frozen pool; they do not estimate the benefit of an independently implemented role on unseen questions.
+ 
++\begin{table}[htbp]
++\caption{Exhaustive post-result failure partition under the unified evaluator. Each question appears in exactly one row for each selector. Correctness means reference agreement, not expert-reviewed business semantics.}
++\label{tab:failure-partition}\centering\small
++\begin{tabular}{lrr}
++\toprule
++Decision outcome & Validation-only & Complete witness\\
++\midrule
++No correct candidate in the original pool & 42 & 42\\
++All correct candidates removed by eligibility gates & 0 & 0\\
++Eligible correct candidates below the highest score & 6 & 6\\
++Correct top candidate lost through tie order & 33 & 32\\
++Selected candidate correct & 99 & 100\\
++\midrule
++Total questions & 180 & 180\\
++\bottomrule
++\end{tabular}
++\end{table}
++
++Table~\ref{tab:failure-partition} connects the formal bounds to the recorded decisions. A correct candidate exists in 138 pools and survives eligibility in every one; neither selector removes any evaluator-correct source slot in this dataset. Six questions lose their remaining opportunity at scoring. Both selectors have mixed-correctness top sets on 51 questions, of which the original order resolves 33 and 32 incorrectly. Thus 130 slot ties do not mean 130 correctness-sensitive ambiguities. These counts distinguish candidate availability, gate retention, score discrimination, and final tie resolution without treating any oracle choice as a usable policy.
++
+ An automated evaluator-state taxonomy further separates execution failure, output-shape mismatch, and wrong denotation after both shape gates pass. C000 has 1 execution error, 85 shape mismatches, and 18 wrong denotations among its 104 failures. Validation-only selection has 0, 42, and 39, respectively; complete-witness selection has 0, 41, and 39. The best fixed Qwen F01 source has 5 execution errors, 1 shape mismatch, and 45 wrong denotations. Thus the frozen selector removes many inadmissible or shape-inconsistent candidates but leaves a larger share of its remaining failures beyond the evaluator's shape gate. This automatic taxonomy does not distinguish wrong status meaning, units, time boundaries, topology intent, or professional usefulness; those categories remain subject to independent expert review.
+ 
+ The numerical supplement contains all eight GridDB cells, 12 component endpoints, eight 15-state cells, the exact unified-evaluator order histogram, the descriptive risk--coverage curve, the 360-row item-level tie ledger, selected-origin counts, and the Q039 trace. The main-text findings use different questions, candidates, call patterns, and endpoints, so they are not combined into a single framework accuracy. Across these studies, the common diagnostic finding is that context and validation evidence can change observable behavior, while stable semantic selection remains unresolved.
+@@ -652,6 +676,8 @@
+ 
+ The historical-pool result distinguishes a useful filter from a successful selector. Validation-aware ranking recovers 25 questions and harms two relative to C000, producing 23 additional reference matches. Yet the fixed Qwen F01 source achieves 30 more matches than validation-aware selection. The strongest-source comparison changes the interpretation: the pool already contains a better fixed policy, but the recorded evidence does not recover its performance. Proposition~\ref{prop:pool-bound} explains why candidate availability and selection ability must be reported separately.
+ 
++The failure partition makes the redesign question more precise. Changing the selector alone cannot repair the 42 questions with no correct candidate. Improving eligibility retention is not the observed bottleneck because no correct slot was removed. The six scoring failures require evidence or a score that promotes a surviving correct candidate, whereas the 33 validation-only tie losses concern alternatives already at the maximum score. This is a diagnostic allocation of the observed errors, not a promise that the four interventions can be optimized independently. A future study can test whether the same allocation recurs across candidate pools before choosing which interface to redesign.
++
+ The automatic error taxonomy supports a more specific account than a general claim of improved reasoning. Relative to C000, the selectors reduce execution and shape failures while leaving many wrong denotations after those gates pass. They are therefore effective at some forms of rejection within this pool, but the remaining ranking problem concerns distinctions the current features represent only weakly. This is not proof that execution evidence is unhelpful in other systems. It shows why a validation metric should be interpreted through the errors it can detect, rather than equated with answer correctness.
+ 
+ The same distinction applies to the five-role architecture. Typed records identify where evidence enters the workflow and allow a decision to be replayed. They do not establish that every role contributes to prediction quality. In particular, recorded-only schema grounding cannot explain a change in historical-pool selection. The role-utilization audit is consequently as important as the architecture diagram: it separates an implemented interface from an active decision mechanism.

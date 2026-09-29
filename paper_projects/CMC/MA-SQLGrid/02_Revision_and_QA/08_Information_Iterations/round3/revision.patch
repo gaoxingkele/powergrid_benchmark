@@ -1,0 +1,786 @@
+--- before.tex
++++ after.tex
+@@ -1,4 +1,4 @@
+-% MA-SQLGrid Information reconstruction, round 2, 2026-09-13.
++% MA-SQLGrid Information reconstruction, round 3, 2026-09-13.
+ % Empirical evidence retained; formal properties are not new efficacy experiments.
+ \documentclass[information,article,submit,moreauthors]{Definitions/mdpi}
+ \firstpage{1}
+@@ -333,7 +333,7 @@
+ 
+ The historical-pool comparison is reported through complete counts, paired rescue/harm, coverage, abstention, tie multiplicity, and candidate-order sensitivity. Because same-item outcomes were accessible during earlier development, these quantities describe the observed pool and do not estimate a population or causal multi-agent effect.
+ 
+-The reconciliation table additionally retains a historical question-level analysis: paired question-composition bootstrap intervals and exact discordant-sign tests against C000, with Holm adjustment over nine unique comparisons. Unlike the grouped analyses above, these tests do not protect against dependence between questions sharing a SQL structure. Their small values must not be read as confirmation across templates or databases. Complete finite-pool counts are the principal evidence for the selection diagnosis. The new stage decomposition joins frozen candidate correctness to recorded eligibility, scores, and sealed choices only after selection; it produces no online feature and is explicitly post-result.
++Appendix~\ref{sec:historical-question-statistics} retains the historical question-level reconciliation: paired question-composition bootstrap intervals and exact discordant-sign tests against C000, with Holm adjustment over nine unique comparisons. Unlike the grouped analyses above, these tests do not protect against dependence between questions sharing a SQL structure. Their small values must not be read as confirmation across templates or databases. The main selection table therefore reports finite-pool counts, differences, and paired rescue/harm without inferential labels. The new stage decomposition joins frozen candidate correctness to recorded eligibility, scores, and sealed choices only after selection; it produces no online feature and is explicitly post-result.
+ 
+ \subsection{Implementation and Reproducibility}
+ 
+@@ -366,10 +366,399 @@
+ Keeping all 332 failures matters for two reasons. Removing them would overstate the executability of the historical pool, and retaining their slot identities verifies that selectors did not receive replacements or retries. Full question-level coverage means only that another slot was eligible for every question; it does not mean every candidate was valid or that an operational system should always answer.
+ 
+ \begin{table}[htbp]
+-\caption{Unified-evaluator comparison for the historical eight-slot pool. C000 is byte-identical in normalized SQL to Qwen F00 for all 180 questions. Differences, paired question-composition intervals, rescue/harm counts, and exact discordant-sign tests use C000 as baseline; Holm adjustment covers nine unique comparisons. This reconciliation is post-result.}
++\caption{Descriptive unified-evaluator comparison for the historical eight-slot pool. Differences and paired rescue/harm use C000 as baseline. C000 and Qwen F00 contain identical normalized SQL. All 180 questions are retained; no population or cross-template inference is attached to these counts. Historical question-level intervals and tests are preserved in Appendix~\ref{sec:historical-question-statistics}.}
+ \label{tab:offline}
+ \centering
+ \scriptsize
++\resizebox{\textwidth}{!}{%
++\begin{tabular}{lrrrr}
++\toprule
++Method & Correct/180 & Accuracy & Difference & Rescue/harm\\
++\midrule
++C000 / Qwen F00 & 76/180 & 0.4222 & 0 & 0/0\\
++Qwen F01 & 129/180 & 0.7167 & +0.2944 & 56/3\\
++Qwen F10 & 78/180 & 0.4333 & +0.0111 & 3/1\\
++Qwen F11 & 108/180 & 0.6000 & +0.1778 & 46/14\\
++Granite F00 & 77/180 & 0.4278 & +0.0056 & 6/5\\
++Granite F01 & 100/180 & 0.5556 & +0.1333 & 45/21\\
++Granite F10 & 74/180 & 0.4111 & -0.0111 & 6/8\\
++Granite F11 & 108/180 & 0.6000 & +0.1778 & 42/10\\
++Validation-only selector & 99/180 & 0.5500 & +0.1278 & 25/2\\
++Complete-witness selector & 100/180 & 0.5556 & +0.1333 & 26/2\\
++\bottomrule
++\end{tabular}}
++\end{table}
++
++Qwen F00 and historical C000 contain the same 180 SQL artifacts. Their previously reported 76-versus-80 discrepancy came from evaluator policy: the historical row-only comparator treated Q104, Q107, Q110, and Q140 as matches because both results were empty, whereas all four candidate projections had the wrong column count. The unified evaluator applies the frozen shape gate before empty-row equality and reproduces all 1440 canonical fixed-slot verdicts. Under that evaluator, validation-only and complete-witness selection differ by one match and remain 30 and 29 matches below Qwen F01, respectively.
++
++Figure~\ref{fig:offline-diagnostics} juxtaposes reference matches and witness invariance. The one-match selector increment focuses interpretation on validation ranking and tie policy, not a broad witness benefit.
++
++\begin{figure}[htbp]
++\centering
++\includegraphics[width=0.90\textwidth]{figures/fig05_offline_selector_diagnostics.pdf}
++\caption{Selector endpoints over 180 historical-pool questions. Reference matches are loaded only after board sealing; invariance denotes agreement across the three constructed witnesses.}
++\label{fig:offline-diagnostics}
++\end{figure}
++
++Both evidence-aware selectors produced multiple highest-scoring candidates on 130/180 questions, with mean top-tie sizes of 5.4000 and 5.3889. With original-order tie breaking, 178/180 selections came from Qwen slots, reflecting source order rather than learned preference.
++
++Most apparent source preference is mechanically induced. When all eight candidates tie, the first slot is selected regardless of backbone quality; when seven tie, the earliest surviving slot has the same advantage. The observed 178 Qwen selections measure how often the available reference-free features failed to separate candidates before the stable-order rule acted, not a learned preference for one backbone.
++
++The numerical supplement reports the complete multiplicity and selected-slot distributions, including all eight-candidate ties.
++
++Validation-only ranking added 23 net reference matches relative to C000 through 25 rescues and 2 harms. Complete-witness selection changed the chosen candidate on only Q039, yielding one further match (100/180 versus 99/180), one additional rescue, no additional harm, and no coverage or abstention change. Table~\ref{tab:q039} gives the constructed trace for this sole selector difference. Neither selector exceeded the fixed Qwen F01 source at 129/180.
++
++\subsection{Tie Structure, Order Sensitivity, and the Q039 Case}
++
++\begin{table}[htbp]
++\caption{Q039 is the sole validation-only versus complete-witness selection difference. ``Match'' denotes agreement with the synthetic reference.}
++\label{tab:q039}
++\centering
++\footnotesize
++\setlength{\tabcolsep}{3pt}
++\begin{tabular}{p{2.2cm}p{4.0cm}p{4.0cm}p{1.8cm}}
++\toprule
++Field & Validation-only & Complete witnesses & Interpretation\\
++\midrule
++Request & \multicolumn{2}{p{8.8cm}}{``Show the first scheduled work order after June 2024.''} & Status/date ambiguity\\
++Projection & \texttt{SELECT *} & \texttt{SELECT work\_order\_id, scheduled\_date} & Wildcard vs. explicit fields\\
++Shared filter & \multicolumn{2}{p{8.8cm}}{\texttt{scheduled\_date > '2024-06-01' ORDER BY scheduled\_date ASC LIMIT 1}} & Ambiguous time scope\\
++M3 outcome & Wildcard width changes & Two-column projection preserved & Projection stability\\
++Reference result & No match & Match & One-question trace\\
++\bottomrule
++\end{tabular}
++\end{table}
++
++M3 added nullable columns to \texttt{work\_orders}; consequently, complete-witness eligibility rejected the wildcard projection and retained the explicit \texttt{work\_order\_id, scheduled\_date} projection. The full SQL strings are supplied in the numerical supplement. Neither query resolves the request's status and date-boundary ambiguity through qualified review, so the extra reference match is interpreted as a projection-stability trace rather than an engineering correctness judgment.
++
++Table~\ref{tab:sensitivity} replaces the non-comparable historical row-only sensitivity values with an exact audit under the unified evaluator. The audit enumerated all $8!=40{,}320$ global slot orders while preserving each question's frozen evidence scores. Validation-only selection ranged from 95 to 128 matches and complete-witness selection also ranged from 95 to 128; both had a median of 107. The original orders produced 99 and 100 matches, respectively, while the reverse order produced 116 for both selectors. Even the outcome-exposed maximum remained below the fixed Qwen F01 source at 129/180.
++
++These permutations are diagnostics, not candidate policies: no order is preferred after outcomes are observed. A second descriptive audit abstained whenever the top-score set was not unique. It covered only 50/180 questions and matched 24 of them (0.4800), so top-tie size alone was not a calibrated confidence signal. The range across global orders and the poor strict-abstention result motivate a semantic tie or abstention rule frozen before evaluation on an untouched pool.
++
++A transparent post-run hash audit emitted no SQL text and found duplicate normalized SQL in 154/180 pools. Mean validation and complete-witness top sets fell from 5.400 and 5.389 slots to 3.150 and 3.139 unique strings; the mean pool contained 5.322 unique strings. Deduplication reduces apparent multiplicity but does not remove ambiguity. The outcome-aware right-step tie-size AURC values, 0.4826 and 0.4795, are diagnostics rather than calibration results.
++
++\begin{table}[htbp]
++\caption{Exact global candidate-order sensitivity under the unified shape-and-denotation evaluator. All 40,320 orders are outcome-aware diagnostics; original and reverse are two members of that enumeration.}
++\label{tab:sensitivity}
++\centering
++\small
++\resizebox{\textwidth}{!}{%
++\begin{tabular}{lrrrrrr}
++\toprule
++Selector & Original & Reverse & Minimum & Median & Mean & Maximum\\
++\midrule
++Validation-only & 99 & 116 & 95 & 107 & 109.845 & 128\\
++Complete witness & 100 & 116 & 95 & 107 & 109.929 & 128\\
++\bottomrule
++\end{tabular}}
++\end{table}
++
++The post-review utilization audit then traced which role outputs actually enter the historical-pool selector. Query Analyst fields feed aggregation, order, and lexical-match validation features. By contrast, the Schema Cartographer's grounding is posted to the blackboard but is not passed to candidate generation, validation, the critic, or adjudication in this frozen driver. The candidate provider is an adapter for stored SQL and makes no model calls. Table~\ref{tab:role-ablation} therefore reports score-component diagnostics rather than claiming a prospective removal of five independently active agents. Safety and executability gates remain active in every variant.
++
++\begin{table}[htbp]
++\caption{Post-review role-utilization and single-component diagnostics under the unified evaluator. Changes, gains, and losses are relative to the stated parent and use the original candidate order.}
++\label{tab:role-ablation}
++\centering
++\small
++\resizebox{\textwidth}{!}{%
++\begin{tabular}{llrrrr}
++\toprule
++Selector variant & Parent & Correct/180 & Choices changed & Gains & Losses\\
++\midrule
++Validation original & --- & 99 & 0 & 0 & 0\\
++Without all Query-Analyst-derived score terms & Validation original & 76 & 64 & 2 & 25\\
++Without shape term & Validation original & 99 & 0 & 0 & 0\\
++Without order term & Validation original & 77 & 49 & 1 & 23\\
++Without lexical value-hit term & Validation original & 99 & 14 & 1 & 1\\
++Complete witness original & --- & 100 & 0 & 0 & 0\\
++Without constructed-state gate & Complete witness & 99 & 1 & 0 & 1\\
++Without recorded-only schema grounding & Complete witness & 100 & 0 & 0 & 0\\
++\bottomrule
++\end{tabular}}
++\end{table}
++
++The order feature accounts for most of the observed post-review change in this decomposition: removing it changes 49 validation choices and lowers the match count by 22. Removing lexical value hits changes 14 choices but exchanges one gain for one loss, while removing the shape term changes none. Removing constructed-state eligibility changes only Q039. These same-item, outcome-aware diagnostics localize behavior in the frozen pool; they do not estimate the benefit of an independently implemented role on unseen questions.
++
++\begin{table}[htbp]
++\caption{Exhaustive post-result failure partition under the unified evaluator. Each question appears in exactly one row for each selector. Correctness means reference agreement, not expert-reviewed business semantics.}
++\label{tab:failure-partition}\centering\small
++\begin{tabular}{lrr}
++\toprule
++Decision outcome & Validation-only & Complete witness\\
++\midrule
++No correct candidate in the original pool & 42 & 42\\
++All correct candidates removed by eligibility gates & 0 & 0\\
++Eligible correct candidates below the highest score & 6 & 6\\
++Correct top candidate lost through tie order & 33 & 32\\
++Selected candidate correct & 99 & 100\\
++\midrule
++Total questions & 180 & 180\\
++\bottomrule
++\end{tabular}
++\end{table}
++
++Table~\ref{tab:failure-partition} connects the formal bounds to the recorded decisions. A correct candidate exists in 138 pools and survives eligibility in every one; neither selector removes any evaluator-correct source slot in this dataset. Six questions lose their remaining opportunity at scoring. Both selectors have mixed-correctness top sets on 51 questions, of which the original order resolves 33 and 32 incorrectly. Thus 130 slot ties do not mean 130 correctness-sensitive ambiguities. These counts distinguish candidate availability, gate retention, score discrimination, and final tie resolution without treating any oracle choice as a usable policy.
++
++An automated evaluator-state taxonomy further separates execution failure, output-shape mismatch, and wrong denotation after both shape gates pass. C000 has 1 execution error, 85 shape mismatches, and 18 wrong denotations among its 104 failures. Validation-only selection has 0, 42, and 39, respectively; complete-witness selection has 0, 41, and 39. The best fixed Qwen F01 source has 5 execution errors, 1 shape mismatch, and 45 wrong denotations. Thus the frozen selector removes many inadmissible or shape-inconsistent candidates but leaves a larger share of its remaining failures beyond the evaluator's shape gate. This automatic taxonomy does not distinguish wrong status meaning, units, time boundaries, topology intent, or professional usefulness; those categories remain subject to independent expert review.
++
++The numerical supplement contains all eight GridDB cells, 12 component endpoints, eight 15-state cells, the exact unified-evaluator order histogram, the descriptive risk--coverage curve, the 360-row item-level tie ledger, selected-origin counts, and the Q039 trace. The main-text findings use different questions, candidates, call patterns, and endpoints, so they are not combined into a single framework accuracy. Across these studies, the common diagnostic finding is that context and validation evidence can change observable behavior, while stable semantic selection remains unresolved.
++
++\subsection{Context and Component Effects on SQL Generation}
++
++All 1440 scheduled predictions are present, and independent SQLite re-execution reproduced the stored execution verdicts. Table~\ref{tab:cells} reports strict execution equality, and Figure~\ref{fig:cells} visualizes the same audited cell estimates.
++
++\begin{table}[htbp]
++\caption{Strict execution equality over 180 GridDB questions per cell.}
++\label{tab:cells}
++\centering
++\small
++\setlength{\tabcolsep}{4pt}
++\begin{tabular}{lcccc}
++\toprule
++Backbone & F00 full/no hint & F01 full/hint & F10 compact/no hint & F11 compact/hint\\
++\midrule
++Qwen & 76/180 (0.4222) & 129/180 (0.7167) & 78/180 (0.4333) & 108/180 (0.6000)\\
++Granite & 77/180 (0.4278) & 100/180 (0.5556) & 74/180 (0.4111) & 108/180 (0.6000)\\
++\bottomrule
++\end{tabular}
++\end{table}
++
++\begin{figure}[htbp]
++\centering
++\includegraphics[width=0.94\textwidth]{figures/results/fig01_v2_cells.pdf}
++\caption{Audited GridDB cell point estimates. Each cell contains all 180 attempts; the figure is descriptive and does not replace the documented factorial contrasts.}
++\label{fig:cells}
++\end{figure}
++
++The common-target projected-column diagnostic is 0.5222 in F00 for both backbones. Qwen obtains 0.9667, 0.5889, and 0.9611 in F01, F10, and F11; Granite obtains 0.8778, 0.5667, and 0.9222. These values show that returning the requested number of columns is easier than returning the intended rows. In Qwen F01, projected-column conformity is 0.9667 while execution equality is 0.7167.
++
++The eight cells also show that no single prompt summarizes the design. Adding the hint to full context increases the point estimate for both backbones, whereas adding compact context without the hint leaves execution equality close to F00. Under compact context, the hint produces 108 correct answers for both models, but this numerical convergence arises from different unhinted baselines and does not establish identical behavior. Reporting every cell preserves these interactions instead of selecting only the highest value.
++
++The 0.2500 gap between Qwen F01 projected-column conformity and strict execution equality warns against structural proxy endpoints. A model may recognize that one column, an aggregate, or an ordered row is requested while still choosing the wrong table, join, predicate, value, or boundary. Shape diagnostics can localize errors and inform adjudication, but they cannot replace result equality or qualified semantic review.
++
++\subsubsection{Factorial Effects and Multiplicity}
++
++Table~\ref{tab:factorial-nine} reports the complete primary family. For Qwen, the composite-hint execution effect is +0.2306, the package--hint interaction is $-0.1278$, and the compact-package main effect is $-0.0528$. Granite's corresponding estimates are +0.1583, +0.0611, and +0.0139. None of the nine primary execution tests survives Holm correction. Qwen's hint effect has raw/adjusted $p=0.01372/0.09604$, its interaction $0.00919/0.07352$, and the cross-backbone hint modifier $0.00640/0.05760$. Accordingly, no primary factorial execution effect or modifier is described as statistically nonzero.
++
++\begin{table}[htbp]
++\caption{Complete primary factorial family for strict execution equality. Estimates are question-weighted finite-set differences; intervals are 95\% normalized-SQL-group composition-sensitivity intervals. Each sign-randomization used 70 groups, 100,000 draws, and the displayed raw values were Holm-adjusted jointly over all nine rows.}
++\label{tab:factorial-nine}\centering\scriptsize
++\resizebox{\textwidth}{!}{%
++\begin{tabular}{llrrrr}
++\toprule
++Scope & Effect & Estimate & Composition interval & Raw $p$ & Holm $p$\\
++\midrule
++Qwen & Compact-package main & -0.0528 & [-0.1131, 0.0000] & 0.10523 & 0.52614\\
++Qwen & Structural-hint main & 0.2306 & [0.0548, 0.4355] & 0.01372 & 0.09604\\
++Qwen & Package $\times$ hint & -0.1278 & [-0.2454, -0.0341] & 0.00919 & 0.07352\\
++Granite & Compact-package main & 0.0139 & [-0.0584, 0.0798] & 0.85021 & 1.00000\\
++Granite & Structural-hint main & 0.1583 & [-0.0193, 0.3662] & 0.15480 & 0.61919\\
++Granite & Package $\times$ hint & 0.0611 & [-0.0539, 0.2013] & 0.55890 & 1.00000\\
++Granite--Qwen & Backbone $\times$ package & 0.0667 & [-0.0360, 0.1814] & 0.41478 & 1.00000\\
++Granite--Qwen & Backbone $\times$ hint & -0.0722 & [-0.1229, -0.0276] & 0.00640 & 0.05760\\
++Granite--Qwen & Three-way interaction & 0.1889 & [0.0090, 0.4321] & 0.07010 & 0.42060\\
++\bottomrule
++\end{tabular}}
++\end{table}
++
++The normalized-SQL mapping contains 70 groups, 58 singletons, and a maximum group size of 19. Question-level weighting is retained; groups are resampling and sign-assignment proxies, not verified authoring templates or sampled clusters. The randomization interpretation requires exchangeability of group signs under the tested sharp null, while the composition interval asks how the finite-corpus mean changes when those observed groups are reweighted. Neither assumption follows from the data, and the high singleton fraction limits protection against unmeasured dependence.
++
++The displayed composition intervals are pointwise sensitivity intervals; they are neither simultaneous/familywise intervals nor inversions of the nine Holm-adjusted randomization tests. An interval that excludes zero can therefore coexist with a Holm non-rejection. The multiplicity decision, not interval exclusion, controls statements about the documented nine-test family.
++
++No minimum practically important execution-accuracy difference, equivalence margin, or non-inferiority margin was specified before analysis. The study therefore cannot infer practical equivalence from a non-rejection, and the 1/180 complete-witness difference is a mechanism trace rather than evidence of a meaningful benefit.
++
++In the separately corrected secondary family, the common-target hint effects survive: +0.4083 for Qwen (adjusted $p=0.000090$) and +0.3556 for Granite (adjusted $p=0.01944$). Because the hint supplies structural information later scored by this endpoint, these are manipulation-check results, not independent semantic evidence.
++
++The multiplicity result changes the emphasis of the factorial study. Large raw contrasts motivate hypotheses about structural instructions, but none of the nine primary execution comparisons meets the documented familywise rule. The projected-column findings verify that the manipulation changed a closely aligned surface property. They do not show that the compact package or hint produces a backbone-independent accuracy gain. Future work should separate schema pruning, value presentation, normalization, and structural hints rather than retaining composite packages.
++
++\subsubsection{Presented Values and Candidate Selection Components}
++
++The component run completed all 700 scored calls under a prospectively frozen call-and-selection procedure on development-visible GridDB items. On the paired 170-question subset, Qwen first-candidate correctness increased from 83/170 to 101/170, a +0.1059 difference (95\% composition-sensitivity interval [+0.0282, +0.2013], adjusted $p=0.0310$). Granite remained 69/170 in both paired conditions, with an interval spanning zero. The cross-backbone modifier did not meet the frozen decision rule, so the Qwen result is not replicated across backbones and is not a five-role result.
++
++The deterministic selector changed 24 Qwen and 36 Granite choices. Relative to the first candidate, it rescued eight and harmed one Qwen question, and rescued ten while harming none for Granite. Execution effects were +0.0389 and +0.0556; neither survived its two-test Holm family. Oracle-at-three values of 0.6389 and 0.4667 are gold-only diagnostics and are not deployable selector results.
++
++For Qwen, the value-evidence intervention adds 18 correct first candidates when the 170 eligible V0 questions are compared with their V1 counterparts under the documented frozen component protocol; the corresponding Granite estimate is zero. The disagreement is more informative than averaging the backbones: the effect depends on how a frozen model uses schema and value context. Oracle-at-three measures candidate-pool headroom, whereas the reference-free selector measures how much of that headroom the recorded rule can recover without gold.
++
++Complete component counts appear in the numerical supplement. On all 180 V1 questions, Qwen first/selector/oracle-at-three counts were 105/112/115, and Granite counts were 71/81/84; the paired 170-question intervention counts and all documented effects appear in Table~\ref{tab:component-effects}. These are component, not five-role, outcomes.
++
++\begin{table}[htbp]
++\caption{Complete component-effect families. Intervals are pointwise group-composition sensitivity summaries, not simultaneous intervals and not inversions of the Holm tests. Each family contains the two displayed members indicated by its identifier.}
++\label{tab:component-effects}\centering\scriptsize
++\resizebox{\textwidth}{!}{%
++\begin{tabular}{llrrrrrr}
++\toprule
++Family & Contrast & $N$ & Groups & Estimate & Composition interval & Raw $p$ & Holm $p$\\
++\midrule
++E1 & Qwen V1--V0 first candidate & 170 & 61 & 0.1059 & [0.0282, 0.2013] & 0.01552 & 0.03104\\
++E1 & Granite V1--V0 first candidate & 170 & 61 & 0.0000 & [-0.1902, 0.1705] & 1.00000 & 1.00000\\
++E2 & Qwen selector--first V1 & 180 & 70 & 0.0389 & [-0.0081, 0.1071] & 0.50080 & 0.50080\\
++E2 & Granite selector--first V1 & 180 & 70 & 0.0556 & [0.0075, 0.1232] & 0.06425 & 0.12850\\
++Cross-E & Granite--Qwen E1 effects & 170 & 61 & -0.1059 & [-0.2701, 0.0394] & 0.26986 & 0.53971\\
++Cross-E & Granite--Qwen E2 effects & 180 & 70 & 0.0167 & [-0.0062, 0.0457] & 0.37477 & 0.53971\\
++\bottomrule
++\end{tabular}}
++\end{table}
++
++The three two-member Holm families are E1 across backbones, E2 across backbones, and Cross-E across modifiers. The Granite E2 pointwise interval excludes zero while its adjusted decision does not meet the frozen decision rule; these summaries are not contradictory. The 61- and 70-group mappings retain question weights but are dependence proxies, not a probability sample. Figure~\ref{fig:components} visualizes these effects without replacing the adjusted decisions.
++
++\begin{figure}[htbp]
++\centering
++\includegraphics[width=0.92\textwidth]{figures/results/figure_01_primary_effects.pdf}
++\caption{Component effects under a prospectively frozen call-and-selection procedure on development-visible GridDB items. Intervals describe composition sensitivity; the frozen decision rule also requires multiplicity-adjusted evidence.}
++\label{fig:components}
++\end{figure}
++
++\subsection{Constructed-State Stability}
++
++The v5 scorer produced all 25,920 protocol-specified rows, and its T0 slice reproduced 1440/1440 snapshot labels. Table~\ref{tab:multistatecounts} and Figure~\ref{fig:multistate} report the 66-question automatic subset. The 15-state logical-AND rates range from 0.6212 (Granite F01) to 0.8182 (Granite F00). All nine Holm-adjusted values equal 1.0000 under exact cluster-sign enumeration. No context, hint, interaction, or cross-backbone multi-state effect meets the declared rule. These rates characterize constructed-state agreement, not population accuracy or human-certified equivalence.
++
++The ordering under this endpoint differs from the single-snapshot table. Granite F00 has the highest logical-AND rate on the 66-question automatic subset even though Granite F11 has the larger T0 execution count over all 180 questions. The denominators and endpoints differ, so this is not a contradiction. The reversal shows why a robustness statement must name both the admitted question subset and the required state set.
++
++\begin{table}[htbp]
++\caption{Complete 15-state logical-AND counts for the prediction-blinded 66-question automatic subset.}
++\label{tab:multistatecounts}
++\centering
++\small
++\begin{tabular}{lcccc}
++\toprule
++Backbone & F00 & F01 & F10 & F11\\
++\midrule
++Qwen & 49/66 (0.7424) & 48/66 (0.7273) & 53/66 (0.8030) & 43/66 (0.6515)\\
++Granite & 54/66 (0.8182) & 41/66 (0.6212) & 51/66 (0.7727) & 49/66 (0.7424)\\
++\bottomrule
++\end{tabular}
++\end{table}
++
++\begin{figure}[htbp]
++\centering
++\includegraphics[width=0.92\textwidth]{figures/results/fig04_semantic_reliability.pdf}
++\caption{GridDB multi-state logical-AND agreement for the prediction-blinded automatic subset. The endpoint is a constructed-state robustness diagnostic.}
++\label{fig:multistate}
++\end{figure}
++
++\subsection{Cross-Database Portability on BIRD}
++
++Table~\ref{tab:bird} reports all eight cells. BIRD Mini-Dev is a public non-grid portability benchmark and does not validate power-grid semantics. B0--B2 use one physical generation call per item; B3 uses two, so the inherited comparison estimates frozen workflow efficacy under unequal call counts rather than a call-matched repair effect. Each backbone completed 2500 calls, 2000 final predictions, zero retries, and zero final-ledger omissions. Latency and token totals are unavailable in the retained summary and were not reconstructed.
++
++\begin{table}[htbp]
++\caption{Inherited BIRD Mini-Dev v1.1 results (non-grid portability evidence; 11 database clusters). Intervals are database-cluster composition-sensitivity intervals.}
++\label{tab:bird}
++\centering
++\small
++\setlength{\tabcolsep}{3pt}
++\begin{tabular}{llrrrrp{1.5cm}}
++\toprule
++Backbone & Method & Correct/500 & Accuracy & Interval & Calls/item & Final-ledger omissions\\
++\midrule
++Qwen & B0 direct & 189/500 & 0.378 & [0.286, 0.470] & 1 & 0\\
++Qwen & B1 decomposition & 151/500 & 0.302 & [0.203, 0.401] & 1 & 0\\
++Qwen & B2 schema selection & 197/500 & 0.394 & [0.279, 0.511] & 1 & 0\\
++\cmidrule(lr){1-7}
++Qwen & B3 execution repair & 174/500 & 0.348 & [0.250, 0.452] & 2 & 0\\
++Granite & B0 direct & 102/500 & 0.204 & [0.125, 0.284] & 1 & 0\\
++Granite & B1 decomposition & 105/500 & 0.210 & [0.131, 0.294] & 1 & 0\\
++Granite & B2 schema selection & 101/500 & 0.202 & [0.137, 0.273] & 1 & 0\\
++\cmidrule(lr){1-7}
++Granite & B3 execution repair & 118/500 & 0.236 & [0.159, 0.318] & 2 & 0\\
++\bottomrule
++\end{tabular}
++\end{table}
++
++After Holm adjustment, Qwen decomposition is 0.076 below direct prompting (adjusted $p=0.0430$), and schema selection is 0.092 above decomposition (adjusted $p=0.0117$). No Granite contrast survives correction. Different method orders across the two model snapshots argue against a universal prompting recipe. Two incomplete predecessor runs were retained for traceability and excluded from all reported denominators; their disposition is documented in the Supplementary Materials.
++
++The BIRD results also constrain the meaning of ``agentic'' improvement. Decomposition reduces Qwen accuracy relative to direct prompting, while bounded repair uses twice the physical calls without becoming the best Qwen method. Granite shows a different descriptive ordering and no adjusted contrast. More stages or calls do not guarantee a better outcome. A future comparison must count physical generations, retries, context tokens, and failed attempts, not only final predictions.
++
++\subsection{Implementation Reliability}
++
++The five-role controller and executor were tested for typed handoffs, mutation denial, bounded execution, trace completeness, deterministic replay, and fail-closed state coverage. Failed attempts remain in the evidence ledger and cannot be silently replaced. The executor used to create the historical candidate and evidence ledgers enforced SQLite read-only mode, \texttt{query\_only}, authorization callbacks, disabled extensions, and time, opcode, and row bounds. A later revision added cell-byte, total-result-byte, width, and function controls; these tests strengthen the implementation boundary but do not reinterpret the frozen ledgers. The unified evaluator subsequently scored the stored fixed and selected SQL under one explicit shape-and-denotation rule. The historical selector ledger contains 3960 blackboard messages and 5760 database attempts (5428 executable and 332 SQLite failures) across 953 distinct SQL hashes; it contains no selector-stage model calls. Recorded local attempt time totals 839 ms, but timer granularity places both the median and 95th percentile at 0 ms, so these values are an audit of the ledger rather than a deployment-latency estimate. Supplementary Tables S1--S3 provide the complete test inventory and protocol attribution.
++
++\section{Discussion}
++
++\subsection{Validation and Selection Solve Different Problems}
++
++The historical-pool result distinguishes a useful filter from a successful selector. Validation-aware ranking recovers 25 questions and harms two relative to C000, producing 23 additional reference matches. Yet the fixed Qwen F01 source achieves 30 more matches than validation-aware selection. The strongest-source comparison changes the interpretation: the pool already contains a better fixed policy, but the recorded evidence does not recover its performance. Proposition~\ref{prop:pool-bound} explains why candidate availability and selection ability must be reported separately.
++
++The failure partition makes the redesign question more precise. Changing the selector alone cannot repair the 42 questions with no correct candidate. Improving eligibility retention is not the observed bottleneck because no correct slot was removed. The six scoring failures require evidence or a score that promotes a surviving correct candidate, whereas the 33 validation-only tie losses concern alternatives already at the maximum score. This is a diagnostic allocation of the observed errors, not a promise that the four interventions can be optimized independently. A future study can test whether the same allocation recurs across candidate pools before choosing which interface to redesign.
++
++The automatic error taxonomy supports a more specific account than a general claim of improved reasoning. Relative to C000, the selectors reduce execution and shape failures while leaving many wrong denotations after those gates pass. They are therefore effective at some forms of rejection within this pool, but the remaining ranking problem concerns distinctions the current features represent only weakly. This is not proof that execution evidence is unhelpful in other systems. It shows why a validation metric should be interpreted through the errors it can detect, rather than equated with answer correctness.
++
++The same distinction applies to the five-role architecture. Typed records identify where evidence enters the workflow and allow a decision to be replayed. They do not establish that every role contributes to prediction quality. In particular, recorded-only schema grounding cannot explain a change in historical-pool selection. The role-utilization audit is consequently as important as the architecture diagram: it separates an implemented interface from an active decision mechanism.
++
++\subsection{Why the Tested Witnesses Add Little Discrimination}
++
++Complete-witness eligibility changes only Q039, raising the count from 99 to 100. The witnesses were designed to test irrelevant-table, storage/index, and nullable-column transformations. These interventions probe specific invariances; they do not introduce the missing business definitions needed to interpret coded statuses or time fields. Limited incremental selection is therefore compatible with the narrow information supplied by the tests.
++
++Q039 provides a concrete example. Nullable schema extension distinguishes a wildcard projection from an explicit two-column projection, while the intended meaning of scheduled maintenance remains unresolved. Agreement with the synthetic reference is the measured outcome; the trace is not independent expert adjudication of that reference. This example also prevents an overgeneralization of Proposition~\ref{prop:indistinguishability}: additional evidence can resolve a particular distinction, but a witness that resolves projection width need not resolve business intent.
++
++For future systems, witness design should begin with a stated ambiguity and an expected discriminating relation. Merely increasing the number of state checks can add cost without separating candidates. Conversely, a gate may exclude a correct query if the transformation violates the query's intended equivalence class. Witness coverage, rejection patterns, and retained correct candidates should therefore be examined together. The present study does not establish an optimal witness set.
++
++\subsection{Candidate Order Is Part of the Decision Rule}
++
++Both selectors have top-score ties on 130 of 180 questions. Across all global slot orders, their reference-match counts range from 95 to 128, while reversal raises the original counts to 116. Proposition~\ref{prop:ties} identifies the mechanism: when the score cannot distinguish top candidates, the order supplies the final choice. The order is thus a substantive policy, not an innocuous implementation detail.
++
++The empirical quantities need to remain distinct. Slot multiplicity includes duplicate SQL; deduplication reduces the average top set to about 3.1 unique strings but does not eliminate ambiguity. A tie between equivalent queries need not affect correctness, whereas a mixed-correctness tie can. The global-order enumeration captures their joint consequences for this finite pool; it does not identify a policy to select after observing outcomes.
++
++Nor does uniqueness establish confidence. The strict no-tie rule covers 50 questions and matches only 24. A unique maximizer can still be wrong because the features themselves are imperfect. The relevant next experiment is therefore not simply to force agreement or remove ties. It is to compare prospectively frozen semantic evidence and clarification policies using both answer quality and coverage on untouched questions.
++
++\subsection{Context Effects Depend on the Model and Evaluation Task}
++
++The generation studies provide context for the selection failure. Structural hints strongly alter projected-column conformity, yet none of the nine primary GridDB execution contrasts survives its Holm correction. Presented values improve the Qwen first-candidate count on the paired component subset but leave Granite unchanged. BIRD likewise yields different method orderings: schema selection has the highest Qwen point estimate, while bounded repair has the highest Granite estimate and uses an additional call.
++
++These observations are consistent with a trade-off between supplying useful context and introducing irrelevant or misleading context \cite{bozdemir2026schema,liu2025solidsql,hao2025genlink}. They do not show that one prompting strategy generalizes across backbones. The schema-description study of Avignone et al.\ similarly separates recognition of constructs from the quality of the resulting text \cite{avignone2025exploring}; here, the analogous distinction is between adopting the requested output shape and returning the intended rows.
++
++A modular interface makes these alternatives easier to inspect, but modularity is not the treatment tested in the generation experiments. A causal architecture comparison would require matched models, physical calls, tokens, candidate counts, and evaluator conditions. The present studies instead establish the narrower fact that context and evidence choices can have different effects at different stages.
++
++\subsection{Implications for Auditable Information Systems}
++
++Three design implications follow from the specification and observed failures. First, separate policy admissibility, execution success, reference agreement, and independently reviewed business meaning in both logs and reports. Second, preserve candidate provenance, active feature values, gate failures, and tie rules so that a selected answer can be traced to its actual decision mechanism. Third, test whether added evidence distinguishes the surviving alternatives rather than rewarding checks that all of them pass.
++
++These are recommendations motivated by this study, not measured deployment benefits. The framework does not authenticate a user, enforce institutional row-level policy, or establish that displayed records are appropriate for consequential decisions. Those responsibilities remain with the calling application and qualified reviewers. Similarly, trace hashing supports comparison of retained records under a trusted host; it does not make an untrusted host tamper-proof.
++
++Figure~\ref{fig:evidence-map} links the empirical streams to these boundaries. Generation experiments test candidate production, state checks test specified invariances, and the historical-pool study tests selection. Keeping those endpoints separate makes the negative selection result informative to other information-system researchers without implying that this small grid case study measures a general failure rate.
++
++\begin{figure}[htbp]
++\centering
++\includegraphics[width=0.88\textwidth]{figures/fig06_evidence_map.pdf}
++\caption{Evidence flow from generation studies to read-only validation, constructed-state analysis, and historical-pool selection. The four empirical streams answer complementary questions and are not pooled into one framework accuracy.}
++\label{fig:evidence-map}
++\end{figure}
++
++\subsection{Limitations and Next Evaluation}
++
++GridDB contains eight tables and 98 synthetic rows, and its evaluation questions were visible during development. The question groups used for resampling are dependence proxies, not sampled deployment clusters. BIRD adds public database diversity but no independent validation of power-grid business semantics. The findings therefore describe the retained cases and model snapshots rather than a deployment population.
++
++Chronology imposes a second limit. Although selection is sealed before offline scoring, same-item derived outcomes had been accessed during earlier development. The reconciled evaluator, global-order enumeration, and role diagnostics are post-result analyses. Their transparency does not convert them into confirmation on unseen data. Likewise, later executor hardening cannot be credited to the earlier ledgers.
++
++The formal properties are intentionally modest. They characterize a finite selector under fixed inputs and correct implementation; they do not establish learned calibration, general SQL equivalence, or system security beyond the stated threat model. No expert user study measures review time, usability, or unsafe omission. Existing machine-adjudicated RTS-GMLC, SimBench, and NERC-derived question--SQL resources cannot supply that missing human evidence.
++
++The next evaluation should freeze schema and value retrieval, candidate budgets, semantic evidence, tie handling, and abstention rules before opening unseen grid schemas and independently reviewed questions. It should compare direct generation, staged single-candidate processing, and multi-candidate selection under matched physical calls and tokens. Reported outcomes should include reference agreement, expert-semantic errors, correct-candidate loss at gates, coverage, and total evaluation cost. These are proposed requirements, not experiments completed in this revision.
++
++\section{Conclusions}
++
++\masql{} separates candidate production, eligibility checks, and final selection in an auditable power-grid Text-to-SQL workflow. Its five role interfaces and deterministic controller expose the evidence behind each decision. The formal analysis establishes limited properties of that rule: selection stays within the eligible pool, its accuracy is bounded by available correct candidates, and unresolved top ties delegate the decision to candidate order. None of these properties implies semantic correctness.
++
++The 180-question historical pool separates the remaining errors into actionable categories: 42 questions contain no correct candidate, no evaluator-correct slot is lost at eligibility, six questions lose the correct candidates at scoring, and 33 or 32 lose a correct top candidate through the original tie order. Validation-aware and complete-witness selection therefore match 99 and 100 references, below the strongest fixed source at 129. Mixed-correctness top sets occur on 51 questions, not on every one of the 130 slot-tied questions. These are finite-case findings about the recorded rule; the supporting BIRD generation results do not establish their prevalence across databases.
++
++The design lesson is to diagnose the decision stage before adding complexity. A missing correct candidate requires a change upstream of selection; a correct candidate below the top score requires better discrimination; a mixed-correctness top set requires additional evidence or a justified ambiguity policy. More eligibility checks alone need not repair either of the latter failures. Whether this decomposition identifies the same bottlenecks in other settings must be tested on independently reviewed queries and new candidate pools under a frozen, budget-matched protocol.
++
++\supplementary{The Supplementary Materials include software and executor tests, protocol and version records, complete numerical tables, figure provenance, rights information, and reproducibility instructions.}
++\authorcontributions{Conceptualization, B.L. and Y.Y.; methodology, B.L.; software, B.L.; validation, B.L. and C.S.; formal analysis, B.L. and C.S.; investigation, B.L. and C.S.; resources, Y.Y.; data curation, B.L. and C.S.; writing---original draft preparation, B.L.; writing---review and editing, C.S. and Y.Y.; visualization, B.L.; supervision, Y.Y.; project administration, Y.Y.; funding acquisition, Y.Y. All authors have read and agreed to the published version of the manuscript.}
++\funding{This research was funded by the Science and Technology Research Project of State Grid Fujian Electric Power Co., Ltd., grant number 521300250006. The funder had no role in the study design; in the collection, analysis, or interpretation of data; in the writing of the manuscript; or in the decision to publish the results.}
++\institutionalreview{Not applicable. This study did not involve human participants or animals.}
++\informedconsent{Not applicable.}
++\dataavailability{The manuscript-bound, rights-safe technical package can be inspected in the public \nolinkurl{powergrid_benchmark} repository under the frozen tag \nolinkurl{cmc-2026-08-24-v3} via the \href{https://github.com/gaoxingkele/powergrid_benchmark/tree/cmc-2026-08-24-v3/paper_projects/CMC/MA-SQLGrid}{frozen MA-SQLGrid package}. It includes the numerical supplement, code, tests, derived evidence, and reproducibility records underlying the historical empirical results; the present Information rewrite is not contained in that historical tag. BIRD Mini-Dev remains available from its public provider. Owing to third-party licensing restrictions, raw GridDB and BIRD databases and restricted source records are not redistributed, and source-dependent RTS-GMLC or SimBench artifacts may be provided for editorial or peer-review verification only when permitted by the applicable licenses. The historical \texttt{ma-sqlgrid} repository is not the manuscript-bound release for this version.}
++\acknowledgments{During preparation of this manuscript, the authors used the OpenAI Codex agent interface for the activities described in Materials and Methods, including manuscript preparation and local code and build review. The exact backend model identifier and version were not retained for every session. The authors reviewed and edited the assisted work and take full responsibility for the analyses, interpretations, and content of this publication.}
++\conflictsofinterest{The authors declare no conflicts of interest.}
++
++\appendix
++\section{Historical Question-Level Statistical Reconciliation}
++\label{sec:historical-question-statistics}
++
++Table~\ref{tab:historical-question-statistics} preserves the original post-result numerical reconciliation. Its resampling unit is the individual question, unlike the grouped analyses of the generation studies. Dependence among questions sharing SQL structure is not addressed by these intervals or discordant-sign tests. They are retained for provenance, not used to support generalization or the diagnostic contribution. The main text relies on exhaustive finite-pool counts and the stage partition.
++
++\begin{table}[htbp]
++\caption{Archived question-level reconciliation, without a cross-template or population interpretation. Intervals are paired question-composition summaries; Holm adjustment covers nine unique C000 comparisons.}
++\label{tab:historical-question-statistics}\centering\scriptsize
+ \resizebox{\textwidth}{!}{%
+ \begin{tabular}{lrrrrrr}
+ \toprule
+@@ -389,367 +778,6 @@
+ \end{tabular}}
+ \end{table}
+ 
+-Qwen F00 and historical C000 contain the same 180 SQL artifacts. Their previously reported 76-versus-80 discrepancy came from evaluator policy: the historical row-only comparator treated Q104, Q107, Q110, and Q140 as matches because both results were empty, whereas all four candidate projections had the wrong column count. The unified evaluator applies the frozen shape gate before empty-row equality and reproduces all 1440 canonical fixed-slot verdicts. Under that evaluator, validation-only and complete-witness selection differ by one match and remain 30 and 29 matches below Qwen F01, respectively.
+-
+-Figure~\ref{fig:offline-diagnostics} juxtaposes reference matches and witness invariance. The one-match selector increment focuses interpretation on validation ranking and tie policy, not a broad witness benefit.
+-
+-\begin{figure}[htbp]
+-\centering
+-\includegraphics[width=0.90\textwidth]{figures/fig05_offline_selector_diagnostics.pdf}
+-\caption{Selector endpoints over 180 historical-pool questions. Reference matches are loaded only after board sealing; invariance denotes agreement across the three constructed witnesses.}
+-\label{fig:offline-diagnostics}
+-\end{figure}
+-
+-Both evidence-aware selectors produced multiple highest-scoring candidates on 130/180 questions, with mean top-tie sizes of 5.4000 and 5.3889. With original-order tie breaking, 178/180 selections came from Qwen slots, reflecting source order rather than learned preference.
+-
+-Most apparent source preference is mechanically induced. When all eight candidates tie, the first slot is selected regardless of backbone quality; when seven tie, the earliest surviving slot has the same advantage. The observed 178 Qwen selections measure how often the available reference-free features failed to separate candidates before the stable-order rule acted, not a learned preference for one backbone.
+-
+-The numerical supplement reports the complete multiplicity and selected-slot distributions, including all eight-candidate ties.
+-
+-Validation-only ranking added 23 net reference matches relative to C000 through 25 rescues and 2 harms. Complete-witness selection changed the chosen candidate on only Q039, yielding one further match (100/180 versus 99/180), one additional rescue, no additional harm, and no coverage or abstention change. Table~\ref{tab:q039} gives the constructed trace for this sole selector difference. Neither selector exceeded the fixed Qwen F01 source at 129/180.
+-
+-\subsection{Tie Structure, Order Sensitivity, and the Q039 Case}
+-
+-\begin{table}[htbp]
+-\caption{Q039 is the sole validation-only versus complete-witness selection difference. ``Match'' denotes agreement with the synthetic reference.}
+-\label{tab:q039}
+-\centering
+-\footnotesize
+-\setlength{\tabcolsep}{3pt}
+-\begin{tabular}{p{2.2cm}p{4.0cm}p{4.0cm}p{1.8cm}}
+-\toprule
+-Field & Validation-only & Complete witnesses & Interpretation\\
+-\midrule
+-Request & \multicolumn{2}{p{8.8cm}}{``Show the first scheduled work order after June 2024.''} & Status/date ambiguity\\
+-Projection & \texttt{SELECT *} & \texttt{SELECT work\_order\_id, scheduled\_date} & Wildcard vs. explicit fields\\
+-Shared filter & \multicolumn{2}{p{8.8cm}}{\texttt{scheduled\_date > '2024-06-01' ORDER BY scheduled\_date ASC LIMIT 1}} & Ambiguous time scope\\
+-M3 outcome & Wildcard width changes & Two-column projection preserved & Projection stability\\
+-Reference result & No match & Match & One-question trace\\
+-\bottomrule
+-\end{tabular}
+-\end{table}
+-
+-M3 added nullable columns to \texttt{work\_orders}; consequently, complete-witness eligibility rejected the wildcard projection and retained the explicit \texttt{work\_order\_id, scheduled\_date} projection. The full SQL strings are supplied in the numerical supplement. Neither query resolves the request's status and date-boundary ambiguity through qualified review, so the extra reference match is interpreted as a projection-stability trace rather than an engineering correctness judgment.
+-
+-Table~\ref{tab:sensitivity} replaces the non-comparable historical row-only sensitivity values with an exact audit under the unified evaluator. The audit enumerated all $8!=40{,}320$ global slot orders while preserving each question's frozen evidence scores. Validation-only selection ranged from 95 to 128 matches and complete-witness selection also ranged from 95 to 128; both had a median of 107. The original orders produced 99 and 100 matches, respectively, while the reverse order produced 116 for both selectors. Even the outcome-exposed maximum remained below the fixed Qwen F01 source at 129/180.
+-
+-These permutations are diagnostics, not candidate policies: no order is preferred after outcomes are observed. A second descriptive audit abstained whenever the top-score set was not unique. It covered only 50/180 questions and matched 24 of them (0.4800), so top-tie size alone was not a calibrated confidence signal. The range across global orders and the poor strict-abstention result motivate a semantic tie or abstention rule frozen before evaluation on an untouched pool.
+-
+-A transparent post-run hash audit emitted no SQL text and found duplicate normalized SQL in 154/180 pools. Mean validation and complete-witness top sets fell from 5.400 and 5.389 slots to 3.150 and 3.139 unique strings; the mean pool contained 5.322 unique strings. Deduplication reduces apparent multiplicity but does not remove ambiguity. The outcome-aware right-step tie-size AURC values, 0.4826 and 0.4795, are diagnostics rather than calibration results.
+-
+-\begin{table}[htbp]
+-\caption{Exact global candidate-order sensitivity under the unified shape-and-denotation evaluator. All 40,320 orders are outcome-aware diagnostics; original and reverse are two members of that enumeration.}
+-\label{tab:sensitivity}
+-\centering
+-\small
+-\resizebox{\textwidth}{!}{%
+-\begin{tabular}{lrrrrrr}
+-\toprule
+-Selector & Original & Reverse & Minimum & Median & Mean & Maximum\\
+-\midrule
+-Validation-only & 99 & 116 & 95 & 107 & 109.845 & 128\\
+-Complete witness & 100 & 116 & 95 & 107 & 109.929 & 128\\
+-\bottomrule
+-\end{tabular}}
+-\end{table}
+-
+-The post-review utilization audit then traced which role outputs actually enter the historical-pool selector. Query Analyst fields feed aggregation, order, and lexical-match validation features. By contrast, the Schema Cartographer's grounding is posted to the blackboard but is not passed to candidate generation, validation, the critic, or adjudication in this frozen driver. The candidate provider is an adapter for stored SQL and makes no model calls. Table~\ref{tab:role-ablation} therefore reports score-component diagnostics rather than claiming a prospective removal of five independently active agents. Safety and executability gates remain active in every variant.
+-
+-\begin{table}[htbp]
+-\caption{Post-review role-utilization and single-component diagnostics under the unified evaluator. Changes, gains, and losses are relative to the stated parent and use the original candidate order.}
+-\label{tab:role-ablation}
+-\centering
+-\small
+-\resizebox{\textwidth}{!}{%
+-\begin{tabular}{llrrrr}
+-\toprule
+-Selector variant & Parent & Correct/180 & Choices changed & Gains & Losses\\
+-\midrule
+-Validation original & --- & 99 & 0 & 0 & 0\\
+-Without all Query-Analyst-derived score terms & Validation original & 76 & 64 & 2 & 25\\
+-Without shape term & Validation original & 99 & 0 & 0 & 0\\
+-Without order term & Validation original & 77 & 49 & 1 & 23\\
+-Without lexical value-hit term & Validation original & 99 & 14 & 1 & 1\\
+-Complete witness original & --- & 100 & 0 & 0 & 0\\
+-Without constructed-state gate & Complete witness & 99 & 1 & 0 & 1\\
+-Without recorded-only schema grounding & Complete witness & 100 & 0 & 0 & 0\\
+-\bottomrule
+-\end{tabular}}
+-\end{table}
+-
+-The order feature accounts for most of the observed post-review change in this decomposition: removing it changes 49 validation choices and lowers the match count by 22. Removing lexical value hits changes 14 choices but exchanges one gain for one loss, while removing the shape term changes none. Removing constructed-state eligibility changes only Q039. These same-item, outcome-aware diagnostics localize behavior in the frozen pool; they do not estimate the benefit of an independently implemented role on unseen questions.
+-
+-\begin{table}[htbp]
+-\caption{Exhaustive post-result failure partition under the unified evaluator. Each question appears in exactly one row for each selector. Correctness means reference agreement, not expert-reviewed business semantics.}
+-\label{tab:failure-partition}\centering\small
+-\begin{tabular}{lrr}
+-\toprule
+-Decision outcome & Validation-only & Complete witness\\
+-\midrule
+-No correct candidate in the original pool & 42 & 42\\
+-All correct candidates removed by eligibility gates & 0 & 0\\
+-Eligible correct candidates below the highest score & 6 & 6\\
+-Correct top candidate lost through tie order & 33 & 32\\
+-Selected candidate correct & 99 & 100\\
+-\midrule
+-Total questions & 180 & 180\\
+-\bottomrule
+-\end{tabular}
+-\end{table}
+-
+-Table~\ref{tab:failure-partition} connects the formal bounds to the recorded decisions. A correct candidate exists in 138 pools and survives eligibility in every one; neither selector removes any evaluator-correct source slot in this dataset. Six questions lose their remaining opportunity at scoring. Both selectors have mixed-correctness top sets on 51 questions, of which the original order resolves 33 and 32 incorrectly. Thus 130 slot ties do not mean 130 correctness-sensitive ambiguities. These counts distinguish candidate availability, gate retention, score discrimination, and final tie resolution without treating any oracle choice as a usable policy.
+-
+-An automated evaluator-state taxonomy further separates execution failure, output-shape mismatch, and wrong denotation after both shape gates pass. C000 has 1 execution error, 85 shape mismatches, and 18 wrong denotations among its 104 failures. Validation-only selection has 0, 42, and 39, respectively; complete-witness selection has 0, 41, and 39. The best fixed Qwen F01 source has 5 execution errors, 1 shape mismatch, and 45 wrong denotations. Thus the frozen selector removes many inadmissible or shape-inconsistent candidates but leaves a larger share of its remaining failures beyond the evaluator's shape gate. This automatic taxonomy does not distinguish wrong status meaning, units, time boundaries, topology intent, or professional usefulness; those categories remain subject to independent expert review.
+-
+-The numerical supplement contains all eight GridDB cells, 12 component endpoints, eight 15-state cells, the exact unified-evaluator order histogram, the descriptive risk--coverage curve, the 360-row item-level tie ledger, selected-origin counts, and the Q039 trace. The main-text findings use different questions, candidates, call patterns, and endpoints, so they are not combined into a single framework accuracy. Across these studies, the common diagnostic finding is that context and validation evidence can change observable behavior, while stable semantic selection remains unresolved.
+-
+-\subsection{Context and Component Effects on SQL Generation}
+-
+-All 1440 scheduled predictions are present, and independent SQLite re-execution reproduced the stored execution verdicts. Table~\ref{tab:cells} reports strict execution equality, and Figure~\ref{fig:cells} visualizes the same audited cell estimates.
+-
+-\begin{table}[htbp]
+-\caption{Strict execution equality over 180 GridDB questions per cell.}
+-\label{tab:cells}
+-\centering
+-\small
+-\setlength{\tabcolsep}{4pt}
+-\begin{tabular}{lcccc}
+-\toprule
+-Backbone & F00 full/no hint & F01 full/hint & F10 compact/no hint & F11 compact/hint\\
+-\midrule
+-Qwen & 76/180 (0.4222) & 129/180 (0.7167) & 78/180 (0.4333) & 108/180 (0.6000)\\
+-Granite & 77/180 (0.4278) & 100/180 (0.5556) & 74/180 (0.4111) & 108/180 (0.6000)\\
+-\bottomrule
+-\end{tabular}
+-\end{table}
+-
+-\begin{figure}[htbp]
+-\centering
+-\includegraphics[width=0.94\textwidth]{figures/results/fig01_v2_cells.pdf}
+-\caption{Audited GridDB cell point estimates. Each cell contains all 180 attempts; the figure is descriptive and does not replace the documented factorial contrasts.}
+-\label{fig:cells}
+-\end{figure}
+-
+-The common-target projected-column diagnostic is 0.5222 in F00 for both backbones. Qwen obtains 0.9667, 0.5889, and 0.9611 in F01, F10, and F11; Granite obtains 0.8778, 0.5667, and 0.9222. These values show that returning the requested number of columns is easier than returning the intended rows. In Qwen F01, projected-column conformity is 0.9667 while execution equality is 0.7167.
+-
+-The eight cells also show that no single prompt summarizes the design. Adding the hint to full context increases the point estimate for both backbones, whereas adding compact context without the hint leaves execution equality close to F00. Under compact context, the hint produces 108 correct answers for both models, but this numerical convergence arises from different unhinted baselines and does not establish identical behavior. Reporting every cell preserves these interactions instead of selecting only the highest value.
+-
+-The 0.2500 gap between Qwen F01 projected-column conformity and strict execution equality warns against structural proxy endpoints. A model may recognize that one column, an aggregate, or an ordered row is requested while still choosing the wrong table, join, predicate, value, or boundary. Shape diagnostics can localize errors and inform adjudication, but they cannot replace result equality or qualified semantic review.
+-
+-\subsubsection{Factorial Effects and Multiplicity}
+-
+-Table~\ref{tab:factorial-nine} reports the complete primary family. For Qwen, the composite-hint execution effect is +0.2306, the package--hint interaction is $-0.1278$, and the compact-package main effect is $-0.0528$. Granite's corresponding estimates are +0.1583, +0.0611, and +0.0139. None of the nine primary execution tests survives Holm correction. Qwen's hint effect has raw/adjusted $p=0.01372/0.09604$, its interaction $0.00919/0.07352$, and the cross-backbone hint modifier $0.00640/0.05760$. Accordingly, no primary factorial execution effect or modifier is described as statistically nonzero.
+-
+-\begin{table}[htbp]
+-\caption{Complete primary factorial family for strict execution equality. Estimates are question-weighted finite-set differences; intervals are 95\% normalized-SQL-group composition-sensitivity intervals. Each sign-randomization used 70 groups, 100,000 draws, and the displayed raw values were Holm-adjusted jointly over all nine rows.}
+-\label{tab:factorial-nine}\centering\scriptsize
+-\resizebox{\textwidth}{!}{%
+-\begin{tabular}{llrrrr}
+-\toprule
+-Scope & Effect & Estimate & Composition interval & Raw $p$ & Holm $p$\\
+-\midrule
+-Qwen & Compact-package main & -0.0528 & [-0.1131, 0.0000] & 0.10523 & 0.52614\\
+-Qwen & Structural-hint main & 0.2306 & [0.0548, 0.4355] & 0.01372 & 0.09604\\
+-Qwen & Package $\times$ hint & -0.1278 & [-0.2454, -0.0341] & 0.00919 & 0.07352\\
+-Granite & Compact-package main & 0.0139 & [-0.0584, 0.0798] & 0.85021 & 1.00000\\
+-Granite & Structural-hint main & 0.1583 & [-0.0193, 0.3662] & 0.15480 & 0.61919\\
+-Granite & Package $\times$ hint & 0.0611 & [-0.0539, 0.2013] & 0.55890 & 1.00000\\
+-Granite--Qwen & Backbone $\times$ package & 0.0667 & [-0.0360, 0.1814] & 0.41478 & 1.00000\\
+-Granite--Qwen & Backbone $\times$ hint & -0.0722 & [-0.1229, -0.0276] & 0.00640 & 0.05760\\
+-Granite--Qwen & Three-way interaction & 0.1889 & [0.0090, 0.4321] & 0.07010 & 0.42060\\
+-\bottomrule
+-\end{tabular}}
+-\end{table}
+-
+-The normalized-SQL mapping contains 70 groups, 58 singletons, and a maximum group size of 19. Question-level weighting is retained; groups are resampling and sign-assignment proxies, not verified authoring templates or sampled clusters. The randomization interpretation requires exchangeability of group signs under the tested sharp null, while the composition interval asks how the finite-corpus mean changes when those observed groups are reweighted. Neither assumption follows from the data, and the high singleton fraction limits protection against unmeasured dependence.
+-
+-The displayed composition intervals are pointwise sensitivity intervals; they are neither simultaneous/familywise intervals nor inversions of the nine Holm-adjusted randomization tests. An interval that excludes zero can therefore coexist with a Holm non-rejection. The multiplicity decision, not interval exclusion, controls statements about the documented nine-test family.
+-
+-No minimum practically important execution-accuracy difference, equivalence margin, or non-inferiority margin was specified before analysis. The study therefore cannot infer practical equivalence from a non-rejection, and the 1/180 complete-witness difference is a mechanism trace rather than evidence of a meaningful benefit.
+-
+-In the separately corrected secondary family, the common-target hint effects survive: +0.4083 for Qwen (adjusted $p=0.000090$) and +0.3556 for Granite (adjusted $p=0.01944$). Because the hint supplies structural information later scored by this endpoint, these are manipulation-check results, not independent semantic evidence.
+-
+-The multiplicity result changes the emphasis of the factorial study. Large raw contrasts motivate hypotheses about structural instructions, but none of the nine primary execution comparisons meets the documented familywise rule. The projected-column findings verify that the manipulation changed a closely aligned surface property. They do not show that the compact package or hint produces a backbone-independent accuracy gain. Future work should separate schema pruning, value presentation, normalization, and structural hints rather than retaining composite packages.
+-
+-\subsubsection{Presented Values and Candidate Selection Components}
+-
+-The component run completed all 700 scored calls under a prospectively frozen call-and-selection procedure on development-visible GridDB items. On the paired 170-question subset, Qwen first-candidate correctness increased from 83/170 to 101/170, a +0.1059 difference (95\% composition-sensitivity interval [+0.0282, +0.2013], adjusted $p=0.0310$). Granite remained 69/170 in both paired conditions, with an interval spanning zero. The cross-backbone modifier did not meet the frozen decision rule, so the Qwen result is not replicated across backbones and is not a five-role result.
+-
+-The deterministic selector changed 24 Qwen and 36 Granite choices. Relative to the first candidate, it rescued eight and harmed one Qwen question, and rescued ten while harming none for Granite. Execution effects were +0.0389 and +0.0556; neither survived its two-test Holm family. Oracle-at-three values of 0.6389 and 0.4667 are gold-only diagnostics and are not deployable selector results.
+-
+-For Qwen, the value-evidence intervention adds 18 correct first candidates when the 170 eligible V0 questions are compared with their V1 counterparts under the documented frozen component protocol; the corresponding Granite estimate is zero. The disagreement is more informative than averaging the backbones: the effect depends on how a frozen model uses schema and value context. Oracle-at-three measures candidate-pool headroom, whereas the reference-free selector measures how much of that headroom the recorded rule can recover without gold.
+-
+-Complete component counts appear in the numerical supplement. On all 180 V1 questions, Qwen first/selector/oracle-at-three counts were 105/112/115, and Granite counts were 71/81/84; the paired 170-question intervention counts and all documented effects appear in Table~\ref{tab:component-effects}. These are component, not five-role, outcomes.
+-
+-\begin{table}[htbp]
+-\caption{Complete component-effect families. Intervals are pointwise group-composition sensitivity summaries, not simultaneous intervals and not inversions of the Holm tests. Each family contains the two displayed members indicated by its identifier.}
+-\label{tab:component-effects}\centering\scriptsize
+-\resizebox{\textwidth}{!}{%
+-\begin{tabular}{llrrrrrr}
+-\toprule
+-Family & Contrast & $N$ & Groups & Estimate & Composition interval & Raw $p$ & Holm $p$\\
+-\midrule
+-E1 & Qwen V1--V0 first candidate & 170 & 61 & 0.1059 & [0.0282, 0.2013] & 0.01552 & 0.03104\\
+-E1 & Granite V1--V0 first candidate & 170 & 61 & 0.0000 & [-0.1902, 0.1705] & 1.00000 & 1.00000\\
+-E2 & Qwen selector--first V1 & 180 & 70 & 0.0389 & [-0.0081, 0.1071] & 0.50080 & 0.50080\\
+-E2 & Granite selector--first V1 & 180 & 70 & 0.0556 & [0.0075, 0.1232] & 0.06425 & 0.12850\\
+-Cross-E & Granite--Qwen E1 effects & 170 & 61 & -0.1059 & [-0.2701, 0.0394] & 0.26986 & 0.53971\\
+-Cross-E & Granite--Qwen E2 effects & 180 & 70 & 0.0167 & [-0.0062, 0.0457] & 0.37477 & 0.53971\\
+-\bottomrule
+-\end{tabular}}
+-\end{table}
+-
+-The three two-member Holm families are E1 across backbones, E2 across backbones, and Cross-E across modifiers. The Granite E2 pointwise interval excludes zero while its adjusted decision does not meet the frozen decision rule; these summaries are not contradictory. The 61- and 70-group mappings retain question weights but are dependence proxies, not a probability sample. Figure~\ref{fig:components} visualizes these effects without replacing the adjusted decisions.
+-
+-\begin{figure}[htbp]
+-\centering
+-\includegraphics[width=0.92\textwidth]{figures/results/figure_01_primary_effects.pdf}
+-\caption{Component effects under a prospectively frozen call-and-selection procedure on development-visible GridDB items. Intervals describe composition sensitivity; the frozen decision rule also requires multiplicity-adjusted evidence.}
+-\label{fig:components}
+-\end{figure}
+-
+-\subsection{Constructed-State Stability}
+-
+-The v5 scorer produced all 25,920 protocol-specified rows, and its T0 slice reproduced 1440/1440 snapshot labels. Table~\ref{tab:multistatecounts} and Figure~\ref{fig:multistate} report the 66-question automatic subset. The 15-state logical-AND rates range from 0.6212 (Granite F01) to 0.8182 (Granite F00). All nine Holm-adjusted values equal 1.0000 under exact cluster-sign enumeration. No context, hint, interaction, or cross-backbone multi-state effect meets the declared rule. These rates characterize constructed-state agreement, not population accuracy or human-certified equivalence.
+-
+-The ordering under this endpoint differs from the single-snapshot table. Granite F00 has the highest logical-AND rate on the 66-question automatic subset even though Granite F11 has the larger T0 execution count over all 180 questions. The denominators and endpoints differ, so this is not a contradiction. The reversal shows why a robustness statement must name both the admitted question subset and the required state set.
+-
+-\begin{table}[htbp]
+-\caption{Complete 15-state logical-AND counts for the prediction-blinded 66-question automatic subset.}
+-\label{tab:multistatecounts}
+-\centering
+-\small
+-\begin{tabular}{lcccc}
+-\toprule
+-Backbone & F00 & F01 & F10 & F11\\
+-\midrule
+-Qwen & 49/66 (0.7424) & 48/66 (0.7273) & 53/66 (0.8030) & 43/66 (0.6515)\\
+-Granite & 54/66 (0.8182) & 41/66 (0.6212) & 51/66 (0.7727) & 49/66 (0.7424)\\
+-\bottomrule
+-\end{tabular}
+-\end{table}
+-
+-\begin{figure}[htbp]
+-\centering
+-\includegraphics[width=0.92\textwidth]{figures/results/fig04_semantic_reliability.pdf}
+-\caption{GridDB multi-state logical-AND agreement for the prediction-blinded automatic subset. The endpoint is a constructed-state robustness diagnostic.}
+-\label{fig:multistate}
+-\end{figure}
+-
+-\subsection{Cross-Database Portability on BIRD}
+-
+-Table~\ref{tab:bird} reports all eight cells. BIRD Mini-Dev is a public non-grid portability benchmark and does not validate power-grid semantics. B0--B2 use one physical generation call per item; B3 uses two, so the inherited comparison estimates frozen workflow efficacy under unequal call counts rather than a call-matched repair effect. Each backbone completed 2500 calls, 2000 final predictions, zero retries, and zero final-ledger omissions. Latency and token totals are unavailable in the retained summary and were not reconstructed.
+-
+-\begin{table}[htbp]
+-\caption{Inherited BIRD Mini-Dev v1.1 results (non-grid portability evidence; 11 database clusters). Intervals are database-cluster composition-sensitivity intervals.}
+-\label{tab:bird}
+-\centering
+-\small
+-\setlength{\tabcolsep}{3pt}
+-\begin{tabular}{llrrrrp{1.5cm}}
+-\toprule
+-Backbone & Method & Correct/500 & Accuracy & Interval & Calls/item & Final-ledger omissions\\
+-\midrule
+-Qwen & B0 direct & 189/500 & 0.378 & [0.286, 0.470] & 1 & 0\\
+-Qwen & B1 decomposition & 151/500 & 0.302 & [0.203, 0.401] & 1 & 0\\
+-Qwen & B2 schema selection & 197/500 & 0.394 & [0.279, 0.511] & 1 & 0\\
+-\cmidrule(lr){1-7}
+-Qwen & B3 execution repair & 174/500 & 0.348 & [0.250, 0.452] & 2 & 0\\
+-Granite & B0 direct & 102/500 & 0.204 & [0.125, 0.284] & 1 & 0\\
+-Granite & B1 decomposition & 105/500 & 0.210 & [0.131, 0.294] & 1 & 0\\
+-Granite & B2 schema selection & 101/500 & 0.202 & [0.137, 0.273] & 1 & 0\\
+-\cmidrule(lr){1-7}
+-Granite & B3 execution repair & 118/500 & 0.236 & [0.159, 0.318] & 2 & 0\\
+-\bottomrule
+-\end{tabular}
+-\end{table}
+-
+-After Holm adjustment, Qwen decomposition is 0.076 below direct prompting (adjusted $p=0.0430$), and schema selection is 0.092 above decomposition (adjusted $p=0.0117$). No Granite contrast survives correction. Different method orders across the two model snapshots argue against a universal prompting recipe. Two incomplete predecessor runs were retained for traceability and excluded from all reported denominators; their disposition is documented in the Supplementary Materials.
+-
+-The BIRD results also constrain the meaning of ``agentic'' improvement. Decomposition reduces Qwen accuracy relative to direct prompting, while bounded repair uses twice the physical calls without becoming the best Qwen method. Granite shows a different descriptive ordering and no adjusted contrast. More stages or calls do not guarantee a better outcome. A future comparison must count physical generations, retries, context tokens, and failed attempts, not only final predictions.
+-
+-\subsection{Implementation Reliability}
+-
+-The five-role controller and executor were tested for typed handoffs, mutation denial, bounded execution, trace completeness, deterministic replay, and fail-closed state coverage. Failed attempts remain in the evidence ledger and cannot be silently replaced. The executor used to create the historical candidate and evidence ledgers enforced SQLite read-only mode, \texttt{query\_only}, authorization callbacks, disabled extensions, and time, opcode, and row bounds. A later revision added cell-byte, total-result-byte, width, and function controls; these tests strengthen the implementation boundary but do not reinterpret the frozen ledgers. The unified evaluator subsequently scored the stored fixed and selected SQL under one explicit shape-and-denotation rule. The historical selector ledger contains 3960 blackboard messages and 5760 database attempts (5428 executable and 332 SQLite failures) across 953 distinct SQL hashes; it contains no selector-stage model calls. Recorded local attempt time totals 839 ms, but timer granularity places both the median and 95th percentile at 0 ms, so these values are an audit of the ledger rather than a deployment-latency estimate. Supplementary Tables S1--S3 provide the complete test inventory and protocol attribution.
+-
+-\section{Discussion}
+-
+-\subsection{Validation and Selection Solve Different Problems}
+-
+-The historical-pool result distinguishes a useful filter from a successful selector. Validation-aware ranking recovers 25 questions and harms two relative to C000, producing 23 additional reference matches. Yet the fixed Qwen F01 source achieves 30 more matches than validation-aware selection. The strongest-source comparison changes the interpretation: the pool already contains a better fixed policy, but the recorded evidence does not recover its performance. Proposition~\ref{prop:pool-bound} explains why candidate availability and selection ability must be reported separately.
+-
+-The failure partition makes the redesign question more precise. Changing the selector alone cannot repair the 42 questions with no correct candidate. Improving eligibility retention is not the observed bottleneck because no correct slot was removed. The six scoring failures require evidence or a score that promotes a surviving correct candidate, whereas the 33 validation-only tie losses concern alternatives already at the maximum score. This is a diagnostic allocation of the observed errors, not a promise that the four interventions can be optimized independently. A future study can test whether the same allocation recurs across candidate pools before choosing which interface to redesign.
+-
+-The automatic error taxonomy supports a more specific account than a general claim of improved reasoning. Relative to C000, the selectors reduce execution and shape failures while leaving many wrong denotations after those gates pass. They are therefore effective at some forms of rejection within this pool, but the remaining ranking problem concerns distinctions the current features represent only weakly. This is not proof that execution evidence is unhelpful in other systems. It shows why a validation metric should be interpreted through the errors it can detect, rather than equated with answer correctness.
+-
+-The same distinction applies to the five-role architecture. Typed records identify where evidence enters the workflow and allow a decision to be replayed. They do not establish that every role contributes to prediction quality. In particular, recorded-only schema grounding cannot explain a change in historical-pool selection. The role-utilization audit is consequently as important as the architecture diagram: it separates an implemented interface from an active decision mechanism.
+-
+-\subsection{Why the Tested Witnesses Add Little Discrimination}
+-
+-Complete-witness eligibility changes only Q039, raising the count from 99 to 100. The witnesses were designed to test irrelevant-table, storage/index, and nullable-column transformations. These interventions probe specific invariances; they do not introduce the missing business definitions needed to interpret coded statuses or time fields. Limited incremental selection is therefore compatible with the narrow information supplied by the tests.
+-
+-Q039 provides a concrete example. Nullable schema extension distinguishes a wildcard projection from an explicit two-column projection, while the intended meaning of scheduled maintenance remains unresolved. Agreement with the synthetic reference is the measured outcome; the trace is not independent expert adjudication of that reference. This example also prevents an overgeneralization of Proposition~\ref{prop:indistinguishability}: additional evidence can resolve a particular distinction, but a witness that resolves projection width need not resolve business intent.
+-
+-For future systems, witness design should begin with a stated ambiguity and an expected discriminating relation. Merely increasing the number of state checks can add cost without separating candidates. Conversely, a gate may exclude a correct query if the transformation violates the query's intended equivalence class. Witness coverage, rejection patterns, and retained correct candidates should therefore be examined together. The present study does not establish an optimal witness set.
+-
+-\subsection{Candidate Order Is Part of the Decision Rule}
+-
+-Both selectors have top-score ties on 130 of 180 questions. Across all global slot orders, their reference-match counts range from 95 to 128, while reversal raises the original counts to 116. Proposition~\ref{prop:ties} identifies the mechanism: when the score cannot distinguish top candidates, the order supplies the final choice. The order is thus a substantive policy, not an innocuous implementation detail.
+-
+-The empirical quantities need to remain distinct. Slot multiplicity includes duplicate SQL; deduplication reduces the average top set to about 3.1 unique strings but does not eliminate ambiguity. A tie between equivalent queries need not affect correctness, whereas a mixed-correctness tie can. The global-order enumeration captures their joint consequences for this finite pool; it does not identify a policy to select after observing outcomes.
+-
+-Nor does uniqueness establish confidence. The strict no-tie rule covers 50 questions and matches only 24. A unique maximizer can still be wrong because the features themselves are imperfect. The relevant next experiment is therefore not simply to force agreement or remove ties. It is to compare prospectively frozen semantic evidence and clarification policies using both answer quality and coverage on untouched questions.
+-
+-\subsection{Context Effects Depend on the Model and Evaluation Task}
+-
+-The generation studies provide context for the selection failure. Structural hints strongly alter projected-column conformity, yet none of the nine primary GridDB execution contrasts survives its Holm correction. Presented values improve the Qwen first-candidate count on the paired component subset but leave Granite unchanged. BIRD likewise yields different method orderings: schema selection has the highest Qwen point estimate, while bounded repair has the highest Granite estimate and uses an additional call.
+-
+-These observations are consistent with a trade-off between supplying useful context and introducing irrelevant or misleading context \cite{bozdemir2026schema,liu2025solidsql,hao2025genlink}. They do not show that one prompting strategy generalizes across backbones. The schema-description study of Avignone et al.\ similarly separates recognition of constructs from the quality of the resulting text \cite{avignone2025exploring}; here, the analogous distinction is between adopting the requested output shape and returning the intended rows.
+-
+-A modular interface makes these alternatives easier to inspect, but modularity is not the treatment tested in the generation experiments. A causal architecture comparison would require matched models, physical calls, tokens, candidate counts, and evaluator conditions. The present studies instead establish the narrower fact that context and evidence choices can have different effects at different stages.
+-
+-\subsection{Implications for Auditable Information Systems}
+-
+-Three design implications follow from the specification and observed failures. First, separate policy admissibility, execution success, reference agreement, and independently reviewed business meaning in both logs and reports. Second, preserve candidate provenance, active feature values, gate failures, and tie rules so that a selected answer can be traced to its actual decision mechanism. Third, test whether added evidence distinguishes the surviving alternatives rather than rewarding checks that all of them pass.
+-
+-These are recommendations motivated by this study, not measured deployment benefits. The framework does not authenticate a user, enforce institutional row-level policy, or establish that displayed records are appropriate for consequential decisions. Those responsibilities remain with the calling application and qualified reviewers. Similarly, trace hashing supports comparison of retained records under a trusted host; it does not make an untrusted host tamper-proof.
+-
+-Figure~\ref{fig:evidence-map} links the empirical streams to these boundaries. Generation experiments test candidate production, state checks test specified invariances, and the historical-pool study tests selection. Keeping those endpoints separate makes the negative selection result informative to other information-system researchers without implying that this small grid case study measures a general failure rate.
+-
+-\begin{figure}[htbp]
+-\centering
+-\includegraphics[width=0.88\textwidth]{figures/fig06_evidence_map.pdf}
+-\caption{Evidence flow from generation studies to read-only validation, constructed-state analysis, and historical-pool selection. The four empirical streams answer complementary questions and are not pooled into one framework accuracy.}
+-\label{fig:evidence-map}
+-\end{figure}
+-
+-\subsection{Limitations and Next Evaluation}
+-
+-GridDB contains eight tables and 98 synthetic rows, and its evaluation questions were visible during development. The question groups used for resampling are dependence proxies, not sampled deployment clusters. BIRD adds public database diversity but no independent validation of power-grid business semantics. The findings therefore describe the retained cases and model snapshots rather than a deployment population.
+-
+-Chronology imposes a second limit. Although selection is sealed before offline scoring, same-item derived outcomes had been accessed during earlier development. The reconciled evaluator, global-order enumeration, and role diagnostics are post-result analyses. Their transparency does not convert them into confirmation on unseen data. Likewise, later executor hardening cannot be credited to the earlier ledgers.
+-
+-The formal properties are intentionally modest. They characterize a finite selector under fixed inputs and correct implementation; they do not establish learned calibration, general SQL equivalence, or system security beyond the stated threat model. No expert user study measures review time, usability, or unsafe omission. Existing machine-adjudicated RTS-GMLC, SimBench, and NERC-derived question--SQL resources cannot supply that missing human evidence.
+-
+-The next evaluation should freeze schema and value retrieval, candidate budgets, semantic evidence, tie handling, and abstention rules before opening unseen grid schemas and independently reviewed questions. It should compare direct generation, staged single-candidate processing, and multi-candidate selection under matched physical calls and tokens. Reported outcomes should include reference agreement, expert-semantic errors, correct-candidate loss at gates, coverage, and total evaluation cost. These are proposed requirements, not experiments completed in this revision.
+-
+-\section{Conclusions}
+-
+-\masql{} separates candidate production, eligibility checks, and final selection in an auditable power-grid Text-to-SQL workflow. Its five role interfaces and deterministic controller expose the evidence behind each decision. The formal analysis establishes limited properties of that rule: selection stays within the eligible pool, its accuracy is bounded by available correct candidates, and unresolved top ties delegate the decision to candidate order. None of these properties implies semantic correctness.
+-
+-The 180-question historical pool separates the remaining errors into actionable categories: 42 questions contain no correct candidate, no evaluator-correct slot is lost at eligibility, six questions lose the correct candidates at scoring, and 33 or 32 lose a correct top candidate through the original tie order. Validation-aware and complete-witness selection therefore match 99 and 100 references, below the strongest fixed source at 129. Mixed-correctness top sets occur on 51 questions, not on every one of the 130 slot-tied questions. These are finite-case findings about the recorded rule; the supporting BIRD generation results do not establish their prevalence across databases.
+-
+-The design lesson is to diagnose the decision stage before adding complexity. A missing correct candidate requires a change upstream of selection; a correct candidate below the top score requires better discrimination; a mixed-correctness top set requires additional evidence or a justified ambiguity policy. More eligibility checks alone need not repair either of the latter failures. Whether this decomposition identifies the same bottlenecks in other settings must be tested on independently reviewed queries and new candidate pools under a frozen, budget-matched protocol.
+-
+-\supplementary{The Supplementary Materials include software and executor tests, protocol and version records, complete numerical tables, figure provenance, rights information, and reproducibility instructions.}
+-\authorcontributions{Conceptualization, B.L. and Y.Y.; methodology, B.L.; software, B.L.; validation, B.L. and C.S.; formal analysis, B.L. and C.S.; investigation, B.L. and C.S.; resources, Y.Y.; data curation, B.L. and C.S.; writing---original draft preparation, B.L.; writing---review and editing, C.S. and Y.Y.; visualization, B.L.; supervision, Y.Y.; project administration, Y.Y.; funding acquisition, Y.Y. All authors have read and agreed to the published version of the manuscript.}
+-\funding{This research was funded by the Science and Technology Research Project of State Grid Fujian Electric Power Co., Ltd., grant number 521300250006. The funder had no role in the study design; in the collection, analysis, or interpretation of data; in the writing of the manuscript; or in the decision to publish the results.}
+-\institutionalreview{Not applicable. This study did not involve human participants or animals.}
+-\informedconsent{Not applicable.}
+-\dataavailability{The manuscript-bound, rights-safe technical package can be inspected in the public \nolinkurl{powergrid_benchmark} repository under the frozen tag \nolinkurl{cmc-2026-08-24-v3} via the \href{https://github.com/gaoxingkele/powergrid_benchmark/tree/cmc-2026-08-24-v3/paper_projects/CMC/MA-SQLGrid}{frozen MA-SQLGrid package}. It includes the numerical supplement, code, tests, derived evidence, and reproducibility records underlying the historical empirical results; the present Information rewrite is not contained in that historical tag. BIRD Mini-Dev remains available from its public provider. Owing to third-party licensing restrictions, raw GridDB and BIRD databases and restricted source records are not redistributed, and source-dependent RTS-GMLC or SimBench artifacts may be provided for editorial or peer-review verification only when permitted by the applicable licenses. The historical \texttt{ma-sqlgrid} repository is not the manuscript-bound release for this version.}
+-\acknowledgments{During preparation of this manuscript, the authors used the OpenAI Codex agent interface for the activities described in Materials and Methods, including manuscript preparation and local code and build review. The exact backend model identifier and version were not retained for every session. The authors reviewed and edited the assisted work and take full responsibility for the analyses, interpretations, and content of this publication.}
+-\conflictsofinterest{The authors declare no conflicts of interest.}
+-
+ \begin{adjustwidth}{-\extralength}{0cm}
+ \reftitle{References}
+ \bibliography{references_verified,references_information}

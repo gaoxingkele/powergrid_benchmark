@@ -1,0 +1,767 @@
+Article
+
+A Systems Approach to Validating Large Language Model
+Information Extraction: The Learnability Framework Applied to
+Historical Legal Texts
+Ali Çetinkaya
+
+
+                                          Department of Computer Engineering, Faculty of Technology, Selçuk University, 42250 Konya, Turkey;
+                                          ali.cetinkaya@selcuk.edu.tr
+
+
+                                          Abstract
+                                          This paper introduces a learnability framework for validating large language model (LLM)
+                                          information extraction without ground-truth annotations. Applied to 20,809 Ottoman
+                                          legal texts, the framework achieves a Learnability Score of 0.891 through multi-classifier
+                                          consensus, with external validation confirming substantial agreement across five diverse
+                                          LLMs (κ = 0.785) and human experts (κ = 0.786). The approach treats internal consis-
+                                          tency as a measurable systemic property, where heterogeneous machine learning models
+                                          independently rediscover LLM-assigned patterns. Confusion analysis reveals errors con-
+                                          centrate at jurisprudentially meaningful boundaries (e.g., commercial-inheritance: 20.4%
+                                          of disagreements), demonstrating semantic coherence rather than arbitrary noise. The
+                                          framework offers practical validation for historical and specialized corpora where tradi-
+                                          tional annotation is infeasible, processing documents at USD 0.01 each with parallelizable
+                                          throughput. Validated annotations enable knowledge graph construction with 20,809 docu-
+                                          ment nodes, 7 category nodes, and confusion-weighted semantic proximity edges. This
+                                          systems-based methodology advances reproducible computational research in domains
+                                          lacking established benchmarks.
+
+Academic Editor: Luis Martínez            Keywords: information extraction; knowledge graphs; large language models; learnability;
+López
+                                          validation framework; Ottoman legal history; multi-model consensus; computational
+Received: 3 September 2025                humanities
+Revised: 26 September 2025
+Accepted: 22 October 2025
+Published: 5 November 2025
+
+Citation: Çetinkaya, A. A Systems         1. Introduction
+Approach to Validating Large
+                                               Information extraction (IE) has evolved from rule-based pattern matching to sophisti-
+Language Model Information
+Extraction: The Learnability
+                                          cated neural approaches capable of processing complex, domain-specific texts [1–3]. The
+Framework Applied to Historical           integration of large language models (LLMs) into IE pipelines represents a transformative
+Legal Texts. Information 2025, 16, 960.   advancement, enabling the processing of historical, multilingual, and specialized corpora at
+https://doi.org/10.3390/                  unprecedented scale [4,5]. However, this technological leap has created a critical validation
+info16110960
+                                          bottleneck: while LLMs can perform IE tasks with remarkable sophistication, the quality
+Copyright: © 2025 by the author.          assurance mechanisms for their outputs remain underdeveloped, particularly in domains
+Licensee MDPI, Basel, Switzerland.        where creating ground-truth datasets is impractical or impossible [6,7].
+This article is an open access article
+                                               This validation challenge is especially acute in computational humanities and social
+distributed under the terms and
+                                          sciences, where IE often involves interpretive categories that resist simple binary classifi-
+conditions of the Creative Commons
+Attribution (CC BY) license
+                                          cation [8]. Historical legal texts exemplify this complexity—documents like the Ottoman
+(https://creativecommons.org/             fatwas contain layered juridical reasoning that requires contextual understanding beyond
+licenses/by/4.0/).                        surface-level pattern recognition [9]. Traditional IE evaluation relies on comparing system
+
+
+Information 2025, 16, 960                                                                                      https://doi.org/10.3390/info16110960
+Information 2025, 16, 960                                                                                             2 of 16
+
+
+
+
+                            outputs to human-annotated gold standards [10], but this approach faces fundamental
+                            limitations when applied to specialized historical domains where annotator expertise is
+                            scarce and interpretive disagreement may signal legitimate semantic ambiguity rather than
+                            error [11,12].
+                                 The resulting systemic disconnect—powerful IE capabilities coupled with inadequate
+                            validation mechanisms—threatens the foundation of reproducible computational research.
+                            Current approaches to this problem have evolved through several paradigms, yet none
+                            fully address the challenge of validating high-quality LLM-based IE in the absence of
+                            ground truth.
+
+                            1.1. Information Extraction Validation: Current Approaches and Limitations
+                                  Early IE systems relied heavily on precision–recall metrics computed against manually
+                            annotated datasets [13]. While effective for well-defined domains, this approach is problem-
+                            atic for historical texts where “correct” extraction may be subjective [12]. Crowdsourcing,
+                            while scalable, often fails due to a lack of domain expertise [14].
+                                  Recent advances in weak supervision and confident learning have attempted to cir-
+                            cumvent the ground-truth requirement [15–17], but these methods are designed primarily
+                            for training data creation or sample-level diagnostics rather than holistic system valida-
+                            tion. The most promising recent work has focused on learning dynamics [18–20], but
+                            their application has been limited to sample-level diagnostics rather than system-level
+                            quality assessment.
+
+                            1.2. Large Language Models in Information Extraction: Opportunities and Challenges
+                                  LLMs have demonstrated remarkable capabilities in IE tasks [21–23]. However, their
+                            black-box nature and tendency toward confident but incorrect outputs creates new val-
+                            idation challenges [24]. In historical IE, LLMs can handle linguistic variation and noisy
+                            text [25], but their plausible yet incorrect outputs are difficult to detect without deep domain
+                            expertise [26].
+
+                            1.3. Systems Theory and Information Extraction Validation
+                                 This paper approaches IE validation through the lens of systems theory [27], con-
+                            ceptualizing validation as a feedback mechanism. A well-functioning IE system should
+                            produce internally consistent outputs that can be reliably reproduced by independent
+                            learning algorithms—a property we term “learnability.” Drawing from computational
+                            learning theory [28], we hypothesize that a systematic and consistent IE process will pro-
+                            duce datasets with high internal coherence.
+
+                            1.4. Research Objectives and Contributions
+                                 This study addresses three fundamental research questions:
+                            •    RQ1: How can the internal consistency of LLM-based IE be quantitatively measured
+                                 as a systemic property in the absence of ground-truth annotations?
+                            •    RQ2: Does this proposed validation system provide robust empirical evidence of
+                                 systematic, semantically coherent IE when applied to historical legal texts?
+                            •    RQ3: What are the implications of using such a framework for enhancing the reliability
+                                 of AI-assisted IE in computational research?
+                                 Our contributions are fourfold: (1) a novel validation paradigm based on cross-model
+                            consensus, (2) comprehensive empirical validation on a large-scale historical corpus with
+                            multi-LLM comparison, (3) detailed error analysis revealing semantically coherent confu-
+                            sion patterns, and (4) practical implementation guidelines with cost-efficiency metrics.
+Information 2025, 16, 960                                                                                                  3 of 16
+
+
+
+
+                            2. Materials and Methods
+                                  Our methodology implements a complete IE and validation system that takes unanno-
+                            tated historical texts as input and outputs validated, structured annotations with quantita-
+                            tive quality metrics. The system comprises three interconnected subsystems: (1) LLM-based
+                            IE, (2) learnability-based internal validation, and (3) multi-method external validation
+                            Figure 1 illustrates this three-stage validation framework.
+
+
+
+
+                            Figure 1. The learnability framework as a validation system. This flowchart illustrates the three-
+                            stage process. Stage 1 (AI-driven data generation) involves using an LLM to extract structured
+                            categories from raw text. Stage 2 consists of parallel validation subsystems: Internal validation uses
+                            machine learning classifiers to compute a learnability score, while external validation uses multi-LLM
+                            and human expert comparisons. Stage 3 (validated output) synthesizes these results to produce a
+                            validated, structured dataset with quality assurance metrics.
+
+                            2.1. Corpus and Information Extraction Task Definition
+                            2.1.1. Historical Legal Corpus
+                                 The corpus comprises 20,809 Ottoman Şeyhülislam fatwas spanning the 15th–20th
+                            centuries. The information extraction task involves categorizing these documents according
+                            to their primary legal domain. The corpus was assembled from seven authoritative print
+                            collections [29–35] using a multi-stage digitization pipeline. Latin-script transliterations
+                            were processed via Optical Character Recognition (OCR), introducing realistic noise that
+                            tests the robustness of our extraction and validation methods. Individual fatwas were
+                            programmatically segmented from continuous text, preserving the authentic complexity of
+                            working with historical document collections.
+
+                            2.1.2. Information Extraction Schema Design
+                                We designed a seven-category classification schema based on classical Islamic jurispru-
+                            dence (fiqh) divisions, as detailed in Table 1.
+                                The data curation pipeline is depicted in Figure 2.
+Information 2025, 16, 960                                                                                                  4 of 16
+
+
+
+
+                            Figure 2. The data curation pipeline. This diagram shows the linear process from print sources to a
+                            machine-readable corpus. It begins with physical historical books, which undergo Optical Character
+                            Recognition (OCR) to produce digital text. This raw text is then processed via programmatic extraction
+                            to segment it into individual, analysis-ready documents, forming the final corpus.
+
+                            Table 1. Information extraction schema for Ottoman legal texts.
+
+ Domain                         Description                                      Key Linguistic Markers
+                                                                                 trade, sales, finance, rental, partnership,
+                                Commercial transactions, property rights,
+ COMMERCIAL_LEGAL                                                                property rights, land, agency, trust, icare,
+                                financial dealings, business partnerships
+                                                                                 bey, şirket, vekalet
+                               Inheritance law, wills, endowments
+                                                                                 inheritance, wills, waqf, endowment,
+ PROPERTY_INHERITANCE          (waqf ), property transfer through
+                                                                                 miras, vakıf, hibe, vasiyet
+                               inheritance or donation
+                               Marriage contracts, marital rights,
+                                                                                 marriage, divorce, family, spouse, nikâh,
+ FAMILY_MARRIAGE               divorce procedures, family relationships,
+                                                                                 talak, zevc/zevce, family rights
+                               spousal obligations
+                               Court procedures, legal evidence,
+                                                                                 court, evidence, criminal, qisas, hudud,
+ LEGAL_JUDICIAL                criminal law, judicial processes, legal
+                                                                                 judge, şahit, dava, mahkeme
+                               rights, punishment
+                               Daily prayers, congregational prayers,
+                                                                                 prayer, fasting, pilgrimage, purification,
+ WORSHIP_RITUAL                pilgrimage, fasting, purification, ritual
+                                                                                 namaz/salat, oruç, hac, abdest
+                               worship practices
+                               Religious beliefs, theological questions,
+                                                                                 faith, belief, theology, destiny, iman,
+ FAITH_THEOLOGY                matters of faith, destiny, core
+                                                                                 akaid, kader
+                               Islamic doctrines
+                               Charitable obligations, social ethics,
+                                                                                 charity, ethics, zakat, social conduct,
+ SOCIAL_CHARITY                community responsibilities, food
+                                                                                 sadaka, ahlak, food, drink
+                               regulations, zakat
+
+
+                            2.2. Large Language Model Information Extraction System
+                            2.2.1. LLM Architecture and Selection
+                                We selected Claude-3.5-Sonnet for its documented proficiency in complex reasoning
+                            and structured output generation [36].
+Information 2025, 16, 960                                                                                         5 of 16
+
+
+
+
+                            2.2.2. Prompt Engineering for Information Extraction
+                                 The IE system was implemented through careful prompt engineering, following
+                            best practices [37]. The prompt integrated domain knowledge, linguistic cues, a decision
+                            hierarchy, and a structured JSON output schema (see Appendix A).
+
+                            2.2.3. Information Extraction Implementation
+                                 The extraction process applied the prompt to all 20,809 fatwas. The resulting class
+                            distribution reflects authentic patterns in Ottoman legal practice: COMMERCIAL_LEGAL
+                            (35.8%), PROPERTY_INHERITANCE (23.8%), FAMILY_MARRIAGE (16.1%), LE-
+                            GAL_JUDICIAL (15.8%), WORSHIP_RITUAL (4.0%), FAITH_THEOLOGY (2.4%), SO-
+                            CIAL_CHARITY (2.0%).
+
+                            2.3. The Learnability Framework for Information Extraction Validation
+                            2.3.1. Theoretical Foundation: Distinguishing Learnability from Cross-Validation
+                                 The learnability framework operationalizes a fundamentally different validation
+                            paradigm from traditional cross-validation approaches. While cross-validation measures
+                            how well a single model generalizes to unseen data from the same distribution [38], our
+                            framework measures whether multiple architecturally diverse models can independently
+                            discover and replicate the label structure—a systemic property of the dataset itself.
+                                 We formalize this distinction as follows. Traditional cross-validation estimates
+                            the following:
+                                                                     1 k
+                                                             CVk = ∑ L( Mθ , Ditest )                             (1)
+                                                                     k i =1
+
+                            where Mθ represents a single model with parameters θ trained on different folds. In
+                            contrast, the learnability score measures the following:
+
+                                                                        1
+                                                                      | M| m∑
+                                                           Lscore =            F1macro (m)                           (2)
+                                                                            ∈M
+
+                            where M = { MLR , MSVM , MRF , MXGB } represents distinct learning algorithms with differ-
+                            ent inductive biases. This cross-model consensus serves as evidence of systematic, learnable
+                            patterns rather than model-specific overfitting.
+                                  The theoretical foundation draws from PAC learning theory [28], which establishes
+                            that truly systematic patterns should be learnable by any sufficiently expressive algorithm.
+                            When diverse learners—from linear models to tree ensembles—converge on similar deci-
+                            sion boundaries, this provides evidence that the extracted information contains genuine
+                            semantic structure rather than annotation noise or LLM hallucinations.
+
+                            2.3.2. Implementation of Internal Validation
+                                 The internal validation subsystem implements the learnability assessment through
+                            four algorithmically diverse classifiers: Logistic Regression, Support Vector Machine (SVM),
+                            Random Forest, and XGBoost. Text was vectorized using TF-IDF. The dataset was parti-
+                            tioned using stratified sampling (60% training, 20% validation, and 20% test). Statistical
+                            robustness was assessed through bootstrapping (B = 1000 resamples).
+
+                            2.4. External Multi-Method Validation
+                            2.4.1. Multi-LLM Information Extraction Comparison
+                                 Comprehensive comparative analysis was conducted using five diverse LLMs on a
+                            stratified random sample of 442 documents: Claude-3.5-Sonnet (Anthropic), DeepSeek-
+Information 2025, 16, 960                                                                                             6 of 16
+
+
+
+
+                            Reasoner [39], GPT-4 (OpenAI), Gemini-Pro (Google), and Llama-3.1-70B (Meta). This
+                            selection ensures architectural diversity and reduces dependency on proprietary APIs.
+
+                            2.4.2. Human Expert Validation Protocol
+                                 Two domain specialists with expertise in Ottoman legal history reviewed a stratified
+                            sample of 338 documents. To ensure inter-annotator reliability, we first conducted a
+                            calibration phase with 50 documents, achieving a Cohen’s κ of 0.82 between annotators
+                            before proceeding to the main validation. The final κ = 0.786 represents agreement between
+                            the consensus human annotation and Claude’s classifications. Disagreements between
+                            human annotators (8.3% of cases) were resolved through discussion, with unresolved cases
+                            excluded from the final analysis. This rigorous protocol ensures our human validation
+                            benchmark represents genuine expert consensus rather than individual interpretations.
+
+                            2.5. Knowledge Graph Construction from Validated Extractions
+                                 The validated single-label annotations function as high-confidence anchors for knowl-
+                            edge graph (KG) construction. We model Fatwa nodes (documents) linked to DomainCate-
+                            gory via :hasDomain, enriched with Term, Person, SourceVolume, and confusion-weighted
+                            semantic proximity edges derived from the multi-LLM agreement analysis.
+
+                            3. Results
+                                 The proposed learnability framework was evaluated on the 20,809-document Ottoman
+                            fatwa corpus. This section presents a multi-faceted validation of the information extraction
+                            system, beginning with its internal consistency (Section 3.1). We then report on extensive
+                            external validation against a suite of diverse large language models (Section 3.2) and human
+                            domain experts (Section 3.5). A detailed analysis of classification disagreements reveals
+                            semantically coherent error patterns (Section 3.3), which are further supported by linguistic
+                            feature analysis (Section 3.4) and learning dynamics (Section 3.6). Finally, we document the
+                            system’s cost-effectiveness and scalability (Section 3.7).
+
+                            3.1. Information Extraction System Performance and Statistical Robustness
+                                  The internal validation revealed high consistency. All four classifiers successfully
+                            replicated the LLM’s categorization patterns with high fidelity, as detailed in Table 2. We
+                            report macro-average F1 to balance class frequencies; this metric is widely used in retrieval
+                            and agreement settings and its relationship to reliability has been discussed in the IR
+                            literature [40].
+
+                            Table 2. Comprehensive information extraction validation results.
+
+                             Model                   Test Accuracy      Test F1-Macro     CV Mean (F1)    CV Std (F1)
+                             XGBoost                      0.9565            0.9452              0.9459       0.0091
+                             SVM                          0.9389            0.9151              0.9112       0.0049
+                             Random Forest                0.9291            0.8833              0.8965       0.0166
+                             Logistic Regression          0.8810            0.8187              0.8247       0.0122
+
+
+                                 The resulting Learnability Score (Lscore ) of 0.8906 with a tight 95% confidence interval
+                            of [0.8428, 0.9301] indicates highly systematic information extraction. The performance
+                            gradient from complex (XGBoost) to simple (Logistic Regression) models suggests that
+                            categories are largely separable based on distinct terminology, while complex models
+                            capture subtle contextual nuances.
+Information 2025, 16, 960                                                                                         7 of 16
+
+
+
+
+                            3.2. External Validation: Comprehensive Multi-LLM Comparison
+                                  To address concerns about single-model dependency and demonstrate the generaliz-
+                            ability of our extracted categories, we conducted extensive validation across five diverse
+                            large language models on a stratified sample of 442 documents.
+
+                            3.2.1. Model Selection and Architectural Diversity
+                                We deliberately selected models representing different architectures, training ap-
+                            proaches, and development philosophies:
+                            •    Claude-3.5-Sonnet (Anthropic): Our primary extraction model
+                            •    DeepSeek-Reasoner: Reasoning-optimized architecture
+                            •    GPT-4 (OpenAI): Different transformer variant
+                            •    Gemini-Pro (Google): Multimodal foundation model
+                            •    Llama-3.1-70B (Meta): Open-weight model
+
+                            3.2.2. Quantitative Agreement Analysis
+                                Inter-model agreement was measured using Cohen’s Kappa [41]. The complete agree-
+                            ment matrix reveals remarkably high consistency as summarized in Table 3.
+
+                            Table 3. Pairwise Cohen’s Kappa agreement between five LLMs (n = 442).
+
+                                               Claude        DeepSeek          GPT-4          Gemini         Llama
+                             Claude             1.000
+                             DeepSeek           0.830           1.000
+                             GPT-4              0.854           0.774           1.000
+                             Gemini             0.832           0.794           0.885          1.000
+                             Llama              0.710           0.648           0.771          0.753         1.000
+                             Average            0.807           0.762           0.821          0.816         0.720
+
+
+                                 The overall average Cohen’s κ = 0.785 (95% CI: [0.751, 0.819]) indicates “substantial
+                            to almost perfect agreement” [42].
+
+                            3.2.3. Confusion Pattern Analysis Across Models
+                                 Figure 3 presents confusion matrices for each model pair, revealing consistent patterns
+                            across all comparisons.
+
+
+
+
+                                              (a)                                              (b)
+
+                            Figure 3. Cont.
+Information 2025, 16, 960                                                                                                 8 of 16
+
+
+
+
+                                               (c)                                                  (d)
+
+                            Figure 3. Confusion matrices comparing Claude’s classifications with four other LLMs. Strong
+                            diagonal dominance indicates high agreement, while off-diagonal patterns reveal consistent confusion
+                            between semantically adjacent categories. (a) Claude vs. DeepSeek (κ = 0.830); (b) Claude vs. GPT-4
+                            (κ = 0.854); (c) Claude vs. Gemini (κ = 0.832); (d) Claude vs. Llama (κ = 0.710).
+
+                                 The confusion matrices reveal that disagreements concentrate at specific category
+                            boundaries, particularly COMMERCIAL_LEGAL ↔ PROPERTY_INHERITANCE, reflect-
+                            ing genuine jurisprudential ambiguity.
+                                 Inter-model agreement across the five LLMs is summarized in Figure 4.
+
+
+
+
+                            Figure 4. Heatmap of pairwise Cohen’s Kappa values between all five LLMs. Darker green indicates
+                            higher agreement.
+
+                            3.3. Error Analysis: Semantic Coherence in Classification Disagreements
+                                 Analysis of the 157 documents (35.5%) showing any inter-model disagreement reveals
+                            highly structured error patterns as detailed in Table 4.
+                                 These systematic patterns across independent models provide strong evidence that
+                            our categorization scheme captures real jurisprudential structure.
+Information 2025, 16, 960                                                                                                 9 of 16
+
+
+
+
+                            Table 4. Representative classification disagreements with linguistic analysis.
+
+                                                Ottoman Text         English
+                             ID                                                            Classifications   Context
+                                                (Excerpt)            Translation
+
+                                                “sahib-i arz ol      (The landowner        Claude:           Contains both
+                                                değirmen ocağını   gave the mill site    COMMERCIAL        transactional and
+                             CAMIUL_0576
+                                                tapu ile Bekir’e     to Bekir with title   Others:           property transfer
+                                                verip. . . ”         deed. . . )           PROPERTY          elements
+
+                                                                     (Zeyd
+                                                “Zeyd tarlasını                            Claude:           Combines sale,
+                                                                     [transferred] his
+                                                şu kadar akçe                             COMMERCIAL        property transfer,
+                             CAMIUL_1073                             field for such
+                                                bedel muka-                                Others:           and inheritance
+                                                                     amount of
+                                                belesinde. . . ”                           PROPERTY          aspects
+                                                                     akçe. . . )
+
+
+                            3.4. Feature Importance Analysis: Linguistic Validation
+                                Feature importance analysis in Figure 5 confirms that extraction decisions are driven
+                            by authentic domain-specific terminology.
+
+
+
+
+                            Figure 5. Top 20 feature importances from the XGBoost model. Terms like “vakfın” (endowment)
+                            and “diyet” (blood money) are highly predictive.
+
+                            3.5. Human Expert Validation
+                                Agreement with human experts reached Cohen’s κ = 0.786, representing “substantial
+                            agreement”, as shown in Figure 6.
+
+
+
+
+                            Figure 6. Confusion matrix for Claude vs. human experts (n = 338). Strong diagonal correlation
+                            demonstrates alignment with domain expertise.
+Information 2025, 16, 960                                                                                            10 of 16
+
+
+
+
+                            3.6. Learning Curve Analysis: Evidence of Data Quality
+
+                                 The learning curve analysis shows rapid convergence to high-performance plateaus
+                            as depicted in Figure 7.
+
+
+
+
+                            Figure 7. Learning curve for the XGBoost model. Training and cross-validation scores converge at
+                            F1 ≈ 0.95.
+
+                            3.7. Cost-Effectiveness and Scalability
+                                 The process was highly cost-efficient:
+                            •    Total cost: USD 200 for 20,809 documents (USD 0.01 per document).
+                            •    Processing time: 5 s per document (parallelizable).
+                            •    Total time: 28.9 h (reducible with parallelization).
+
+                            4. Discussion
+                            4.1. Validation Without Ground Truth: A Paradigm Shift
+                                  Our results demonstrate that internal consistency, measured through multi-model
+                            learnability, provides a reliable proxy for extraction quality in the absence of ground truth.
+                            The strong correlation between our Learnability Score (0.891) and external validation mea-
+                            sures (κ = 0.785 multi-LLM, κ = 0.786 human expert) empirically validates this approach.
+                                  This finding has profound implications for computational humanities and information
+                            management. Traditional IE evaluation assumes the existence of “correct” annotations
+                            against which systems can be measured [10]. However, in specialized domains like histori-
+                            cal legal texts, this assumption often fails. Our framework sidesteps these limitations by
+                            treating validation as a measurement of systemic properties rather than comparison to an
+                            external standard.
+
+                            4.2. Comparison with Prior Validation Methods
+                                 Table 5 contrasts our approach with existing IE validation methods:
+
+                            Table 5. Comparison of IE validation approaches.
+
+                                                                                    Domain-
+                             Method                Ground Truth       Scalability              Interpretable      Cost
+                                                                                    Agnostic
+                             Gold Standard           Required           Low           Yes         High           High
+                             Crowdsourcing            Created           High        Limited      Medium         Medium
+                             Weak Supervision          Partial          High          Yes         Low            Low
+                             Learnability (Ours)    Not Required        High          Yes         High           Low
+
+
+                                Our framework uniquely combines scalability with interpretability while eliminating
+                            ground-truth requirements.
+Information 2025, 16, 960                                                                                         11 of 16
+
+
+
+
+                            4.3. Implications for Knowledge Graph Construction
+                                The validated annotations provide reliable input for downstream knowledge graph
+                            construction. Figure 8 illustrates the potential structure:
+
+
+
+
+                            Figure 8. Knowledge graph visualization of the Ottoman Fatwa Corpus. Nodes represent legal
+                            categories (sized by document count), with edge thickness indicating confusion frequency from
+                            error analysis.
+
+                                 The error patterns’ semantic coherence can inform relationship modeling between
+                            legal domains, capturing the interconnected nature of Islamic jurisprudence.
+
+                            4.4. Limitations and Boundary Conditions
+                                 While our results are encouraging, several limitations warrant discussion:
+                                 Single-Label Assumption: Our current framework assumes each document belongs to
+                            exactly one category. Many historical legal texts address multiple juridical domains.
+                                 Domain Specificity: The high performance may partly reflect the structured nature of
+                            Islamic legal categories.
+                                 Language Model Dependencies: Despite multi-LLM validation, all models share
+                            transformer architectures and may exhibit correlated biases.
+
+                            4.5. Practical Implementation Guidelines
+                                 Based on our results, we propose specific diagnostic thresholds:
+                                 Quality Benchmarks:
+                            •    Learnability Score (Lscore ) > 0.85: High-quality extraction.
+                            •    Lscore = 0.70–0.85: Moderate quality requiring targeted review.
+                            •    Lscore < 0.70: Systematic issues requiring revision.
+Information 2025, 16, 960                                                                                              12 of 16
+
+
+
+
+                                    External Validation Requirements:
+                            •       κexternal > 0.75: Sufficient agreement for research applications.
+                            •       κexternal = 0.60–0.75: Acceptable with acknowledged limitations.
+                            •       κexternal < 0.60: Inadequate reliability requiring redesign.
+
+                            5. Conclusions
+                                  This study introduced and empirically validated a learnability framework for assessing
+                            the quality of large language model-based information extraction in the absence of gold-
+                            standard annotations. Applied to a large corpus of Ottoman legal texts (n = 20,809), the
+                            approach produced a learnability score of Lscore = 0.891 (95% CI [0.843, 0.930]) and demon-
+                            strated strong external agreement with both five independent LLMs (average Cohen’s
+                            κ = 0.785) and human experts (κ = 0.786). Error patterns concentrate between jurispruden-
+                            tially adjacent domains, indicating semantic coherence rather than arbitrary noise.
+                            Primary contributions:
+                            (i)      A systems-based validation paradigm that provides scalable, model-agnostic quality
+                                     assessment without ground truth.
+                            (ii)     Comprehensive multi-LLM validation demonstrating robust cross-model consensus
+                                     across diverse architectures.
+                            (iii)    Detailed error analysis revealing semantically meaningful confusion patterns that
+                                     reflect genuine domain ambiguity.
+                            (iv)     Practical implementation guidelines with cost-efficiency metrics (USD 0.01 per document).
+                            (v)      An explicit pathway to knowledge graphs using validated labels as high-
+                                     confidence anchors.
+                            Broader Impact:
+                                 The framework advances IE methodology by providing a principled, reproducible
+                            mechanism for validating LLM-derived annotations. It enhances the reproducibility and
+                            trustworthiness of computational research in the humanities and social sciences, while
+                            offering clear operational benefits for information management systems [43]. The method-
+                            ology is domain-agnostic and applicable to other specialized corpora where traditional
+                            annotation approaches are infeasible.
+                            Future Directions:
+                                  Multi-Label Extension: While this study focuses on single-label classification, many
+                            Ottoman fatwas address multiple juridical domains simultaneously. For instance, a
+                            fatwa about inheritance disputes involving commercial partnerships spans both PROP-
+                            ERTY_INHERITANCE and COMMERCIAL_LEGAL categories. Future work will extend
+                            the learnability framework to multi-label scenarios, requiring modified consensus metrics
+                            that account for partial agreement across label sets. This could involve Jaccard similarity
+                            for label overlap or weighted κ statistics for multi-label agreement.
+                                  Active Learning for Targeted Validation: The confusion patterns from our error anal-
+                            ysis in Table 4 are natural starting points for active learning. Documents with high inter-
+                            model disagreement, especially the 4.5% showing high divergence, can be prioritized for
+                            human review. This creates a powerful feedback loop. In this loop, the most informative
+                            samples—those at ambiguous category boundaries—receive expert annotation. This pro-
+                            cess progressively refines the extraction system while minimizing annotation effort. We
+                            estimate that a targeted annotation of just 5% of these high-uncertainty documents could
+                            improve overall accuracy by 2–3 percentage points.
+Information 2025, 16, 960                                                                                           13 of 16
+
+
+
+
+                                 Beyond Classical ML Validators: While our current implementation uses classical
+                            ML models (SVM, Random Forest, and XGBoost), incorporating neural validators could
+                            capture more complex semantic patterns. A hybrid approach combining transformer-
+                            based encoders with our classical validators might identify subtle linguistic nuances while
+                            maintaining interpretability.
+                                 The learnability framework thus offers a practical solution to a critical bottleneck
+                            in modern information extraction, enabling quality-assured processing of historical and
+                            specialized texts at scale.
+
+                            Funding: This research received no external funding.
+
+                            Institutional Review Board Statement: Not applicable.
+
+                            Informed Consent Statement: Not applicable.
+
+                            Data Availability Statement: The data presented in this study are available on request from the
+                            corresponding author. The data are not publicly available due to copyright restrictions on the
+                            historical source materials.
+
+                            Acknowledgments: The author acknowledges the domain experts who participated in the human
+                            validation phase.
+
+                            Conflicts of Interest: The author declares no conflicts of interest.
+
+                            Appendix A. Large Language Model Information Extraction Prompt
+                                 This appendix contains the complete prompt used for classification.
+                                 Prompt
+
+                            You are an expert in information extraction from legal documents and Islamic
+                            jurisprudence classification. Your task is to perform structured information
+                            extraction on Ottoman fatwa records, categorizing them into predefined legal
+                            domains to create machine-readable knowledge representations.
+
+                            INFORMATION EXTRACTION TASK: Extract the primary legal domain from each fatwa
+                            document by analyzing both explicit terminological markers and implicit contextual
+                             ,→ cues.
+
+                            TARGET CATEGORIES (Choose ONE):
+                            - COMMERCIAL_LEGAL: All commercial transactions, trade, property rights,
+                              financial dealings, business partnerships, rentals, agency relationships.
+                              Keywords: trade, sales, finance, rental, partnership, property rights, land,
+                              agency, trust, icare, bey, şirket, vekalet
+                            - PROPERTY_INHERITANCE: Inheritance law, wills, endowments (waqf), religious
+                              foundations, property transfer through inheritance or donation.
+                              Keywords: inheritance, wills, waqf, endowment, miras, vakıf, hibe, vasiyet
+                            - FAMILY_MARRIAGE: Marriage contracts, marital rights, divorce procedures,
+                              family relationships, spousal obligations.
+                              Keywords: marriage, divorce, family, spouse, nikâh, talak, zevc/zevce, family
+                               ,→ rights
+                            - LEGAL_JUDICIAL: Court procedures, legal evidence, criminal law, judicial
+                              processes, legal rights, punishment.
+                              Keywords: court, evidence, criminal, qisas, hudud, judge, şahit, dava, mahkeme
+                            - WORSHIP_RITUAL: Daily prayers, congregational prayers, pilgrimage, fasting,
+                              purification, ritual worship practices.
+                              Keywords: prayer, fasting, pilgrimage, purification, namaz/salat, oruç, hac,
+                               ,→ abdest
+Information 2025, 16, 960                                                                                                           14 of 16
+
+
+
+
+                                   - FAITH_THEOLOGY: Religious beliefs, theological questions, matters of faith,
+                                       destiny, core Islamic doctrines.
+                                       Keywords: faith, belief, theology, destiny, iman, akaid, kader
+                                   - SOCIAL_CHARITY: Charitable obligations, social ethics, community
+                                    ,→   responsibilities,
+                                       food regulations, zakat.
+                                       Keywords: charity, ethics, zakat, social conduct, sadaka, ahlak, food, drink
+
+                                   CLASSIFICATION PRIORITY HIERARCHY:
+                                   1. COMMERCIAL_LEGAL (if involves business/property transactions)
+                                   2. PROPERTY_INHERITANCE (if involves inheritance/waqf/property transfer)
+                                   3. FAMILY_MARRIAGE (if involves marital/family relationships)
+                                   4. LEGAL_JUDICIAL (if involves court procedures/criminal matters)
+                                   5. WORSHIP_RITUAL (if involves religious practices/rituals)
+                                   6. FAITH_THEOLOGY (if involves beliefs/theological questions)
+                                   7. SOCIAL_CHARITY (if involves social ethics/charitable obligations)
+
+                                   OUTPUT FORMAT:
+                                   Respond with a valid JSON object containing exactly this field:
+                                   {
+                                     "ew_category": "CATEGORY_NAME"
+                                   }
+
+                                   CRITICAL: Your response must be ONLY valid JSON. No explanations, no additional
+                                    ,→ text,
+                                   no markdown formatting.
+
+References
+1.    Sarawagi, S. Information extraction. Found. Trends Databases 2008, 1, 261–377. [CrossRef]
+2.    Yates, A.; Cafarella, M.; Banko, M.; Etzioni, O.; Broadhead, M.; Soderland, S. TextRunner: Open information extraction on the
+      Web. In Proceedings of the Human Language Technologies: The Annual Conference of the North American Chapter of the
+      Association for Computational Linguistics, Rochester, NY, USA, 22–27 April 2007; pp. 25–26.
+3.    Martinez-Rodriguez, J.L.; Hogan, A.; Lopez-Arevalo, I. Information extraction meets the Semantic Web: A survey. Semant. Web
+      2020, 11, 255–335. [CrossRef]
+4.    Qiu, J.; Li, Q.; Sun, L.; Peng, W.; Liu, P. Large Language Models for Information Extraction: A Survey. arXiv 2024, arXiv:2402.12563.
+5.    Wadhwa, S.; Amir, S.; Wallace, B.C. Revisiting relation extraction in the era of large language models. In Proceedings of the 61st
+      Annual Meeting of the Association for Computational Linguistics, Toronto, ON, Canada, 9–14 July 2023; pp. 15566–15589.
+6.    Gilardi, F.; Alizadeh, M.; Kubli, M. ChatGPT outperforms crowd-workers for text-annotation tasks. Proc. Natl. Acad. Sci. USA
+      2023, 120, e2305016120. [CrossRef] [PubMed]
+7.    Goel, A.; Vashisht, S.; Penha, G.; Beirami, A. LLMs Accelerate Annotation for Medical Information Extraction. In Proceedings of
+      the Conference on Health, Inference, and Learning, New York, NY, USA, 11–13 April 2023; pp. 82–100.
+8.    Aroyo, L.; Welty, C. Truth Is a Lie: Crowd Truth and the Seven Myths of Human Annotation. AI Mag. 2015, 36, 15–24. [CrossRef]
+9.    İmber, C. Ebu’s-su’ud: The Islamic Legal Tradition; Stanford University Press: Stanford, CA, USA, 1997.
+10.   Pustejovsky, J.; Stubbs, A. Natural Language Annotation for Machine Learning; O’Reilly Media: Sebastopol, CA, USA, 2012.
+11.   Artstein, R.; Poesio, M. Inter-coder agreement for computational linguistics. Comput. Linguist. 2008, 34, 555–596. [CrossRef]
+12.   Plank, B. The “Problem” of Human Label Variation: On Ground Truth in Data, Modeling and Evaluation. In Proceedings of the
+      2022 Conference on Empirical Methods in Natural Language Processing, Abu Dhabi, United Arab Emirates, 7–11 December 2022;
+      pp. 10671–10682.
+13.   Appelt, D.E.; Hobbs, J.R.; Bear, J.; Israel, D.; Tyson, M. FASTUS: A finite-state processor for information extraction from real-world
+      text. In Proceedings of the 13th International Joint Conference on Artificial Intelligence, Chambéry, France, 28 August–3 September
+      1993; pp. 1172–1178.
+Information 2025, 16, 960                                                                                                            15 of 16
+
+
+
+
+14.   Snow, R.; O’Connor, B.; Jurafsky, D.; Ng, A.Y. Cheap and fast-but is it good? Evaluating non-expert annotations for natural
+      language tasks. In Proceedings of the Conference on Empirical Methods in Natural Language Processing, Honolulu, HI, USA,
+      25–27 October 2008; pp. 254–263.
+15.   Ratner, A.; Sa, C.D.; Wu, S.; Selsam, D.; Ré, C. Data programming: Creating large training sets, quickly. In Proceedings of the 30th
+      International Conference on Neural Information Processing Systems, Barcelona, Spain, 5–10 December 2016; pp. 3567–3575.
+16.   Ratner, A.; Bach, S.H.; Ehrenberg, H.; Fries, J.; Wu, S.; Ré, C. Snorkel: Rapid training data creation with weak supervision. Proc.
+      VLDB Endow. 2017, 11, 269–282. [CrossRef] [PubMed]
+17.   Northcutt, C.G.; Jiang, L.; Chuang, I.L. Confident Learning: Estimating Uncertainty in Dataset Labels. J. Artif. Intell. Res. 2021, 70,
+      1373–1411. [CrossRef]
+18.   Swayamdipta, S.; Schwartz, R.; Lourie, N.; Wang, Y.; Hajishirzi, H.; Smith, N.A.; Choi, Y. Dataset Cartography: Mapping and
+      Diagnosing Datasets with Training Dynamics. In Proceedings of the 2020 Conference on Empirical Methods in Natural Language
+      Processing, Online, 16–20 November 2020; pp. 9275–9293.
+19.   Toneva, M.; Sordoni, A.; des Combes, R.T.; Trischler, A.; Bengio, Y.; Gordon, G.J. An Empirical Study of Example Forgetting During
+      Deep Neural Network Learning. In Proceedings of the International Conference on Learning Representations, New Orleans, LA,
+      USA, 6–9 May 2019.
+20.   Paul, M.; Ganguli, S.; Dziugaite, G.K. Deep learning on a data diet: Finding important examples early in training. In Proceedings
+      of the 35th Conference on Neural Information Processing Systems, Online, 6–14 December 2021; pp. 20596–20607.
+21.   Zhao, W.X.; Zhou, K.; Li, J.; Tang, T.; Wang, X.; Hou, Y.; Min, Y.; Zhang, B.; Zhang, J.; Dong, Z.; et al. A Survey of Large Language
+      Models. arXiv 2023, arXiv:2303.18223. [PubMed]
+22.   Devlin, J.; Chang, M.W.; Lee, K.; Toutanova, K. BERT: Pre-training of Deep Bidirectional Transformers for Language Understand-
+      ing. In Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics:
+      Human Language Technologies, Minneapolis, MN, USA, 2–7 June 2019; pp. 4171–4186.
+23.   Chalkidis, I.; Fergadiotis, M.; Malakasiotis, P.; Aletras, N.; Androutsopoulos, I. LEGAL-BERT: The Muppets straight out of Law
+      School. In Proceedings of the Findings of the Association for Computational Linguistics: EMNLP 2020, Online, 16–20 November
+      2020; pp. 2898–2904.
+24.   Guo, C.; Pleiss, G.; Sun, Y.; Weinberger, K.Q. On Calibration of Modern Neural Networks. In Proceedings of the 34th International
+      Conference on Machine Learning, Sydney, Australia, 6–11 August 2017; pp. 1321–1330.
+25.   Taşdemir, E.F.B.; Tandoğan, Z.; Akansu, S.D.; Kızılırmak, F.; Şen, U.; Akca, A.; Kuru, M.; Yanıkoğlu, B. Automatic Transcription of
+      Ottoman Documents Using Deep Learning. In Proceedings of the 2024 International Conference on Document Analysis and
+      Recognition (ICDAR), Athens, Greece, 30–31 August 2024; IEEE: Piscataway, NJ, USA, 2024; pp. 421–436.
+26.   Liu, P.; Yuan, W.; Fu, J.; Jiang, Z.; Hayashi, H.; Neubig, G. Pre-train, Prompt, and Predict: A Systematic Survey of Prompting
+      Methods in Natural Language Processing. ACM Comput. Surv. 2023, 55, 1–35. [CrossRef]
+27.   Meadows, D.H. Thinking in Systems: A Primer; Chelsea Green Publishing: White River Junction, VT, USA, 2008.
+28.   Valiant, L.G. A Theory of the Learnable. Commun. ACM 1984, 27, 1134–1142. [CrossRef]
+29.   Akgündüz, A. Şeyhülislam Ebüssuüd Efendi Fetvaları; Osmanlı Araştırmaları Vakfı: Istanbul, Turkey, 2018.
+30.   Cebeci, İ. Ceride-i İlmiyye Fetvaları; Klasik Yayınları: Istanbul, Turkey, 2009.
+31.   Demirtaş, H.N. Açıklamalı Osmanlı Fetvaları: Fetâvâ-yi Ali Efendi; Kubbealtı Neşriyatı: Istanbul, Turkey, 2014.
+32.   Efendi, A.; el-Gedûsî, H.M.b.A. Neticetü’l-Fetava; Kaya, S., Algın, B., Çelikçi, A.N., Kaval, E., Eds.; Klasik Yayınları: Istanbul,
+      Turkey, 2014.
+33.   Kaya, S. Fetāvâ-yı Feyziye; Klasik Yayınları: Istanbul, Turkey, 2009.
+34.   Kaya, S.; Algın, B.; Trabzonlu, Z.; Erkan, A. Behcetü’l-Fetava; Klasik Yayınları: Istanbul, Turkey, 2011.
+35.   Kaya, S.; Toprak, E.; Kaval Koss, N.; Mercan, Z. Câmiu’l-Icareteyn; Klasik Yayınları: Istanbul, Turkey, 2019.
+36.   Anthropic. Introducing Claude 3.5 Sonnet. 2025. Available online: https://www.anthropic.com/news/claude-3-5-sonnet
+      (accessed on 1 September 2025).
+37.   Wei, J.; Wang, X.; Schuurmans, D.; Bosma, M.; Xia, F.; Chi, E.; Le, Q.V.; Zhou, D. Chain-of-Thought Prompting Elicits Reasoning in
+      Large Language Models. In Proceedings of the 36th Conference on Neural Information Processing Systems, New Orleans, LA,
+      USA, 28 November–9 December 2022; pp. 24824–24837.
+38.   Stone, M. Cross-Validatory Choice and Assessment of Statistical Predictions. J. R. Stat. Soc. Ser. B Methodol. 1974, 36, 111–133.
+      [CrossRef]
+39.   DeepSeek AI. DeepSeek-V2 and DeepSeek-Coder-V2 Technical Report. 2025. Available online: https://deepseek.com/research
+      (accessed on 1 September 2025).
+40.   Hripcsak, G.; Rothschild, A.S. Agreement, the f-measure, and reliability in information retrieval. J. Am. Med. Inform. Assoc. 2005,
+      12, 296–298. [CrossRef] [PubMed]
+41.   Cohen, J. A Coefficient of Agreement for Nominal Scales. Educ. Psychol. Meas. 1960, 20, 37–46. [CrossRef]
+Information 2025, 16, 960                                                                                                      16 of 16
+
+
+
+
+42.   Landis, J.R.; Koch, G.G. The Measurement of Observer Agreement for Categorical Data. Biometrics 1977, 33, 159–174. [CrossRef]
+      [PubMed]
+43.   National Institute of Standards and Technology. AI Risk Management Framework (AI RMF 1.0); NIST: Gaithersburg, MD, USA, 2023.
+
+Disclaimer/Publisher’s Note: The statements, opinions and data contained in all publications are solely those of the individual
+author(s) and contributor(s) and not of MDPI and/or the editor(s). MDPI and/or the editor(s) disclaim responsibility for any injury to
+people or property resulting from any ideas, methods, instructions or products referred to in the content.
+
